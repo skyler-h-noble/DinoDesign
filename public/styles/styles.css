@@ -1,0 +1,12 @@
+.btn-primary-outline .MuiButton-icon{
+    margin-right: 4px;
+    margin-left: 0px;
+}
+
+.MuiButton-sizeSmall .MuiSvgIcon-root {
+    font-size: 1rem;
+}
+
+[class*="btn-"] .MuiButton-iconSizeSmall .MuiSvgIcon-root, [class*="btn-"] .MuiButton-iconSizeSmall>* {
+    font-size: .75rem !important;
+}

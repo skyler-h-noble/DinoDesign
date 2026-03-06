@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="React app with design system and MUI"
+    />
+    <title>Design System App</title>
+    
+    <!-- CSS Load Order - CRITICAL FOR THEME VARIABLES -->
+    <!-- 1. Foundation variables and base styles -->
+    <link rel="stylesheet" href="%PUBLIC_URL%/styles/foundation.css">
+    
+    <!-- 2. Mode CSS - DYNAMICALLY LOADED BY APP -->
+    <!-- The appropriate mode CSS (Light-Mode-Tonal.css or Light-Mode-Professional.css) -->
+    <!-- will be loaded dynamically by cssLoader.js based on the --Light-Mode setting -->
+    
+    <!-- 3. Base styles (uses variables from foundation + mode) -->
+    <link rel="stylesheet" href="%PUBLIC_URL%/styles/base.css">
+    
+    <!-- 4. Core layout and structure -->
+    <link rel="stylesheet" href="%PUBLIC_URL%/styles/core.css">
+    
+    <!-- 5. Typography styles -->
+    <link rel="stylesheet" href="%PUBLIC_URL%/styles/typography.css">
+    
+    <!-- 6. App-specific styles -->
+    <link rel="stylesheet" href="%PUBLIC_URL%/styles/styles.css">
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
+</html>
