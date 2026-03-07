@@ -1,17 +1,25 @@
+// src/index.js
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
 import App from './App';
-import reportWebVitals from './reportWebVitals';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
+// CSS loaded via URL from public/styles/
+// The DynoDesignProvider injects them in this order:
+//   1. foundation.css
+//   2. core.css
+//   3. Light-Mode.css  OR  Dark-Mode.css  (one at a time, swaps on toggle)
+//   4. base.css
+//   5. styles.css      ← always last
+
+ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    <App
+      foundationCSS="/styles/foundation.css"
+      coreCSS="/styles/core.css"
+      lightModeCSS="/styles/Light-Mode.css"
+      darkModeCSS="/styles/Dark-Mode.css"
+      baseCSS="/styles/base.css"
+      stylesCSS="/styles/styles.css"
+    />
   </React.StrictMode>
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
