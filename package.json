@@ -1,44 +1,66 @@
 {
-  "name": "my-project",
+  "name": "@dynodesign/components",
   "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
-    "@mui/icons-material": "^7.3.7",
-    "@mui/material": "^7.3.7",
-    "@testing-library/dom": "^10.4.1",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
-    "@testing-library/user-event": "^13.5.0",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "react-router-dom": "^7.13.0",
-    "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
+  "description": "DynoDesign adaptive component library — token-driven React components with customizable CSS theming",
+  "author": "Lise Noble",
+  "license": "Apache-2.0",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "CLAUDE.md",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.js"
+    },
+    "./provider": {
+      "import": "./dist/DynoDesignProvider.esm.js",
+      "require": "./dist/DynoDesignProvider.js"
+    }
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build:app": "react-scripts build",
+    "build:lib": "rollup -c rollup.config.js",
+    "build": "npm run build:lib",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "prepublishOnly": "npm run build:lib"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+  "peerDependencies": {
+    "@emotion/react": ">=11.0.0",
+    "@emotion/styled": ">=11.0.0",
+    "@mui/icons-material": ">=5.0.0",
+    "@mui/material": ">=5.0.0",
+    "react": ">=17.0.0",
+    "react-dom": ">=17.0.0"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
+  "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.0",
+    "@babel/preset-react": "^7.28.5",
+    "@rollup/plugin-babel": "^7.0.0",
+    "@rollup/plugin-commonjs": "^25.0.8",
+    "@rollup/plugin-node-resolve": "^15.3.1",
+    "@rollup/plugin-terser": "^0.4.4",
+    "rollup": "^4.59.0",
+    "rollup-plugin-peer-deps-external": "^2.2.4"
+  },
+  "keywords": [
+    "design-system",
+    "react",
+    "components",
+    "tokens",
+    "theming",
+    "accessibility",
+    "dynodesign"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/skyler-h-noble/DinoDesign"
+  },
+  "homepage": "https://github.com/skyler-h-noble/DinoDesign#readme"
 }
