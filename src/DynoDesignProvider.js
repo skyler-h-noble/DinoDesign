@@ -2,38 +2,57 @@
  * DynoDesignProvider
  *
  * Wires the full DynoDesign token cascade into any React app.
- * Handles CSS injection in the correct order, single-mode swapping,
- * data-theme / data-style / data-surface root attributes, and
- * exposes a context hook for all child components.
  *
- * CSS load order (matches DynoDesign cascade spec):
- *   1. foundation.css  — design primitives, spacing scale, reset
- *   2. core.css        — component base styles
- *   3. light-mode.css  — OR dark-mode.css (only one active at a time)
- *   4. base.css        — data-style, data-surface, typography vars
- *                        (loads last so it can reference mode tokens)
+ * ── Two ways to provide CSS ───────────────────────────────────────────────────
  *
- * Usage:
- *
- *   import { DynoDesignProvider } from './DynoDesignProvider';
- *   import foundationCSS from './css/foundation.css?raw';
- *   import coreCSS       from './css/core.css?raw';
- *   import lightModeCSS  from './css/light-mode.css?raw';
- *   import darkModeCSS   from './css/dark-mode.css?raw';
- *   import baseCSS       from './css/base.css?raw';
+ * 1. SIMPLE — single themeURL (recommended):
  *
  *   <DynoDesignProvider
- *     foundationCSS={foundationCSS}
- *     coreCSS={coreCSS}
- *     lightModeCSS={lightModeCSS}
- *     darkModeCSS={darkModeCSS}
- *     baseCSS={baseCSS}
+ *     themeURL="https://themes.dynodesign.com/acme-corp"
  *     defaultTheme="Default"
  *     defaultStyle="Modern"
- *     defaultSurface="Surface"
  *   >
- *     <App />
- *   </DynoDesignProvider>
+ *
+ *   The Provider fetches {themeURL}/theme.json to discover the CSS files,
+ *   then loads them in the correct order automatically.
+ *
+ * 2. MANUAL — individual CSS props (local dev / custom setups):
+ *
+ *   <DynoDesignProvider
+ *     foundationCSS="/styles/foundation.css"
+ *     coreCSS="/styles/core.css"
+ *     lightModeCSS="/styles/Light-Mode.css"
+ *     darkModeCSS="/styles/Dark-Mode.css"
+ *     baseCSS="/styles/base.css"
+ *     stylesCSS="/styles/styles.css"
+ *     defaultTheme="Default"
+ *     defaultStyle="Modern"
+ *   >
+ *
+ * ── theme.json format ─────────────────────────────────────────────────────────
+ *
+ *   {
+ *     "foundation": "foundation.css",
+ *     "core": "core.css",
+ *     "lightMode": "Light-Mode.css",
+ *     "darkMode": "Dark-Mode.css",
+ *     "base": "base.css",
+ *     "styles": "styles.css",
+ *     "defaultTheme": "Default",
+ *     "defaultStyle": "Modern",
+ *     "defaultSurface": "Surface",
+ *     "darkTheme": "Neutral-Dark"
+ *   }
+ *
+ *   All fields are optional — only include the files you have.
+ *   Props passed directly to the Provider always override theme.json values.
+ *
+ * ── CSS load order ────────────────────────────────────────────────────────────
+ *   1. foundation.css  — primitives
+ *   2. core.css        — component base styles
+ *   3. Light-Mode.css  OR Dark-Mode.css  (one at a time, swaps on toggle)
+ *   4. base.css        — data-style / data-surface rules
+ *   5. styles.css      — final overrides
  */
 
 import React, {
@@ -50,20 +69,17 @@ import React, {
 
 const DynoDesignContext = createContext(null);
 
-// ─── Valid values (mirrors DynoDesign spec) ───────────────────────────────────
+// ─── Valid values ─────────────────────────────────────────────────────────────
 
 export const DYNO_THEMES = [
-  // Light
   'Default',
   'Primary-Light', 'Primary',
   'Secondary-Light', 'Secondary',
   'Tertiary-Light', 'Tertiary',
   'Neutral-Light', 'Neutral',
   'Error-Light', 'Success-Light', 'Warning-Light', 'Info-Light',
-  // Dark
   'Primary-Dark', 'Secondary-Dark', 'Tertiary-Dark', 'Neutral-Dark',
   'Error-Dark', 'Success-Dark', 'Warning-Dark', 'Info-Dark',
-  // Navigation zones
   'App-Bar', 'Nav-Bar', 'Status',
 ];
 
@@ -75,7 +91,6 @@ export const DYNO_SURFACES = [
   'Container-High', 'Container-Highest',
 ];
 
-// Surface style → default theme mapping (Section 6B of DynoDesign spec)
 export const SURFACE_STYLE_THEME_MAP = {
   'light-tonal':       { theme: 'Primary-Light', rootSurface: 'Surface-Dim' },
   'grey-professional': { theme: 'Neutral',        rootSurface: 'Surface'     },
@@ -84,12 +99,11 @@ export const SURFACE_STYLE_THEME_MAP = {
 
 // ─── Style tag IDs ────────────────────────────────────────────────────────────
 //
-// DOM order after full injection:
-//   <style id="dyno-foundation">  ← 1st
-//   <style id="dyno-core">        ← 2nd
-//   <style id="dyno-mode">        ← 3rd — content swaps between light/dark
-//   <style id="dyno-base">        ← 4th
-//   <style id="dyno-styles">      ← 5th — always last, highest specificity wins
+//   #dyno-foundation  (1st)
+//   #dyno-core        (2nd)
+//   #dyno-mode        (3rd) ← swaps between light/dark
+//   #dyno-base        (4th)
+//   #dyno-styles      (5th) ← always last
 
 const TAG = {
   foundation: 'dyno-foundation',
@@ -121,9 +135,7 @@ function removeStyleTag(id) {
 
 async function fetchCSS(url) {
   const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`DynoDesignProvider: failed to fetch CSS from ${url} (${res.status})`);
-  }
+  if (!res.ok) throw new Error(`DynoDesignProvider: failed to fetch ${url} (${res.status})`);
   return res.text();
 }
 
@@ -135,20 +147,63 @@ async function resolveCSS(source) {
   return source; // raw CSS string
 }
 
+/**
+ * Fetch and parse theme.json from a themeURL.
+ * Returns an object with resolved absolute URLs for each CSS file.
+ *
+ * @param {string} themeURL  — base URL, e.g. "https://themes.dynodesign.com/acme-corp"
+ * @returns {Promise<object>} — { foundationURL, coreURL, lightModeURL, darkModeURL,
+ *                                baseURL, stylesURL, defaultTheme, defaultStyle,
+ *                                defaultSurface, darkTheme }
+ */
+async function fetchThemeManifest(themeURL) {
+  const base = themeURL.replace(/\/$/, ''); // strip trailing slash
+  const manifestURL = `${base}/theme.json`;
+
+  const res = await fetch(manifestURL);
+  if (!res.ok) {
+    throw new Error(`DynoDesignProvider: could not load theme manifest from ${manifestURL} (${res.status})`);
+  }
+
+  const manifest = await res.json();
+
+  // Resolve each filename to a full URL
+  const resolve = (filename) => filename ? `${base}/${filename}` : null;
+
+  return {
+    foundationURL:  resolve(manifest.foundation),
+    coreURL:        resolve(manifest.core),
+    lightModeURL:   resolve(manifest.lightMode),
+    darkModeURL:    resolve(manifest.darkMode),
+    baseURL:        resolve(manifest.base),
+    stylesURL:      resolve(manifest.styles),
+    // Theme config from manifest (props override these)
+    defaultTheme:   manifest.defaultTheme   ?? null,
+    defaultStyle:   manifest.defaultStyle   ?? null,
+    defaultSurface: manifest.defaultSurface ?? null,
+    darkTheme:      manifest.darkTheme      ?? null,
+  };
+}
+
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 /**
  * @param {object}   props
  *
- * CSS sources (raw strings or URLs):
- * @param {string}   props.foundationCSS     foundation.css  (1st)
- * @param {string}   props.coreCSS           core.css        (2nd)
- * @param {string}   props.lightModeCSS      light-mode.css  (3rd, swaps with dark)
- * @param {string}   props.darkModeCSS       dark-mode.css   (3rd, swaps with light)
- * @param {string}   props.baseCSS           base.css        (4th)
- * @param {string}   props.stylesCSS         styles.css      (5th — always last)
+ * Theme URL (simplest — recommended for production):
+ * @param {string}   props.themeURL          Base URL of the theme folder.
+ *                                           Must contain a theme.json manifest.
+ *                                           e.g. "https://themes.dynodesign.com/acme-corp"
  *
- * Theme config:
+ * Individual CSS props (manual / local dev):
+ * @param {string}   props.foundationCSS     foundation.css (URL or raw string)
+ * @param {string}   props.coreCSS           core.css
+ * @param {string}   props.lightModeCSS      Light-Mode.css
+ * @param {string}   props.darkModeCSS       Dark-Mode.css
+ * @param {string}   props.baseCSS           base.css
+ * @param {string}   props.stylesCSS         styles.css (loaded last)
+ *
+ * Theme config (props override theme.json values):
  * @param {string}   props.defaultTheme      Starting data-theme   (default: 'Default')
  * @param {string}   props.defaultStyle      Starting data-style   (default: 'Modern')
  * @param {string}   props.defaultSurface    Root data-surface     (default: 'Surface')
@@ -169,6 +224,10 @@ async function resolveCSS(source) {
  * @param {React.ReactNode} props.children
  */
 export function DynoDesignProvider({
+  // Theme URL
+  themeURL,
+
+  // Individual CSS (manual / local dev)
   foundationCSS,
   coreCSS,
   lightModeCSS,
@@ -176,17 +235,21 @@ export function DynoDesignProvider({
   baseCSS,
   stylesCSS,
 
-  defaultTheme   = 'Default',
-  defaultStyle   = 'Modern',
-  defaultSurface = 'Surface',
+  // Theme config
+  defaultTheme:   defaultThemeProp   = 'Default',
+  defaultStyle:   defaultStyleProp   = 'Modern',
+  defaultSurface: defaultSurfaceProp = 'Surface',
   surfaceStyle,
 
+  // Dark mode
   defaultDarkMode = false,
-  darkTheme       = 'Neutral-Dark',
+  darkTheme:      darkThemeProp = 'Neutral-Dark',
 
+  // Controlled dark mode
   darkMode: controlledDarkMode,
   onDarkModeChange,
 
+  // DOM
   className,
   style: styleProp,
   fullHeight = true,
@@ -199,21 +262,19 @@ export function DynoDesignProvider({
   const isControlled = controlledDarkMode !== undefined;
   const isDark = isControlled ? controlledDarkMode : internalDark;
 
-  // ── Theme / style / surface ────────────────────────────────────────────────
-  const resolvedDefaultTheme = surfaceStyle
-    ? (SURFACE_STYLE_THEME_MAP[surfaceStyle]?.theme      ?? defaultTheme)
-    : defaultTheme;
-  const resolvedDefaultSurface = surfaceStyle
-    ? (SURFACE_STYLE_THEME_MAP[surfaceStyle]?.rootSurface ?? defaultSurface)
-    : defaultSurface;
+  // ── Resolved CSS sources ───────────────────────────────────────────────────
+  // When themeURL is provided, manifest values fill in anything not passed as props.
+  const [resolvedSources, setResolvedSources] = useState({
+    foundation: foundationCSS ?? null,
+    core:       coreCSS       ?? null,
+    lightMode:  lightModeCSS  ?? null,
+    darkMode:   darkModeCSS   ?? null,
+    base:       baseCSS       ?? null,
+    styles:     stylesCSS     ?? null,
+  });
 
-  const [theme,        setThemeState]   = useState(resolvedDefaultTheme);
-  const [styleVariant, setStyleVariant] = useState(defaultStyle);
-  const [rootSurface,  setRootSurface]  = useState(resolvedDefaultSurface);
-
-  // ── CSS status ─────────────────────────────────────────────────────────────
-  const [cssStatus, setCssStatus] = useState('loading');
-  const [cssError,  setCssError]  = useState(null);
+  // Theme config — may be overridden by manifest values
+  const [manifestThemeConfig, setManifestThemeConfig] = useState({});
 
   const mountedRef = useRef(true);
   useEffect(() => {
@@ -221,37 +282,87 @@ export function DynoDesignProvider({
     return () => { mountedRef.current = false; };
   }, []);
 
-  // ── EFFECT 1: Static files — foundation, core, base ───────────────────────
-  // These are mode-agnostic. Injected once; only re-runs if sources change.
-  // Injection order:
-  //   foundation (appended 1st)
-  //   core       (appended 2nd)
-  //   base       (appended last — after mode tag which Effect 2 inserts between core and base)
-  //
-  // Because Effect 2 runs after Effect 1 on the same render cycle, the mode
-  // tag ends up inserted BEFORE base via insertBefore(tag, baseTag).
+  // ── EFFECT: Fetch manifest if themeURL provided ────────────────────────────
   useEffect(() => {
+    if (!themeURL) return;
+
+    setCssStatus('loading');
+
+    fetchThemeManifest(themeURL)
+      .then(manifest => {
+        if (!mountedRef.current) return;
+
+        // Individual CSS props always take precedence over manifest
+        setResolvedSources({
+          foundation: foundationCSS ?? manifest.foundationURL,
+          core:       coreCSS       ?? manifest.coreURL,
+          lightMode:  lightModeCSS  ?? manifest.lightModeURL,
+          darkMode:   darkModeCSS   ?? manifest.darkModeURL,
+          base:       baseCSS       ?? manifest.baseURL,
+          styles:     stylesCSS     ?? manifest.stylesURL,
+        });
+
+        // Store manifest theme config — props will override in render
+        setManifestThemeConfig({
+          defaultTheme:   manifest.defaultTheme,
+          defaultStyle:   manifest.defaultStyle,
+          defaultSurface: manifest.defaultSurface,
+          darkTheme:      manifest.darkTheme,
+        });
+      })
+      .catch(err => {
+        if (!mountedRef.current) return;
+        console.error('DynoDesignProvider: manifest error:', err);
+        setCssError(err.message);
+        setCssStatus('error');
+      });
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [themeURL]);
+
+  // ── Theme / style / surface ────────────────────────────────────────────────
+  // Priority: prop → manifest → default
+  const resolvedDefaultTheme = surfaceStyle
+    ? (SURFACE_STYLE_THEME_MAP[surfaceStyle]?.theme ?? defaultThemeProp)
+    : (defaultThemeProp !== 'Default' ? defaultThemeProp : (manifestThemeConfig.defaultTheme ?? defaultThemeProp));
+
+  const resolvedDefaultSurface = surfaceStyle
+    ? (SURFACE_STYLE_THEME_MAP[surfaceStyle]?.rootSurface ?? defaultSurfaceProp)
+    : (manifestThemeConfig.defaultSurface ?? defaultSurfaceProp);
+
+  const resolvedDefaultStyle = manifestThemeConfig.defaultStyle ?? defaultStyleProp;
+  const resolvedDarkTheme    = darkThemeProp !== 'Neutral-Dark'
+    ? darkThemeProp
+    : (manifestThemeConfig.darkTheme ?? darkThemeProp);
+
+  const [theme,        setThemeState]   = useState(resolvedDefaultTheme);
+  const [styleVariant, setStyleVariant] = useState(resolvedDefaultStyle);
+  const [rootSurface,  setRootSurface]  = useState(resolvedDefaultSurface);
+
+  // ── CSS status ─────────────────────────────────────────────────────────────
+  const [cssStatus, setCssStatus] = useState('loading');
+  const [cssError,  setCssError]  = useState(null);
+
+  // ── EFFECT: Inject static CSS (foundation, core, base, styles) ────────────
+  useEffect(() => {
+    const { foundation, core, base, styles } = resolvedSources;
+    if (!foundation && !core && !base && !styles) return;
+
     setCssStatus('loading');
     setCssError(null);
 
     Promise.all([
-      resolveCSS(foundationCSS),
-      resolveCSS(coreCSS),
-      resolveCSS(baseCSS),
-      resolveCSS(stylesCSS),
+      resolveCSS(foundation),
+      resolveCSS(core),
+      resolveCSS(base),
+      resolveCSS(styles),
     ])
-      .then(([foundation, core, base, styles]) => {
+      .then(([foundationCSS, coreCSS, baseCSS, stylesCSS]) => {
         if (!mountedRef.current) return;
-
-        // 1. foundation
-        injectStyleTag(TAG.foundation, foundation);
-        // 2. core
-        injectStyleTag(TAG.core, core);
-        // 4. base — sits after mode tag (mode inserted before base by Effect 2)
-        injectStyleTag(TAG.base, base);
-        // 5. styles — always last, appended after base
-        injectStyleTag(TAG.styles, styles);
-
+        injectStyleTag(TAG.foundation, foundationCSS);
+        injectStyleTag(TAG.core,       coreCSS);
+        injectStyleTag(TAG.base,       baseCSS);
+        injectStyleTag(TAG.styles,     stylesCSS);
         setCssStatus('ready');
       })
       .catch(err => {
@@ -267,99 +378,69 @@ export function DynoDesignProvider({
       removeStyleTag(TAG.base);
       removeStyleTag(TAG.styles);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [foundationCSS, coreCSS, baseCSS, stylesCSS]);
+  }, [resolvedSources.foundation, resolvedSources.core, resolvedSources.base, resolvedSources.styles]);
 
-  // ── EFFECT 2: Active mode — light-mode.css OR dark-mode.css ───────────────
-  // Only ONE mode tag exists in the DOM at any time.
-  // On toggle: swap the content of the existing tag in place.
-  // First mount: insert the tag between core and base.
+  // ── EFFECT: Swap active mode CSS ──────────────────────────────────────────
   useEffect(() => {
-    const activeSource = isDark ? darkModeCSS : lightModeCSS;
+    const activeSource = isDark ? resolvedSources.darkMode : resolvedSources.lightMode;
+    if (!activeSource) return;
 
     resolveCSS(activeSource)
       .then(css => {
         if (!mountedRef.current || !css) return;
 
         const existingMode = document.getElementById(TAG.mode);
-
         if (existingMode) {
-          // Swap content in place — DOM order is preserved, no flicker
           existingMode.textContent = css;
         } else {
-          // First inject: insert mode tag between core and base
           const tag = document.createElement('style');
           tag.id = TAG.mode;
           tag.setAttribute('data-dyno', 'true');
           tag.textContent = css;
-
           const baseTag = document.getElementById(TAG.base);
           if (baseTag) {
-            // insertBefore ensures order is: core → mode → base
             document.head.insertBefore(tag, baseTag);
           } else {
             document.head.appendChild(tag);
           }
         }
       })
-      .catch(err => {
-        console.error('DynoDesignProvider mode CSS error:', err);
-      });
+      .catch(err => console.error('DynoDesignProvider mode CSS error:', err));
 
-  }, [isDark, lightModeCSS, darkModeCSS]);
+  }, [isDark, resolvedSources.lightMode, resolvedSources.darkMode]);
 
-  // Remove mode tag on unmount
-  useEffect(() => {
-    return () => { removeStyleTag(TAG.mode); };
-  }, []);
+  // Cleanup mode tag on unmount
+  useEffect(() => { return () => removeStyleTag(TAG.mode); }, []);
 
   // ── Public API ─────────────────────────────────────────────────────────────
-  const activeTheme = isDark ? darkTheme : theme;
+  const activeTheme = isDark ? resolvedDarkTheme : theme;
 
   const toggleDarkMode = useCallback(() => {
-    if (isControlled) {
-      onDarkModeChange?.(!isDark);
-    } else {
-      setInternalDark(d => !d);
-    }
+    if (isControlled) onDarkModeChange?.(!isDark);
+    else setInternalDark(d => !d);
   }, [isControlled, isDark, onDarkModeChange]);
 
   const setTheme = useCallback((next) => {
-    if (!DYNO_THEMES.includes(next)) {
-      console.warn(`DynoDesignProvider: unknown theme "${next}". Valid:`, DYNO_THEMES);
-    }
+    if (!DYNO_THEMES.includes(next)) console.warn(`DynoDesignProvider: unknown theme "${next}"`);
     setThemeState(next);
   }, []);
 
   const setStyle = useCallback((next) => {
-    if (!DYNO_STYLES.includes(next)) {
-      console.warn(`DynoDesignProvider: unknown style "${next}". Valid:`, DYNO_STYLES);
-    }
+    if (!DYNO_STYLES.includes(next)) console.warn(`DynoDesignProvider: unknown style "${next}"`);
     setStyleVariant(next);
   }, []);
 
   const setSurface = useCallback((next) => {
-    if (!DYNO_SURFACES.includes(next)) {
-      console.warn(`DynoDesignProvider: unknown surface "${next}". Valid:`, DYNO_SURFACES);
-    }
+    if (!DYNO_SURFACES.includes(next)) console.warn(`DynoDesignProvider: unknown surface "${next}"`);
     setRootSurface(next);
   }, []);
 
   // ── Context ────────────────────────────────────────────────────────────────
   const contextValue = useMemo(() => ({
-    theme:          activeTheme,
-    style:          styleVariant,
-    surface:        rootSurface,
-    isDark,
-    cssStatus,
-    cssError,
-    setTheme,
-    setStyle,
-    setSurface,
-    toggleDarkMode,
-    themes:         DYNO_THEMES,
-    styles:         DYNO_STYLES,
-    surfaces:       DYNO_SURFACES,
+    theme: activeTheme, style: styleVariant, surface: rootSurface,
+    isDark, cssStatus, cssError,
+    setTheme, setStyle, setSurface, toggleDarkMode,
+    themes: DYNO_THEMES, styles: DYNO_STYLES, surfaces: DYNO_SURFACES,
   }), [
     activeTheme, styleVariant, rootSurface, isDark,
     cssStatus, cssError,
@@ -374,10 +455,7 @@ export function DynoDesignProvider({
         data-style={styleVariant}
         data-surface={rootSurface}
         className={className}
-        style={{
-          ...(fullHeight ? { minHeight: '100vh' } : {}),
-          ...styleProp,
-        }}
+        style={{ ...(fullHeight ? { minHeight: '100vh' } : {}), ...styleProp }}
       >
         {children}
       </div>
@@ -387,50 +465,14 @@ export function DynoDesignProvider({
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
-/**
- * useDynoDesign()
- *
- * Access the full DynoDesign context from any child component.
- * Must be called inside a <DynoDesignProvider>.
- *
- * const {
- *   theme,           // active data-theme string
- *   style,           // active data-style string
- *   surface,         // root data-surface string
- *   isDark,          // boolean
- *   cssStatus,       // 'loading' | 'ready' | 'error'
- *   cssError,        // string | null
- *   setTheme,        // (string) => void
- *   setStyle,        // (string) => void
- *   setSurface,      // (string) => void
- *   toggleDarkMode,  // () => void
- *   themes,          // string[] — all valid theme names
- *   styles,          // string[] — all valid style names
- *   surfaces,        // string[] — all valid surface names
- * } = useDynoDesign();
- */
 export function useDynoDesign() {
   const ctx = useContext(DynoDesignContext);
-  if (!ctx) {
-    throw new Error('useDynoDesign must be used inside a <DynoDesignProvider>');
-  }
+  if (!ctx) throw new Error('useDynoDesign must be used inside a <DynoDesignProvider>');
   return ctx;
 }
 
 // ─── ThemedZone ───────────────────────────────────────────────────────────────
 
-/**
- * Applies a specific data-theme + optional data-surface to a subtree
- * without changing the root theme.
- *
- * <ThemedZone theme="App-Bar" surface="Surface-Bright" as="header">
- *   <AppBar />
- * </ThemedZone>
- *
- * <ThemedZone theme="Success-Light" surface="Surface">
- *   <Alert />
- * </ThemedZone>
- */
 export function ThemedZone({ theme, surface, as: Tag = 'div', children, className, style, ...rest }) {
   return (
     <Tag data-theme={theme} data-surface={surface} className={className} style={style} {...rest}>
@@ -441,14 +483,6 @@ export function ThemedZone({ theme, surface, as: Tag = 'div', children, classNam
 
 // ─── Surfaced ─────────────────────────────────────────────────────────────────
 
-/**
- * Applies only data-surface — resolves --Background to the correct
- * depth token without changing the active theme.
- *
- * <Surfaced surface="Container">
- *   <Card />
- * </Surfaced>
- */
 export function Surfaced({ surface, as: Tag = 'div', children, className, style, ...rest }) {
   return (
     <Tag data-surface={surface} className={className} style={style} {...rest}>
