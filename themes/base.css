@@ -1,6 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Julius+Sans+One&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Gelasio&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Cardo&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bitter&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rufina&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&display=swap');
 
 /* ========================================
  * Base CSS Variables
@@ -153,42 +153,42 @@
   --Chart-Lines: #e2e2e2;
 
   /* Solid Chart Colors */
-  --Chart-1: #ffebf3;
-  --Chart-2: #ffedc7;
-  --Chart-3: #ffe8db;
-  --Chart-4: #e6eeff;
-  --Chart-5: #ccfcd7;
-  --Chart-6: #ffeac2;
-  --Chart-7: #ffdfe5;
+  --Chart-1: #e8f2ff;
+  --Chart-2: #efefff;
+  --Chart-3: #ffeedb;
+  --Chart-4: #eeecff;
+  --Chart-5: #d1fcd3;
+  --Chart-6: #ffe9c3;
+  --Chart-7: #ffe0dc;
   --Chart-8: #f1f1f1;
-  --Chart-9: #f8dbe5;
-  --Chart-10: #fddead;
+  --Chart-9: #cde5ff;
+  --Chart-10: #dde1ff;
 
   /* Opaque Chart Colors (50% opacity) */
-  --Chart-1-Opaque: rgba(255, 235, 243, 0.5);
-  --Chart-2-Opaque: rgba(255, 237, 199, 0.5);
-  --Chart-3-Opaque: rgba(255, 232, 219, 0.5);
-  --Chart-4-Opaque: rgba(230, 238, 255, 0.5);
-  --Chart-5-Opaque: rgba(204, 252, 215, 0.5);
-  --Chart-6-Opaque: rgba(255, 234, 194, 0.5);
-  --Chart-7-Opaque: rgba(255, 223, 229, 0.5);
+  --Chart-1-Opaque: rgba(232, 242, 255, 0.5);
+  --Chart-2-Opaque: rgba(239, 239, 255, 0.5);
+  --Chart-3-Opaque: rgba(255, 238, 219, 0.5);
+  --Chart-4-Opaque: rgba(238, 236, 255, 0.5);
+  --Chart-5-Opaque: rgba(209, 252, 211, 0.5);
+  --Chart-6-Opaque: rgba(255, 233, 195, 0.5);
+  --Chart-7-Opaque: rgba(255, 224, 220, 0.5);
   --Chart-8-Opaque: rgba(241, 241, 241, 0.5);
-  --Chart-9-Opaque: rgba(248, 219, 229, 0.5);
-  --Chart-10-Opaque: rgba(253, 222, 173, 0.5);
+  --Chart-9-Opaque: rgba(205, 229, 255, 0.5);
+  --Chart-10-Opaque: rgba(221, 225, 255, 0.5);
 
   /* ========================================
    * Effect Levels (Box Shadows)
    * ======================================== */
 
 
- --Set-Font-Family-Header: "Julius Sans One", sans-serif;
- --Set-Font-Family-Header-Weight: 800;
- --Set-Font-Family-Body: "Gelasio", serif;
+ --Set-Font-Family-Header: "Bitter", serif;
+ --Set-Font-Family-Header-Weight: 200;
+ --Set-Font-Family-Body: "Rufina", cursive;
  --Set-Font-Family-Body-Weight: 400;
  --Set-Font-Family-Body-Semibold-Weight: 600;
  --Set-Font-Family-Body-Bold-Weight: 700;
- --Set-Font-Family-Decorative: "Cardo", cursive;
- --Set-Font-Family-Decorative-Weight: 800;
+ --Set-Font-Family-Decorative: "DM Serif Display", serif;
+ --Set-Font-Family-Decorative-Weight: 400;
 }
 
 

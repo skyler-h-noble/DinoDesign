@@ -4,15 +4,10 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { DynoDesignProvider } from './DynoDesignProvider';
 import ComponentShowcase from './pages/ComponentShowcase';
 
-function App({ foundationCSS, coreCSS, lightModeCSS, darkModeCSS, baseCSS, stylesCSS }) {
+function App({ themeURL }) {
   return (
     <DynoDesignProvider
-      foundationCSS={foundationCSS}
-      coreCSS={coreCSS}
-      lightModeCSS={lightModeCSS}
-      darkModeCSS={darkModeCSS}
-      baseCSS={baseCSS}
-      stylesCSS={stylesCSS}
+      themeURL={themeURL}
       defaultTheme="Default"
       defaultSurface="Surface"
       defaultStyle="Modern"

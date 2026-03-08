@@ -62,7 +62,6 @@
     "type": "git",
     "url": "https://github.com/skyler-h-noble/DinoDesign"
   },
-  "homepage": "https://github.com/skyler-h-noble/DinoDesign#readme",
   "dependencies": {
     "eslint-plugin-react-hooks": "^7.0.1",
     "react-router-dom": "^7.13.1",
