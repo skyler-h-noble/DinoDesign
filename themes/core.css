@@ -1,0 +1,66 @@
+/*
+  Custom Fonts - placeholder for future font loading
+*/
+
+:root {
+/* Sizing */
+--Container-Padding: 24px;
+--Sizing-1: 8px;
+--Sizing-2: 16px;
+--Sizing-3: 24px;
+--Sizing-4: 32px;
+--Sizing-5: 40px;
+--Sizing-6: 48px;
+--Sizing-7: 56px;
+--Sizing-8: 64px;
+--Sizing-9: 72px;
+--Sizing-10: 80px;
+--Sizing-11: 88px;
+--Sizing-12: 96px;
+--Sizing-13: 104px;
+--Sizing-14: 112px;
+--Sizing-Half: 4px;
+--Sizing-Quarter: 2px;
+--Sizing-1-and-Half: 12px;
+}
+
+:root {
+--Container-Padding: var(--Sizing-4);
+--Platform-Label: "Desktop";
+--Button-Height: 32px;
+--Min-Button-Width: 80px;
+--Body-Font-Size: 16px;
+--Body-Letter-Spacing: 0;
+--Body-Line-Height: 24px;
+--Body-Paragraph-Spacing: 16px;
+--H1-Font-Size: 40px;
+--H1-Line-Height: 40px;
+--H1-Letter-Spacing: -1px;
+--H1-Paragraph-Spacing: 32px;
+--H2-Font-Size: 32px;
+--H2-Line-Height: 40px;
+--H2-Letter-Spacing: -1px;
+--H2-Paragraph-Spacing: 24px;
+--H3-Font-Size: 28px;
+--H3-Line-Height: 36px;
+--H3-Letter-Spacing: -.5px;
+--H3-Paragraph-Spacing: 20px;
+--H4-Font-Size: 24px;
+--H4-Line-Height: 32px;
+--H4-Letter-Spacing: -.5px;
+--H4-Paragraph-Spacing: 16px;
+--H5-Font-Size: 20px;
+--H5-Line-Height: 28px;
+--H5-Letter-Spacing: 0px;
+--H5-Paragraph-Spacing: 12px;
+--H6-Font-Size: 18px;
+--H6-Line-Height: 26px;
+--H6-Letter-Spacing: 0px;
+--H6-Paragraph-Spacing: 12px;
+--Label-Font-Size: 14px;
+--Label-Line-Height: 20px;
+--Label-Letter-Spacing: 0px;
+--Label-Paragraph-Spacing: 4px;
+--Button-Font-Size: 16px;
+--Button-Line-Height: 20px;
+}

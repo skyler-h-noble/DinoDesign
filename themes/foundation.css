@@ -1,0 +1,13 @@
+:root {
+  --Shadow-1: 0px 0px 0px 1px #eeeeee;
+  --Shadow-2: 0px 0px 0px 0px rgba(0, 0, 0, 0.0);
+  --Style-Border-Radius: 8px;
+  --Style-Gradient-Color-1: var(--Buttons-Primary-Button);
+  --Style-Gradient-Color-2: var(--Buttons-Primary-Button);
+  --Style-Gradient-Angle: 0;
+
+
+}
+
+
+
