@@ -1,13 +1,11 @@
-// src/App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { DynoDesignProvider } from './DynoDesignProvider';
 import ComponentShowcase from './pages/ComponentShowcase';
 
-function App({ themeURL }) {
+function App() {
   return (
     <DynoDesignProvider
-      themeURL={themeURL}
       defaultTheme="Default"
       defaultSurface="Surface"
       defaultStyle="Modern"

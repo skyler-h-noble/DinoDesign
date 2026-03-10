@@ -1,41 +1,31 @@
 import { useState, useEffect } from 'react';
 
-const THEME_MODES = {
-  light: 'Light-Mode-Tonal',
-  professional: 'Light-Mode-Professional',
-  dark: 'Dark-Mode',
-};
+function injectLink(href, id) {
+  if (document.getElementById(id)) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = href;
+  link.id = id;
+  document.head.appendChild(link);
+}
 
 export function useThemeMode(initialMode = 'light') {
   const [mode, setMode] = useState(initialMode);
 
+  useEffect(() => {
+    // Load base CSS files once
+    injectLink('/styles/foundations.css', 'css-foundations');
+    injectLink('/styles/core.css', 'css-core');
+    injectLink('/styles/Light-Mode.css', 'css-mode');
+    injectLink('/styles/base.css', 'css-base');
+  }, []);
+
   const switchMode = (newMode) => {
-    if (!THEME_MODES[newMode]) {
-      console.error(`Unknown theme mode: ${newMode}`);
-      return;
-    }
-
-    const oldLink = document.querySelector('link[data-theme]');
-    if (oldLink) oldLink.remove();
-
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = `/styles/${THEME_MODES[newMode]}.css`;
-    link.setAttribute('data-theme', newMode);
-    document.head.appendChild(link);
-
+    const modeLink = document.getElementById('css-mode');
+    if (modeLink) modeLink.href = newMode === 'dark' ? '/styles/Dark-Mode.css' : '/styles/Light-Mode.css';
     setMode(newMode);
     localStorage.setItem('themeMode', newMode);
-    
-    console.log(`✅ Switched to ${newMode} theme`);
   };
-
-  useEffect(() => {
-    const savedMode = localStorage.getItem('themeMode') || initialMode;
-    if (savedMode !== mode) {
-      switchMode(savedMode);
-    }
-  }, []);
 
   return { mode, switchMode };
 }
