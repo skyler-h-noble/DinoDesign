@@ -307,6 +307,38 @@ import type { DynoTheme, DynoSurface, DynoStyle } from '@dyno/components';
 
 ---
 
+## Using with Cursor / AI Agents
+
+Dyno ships a `.cursorrules` file that tells Cursor exactly how to use your design system. 
+
+### Option A — Copy from node_modules (quickest)
+After installing, copy the file into your project root:
+```bash
+cp node_modules/@dynodesign/components/.cursorrules .cursorrules
+```
+
+### Option B — Copy and paste
+Create a `.cursorrules` file at your project root and paste this in:
+```
+This project uses the @dynodesign/components design system.
+
+Read these docs before writing any code:
+- node_modules/@dynodesign/components/docs/getting-started.md
+- node_modules/@dynodesign/components/docs/token-system.md
+- node_modules/@dynodesign/components/docs/components.md
+
+ALWAYS import components from '@dynodesign/components'
+ALWAYS import CSS at the top of App.js:
+  import '@dynodesign/components/public/styles/foundations.css'
+  import '@dynodesign/components/public/styles/core.css'
+  import '@dynodesign/components/public/styles/Light-Mode.css'
+  import '@dynodesign/components/public/styles/base.css'
+
+ALWAYS wrap content in a div with data-theme, data-surface, and data-style attributes.
+```
+
+Once in place, any prompt you give Cursor will automatically use your Dyno components correctly.
+
 ## Next Steps
 
 - **[Token System](./token-system.md)** — how CSS variables cascade through layers

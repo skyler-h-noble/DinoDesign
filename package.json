@@ -11,6 +11,7 @@
     "dist",
     "public/styles",
     "docs",
+    ".cursorrules",
     "CLAUDE.md",
     "README.md"
   ],

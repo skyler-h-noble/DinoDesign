@@ -1,0 +1,21 @@
+This project uses the @dynodesign/components design system.
+
+Read these docs before writing any code:
+- node_modules/@dynodesign/components/docs/getting-started.md
+- node_modules/@dynodesign/components/docs/token-system.md
+- node_modules/@dynodesign/components/docs/components.md
+
+ALWAYS import components from '@dynodesign/components'
+ALWAYS import CSS at the top of App.js:
+  import '@dynodesign/components/public/styles/foundations.css'
+  import '@dynodesign/components/public/styles/core.css'
+  import '@dynodesign/components/public/styles/Light-Mode.css'
+  import '@dynodesign/components/public/styles/base.css'
+
+ALWAYS wrap content in a div with data-theme, data-surface, and data-style attributes.
+
+Available themes: Default, Primary, Primary-Light, Primary-Dark, Secondary, Tertiary, Neutral, Success-Light, Warning-Light, Error-Light, Info-Light
+Available surfaces: Surface, Surface-Dim, Container, Container-Low, Container-Lowest, Container-High
+Available styles: Professional, Modern, Bold, Playful
+Available colors: primary, secondary, tertiary, neutral, info, success, warning, error
+Available components: Button, ButtonGroup, Chip, Input, TextField, Card, Tabs, Stack, Checkbox
