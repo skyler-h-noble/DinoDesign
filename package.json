@@ -79,7 +79,7 @@
     "react-router-dom": "^7.13.1",
     "react-scripts": "^5.0.1"
   },
-  "homepage": "https://skyler-h-noble.github.io/DinoDesign",
+  "homepage": "/",
   "browserslist": {
     "production": [
       ">0.2%",
