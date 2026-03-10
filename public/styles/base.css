@@ -1,6 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Julius+Sans+One&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Gelasio&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Cardo&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+Great+Primer&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Spectral&display=swap');
 
 /* ========================================
  * Base CSS Variables
@@ -181,13 +180,13 @@
    * ======================================== */
 
 
- --Set-Font-Family-Header: "Julius Sans One", sans-serif;
+ --Set-Font-Family-Header: "IM Fell Great Primer", sans-serif;
  --Set-Font-Family-Header-Weight: 800;
- --Set-Font-Family-Body: "Gelasio", serif;
+ --Set-Font-Family-Body: "Spectral", cursive;
  --Set-Font-Family-Body-Weight: 400;
  --Set-Font-Family-Body-Semibold-Weight: 600;
  --Set-Font-Family-Body-Bold-Weight: 700;
- --Set-Font-Family-Decorative: "Cardo", cursive;
+ --Set-Font-Family-Decorative: "Spectral", cursive;
  --Set-Font-Family-Decorative-Weight: 800;
 }
 

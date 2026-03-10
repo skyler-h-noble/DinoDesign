@@ -1,5 +1,5 @@
 // src/components/Card/Card.js
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useRef, useEffect, useState } from 'react';
 import { Box } from '@mui/material';
 
 /**
@@ -57,11 +57,21 @@ export function Card({
   const isSolid = variant === 'solid';
   const isLight = variant === 'light';
 
-  const dataTheme = isSolid
-    ? SOLID_THEME_MAP[color]
-    : isLight
-      ? LIGHT_THEME_MAP[color]
-      : null;
+  // Inherit data-theme from nearest ancestor, unless explicitly overridden
+  const ref = useRef(null);
+  const [inheritedTheme, setInheritedTheme] = useState(null);
+  useEffect(() => {
+    if (!ref.current) return;
+    const closest = ref.current.parentElement?.closest('[data-theme]');
+    if (closest) setInheritedTheme(closest.dataset.theme);
+  }, []);
+
+  const dataTheme = props['data-theme']   // explicit override always wins
+    ?? (isSolid
+      ? SOLID_THEME_MAP[color]
+      : isLight
+        ? LIGHT_THEME_MAP[color]
+        : inheritedTheme);
 
   const bg = isDefault ? 'var(--Background)' : 'var(--Surface)';
 
@@ -84,6 +94,7 @@ export function Card({
         onClick={isClickable ? onClick : undefined}
         role={isClickable ? 'button' : undefined}
         tabIndex={isClickable ? 0 : undefined}
+        ref={ref}
         data-theme={dataTheme || undefined}
         data-surface="Container"
         className={
