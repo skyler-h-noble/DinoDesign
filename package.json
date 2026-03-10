@@ -1,6 +1,6 @@
 {
   "name": "@dynodesign/components",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "DynoDesign adaptive component library — token-driven React components with customizable CSS theming",
   "author": "Lise Noble",
   "license": "Apache-2.0",
