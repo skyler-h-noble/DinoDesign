@@ -23,7 +23,13 @@
     "./provider": {
       "import": "./dist/DynoDesignProvider.esm.js",
       "require": "./dist/DynoDesignProvider.js"
-    }
+    },
+    "./public/styles/foundations.css": "./public/styles/foundations.css",
+    "./public/styles/core.css": "./public/styles/core.css",
+    "./public/styles/Light-Mode.css": "./public/styles/Light-Mode.css",
+    "./public/styles/Dark-Mode.css": "./public/styles/Dark-Mode.css",
+    "./public/styles/base.css": "./public/styles/base.css",
+    "./public/styles/styles.css": "./public/styles/styles.css"
   },
   "scripts": {
     "start": "react-scripts start",
