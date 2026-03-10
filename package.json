@@ -9,6 +9,7 @@
   "types": "dist/index.d.ts",
   "files": [
     "dist",
+    "public/styles",
     "CLAUDE.md",
     "README.md"
   ],
