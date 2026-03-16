@@ -8,6 +8,7 @@ import {
   SocialFooter,
   MultiColumnFooter,
 } from './Footer';
+import { axe } from 'jest-axe';
 
 describe('Footer Component', () => {
   test('renders Footer component', () => {
@@ -282,5 +283,37 @@ describe('MultiColumnFooter Component', () => {
     );
     const footerElement = container.querySelector('footer');
     expect(footerElement).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Footer — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Footer />
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Footer />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Footer />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

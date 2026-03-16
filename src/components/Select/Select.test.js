@@ -3,6 +3,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Select } from './Select';
 import SearchIcon from '@mui/icons-material/Search';
+import { axe } from 'jest-axe';
 
 const OPTIONS = [
   { value: 'a', label: 'Alpha' },
@@ -144,5 +145,37 @@ describe('Keyboard', () => {
     renderSelect();
     fireEvent.keyDown(screen.getByRole('combobox'), { key: ' ' });
     expect(screen.getByRole('listbox')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Select — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Select aria-label="Select option"><option value="1">Option 1</option></Select>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Select aria-label="Select option"><option value="1">Option 1</option></Select>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Select aria-label="Select option"><option value="1">Option 1</option></Select>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

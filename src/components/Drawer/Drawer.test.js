@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Drawer, DrawerClose, DrawerHeader, DrawerContent } from './Drawer';
+import { axe } from 'jest-axe';
 
 /* ─── Helpers ─── */
 const renderDrawer = (props = {}) =>
@@ -207,5 +208,37 @@ describe('Body scroll', () => {
   test('body overflow is hidden when open', () => {
     renderDrawer();
     expect(document.body.style.overflow).toBe('hidden');
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Drawer — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Drawer open={false} aria-label="Navigation drawer"><p>Content</p></Drawer>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Drawer open={false} aria-label="Navigation drawer"><p>Content</p></Drawer>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Drawer open={false} aria-label="Navigation drawer"><p>Content</p></Drawer>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

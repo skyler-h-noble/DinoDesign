@@ -1,30 +1,21 @@
 // src/components/Alert/AlertShowcase.js
 import React, { useState, useEffect } from 'react';
-import {
-  Box, Stack, Grid, Tabs, Tab, Tooltip, IconButton as MuiIconButton, Switch,
-} from '@mui/material';
+import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
-import InfoIcon from '@mui/icons-material/Info';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import WarningIcon from '@mui/icons-material/Warning';
-import ErrorIcon from '@mui/icons-material/Error';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import StarIcon from '@mui/icons-material/Star';
-import SecurityIcon from '@mui/icons-material/Security';
-import UpdateIcon from '@mui/icons-material/Update';
-import CloseIcon from '@mui/icons-material/Close';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SettingsIcon from '@mui/icons-material/Settings';
-import PersonIcon from '@mui/icons-material/Person';
+import * as MuiIcons from '@mui/icons-material';
 import { Alert } from './Alert';
-import {
-  H2, H4, H5, Body, BodySmall, Caption, Label, OverlineSmall
-} from '../Typography';
+import { Button } from '../Button/Button';
+import { Switch } from '../Switch/Switch';
+import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
+import { PreviewSurface } from '../PreviewSurface';
+import { H2, H5, BodySmall, Caption, Label, OverlineSmall } from '../Typography';
+
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
-const COLORS = ['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+
 const COLOR_LABEL_MAP = {
   primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
   info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
@@ -38,21 +29,7 @@ const LIGHT_THEME_MAP = {
   info: 'Info-Light', success: 'Success-Light', warning: 'Warning-Light', error: 'Error-Light',
 };
 
-const ICON_MAP = {
-  Info: <InfoIcon sx={{ fontSize: 'inherit' }} />,
-  Success: <CheckCircleIcon sx={{ fontSize: 'inherit' }} />,
-  Warning: <WarningIcon sx={{ fontSize: 'inherit' }} />,
-  Error: <ErrorIcon sx={{ fontSize: 'inherit' }} />,
-  Notification: <NotificationsIcon sx={{ fontSize: 'inherit' }} />,
-  Star: <StarIcon sx={{ fontSize: 'inherit' }} />,
-  Security: <SecurityIcon sx={{ fontSize: 'inherit' }} />,
-  Update: <UpdateIcon sx={{ fontSize: 'inherit' }} />,
-  Close: <CloseIcon sx={{ fontSize: 'inherit' }} />,
-  Arrow: <ArrowForwardIcon sx={{ fontSize: 'inherit' }} />,
-  Delete: <DeleteIcon sx={{ fontSize: 'inherit' }} />,
-  Settings: <SettingsIcon sx={{ fontSize: 'inherit' }} />,
-};
-const ICON_NAMES = Object.keys(ICON_MAP);
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function getLuminance(hex) {
   const clean = hex.replace('#', '');
@@ -72,24 +49,36 @@ function getCssVar(varName) {
   return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
 }
 
+// Dynamically get a MUI icon component by name
+function getMuiIcon(name) {
+  if (!name) return null;
+  const clean = name.replace(/\s/g, '');
+  return MuiIcons[clean + 'Icon'] || MuiIcons[clean] || null;
+}
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
 function ContrastBadge({ ratio, threshold }) {
   if (!ratio) return <Caption style={{ color: 'var(--Text-Quiet)' }}>--</Caption>;
   const passes = parseFloat(ratio) >= threshold;
   return (
     <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
-      <Box sx={{ px: 1, py: 0.25, borderRadius: '4px',
+      <Box sx={{ px: 1, py: 0.25, borderRadius: '4px', fontSize: '11px', fontWeight: 700,
         backgroundColor: passes ? 'var(--Tags-Success-BG)' : 'var(--Tags-Error-BG)',
-        color: passes ? 'var(--Tags-Success-Text)' : 'var(--Tags-Error-Text)',
-        fontSize: '11px', fontWeight: 700 }}>{ratio}:1</Box>
+        color: passes ? 'var(--Tags-Success-Text)' : 'var(--Tags-Error-Text)' }}>
+        {ratio}:1
+      </Box>
       <Caption style={{ color: passes ? 'var(--Tags-Success-Text)' : 'var(--Tags-Error-Text)' }}>
         {passes ? 'Pass' : 'Fail'}
       </Caption>
     </Box>
   );
 }
+
 function A11yRow({ label, ratio, threshold, note }) {
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', py: 1.5, borderBottom: '1px solid var(--Border)' }}>
+    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+      py: 1.5, borderBottom: '1px solid var(--Border)' }}>
       <Box sx={{ flex: 1 }}>
         <BodySmall style={{ color: 'var(--Text)' }}>{label}</BodySmall>
         {note && <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>{note}</Caption>}
@@ -98,6 +87,7 @@ function A11yRow({ label, ratio, threshold, note }) {
     </Box>
   );
 }
+
 function CopyButton({ code }) {
   const [copied, setCopied] = useState(false);
   const handleCopy = async () => {
@@ -105,205 +95,65 @@ function CopyButton({ code }) {
     catch (err) { console.error('Copy failed:', err); }
   };
   return (
-    <Tooltip title={copied ? 'Copied!' : 'Copy code'}>
-      <MuiIconButton size="small" onClick={handleCopy}
-        sx={{ color: copied ? '#4ade80' : '#9ca3af', '&:hover': { backgroundColor: '#333', color: '#e5e7eb' } }}>
-        {copied ? <CheckIcon fontSize="small" /> : <ContentCopyIcon fontSize="small" />}
-      </MuiIconButton>
-    </Tooltip>
+    <Button iconOnly variant="ghost" size="small" onClick={handleCopy}
+      aria-label={copied ? 'Copied' : 'Copy code'} title={copied ? 'Copied!' : 'Copy code'}
+      sx={{ color: copied ? '#4ade80' : '#9ca3af' }}>
+      {copied ? <CheckIcon fontSize="small" /> : <ContentCopyIcon fontSize="small" />}
+    </Button>
   );
 }
-function ColorSwatchButton({ color, selected, onClick }) {
-  const C = cap(color);
-  return (
-    <Tooltip title={C} arrow>
-      <Box onClick={() => onClick(color)} role="button" aria-label={'Select ' + C} aria-pressed={selected}
-        sx={{ width: 'var(--Button-Height)', height: 'var(--Button-Height)', borderRadius: '4px',
-          backgroundColor: 'var(--Buttons-' + C + '-Button)',
-          border: selected ? '2px solid var(--Text)' : '2px solid transparent',
-          outline: selected ? '2px solid var(--Focus-Visible)' : '2px solid transparent',
-          outlineOffset: '1px', cursor: 'pointer', flexShrink: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transition: 'transform 0.1s ease', '&:hover': { transform: 'scale(1.1)' } }}>
-        {selected && <CheckIcon sx={{ fontSize: 24, color: 'var(--Buttons-' + C + '-Text)', pointerEvents: 'none' }} />}
-      </Box>
-    </Tooltip>
-  );
-}
+
 function ControlButton({ label, selected, onClick }) {
   return (
-    <Box component="button" onClick={onClick}
-      sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-        border: '2px solid var(--Buttons-Primary-Button)', borderRadius: 'var(--Style-Border-Radius)',
-        backgroundColor: selected ? 'var(--Buttons-Primary-Button)' : 'transparent',
-        color: selected ? 'var(--Buttons-Primary-Text)' : 'var(--Text)',
-        padding: '4px 12px', fontSize: '14px',
-        fontFamily: 'inherit', fontWeight: 500, whiteSpace: 'nowrap', flexShrink: 0,
-        transition: 'background-color 0.15s ease, color 0.15s ease',
-        '&:hover': { backgroundColor: selected ? 'var(--Buttons-Primary-Hover)' : 'var(--Surface-Dim)' },
-        '&:focus-visible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '2px' } }}>
+    <Button variant={selected ? 'primary' : 'primary-outline'} size="small" onClick={onClick}>
       {label}
+    </Button>
+  );
+}
+
+// Color swatches using data-theme so var(--Background) shows the tinted surface
+function ColorSwatchButton({ color, selected, onClick, variant }) {
+  const C = COLOR_LABEL_MAP[color] || cap(color);
+  const dataTheme = variant === 'light' ? LIGHT_THEME_MAP[color] : SOLID_THEME_MAP[color];
+  return (
+    <Box component="button"
+      data-theme={dataTheme} data-surface="Surface"
+      onClick={() => onClick(color)} aria-label={'Select ' + C} aria-pressed={selected} title={C}
+      sx={{
+        width: 'var(--Button-Height)', height: 'var(--Button-Height)', borderRadius: '4px',
+        backgroundColor: 'var(--Background)',
+        border: selected ? '2px solid var(--Text)' : '2px solid var(--Border)',
+        outline: selected ? '2px solid var(--Focus-Visible)' : '2px solid transparent',
+        outlineOffset: '1px', cursor: 'pointer', flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        transition: 'transform 0.1s ease', '&:hover': { transform: 'scale(1.1)' },
+      }}>
+      {selected && <CheckIcon sx={{ fontSize: 16, color: 'var(--Text)', pointerEvents: 'none' }} />}
     </Box>
   );
 }
-function SelectInput({ value, onChange, options, label, sx: sxOverride }) {
-  return (
-    <Box
-      component="select"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      aria-label={label}
-      sx={{
-        padding: '4px 6px', fontSize: '13px', fontFamily: 'inherit',
-        border: '1px solid var(--Border)', borderRadius: '4px',
-        backgroundColor: 'var(--Background)', color: 'var(--Text)', outline: 'none',
-        cursor: 'pointer', '&:focus': { borderColor: 'var(--Focus-Visible)' },
-        ...sxOverride,
-      }}
-    >
-      {options.map((o) => (
-        <option key={typeof o === 'string' ? o : o.value} value={typeof o === 'string' ? o : o.value}>
-          {typeof o === 'string' ? o : o.label}
-        </option>
-      ))}
-    </Box>
-  );
-}
-function TextInput({ value, onChange, placeholder, sx: sxOverride }) {
-  return (
-    <Box
-      component="input"
-      type="text"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      sx={{
-        flex: 1, padding: '4px 8px', fontSize: '13px', fontFamily: 'inherit',
-        border: '1px solid var(--Border)', borderRadius: '4px',
-        backgroundColor: 'var(--Background)', color: 'var(--Text)', outline: 'none',
-        '&:focus': { borderColor: 'var(--Focus-Visible)' },
-        ...sxOverride,
-      }}
-    />
-  );
-}
+
+// ─── Main Showcase ────────────────────────────────────────────────────────────
 
 export function AlertShowcase() {
-  const [mainTab, setMainTab] = useState(0);
-  const [variant, setVariant] = useState('outline');
-  const [color, setColor] = useState('info');
-  const [size, setSize] = useState('medium');
-  const [message, setMessage] = useState('This is an alert — check it out!');
+  const [variant, setVariant]   = useState('outline');
+  const [color, setColor]       = useState('default');
+  const [size, setSize]         = useState('medium');
+  const [message, setMessage]   = useState('This is an alert — check it out!');
 
   // Start decorator
-  const [startType, setStartType] = useState('icon'); // none | icon | avatar
-  const [startIcon, setStartIcon] = useState('Info');
-  const [startIconColor, setStartIconColor] = useState('info');
+  const [startType, setStartType]   = useState('icon'); // none | icon
+  const [startIconName, setStartIconName] = useState('Info');
 
   // End decorator
-  const [endType, setEndType] = useState('none'); // none | icon | link | button
-  const [endIcon, setEndIcon] = useState('Close');
-  const [endIconColor, setEndIconColor] = useState('neutral');
-  const [endText, setEndText] = useState('Dismiss');
-  const [endBtnColor, setEndBtnColor] = useState('primary');
+  const [endType, setEndType]       = useState('none'); // none | icon | link | button
+  const [endIconName, setEndIconName]     = useState('Close');
+  const [endText, setEndText]       = useState('Dismiss');
 
   const [contrastData, setContrastData] = useState({});
 
-  const isStandard = variant === 'standard';
+  const isOutline = variant === 'outline';
   const C = COLOR_LABEL_MAP[color] || 'Primary';
-
-  // Build start decorator
-  const buildStartDecorator = () => {
-    if (startType === 'none') return undefined;
-    if (startType === 'avatar') {
-      const SC = cap(startIconColor);
-      return (
-        <Box className="alert-avatar" sx={{
-          width: 28, height: 28, borderRadius: '50%',
-          backgroundColor: 'var(--Buttons-' + SC + '-Button)',
-          color: 'var(--Buttons-' + SC + '-Text)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '14px', fontWeight: 700, flexShrink: 0,
-        }}>
-          <PersonIcon sx={{ fontSize: 16 }} />
-        </Box>
-      );
-    }
-    // icon
-    const SC = cap(startIconColor);
-    const icon = ICON_MAP[startIcon] || ICON_MAP.Info;
-    return (
-      <Box sx={{ color: 'var(--Buttons-' + SC + '-Border)', display: 'inline-flex', fontSize: 'inherit' }}>
-        {icon}
-      </Box>
-    );
-  };
-
-  // Build end decorator
-  const buildEndDecorator = () => {
-    if (endType === 'none') return undefined;
-    if (endType === 'icon') {
-      const EC = cap(endIconColor);
-      const icon = ICON_MAP[endIcon] || ICON_MAP.Close;
-      return (
-        <Box
-          component="button"
-          aria-label={endIcon}
-          sx={{
-            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-            width: 28, height: 28, borderRadius: '4px',
-            border: 'none', backgroundColor: 'transparent',
-            color: 'var(--Buttons-' + EC + '-Border)',
-            cursor: 'pointer', fontSize: '18px', flexShrink: 0,
-            '&:hover': { backgroundColor: 'var(--Hover)' },
-            '&:active': { backgroundColor: 'var(--Active)' },
-            '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '-3px' },
-          }}
-        >
-          {icon}
-        </Box>
-      );
-    }
-    if (endType === 'link') {
-      const EC = cap(endBtnColor);
-      return (
-        <Box
-          component="a"
-          href="#"
-          onClick={(e) => e.preventDefault()}
-          sx={{
-            color: 'var(--Buttons-' + EC + '-Border)',
-            fontSize: '13px', fontWeight: 600, textDecoration: 'underline',
-            cursor: 'pointer', whiteSpace: 'nowrap',
-            '&:hover': { textDecoration: 'none' },
-            '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px' },
-          }}
-        >
-          {endText || 'Learn more'}
-        </Box>
-      );
-    }
-    // button
-    const EC = cap(endBtnColor);
-    return (
-      <Box
-        component="button"
-        sx={{
-          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-          padding: '4px 12px', fontSize: '13px', fontWeight: 600,
-          fontFamily: 'inherit', borderRadius: '4px', cursor: 'pointer',
-          border: 'none', whiteSpace: 'nowrap',
-          backgroundColor: 'var(--Buttons-' + EC + '-Button)',
-          color: 'var(--Buttons-' + EC + '-Text)',
-          '&:hover': { backgroundColor: 'var(--Buttons-' + EC + '-Hover)' },
-          '&:active': { backgroundColor: 'var(--Buttons-' + EC + '-Active)' },
-          '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px' },
-        }}
-      >
-        {endText || 'Action'}
-      </Box>
-    );
-  };
 
   const getThemeName = () => {
     if (variant === 'solid') return SOLID_THEME_MAP[color] || '';
@@ -311,24 +161,79 @@ export function AlertShowcase() {
     return '';
   };
 
+  // Icon color matches the alert's themed surface — var(--Icons-{C})
+  const iconColor = isOutline ? 'var(--Icons-' + C + ')' : 'var(--Icons-' + C + ')';
+
+  const buildStartDecorator = () => {
+    if (startType === 'none') return undefined;
+    const IconComp = getMuiIcon(startIconName);
+    if (!IconComp) return undefined;
+    return (
+      <Box sx={{ color: iconColor, display: 'inline-flex', fontSize: 'inherit' }}>
+        <IconComp sx={{ fontSize: 'inherit' }} />
+      </Box>
+    );
+  };
+
+  const buildEndDecorator = () => {
+    if (endType === 'none') return undefined;
+    if (endType === 'icon') {
+      const IconComp = getMuiIcon(endIconName);
+      if (!IconComp) return undefined;
+      return (
+        <Box sx={{ display: 'inline-flex', alignItems: 'center', color: 'var(--Quiet)', fontSize: '18px', flexShrink: 0 }}>
+          <IconComp sx={{ fontSize: 'inherit' }} />
+        </Box>
+      );
+    }
+    if (endType === 'link') {
+      return (
+        <Box component="a" href="#" onClick={(e) => e.preventDefault()}
+          sx={{
+            color: 'var(--Text-Primary)', fontSize: '13px', fontWeight: 600,
+            textDecoration: 'underline', cursor: 'pointer', whiteSpace: 'nowrap',
+            '&:hover': { textDecoration: 'none' },
+            '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px' },
+          }}>
+          {endText || 'Learn more'}
+        </Box>
+      );
+    }
+    // button
+    return (
+      <Box component="button"
+        sx={{
+          display: 'inline-flex', alignItems: 'center', padding: '4px 12px',
+          fontSize: '13px', fontWeight: 600, fontFamily: 'inherit',
+          borderRadius: '4px', cursor: 'pointer', border: 'none', whiteSpace: 'nowrap',
+          backgroundColor: 'var(--Buttons-' + C + '-Button)',
+          color: 'var(--Buttons-' + C + '-Text)',
+          '&:hover': { backgroundColor: 'var(--Buttons-' + C + '-Hover)' },
+          '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px' },
+        }}>
+        {endText || 'Action'}
+      </Box>
+    );
+  };
+
   const generateCode = () => {
     const parts = [];
-    if (variant !== 'standard') parts.push('variant="' + variant + '"');
-    if (!isStandard && color !== 'primary') parts.push('color="' + color + '"');
+    parts.push('variant="' + variant + '"');
+    if (!isOutline) parts.push('color="' + color + '"');
     if (size !== 'medium') parts.push('size="' + size + '"');
-    if (startType !== 'none') parts.push('startDecorator={<' + startIcon + 'Icon />}');
-    if (endType === 'icon') parts.push('endDecorator={<IconButton><' + endIcon + 'Icon /></IconButton>}');
-    else if (endType === 'link') parts.push('endDecorator={<Link>' + (endText || 'Learn more') + '</Link>}');
-    else if (endType === 'button') parts.push('endDecorator={<Button>' + (endText || 'Action') + '</Button>}');
+    if (startType === 'icon') parts.push('startDecorator={<' + startIconName + 'Icon sx={{ fontSize: \'inherit\', color: \'var(--Icons-' + C + ')\' }} />}');
+    if (endType === 'icon') parts.push('endDecorator={<' + endIconName + 'Icon />}');
+    else if (endType === 'link') parts.push('endDecorator={<a href="#">' + (endText || 'Learn more') + '</a>}');
+    else if (endType === 'button') parts.push('endDecorator={<button>' + (endText || 'Action') + '</button>}');
     const p = parts.length ? '\n  ' + parts.join('\n  ') + '\n' : '';
     return '<Alert' + p + '>\n  ' + message + '\n</Alert>';
   };
 
   useEffect(() => {
     const data = {};
-    data.text = getCssVar('--Text');
-    data.background = getCssVar('--Background');
-    data.border = getCssVar('--Border');
+    data.text        = getCssVar('--Text');
+    data.background  = getCssVar('--Background');
+    data.border      = getCssVar('--Border');
     data.colorBorder = getCssVar('--Buttons-' + C + '-Border');
     setContrastData(data);
   }, [variant, color, C]);
@@ -336,21 +241,15 @@ export function AlertShowcase() {
   return (
     <Box sx={{ pb: 8 }}>
       <H2>Alert</H2>
-      <Tabs value={mainTab} onChange={(e, v) => setMainTab(v)}
-        sx={{ mt: 3, mb: 0, borderBottom: '1px solid var(--Border)',
-          '& .MuiTabs-indicator': { backgroundColor: 'var(--Buttons-Primary-Button)', height: 3 },
-          '& .MuiTab-root': { color: 'var(--Text-Quiet)', textTransform: 'none', fontWeight: 500, '&.Mui-selected': { color: 'var(--Text)' } } }}>
-        <Tab label="Playground" />
-        <Tab label="Accessibility" />
-      </Tabs>
 
-      {mainTab === 0 && (
-        <Grid container sx={{ minHeight: 400 }}>
+      <Grid container sx={{ mt: 2, alignItems: 'flex-start' }}>
+
+        {/* ── LEFT: Preview + Code ── */}
+        <Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, pr: { md: 3 } }}>
+
           {/* Preview */}
-          <Grid item sx={{ width: { xs: '100%', md: 'calc((100vw - 432px) / 2)' }, flexShrink: 0 }}>
-            <Box sx={{ p: 4, display: 'flex', flexDirection: 'column', justifyContent: 'center',
-              minHeight: 300, backgroundColor: 'var(--Background)', borderBottom: '1px solid var(--Border)', gap: 3 }}>
-
+          <PreviewSurface minHeight={80} sx={{ p: 3, alignItems: 'flex-start' }}>
+            <Box sx={{ width: '100%' }}>
               <Alert
                 variant={variant}
                 color={color}
@@ -360,274 +259,234 @@ export function AlertShowcase() {
               >
                 {message}
               </Alert>
+            </Box>
+          </PreviewSurface>
 
-              {/* All variants side by side */}
-              <Box>
-                <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>All variants — {cap(color)}</Caption>
-                <Stack spacing={1.5}>
-                  {['standard', 'outline', 'light', 'solid'].map((v) => (
-                    <Box key={v}>
-                      <Caption style={{ color: 'var(--Text-Quiet)', fontSize: '10px', display: 'block', marginBottom: 2 }}>{cap(v)}</Caption>
-                      <Alert variant={v} color={color} size="small" startDecorator={buildStartDecorator()}>
-                        {cap(v)} alert message
-                      </Alert>
-                    </Box>
-                  ))}
-                </Stack>
-              </Box>
-
-              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                {isStandard && <Caption style={{ color: 'var(--Text-Quiet)' }}>No border, no data-theme.</Caption>}
-                {variant === 'outline' && <Caption style={{ color: 'var(--Text-Quiet)' }}>Border: var(--Buttons-{C}-Border)</Caption>}
-                {(variant === 'light' || variant === 'solid') && (
-                  <>
-                    <Caption style={{ color: 'var(--Text-Quiet)' }}>Outer border: var(--Border)</Caption>
-                    <Caption style={{ color: 'var(--Text-Quiet)' }}>Inner: data-theme="{getThemeName()}" data-surface="Surface"</Caption>
-                  </>
-                )}
+          {/* JSX Code */}
+          <Box sx={{ backgroundColor: '#1e1e1e', borderRadius: '8px', overflow: 'hidden', mt: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              px: 2, py: 1, borderBottom: '1px solid #333' }}>
+              <Caption style={{ color: '#9ca3af' }}>JSX</Caption>
+              <CopyButton code={generateCode()} />
+            </Box>
+            <Box sx={{ p: 2, overflow: 'hidden' }}>
+              <Box component="code" sx={{ fontFamily: 'monospace', fontSize: '11px', color: '#e5e7eb',
+                whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowWrap: 'break-word',
+                maxWidth: '100%', display: 'block' }}>
+                {generateCode()}
               </Box>
             </Box>
+          </Box>
+        </Grid>
 
-            {/* Code */}
-            <Box sx={{ backgroundColor: '#1e1e1e', borderBottom: '1px solid var(--Border)' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, py: 1, borderBottom: '1px solid #333' }}>
-                <Caption style={{ color: '#9ca3af' }}>JSX</Caption>
-                <CopyButton code={generateCode()} />
-              </Box>
-              <Box sx={{ p: 2, overflow: 'auto', maxHeight: 180 }}>
-                <Box component="code" sx={{ fontFamily: 'monospace', fontSize: '13px', color: '#e5e7eb', whiteSpace: 'pre', display: 'block' }}>{generateCode()}</Box>
-              </Box>
-            </Box>
-          </Grid>
+        {/* ── RIGHT: Tabs ── */}
+        <Grid item sx={{ width: { xs: '100%', md: '45%' }, flexShrink: 0 }}>
+          <Box sx={{ backgroundColor: 'var(--Background)', overflow: 'hidden' }}>
 
-          {/* Controls */}
-          <Grid item sx={{ width: { xs: 'calc(100vw - 432px)', md: 'calc((100vw - 432px) / 2)' }, flexShrink: 0, p: 3, backgroundColor: 'var(--Container)', overflowY: 'auto' }}>
-            <H4>Playground</H4>
+            <Tabs defaultValue={0} variant="standard" color="primary">
+              <TabList>
+                <Tab>Playground</Tab>
+                <Tab>Accessibility</Tab>
+              </TabList>
 
-            {/* Style */}
-            <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</OverlineSmall>
-              <Stack direction="row" spacing={1} flexWrap="wrap">
-                {['standard', 'outline', 'light', 'solid'].map((v) => (
-                  <ControlButton key={v} label={cap(v)} selected={variant === v} onClick={() => setVariant(v)} />
-                ))}
-              </Stack>
-              <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
-                {isStandard && 'No border or background — plain text.'}
-                {variant === 'outline' && 'Colored border, no background fill.'}
-                {variant === 'light' && 'Outer var(--Border) + inner data-theme="{Color}-Light".'}
-                {variant === 'solid' && 'Outer var(--Border) + inner data-theme="{Color}".'}
-              </Caption>
-            </Box>
+              {/* ── Playground ── */}
+              <TabPanel value={0}>
+                <Box sx={{ p: 3 }}>
 
-            {/* Color */}
-            {!isStandard && (
-              <Box sx={{ mt: 3 }}>
-                <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
-                <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-                  {COLORS.map((c) => (
-                    <ColorSwatchButton key={c} color={c} selected={color === c} onClick={setColor} />
-                  ))}
-                </Stack>
-              </Box>
-            )}
+                  {/* Style */}
+                  <Box>
+                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</OverlineSmall>
+                    <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
+                      {['outline', 'light', 'solid'].map((v) => (
+                        <ControlButton key={v} label={cap(v)} selected={variant === v} onClick={() => setVariant(v)} />
+                      ))}
+                    </Stack>
+                  </Box>
 
-            {/* Size */}
-            <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</OverlineSmall>
-              <Stack direction="row" spacing={1}>
-                {['small', 'medium', 'large'].map((s) => (
-                  <ControlButton key={s} label={cap(s)} selected={size === s} onClick={() => setSize(s)} />
-                ))}
-              </Stack>
-              <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
-                {size === 'small' ? '13px text, 8px/12px padding.' : size === 'medium' ? '14px text, 12px/16px padding.' : '16px text, 14px/20px padding.'}
-              </Caption>
-            </Box>
-
-            {/* Message */}
-            <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>MESSAGE</OverlineSmall>
-              <TextInput value={message} onChange={setMessage} placeholder="Alert message text" />
-            </Box>
-
-            {/* Start Decorator */}
-            <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>START DECORATOR</OverlineSmall>
-              <Stack spacing={1.5}>
-                <Stack direction="row" spacing={1}>
-                  {['none', 'icon', 'avatar'].map((t) => (
-                    <ControlButton key={t} label={cap(t)} selected={startType === t} onClick={() => setStartType(t)} />
-                  ))}
-                </Stack>
-                {startType !== 'none' && (
-                  <Stack spacing={1}>
-                    {startType === 'icon' && (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Caption style={{ color: 'var(--Text-Quiet)', flexShrink: 0, width: 40 }}>Icon</Caption>
-                        <SelectInput value={startIcon} onChange={setStartIcon} options={ICON_NAMES} label="Start icon" />
-                      </Box>
-                    )}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Caption style={{ color: 'var(--Text-Quiet)', flexShrink: 0, width: 40 }}>Color</Caption>
-                      <Stack direction="row" sx={{ gap: 0.5 }}>
-                        {COLORS.map((c) => {
-                          const CC = cap(c);
-                          return (
-                            <Tooltip key={c} title={CC} arrow>
-                              <Box onClick={() => setStartIconColor(c)} role="button" aria-label={'Icon color ' + CC}
-                                sx={{ width: 22, height: 22, borderRadius: '3px', cursor: 'pointer',
-                                  backgroundColor: 'var(--Buttons-' + CC + '-Button)',
-                                  border: startIconColor === c ? '2px solid var(--Text)' : '2px solid transparent',
-                                  '&:hover': { transform: 'scale(1.15)' }, transition: 'transform 0.1s' }} />
-                            </Tooltip>
-                          );
-                        })}
+                  {/* Color — hidden for outline */}
+                  {!isOutline && (
+                    <Box sx={{ mt: 3 }}>
+                      <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
+                      <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
+                        {COLORS.map((c) => (
+                          <ColorSwatchButton key={c} color={c} variant={variant} selected={color === c} onClick={setColor} />
+                        ))}
                       </Stack>
                     </Box>
-                  </Stack>
-                )}
-              </Stack>
-            </Box>
+                  )}
 
-            {/* End Decorator */}
-            <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>END DECORATOR</OverlineSmall>
-              <Stack spacing={1.5}>
-                <Stack direction="row" spacing={1} flexWrap="wrap">
-                  {['none', 'icon', 'link', 'button'].map((t) => (
-                    <ControlButton key={t} label={cap(t)} selected={endType === t} onClick={() => setEndType(t)} />
-                  ))}
-                </Stack>
-                {endType !== 'none' && (
-                  <Stack spacing={1}>
+                  {/* Size */}
+                  <Box sx={{ mt: 3 }}>
+                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</OverlineSmall>
+                    <Stack direction="row" spacing={1}>
+                      {['small', 'medium', 'large'].map((s) => (
+                        <ControlButton key={s} label={cap(s)} selected={size === s} onClick={() => setSize(s)} />
+                      ))}
+                    </Stack>
+                  </Box>
+
+                  {/* Message */}
+                  <Box sx={{ mt: 3 }}>
+                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>MESSAGE</OverlineSmall>
+                    <Box component="input" type="text" value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      placeholder="Alert message text"
+                      sx={{
+                        width: '100%', padding: '6px 10px', fontSize: '13px', fontFamily: 'inherit',
+                        border: '1px solid var(--Border)', borderRadius: '4px',
+                        backgroundColor: 'var(--Background)', color: 'var(--Text)', boxSizing: 'border-box',
+                        '&:focus': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px' },
+                      }} />
+                  </Box>
+
+                  {/* Start Decorator */}
+                  <Box sx={{ mt: 3 }}>
+                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>START ICON</OverlineSmall>
+                    <Stack direction="row" spacing={1} sx={{ mb: 1.5 }}>
+                      {['none', 'icon'].map((t) => (
+                        <ControlButton key={t} label={cap(t)} selected={startType === t} onClick={() => setStartType(t)} />
+                      ))}
+                    </Stack>
+                    {startType === 'icon' && (
+                      <>
+                        <Box component="input" type="text" value={startIconName}
+                          onChange={(e) => setStartIconName(e.target.value)}
+                          placeholder="e.g. Info, CheckCircle, Warning"
+                          sx={{
+                            width: '100%', padding: '6px 10px', fontSize: '13px', fontFamily: 'inherit',
+                            border: '1px solid var(--Border)', borderRadius: '4px',
+                            backgroundColor: 'var(--Background)', color: 'var(--Text)', boxSizing: 'border-box',
+                            '&:focus': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px' },
+                          }} />
+                        <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 4 }}>
+                          Icon color: var(--Icons-{C}) — matches alert theme.{' '}
+                          <Box component="a" href="https://mui.com/material-ui/material-icons/" target="_blank"
+                            rel="noopener noreferrer"
+                            sx={{ color: 'var(--Text-Primary)', textDecoration: 'underline' }}>
+                            Browse MUI Icons ↗
+                          </Box>
+                        </Caption>
+                      </>
+                    )}
+                  </Box>
+
+                  {/* End Decorator */}
+                  <Box sx={{ mt: 3 }}>
+                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>END DECORATOR</OverlineSmall>
+                    <Stack direction="row" flexWrap="wrap" sx={{ gap: 1, mb: 1.5 }}>
+                      {['none', 'icon', 'link', 'button'].map((t) => (
+                        <ControlButton key={t} label={cap(t)} selected={endType === t} onClick={() => setEndType(t)} />
+                      ))}
+                    </Stack>
                     {endType === 'icon' && (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Caption style={{ color: 'var(--Text-Quiet)', flexShrink: 0, width: 40 }}>Icon</Caption>
-                        <SelectInput value={endIcon} onChange={setEndIcon} options={ICON_NAMES} label="End icon" />
-                      </Box>
+                      <Box component="input" type="text" value={endIconName}
+                        onChange={(e) => setEndIconName(e.target.value)}
+                        placeholder="e.g. Close, Delete, ArrowForward"
+                        sx={{
+                          width: '100%', padding: '6px 10px', fontSize: '13px', fontFamily: 'inherit',
+                          border: '1px solid var(--Border)', borderRadius: '4px',
+                          backgroundColor: 'var(--Background)', color: 'var(--Text)', boxSizing: 'border-box',
+                          '&:focus': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px' },
+                        }} />
                     )}
                     {(endType === 'link' || endType === 'button') && (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Caption style={{ color: 'var(--Text-Quiet)', flexShrink: 0, width: 40 }}>Text</Caption>
-                        <TextInput value={endText} onChange={setEndText} placeholder={endType === 'link' ? 'Link text' : 'Button text'} />
-                      </Box>
+                      <Box component="input" type="text" value={endText}
+                        onChange={(e) => setEndText(e.target.value)}
+                        placeholder={endType === 'link' ? 'Link text' : 'Button text'}
+                        sx={{
+                          width: '100%', padding: '6px 10px', fontSize: '13px', fontFamily: 'inherit',
+                          border: '1px solid var(--Border)', borderRadius: '4px',
+                          backgroundColor: 'var(--Background)', color: 'var(--Text)', boxSizing: 'border-box',
+                          '&:focus': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px' },
+                        }} />
                     )}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Caption style={{ color: 'var(--Text-Quiet)', flexShrink: 0, width: 40 }}>Color</Caption>
-                      <Stack direction="row" sx={{ gap: 0.5 }}>
-                        {COLORS.map((c) => {
-                          const CC = cap(c);
-                          const sel = endType === 'icon' ? endIconColor : endBtnColor;
-                          const setSel = endType === 'icon' ? setEndIconColor : setEndBtnColor;
-                          return (
-                            <Tooltip key={c} title={CC} arrow>
-                              <Box onClick={() => setSel(c)} role="button" aria-label={'End color ' + CC}
-                                sx={{ width: 22, height: 22, borderRadius: '3px', cursor: 'pointer',
-                                  backgroundColor: 'var(--Buttons-' + CC + '-Button)',
-                                  border: sel === c ? '2px solid var(--Text)' : '2px solid transparent',
-                                  '&:hover': { transform: 'scale(1.15)' }, transition: 'transform 0.1s' }} />
-                            </Tooltip>
-                          );
-                        })}
+                  </Box>
+                </Box>
+              </TabPanel>
+
+              {/* ── Accessibility ── */}
+              <TabPanel value={1}>
+                <Box sx={{ p: 3 }}>
+                  <BodySmall color="quiet" style={{ marginBottom: 24 }}>
+                    {variant} / {color} / {size}
+                    {getThemeName() ? ' — data-theme="' + getThemeName() + '"' : ''}
+                  </BodySmall>
+
+                  <Stack spacing={3}>
+
+                    {/* Contrast */}
+                    <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
+                      <H5>Visual Contrast (WCAG 1.4.3 / 1.4.11)</H5>
+                      <BodySmall color="quiet" style={{ marginBottom: 16 }}>
+                        Text (4.5:1) and borders/containers (3:1) against the page background.
+                      </BodySmall>
+                      <A11yRow label="Text: var(--Text) vs. var(--Background)"
+                        ratio={getContrast(contrastData.text, contrastData.background)} threshold={4.5}
+                        note="Alert message text readability (WCAG 1.4.3)" />
+                      {variant === 'outline' && (
+                        <A11yRow label={'Border: var(--Buttons-' + C + '-Border) vs. var(--Background)'}
+                          ratio={getContrast(contrastData.colorBorder, contrastData.background)} threshold={3.0}
+                          note="Outline border visibility (WCAG 1.4.11)" />
+                      )}
+                      {(variant === 'light' || variant === 'solid') && (
+                        <A11yRow label="Outer border: var(--Border) vs. var(--Background)"
+                          ratio={getContrast(contrastData.border, contrastData.background)} threshold={3.0}
+                          note="Container border — page-level --Border outside themed area (WCAG 1.4.11)" />
+                      )}
+                    </Box>
+
+                    {/* ARIA */}
+                    <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
+                      <H5>ARIA and Semantics</H5>
+                      <Stack spacing={0}>
+                        <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
+                          <BodySmall>Alert role:</BodySmall>
+                          <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>
+                            {'<div role="alert">'} — announces content on render. Implicit aria-live="assertive".
+                          </Caption>
+                        </Box>
+                        <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
+                          <BodySmall>Structure:</BodySmall>
+                          <Caption style={{ color: 'var(--Text-Quiet)' }}>
+                            {(variant === 'light' || variant === 'solid')
+                              ? 'Outer (role="alert", border) → inner (data-theme="' + getThemeName() + '", data-surface="Surface") → content slots.'
+                              : 'Single container (role="alert") → content slots.'}
+                          </Caption>
+                        </Box>
+                        <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
+                          <BodySmall>Icon color:</BodySmall>
+                          <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>
+                            color: var(--Icons-{C}) — resolves within the alert's data-theme context.
+                          </Caption>
+                        </Box>
+                        <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
+                          <BodySmall>Start decorator:</BodySmall>
+                          <Caption style={{ color: 'var(--Text-Quiet)' }}>
+                            Decorative icon — not announced separately. Add aria-label to Alert if icon conveys meaning.
+                          </Caption>
+                        </Box>
+                        <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
+                          <BodySmall>End decorator:</BodySmall>
+                          <Caption style={{ color: 'var(--Text-Quiet)' }}>
+                            Icon button needs aria-label. Link uses standard semantics. Button needs visible label. All have 3px focus ring.
+                          </Caption>
+                        </Box>
+                        <Box sx={{ py: 1.5 }}>
+                          <BodySmall>Not a dialog:</BodySmall>
+                          <Caption style={{ color: 'var(--Text-Quiet)' }}>
+                            Alerts are passive — no focus trap. Use role="alertdialog" for interrupting messages requiring action.
+                          </Caption>
+                        </Box>
                       </Stack>
                     </Box>
+
                   </Stack>
-                )}
-              </Stack>
-            </Box>
-          </Grid>
+                </Box>
+              </TabPanel>
+            </Tabs>
+          </Box>
         </Grid>
-      )}
-
-      {/* == ACCESSIBILITY == */}
-      {mainTab === 1 && (
-        <Box sx={{ p: 4 }}>
-          <H4>Accessibility Requirements</H4>
-          <BodySmall color="quiet" style={{ marginBottom: 32 }}>
-            Based on current settings: {variant} / {color} / {size}
-          </BodySmall>
-
-          <Stack spacing={4}>
-            {/* Visual Contrast */}
-            <Box sx={{ p: 3, backgroundColor: 'var(--Container)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
-              <H5>Visual Contrast</H5>
-              <BodySmall color="quiet" style={{ marginBottom: 16 }}>Text and borders must be visually distinct</BodySmall>
-              <A11yRow label="Text: var(--Text) vs. var(--Background)"
-                ratio={getContrast(contrastData.text, contrastData.background)} threshold={4.5}
-                note="Alert message text readability (WCAG 1.4.3, 4.5:1)" />
-              {variant === 'outline' && (
-                <A11yRow label={'Border: var(--Buttons-' + C + '-Border) vs. var(--Background)'}
-                  ratio={getContrast(contrastData.colorBorder, contrastData.background)} threshold={3.0}
-                  note="Outline border visibility (WCAG 1.4.11, 3:1)" />
-              )}
-              {(variant === 'light' || variant === 'solid') && (
-                <A11yRow label="Outer border: var(--Border) vs. var(--Background)"
-                  ratio={getContrast(contrastData.border, contrastData.background)} threshold={3.0}
-                  note="Container border — uses page-level --Border outside themed area (WCAG 1.4.11, 3:1)" />
-              )}
-            </Box>
-
-            {/* ARIA and Semantics */}
-            <Box sx={{ p: 3, backgroundColor: 'var(--Container)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
-              <H5>ARIA and Semantics</H5>
-              <Stack spacing={0}>
-                <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                  <BodySmall>Alert role:</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>
-                    {'<div role="alert">'} — screen readers announce content when it appears without interrupting current task (implicit aria-live="assertive" + aria-atomic="true").
-                  </Caption>
-                </Box>
-                <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                  <BodySmall>Structure:</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)' }}>
-                    {(variant === 'light' || variant === 'solid')
-                      ? 'Outer wrapper (role="alert", border: var(--Border)) → inner div (data-theme="' + getThemeName() + '", data-surface="Surface") → content slots.'
-                      : 'Single container (role="alert") → content slots.'}
-                  </Caption>
-                </Box>
-                <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                  <BodySmall>Start decorator:</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)' }}>
-                    Icon or avatar. Decorative — not announced separately. Use aria-label on the Alert if the icon conveys meaning (e.g. "Error alert").
-                  </Caption>
-                </Box>
-                <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                  <BodySmall>End decorator:</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)' }}>
-                    Icon button (aria-label required), link (standard link semantics), or button (visible label). All have focus-visible indicators: 3px solid var(--Focus-Visible).
-                  </Caption>
-                </Box>
-                <Box sx={{ py: 1.5 }}>
-                  <BodySmall>Not a dialog:</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)' }}>
-                    Alerts are passive — they do not trap focus or require a response. For interrupting messages requiring user action, use a Modal (role="alertdialog").
-                  </Caption>
-                </Box>
-              </Stack>
-            </Box>
-
-            {/* Size Reference */}
-            <Box sx={{ p: 3, backgroundColor: 'var(--Container)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
-              <H5>Size Reference</H5>
-              <Stack spacing={0}>
-                <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                  <BodySmall>Small</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)' }}>13px text, 18px icon, 8px/12px padding, 8px gap.</Caption>
-                </Box>
-                <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                  <BodySmall>Medium</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)' }}>14px text, 20px icon, 12px/16px padding, 10px gap.</Caption>
-                </Box>
-                <Box sx={{ py: 1.5 }}>
-                  <BodySmall>Large</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)' }}>16px text, 22px icon, 14px/20px padding, 12px gap.</Caption>
-                </Box>
-              </Stack>
-            </Box>
-          </Stack>
-        </Box>
-      )}
+      </Grid>
     </Box>
   );
 }

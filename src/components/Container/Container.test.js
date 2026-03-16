@@ -10,6 +10,7 @@ import {
   GridContainer,
   StackContainer,
 } from './Container';
+import { axe } from 'jest-axe';
 
 describe('Container Component', () => {
   test('renders Container with children', () => {
@@ -340,5 +341,37 @@ describe('StackContainer Component', () => {
       const element = container.firstChild;
       expect(element).toHaveStyle(`align-items: ${align}`);
     });
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Container — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Container><p>Content</p></Container>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Container><p>Content</p></Container>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Container><p>Content</p></Container>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

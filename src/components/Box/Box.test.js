@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Box } from './Box';
+import { axe } from 'jest-axe';
 
 const renderBox = (props = {}) =>
   render(<Box {...props}>Test content</Box>);
@@ -135,5 +136,37 @@ describe('data-surface', () => {
   test('no data-surface when color omitted', () => {
     const { container } = renderBox();
     expect(container.querySelector('[data-surface]')).not.toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Box — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Box>Content</Box>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Box>Content</Box>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Box>Content</Box>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

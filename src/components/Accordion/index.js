@@ -6,7 +6,6 @@ export {
   AccordionDetails,
   DefaultAccordionGroup,
   SolidAccordionGroup,
-  LightAccordionGroup,
 } from './Accordion';
 
 export { AccordionShowcase } from './AccordionShowcase';

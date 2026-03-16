@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TransferList } from './TransferList';
+import { axe } from 'jest-axe';
 
 const LEFT = ['Alpha', 'Beta', 'Gamma'];
 const RIGHT = ['Delta', 'Epsilon'];
@@ -125,5 +126,37 @@ describe('Empty', () => {
   test('shows no items message', () => {
     renderTL({ defaultLeftItems: [], defaultRightItems: ['A'] });
     expect(screen.getByText('No items')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('TransferList — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <TransferList />
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <TransferList />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <TransferList />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

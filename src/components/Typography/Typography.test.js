@@ -6,6 +6,7 @@ import {
   Body, BodySmall, BodyLarge, BodySemibold, BodyBold,
   Label, Caption, Overline, OverlineSmall,
 } from './Typography';
+import { axe } from 'jest-axe';
 
 describe('Typography', () => {
   test('renders children', () => {
@@ -212,4 +213,36 @@ describe('Convenience exports', () => {
   test('Caption', () => { render(<Caption>T</Caption>); expect(screen.getByText('T')).toHaveClass('typography-caption'); });
   test('Overline', () => { render(<Overline>T</Overline>); expect(screen.getByText('T')).toHaveClass('typography-overline'); });
   test('OverlineSmall', () => { render(<OverlineSmall>T</OverlineSmall>); expect(screen.getByText('T')).toHaveClass('typography-overline'); });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Typography — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Typography>Text content</Typography>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Typography>Text content</Typography>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Typography>Text content</Typography>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
 });

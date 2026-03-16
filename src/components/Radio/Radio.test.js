@@ -24,6 +24,7 @@ import {
   ErrorLightRadio,
   OutlineRadio,
 } from './Radio';
+import { axe } from 'jest-axe';
 
 // ─── Radio (single) ─────────────────────────────────────────────────────────
 
@@ -401,5 +402,37 @@ describe('Accessibility', () => {
       <RadioGroup label="Pick one" options={options} value="a" onChange={() => {}} />
     );
     expect(screen.getByText('Pick one')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Radio — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Radio aria-label="Option one" value="one" />
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Radio aria-label="Option one" value="one" />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Radio aria-label="Option one" value="one" />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

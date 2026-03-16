@@ -15,6 +15,7 @@ import {
   WarningLightSlider,
   ErrorLightSlider,
 } from './Slider';
+import { axe } from 'jest-axe';
 
 // ─── Slider Component ───────────────────────────────────────────────────────
 
@@ -326,5 +327,37 @@ describe('Accessibility', () => {
     );
     expect(screen.getByLabelText('Minimum')).toBeInTheDocument();
     expect(screen.getByLabelText('Maximum')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Slider — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Slider aria-label="Volume" defaultValue={50} />
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Slider aria-label="Volume" defaultValue={50} />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Slider aria-label="Volume" defaultValue={50} />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

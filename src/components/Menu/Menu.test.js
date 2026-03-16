@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { Dropdown, MenuButton, Menu, MenuItem, MenuDivider } from './Menu';
+import { axe } from 'jest-axe';
 
 /* ─── Helpers ─── */
 const renderMenu = (dropdownProps = {}, menuItems) =>
@@ -301,5 +302,37 @@ describe('Outlined', () => {
     const menu = container.querySelector('.menu');
     expect(menu).toBeInTheDocument();
     // Border applied via sx — class presence confirms component rendered
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Menu — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Menu open={false}><MenuItem>Item</MenuItem></Menu>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Menu open={false}><MenuItem>Item</MenuItem></Menu>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Menu open={false}><MenuItem>Item</MenuItem></Menu>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

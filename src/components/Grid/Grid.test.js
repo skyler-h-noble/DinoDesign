@@ -14,6 +14,7 @@ import {
   CenteredGrid,
   ColumnGrid,
 } from './Grid';
+import { axe } from 'jest-axe';
 
 describe('Grid Component', () => {
   test('renders Grid', () => {
@@ -220,5 +221,37 @@ describe('ColumnGrid Component', () => {
       </ColumnGrid>
     );
     expect(container).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Grid — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Grid><div>Item</div></Grid>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Grid><div>Item</div></Grid>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Grid><div>Item</div></Grid>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

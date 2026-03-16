@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { SearchField } from './SearchField';
+import { axe } from 'jest-axe';
 
 const renderField = (props = {}) =>
   render(<SearchField {...props} />);
@@ -217,5 +218,37 @@ describe('Defaults', () => {
   test('clear button shown by default', () => {
     renderField({ defaultValue: 'test' });
     expect(screen.getByLabelText('Clear search')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('SearchField — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <SearchField aria-label="Search" />
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <SearchField aria-label="Search" />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <SearchField aria-label="Search" />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

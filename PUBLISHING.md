@@ -63,9 +63,23 @@ npm publish --access public
 
 ## How consumers install and use it
 
+### 1. Install peer dependencies
+
+`@dynodesign/components` is built on MUI and uses Emotion for styling. These are peer dependencies — they must be installed in the consuming app:
+
+```bash
+npm install @mui/material @mui/icons-material @emotion/react @emotion/styled
+```
+
+### 2. Install DynoDesign
+
 ```bash
 npm install @dynodesign/components
 ```
+
+### 3. Wrap your app in DynoDesignProvider
+
+The `DynoDesignProvider` handles all MUI ThemeProvider setup, CSS injection, and token wiring automatically. No manual MUI theme configuration needed.
 
 ```jsx
 import { DynoDesignProvider } from '@dynodesign/components/provider';
@@ -85,6 +99,19 @@ function App() {
   );
 }
 ```
+
+> **Why peer dependencies?** MUI is not bundled inside `@dynodesign/components` to avoid shipping duplicate copies of React and MUI in apps that already use them. The consuming app provides MUI; DynoDesign provides the token-driven theme on top of it.
+
+### Required peer dependency versions
+
+| Package | Version |
+|---------|---------|
+| `react` | `>=18.0.0` |
+| `react-dom` | `>=18.0.0` |
+| `@mui/material` | `>=5.0.0` |
+| `@mui/icons-material` | `>=5.0.0` |
+| `@emotion/react` | `>=11.0.0` |
+| `@emotion/styled` | `>=11.0.0` |
 
 ---
 

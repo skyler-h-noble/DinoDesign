@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Tabs, TabList, Tab, TabPanel } from './Tabs';
+import { axe } from 'jest-axe';
 
 /* ─── Helpers ─── */
 const LABELS = ['Home', 'Settings', 'Profile'];
@@ -518,5 +519,37 @@ describe('Scrollable', () => {
     );
     expect(screen.queryByLabelText('Scroll tabs left')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Scroll tabs right')).not.toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Tabs — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Tabs defaultValue={0}><TabList><Tab>Tab 1</Tab><Tab>Tab 2</Tab></TabList><TabPanel value={0}>Panel 1</TabPanel><TabPanel value={1}>Panel 2</TabPanel></Tabs>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Tabs defaultValue={0}><TabList><Tab>Tab 1</Tab><Tab>Tab 2</Tab></TabList><TabPanel value={0}>Panel 1</TabPanel><TabPanel value={1}>Panel 2</TabPanel></Tabs>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Tabs defaultValue={0}><TabList><Tab>Tab 1</Tab><Tab>Tab 2</Tab></TabList><TabPanel value={0}>Panel 1</TabPanel><TabPanel value={1}>Panel 2</TabPanel></Tabs>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

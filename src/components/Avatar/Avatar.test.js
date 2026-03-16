@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Avatar, AvatarGroup } from './Avatar';
+import { axe } from 'jest-axe';
 
 const renderAvatar = (props = {}) => render(<Avatar {...props} />);
 
@@ -117,5 +118,37 @@ describe('AvatarGroup', () => {
   test('has group role', () => {
     render(<AvatarGroup><Avatar initials="A" /></AvatarGroup>);
     expect(screen.getByRole('group')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Avatar — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Avatar alt="Test User" />
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Avatar alt="Test User" />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Avatar alt="Test User" />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { Tooltip, SolidTooltip, LightTooltip, OutlineTooltip } from './Tooltip';
+import { axe } from 'jest-axe';
 
 // MUI Tooltip uses Popper; tests use open={true} for synchronous rendering
 
@@ -253,5 +254,37 @@ describe('Convenience Exports', () => {
     await waitFor(() => {
       expect(document.querySelector('.tooltip-outline')).toBeInTheDocument();
     });
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Tooltip — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Tooltip title="Helpful tip"><button>Hover me</button></Tooltip>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Tooltip title="Helpful tip"><button>Hover me</button></Tooltip>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Tooltip title="Helpful tip"><button>Hover me</button></Tooltip>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

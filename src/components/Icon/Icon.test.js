@@ -3,6 +3,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Icon } from './Icon';
 import HomeIcon from '@mui/icons-material/Home';
+import { axe } from 'jest-axe';
 
 /* ─── Helpers ─── */
 const renderIcon = (props = {}) =>
@@ -109,5 +110,37 @@ describe('Custom props', () => {
   test('accepts custom className', () => {
     const { container } = renderIcon({ className: 'my-icon' });
     expect(container.querySelector('.my-icon')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Icon — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Icon aria-hidden="true" />
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Icon aria-hidden="true" />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Icon aria-hidden="true" />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

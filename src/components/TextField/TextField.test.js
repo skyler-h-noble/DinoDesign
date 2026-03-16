@@ -12,6 +12,7 @@ import {
   TextArea,
   TextFieldGroup,
 } from './TextField';
+import { axe } from 'jest-axe';
 
 describe('TextField Component', () => {
   test('renders with label', () => {
@@ -151,5 +152,37 @@ describe('TextField Component', () => {
     );
     const box = container.querySelector('div');
     expect(box).toHaveStyle('width: 100%');
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('TextField — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <TextField aria-label="Text field" />
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <TextField aria-label="Text field" />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <TextField aria-label="Text field" />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

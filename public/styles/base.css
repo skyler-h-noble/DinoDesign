@@ -1,5 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=IM+Fell+Great+Primer&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Spectral&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gentium+Book+Basic&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Andada+Pro&display=swap');
 
 /* ========================================
  * Base CSS Variables
@@ -27,7 +28,7 @@
   --Surface-Bright: var(--Primary-Background-11-Surface-Bright);
   --Header: var(--Header-Surfaces-Primary-Color-11);
   --Text: var(--Text-Surfaces-Primary-Color-11);
-  --Text-Quiet: var(--Quiet-Surfaces-Primary-Color-11);
+  --Quiet: var(--Quiet-Surfaces-Primary-Color-11);
   --Border: var(--Border-Surfaces-Primary-Color-11);
   --Border-Variant: var(--Border-Variant-Surfaces-Primary-Color-11);
   --Hotlink: var(--Text-Surfaces-Info-Color-11);
@@ -180,13 +181,13 @@
    * ======================================== */
 
 
- --Set-Font-Family-Header: "IM Fell Great Primer", sans-serif;
+ --Set-Font-Family-Header: "Gentium Book Basic", serif;
  --Set-Font-Family-Header-Weight: 800;
- --Set-Font-Family-Body: "Spectral", cursive;
+ --Set-Font-Family-Body: "IBM Plex Sans", sans-serif;
  --Set-Font-Family-Body-Weight: 400;
  --Set-Font-Family-Body-Semibold-Weight: 600;
  --Set-Font-Family-Body-Bold-Weight: 700;
- --Set-Font-Family-Decorative: "Spectral", cursive;
+ --Set-Font-Family-Decorative: "Andada Pro", sans-serif;
  --Set-Font-Family-Decorative-Weight: 800;
 }
 

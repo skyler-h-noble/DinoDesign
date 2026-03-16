@@ -5,6 +5,7 @@ import {
   Card, CardContent, CardOverflow, CardCover, CardActions,
   DefaultCard, SolidCard, LightCard,
 } from './Card';
+import { axe } from 'jest-axe';
 
 /* ─── Helpers ─── */
 const renderCard = (props = {}, children) =>
@@ -243,5 +244,37 @@ describe('Convenience exports', () => {
       <LightCard color="error"><CardContent>T</CardContent></LightCard>
     );
     expect(container.querySelector('[data-theme="Error-Light"]')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Card — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Card>Card content</Card>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Card>Card content</Card>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Card>Card content</Card>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

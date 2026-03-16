@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Rating } from './Rating';
+import { axe } from 'jest-axe';
 
 const renderRating = (props = {}) =>
   render(<Rating {...props} />);
@@ -127,5 +128,37 @@ describe('Keyboard', () => {
     renderRating({ value: 2, onChange });
     fireEvent.keyDown(screen.getAllByRole('radio')[1], { key: 'ArrowLeft' });
     expect(onChange).toHaveBeenCalledWith(1);
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Rating — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Rating aria-label="Rating" value={3} />
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Rating aria-label="Rating" value={3} />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Rating aria-label="Rating" value={3} />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

@@ -3,6 +3,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ButtonGroup } from './ButtonGroup';
 import { Button } from '../Button/Button';
+import { axe } from 'jest-axe';
 
 describe('ButtonGroup Component', () => {
   // Render tests
@@ -266,5 +267,37 @@ describe('ButtonGroup Component', () => {
     const first = screen.getByText('First');
     first.focus();
     expect(first).toHaveFocus();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('ButtonGroup — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <ButtonGroup><button>One</button><button>Two</button></ButtonGroup>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <ButtonGroup><button>One</button><button>Two</button></ButtonGroup>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <ButtonGroup><button>One</button><button>Two</button></ButtonGroup>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { LinearProgress } from './LinearProgress';
+import { axe } from 'jest-axe';
 
 /* ─── Helpers ─── */
 const renderLP = (props = {}) => render(<LinearProgress {...props} />);
@@ -168,5 +169,37 @@ describe('Defaults', () => {
   test('default mode is indeterminate', () => {
     const { container } = renderLP();
     expect(container.querySelector('.linear-progress-indeterminate')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('LinearProgress — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <LinearProgress aria-label="Loading" />
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <LinearProgress aria-label="Loading" />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <LinearProgress aria-label="Loading" />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import { Breadcrumbs, BreadcrumbItem } from './Breadcrumbs';
+import { axe } from 'jest-axe';
 
 /* ─── Helpers ─── */
 const CRUMBS = ['Home', 'Products', 'Electronics', 'Computers', 'Laptops', 'MacBook Pro'];
@@ -220,5 +221,37 @@ describe('Defaults', () => {
     const { container } = renderBreadcrumbs();
     const sep = container.querySelector('.breadcrumb-separator');
     expect(sep.textContent).toBe('/');
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Breadcrumbs — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Breadcrumbs><BreadcrumbItem>Home</BreadcrumbItem><BreadcrumbItem>Page</BreadcrumbItem></Breadcrumbs>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Breadcrumbs><BreadcrumbItem>Home</BreadcrumbItem><BreadcrumbItem>Page</BreadcrumbItem></Breadcrumbs>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Breadcrumbs><BreadcrumbItem>Home</BreadcrumbItem><BreadcrumbItem>Page</BreadcrumbItem></Breadcrumbs>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

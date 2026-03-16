@@ -80,7 +80,7 @@ export function Alert({
       {startDecorator && (
         <Box
           className="alert-start-decorator"
-          sx={{ display: 'inline-flex', alignItems: 'center', fontSize: s.iconSize, lineHeight: 1, flexShrink: 0 }}
+          sx={{ display: 'inline-flex', alignItems: 'center', fontSize: s.iconSize, lineHeight: 1, flexShrink: 0, mt: '2px' }}
         >
           {startDecorator}
         </Box>
@@ -91,7 +91,7 @@ export function Alert({
       {endDecorator && (
         <Box
           className="alert-end-decorator"
-          sx={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0, gap: s.gap }}
+          sx={{ display: 'inline-flex', alignItems: 'flex-start', flexShrink: 0, gap: s.gap, paddingTop: '2px' }}
         >
           {endDecorator}
         </Box>
@@ -102,7 +102,7 @@ export function Alert({
   // Shared inner styles (layout, text, padding)
   const innerSx = {
     display: 'flex',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: s.gap,
     padding: s.py + ' ' + s.px,
     fontSize: s.fontSize,
@@ -162,7 +162,7 @@ export function Alert({
       sx={{
         border: '1px solid var(--Border)',
         borderRadius: s.borderRadius,
-        overflow: 'hidden',
+        width: '100%',
         ...sx,
       }}
       {...props}

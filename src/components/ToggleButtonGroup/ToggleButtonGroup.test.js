@@ -9,6 +9,7 @@ import {
   ErrorLightToggleButtonGroup,
   SuccessLightToggleButtonGroup,
 } from './ToggleButtonGroup';
+import { axe } from 'jest-axe';
 
 // ─── ToggleButtonGroup ───────────────────────────────────────────────────────
 
@@ -238,5 +239,37 @@ describe('Accessibility', () => {
       </ToggleButtonGroup>
     );
     expect(screen.getByRole('button')).toBeDisabled();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('ToggleButtonGroup — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <ToggleButtonGroup aria-label="Text formatting"><button value="bold">Bold</button></ToggleButtonGroup>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <ToggleButtonGroup aria-label="Text formatting"><button value="bold">Bold</button></ToggleButtonGroup>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <ToggleButtonGroup aria-label="Text formatting"><button value="bold">Bold</button></ToggleButtonGroup>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

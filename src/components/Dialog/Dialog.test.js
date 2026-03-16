@@ -3,6 +3,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Dialog, AlertDialog, FormDialog } from './Dialog';
 import { Box } from '@mui/material';
+import { axe } from 'jest-axe';
 
 /* ─── Helpers ─── */
 const renderDialog = (props = {}) =>
@@ -209,5 +210,37 @@ describe('Defaults', () => {
   test('not alert by default', () => {
     const { baseElement } = renderDialog();
     expect(baseElement.querySelector('.dialog-alert')).not.toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Dialog — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Dialog open={false} aria-labelledby="dialog-title"><div id="dialog-title">Title</div></Dialog>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Dialog open={false} aria-labelledby="dialog-title"><div id="dialog-title">Title</div></Dialog>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Dialog open={false} aria-labelledby="dialog-title"><div id="dialog-title">Title</div></Dialog>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

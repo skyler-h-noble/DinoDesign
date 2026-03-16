@@ -12,6 +12,7 @@ import {
   DisabledToggleButton,
   ToggleButtonShowcase,
 } from './ToggleButton';
+import { axe } from 'jest-axe';
 
 describe('ToggleButton Component', () => {
   test('renders toggle button', () => {
@@ -212,5 +213,37 @@ describe('Accessibility', () => {
       <AlignmentToggleGroup alignment="left" onChange={jest.fn()} />
     );
     expect(container).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('ToggleButton — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <ToggleButton value="bold" aria-label="Bold">B</ToggleButton>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <ToggleButton value="bold" aria-label="Bold">B</ToggleButton>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <ToggleButton value="bold" aria-label="Bold">B</ToggleButton>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

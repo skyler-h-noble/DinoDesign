@@ -5,6 +5,7 @@ import { Toolbar } from './Toolbar';
 import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
 import AddIcon from '@mui/icons-material/Add';
+import { axe } from 'jest-axe';
 
 const ITEMS = [
   { icon: <UndoIcon />, label: 'Undo' },
@@ -138,5 +139,37 @@ describe('Bar colors', () => {
       const { container } = renderToolbar({ barColor: color });
       expect(container.querySelector('[data-theme="' + theme + '"]')).toBeInTheDocument();
     });
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Toolbar — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Toolbar />
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Toolbar />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Toolbar />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

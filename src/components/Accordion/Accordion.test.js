@@ -5,6 +5,7 @@ import {
   AccordionGroup, Accordion, AccordionSummary, AccordionDetails,
   DefaultAccordionGroup, SolidAccordionGroup, LightAccordionGroup,
 } from './Accordion';
+import { axe } from 'jest-axe';
 
 /* ─── Helpers ─── */
 const renderAccordion = (groupProps = {}, accordionProps = {}) =>
@@ -278,5 +279,37 @@ describe('Multiple accordions', () => {
     fireEvent.click(screen.getByText('Second'));
     expect(screen.getByText('Content A')).toBeInTheDocument();
     expect(screen.getByText('Content B')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Accordion — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <AccordionGroup><Accordion><AccordionSummary>Title</AccordionSummary><AccordionDetails>Content</AccordionDetails></Accordion></AccordionGroup>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <AccordionGroup><Accordion><AccordionSummary>Title</AccordionSummary><AccordionDetails>Content</AccordionDetails></Accordion></AccordionGroup>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <AccordionGroup><Accordion><AccordionSummary>Title</AccordionSummary><AccordionDetails>Content</AccordionDetails></Accordion></AccordionGroup>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

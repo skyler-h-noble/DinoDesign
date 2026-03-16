@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Table, DefaultTable, OutlinedTable, LightTable, SolidTable } from './Table';
+import { axe } from 'jest-axe';
 
 const cols = [
   { label: 'Name', field: 'name' },
@@ -102,5 +103,37 @@ describe('Convenience Exports', () => {
       <SolidTable color="primary" columns={cols} rows={data} />
     );
     expect(container.querySelector('.table-solid')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Table — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Table><thead><tr><th>Header</th></tr></thead><tbody><tr><td>Cell</td></tr></tbody></Table>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Table><thead><tr><th>Header</th></tr></thead><tbody><tr><td>Cell</td></tr></tbody></Table>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Table><thead><tr><th>Header</th></tr></thead><tbody><tr><td>Cell</td></tr></tbody></Table>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

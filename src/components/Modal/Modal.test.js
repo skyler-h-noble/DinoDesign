@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Modal } from './Modal';
+import { axe } from 'jest-axe';
 
 const renderModal = (props = {}) =>
   render(<Modal open={true} onClose={jest.fn()} title="Test Modal" {...props}>Modal content</Modal>);
@@ -151,5 +152,37 @@ describe('Defaults', () => {
   test('default layout center', () => {
     const { container } = renderModal();
     expect(container.querySelector('.modal-center')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Modal — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Modal open={false} aria-labelledby="modal-title"><div id="modal-title">Title</div></Modal>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Modal open={false} aria-labelledby="modal-title"><div id="modal-title">Title</div></Modal>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Modal open={false} aria-labelledby="modal-title"><div id="modal-title">Title</div></Modal>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

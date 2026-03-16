@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Alert } from './Alert';
+import { axe } from 'jest-axe';
 
 /* ─── Helpers ─── */
 const renderAlert = (props = {}) => render(<Alert {...props}>Test message</Alert>);
@@ -250,5 +251,37 @@ describe('Defaults', () => {
   test('default size is medium', () => {
     const { container } = renderAlert();
     expect(container.querySelector('.alert-medium')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Alert — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Alert>Test alert message</Alert>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Alert>Test alert message</Alert>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Alert>Test alert message</Alert>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

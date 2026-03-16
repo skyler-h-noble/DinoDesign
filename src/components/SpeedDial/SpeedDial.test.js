@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { SpeedDial } from './SpeedDial';
+import { axe } from 'jest-axe';
 
 /* ─── Helpers ─── */
 const ACTIONS = [
@@ -198,5 +199,37 @@ describe('Defaults', () => {
   test('default direction is up', () => {
     const { container } = renderDial();
     expect(container.querySelector('.speed-dial-up')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('SpeedDial — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <SpeedDial open={false} ariaLabel="Speed dial actions" icon={<span>+</span>} />
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <SpeedDial open={false} ariaLabel="Speed dial actions" icon={<span>+</span>} />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <SpeedDial open={false} ariaLabel="Speed dial actions" icon={<span>+</span>} />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

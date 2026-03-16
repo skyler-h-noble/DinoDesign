@@ -12,15 +12,38 @@ a brand requires only replacing the token CSS files; no component code changes.
 ## Prerequisites
 
 - React 18+
-- A Dyno theme URL (provided by Dino after brand generation) **or** local CSS files
+- A Dyno theme URL (provided by DynoDesign after brand generation) **or** local CSS files
 
 ---
 
 ## Installation
 
+### 1. Install peer dependencies
+
+`@dynodesign/components` is built on MUI and uses Emotion for styling. These must be installed in your app — they are not bundled inside the package:
+
 ```bash
-npm install @dyno/components
+npm install @mui/material @mui/icons-material @emotion/react @emotion/styled
 ```
+
+### 2. Install DynoDesign
+
+```bash
+npm install @dynodesign/components
+```
+
+> **Why peer dependencies?** MUI is not bundled inside `@dynodesign/components` to avoid shipping duplicate copies of React and MUI in apps that already use them. Your app provides MUI; DynoDesign provides the token-driven theme layer on top of it. You never need to configure MUI directly — `DynoDesignProvider` handles all of that automatically.
+
+### Required peer dependency versions
+
+| Package | Minimum Version |
+|---------|----------------|
+| `react` | `18.0.0` |
+| `react-dom` | `18.0.0` |
+| `@mui/material` | `5.0.0` |
+| `@mui/icons-material` | `5.0.0` |
+| `@emotion/react` | `11.0.0` |
+| `@emotion/styled` | `11.0.0` |
 
 ---
 
@@ -39,7 +62,7 @@ automatically and injects them into the page.
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import { DynoDesignProvider } from '@dyno/components';
+import { DynoDesignProvider } from '@dynodesign/components';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -71,9 +94,9 @@ If you manage CSS loading yourself, just import the files and use components
 directly. No Provider needed.
 
 ```jsx
-import '@dyno/tokens/base.css';
-import '@dyno/tokens/light-mode.css';
-import '@dyno/tokens/themes.css';
+import '@dynodesign/tokens/base.css';
+import '@dynodesign/tokens/light-mode.css';
+import '@dynodesign/tokens/themes.css';
 
 // Components work without a Provider
 <Card variant="solid" color="primary">
@@ -89,7 +112,7 @@ Once the Provider is set up, import and use components anywhere in your app.
 No additional wiring required — components inherit the active theme automatically.
 
 ```jsx
-import { Button } from '@dyno/components';
+import { Button } from '@dynodesign/components';
 
 function MyPage() {
   return (
@@ -108,7 +131,7 @@ Components automatically adapt to the theme of their nearest surface ancestor.
 You never need to pass a theme down manually.
 
 ```jsx
-import { Card, CardContent, Button } from '@dyno/components';
+import { Card, CardContent, Button } from '@dynodesign/components';
 
 // Card sets the surface context — Button inherits it automatically
 <Card variant="solid" color="primary">
@@ -141,7 +164,7 @@ To nest a different theme inside another:
 `useDynoDesign` hook:
 
 ```jsx
-import { useDynoDesign } from '@dyno/components';
+import { useDynoDesign } from '@dynodesign/components';
 
 function DarkModeToggle() {
   const { isDark, toggleDarkMode } = useDynoDesign();
@@ -186,7 +209,7 @@ const [dark, setDark] = useState(false);
 Use `setTheme` from `useDynoDesign` to change the root theme at runtime:
 
 ```jsx
-import { useDynoDesign } from '@dyno/components';
+import { useDynoDesign } from '@dynodesign/components';
 
 function ThemeSwitcher() {
   const { theme, setTheme } = useDynoDesign();
@@ -230,7 +253,7 @@ function ThemeSwitcher() {
 Access the active theme state anywhere inside the Provider:
 
 ```jsx
-import { useDynoDesign } from '@dyno/components';
+import { useDynoDesign } from '@dynodesign/components';
 
 const {
   theme,           // active theme name e.g. 'Primary'
@@ -302,7 +325,7 @@ Professional   Modern   Bold   Playful
 Types are included. Import them as needed:
 
 ```ts
-import type { DynoTheme, DynoSurface, DynoStyle } from '@dyno/components';
+import type { DynoTheme, DynoSurface, DynoStyle } from '@dynodesign/components';
 ```
 
 ---

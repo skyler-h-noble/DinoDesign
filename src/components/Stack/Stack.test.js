@@ -13,6 +13,7 @@ import {
   ScrollStack,
   WrapStack,
 } from './Stack';
+import { axe } from 'jest-axe';
 
 describe('Stack Components', () => {
   const testContent = (
@@ -196,5 +197,37 @@ describe('Stack Components', () => {
       );
       expect(container.firstChild).toHaveStyle('flex-wrap: wrap');
     });
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Stack — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Stack><div>Item one</div><div>Item two</div></Stack>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Stack><div>Item one</div><div>Item two</div></Stack>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Stack><div>Item one</div><div>Item two</div></Stack>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

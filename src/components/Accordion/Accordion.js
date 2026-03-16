@@ -8,7 +8,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
  *
  * STYLES:
  *   default   No data-theme. border: var(--Border), bg: var(--Background)
- *             Closed summary: var(--Text-Quiet). Open summary: var(--Text)
+ *             Closed summary: var(--Quiet). Open summary: var(--Text)
  *
  *   solid     data-theme={Color} data-surface="Surface"
  *             bg: var(--Surface), text: var(--Text), border: none
@@ -64,7 +64,7 @@ export function AccordionGroup({
     ? SOLID_THEME_MAP[color]
     : isLight
       ? LIGHT_THEME_MAP[color]
-      : null;
+      : null; // default variant inherits data-theme from PreviewSurface wrapper
 
   const containerBg = isDefault ? 'var(--Background)' : 'var(--Surface)';
   const containerBorder = '1px solid var(--Border)';
@@ -73,7 +73,7 @@ export function AccordionGroup({
     <GroupContext.Provider value={{ variant, color, size, disableDivider }}>
       <Box
         data-theme={dataTheme || undefined}
-        data-surface={isSolid ? 'Surface' : undefined}
+        data-surface={isSolid || isLight ? 'Surface' : undefined}
         role="presentation"
         className={'accordion-group accordion-group-' + variant + ' accordion-group-' + color + ' ' + className}
         sx={{
@@ -152,10 +152,16 @@ export function AccordionSummary({
 
   // Default variant: closed = quiet, open = standard
   const textColor = isDefault
-    ? (expanded ? 'var(--Text)' : 'var(--Text-Quiet)')
+    ? (expanded ? 'var(--Text)' : 'var(--Quiet)')
     : 'var(--Text)';
 
-  const icon = expandIcon || <ExpandMoreIcon sx={{ fontSize: s.iconSize + 'px' }} />;
+  const icon = expandIcon || (
+    <ExpandMoreIcon sx={{
+      fontSize: s.iconSize + 'px',
+      fill: 'var(--Quiet)',
+      transition: 'fill 0.15s ease',
+    }} />
+  );
 
   return (
     <Box
@@ -184,7 +190,11 @@ export function AccordionSummary({
         textAlign: 'left',
         transition: 'color 0.2s ease, background-color 0.15s ease',
         borderRadius: 0,
-        '&:hover': !disabled ? { backgroundColor: isDefault ? 'var(--Surface-Dim)' : 'var(--Surface-Dim)' } : {},
+        '&:hover': !disabled ? {
+          backgroundColor: isDefault ? 'var(--Surface-Dim)' : 'var(--Surface-Dim)',
+          '& .MuiSvgIcon-root': { fill: 'var(--Text)' },
+        } : {},
+        '&:active .MuiSvgIcon-root': { fill: 'var(--Text)' },
         '&:focus-visible': {
           outline: '3px solid var(--Focus-Visible)',
           outlineOffset: '-3px',
@@ -197,7 +207,6 @@ export function AccordionSummary({
       <Box
         sx={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: 'inherit',
           transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
           transition: 'transform 0.25s ease',
           flexShrink: 0,

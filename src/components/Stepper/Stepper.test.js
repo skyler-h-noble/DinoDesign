@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Stepper, Step } from './Stepper';
+import { axe } from 'jest-axe';
 
 /* ─── Helpers ─── */
 const LABELS = ['Order', 'Processing', 'Shipped', 'Delivered'];
@@ -317,5 +318,37 @@ describe('Labels', () => {
     const { container } = renderStepper({ activeStep: 1 });
     const steps = container.querySelectorAll('.step');
     expect(steps[1]).toHaveClass('step-active');
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Stepper — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Stepper activeStep={0}><Step label="Step 1" /><Step label="Step 2" /></Stepper>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Stepper activeStep={0}><Step label="Step 1" /><Step label="Step 2" /></Stepper>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Stepper activeStep={0}><Step label="Step 1" /><Step label="Step 2" /></Stepper>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

@@ -8,6 +8,7 @@ import {
   PrimaryOutlineChip,
   SuccessLightChip,
 } from './Chip';
+import { axe } from 'jest-axe';
 
 describe('Chip Component', () => {
   test('renders without crashing', () => {
@@ -127,5 +128,37 @@ describe('Convenience Exports', () => {
   test('SuccessLightChip renders', () => {
     const { container } = render(<SuccessLightChip label="Test" />);
     expect(container.querySelector('.chip-success-light')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Chip — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Chip label="Test chip" />
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Chip label="Test chip" />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Chip label="Test chip" />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

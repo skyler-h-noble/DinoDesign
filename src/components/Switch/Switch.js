@@ -14,7 +14,7 @@ import { Body, BodySmall } from '../Typography';
  *
  * SIZES: small (10px thumb, 26×14 track) | medium (15px thumb, 34×18 track) | large (18px thumb, 42×22 track)
  *   Root always has min 24×24px for WCAG 2.2 AA touch target.
- *   Handle is always var(--Buttons-{Color}-Border) in all states.
+ *   Thumb is var(--Quiet) in the OFF state, styles.thumb in the ON state.
  *   switchBase uses display:flex + justify-content for thumb positioning.
  *
  * STATES: checked | unchecked | disabled | hover | active | focus-visible
@@ -28,15 +28,11 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 function solidStyles(color) {
   const C = cap(color);
   return {
-    // Handle
     thumb:          'var(--Buttons-' + C + '-Button)',
-    // Checked (ON)
     trackOn:        'var(--Buttons-' + C + '-Border)',
     trackOnBorder:  'none',
-    // Unchecked (OFF)
     trackOff:       'var(--Border-Variant)',
     trackOffBorder: 'none',
-    // States
     hoverOn:        'var(--Buttons-' + C + '-Hover)',
     hoverOff:       'var(--Surface-Dim)',
     activeOn:       'var(--Buttons-' + C + '-Active)',
@@ -85,7 +81,6 @@ function buildVariantMap() {
 }
 
 // --- Sizing ------------------------------------------------------------------
-// Root always min 24×24. switchBase uses flex + justify-content for positioning.
 
 const TOUCH_MIN = 24;
 
@@ -93,6 +88,13 @@ const SIZE_MAP = {
   small:  { thumb: 10, trackW: 26, trackH: 14 },
   medium: { thumb: 15, trackW: 34, trackH: 18 },
   large:  { thumb: 18, trackW: 42, trackH: 22 },
+};
+
+// Outline variant needs 1px smaller thumb so it doesn't touch the border
+const OUTLINE_SIZE_MAP = {
+  small:  { thumb: 9,  trackW: 26, trackH: 14 },
+  medium: { thumb: 14, trackW: 34, trackH: 18 },
+  large:  { thumb: 17, trackW: 42, trackH: 22 },
 };
 
 // --- Component ---------------------------------------------------------------
@@ -116,16 +118,14 @@ export function Switch({
 }) {
   const variantMap = buildVariantMap();
   const styles = variantMap[variant] || variantMap['primary'];
-  const sc = SIZE_MAP[size] || SIZE_MAP.medium;
+  const isOutline = variant.includes('-outline') || variant === 'outline';
+  const sc = (isOutline ? OUTLINE_SIZE_MAP : SIZE_MAP)[size] || (isOutline ? OUTLINE_SIZE_MAP : SIZE_MAP).medium;
   const LabelComp = size === 'small' ? BodySmall : Body;
 
-  // Root height — at least 24px
   const rootH = Math.max(TOUCH_MIN, sc.trackH);
-  // Track vertically centered in root
   const trackTop = (rootH - sc.trackH) / 2;
 
   const switchSx = {
-    // Root
     width: sc.trackW,
     minWidth: TOUCH_MIN,
     height: rootH,
@@ -133,7 +133,6 @@ export function Switch({
     padding: 0,
     overflow: 'visible',
 
-    // --- switchBase: flex container for thumb positioning ---
     '& .MuiSwitch-switchBase': {
       width: 'calc(100% - 4px)',
       display: 'flex',
@@ -143,21 +142,22 @@ export function Switch({
       left: '2px',
       top: trackTop,
       height: sc.trackH,
-      color: styles.thumb,
+      color: 'var(--Quiet)',
       transition: 'justify-content 0.15s ease',
       transform: 'none',
 
-      // Input — fill switchBase
       '& .MuiSwitch-input': {
         left: 0,
         width: '100%',
       },
 
-      // Checked — slide thumb to end
+      // ON state — thumb uses variant color
+      // Outline checked: left 3px + width calc(100% - 6px) so thumb clears both borders
       '&.Mui-checked': {
         justifyContent: 'flex-end',
         transform: 'none',
         color: styles.thumb,
+        ...(isOutline && { left: '3px', width: 'calc(100% - 6px)' }),
 
         '& + .MuiSwitch-track': {
           backgroundColor: styles.trackOn,
@@ -205,7 +205,7 @@ export function Switch({
       // Disabled
       '&.Mui-disabled': {
         opacity: 0.6,
-        color: styles.thumb,
+        color: 'var(--Quiet)',
         '& + .MuiSwitch-track': {
           opacity: 0.6,
         },
@@ -215,7 +215,6 @@ export function Switch({
       },
     },
 
-    // --- Thumb ---
     '& .MuiSwitch-thumb': {
       width: sc.thumb,
       height: sc.thumb,
@@ -223,7 +222,6 @@ export function Switch({
       border: 'none',
     },
 
-    // --- Track (unchecked default) ---
     '& .MuiSwitch-track': {
       width: sc.trackW,
       height: sc.trackH,

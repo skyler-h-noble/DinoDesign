@@ -21,6 +21,12 @@ import { Body, BodySmall } from '../Typography';
  * SIZES: small (16px) | medium (20px) | large (24px)
  * STATES: checked | unchecked | disabled
  * LABEL: optional text to the right of the radio
+ *
+ * ACCESSIBILITY:
+ *   - aria-label and aria-labelledby passed via inputProps to the <input>
+ *     element directly per WCAG 1.3.1
+ *   - Without a visible label prop, always provide aria-label
+ *   - Use RadioGroup with a label for grouped radio buttons
  */
 
 const COLORS = ['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
@@ -79,8 +85,8 @@ function buildVariantMap() {
 // --- Sizing ------------------------------------------------------------------
 
 const SIZE_MAP = {
-  small:  { box: 16, dot: 8,  labelSize: '13px', gap: 6, touchTarget: 28 },
-  medium: { box: 20, dot: 10, labelSize: '15px', gap: 8, touchTarget: 32 },
+  small:  { box: 16, dot: 8,  labelSize: '13px', gap: 6,  touchTarget: 28 },
+  medium: { box: 20, dot: 10, labelSize: '15px', gap: 8,  touchTarget: 32 },
   large:  { box: 24, dot: 12, labelSize: '17px', gap: 10, touchTarget: 40 },
 };
 
@@ -144,12 +150,25 @@ export function Radio({
   value,
   className = '',
   sx = {},
+  // Extract aria props explicitly so they go to <input> not the outer <span>
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledBy,
+  'aria-describedby': ariaDescribedBy,
+  inputProps: inputPropsProp = {},
   ...props
 }) {
   const variantMap = buildVariantMap();
   const styles = variantMap[variant] || variantMap['primary-outline'];
   const sizeConfig = SIZE_MAP[size] || SIZE_MAP.medium;
   const LabelComp = size === 'small' ? BodySmall : Body;
+
+  // Pass aria attributes directly to the <input> element
+  const mergedInputProps = {
+    ...inputPropsProp,
+    ...(ariaLabel       && { 'aria-label': ariaLabel }),
+    ...(ariaLabelledBy  && { 'aria-labelledby': ariaLabelledBy }),
+    ...(ariaDescribedBy && { 'aria-describedby': ariaDescribedBy }),
+  };
 
   const radioElement = (
     <MuiRadio
@@ -161,6 +180,7 @@ export function Radio({
       icon={<UncheckedRadioIcon size={size} variant={variant} />}
       checkedIcon={<CheckedRadioIcon size={size} variant={variant} />}
       className={'radio-' + variant + ' ' + className}
+      inputProps={mergedInputProps}
       disableRipple
       sx={{
         padding: (sizeConfig.touchTarget - sizeConfig.box) / 2 + 'px',
@@ -235,6 +255,7 @@ export function RadioGroup({
   className = '',
   sx = {},
   'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledBy,
   ...props
 }) {
   return (
@@ -264,6 +285,7 @@ export function RadioGroup({
         onChange={onChange}
         name={name}
         aria-label={ariaLabel}
+        aria-labelledby={ariaLabelledBy}
         row={orientation === 'horizontal'}
         sx={{ gap: spacing }}
         {...props}
@@ -286,24 +308,24 @@ export function RadioGroup({
 // --- Convenience Exports -----------------------------------------------------
 
 // Outline
-export const PrimaryOutlineRadio   = (p) => <Radio variant="primary-outline"    {...p} />;
-export const SecondaryOutlineRadio = (p) => <Radio variant="secondary-outline"  {...p} />;
-export const TertiaryOutlineRadio  = (p) => <Radio variant="tertiary-outline"   {...p} />;
-export const NeutralOutlineRadio   = (p) => <Radio variant="neutral-outline"    {...p} />;
-export const InfoOutlineRadio      = (p) => <Radio variant="info-outline"       {...p} />;
-export const SuccessOutlineRadio   = (p) => <Radio variant="success-outline"    {...p} />;
-export const WarningOutlineRadio   = (p) => <Radio variant="warning-outline"    {...p} />;
-export const ErrorOutlineRadio     = (p) => <Radio variant="error-outline"      {...p} />;
+export const PrimaryOutlineRadio   = (p) => <Radio variant="primary-outline"   {...p} />;
+export const SecondaryOutlineRadio = (p) => <Radio variant="secondary-outline" {...p} />;
+export const TertiaryOutlineRadio  = (p) => <Radio variant="tertiary-outline"  {...p} />;
+export const NeutralOutlineRadio   = (p) => <Radio variant="neutral-outline"   {...p} />;
+export const InfoOutlineRadio      = (p) => <Radio variant="info-outline"      {...p} />;
+export const SuccessOutlineRadio   = (p) => <Radio variant="success-outline"   {...p} />;
+export const WarningOutlineRadio   = (p) => <Radio variant="warning-outline"   {...p} />;
+export const ErrorOutlineRadio     = (p) => <Radio variant="error-outline"     {...p} />;
 
 // Light
-export const PrimaryLightRadio     = (p) => <Radio variant="primary-light"      {...p} />;
-export const SecondaryLightRadio   = (p) => <Radio variant="secondary-light"    {...p} />;
-export const TertiaryLightRadio    = (p) => <Radio variant="tertiary-light"     {...p} />;
-export const NeutralLightRadio     = (p) => <Radio variant="neutral-light"      {...p} />;
-export const InfoLightRadio        = (p) => <Radio variant="info-light"         {...p} />;
-export const SuccessLightRadio     = (p) => <Radio variant="success-light"      {...p} />;
-export const WarningLightRadio     = (p) => <Radio variant="warning-light"      {...p} />;
-export const ErrorLightRadio       = (p) => <Radio variant="error-light"        {...p} />;
+export const PrimaryLightRadio     = (p) => <Radio variant="primary-light"     {...p} />;
+export const SecondaryLightRadio   = (p) => <Radio variant="secondary-light"   {...p} />;
+export const TertiaryLightRadio    = (p) => <Radio variant="tertiary-light"    {...p} />;
+export const NeutralLightRadio     = (p) => <Radio variant="neutral-light"     {...p} />;
+export const InfoLightRadio        = (p) => <Radio variant="info-light"        {...p} />;
+export const SuccessLightRadio     = (p) => <Radio variant="success-light"     {...p} />;
+export const WarningLightRadio     = (p) => <Radio variant="warning-light"     {...p} />;
+export const ErrorLightRadio       = (p) => <Radio variant="error-light"       {...p} />;
 
 // Aliases
 export const OutlineRadio = (p) => <Radio variant="primary-outline" {...p} />;

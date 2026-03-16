@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { Snackbar } from './Snackbar';
+import { axe } from 'jest-axe';
 
 /* ─── Helpers ─── */
 const renderSnackbar = (props = {}) =>
@@ -276,5 +277,37 @@ describe('Defaults', () => {
   test('default variant is standard', () => {
     const { container } = renderSnackbar();
     expect(container.querySelector('.snackbar-standard')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Snackbar — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Snackbar open={false} message="Test message" />
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Snackbar open={false} message="Test message" />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Snackbar open={false} message="Test message" />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

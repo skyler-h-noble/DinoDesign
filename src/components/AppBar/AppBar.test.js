@@ -3,6 +3,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { AppBar, DesktopAppBar, MobileAppBar } from './AppBar';
 import CheckIcon from '@mui/icons-material/Check';
+import { axe } from 'jest-axe';
 
 /* --- Basic --- */
 describe('AppBar', () => {
@@ -138,5 +139,37 @@ describe('Defaults', () => {
   test('default mobile variant is search', () => {
     const { container } = render(<AppBar mode="mobile" />);
     expect(container.querySelector('.appbar-mobile-search')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('AppBar — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <AppBar />
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <AppBar />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <AppBar />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

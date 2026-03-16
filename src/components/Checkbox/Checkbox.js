@@ -18,6 +18,12 @@ import { Body, BodySmall } from '../Typography';
  * SIZES: small (16px box) | medium (20px box) | large (24px box)
  * STATES: checked | unchecked | indeterminate | disabled
  * LABEL: optional text to the right of the checkbox
+ *
+ * ACCESSIBILITY:
+ *   - aria-label and aria-labelledby are passed via inputProps to the <input>
+ *     element directly, not the outer <span> wrapper, per WCAG 1.3.1
+ *   - Without a visible label prop, always provide aria-label
+ *   - FormControlLabel automatically associates the label with the input
  */
 
 const COLORS = ['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
@@ -84,12 +90,10 @@ function lightStyles(color) {
 
 function buildVariantMap() {
   const map = {};
-  // Primary style: only available for primary color
-  map['primary']              = solidStyles('primary');
-  // Outline and Light: available for all colors
+  map['primary'] = solidStyles('primary');
   COLORS.forEach((color) => {
-    map[color + '-outline']   = outlineStyles(color);
-    map[color + '-light']     = lightStyles(color);
+    map[color + '-outline'] = outlineStyles(color);
+    map[color + '-light']   = lightStyles(color);
   });
   map['outline'] = outlineStyles('primary');
   return map;
@@ -98,8 +102,8 @@ function buildVariantMap() {
 // --- Sizing ------------------------------------------------------------------
 
 const SIZE_MAP = {
-  small:  { box: 16, icon: 12, labelSize: '13px', gap: 6, touchTarget: 28 },
-  medium: { box: 20, icon: 14, labelSize: '15px', gap: 8, touchTarget: 32 },
+  small:  { box: 16, icon: 12, labelSize: '13px', gap: 6,  touchTarget: 28 },
+  medium: { box: 20, icon: 14, labelSize: '15px', gap: 8,  touchTarget: 32 },
   large:  { box: 24, icon: 18, labelSize: '17px', gap: 10, touchTarget: 40 },
 };
 
@@ -165,12 +169,26 @@ export function Checkbox({
   value,
   className = '',
   sx = {},
+  // Extract aria props explicitly so they go to the <input> not the <span>
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledBy,
+  'aria-describedby': ariaDescribedBy,
+  inputProps: inputPropsProp = {},
   ...props
 }) {
   const variantMap = buildVariantMap();
   const styles = variantMap[variant] || variantMap.primary;
   const sizeConfig = SIZE_MAP[size] || SIZE_MAP.medium;
   const LabelComp = size === 'small' ? BodySmall : Body;
+
+  // Pass aria attributes directly to the <input> element
+  // This fixes: "aria-label attribute cannot be used on a span with no valid role"
+  const mergedInputProps = {
+    ...inputPropsProp,
+    ...(ariaLabel      && { 'aria-label': ariaLabel }),
+    ...(ariaLabelledBy && { 'aria-labelledby': ariaLabelledBy }),
+    ...(ariaDescribedBy && { 'aria-describedby': ariaDescribedBy }),
+  };
 
   const checkboxElement = (
     <MuiCheckbox
@@ -185,6 +203,7 @@ export function Checkbox({
       checkedIcon={<CheckedIcon size={size} variant={variant} />}
       indeterminateIcon={<IndeterminateIcon size={size} variant={variant} />}
       className={'chk-' + variant + ' ' + className}
+      inputProps={mergedInputProps}
       disableRipple
       sx={{
         padding: (sizeConfig.touchTarget - sizeConfig.box) / 2 + 'px',

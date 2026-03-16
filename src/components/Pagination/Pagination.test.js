@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Pagination } from './Pagination';
+import { axe } from 'jest-axe';
 
 /* ─── Helpers ─── */
 const renderPagination = (props = {}) => render(<Pagination count={10} {...props} />);
@@ -249,5 +250,37 @@ describe('Sibling and boundary count', () => {
     // Should include pages 1, 2 at start and 19, 20 at end
     expect(screen.getByLabelText('Page 2')).toBeInTheDocument();
     expect(screen.getByLabelText('Page 19')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Pagination — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Pagination count={5} aria-label="Pagination" />
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Pagination count={5} aria-label="Pagination" />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Pagination count={5} aria-label="Pagination" />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

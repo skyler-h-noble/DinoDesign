@@ -8,6 +8,7 @@ import {
   InfoDivider,
   ErrorDivider,
 } from './Divider';
+import { axe } from 'jest-axe';
 
 describe('Divider Component', () => {
   test('renders without crashing', () => {
@@ -85,5 +86,37 @@ describe('Convenience Exports', () => {
   test('ErrorDivider renders', () => {
     const { container } = render(<ErrorDivider />);
     expect(container.querySelector('.divider-error')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Divider — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Divider />
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Divider />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Divider />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

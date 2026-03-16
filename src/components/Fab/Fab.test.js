@@ -3,6 +3,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Fab } from './Fab';
 import EditIcon from '@mui/icons-material/Edit';
+import { axe } from 'jest-axe';
 
 const renderFab = (props = {}) =>
   render(<Fab ariaLabel="Test action" {...props} />);
@@ -138,5 +139,37 @@ describe('Defaults', () => {
   test('default size is medium', () => {
     const { container } = renderFab();
     expect(container.querySelector('.fab-medium')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Fab — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Fab aria-label="Add">+</Fab>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Fab aria-label="Add">+</Fab>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Fab aria-label="Add">+</Fab>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

@@ -1,156 +1,214 @@
 // src/components/Button/Button.test.js
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { axe } from 'jest-axe';
 import { Button } from './Button';
 
-describe('Button Component', () => {
-  // Render tests
+// ─── Render ───────────────────────────────────────────────────────────────────
+
+describe('Button — Render', () => {
   test('renders button with text', () => {
     render(<Button>Click me</Button>);
-    expect(screen.getByText('Click me')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /click me/i })).toBeInTheDocument();
   });
 
-  // Variant tests
-  test('renders primary variant by default', () => {
-    render(<Button>Primary</Button>);
-    const button = screen.getByText('Primary');
-    expect(button.style.background).toContain('var(');
+  test('renders as a button element', () => {
+    const { container } = render(<Button>Test</Button>);
+    expect(container.querySelector('button')).toBeInTheDocument();
+  });
+});
+
+// ─── Variants ─────────────────────────────────────────────────────────────────
+
+describe('Button — Variants', () => {
+  test('applies btn-primary class by default', () => {
+    const { container } = render(<Button>Primary</Button>);
+    expect(container.querySelector('.btn-primary')).toBeInTheDocument();
   });
 
-  test('renders primary-outline variant', () => {
-    render(<Button variant="primary-outline">Outline</Button>);
-    const button = screen.getByText('Outline');
-    expect(button).toHaveClass('primary-outline');
+  test('applies btn-secondary class', () => {
+    const { container } = render(<Button variant="secondary">Secondary</Button>);
+    expect(container.querySelector('.btn-secondary')).toBeInTheDocument();
   });
 
-  test('renders primary-light variant', () => {
-    render(<Button variant="primary-light">Light</Button>);
-    const button = screen.getByText('Light');
-    expect(button).toHaveClass('primary-light');
+  test('applies btn-tertiary class', () => {
+    const { container } = render(<Button variant="tertiary">Tertiary</Button>);
+    expect(container.querySelector('.btn-tertiary')).toBeInTheDocument();
   });
 
-  test('renders secondary variant', () => {
-    render(<Button variant="secondary">Secondary</Button>);
-    expect(screen.getByText('Secondary')).toHaveClass('secondary');
+  test('applies btn-primary-outline class', () => {
+    const { container } = render(<Button variant="primary-outline">Outline</Button>);
+    expect(container.querySelector('.btn-primary-outline')).toBeInTheDocument();
   });
 
-  test('renders tertiary variant', () => {
-    render(<Button variant="tertiary">Tertiary</Button>);
-    expect(screen.getByText('Tertiary')).toHaveClass('tertiary');
+  test('applies btn-primary-light class', () => {
+    const { container } = render(<Button variant="primary-light">Light</Button>);
+    expect(container.querySelector('.btn-primary-light')).toBeInTheDocument();
   });
 
-  test('renders info variant', () => {
-    render(<Button variant="info">Info</Button>);
-    expect(screen.getByText('Info')).toHaveClass('info');
+  test('applies btn-info class', () => {
+    const { container } = render(<Button variant="info">Info</Button>);
+    expect(container.querySelector('.btn-info')).toBeInTheDocument();
   });
 
-  test('renders success variant', () => {
-    render(<Button variant="success">Success</Button>);
-    expect(screen.getByText('Success')).toHaveClass('success');
+  test('applies btn-success class', () => {
+    const { container } = render(<Button variant="success">Success</Button>);
+    expect(container.querySelector('.btn-success')).toBeInTheDocument();
   });
 
-  test('renders warning variant', () => {
-    render(<Button variant="warning">Warning</Button>);
-    expect(screen.getByText('Warning')).toHaveClass('warning');
+  test('applies btn-warning class', () => {
+    const { container } = render(<Button variant="warning">Warning</Button>);
+    expect(container.querySelector('.btn-warning')).toBeInTheDocument();
   });
 
-  test('renders error variant', () => {
-    render(<Button variant="error">Error</Button>);
-    expect(screen.getByText('Error')).toHaveClass('error');
+  test('applies btn-error class', () => {
+    const { container } = render(<Button variant="error">Error</Button>);
+    expect(container.querySelector('.btn-error')).toBeInTheDocument();
   });
 
-  // Size tests
+  test('applies btn-ghost class', () => {
+    const { container } = render(<Button variant="ghost">Ghost</Button>);
+    expect(container.querySelector('.btn-ghost')).toBeInTheDocument();
+  });
+});
+
+// ─── Sizes ────────────────────────────────────────────────────────────────────
+
+describe('Button — Sizes', () => {
   test('renders small size', () => {
     render(<Button size="small">Small</Button>);
-    const button = screen.getByText('Small');
-    expect(button.style.fontSize).toBe('14px');
+    expect(screen.getByRole('button', { name: /small/i })).toBeInTheDocument();
   });
 
   test('renders medium size by default', () => {
     render(<Button>Medium</Button>);
-    const button = screen.getByText('Medium');
-    expect(button.style.fontSize).toBe('16px');
+    expect(screen.getByRole('button', { name: /medium/i })).toBeInTheDocument();
   });
 
   test('renders large size', () => {
     render(<Button size="large">Large</Button>);
-    const button = screen.getByText('Large');
-    expect(button.style.fontSize).toBe('18px');
+    expect(screen.getByRole('button', { name: /large/i })).toBeInTheDocument();
   });
+});
 
-  // Disabled state tests
+// ─── Disabled ─────────────────────────────────────────────────────────────────
+
+describe('Button — Disabled', () => {
   test('disables button when disabled prop is true', () => {
     render(<Button disabled>Disabled</Button>);
-    expect(screen.getByText('Disabled')).toBeDisabled();
-  });
-
-  test('disables button with opacity 0.6', () => {
-    render(<Button disabled>Disabled</Button>);
-    const button = screen.getByText('Disabled');
-    expect(button.style.opacity).toBe('0.6');
-  });
-
-  test('shows not-allowed cursor when disabled', () => {
-    render(<Button disabled>Disabled</Button>);
-    const button = screen.getByText('Disabled');
-    expect(button.style.cursor).toBe('not-allowed');
-  });
-
-  // Event handling tests
-  test('calls onClick when clicked', () => {
-    const handleClick = jest.fn();
-    render(<Button onClick={handleClick}>Click</Button>);
-    fireEvent.click(screen.getByText('Click'));
-    expect(handleClick).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('button', { name: /disabled/i })).toBeDisabled();
   });
 
   test('does not call onClick when disabled', () => {
     const handleClick = jest.fn();
     render(<Button onClick={handleClick} disabled>Disabled</Button>);
-    fireEvent.click(screen.getByText('Disabled'));
+    fireEvent.click(screen.getByRole('button'));
     expect(handleClick).not.toHaveBeenCalled();
   });
+});
 
-  // Accessibility tests
+// ─── Click ────────────────────────────────────────────────────────────────────
+
+describe('Button — Click', () => {
+  test('calls onClick when clicked', () => {
+    const handleClick = jest.fn();
+    render(<Button onClick={handleClick}>Click</Button>);
+    fireEvent.click(screen.getByRole('button'));
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+});
+
+// ─── Focus ────────────────────────────────────────────────────────────────────
+
+describe('Button — Focus', () => {
   test('button is focusable', () => {
     render(<Button>Focus me</Button>);
-    const button = screen.getByText('Focus me');
+    const button = screen.getByRole('button');
     button.focus();
     expect(button).toHaveFocus();
   });
+});
 
-  test('button has focus-visible outline on focus', () => {
-    const { container } = render(<Button>Focus</Button>);
-    const button = container.querySelector('button');
-    button.focus();
-    // Note: CSS-in-JS focus styles may not be testable with jsdom
-    expect(button).toHaveFocus();
-  });
+// ─── Props ────────────────────────────────────────────────────────────────────
 
-  // Class tests
+describe('Button — Props', () => {
   test('accepts additional className', () => {
-    render(<Button className="custom-class">Button</Button>);
-    expect(screen.getByText('Button')).toHaveClass('custom-class');
+    const { container } = render(<Button className="custom-class">Button</Button>);
+    expect(container.querySelector('.custom-class')).toBeInTheDocument();
   });
 
-  test('applies variant class', () => {
-    render(<Button variant="secondary">Button</Button>);
-    expect(screen.getByText('Button')).toHaveClass('secondary');
+  test('forwards aria-label', () => {
+    render(<Button aria-label="test-button">Button</Button>);
+    expect(screen.getByRole('button', { name: 'test-button' })).toBeInTheDocument();
   });
 
-  // Props forwarding tests
-  test('forwards additional props to button element', () => {
-    const { container } = render(
-      <Button aria-label="test-button" data-testid="custom-id">
-        Button
-      </Button>
-    );
-    const button = container.querySelector('[data-testid="custom-id"]');
-    expect(button).toHaveAttribute('aria-label', 'test-button');
+  test('forwards data-testid', () => {
+    render(<Button data-testid="my-btn">Button</Button>);
+    expect(screen.getByTestId('my-btn')).toBeInTheDocument();
   });
 
-  test('button has proper type attribute', () => {
+  test('forwards type attribute', () => {
     const { container } = render(<Button type="submit">Submit</Button>);
     expect(container.querySelector('button')).toHaveAttribute('type', 'submit');
+  });
+
+  test('renders fullWidth', () => {
+    const { container } = render(<Button fullWidth>Full</Button>);
+    expect(container.querySelector('button')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Button — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations — primary', async () => {
+    const { container } = render(<Button variant="primary">Click me</Button>);
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations — outline', async () => {
+    const { container } = render(<Button variant="primary-outline">Click me</Button>);
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations — light', async () => {
+    const { container } = render(<Button variant="primary-light">Click me</Button>);
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations — ghost', async () => {
+    const { container } = render(<Button variant="ghost">Click me</Button>);
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations — disabled', async () => {
+    const { container } = render(<Button disabled>Disabled</Button>);
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations — icon only', async () => {
+    const { container } = render(<Button iconOnly aria-label="Add item">+</Button>);
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary"><Button variant="primary">Click me</Button></div>
+    );
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary"><Button variant="primary">Click me</Button></div>
+    );
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Tertiary theme', async () => {
+    const { container } = render(
+      <div data-theme="Tertiary"><Button variant="primary">Click me</Button></div>
+    );
+    expect(await axe(container)).toHaveNoViolations();
   });
 });

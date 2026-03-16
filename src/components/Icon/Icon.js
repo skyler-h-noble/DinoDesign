@@ -10,7 +10,8 @@ import { Box } from '@mui/material';
  * COLORS:
  *   default    var(--Icons-Default)         Two-tone: var(--Icons-Variant-Default)
  *   primary    var(--Icons-Primary)         Two-tone: var(--Icons-Variant-Primary)
- *   secondary  var(--Icons-Secondary)       Two-tone: var(--Icons-Variant-Secondary)
+ * *   secondary  var(--Icons-Secondary)       Two-tone: var(--Icons-Variant-Secondary)
+ *   tertiary   var(--Icons-Tertiary)        Two-tone: var(--Icons-Variant-Tertiary)
  *   neutral    var(--Icons-Neutral)         Two-tone: var(--Icons-Variant-Neutral)
  *   info       var(--Icons-Info)            Two-tone: var(--Icons-Variant-Info)
  *   success    var(--Icons-Success)         Two-tone: var(--Icons-Variant-Success)
@@ -36,14 +37,15 @@ import { Box } from '@mui/material';
  */
 
 const COLOR_LABEL_MAP = {
-  default: 'Default',
-  primary: 'Primary',
+  default:   'Default',
+  primary:   'Primary',
   secondary: 'Secondary',
-  neutral: 'Neutral',
-  info: 'Info',
-  success: 'Success',
-  warning: 'Warning',
-  error: 'Error',
+  tertiary:  'Tertiary',
+  neutral:   'Neutral',
+  info:      'Info',
+  success:   'Success',
+  warning:   'Warning',
+  error:     'Error',
 };
 
 const SIZE_MAP = {

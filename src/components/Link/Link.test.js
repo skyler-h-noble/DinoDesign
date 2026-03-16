@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Link, LINK_STYLES, LINK_COLORS } from './Link';
+import { axe } from 'jest-axe';
 
 /* ─── Helpers ─── */
 const renderLink = (props = {}) =>
@@ -163,5 +164,37 @@ describe('Defaults', () => {
   test('default color is primary', () => {
     const { container } = renderLink();
     expect(container.querySelector('.link-color-primary')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Link — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Link href="#">Test link</Link>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Link href="#">Test link</Link>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Link href="#">Test link</Link>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

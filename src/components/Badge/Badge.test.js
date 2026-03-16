@@ -8,6 +8,7 @@ import {
   PrimaryOutlineBadge,
   SuccessLightBadge,
 } from './Badge';
+import { axe } from 'jest-axe';
 
 // ─── Badge Component ─────────────────────────────────────────────────────────
 
@@ -162,5 +163,37 @@ describe('Convenience Exports', () => {
       <SuccessLightBadge badgeContent={1}><span>Child</span></SuccessLightBadge>
     );
     expect(container.querySelector('.badge-success-light')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Badge — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Badge badgeContent={4}><span>Item</span></Badge>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Badge badgeContent={4}><span>Item</span></Badge>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Badge badgeContent={4}><span>Item</span></Badge>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

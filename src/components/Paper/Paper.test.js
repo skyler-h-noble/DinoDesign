@@ -13,6 +13,7 @@ import {
   ResponsivePaper,
   FloatingPaper,
 } from './Paper';
+import { axe } from 'jest-axe';
 
 describe('usePaperSurface Hook', () => {
   test('returns correct config for Container-Lowest', () => {
@@ -215,5 +216,37 @@ describe('Data-surface Attribute', () => {
       const { container } = render(component);
       expect(container.querySelector('[data-surface]')).toBeInTheDocument();
     });
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Paper — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Paper>Content</Paper>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Paper>Content</Paper>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Paper>Content</Paper>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

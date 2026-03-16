@@ -5,17 +5,10 @@ import { TextField, Stack, Typography } from '@mui/material';
 /**
  * TextInput Component
  * Basic text input field with design system styling
- * 
- * @param {string} label - Input label
- * @param {string} placeholder - Placeholder text
- * @param {string} value - Input value
- * @param {function} onChange - Change handler
- * @param {string} type - Input type (default: text)
- * @param {boolean} error - Error state
- * @param {string} helperText - Helper/error text
- * @param {boolean} fullWidth - Full width input
- * @param {string} size - Size: small, medium (default: medium)
- * @param {object} props - Additional props
+ *
+ * ACCESSIBILITY:
+ *   - aria-label and aria-labelledby passed via inputProps to <input>
+ *   - Always provide label prop OR aria-label for screen readers
  */
 export function TextInput({
   label,
@@ -28,8 +21,19 @@ export function TextInput({
   fullWidth = true,
   size = 'medium',
   sx = {},
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledBy,
+  'aria-describedby': ariaDescribedBy,
+  inputProps: inputPropsProp = {},
   ...props
 }) {
+  const mergedInputProps = {
+    ...inputPropsProp,
+    ...(ariaLabel       && { 'aria-label': ariaLabel }),
+    ...(ariaLabelledBy  && { 'aria-labelledby': ariaLabelledBy }),
+    ...(ariaDescribedBy && { 'aria-describedby': ariaDescribedBy }),
+  };
+
   return (
     <TextField
       label={label}
@@ -41,28 +45,19 @@ export function TextInput({
       helperText={helperText}
       fullWidth={fullWidth}
       size={size}
+      inputProps={mergedInputProps}
       sx={{
         '& .MuiOutlinedInput-root': {
           color: 'var(--Text)',
-          '& fieldset': {
-            borderColor: 'var(--Border)',
-          },
-          '&:hover fieldset': {
-            borderColor: 'var(--Border)',
-          },
-          '&.Mui-focused fieldset': {
-            borderColor: 'var(--Button-Primary-Button)',
-          },
+          '& fieldset': { borderColor: 'var(--Border)' },
+          '&:hover fieldset': { borderColor: 'var(--Border)' },
+          '&.Mui-focused fieldset': { borderColor: 'var(--Button-Primary-Button)' },
         },
         '& .MuiInputLabel-root': {
           color: 'var(--Text-Secondary)',
-          '&.Mui-focused': {
-            color: 'var(--Button-Primary-Button)',
-          },
+          '&.Mui-focused': { color: 'var(--Button-Primary-Button)' },
         },
-        '& .MuiFormHelperText-root': {
-          color: 'var(--Text-Secondary)',
-        },
+        '& .MuiFormHelperText-root': { color: 'var(--Text-Secondary)' },
         ...sx,
       }}
       {...props}
@@ -72,15 +67,6 @@ export function TextInput({
 
 /**
  * EmailInput Component
- * Email input with validation styling
- * 
- * @param {string} label - Input label (default: Email)
- * @param {string} placeholder - Placeholder (default: your@email.com)
- * @param {string} value - Input value
- * @param {function} onChange - Change handler
- * @param {boolean} error - Error state
- * @param {string} helperText - Helper/error text
- * @param {object} props - Additional props
  */
 export function EmailInput({
   label = 'Email',
@@ -109,15 +95,6 @@ export function EmailInput({
 
 /**
  * PasswordInput Component
- * Password input with masked text
- * 
- * @param {string} label - Input label (default: Password)
- * @param {string} placeholder - Placeholder (default: ••••••••)
- * @param {string} value - Input value
- * @param {function} onChange - Change handler
- * @param {boolean} error - Error state
- * @param {string} helperText - Helper/error text
- * @param {object} props - Additional props
  */
 export function PasswordInput({
   label = 'Password',
@@ -146,17 +123,6 @@ export function PasswordInput({
 
 /**
  * TextArea Component
- * Multi-line text input
- * 
- * @param {string} label - Input label
- * @param {string} placeholder - Placeholder text
- * @param {string} value - Input value
- * @param {function} onChange - Change handler
- * @param {number} rows - Number of rows (default: 4)
- * @param {boolean} error - Error state
- * @param {string} helperText - Helper/error text
- * @param {boolean} fullWidth - Full width input
- * @param {object} props - Additional props
  */
 export function TextArea({
   label,
@@ -168,8 +134,19 @@ export function TextArea({
   helperText = '',
   fullWidth = true,
   sx = {},
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledBy,
+  'aria-describedby': ariaDescribedBy,
+  inputProps: inputPropsProp = {},
   ...props
 }) {
+  const mergedInputProps = {
+    ...inputPropsProp,
+    ...(ariaLabel       && { 'aria-label': ariaLabel }),
+    ...(ariaLabelledBy  && { 'aria-labelledby': ariaLabelledBy }),
+    ...(ariaDescribedBy && { 'aria-describedby': ariaDescribedBy }),
+  };
+
   return (
     <TextField
       label={label}
@@ -181,28 +158,19 @@ export function TextArea({
       error={error}
       helperText={helperText}
       fullWidth={fullWidth}
+      inputProps={mergedInputProps}
       sx={{
         '& .MuiOutlinedInput-root': {
           color: 'var(--Text)',
-          '& fieldset': {
-            borderColor: 'var(--Border)',
-          },
-          '&:hover fieldset': {
-            borderColor: 'var(--Border)',
-          },
-          '&.Mui-focused fieldset': {
-            borderColor: 'var(--Button-Primary-Button)',
-          },
+          '& fieldset': { borderColor: 'var(--Border)' },
+          '&:hover fieldset': { borderColor: 'var(--Border)' },
+          '&.Mui-focused fieldset': { borderColor: 'var(--Button-Primary-Button)' },
         },
         '& .MuiInputLabel-root': {
           color: 'var(--Text-Secondary)',
-          '&.Mui-focused': {
-            color: 'var(--Button-Primary-Button)',
-          },
+          '&.Mui-focused': { color: 'var(--Button-Primary-Button)' },
         },
-        '& .MuiFormHelperText-root': {
-          color: 'var(--Text-Secondary)',
-        },
+        '& .MuiFormHelperText-root': { color: 'var(--Text-Secondary)' },
         ...sx,
       }}
       {...props}

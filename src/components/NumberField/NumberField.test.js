@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { NumberField } from './NumberField';
+import { axe } from 'jest-axe';
 
 const renderField = (props = {}) =>
   render(<NumberField label="Test" {...props} />);
@@ -154,5 +155,37 @@ describe('Spinner sizes', () => {
   test('small size class', () => {
     const { container } = renderField({ variant: 'spinner', size: 'small' });
     expect(container.querySelector('.numberfield-small')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('NumberField — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <NumberField aria-label="Quantity" />
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <NumberField aria-label="Quantity" />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <NumberField aria-label="Quantity" />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

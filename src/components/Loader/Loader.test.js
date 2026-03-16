@@ -10,6 +10,7 @@ import {
   SkeletonCard,
   OverlayLoader,
 } from './Loader';
+import { axe } from 'jest-axe';
 
 describe('Loader Component', () => {
   test('renders Loader', () => {
@@ -178,5 +179,37 @@ describe('OverlayLoader Component', () => {
       </OverlayLoader>
     );
     expect(queryByText('Loading...')).not.toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Loader — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Loader aria-label="Loading" />
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Loader aria-label="Loading" />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Loader aria-label="Loading" />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

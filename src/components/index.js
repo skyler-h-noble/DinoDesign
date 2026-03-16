@@ -56,7 +56,6 @@ export { Icon, IconShowcase } from './Icon';
 // ========== BUTTONS ==========
 export { Button } from './Button';
 export { ButtonGroup } from './ButtonGroup';
-export { ButtonIcon } from './ButtonIcon';
 export { Fab, FabShowcase } from './Fab';
 export { Rail, RailShowcase } from './Rail';
 export { Toolbar, ToolbarShowcase } from './Toolbar';

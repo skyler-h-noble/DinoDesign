@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { List, DefaultList, SolidList, LightList } from './List';
+import { axe } from 'jest-axe';
 
 const items = [
   { label: 'Home' }, { label: 'Inbox' }, { label: 'Projects' }, { label: 'Settings' },
@@ -176,5 +177,37 @@ describe('Convenience Exports', () => {
   test('LightList', () => {
     const { container } = render(<LightList color="primary" items={items} />);
     expect(container.querySelector('.list-light')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('List — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <List><li>Item one</li><li>Item two</li></List>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <List><li>Item one</li><li>Item two</li></List>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <List><li>Item one</li><li>Item two</li></List>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

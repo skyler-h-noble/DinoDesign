@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { CircularProgress } from './CircularProgress';
+import { axe } from 'jest-axe';
 
 /* ─── Helpers ─── */
 const renderCP = (props = {}) => render(<CircularProgress {...props} />);
@@ -237,5 +238,37 @@ describe('Defaults', () => {
   test('default mode is indeterminate', () => {
     const { container } = renderCP();
     expect(container.querySelector('.circular-progress-indeterminate')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('CircularProgress — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <CircularProgress aria-label="Loading" />
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <CircularProgress aria-label="Loading" />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <CircularProgress aria-label="Loading" />
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

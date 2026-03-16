@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Sheet, DefaultSheet, SolidSheet, LightSheet } from './Sheet';
+import { axe } from 'jest-axe';
 
 /* ─── Helpers ─── */
 const renderSheet = (props = {}) =>
@@ -170,5 +171,37 @@ describe('Convenience exports', () => {
   test('LightSheet renders with data-theme', () => {
     const { container } = render(<LightSheet color="error"><span>T</span></LightSheet>);
     expect(container.querySelector('[data-theme="Error-Light"]')).toBeInTheDocument();
+  });
+});
+
+// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
+
+describe('Sheet — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations with default props', async () => {
+    const { container } = render(
+      <Sheet>Content</Sheet>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Primary theme', async () => {
+    const { container } = render(
+      <div data-theme="Primary">
+        <Sheet>Content</Sheet>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations in Secondary theme', async () => {
+    const { container } = render(
+      <div data-theme="Secondary">
+        <Sheet>Content</Sheet>
+      </div>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

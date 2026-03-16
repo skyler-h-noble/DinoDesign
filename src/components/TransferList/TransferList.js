@@ -25,6 +25,11 @@ import { List, ListItem } from '../List/List';
  *   Hover:           var(--Buttons-Default-Hover)
  *   Active:          var(--Buttons-Default-Active)
  *   Selected row:    bg var(--Surface-Dim)
+ *
+ * ACCESSIBILITY:
+ *   - Empty state renders as <li> to satisfy aria-required-children for role="list"
+ *   - Move buttons have aria-label for screen reader clarity
+ *   - Outer wrapper has role="group" with aria-label
  */
 
 const MOVE_BTN_SX = {
@@ -142,6 +147,7 @@ export function TransferList({
               indeterminate={someChecked}
               onChange={() => handleToggleAll(items)}
               disabled={disabled || items.length === 0}
+              aria-label={allChecked ? 'Deselect all' : 'Select all'}
             />
           )}
           <Box sx={{ flex: 1, fontSize: '13px', fontWeight: 600, color: 'var(--Text)' }}>
@@ -169,6 +175,7 @@ export function TransferList({
                       checked={isItemChecked}
                       onChange={() => handleToggle(item)}
                       disabled={disabled}
+                      aria-label={'Select ' + item}
                       sx={{ pointerEvents: 'none' }}
                     />
                   }
@@ -182,8 +189,19 @@ export function TransferList({
                 </ListItem>
               );
             })}
+            {/* Empty state — must render as <li> to satisfy aria-required-children
+                for the parent <ul role="list"> (WCAG aria-required-children) */}
             {items.length === 0 && (
-              <Box sx={{ p: 2, textAlign: 'center', fontSize: '13px', color: 'var(--Text-Quiet)' }}>
+              <Box
+                component="li"
+                sx={{
+                  p: 2,
+                  textAlign: 'center',
+                  fontSize: '13px',
+                  color: 'var(--Text-Quiet)',
+                  listStyle: 'none',
+                }}
+              >
                 No items
               </Box>
             )}
@@ -195,9 +213,11 @@ export function TransferList({
 
   return (
     <Box
-      className={'transfer-list transfer-list-' + mode +
+      className={
+        'transfer-list transfer-list-' + mode +
         (disabled ? ' transfer-list-disabled' : '') +
-        (className ? ' ' + className : '')}
+        (className ? ' ' + className : '')
+      }
       role="group"
       aria-label="Transfer list"
       sx={{

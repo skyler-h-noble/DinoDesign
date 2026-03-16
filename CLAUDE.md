@@ -73,9 +73,29 @@ Sets `--Background` which components use via `background: var(--Background)`.
 
 ---
 
+## MUI Integration
+
+`@dynodesign/components` is built on MUI. The `DynoDesignProvider` handles all MUI `ThemeProvider` wiring internally — **you never configure MUI directly**. DynoDesign's CSS custom properties drive all visual values; MUI is purely structural.
+
+**MUI peer dependencies must be installed in the consuming app:**
+```bash
+npm install @mui/material @mui/icons-material @emotion/react @emotion/styled
+```
+
+**Never use MUI's theming system to set colors — always use DynoDesign tokens:**
+```jsx
+// ✅ Correct — token-driven
+style={{ background: 'var(--Buttons-Primary-Button)', color: 'var(--Buttons-Primary-Text)' }}
+
+// ❌ Wrong — bypasses the token system
+sx={{ bgcolor: 'primary.main', color: 'white' }}
+```
+
+---
+
 ## Provider Setup
 
-The `DynoDesignProvider` must wrap your entire app. It injects CSS and sets the root attributes:
+The `DynoDesignProvider` must wrap your entire app. It injects CSS, configures MUI ThemeProvider, and sets the root attributes:
 
 ```jsx
 // src/App.js

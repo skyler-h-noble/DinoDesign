@@ -1,37 +1,162 @@
 // src/components/Typography/TypographyShowcase.js
 import React, { useState, useEffect } from 'react';
-import {
-  Box, Stack, Grid, Tabs, Tab, Tooltip, IconButton as MuiIconButton, TextField,
-} from '@mui/material';
+import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
-import { Typography, TYPOGRAPHY_STYLES } from './Typography';
+import { Typography, TYPOGRAPHY_STYLES, HEADER_COLORS, TEXT_COLORS } from './Typography';
 import {
-  H2, H4, H5, Body, BodySmall, Caption, Label, OverlineSmall
+  H2, H5, BodySmall, Caption, Label, OverlineSmall
 } from './Typography';
+import { Button } from '../Button/Button';
+import { Switch } from '../Switch/Switch';
+import { Input } from '../Input/Input';
+import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
+
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 
 const STYLE_LABELS = {
+  'display-large': 'Display Large',
+  'display-small': 'Display Small',
   h1: 'H1', h2: 'H2', h3: 'H3', h4: 'H4', h5: 'H5', h6: 'H6',
-  body: 'Body', 'body-small': 'Body Small', 'body-large': 'Body Large',
-  'body-semibold': 'Body Semibold', 'body-bold': 'Body Bold',
-  button: 'Button', label: 'Label', caption: 'Caption', overline: 'Overline',
+  'subtitle':         'Subtitle',
+  'subtitle-large':   'Subtitle Large',
+  'body-small':          'Body Small',
+  'body-small-semibold': 'Body Small Semibold',
+  'body-small-bold':     'Body Small Bold',
+  'body':                'Body Medium',
+  'body-semibold':       'Body Medium Semibold',
+  'body-bold':           'Body Medium Bold',
+  'body-large':          'Body Large',
+  'body-large-semibold': 'Body Large Semibold',
+  'body-large-bold':     'Body Large Bold',
+  'label':        'Label',
+  'label-small':  'Label Small',
+  'label-large':  'Label Large',
+  'caption':      'Caption',
+  'caption-bold': 'Caption Bold',
+  'legal':        'Legal',
+  'legal-semibold': 'Legal Semibold',
+  'overline':     'Overline',
+  'overline-large': 'Overline Large',
+  'button':       'Button',
+  'button-small': 'Button Small',
+  'number-large':  'Number Large',
+  'number-medium': 'Number Medium',
+  'number-small':  'Number Small',
 };
 
 const STYLE_GROUPS = {
-  Headings: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
-  Body: ['body', 'body-small', 'body-large', 'body-semibold', 'body-bold'],
-  Utility: ['button', 'label', 'caption', 'overline'],
+  Display:       ['display-large', 'display-small'],
+  Headings:      ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
+  Subtitle:      ['subtitle', 'subtitle-large'],
+  'Body Small':  ['body-small', 'body-small-semibold', 'body-small-bold'],
+  'Body Medium': ['body', 'body-semibold', 'body-bold'],
+  'Body Large':  ['body-large', 'body-large-semibold', 'body-large-bold'],
+  Label:         ['label', 'label-small', 'label-large'],
+  Caption:       ['caption', 'caption-bold'],
+  Legal:         ['legal', 'legal-semibold'],
+  Overline:      ['overline', 'overline-large'],
+  Button:        ['button', 'button-small'],
+  Number:        ['number-large', 'number-medium', 'number-small'],
 };
 
-const COLOR_LABELS = { header: 'Header', standard: 'Standard', quiet: 'Quiet' };
-const COLOR_TOKENS = { header: 'var(--Header)', standard: 'var(--Text)', quiet: 'var(--Text-Quiet)' };
+const HEADING_STYLES = new Set(['display-large', 'display-small', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'subtitle', 'subtitle-large']);
 
-const HEADER_DEFAULT_STYLES = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+// Header color → data-theme for swatch buttons
+const HEADER_SWATCH_THEME = {
+  default:   null,
+  primary:   'Primary',
+  secondary: 'Secondary',
+  tertiary:  'Tertiary',
+  neutral:   'Neutral',
+  info:      'Info-Medium',
+  success:   'Success-Medium',
+  warning:   'Warning-Medium',
+  error:     'Error-Medium',
+};
+
+// Text color → data-theme for swatch buttons
+const TEXT_SWATCH_THEME = {
+  default:   null,
+  quiet:     null,
+  primary:   'Primary',
+  secondary: 'Secondary',
+  tertiary:  'Tertiary',
+  neutral:   'Neutral',
+  info:      'Info-Medium',
+  success:   'Success-Medium',
+  warning:   'Warning-Medium',
+  error:     'Error-Medium',
+};
+
+// Header color → CSS token
+const HEADER_TOKEN_MAP = {
+  default:   'var(--Header)',
+  primary:   'var(--Header-Primary)',
+  secondary: 'var(--Header-Secondary)',
+  tertiary:  'var(--Header-Tertiary)',
+  neutral:   'var(--Header-Neutral)',
+  info:      'var(--Header-Info)',
+  success:   'var(--Header-Success)',
+  warning:   'var(--Header-Warning)',
+  error:     'var(--Header-Error)',
+};
+
+// Text color → CSS token
+const TEXT_TOKEN_MAP = {
+  default:   'var(--Text)',
+  quiet:     'var(--Quiet)',
+  primary:   'var(--Text-Primary)',
+  secondary: 'var(--Text-Secondary)',
+  tertiary:  'var(--Text-Tertiary)',
+  neutral:   'var(--Text-Neutral)',
+  info:      'var(--Text-Info)',
+  success:   'var(--Text-Success)',
+  warning:   'var(--Text-Warning)',
+  error:     'var(--Text-Error)',
+};
+
+const STYLE_CONFIG = {
+  h1: { defaultColor: 'header', defaultWidth: 'fill' },
+  h2: { defaultColor: 'header', defaultWidth: 'fill' },
+  h3: { defaultColor: 'header', defaultWidth: 'fill' },
+  h4: { defaultColor: 'header', defaultWidth: 'fill' },
+  h5: { defaultColor: 'header', defaultWidth: 'fill' },
+  h6: { defaultColor: 'header', defaultWidth: 'fill' },
+  'display-large':       { defaultColor: 'header',   defaultWidth: 'fill' },
+  'display-small':       { defaultColor: 'header',   defaultWidth: 'fill' },
+  'subtitle':            { defaultColor: 'header',   defaultWidth: 'fill' },
+  'subtitle-large':      { defaultColor: 'header',   defaultWidth: 'fill' },
+  'body':                { defaultColor: 'standard', defaultWidth: 'fill' },
+  'body-semibold':       { defaultColor: 'standard', defaultWidth: 'fill' },
+  'body-bold':           { defaultColor: 'standard', defaultWidth: 'fill' },
+  'body-small':          { defaultColor: 'standard', defaultWidth: 'fill' },
+  'body-small-semibold': { defaultColor: 'standard', defaultWidth: 'fill' },
+  'body-small-bold':     { defaultColor: 'standard', defaultWidth: 'fill' },
+  'body-large':          { defaultColor: 'standard', defaultWidth: 'fill' },
+  'body-large-semibold': { defaultColor: 'standard', defaultWidth: 'fill' },
+  'body-large-bold':     { defaultColor: 'standard', defaultWidth: 'fill' },
+  'label':               { defaultColor: 'standard', defaultWidth: 'hug' },
+  'label-small':         { defaultColor: 'standard', defaultWidth: 'hug' },
+  'label-large':         { defaultColor: 'standard', defaultWidth: 'hug' },
+  'caption':             { defaultColor: 'quiet',    defaultWidth: 'hug' },
+  'caption-bold':        { defaultColor: 'quiet',    defaultWidth: 'hug' },
+  'legal':               { defaultColor: 'quiet',    defaultWidth: 'hug' },
+  'legal-semibold':      { defaultColor: 'quiet',    defaultWidth: 'hug' },
+  'overline':            { defaultColor: 'quiet',    defaultWidth: 'hug' },
+  'overline-large':      { defaultColor: 'quiet',    defaultWidth: 'hug' },
+  'button':              { defaultColor: 'standard', defaultWidth: 'hug' },
+  'button-small':        { defaultColor: 'standard', defaultWidth: 'hug' },
+  'number-large':        { defaultColor: 'standard', defaultWidth: 'hug' },
+  'number-medium':       { defaultColor: 'standard', defaultWidth: 'hug' },
+  'number-small':        { defaultColor: 'standard', defaultWidth: 'hug' },
+};
 
 const SAMPLE_TEXT = 'The quick brown fox jumps over the lazy dog.';
-const SAMPLE_LONG = 'Typography is the art and technique of arranging type to make written language legible, readable, and appealing when displayed. The arrangement of type involves selecting typefaces, point sizes, line lengths, line-spacing, and letter-spacing.';
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function getLuminance(hex) {
   const clean = hex.replace('#', '');
@@ -51,24 +176,29 @@ function getCssVar(varName) {
   return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
 }
 
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
 function ContrastBadge({ ratio, threshold }) {
   if (!ratio) return <Caption style={{ color: 'var(--Text-Quiet)' }}>--</Caption>;
   const passes = parseFloat(ratio) >= threshold;
   return (
     <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
-      <Box sx={{ px: 1, py: 0.25, borderRadius: '4px',
+      <Box sx={{ px: 1, py: 0.25, borderRadius: '4px', fontSize: '11px', fontWeight: 700,
         backgroundColor: passes ? 'var(--Tags-Success-BG)' : 'var(--Tags-Error-BG)',
-        color: passes ? 'var(--Tags-Success-Text)' : 'var(--Tags-Error-Text)',
-        fontSize: '11px', fontWeight: 700 }}>{ratio}:1</Box>
+        color: passes ? 'var(--Tags-Success-Text)' : 'var(--Tags-Error-Text)' }}>
+        {ratio}:1
+      </Box>
       <Caption style={{ color: passes ? 'var(--Tags-Success-Text)' : 'var(--Tags-Error-Text)' }}>
         {passes ? 'Pass' : 'Fail'}
       </Caption>
     </Box>
   );
 }
+
 function A11yRow({ label, ratio, threshold, note }) {
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', py: 1.5, borderBottom: '1px solid var(--Border)' }}>
+    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+      py: 1.5, borderBottom: '1px solid var(--Border)' }}>
       <Box sx={{ flex: 1 }}>
         <BodySmall style={{ color: 'var(--Text)' }}>{label}</BodySmall>
         {note && <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>{note}</Caption>}
@@ -77,6 +207,7 @@ function A11yRow({ label, ratio, threshold, note }) {
     </Box>
   );
 }
+
 function CopyButton({ code }) {
   const [copied, setCopied] = useState(false);
   const handleCopy = async () => {
@@ -84,293 +215,304 @@ function CopyButton({ code }) {
     catch (err) { console.error('Copy failed:', err); }
   };
   return (
-    <Tooltip title={copied ? 'Copied!' : 'Copy code'}>
-      <MuiIconButton size="small" onClick={handleCopy}
-        sx={{ color: copied ? '#4ade80' : '#9ca3af', '&:hover': { backgroundColor: '#333', color: '#e5e7eb' } }}>
-        {copied ? <CheckIcon fontSize="small" /> : <ContentCopyIcon fontSize="small" />}
-      </MuiIconButton>
-    </Tooltip>
+    <Button iconOnly variant="ghost" size="small" onClick={handleCopy}
+      aria-label={copied ? 'Copied' : 'Copy code'} title={copied ? 'Copied!' : 'Copy code'}
+      sx={{ color: copied ? '#4ade80' : '#9ca3af' }}>
+      {copied ? <CheckIcon fontSize="small" /> : <ContentCopyIcon fontSize="small" />}
+    </Button>
   );
 }
+
 function ControlButton({ label, selected, onClick }) {
   return (
-    <Box component="button" onClick={onClick}
-      sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-        cursor: 'pointer',
-        border: '2px solid var(--Buttons-Primary-Button)', borderRadius: 'var(--Style-Border-Radius)',
-        backgroundColor: selected ? 'var(--Buttons-Primary-Button)' : 'transparent',
-        color: selected ? 'var(--Buttons-Primary-Text)' : 'var(--Text)',
-        padding: '4px 12px', fontSize: '14px',
-        fontFamily: 'inherit', fontWeight: 500, whiteSpace: 'nowrap', flexShrink: 0,
-        transition: 'background-color 0.15s ease, color 0.15s ease',
-        '&:hover': { backgroundColor: selected ? 'var(--Buttons-Primary-Hover)' : 'var(--Surface-Dim)' },
-        '&:focus-visible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '2px' } }}>
+    <Button variant={selected ? 'primary' : 'primary-outline'} size="small" onClick={onClick}>
       {label}
-    </Box>
+    </Button>
   );
 }
 
+// ─── Main Showcase ────────────────────────────────────────────────────────────
+
 export function TypographyShowcase() {
-  const [mainTab, setMainTab] = useState(0);
   const [textStyle, setTextStyle] = useState('body');
-  const [color, setColor] = useState('');
-  const [width, setWidth] = useState('');
+  const [color, setColor]         = useState('');
+  const [width, setWidth]         = useState('');
   const [sampleText, setSampleText] = useState(SAMPLE_TEXT);
-  const [noWrap, setNoWrap] = useState(false);
+  const [noWrap, setNoWrap]       = useState(false);
   const [contrastData, setContrastData] = useState({});
 
-  const config = {
-    h1: { defaultColor: 'header', defaultWidth: 'fill' },
-    h2: { defaultColor: 'header', defaultWidth: 'fill' },
-    h3: { defaultColor: 'header', defaultWidth: 'fill' },
-    h4: { defaultColor: 'header', defaultWidth: 'fill' },
-    h5: { defaultColor: 'header', defaultWidth: 'fill' },
-    h6: { defaultColor: 'header', defaultWidth: 'fill' },
-    body: { defaultColor: 'standard', defaultWidth: 'fill' },
-    'body-small': { defaultColor: 'standard', defaultWidth: 'fill' },
-    'body-large': { defaultColor: 'standard', defaultWidth: 'fill' },
-    'body-semibold': { defaultColor: 'standard', defaultWidth: 'fill' },
-    'body-bold': { defaultColor: 'standard', defaultWidth: 'fill' },
-    button: { defaultColor: 'standard', defaultWidth: 'hug' },
-    label: { defaultColor: 'standard', defaultWidth: 'hug' },
-    caption: { defaultColor: 'quiet', defaultWidth: 'hug' },
-    overline: { defaultColor: 'quiet', defaultWidth: 'hug' },
-  };
-  const currentConfig = config[textStyle] || config.body;
-  const resolvedColor = color || currentConfig.defaultColor;
+  const isHeading = HEADING_STYLES.has(textStyle);
+  const currentConfig = STYLE_CONFIG[textStyle] || STYLE_CONFIG.body;
+  const resolvedColor = color || (isHeading ? 'default' : currentConfig.defaultColor === 'standard' ? 'default' : currentConfig.defaultColor);
   const resolvedWidth = width || currentConfig.defaultWidth;
+  const availableColors = isHeading ? HEADER_COLORS : TEXT_COLORS;
+  const tokenMap = isHeading ? HEADER_TOKEN_MAP : TEXT_TOKEN_MAP;
 
   const generateCode = () => {
     const parts = ['textStyle="' + textStyle + '"'];
     if (color) parts.push('color="' + color + '"');
     if (width) parts.push('width="' + width + '"');
     if (noWrap) parts.push('noWrap');
-    return '<Typography ' + parts.join(' ') + '>\n  ' + sampleText.substring(0, 50) + (sampleText.length > 50 ? '...' : '') + '\n</Typography>';
+    const preview = sampleText.length > 50 ? sampleText.substring(0, 50) + '...' : sampleText;
+    return '<Typography ' + parts.join(' ') + '>\n  ' + preview + '\n</Typography>';
   };
 
   useEffect(() => {
     const data = {};
-    data.header = getCssVar('--Header');
-    data.text = getCssVar('--Text');
-    data.textQuiet = getCssVar('--Text-Quiet');
     data.background = getCssVar('--Background');
+    // Header colors
+    HEADER_COLORS.forEach(c => {
+      const varName = c === 'default' ? '--Header' : '--Header-' + cap(c);
+      data['header_' + c] = getCssVar(varName);
+    });
+    // Text colors
+    TEXT_COLORS.forEach(c => {
+      const varName = c === 'default' ? '--Text' : c === 'quiet' ? '--Text-Quiet' : '--Text-' + cap(c);
+      data['text_' + c] = getCssVar(varName);
+    });
     setContrastData(data);
   }, []);
+
+  // Get current text color value for accessibility check
+  const getCurrentColorValue = () => {
+    const key = color || resolvedColor;
+    if (isHeading) return contrastData['header_' + key];
+    return contrastData['text_' + key];
+  };
 
   return (
     <Box sx={{ pb: 8 }}>
       <H2>Typography</H2>
-      <Tabs value={mainTab} onChange={(e, v) => setMainTab(v)}
-        sx={{ mt: 3, mb: 0, borderBottom: '1px solid var(--Border)',
-          '& .MuiTabs-indicator': { backgroundColor: 'var(--Buttons-Primary-Button)', height: 3 },
-          '& .MuiTab-root': { color: 'var(--Text-Quiet)', textTransform: 'none', fontWeight: 500, '&.Mui-selected': { color: 'var(--Text)' } } }}>
-        <Tab label="Playground" />
-        <Tab label="Accessibility" />
-      </Tabs>
 
-      {mainTab === 0 && (
-        <Grid container sx={{ minHeight: 400 }}>
+      <Grid container sx={{ mt: 2, alignItems: 'flex-start' }}>
+
+        {/* ── LEFT: Preview + Code ── */}
+        <Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, pr: { md: 3 } }}>
+
           {/* Preview */}
-          <Grid item sx={{ width: { xs: '100%', md: 'calc((100vw - 432px) / 2)' }, flexShrink: 0 }}>
-            <Box sx={{ p: 4, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center',
-              minHeight: 200, backgroundColor: 'var(--Background)', borderBottom: '1px solid var(--Border)' }}>
-              <Box sx={{ width: '100%', maxWidth: 560, overflow: 'hidden' }}>
-                <Typography textStyle={textStyle} color={color || undefined} width={width || undefined} noWrap={noWrap}>
-                  {sampleText}
-                </Typography>
-              </Box>
-              <Box sx={{ mt: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                <Caption style={{ color: 'var(--Text-Quiet)' }}>
-                  Color: {COLOR_LABELS[resolvedColor]} ({COLOR_TOKENS[resolvedColor]})
-                </Caption>
-                <Caption style={{ color: 'var(--Text-Quiet)' }}>
-                  Width: {cap(resolvedWidth)}
-                </Caption>
+          <Box sx={{
+            p: 4, display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
+            minHeight: 160, backgroundColor: 'var(--Background)',
+            borderBottom: '1px solid var(--Border)',
+          }}>
+            <Box sx={{ width: '100%', overflow: 'hidden' }}>
+              <Typography
+                textStyle={textStyle}
+                color={color || undefined}
+                width={width || undefined}
+                noWrap={noWrap}
+              >
+                {sampleText}
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* JSX Code */}
+          <Box sx={{ backgroundColor: '#1e1e1e', borderRadius: '8px', overflow: 'hidden', mt: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              px: 2, py: 1, borderBottom: '1px solid #333' }}>
+              <Caption style={{ color: '#9ca3af' }}>JSX</Caption>
+              <CopyButton code={generateCode()} />
+            </Box>
+            <Box sx={{ p: 2, overflow: 'hidden' }}>
+              <Box component="code" sx={{ fontFamily: 'monospace', fontSize: '11px', color: '#e5e7eb',
+                whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowWrap: 'break-word',
+                maxWidth: '100%', display: 'block' }}>
+                {generateCode()}
               </Box>
             </Box>
-            {/* Code */}
-            <Box sx={{ backgroundColor: '#1e1e1e', borderBottom: '1px solid var(--Border)' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, py: 1, borderBottom: '1px solid #333' }}>
-                <Caption style={{ color: '#9ca3af' }}>JSX</Caption>
-                <CopyButton code={generateCode()} />
-              </Box>
-              <Box sx={{ p: 2, overflow: 'auto' }}>
-                <Box component="code" sx={{ fontFamily: 'monospace', fontSize: '13px', color: '#e5e7eb', whiteSpace: 'pre', display: 'block' }}>{generateCode()}</Box>
-              </Box>
-            </Box>
-          </Grid>
-
-          {/* Controls */}
-          <Grid item sx={{ width: { xs: 'calc(100vw - 432px)', md: 'calc((100vw - 432px) / 2)' }, flexShrink: 0, p: 3, backgroundColor: 'var(--Container)', overflowY: 'auto' }}>
-            <H4>Playground</H4>
-
-            {/* Style */}
-            {Object.entries(STYLE_GROUPS).map(([group, styles]) => (
-              <Box key={group} sx={{ mt: 3 }}>
-                <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
-                  {group === 'Headings' ? 'STYLE \u2014 HEADINGS' : group === 'Body' ? 'STYLE \u2014 BODY' : 'STYLE \u2014 UTILITY'}
-                </OverlineSmall>
-                <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1 }}>
-                  {styles.map((s) => (
-                    <ControlButton key={s} label={STYLE_LABELS[s]} selected={textStyle === s}
-                      onClick={() => { setTextStyle(s); setColor(''); setWidth(''); }} />
-                  ))}
-                </Stack>
-              </Box>
-            ))}
-
-            {/* Color */}
-            <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
-              <Stack direction="row" spacing={1}>
-                <ControlButton label="Default" selected={color === ''} onClick={() => setColor('')} />
-                {Object.entries(COLOR_LABELS).map(([c, l]) => (
-                  <ControlButton key={c} label={l} selected={color === c} onClick={() => setColor(c)} />
-                ))}
-              </Stack>
-              <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
-                {color
-                  ? cap(color) + ': ' + COLOR_TOKENS[color]
-                  : 'Default: ' + COLOR_LABELS[currentConfig.defaultColor] + ' (' + COLOR_TOKENS[currentConfig.defaultColor] + ')'
-                }
-                {!color && HEADER_DEFAULT_STYLES.includes(textStyle) && ' \u2014 Headings auto-use Header color for text >19px bold or >24px'}
-              </Caption>
-            </Box>
-
-            {/* Width */}
-            <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>WIDTH</OverlineSmall>
-              <Stack direction="row" spacing={1}>
-                <ControlButton label="Default" selected={width === ''} onClick={() => setWidth('')} />
-                <ControlButton label="Hug" selected={width === 'hug'} onClick={() => setWidth('hug')} />
-                <ControlButton label="Fill" selected={width === 'fill'} onClick={() => setWidth('fill')} />
-              </Stack>
-              <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
-                {width
-                  ? cap(width) + ': ' + (width === 'hug' ? 'display: inline, width: auto' : 'display: block, width: 100%')
-                  : 'Default: ' + cap(currentConfig.defaultWidth) + ' \u2014 ' + (currentConfig.defaultWidth === 'hug' ? 'inline element' : 'block element')
-                }
-              </Caption>
-            </Box>
-
-            {/* Sample text */}
-            <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SAMPLE TEXT</OverlineSmall>
-              <TextField size="small" multiline minRows={2} maxRows={4} value={sampleText}
-                onChange={(e) => setSampleText(e.target.value)}
-                sx={{ width: '100%',
-                  '& .MuiInputBase-root': { backgroundColor: 'var(--Background)', color: 'var(--Text)', fontSize: '13px', fontFamily: 'inherit' },
-                  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--Border)' } }} />
-            </Box>
-
-            {/* noWrap */}
-            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Box>
-                <Label>noWrap</Label>
-                <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Truncate with ellipsis on overflow</Caption>
-              </Box>
-              <Box component="button" onClick={() => setNoWrap(!noWrap)}
-                sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  cursor: 'pointer', width: 40, height: 24,
-                  border: '2px solid var(--Border)', borderRadius: '12px',
-                  backgroundColor: noWrap ? 'var(--Buttons-Primary-Button)' : 'transparent',
-                  padding: 0, transition: 'background-color 0.15s ease',
-                  '&:focus-visible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '2px' } }}>
-                <Box sx={{ width: 16, height: 16, borderRadius: '50%',
-                  backgroundColor: noWrap ? 'var(--Buttons-Primary-Text)' : 'var(--Text-Quiet)',
-                  transform: noWrap ? 'translateX(6px)' : 'translateX(-6px)',
-                  transition: 'transform 0.15s ease, background-color 0.15s ease' }} />
-              </Box>
-            </Box>
-          </Grid>
+          </Box>
         </Grid>
-      )}
 
-      {/* == ACCESSIBILITY == */}
-      {mainTab === 1 && (
-        <Box sx={{ p: 4 }}>
-          <H4>Accessibility Requirements</H4>
-          <BodySmall color="quiet" style={{ marginBottom: 32 }}>
-            Based on current settings: {STYLE_LABELS[textStyle]} / {COLOR_LABELS[resolvedColor]} / {cap(resolvedWidth)}
-            {noWrap ? ' / noWrap' : ''}
-          </BodySmall>
+        {/* ── RIGHT: Tabs ── */}
+        <Grid item sx={{ width: { xs: '100%', md: '45%' }, flexShrink: 0 }}>
+          <Box sx={{ backgroundColor: 'var(--Background)', overflow: 'hidden' }}>
 
-          <Stack spacing={4}>
-            {/* Text Readability */}
-            <Box sx={{ p: 3, backgroundColor: 'var(--Container)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
-              <H5>Text Readability</H5>
-              <BodySmall color="quiet" style={{ marginBottom: 16 }}>Text must be readable against page background (WCAG 1.4.3)</BodySmall>
-              <A11yRow label="var(--Header) vs. var(--Background)"
-                ratio={getContrast(contrastData.header, contrastData.background)} threshold={4.5}
-                note="Header color against page background (for headings)" />
-              <A11yRow label="var(--Text) vs. var(--Background)"
-                ratio={getContrast(contrastData.text, contrastData.background)} threshold={4.5}
-                note="Standard color against page background (for body text)" />
-              <A11yRow label="var(--Text-Quiet) vs. var(--Background)"
-                ratio={getContrast(contrastData.textQuiet, contrastData.background)} threshold={4.5}
-                note="Quiet color against page background (for secondary text)" />
-            </Box>
+            <Tabs defaultValue={0} variant="standard" color="primary">
+              <TabList>
+                <Tab>Playground</Tab>
+                <Tab>Accessibility</Tab>
+              </TabList>
 
-            {/* ARIA and Semantics */}
-            <Box sx={{ p: 3, backgroundColor: 'var(--Container)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
-              <H5>ARIA and Semantics</H5>
-              <Stack spacing={0}>
-                <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                  <BodySmall>Semantic elements:</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)' }}>
-                    H1-H6 render as {'<h1>-<h6>'} for document outline. Body renders as {'<p>'}. Label renders as {'<label>'}. Button, Caption, Overline render as {'<span>'}.
-                  </Caption>
-                </Box>
-                <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                  <BodySmall>Heading hierarchy:</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)' }}>
-                    Headings must follow proper order (H1 then H2, not skipping levels). Only one H1 per page. Assistive technologies use heading levels for page navigation.
-                  </Caption>
-                </Box>
-                <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                  <BodySmall>Cognitive accessibility:</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)' }}>
-                    All line-height values include var(--Cognitive-Multiplier, 1) for adaptive spacing. Increasing this value improves readability for users with dyslexia or cognitive differences.
-                  </Caption>
-                </Box>
-                <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                  <BodySmall>noWrap truncation:</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)' }}>
-                    When noWrap is enabled, content is clipped with ellipsis. The full text remains accessible to screen readers. Consider adding a title attribute or tooltip for sighted users.
-                  </Caption>
-                </Box>
-                <Box sx={{ py: 1.5 }}>
-                  <BodySmall>Component override:</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)' }}>
-                    The component prop allows rendering any style with any HTML element. For example, an H2 style rendered as {'<h3>'} for correct document outline when visual hierarchy differs from semantic hierarchy.
-                  </Caption>
-                </Box>
-              </Stack>
-            </Box>
+              {/* ── Playground ── */}
+              <TabPanel value={0}>
+                <Box sx={{ p: 3 }}>
 
-            {/* Type Scale */}
-            <Box sx={{ p: 3, backgroundColor: 'var(--Container)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
-              <H5>Type Scale Reference</H5>
-              <BodySmall color="quiet" style={{ marginBottom: 16 }}>All styles rendered with current design tokens</BodySmall>
-              <Stack spacing={2}>
-                {Object.entries(STYLE_GROUPS).map(([group, styles]) => (
-                  <Box key={group}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>{group.toUpperCase()}</OverlineSmall>
-                    {styles.map((s) => (
-                      <Box key={s} sx={{ py: 1, borderBottom: '1px solid var(--Border)', display: 'flex', alignItems: 'baseline', gap: 2 }}>
-                        <Box sx={{ width: 120, flexShrink: 0 }}>
-                          <Caption style={{ color: 'var(--Text-Quiet)' }}>{STYLE_LABELS[s]}</Caption>
-                        </Box>
-                        <Typography textStyle={s}>{SAMPLE_TEXT.substring(0, 40)}</Typography>
-                      </Box>
-                    ))}
+                  {/* Color */}
+                  <Box sx={{ mt: 0, mb: 3 }}>
+                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+                      {isHeading ? 'HEADER COLOR' : 'TEXT COLOR'}
+                    </OverlineSmall>
+                    <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
+                      {availableColors.map((c) => {
+                        const isSel = color === c || (color === '' && c === 'default');
+                        // Resolve the actual color token for this swatch background
+                        const swatchBg = isHeading
+                          ? (c === 'default' ? 'var(--Header)' : 'var(--Header-' + cap(c) + ')')
+                          : (c === 'default' ? 'var(--Text)' : c === 'quiet' ? 'var(--Quiet)' : 'var(--Text-' + cap(c) + ')');
+                        return (
+                          <Box key={c} component="button"
+                            onClick={() => setColor(c === 'default' ? '' : c)}
+                            aria-label={'Select ' + cap(c)} aria-pressed={isSel} title={cap(c)}
+                            sx={{
+                              width: 'var(--Button-Height)', height: 'var(--Button-Height)',
+                              borderRadius: '4px',
+                              backgroundColor: swatchBg,
+                              border: isSel ? '2px solid var(--Text)' : '2px solid var(--Border)',
+                              outline: isSel ? '2px solid var(--Focus-Visible)' : '2px solid transparent',
+                              outlineOffset: '1px', cursor: 'pointer', flexShrink: 0,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              transition: 'transform 0.1s ease', '&:hover': { transform: 'scale(1.1)' },
+                            }}>
+                            {isSel && <CheckIcon sx={{ fontSize: 16, color: 'var(--Background)', pointerEvents: 'none' }} />}
+                          </Box>
+                        );
+                      })}
+                    </Stack>
                   </Box>
-                ))}
-              </Stack>
-            </Box>
-          </Stack>
-        </Box>
-      )}
+
+                  {/* Style groups */}
+                  {Object.entries(STYLE_GROUPS).map(([group, styles]) => (
+                    <Box key={group} sx={{ mt: group === 'Headings' ? 0 : 3 }}>
+                      <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+                        {'STYLE — ' + group.toUpperCase()}
+                      </OverlineSmall>
+                      <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
+                        {styles.map((s) => (
+                          <ControlButton key={s} label={STYLE_LABELS[s]} selected={textStyle === s}
+                            onClick={() => { setTextStyle(s); setColor(''); setWidth(''); }} />
+                        ))}
+                      </Stack>
+                    </Box>
+                  ))}
+
+                  {/* Width */}
+                  <Box sx={{ mt: 3 }}>
+                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>WIDTH</OverlineSmall>
+                    <Stack direction="row" spacing={1}>
+                      {['default', 'hug', 'fill'].map((w) => (
+                        <ControlButton key={w} label={cap(w)} selected={width === (w === 'default' ? '' : w)}
+                          onClick={() => setWidth(w === 'default' ? '' : w)} />
+                      ))}
+                    </Stack>
+                  </Box>
+
+                  {/* Sample text */}
+                  <Box sx={{ mt: 3 }}>
+                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SAMPLE TEXT</OverlineSmall>
+                    <Input
+                      variant="primary-outline"
+                      size="small"
+                      value={sampleText}
+                      onChange={(e) => setSampleText(e.target.value)}
+                      multiline
+                      rows={2}
+                      fullWidth
+                    />
+                  </Box>
+
+                  {/* noWrap */}
+                  <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box>
+                      <Label>noWrap</Label>
+                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Truncate with ellipsis on overflow</Caption>
+                    </Box>
+                    <Switch checked={noWrap} onChange={(e) => setNoWrap(e.target.checked)}
+                      size="small" aria-label="Toggle noWrap" />
+                  </Box>
+                </Box>
+              </TabPanel>
+
+              {/* ── Accessibility ── */}
+              <TabPanel value={1}>
+                <Box sx={{ p: 3 }}>
+                  <BodySmall color="quiet" style={{ marginBottom: 24 }}>
+                    {STYLE_LABELS[textStyle]} / {cap(resolvedColor)} / {cap(resolvedWidth)}
+                    {noWrap ? ' / noWrap' : ''}
+                  </BodySmall>
+
+                  <Stack spacing={3}>
+
+                    {/* Current color contrast */}
+                    <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
+                      <H5>Text Contrast (WCAG 1.4.3 — 4.5:1)</H5>
+                      <BodySmall color="quiet" style={{ marginBottom: 16 }}>
+                        Selected color vs page background.
+                      </BodySmall>
+                      <A11yRow
+                        label={(tokenMap[resolvedColor] || tokenMap.default) + ' vs. var(--Background)'}
+                        ratio={getContrast(getCurrentColorValue(), contrastData.background)}
+                        threshold={4.5}
+                        note={STYLE_LABELS[textStyle] + ' — ' + cap(resolvedColor) + ' color'} />
+                    </Box>
+
+                    {/* Semantics */}
+                    <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
+                      <H5>ARIA and Semantics</H5>
+                      <Stack spacing={0}>
+                        <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
+                          <BodySmall>Semantic elements:</BodySmall>
+                          <Caption style={{ color: 'var(--Text-Quiet)' }}>
+                            H1–H6 → &lt;h1&gt;–&lt;h6&gt; · Body → &lt;p&gt; · Label → &lt;label&gt; · Button, Caption, Overline → &lt;span&gt;
+                          </Caption>
+                        </Box>
+                        <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
+                          <BodySmall>Heading hierarchy:</BodySmall>
+                          <Caption style={{ color: 'var(--Text-Quiet)' }}>
+                            Use headings in order — don't skip levels. One H1 per page. Screen readers use heading levels for navigation.
+                          </Caption>
+                        </Box>
+                        <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
+                          <BodySmall>Cognitive accessibility:</BodySmall>
+                          <Caption style={{ color: 'var(--Text-Quiet)' }}>
+                            All line-heights use var(--Cognitive-Multiplier, 1) for adaptive spacing. Increasing this improves readability for dyslexia or cognitive differences.
+                          </Caption>
+                        </Box>
+                        <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
+                          <BodySmall>noWrap truncation:</BodySmall>
+                          <Caption style={{ color: 'var(--Text-Quiet)' }}>
+                            Content is clipped with ellipsis but remains accessible to screen readers. Add a title attribute or tooltip for sighted users.
+                          </Caption>
+                        </Box>
+                        <Box sx={{ py: 1.5 }}>
+                          <BodySmall>component override:</BodySmall>
+                          <Caption style={{ color: 'var(--Text-Quiet)' }}>
+                            The component prop renders any style with any HTML element — e.g. H2 style as &lt;h3&gt; when visual and semantic hierarchy differ.
+                          </Caption>
+                        </Box>
+                      </Stack>
+                    </Box>
+
+                    {/* Type scale reference */}
+                    <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
+                      <H5>Type Scale Reference</H5>
+                      <BodySmall color="quiet" style={{ marginBottom: 16 }}>All styles with current design tokens</BodySmall>
+                      <Stack spacing={2}>
+                        {Object.entries(STYLE_GROUPS).map(([group, styles]) => (
+                          <Box key={group}>
+                            <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+                              {group.toUpperCase()}
+                            </OverlineSmall>
+                            {styles.map((s) => (
+                              <Box key={s} sx={{ py: 1, borderBottom: '1px solid var(--Border)', display: 'flex', alignItems: 'baseline', gap: 2 }}>
+                                <Box sx={{ width: 100, flexShrink: 0 }}>
+                                  <Caption style={{ color: 'var(--Text-Quiet)' }}>{STYLE_LABELS[s]}</Caption>
+                                </Box>
+                                <Typography textStyle={s}>{SAMPLE_TEXT.substring(0, 36)}</Typography>
+                              </Box>
+                            ))}
+                          </Box>
+                        ))}
+                      </Stack>
+                    </Box>
+
+                  </Stack>
+                </Box>
+              </TabPanel>
+            </Tabs>
+          </Box>
+        </Grid>
+      </Grid>
     </Box>
   );
 }

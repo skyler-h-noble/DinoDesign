@@ -42,6 +42,10 @@ import { Body, BodySmall } from '../Typography';
  *
  * --- VALIDATION --------------------------------------------------------------
  *   info | success | warning | error — icon + colored border + helper message
+ *
+ * --- ACCESSIBILITY -----------------------------------------------------------
+ *   aria-label and aria-labelledby are passed via inputProps to the <input>
+ *   element directly per WCAG 1.3.1. Always provide label or aria-label.
  */
 
 const COLORS = ['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
@@ -62,7 +66,7 @@ function outlineStyles(color) {
 function buildVariantMap() {
   const map = {};
   COLORS.forEach((color) => {
-    map[color + '-outline']   = outlineStyles(color);
+    map[color + '-outline'] = outlineStyles(color);
   });
   map['outline'] = outlineStyles('primary');
   return map;
@@ -71,15 +75,15 @@ function buildVariantMap() {
 // --- Sizing ------------------------------------------------------------------
 
 const SIZE_MAP = {
-  small:  { height: '32px',  fontSize: '13px', labelSize: '13px', padding: '4px 8px',   iconSize: 16 },
-  medium: { height: 'var(--Button-Height)', fontSize: '15px', labelSize: '15px', padding: '6px 12px',  iconSize: 18 },
-  large:  { height: '56px',  fontSize: '17px', labelSize: '17px', padding: '8px 16px',  iconSize: 20 },
+  small:  { height: '32px',                   fontSize: '13px', labelSize: '13px', padding: '4px 8px',        iconSize: 16 },
+  medium: { height: 'var(--Button-Height)',    fontSize: '15px', labelSize: '15px', padding: '6px 12px',       iconSize: 18 },
+  large:  { height: '56px',                   fontSize: '17px', labelSize: '17px', padding: '8px 16px',       iconSize: 20 },
 };
 
 const FLOATING_SIZE_MAP = {
-  small:  { height: '48px',  fontSize: '13px', labelSize: '11px', padding: '20px 12px 4px',  leftPad: 12, iconSize: 16 },
-  medium: { height: '56px',  fontSize: '15px', labelSize: '12px', padding: '22px 14px 6px',  leftPad: 14, iconSize: 18 },
-  large:  { height: '64px',  fontSize: '17px', labelSize: '14px', padding: '24px 16px 6px',  leftPad: 16, iconSize: 20 },
+  small:  { height: '48px', fontSize: '13px', labelSize: '11px', padding: '20px 12px 4px', leftPad: 12, iconSize: 16 },
+  medium: { height: '56px', fontSize: '15px', labelSize: '12px', padding: '22px 14px 6px', leftPad: 14, iconSize: 18 },
+  large:  { height: '64px', fontSize: '17px', labelSize: '14px', padding: '24px 16px 6px', leftPad: 16, iconSize: 20 },
 };
 
 // --- Validation icons --------------------------------------------------------
@@ -123,6 +127,13 @@ export function Input({
   fullWidth = false,
   className = '',
   sx = {},
+  // Extract aria props explicitly so they go to <input> not the outer wrapper
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledBy,
+  'aria-describedby': ariaDescribedBy,
+  'aria-required': ariaRequired,
+  'aria-invalid': ariaInvalid,
+  inputProps: inputPropsProp = {},
   ...props
 }) {
   const variantMap = buildVariantMap();
@@ -136,6 +147,16 @@ export function Input({
   const validationConfig = validation ? VALIDATION_COLORS[validation] : null;
   const ValidationIcon = validation ? VALIDATION_ICONS[validation] : null;
   const effectiveBorder = validationConfig ? validationConfig.border : styles.border;
+
+  // Pass aria attributes to the actual <input> element
+  const mergedInputProps = {
+    ...inputPropsProp,
+    ...(ariaLabel       && { 'aria-label': ariaLabel }),
+    ...(ariaLabelledBy  && { 'aria-labelledby': ariaLabelledBy }),
+    ...(ariaDescribedBy && { 'aria-describedby': ariaDescribedBy }),
+    ...(ariaRequired    && { 'aria-required': ariaRequired }),
+    ...(ariaInvalid     && { 'aria-invalid': ariaInvalid }),
+  };
 
   // Standard label (above input)
   const renderStandardLabel = () => {
@@ -158,7 +179,7 @@ export function Input({
     );
   };
 
-  // Build end adornment (user-provided only, no validation icon inside input)
+  // Build end adornment
   const renderEndAdornment = () => {
     if (!endAdornment) return undefined;
     return (
@@ -190,6 +211,7 @@ export function Input({
         label={isFloating ? label : undefined}
         variant="outlined"
         size={size === 'small' ? 'small' : 'medium'}
+        inputProps={mergedInputProps}
         InputProps={{
           'data-surface': 'Container-Lowest',
           startAdornment: startAdornment ? (
@@ -198,7 +220,6 @@ export function Input({
           endAdornment: renderEndAdornment(),
         }}
         sx={{
-          // Root
           '& .MuiOutlinedInput-root': {
             backgroundColor: styles.bg,
             color: styles.text,
@@ -208,18 +229,15 @@ export function Input({
             borderRadius: 'var(--Style-Border-Radius)',
             transition: 'background-color 0.15s ease-in-out, border-color 0.15s ease-in-out',
 
-            // Fieldset border
             '& fieldset': {
               border: '2px solid ' + effectiveBorder,
               transition: 'border-color 0.15s ease-in-out',
             },
 
-            // Hover
             '&:hover fieldset': {
               borderColor: validationConfig ? validationConfig.border : styles.border,
             },
 
-            // Focus
             '&.Mui-focused': {
               backgroundColor: styles.focusBg,
               '& fieldset': {
@@ -228,42 +246,27 @@ export function Input({
               },
             },
 
-            // Disabled
             '&.Mui-disabled': {
               opacity: 0.6,
               cursor: 'not-allowed',
-              '& fieldset': {
-                borderColor: effectiveBorder,
-              },
+              '& fieldset': { borderColor: effectiveBorder },
             },
 
-            // Input — placeholder uses var(--Quiet)
             '& input': {
               padding: sizeConfig.padding,
               color: 'inherit',
-              '&::placeholder': {
-                color: 'var(--Quiet)',
-                opacity: 1,
-              },
+              '&::placeholder': { color: 'var(--Quiet)', opacity: 1 },
             },
 
-            // Textarea — placeholder uses var(--Quiet)
             '& textarea': {
               padding: sizeConfig.padding,
               color: 'inherit',
-              '&::placeholder': {
-                color: 'var(--Quiet)',
-                opacity: 1,
-              },
+              '&::placeholder': { color: 'var(--Quiet)', opacity: 1 },
             },
 
-            // Adornment colors
-            '& .MuiInputAdornment-root': {
-              color: styles.text,
-            },
+            '& .MuiInputAdornment-root': { color: styles.text },
           },
 
-          // Floating label — stays inside the field, never pops outside
           '& .MuiInputLabel-root': {
             color: 'var(--Quiet)',
             fontSize: sizeConfig.fontSize,
@@ -273,26 +276,14 @@ export function Input({
               transform: 'translate(' + (sizeConfig.leftPad || 14) + 'px, 6px) scale(0.75)',
               color: 'var(--Quiet)',
             },
-            '&.Mui-focused': {
-              color: 'var(--Hotlink)',
-            },
-            '&.Mui-disabled': {
-              color: 'var(--Quiet)',
-              opacity: 0.6,
-            },
-          },
-          // Hide the notch so the border stays solid
-          '& .MuiOutlinedInput-notchedOutline legend': {
-            display: 'none',
-          },
-          '& .MuiOutlinedInput-notchedOutline': {
-            top: 0,
+            '&.Mui-focused': { color: 'var(--Hotlink)' },
+            '&.Mui-disabled': { color: 'var(--Quiet)', opacity: 0.6 },
           },
 
-          // Focus visible outline
-          '& .MuiOutlinedInput-root.Mui-focused': {
-            outline: 'none',
-          },
+          '& .MuiOutlinedInput-notchedOutline legend': { display: 'none' },
+          '& .MuiOutlinedInput-notchedOutline': { top: 0 },
+
+          '& .MuiOutlinedInput-root.Mui-focused': { outline: 'none' },
           '& .MuiOutlinedInput-root:focus-within': {
             '& fieldset': {
               outline: '2px solid var(--Focus-Visible)',
@@ -303,31 +294,17 @@ export function Input({
         {...props}
       />
 
-      {/* Helper text OR Validation message — validation replaces helper text */}
       {(validation && validationMessage) ? (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px', marginLeft: '2px' }}>
           {ValidationIcon && (
             <ValidationIcon sx={{ fontSize: sizeConfig.iconSize, color: validationConfig.icon, flexShrink: 0 }} />
           )}
-          <FormHelperText
-            sx={{
-              color: validationConfig.text,
-              fontSize: size === 'small' ? '11px' : '12px',
-              margin: 0,
-            }}
-          >
+          <FormHelperText sx={{ color: validationConfig.text, fontSize: size === 'small' ? '11px' : '12px', margin: 0 }}>
             {validationMessage}
           </FormHelperText>
         </Box>
       ) : helperText ? (
-        <FormHelperText
-          sx={{
-            color: 'var(--Quiet)',
-            fontSize: size === 'small' ? '11px' : '12px',
-            marginTop: '4px',
-            marginLeft: '2px',
-          }}
-        >
+        <FormHelperText sx={{ color: 'var(--Quiet)', fontSize: size === 'small' ? '11px' : '12px', marginTop: '4px', marginLeft: '2px' }}>
           {helperText}
         </FormHelperText>
       ) : null}
@@ -337,17 +314,15 @@ export function Input({
 
 // --- Convenience Exports -----------------------------------------------------
 
-// Outline (all colors)
-export const PrimaryOutlineInput   = (p) => <Input variant="primary-outline"    {...p} />;
-export const SecondaryOutlineInput = (p) => <Input variant="secondary-outline"  {...p} />;
-export const TertiaryOutlineInput  = (p) => <Input variant="tertiary-outline"   {...p} />;
-export const NeutralOutlineInput   = (p) => <Input variant="neutral-outline"    {...p} />;
-export const InfoOutlineInput      = (p) => <Input variant="info-outline"       {...p} />;
-export const SuccessOutlineInput   = (p) => <Input variant="success-outline"    {...p} />;
-export const WarningOutlineInput   = (p) => <Input variant="warning-outline"    {...p} />;
-export const ErrorOutlineInput     = (p) => <Input variant="error-outline"      {...p} />;
+export const PrimaryOutlineInput   = (p) => <Input variant="primary-outline"   {...p} />;
+export const SecondaryOutlineInput = (p) => <Input variant="secondary-outline" {...p} />;
+export const TertiaryOutlineInput  = (p) => <Input variant="tertiary-outline"  {...p} />;
+export const NeutralOutlineInput   = (p) => <Input variant="neutral-outline"   {...p} />;
+export const InfoOutlineInput      = (p) => <Input variant="info-outline"      {...p} />;
+export const SuccessOutlineInput   = (p) => <Input variant="success-outline"   {...p} />;
+export const WarningOutlineInput   = (p) => <Input variant="warning-outline"   {...p} />;
+export const ErrorOutlineInput     = (p) => <Input variant="error-outline"     {...p} />;
 
-// Aliases
 export const OutlineInput = (p) => <Input variant="primary-outline" {...p} />;
 export const PrimaryInput = (p) => <Input variant="primary-outline" {...p} />;
 

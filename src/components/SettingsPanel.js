@@ -1,299 +1,165 @@
 // src/components/SettingsPanel.js
 import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Drawer,
-  Typography,
-  Stack,
-  FormControl,
-  FormLabel,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  Button,
-  Divider,
-} from '@mui/material';
+import { Box, Drawer, Stack, Divider } from '@mui/material';
 import { Settings as SettingsIcon, Close as CloseIcon } from '@mui/icons-material';
 import { useThemeMode } from '../theme/useThemeMode';
-import { loadModeCSS } from '../utils/cssLoader';
+import { Button } from './Button/Button';
+import { H5, BodySmall, Caption, OverlineSmall } from './Typography';
 
-/**
- * SettingsPanel Component
- * Allows users to customize:
- * - Light/Dark mode
- * - Background variant (Default, Primary, Secondary, Tertiary, Neutral, Neutral-Variant)
- * - Surface theme
- */
+const PLATFORMS = [
+  { value: 'desktop',    label: 'Desktop',    note: '32px touch targets (WCAG)' },
+  { value: 'ios-mobile', label: 'iOS Mobile', note: '44px touch targets (HIG)' },
+  { value: 'ios-tablet', label: 'iOS Tablet', note: '44px touch targets (HIG)' },
+  { value: 'android',    label: 'Android',    note: '48px touch targets (M3)' },
+];
+
+const PLATFORM_BUTTON_HEIGHT = {
+  'desktop':    '32px',
+  'ios-mobile': '44px',
+  'ios-tablet': '44px',
+  'android':    '48px',
+};
+
 export function SettingsPanel() {
   const { mode, switchMode } = useThemeMode('light');
   const [panelOpen, setPanelOpen] = useState(false);
-  const [lightModeType, setLightModeType] = useState('Light-Mode-Tonal');
-  const [backgroundVariant, setBackgroundVariant] = useState('Default');
-  const [surfaceTheme, setSurfaceTheme] = useState('Surface');
+  const [platform, setPlatform]   = useState('desktop');
 
-  // Load settings from localStorage on mount
   useEffect(() => {
-    const savedMode = localStorage.getItem('--Light-Mode') || 'Light-Mode-Tonal';
-    const savedBg = localStorage.getItem('--Background-Variant') || 'Default';
-    const savedSurface = localStorage.getItem('--Surface-Theme') || 'Surface';
-
-    setLightModeType(savedMode);
-    setBackgroundVariant(savedBg);
-    setSurfaceTheme(savedSurface);
+    const savedPlatform = localStorage.getItem('dino-platform') || 'desktop';
+    const savedTheme    = localStorage.getItem('themeMode')     || 'light';
+    setPlatform(savedPlatform);
+    document.documentElement.style.setProperty('--Button-Height', PLATFORM_BUTTON_HEIGHT[savedPlatform] || '32px');
+    if (savedTheme === 'dark') switchMode('dark');
   }, []);
 
-  // Handle Light Mode type change
-  const handleLightModeChange = (e) => {
-    const newMode = e.target.value;
-    setLightModeType(newMode);
-    localStorage.setItem('--Light-Mode', newMode);
-    loadModeCSS(newMode);
+  const handlePlatformChange = (value) => {
+    setPlatform(value);
+    localStorage.setItem('dino-platform', value);
+    document.documentElement.style.setProperty('--Button-Height', PLATFORM_BUTTON_HEIGHT[value] || '32px');
   };
 
-  // Handle Background variant change
-  const handleBackgroundChange = (e) => {
-    const newBg = e.target.value;
-    setBackgroundVariant(newBg);
-    localStorage.setItem('--Background-Variant', newBg);
-    
-    // Update CSS variable
-    document.documentElement.style.setProperty('--Background-Variant', newBg);
-  };
-
-  // Handle Surface theme change
-  const handleSurfaceChange = (e) => {
-    const newSurface = e.target.value;
-    setSurfaceTheme(newSurface);
-    localStorage.setItem('--Surface-Theme', newSurface);
-    
-    // Update CSS variable
-    document.documentElement.style.setProperty('--Surface-Theme', newSurface);
-  };
-
-  // Reset all settings to defaults
   const handleReset = () => {
-    setLightModeType('Light-Mode-Tonal');
-    setBackgroundVariant('Default');
-    setSurfaceTheme('Surface');
-    
-    localStorage.setItem('--Light-Mode', 'Light-Mode-Tonal');
-    localStorage.setItem('--Background-Variant', 'Default');
-    localStorage.setItem('--Surface-Theme', 'Surface');
-    
-    document.documentElement.style.setProperty('--Background-Variant', 'Default');
-    document.documentElement.style.setProperty('--Surface-Theme', 'Surface');
-    
-    loadModeCSS('Light-Mode-Tonal');
+    handlePlatformChange('desktop');
+    switchMode('light');
   };
 
   return (
     <>
-      {/* Floating Settings Button */}
-      <Box
-        onClick={() => setPanelOpen(true)}
+      {/* FAB */}
+      <Box onClick={() => setPanelOpen(true)} role="button" aria-label="Open settings"
         sx={{
-          position: 'fixed',
-          bottom: 24,
-          right: 24,
-          width: 56,
-          height: 56,
-          borderRadius: '50%',
+          position: 'fixed', bottom: 24, right: 24,
+          width: 52, height: 52, borderRadius: '50%',
           backgroundColor: 'var(--Buttons-Tertiary-Button)',
-          color: 'var(--Buttons-Tertiary-Button-Text)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-          transition: 'all 0.2s ease-in-out',
-          zIndex: 999,
-          '&:hover': {
-            transform: 'scale(1.1)',
-            boxShadow: '0 6px 16px rgba(0, 0, 0, 0.2)',
-          },
-        }}
-      >
-        <SettingsIcon sx={{ fontSize: 28 }} />
+          color: 'var(--Buttons-Tertiary-Text)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          cursor: 'pointer', boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          zIndex: 999, transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+          '&:hover': { transform: 'scale(1.08)', boxShadow: '0 6px 16px rgba(0,0,0,0.2)' },
+        }}>
+        <SettingsIcon sx={{ fontSize: 24 }} />
       </Box>
 
-      {/* Settings Drawer */}
-      <Drawer
-        anchor="right"
-        open={panelOpen}
-        onClose={() => setPanelOpen(false)}
-        hideBackdrop={true} // No overlay backdrop
-        sx={{
-          zIndex: 1400,
-        }}
-        ModalProps={{
-          keepMounted: true,
-        }}
+      {/* Drawer */}
+      <Drawer anchor="right" open={panelOpen} onClose={() => setPanelOpen(false)}
+        hideBackdrop
+        ModalProps={{ keepMounted: true }}
+        sx={{ zIndex: 1400 }}
         PaperProps={{
           sx: {
-            width: 360,
-            background: 'var(--Background)',
+            width: 320,
+            backgroundColor: 'var(--Background)',
             color: 'var(--Text)',
-            boxShadow: '-4px 0 12px rgba(0, 0, 0, 0.15)',
+            boxShadow: '-4px 0 16px rgba(0,0,0,0.12)',
           },
-        }}
-      >
-        <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
+        }}>
+
+        {/* Inner wrapper with surface context */}
+        <Box
+          data-theme="Default"
+          data-surface="Surface-Dim"
+          sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--Background)' }}>
+
           {/* Header */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-            <Typography variant="h5" sx={{ fontWeight: 700 }}>
-              Settings
-            </Typography>
-            <Box
-              onClick={() => setPanelOpen(false)}
-              sx={{
-                cursor: 'pointer',
-                p: 1,
-                borderRadius: 0.5,
-                '&:hover': {
-                  backgroundColor: 'var(--Container-Low)',
-                },
-              }}
-            >
-              <CloseIcon />
-            </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <H5>Settings</H5>
+            <Button iconOnly variant="ghost" size="small" onClick={() => setPanelOpen(false)}
+              aria-label="Close settings">
+              <CloseIcon fontSize="small" />
+            </Button>
           </Box>
 
           <Divider sx={{ mb: 3, borderColor: 'var(--Border)' }} />
 
-          {/* Scrollable Content */}
-          <Box sx={{ flex: 1, overflow: 'auto' }}>
+          <Box sx={{ flex: 1, overflowY: 'auto' }}>
             <Stack spacing={4}>
-              {/* Light Mode Type */}
-              <FormControl>
-                <FormLabel sx={{ color: 'var(--Text)', fontWeight: 600, mb: 1.5 }}>
-                  Light Mode Style
-                </FormLabel>
-                <RadioGroup value={lightModeType} onChange={handleLightModeChange}>
-                  <FormControlLabel
-                    value="Light-Mode-Tonal"
-                    control={<Radio />}
-                    label="Tonal"
-                    sx={{ color: 'var(--Text)' }}
-                  />
-                  <FormControlLabel
-                    value="Light-Mode-Professional"
-                    control={<Radio />}
-                    label="Professional"
-                    sx={{ color: 'var(--Text)' }}
-                  />
-                </RadioGroup>
-              </FormControl>
 
-              {/* Background Variant */}
-              <FormControl>
-                <FormLabel sx={{ color: 'var(--Text)', fontWeight: 600, mb: 1.5 }}>
-                  Background Variant
-                </FormLabel>
-                <RadioGroup value={backgroundVariant} onChange={handleBackgroundChange}>
-                  <FormControlLabel
-                    value="Default"
-                    control={<Radio />}
-                    label="Default"
-                    sx={{ color: 'var(--Text)' }}
-                  />
-                  <FormControlLabel
-                    value="Primary"
-                    control={<Radio />}
-                    label="Primary"
-                    sx={{ color: 'var(--Text)' }}
-                  />
-                  <FormControlLabel
-                    value="Secondary"
-                    control={<Radio />}
-                    label="Secondary"
-                    sx={{ color: 'var(--Text)' }}
-                  />
-                  <FormControlLabel
-                    value="Tertiary"
-                    control={<Radio />}
-                    label="Tertiary"
-                    sx={{ color: 'var(--Text)' }}
-                  />
-                  <FormControlLabel
-                    value="Neutral"
-                    control={<Radio />}
-                    label="Neutral"
-                    sx={{ color: 'var(--Text)' }}
-                  />
-                  <FormControlLabel
-                    value="Neutral-Variant"
-                    control={<Radio />}
-                    label="Neutral-Variant"
-                    sx={{ color: 'var(--Text)' }}
-                  />
-                </RadioGroup>
-              </FormControl>
+              {/* Mode */}
+              <Box>
+                <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 12 }}>
+                  MODE
+                </OverlineSmall>
+                <Stack direction="row" spacing={1}>
+                  <Button
+                    variant={mode === 'light' ? 'primary' : 'primary-outline'}
+                    size="small"
+                    onClick={() => switchMode('light')}
+                    sx={{ flex: 1 }}>
+                    Light
+                  </Button>
+                  <Button
+                    variant={mode === 'dark' ? 'primary' : 'primary-outline'}
+                    size="small"
+                    onClick={() => switchMode('dark')}
+                    sx={{ flex: 1 }}>
+                    Dark
+                  </Button>
+                </Stack>
+              </Box>
 
-              {/* Surface Theme */}
-              <FormControl>
-                <FormLabel sx={{ color: 'var(--Text)', fontWeight: 600, mb: 1.5 }}>
-                  Surface Theme
-                </FormLabel>
-                <RadioGroup value={surfaceTheme} onChange={handleSurfaceChange}>
-                  <FormControlLabel
-                    value="Surface"
-                    control={<Radio />}
-                    label="Surface"
-                    sx={{ color: 'var(--Text)' }}
-                  />
-                  <FormControlLabel
-                    value="Surface-Dim"
-                    control={<Radio />}
-                    label="Surface Dim"
-                    sx={{ color: 'var(--Text)' }}
-                  />
-                  <FormControlLabel
-                    value="Surface-Bright"
-                    control={<Radio />}
-                    label="Surface Bright"
-                    sx={{ color: 'var(--Text)' }}
-                  />
-                </RadioGroup>
-              </FormControl>
+              {/* Platform */}
+              <Box>
+                <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 12 }}>
+                  PLATFORM
+                </OverlineSmall>
+                <Stack spacing={1}>
+                  {PLATFORMS.map(({ value, label, note }) => {
+                    const isSel = platform === value;
+                    return (
+                      <Box key={value} onClick={() => handlePlatformChange(value)}
+                        sx={{
+                          p: 1.5, borderRadius: 'var(--Style-Border-Radius)', cursor: 'pointer',
+                          border: isSel ? '2px solid var(--Buttons-Primary-Button)' : '1px solid var(--Border)',
+                          backgroundColor: isSel ? 'var(--Surface)' : 'transparent',
+                          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                          transition: 'all 0.15s ease', '&:hover': { backgroundColor: 'var(--Hover)' },
+                        }}>
+                        <Box>
+                          <BodySmall style={{
+                            color: isSel ? 'var(--Buttons-Primary-Button)' : 'var(--Text)',
+                            fontWeight: isSel ? 600 : 400,
+                          }}>
+                            {label}
+                          </BodySmall>
+                          <Caption style={{ color: 'var(--Text-Quiet)' }}>{note}</Caption>
+                        </Box>
+                        {isSel && (
+                          <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'var(--Buttons-Primary-Button)', flexShrink: 0 }} />
+                        )}
+                      </Box>
+                    );
+                  })}
+                </Stack>
+              </Box>
 
-              {/* Mode Toggle */}
-              <FormControl>
-                <FormLabel sx={{ color: 'var(--Text)', fontWeight: 600, mb: 1.5 }}>
-                  Theme Mode
-                </FormLabel>
-                <RadioGroup value={mode} onChange={(e) => switchMode(e.target.value)}>
-                  <FormControlLabel
-                    value="light"
-                    control={<Radio />}
-                    label="Light"
-                    sx={{ color: 'var(--Text)' }}
-                  />
-                  <FormControlLabel
-                    value="dark"
-                    control={<Radio />}
-                    label="Dark"
-                    sx={{ color: 'var(--Text)' }}
-                  />
-                </RadioGroup>
-              </FormControl>
             </Stack>
           </Box>
 
           <Divider sx={{ my: 3, borderColor: 'var(--Border)' }} />
 
-          {/* Reset Button */}
-          <Button
-            variant="outline"
-            onClick={handleReset}
-            sx={{
-              width: '100%',
-              color: 'var(--Text)',
-              borderColor: 'var(--Border)',
-              '&:hover': {
-                backgroundColor: 'var(--Container-Low)',
-              },
-            }}
-          >
+          <Button variant="primary-outline" size="small" onClick={handleReset}
+            sx={{ width: '100%' }}>
             Reset to Defaults
           </Button>
         </Box>
