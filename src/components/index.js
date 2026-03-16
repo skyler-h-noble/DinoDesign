@@ -152,4 +152,7 @@ export { SwitchInput as Switch } from './Switch';
 export { SliderInput as Slider } from './Slider';
 export { RatingInput as Rating } from './Rating';
 
+// ========== PROVIDER ==========
+export { DynoDesignProvider, useDynoDesign, ThemedZone, Surfaced } from '../DynoDesignProvider';
+
 export default {};
