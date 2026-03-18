@@ -100,7 +100,7 @@ import {
   Tabs,
   Accordion,
   SettingsPanel,
-  Header,
+  AppBar,
   Footer,
   Typography,
   Spacing,
@@ -224,9 +224,18 @@ export function ComponentShowcase() {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', flexDirection: 'column' }}>
-      {/* Header */}
-      <Header data-surface="Surface-Bright" mode={mode} onModeChange={switchMode} />
-
+      {/* App Bar */}
+      <AppBar
+        mode="desktop"
+        barColor="default"
+        sx={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 9999999,
+        }}
+      />
       {/* Main Content Container */}
       <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden', mt: 7.5 }}>
         {/* Sidebar Drawer */}

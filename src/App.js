@@ -6,7 +6,6 @@ import ComponentShowcase from './pages/ComponentShowcase';
 const SUPABASE_STORAGE_BASE = 'https://aqpmdqlhffjakkznxudv.supabase.co/storage/v1/object/public/design-system';
 
 function App() {
-  // Check for ?user={uuid} to load a custom design system
   const params = new URLSearchParams(window.location.search);
   const userId = params.get('user');
 
@@ -21,11 +20,21 @@ function App() {
       defaultSurface="Surface"
       defaultStyle="Modern"
     >
-      <Router>
-        <Routes>
-          <Route path="/" element={<ComponentShowcase />} />
-        </Routes>
-      </Router>
+      <div
+        data-theme="Default"
+        data-surface="Surface"
+        style={{
+          background: 'var(--Background)',
+          color: 'var(--Text)',
+          minHeight: '100vh',
+        }}
+      >
+        <Router>
+          <Routes>
+            <Route path="/" element={<ComponentShowcase />} />
+          </Routes>
+        </Router>
+      </div>
     </DynoDesignProvider>
   );
 }
