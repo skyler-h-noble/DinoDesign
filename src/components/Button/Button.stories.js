@@ -15,19 +15,16 @@ export default {
     variant: {
       options: [
         // Solid
-        'primary', 'secondary', 'tertiary', 'neutral',
+        'default', 'primary', 'secondary', 'tertiary', 'neutral',
         'info', 'success', 'warning', 'error',
         // Outline
-        'primary-outline', 'secondary-outline', 'tertiary-outline', 'neutral-outline',
+        'default-outline', 'primary-outline', 'secondary-outline', 'tertiary-outline', 'neutral-outline',
         'info-outline', 'success-outline', 'warning-outline', 'error-outline',
-        // Light
-        'primary-light', 'secondary-light', 'tertiary-light', 'neutral-light',
-        'info-light', 'success-light', 'warning-light', 'error-light',
         // Ghost
         'ghost', 'text',
       ],
       control: { type: 'select' },
-      description: 'Button style variant — {color} | {color}-outline | {color}-light | ghost',
+      description: 'Button style variant — {color} | {color}-outline | ghost',
     },
     size: {
       options: ['small', 'medium', 'large'],
@@ -46,7 +43,7 @@ export default {
 
 export const Sandbox = {
   args: {
-    variant: 'primary',
+    variant: 'default',
     size: 'medium',
     children: 'Button',
     disabled: false,
@@ -62,7 +59,7 @@ export const SolidVariants = {
   name: 'Solid — All Colors',
   render: () => (
     <Stack spacing={2}>
-      {['primary','secondary','tertiary','neutral','info','success','warning','error'].map((color) => (
+      {['default','primary','secondary','tertiary','neutral','info','success','warning','error'].map((color) => (
         <Stack key={color} direction="row" spacing={2} alignItems="center">
           <Box sx={{ width: 100, fontSize: 12, color: 'var(--Text-Quiet)' }}>{color}</Box>
           <Button variant={color}>{color}</Button>
@@ -81,32 +78,13 @@ export const OutlineVariants = {
   name: 'Outline — All Colors',
   render: () => (
     <Stack spacing={2}>
-      {['primary','secondary','tertiary','neutral','info','success','warning','error'].map((color) => (
+      {['default','primary','secondary','tertiary','neutral','info','success','warning','error'].map((color) => (
         <Stack key={color} direction="row" spacing={2} alignItems="center">
           <Box sx={{ width: 100, fontSize: 12, color: 'var(--Text-Quiet)' }}>{color}</Box>
           <Button variant={`${color}-outline`}>{color}</Button>
           <Button variant={`${color}-outline`} disabled>{color} disabled</Button>
           <Button variant={`${color}-outline`} startIcon={<AddIcon aria-hidden="true" alt="" />}>With icon</Button>
           <Button variant={`${color}-outline`} iconOnly aria-label={color}><AddIcon aria-hidden="true" alt="" /></Button>
-        </Stack>
-      ))}
-    </Stack>
-  ),
-};
-
-// ─── Light variants ───────────────────────────────────────────────────────────
-
-export const LightVariants = {
-  name: 'Light — All Colors',
-  render: () => (
-    <Stack spacing={2}>
-      {['primary','secondary','tertiary','neutral','info','success','warning','error'].map((color) => (
-        <Stack key={color} direction="row" spacing={2} alignItems="center">
-          <Box sx={{ width: 100, fontSize: 12, color: 'var(--Text-Quiet)' }}>{color}</Box>
-          <Button variant={`${color}-light`}>{color}</Button>
-          <Button variant={`${color}-light`} disabled>{color} disabled</Button>
-          <Button variant={`${color}-light`} startIcon={<AddIcon aria-hidden="true" alt="" />}>With icon</Button>
-          <Button variant={`${color}-light`} iconOnly aria-label={color}><AddIcon aria-hidden="true" alt="" /></Button>
         </Stack>
       ))}
     </Stack>
@@ -154,13 +132,13 @@ export const GhostVariants = {
 export const Sizes = {
   render: () => (
     <Stack spacing={3}>
-      {['solid','outline','light'].map((style) => (
+      {['solid','outline','ghost'].map((style) => (
         <Box key={style}>
           <Box sx={{ fontSize: 11, color: 'var(--Text-Quiet)', mb: 1, textTransform: 'uppercase' }}>{style}</Box>
           <Stack direction="row" spacing={2} alignItems="center">
-            <Button variant={style === 'solid' ? 'primary' : `primary-${style}`} size="small">Small</Button>
-            <Button variant={style === 'solid' ? 'primary' : `primary-${style}`} size="medium">Medium</Button>
-            <Button variant={style === 'solid' ? 'primary' : `primary-${style}`} size="large">Large</Button>
+            <Button variant={style === 'solid' ? 'default' : style === 'outline' ? 'default-outline' : 'ghost'} size="small">Small</Button>
+            <Button variant={style === 'solid' ? 'default' : style === 'outline' ? 'default-outline' : 'ghost'} size="medium">Medium</Button>
+            <Button variant={style === 'solid' ? 'default' : style === 'outline' ? 'default-outline' : 'ghost'} size="large">Large</Button>
           </Stack>
         </Box>
       ))}
@@ -201,10 +179,10 @@ export const LetterNumber = {
       </Stack>
       <Stack direction="row" spacing={1} alignItems="center">
         {['A','B','C'].map((l) => (
-          <Button key={l} variant="primary-outline" letterNumber>{l}</Button>
+          <Button key={l} variant="default-outline" letterNumber>{l}</Button>
         ))}
         {['A','B','C'].map((l) => (
-          <Button key={l} variant="primary-light" letterNumber>{l}</Button>
+          <Button key={l} variant="primary-outline" letterNumber>{l}</Button>
         ))}
       </Stack>
     </Stack>
@@ -216,9 +194,10 @@ export const LetterNumber = {
 export const FullWidth = {
   render: () => (
     <Stack spacing={2} sx={{ width: 320 }}>
+      <Button variant="default" fullWidth>Full Width Default</Button>
+      <Button variant="default-outline" fullWidth>Full Width Default Outline</Button>
       <Button variant="primary" fullWidth>Full Width Solid</Button>
       <Button variant="primary-outline" fullWidth>Full Width Outline</Button>
-      <Button variant="primary-light" fullWidth>Full Width Light</Button>
       <Button variant="ghost" fullWidth>Full Width Ghost</Button>
     </Stack>
   ),
@@ -233,18 +212,17 @@ export const StyleMatrix = {
       {/* Header row */}
       <Stack direction="row" spacing={1}>
         <Box sx={{ width: 80 }} />
-        {['Solid','Outline','Light','Ghost'].map((s) => (
+        {['Solid','Outline','Ghost'].map((s) => (
           <Box key={s} sx={{ width: 110, fontSize: 11, fontWeight: 600, color: 'var(--Text-Quiet)' }}>{s}</Box>
         ))}
       </Stack>
-      {['primary','secondary','tertiary','neutral','info','success','warning','error'].map((color) => (
+      {['default','primary','secondary','tertiary','neutral','info','success','warning','error'].map((color) => (
         <Stack key={color} direction="row" spacing={1} alignItems="center">
           <Box sx={{ width: 80, fontSize: 11, color: 'var(--Text-Quiet)' }}>{color}</Box>
           <Box sx={{ width: 110 }}><Button variant={color} size="small">{color}</Button></Box>
           <Box sx={{ width: 110 }}><Button variant={`${color}-outline`} size="small">{color}</Button></Box>
-          <Box sx={{ width: 110 }}><Button variant={`${color}-light`} size="small">{color}</Button></Box>
           <Box sx={{ width: 110 }}>
-            <Button variant="ghost" size="small">{color === 'info' ? color : '—'}</Button>
+            <Button variant="ghost" size="small">{color === 'default' ? 'ghost' : '—'}</Button>
           </Box>
         </Stack>
       ))}

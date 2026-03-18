@@ -10,7 +10,6 @@ import CircularProgress from '@mui/material/CircularProgress';
  *
  * STYLES:
  *   default   No theme. border inherit, active var(--Buttons-Default-Border)
- *   light     Selected: bg var(--Buttons-Default-Light-Button), text var(--Buttons-Default-Light-Text)
  *   solid     Selected: bg var(--Buttons-Default-Button), text var(--Buttons-Default-Text)
  *
  * LABEL: top | floating | none
@@ -40,13 +39,6 @@ function getOptionStyles(style, isHighlighted, isSelected) {
       return {
         backgroundColor: 'var(--Buttons-Default-Button)',
         color: 'var(--Buttons-Default-Text)',
-        fontWeight: 600,
-      };
-    }
-    if (style === 'light') {
-      return {
-        backgroundColor: 'var(--Buttons-Default-Light-Button)',
-        color: 'var(--Buttons-Default-Light-Text)',
         fontWeight: 600,
       };
     }

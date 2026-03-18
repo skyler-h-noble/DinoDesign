@@ -21,9 +21,19 @@ describe('Button — Render', () => {
 // ─── Variants ─────────────────────────────────────────────────────────────────
 
 describe('Button — Variants', () => {
-  test('applies btn-primary class by default', () => {
-    const { container } = render(<Button>Primary</Button>);
-    expect(container.querySelector('.btn-primary')).toBeInTheDocument();
+  test('applies btn-default class by default', () => {
+    const { container } = render(<Button>Default</Button>);
+    expect(container.querySelector('.btn-default')).toBeInTheDocument();
+  });
+
+  test('applies btn-default class', () => {
+    const { container } = render(<Button variant="default">Default</Button>);
+    expect(container.querySelector('.btn-default')).toBeInTheDocument();
+  });
+
+  test('applies btn-default-outline class', () => {
+    const { container } = render(<Button variant="default-outline">Default Outline</Button>);
+    expect(container.querySelector('.btn-default-outline')).toBeInTheDocument();
   });
 
   test('applies btn-secondary class', () => {
@@ -39,11 +49,6 @@ describe('Button — Variants', () => {
   test('applies btn-primary-outline class', () => {
     const { container } = render(<Button variant="primary-outline">Outline</Button>);
     expect(container.querySelector('.btn-primary-outline')).toBeInTheDocument();
-  });
-
-  test('applies btn-primary-light class', () => {
-    const { container } = render(<Button variant="primary-light">Light</Button>);
-    expect(container.querySelector('.btn-primary-light')).toBeInTheDocument();
   });
 
   test('applies btn-info class', () => {
@@ -161,6 +166,16 @@ describe('Button — Props', () => {
 // ─── Accessibility — jest-axe ─────────────────────────────────────────────────
 
 describe('Button — Accessibility (jest-axe)', () => {
+  test('has no accessibility violations — default', async () => {
+    const { container } = render(<Button variant="default">Click me</Button>);
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  test('has no accessibility violations — default outline', async () => {
+    const { container } = render(<Button variant="default-outline">Click me</Button>);
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
   test('has no accessibility violations — primary', async () => {
     const { container } = render(<Button variant="primary">Click me</Button>);
     expect(await axe(container)).toHaveNoViolations();
@@ -168,11 +183,6 @@ describe('Button — Accessibility (jest-axe)', () => {
 
   test('has no accessibility violations — outline', async () => {
     const { container } = render(<Button variant="primary-outline">Click me</Button>);
-    expect(await axe(container)).toHaveNoViolations();
-  });
-
-  test('has no accessibility violations — light', async () => {
-    const { container } = render(<Button variant="primary-light">Click me</Button>);
     expect(await axe(container)).toHaveNoViolations();
   });
 

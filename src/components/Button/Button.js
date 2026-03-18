@@ -51,7 +51,7 @@ import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography } from
  *   swatch:     swatch prop, square color block, no content, wrappable in Tooltip
  */
 
-const COLORS = ['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // ─── Variant Style Builders ───────────────────────────────────────────────────
@@ -189,7 +189,7 @@ function buildVariantMap(isTextContent) {
     map[`${color}-light`]     = lightStyles(color);
   });
   map['danger']         = solidStyles('error');
-  map['outline']        = outlineStyles('primary');
+  map['outline']        = outlineStyles('default');
   map['ghost']          = ghostStyles(isTextContent);
   map['text']           = ghostStyles(isTextContent);
   return map;
@@ -253,7 +253,7 @@ function getSizingStyles({ size, iconOnly, letterNumber, avatar }) {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function Button({
-  variant = 'primary',
+  variant = 'default',
   size = 'medium',
   fullWidth = false,
   disabled = false,
@@ -281,7 +281,7 @@ export function Button({
     : variant;
   
   const variantMap     = buildVariantMap(isTextContent);
-  const variantStyles  = variantMap[effectiveVariant] || variantMap.primary;
+  const variantStyles  = variantMap[effectiveVariant] || variantMap.default;
   const sizingStyles   = getSizingStyles({ size, iconOnly: isIconOnly, letterNumber, avatar });
 
   // Typography component: small for small size, regular otherwise
@@ -444,6 +444,10 @@ export function Button({
 }
 
 // ─── Convenience Exports ──────────────────────────────────────────────────────
+
+// Default
+export const DefaultButton        = (p) => <Button variant="default"           {...p} />;
+export const DefaultOutlineButton = (p) => <Button variant="default-outline"   {...p} />;
 
 // Solid
 export const PrimaryButton          = (p) => <Button variant="primary"            {...p} />;

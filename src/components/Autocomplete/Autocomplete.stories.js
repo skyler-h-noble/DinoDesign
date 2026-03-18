@@ -23,7 +23,7 @@ export const FloatingLabel = {
 export const SelectionStyles = {
   render: () => (
     <Stack spacing={3} sx={{ p: 4, maxWidth: 320 }}>
-      {['default', 'light', 'solid'].map((s) => (
+      {['default', 'solid'].map((s) => (
         <Autocomplete key={s} label={s} style={s} options={COUNTRIES} defaultValue={COUNTRIES[0]} fullWidth />
       ))}
     </Stack>

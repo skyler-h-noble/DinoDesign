@@ -182,7 +182,7 @@ describe('Sizes', () => {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 describe('Styles', () => {
-  ['default', 'light', 'solid'].forEach((st) => {
+  ['default', 'solid'].forEach((st) => {
     test(st + ' class', () => {
       const { container } = renderAC({ style: st });
       expect(container.querySelector('.autocomplete-style-' + st)).toBeInTheDocument();
