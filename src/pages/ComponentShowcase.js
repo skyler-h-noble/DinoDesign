@@ -61,11 +61,7 @@ import { RatingShowcase } from '../components/Rating/RatingShowcase';
 import { ModalShowcase } from '../components/Modal/ModalShowcase';
 import { AvatarShowcase } from '../components/Avatar/AvatarShowcase';
 import { AutocompleteShowcase } from '../components/Autocomplete/AutocompleteShowcase';
-
-
-
-
-
+import { TreeViewShowcase } from '../components/TreeView/TreeViewShowcase';
 
 import {
   Button,
@@ -105,7 +101,6 @@ import {
   Typography,
   Spacing,
   Fab,
-  
 } from '../components';
 import { useThemeMode } from '../theme/useThemeMode';
 
@@ -126,8 +121,8 @@ const COMPONENT_CATEGORIES = [
     items: [
       { id: 'buttons', label: 'Button' },
       { id: 'fab', label: 'FAB' },
-      { id: 'buttongroup', label: 'Button Group' },   // ← ADD
-      { id: 'togglebuttongroup', label: 'Toggle Button Group' }, // ← ADD
+      { id: 'buttongroup', label: 'Button Group' },
+      { id: 'togglebuttongroup', label: 'Toggle Button Group' },
       { id: 'input', label: 'Input' },
       { id: 'select', label: 'Select' },
       { id: 'autocomplete', label: 'Autocomplete' },
@@ -149,6 +144,7 @@ const COMPONENT_CATEGORIES = [
       { id: 'box', label: 'Box' },
       { id: 'sheet', label: 'Sheet' },
       { id: 'accordion', label: 'Accordion' },
+      { id: 'treeview', label: 'Tree View' },
     ],
   },
   {
@@ -192,7 +188,6 @@ const COMPONENT_CATEGORIES = [
       { id: 'menu', label: 'Menu' },
       { id: 'drawer', label: 'Drawer' },
       { id: 'speeddial', label: 'Speed Dial' },
-
     ],
   },
 ];
@@ -236,8 +231,10 @@ export function ComponentShowcase() {
           zIndex: 9999999,
         }}
       />
+
       {/* Main Content Container */}
       <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden', mt: 7.5 }}>
+
         {/* Sidebar Drawer */}
         <Drawer
           variant="permanent"
@@ -249,7 +246,7 @@ export function ComponentShowcase() {
               background: 'var(--Background)',
               color: 'var(--Text)',
               borderRight: '1px solid var(--Neutral-Color-10)',
-              pt: 9.5, // Space for fixed header (64px header + 12px padding)
+              pt: 9.5,
               boxSizing: 'border-box',
             },
           }}
@@ -271,9 +268,7 @@ export function ComponentShowcase() {
                     fontSize: '0.75rem',
                     letterSpacing: '0.5px',
                     py: 1.5,
-                    '&:hover': {
-                      backgroundColor: 'var(--Container-Low)',
-                    },
+                    '&:hover': { backgroundColor: 'var(--Container-Low)' },
                   }}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
@@ -301,15 +296,11 @@ export function ComponentShowcase() {
                           color: 'var(--Text)',
                           fontSize: '0.875rem',
                           py: 1,
-                          '&:hover': {
-                            backgroundColor: 'var(--Container-Low)',
-                          },
+                          '&:hover': { backgroundColor: 'var(--Container-Low)' },
                           '&.Mui-selected': {
                             backgroundColor: 'var(--Primary-Color-11)',
                             color: 'white',
-                            '&:hover': {
-                              backgroundColor: 'var(--Primary-Color-11)',
-                            },
+                            '&:hover': { backgroundColor: 'var(--Primary-Color-11)' },
                           },
                         }}
                       >
@@ -326,112 +317,67 @@ export function ComponentShowcase() {
         {/* Main Content Area */}
         <Box component="main" sx={{ flex: 1, overflow: 'auto', p: 4, backgroundColor: 'var(--Surface)' }}>
           <Container maxWidth="lg">
+
             {/* ============ FOUNDATIONS ============ */}
             {activeSection === 'typography' && <TypographyShowcase />}
-            
             {activeSection === 'icons' && <IconShowcase />}
 
             {/* ============ INPUTS ============ */}
-
             {activeSection === 'buttons' && <ButtonShowcase />}
-
             {activeSection === 'fab' && <FabShowcase />}
-
             {activeSection === 'buttongroup' && <ButtonGroupShowcase />}
-            
             {activeSection === 'togglebuttongroup' && <ToggleButtonGroupShowcase />}
-  
-             {activeSection === 'select' && <SelectShowcase />}
-  
+            {activeSection === 'select' && <SelectShowcase />}
             {activeSection === 'autocomplete' && <AutocompleteShowcase />}
-  
             {activeSection === 'checkbox' && <CheckboxShowcase />}
-
-             {activeSection === 'radio' && <RadioShowcase />}
-            
+            {activeSection === 'radio' && <RadioShowcase />}
             {activeSection === 'input' && <InputShowcase />}
-
             {activeSection === 'slider' && <SliderShowcase />}
-
             {activeSection === 'switch' && <SwitchShowcase />}
-
-             {activeSection === 'rating' && <RatingShowcase />}
-
+            {activeSection === 'rating' && <RatingShowcase />}
             {activeSection === 'numberfield' && <NumberFieldShowcase />}
-
             {activeSection === 'searchfield' && <SearchFieldShowcase />}
-
             {activeSection === 'transferlist' && <TransferListShowcase />}
 
             {/* ============ SURFACES ============ */}
-
             {activeSection === 'card' && <CardShowcase />}
-
-           {activeSection === 'box' && <BoxShowcase />}
-
+            {activeSection === 'box' && <BoxShowcase />}
             {activeSection === 'sheet' && <SheetShowcase />}
-
             {activeSection === 'accordion' && <AccordionShowcase />}
+            {activeSection === 'treeview' && <TreeViewShowcase />}
 
             {/* ============ FEEDBACK ============ */}
             {activeSection === 'alert' && <AlertShowcase />}
-            
             {activeSection === 'circularprogress' && <CircularProgressShowcase />}
-
             {activeSection === 'linearprogress' && <LinearProgressShowcase />}
-            
             {activeSection === 'snackbar' && <SnackbarShowcase />}
-
             {activeSection === 'dialog' && <DialogShowcase />}
-
             {activeSection === 'modal' && <ModalShowcase />}
 
             {/* ============ DATA DISPLAY ============ */}
-            
-             {activeSection === 'avatar' && <AvatarShowcase />}
-
+            {activeSection === 'avatar' && <AvatarShowcase />}
             {activeSection === 'badge' && <BadgeShowcase />}
-
             {activeSection === 'chip' && <ChipShowcase />}
-
             {activeSection === 'divider' && <DividerShowcase />}
-
             {activeSection === 'list' && <ListShowcase />}
-
             {activeSection === 'table' && <TableShowcase />}
-
             {activeSection === 'tooltip' && <TooltipShowcase />}
 
- 
             {/* ============ NAVIGATION ============ */}
-            
             {activeSection === 'link' && <LinkShowcase />}
-
             {activeSection === 'appbar' && <AppBarShowcase />}
-
             {activeSection === 'bottomnav' && <BottomNavigationShowcase />}
-
             {activeSection === 'toolbar' && <ToolbarShowcase />}
-
             {activeSection === 'rail' && <RailShowcase />}
-
             {activeSection === 'breadcrumbs' && <BreadcrumbsShowcase />}
-
             {activeSection === 'pagination' && <PaginationShowcase />}
-            
             {activeSection === 'tabs' && <TabsShowcase />}
-
             {activeSection === 'stepper' && <StepperShowcase />}
-
             {activeSection === 'menu' && <MenuShowcase />}
-
             {activeSection === 'drawer' && <DrawerShowcase />}
-
             {activeSection === 'speeddial' && <SpeedDialShowcase />}
 
-           
-
-           </Container>
+          </Container>
         </Box>
       </Box>
 
