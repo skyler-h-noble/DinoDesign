@@ -1,5 +1,6 @@
 // src/components/Select/Select.js
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import ReactDOM from 'react-dom';
 import { Box } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
@@ -13,6 +14,9 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
  * DIVIDERS: optional divider between each option
  * COLOR LABELS: show/hide text labels next to color swatches (aria-label always present)
  * START DECORATION: icon or avatar
+ *
+ * Dropdown renders via React portal so it escapes parent overflow:hidden.
+ * Smart positioning: opens downward if space allows, upward otherwise.
  */
 
 const SIZE_MAP = {
@@ -26,6 +30,8 @@ const FLOATING_SIZE_MAP = {
   medium: { height: 56, fontSize: '14px', padding: '22px 14px 6px', labelSize: '12px', leftPad: 14 },
   large:  { height: 64, fontSize: '16px', padding: '24px 16px 6px', labelSize: '14px', leftPad: 16 },
 };
+
+const DROPDOWN_MAX_HEIGHT = 240;
 
 function getSelectedStyles(selectionStyle, isSelected) {
   if (!isSelected) {
@@ -82,6 +88,13 @@ export function Select({
   const [internalValue, setInternalValue] = useState(defaultValue);
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
+  const [dropdownPos, setDropdownPos] = useState({
+    top: 0,
+    left: 0,
+    width: 0,
+    direction: 'down',
+  });
+
   const wrapperRef = useRef(null);
   const triggerRef = useRef(null);
 
@@ -113,10 +126,34 @@ export function Select({
   useEffect(() => {
     if (!open) return;
     const handler = (e) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) setOpen(false);
+      if (
+        wrapperRef.current && !wrapperRef.current.contains(e.target) &&
+        !e.target.closest('[data-select-dropdown]')
+      ) {
+        setOpen(false);
+      }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  // Smart positioning: measure space above/below and choose direction
+  useEffect(() => {
+    if (!open || !triggerRef.current) return;
+
+    const rect = triggerRef.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    const direction = spaceBelow >= DROPDOWN_MAX_HEIGHT || spaceBelow >= spaceAbove ? 'down' : 'up';
+
+    setDropdownPos({
+      top: rect.bottom + window.scrollY + 4,
+      bottom: window.innerHeight - rect.top + (window.innerHeight - window.scrollY - window.innerHeight) + 4,
+      left: rect.left + window.scrollX,
+      width: rect.width,
+      triggerTop: rect.top + window.scrollY,
+      direction,
+    });
   }, [open]);
 
   const handleKeyDown = (e) => {
@@ -127,14 +164,93 @@ export function Select({
 
   const borderColor = (open || focused) ? 'var(--Buttons-Default-Border)' : 'inherit';
 
+  // The dropdown rendered into document.body via portal
+  const dropdown = open ? ReactDOM.createPortal(
+    <Box
+      data-select-dropdown
+      role="listbox"
+      aria-label={label || 'Options'}
+      sx={{
+        position: 'absolute',
+        top: dropdownPos.direction === 'down' ? dropdownPos.top + 'px' : 'unset',
+        bottom: dropdownPos.direction === 'up'
+          ? (window.innerHeight - dropdownPos.triggerTop + 4) + 'px'
+          : 'unset',
+        left: dropdownPos.left + 'px',
+        width: dropdownPos.width + 'px',
+        backgroundColor: 'var(--Background)',
+        border: '1px solid var(--Border)',
+        borderRadius: 'var(--Style-Border-Radius)',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+        zIndex: 99999,
+        maxHeight: DROPDOWN_MAX_HEIGHT + 'px',
+        overflowY: 'auto',
+        py: 0.5,
+      }}
+    >
+      {options.map((opt, idx) => {
+        const optValue = typeof opt === 'string' ? opt : opt.value;
+        const optLabel = typeof opt === 'string' ? opt : opt.label;
+        const optColor = typeof opt === 'object' ? opt.color : null;
+        const isSelected = optValue === currentValue;
+        const styles = getSelectedStyles(selectionStyle, isSelected);
+        const isLast = idx === options.length - 1;
+
+        return (
+          <React.Fragment key={optValue}>
+            <Box
+              role="option"
+              aria-selected={isSelected}
+              aria-label={isColor && !showColorLabels ? optLabel : undefined}
+              onClick={() => handleSelect(optValue)}
+              sx={{
+                display: 'flex', alignItems: 'center', gap: 1,
+                px: 1.5, py: 1, mx: 0.5,
+                cursor: 'pointer',
+                fontSize: sizeConfig.fontSize,
+                fontFamily: 'inherit',
+                borderRadius: '4px',
+                ...styles,
+                transition: 'background-color 0.1s ease',
+                '&:hover': !isSelected ? { backgroundColor: 'var(--Hover)' } : {},
+                '&:active': !isSelected ? { backgroundColor: 'var(--Active)' } : {},
+              }}
+            >
+              {isColor && optColor && (
+                <Box sx={{
+                  width: 20, height: 20, borderRadius: '4px',
+                  backgroundColor: optColor,
+                  border: isSelected ? '2px solid var(--Buttons-Default-Border)' : '1px solid var(--Border)',
+                  flexShrink: 0,
+                }} />
+              )}
+              {(!isColor || showColorLabels) && (
+                <Box sx={{ flex: 1 }}>{optLabel}</Box>
+              )}
+              {isSelected && <Box sx={{ fontSize: '14px', flexShrink: 0, opacity: 0.6 }}>✓</Box>}
+            </Box>
+            {showDividers && !isLast && (
+              <Box aria-hidden="true" sx={{ height: '1px', backgroundColor: 'var(--Border)', mx: 1, my: 0.25 }} />
+            )}
+          </React.Fragment>
+        );
+      })}
+    </Box>,
+    document.body
+  ) : null;
+
   return (
     <Box
       ref={wrapperRef}
       data-surface="Container-Lowest"
-      className={'select-wrapper select-' + size + ' select-label-' + labelPosition + ' select-style-' + selectionStyle +
+      className={
+        'select-wrapper select-' + size +
+        ' select-label-' + labelPosition +
+        ' select-style-' + selectionStyle +
         (open ? ' select-open' : '') +
         (disabled ? ' select-disabled' : '') +
-        (className ? ' ' + className : '')}
+        (className ? ' ' + className : '')
+      }
       sx={{ position: 'relative', width: fullWidth ? '100%' : 'auto', display: 'inline-block', fontFamily: 'inherit', ...sx }}
       {...props}
     >
@@ -206,7 +322,8 @@ export function Select({
         )}
 
         {/* Value display */}
-        <Box sx={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        <Box sx={{
+          flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           ...(isFloating && { mt: hasValue || open ? '8px' : 0 }),
         }}>
           {isColor && hasValue ? (
@@ -227,77 +344,8 @@ export function Select({
         }} />
       </Box>
 
-      {/* Dropdown */}
-      {open && (
-        <Box
-          role="listbox"
-          aria-label={label || 'Options'}
-          sx={{
-            position: 'absolute',
-            top: '100%',
-            left: 0, right: 0,
-            mt: 0.5,
-            backgroundColor: 'var(--Background)',
-            border: '1px solid var(--Border)',
-            borderRadius: 'var(--Style-Border-Radius)',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
-            zIndex: 9999,
-            maxHeight: 240,
-            overflowY: 'auto',
-            py: 0.5,
-          }}
-        >
-          {options.map((opt, idx) => {
-            const optValue = typeof opt === 'string' ? opt : opt.value;
-            const optLabel = typeof opt === 'string' ? opt : opt.label;
-            const optColor = typeof opt === 'object' ? opt.color : null;
-            const isSelected = optValue === currentValue;
-            const styles = getSelectedStyles(selectionStyle, isSelected);
-            const isLast = idx === options.length - 1;
-
-            return (
-              <React.Fragment key={optValue}>
-                <Box
-                  role="option"
-                  aria-selected={isSelected}
-                  aria-label={isColor && !showColorLabels ? optLabel : undefined}
-                  onClick={() => handleSelect(optValue)}
-                  sx={{
-                    display: 'flex', alignItems: 'center', gap: 1,
-                    px: 1.5, py: 1, mx: 0.5,
-                    cursor: 'pointer',
-                    fontSize: sizeConfig.fontSize,
-                    fontFamily: 'inherit',
-                    borderRadius: '4px',
-                    ...styles,
-                    transition: 'background-color 0.1s ease',
-                    '&:hover': !isSelected ? { backgroundColor: 'var(--Hover)' } : {},
-                    '&:active': !isSelected ? { backgroundColor: 'var(--Active)' } : {},
-                  }}
-                >
-                  {isColor && optColor && (
-                    <Box sx={{
-                      width: 20, height: 20, borderRadius: '4px',
-                      backgroundColor: optColor,
-                      border: isSelected ? '2px solid var(--Buttons-Default-Border)' : '1px solid var(--Border)',
-                      flexShrink: 0,
-                    }} />
-                  )}
-                  {/* Show label text — always for standard, conditionally for color */}
-                  {(!isColor || showColorLabels) && (
-                    <Box sx={{ flex: 1 }}>{optLabel}</Box>
-                  )}
-                  {isSelected && <Box sx={{ fontSize: '14px', flexShrink: 0, opacity: 0.6 }}>✓</Box>}
-                </Box>
-                {/* Divider between options */}
-                {showDividers && !isLast && (
-                  <Box aria-hidden="true" sx={{ height: '1px', backgroundColor: 'var(--Border)', mx: 1, my: 0.25 }} />
-                )}
-              </React.Fragment>
-            );
-          })}
-        </Box>
-      )}
+      {/* Portal dropdown — renders into document.body to escape overflow:hidden */}
+      {dropdown}
     </Box>
   );
 }
