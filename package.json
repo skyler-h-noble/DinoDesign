@@ -98,6 +98,7 @@
     "url": "https://github.com/skyler-h-noble/DinoDesign"
   },
   "dependencies": {
+    "@mui/x-tree-view": "^8.27.2",
     "eslint-plugin-react-hooks": "^7.0.1",
     "react-router-dom": "^7.13.1",
     "react-scripts": "^5.0.1"
