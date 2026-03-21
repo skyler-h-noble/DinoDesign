@@ -63,6 +63,7 @@ import { AvatarShowcase } from '../components/Avatar/AvatarShowcase';
 import { AutocompleteShowcase } from '../components/Autocomplete/AutocompleteShowcase';
 import { TreeViewShowcase } from '../components/TreeView/TreeViewShowcase';
 import { StackShowcase } from '../components/Stack/StackShowcase';
+import { TagShowcase } from '../components/Tag/TagShowcase';
 
 import {
   Button,
@@ -174,6 +175,7 @@ const COMPONENT_CATEGORIES = [
       { id: 'avatar', label: 'Avatar' },
       { id: 'badge', label: 'Badge' },
       { id: 'chip', label: 'Chip' },
+      { id: 'tag', label: 'Tag' },
       { id: 'divider', label: 'Divider' },
       { id: 'list', label: 'List' },
       { id: 'table', label: 'Table' },
@@ -352,6 +354,7 @@ export function ComponentShowcase() {
             {activeSection === 'avatar' && <AvatarShowcase />}
             {activeSection === 'badge' && <BadgeShowcase />}
             {activeSection === 'chip' && <ChipShowcase />}
+            {activeSection === 'tag' && <TagShowcase />}
             {activeSection === 'divider' && <DividerShowcase />}
             {activeSection === 'list' && <ListShowcase />}
             {activeSection === 'table' && <TableShowcase />}
