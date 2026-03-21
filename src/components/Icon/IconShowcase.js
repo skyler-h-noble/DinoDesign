@@ -85,18 +85,18 @@ const STYLES = ['filled', 'outlined', 'rounded', 'twotone', 'sharp'];
 const STYLE_LABELS = { filled: 'Filled', outlined: 'Outlined', rounded: 'Rounded', twotone: 'Two Tone', sharp: 'Sharp' };
 const ICON_NAMES = ['Home', 'Favorite', 'Delete', 'Settings', 'Search', 'Star', 'Person', 'Notifications', 'Visibility', 'ShoppingCart', 'Lock', 'Info'];
 const ICON_REGISTRY = {
-  Home:          { filled: HomeIcon,         outlined: HomeOutlinedIcon,          rounded: HomeRoundedIcon,          twotone: HomeTwoToneIcon,          sharp: HomeSharpIcon },
-  Favorite:      { filled: FavoriteIcon,     outlined: FavoriteOutlinedIcon,      rounded: FavoriteRoundedIcon,      twotone: FavoriteTwoToneIcon,      sharp: FavoriteSharpIcon },
-  Delete:        { filled: DeleteIcon,       outlined: DeleteOutlinedIcon,         rounded: DeleteRoundedIcon,         twotone: DeleteTwoToneIcon,         sharp: DeleteSharpIcon },
-  Settings:      { filled: SettingsIcon,     outlined: SettingsOutlinedIcon,       rounded: SettingsRoundedIcon,       twotone: SettingsTwoToneIcon,       sharp: SettingsSharpIcon },
-  Search:        { filled: SearchIcon,       outlined: SearchIcon,                 rounded: SearchRoundedIcon,         twotone: SearchTwoToneIcon,         sharp: SearchSharpIcon },
-  Star:          { filled: StarIcon,         outlined: StarOutlinedIcon,           rounded: StarRoundedIcon,           twotone: StarTwoToneIcon,           sharp: StarSharpIcon },
-  Person:        { filled: PersonIcon,       outlined: PersonOutlinedIcon,         rounded: PersonRoundedIcon,         twotone: PersonTwoToneIcon,         sharp: PersonSharpIcon },
+  Home:          { filled: HomeIcon,          outlined: HomeOutlinedIcon,          rounded: HomeRoundedIcon,          twotone: HomeTwoToneIcon,          sharp: HomeSharpIcon },
+  Favorite:      { filled: FavoriteIcon,      outlined: FavoriteOutlinedIcon,      rounded: FavoriteRoundedIcon,      twotone: FavoriteTwoToneIcon,      sharp: FavoriteSharpIcon },
+  Delete:        { filled: DeleteIcon,        outlined: DeleteOutlinedIcon,        rounded: DeleteRoundedIcon,        twotone: DeleteTwoToneIcon,        sharp: DeleteSharpIcon },
+  Settings:      { filled: SettingsIcon,      outlined: SettingsOutlinedIcon,      rounded: SettingsRoundedIcon,      twotone: SettingsTwoToneIcon,      sharp: SettingsSharpIcon },
+  Search:        { filled: SearchIcon,        outlined: SearchIcon,                rounded: SearchRoundedIcon,        twotone: SearchTwoToneIcon,        sharp: SearchSharpIcon },
+  Star:          { filled: StarIcon,          outlined: StarOutlinedIcon,          rounded: StarRoundedIcon,          twotone: StarTwoToneIcon,          sharp: StarSharpIcon },
+  Person:        { filled: PersonIcon,        outlined: PersonOutlinedIcon,        rounded: PersonRoundedIcon,        twotone: PersonTwoToneIcon,        sharp: PersonSharpIcon },
   Notifications: { filled: NotificationsIcon, outlined: NotificationsOutlinedIcon, rounded: NotificationsRoundedIcon, twotone: NotificationsTwoToneIcon,  sharp: NotificationsSharpIcon },
-  Visibility:    { filled: VisibilityIcon,   outlined: VisibilityOutlinedIcon,     rounded: VisibilityRoundedIcon,     twotone: VisibilityTwoToneIcon,     sharp: VisibilitySharpIcon },
-  ShoppingCart:  { filled: ShoppingCartIcon, outlined: ShoppingCartOutlinedIcon,   rounded: ShoppingCartRoundedIcon,   twotone: ShoppingCartTwoToneIcon,   sharp: ShoppingCartSharpIcon },
-  Lock:          { filled: LockIcon,         outlined: LockOutlinedIcon,           rounded: LockRoundedIcon,           twotone: LockTwoToneIcon,           sharp: LockSharpIcon },
-  Info:          { filled: InfoIcon,         outlined: InfoOutlinedIcon,           rounded: InfoRoundedIcon,           twotone: InfoTwoToneIcon,           sharp: InfoSharpIcon },
+  Visibility:    { filled: VisibilityIcon,    outlined: VisibilityOutlinedIcon,    rounded: VisibilityRoundedIcon,    twotone: VisibilityTwoToneIcon,    sharp: VisibilitySharpIcon },
+  ShoppingCart:  { filled: ShoppingCartIcon,  outlined: ShoppingCartOutlinedIcon,  rounded: ShoppingCartRoundedIcon,  twotone: ShoppingCartTwoToneIcon,  sharp: ShoppingCartSharpIcon },
+  Lock:          { filled: LockIcon,          outlined: LockOutlinedIcon,          rounded: LockRoundedIcon,          twotone: LockTwoToneIcon,          sharp: LockSharpIcon },
+  Info:          { filled: InfoIcon,          outlined: InfoOutlinedIcon,          rounded: InfoRoundedIcon,          twotone: InfoTwoToneIcon,          sharp: InfoSharpIcon },
 };
 
 function getIconComponent(name, style) { return ICON_REGISTRY[name]?.[style] || ICON_REGISTRY[name]?.filled || HomeIcon; }
@@ -162,25 +162,39 @@ export function IconShowcase() {
   const [customSize, setCustomSize] = useState('40');
   const [disabled, setDisabled]     = useState(false);
   const [selectedIcon, setSelectedIcon] = useState('Home');
+  const [ariaLabel, setAriaLabel]   = useState('');
   const [contrastData, setContrastData] = useState({});
 
   const C = COLOR_LABEL_MAP[color] || 'Default';
   const isTwoTone = style === 'twotone';
-  const resolvedFontSize = size === 'custom' ? (parseInt(customSize,10)||40)+'px' : ({small:'20px',medium:'24px',large:'36px'}[size]||'24px');
+  const resolvedFontSize = size === 'custom'
+    ? (parseInt(customSize, 10) || 40) + 'px'
+    : ({ small: '20px', medium: '24px', large: '36px' }[size] || '24px');
   const IconComp = getIconComponent(selectedIcon, style);
   const suffix = getIconSuffix(style);
   const importName = selectedIcon + suffix + 'Icon';
 
+  // Whether the current icon is decorative (no aria-label) or meaningful
+  const isMeaningful = ariaLabel.trim().length > 0;
+
   const generateCode = () => {
     const parts = [];
-    if (color !== 'default') parts.push('color="' + color + '"');
-    if (size === 'custom') { parts.push('size="custom"'); parts.push('fontSize={' + (parseInt(customSize,10)||40) + '}'); }
+    if (color !== 'default')  parts.push('color="' + color + '"');
+    if (size === 'custom')    { parts.push('size="custom"'); parts.push('fontSize={' + (parseInt(customSize,10)||40) + '}'); }
     else if (size !== 'medium') parts.push('size="' + size + '"');
-    if (isTwoTone) parts.push('twoTone');
-    if (disabled)  parts.push('disabled');
+    if (isTwoTone)            parts.push('twoTone');
+    if (disabled)             parts.push('disabled');
+    if (isMeaningful)         parts.push('aria-label="' + ariaLabel.trim() + '"');
     const p = parts.length ? ' ' + parts.join(' ') : '';
     return "import " + importName + " from '@mui/icons-material/" + selectedIcon + (suffix||"") + "';\n\n<Icon" + p + ">\n  <" + importName + " />\n</Icon>";
   };
+
+  // Decorative code example using the current icon
+  const decorativeExample = '<Icon>\n  <' + importName + ' />\n</Icon>\n{/* aria-hidden="true" by default */}';
+
+  // Meaningful code example using the current icon + aria-label input (or a placeholder)
+  const meaningfulLabel = isMeaningful ? ariaLabel.trim() : selectedIcon + ' icon';
+  const meaningfulExample = '<Icon aria-label="' + meaningfulLabel + '">\n  <' + importName + ' />\n</Icon>\n{/* role="img" added automatically */}';
 
   useEffect(() => {
     setContrastData({
@@ -195,11 +209,18 @@ export function IconShowcase() {
       <H2>Icon</H2>
       <Grid container sx={{ mt: 2, alignItems: 'flex-start' }}>
 
-        {/* LEFT */}
+        {/* ── LEFT ── */}
         <Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, pr: { md: 3 } }}>
           <Box sx={{ p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
             minHeight: 200, backgroundColor: 'var(--Background)', borderBottom: '1px solid var(--Border)', gap: 2 }}>
-            <Icon color={color} size={size} fontSize={size==='custom'?parseInt(customSize,10)||40:undefined} disabled={disabled} twoTone={isTwoTone}>
+            <Icon
+              color={color}
+              size={size}
+              fontSize={size === 'custom' ? parseInt(customSize, 10) || 40 : undefined}
+              disabled={disabled}
+              twoTone={isTwoTone}
+              aria-label={isMeaningful ? ariaLabel.trim() : undefined}
+            >
               <IconComp />
             </Icon>
           </Box>
@@ -217,7 +238,7 @@ export function IconShowcase() {
           </Box>
         </Grid>
 
-        {/* RIGHT */}
+        {/* ── RIGHT ── */}
         <Grid item sx={{ width: { xs: '100%', md: '45%' }, flexShrink: 0 }}>
           <Box sx={{ backgroundColor: 'var(--Background)', overflow: 'hidden' }}>
             <Tabs defaultValue={0} variant="standard" color="primary">
@@ -226,8 +247,11 @@ export function IconShowcase() {
                 <Tab>Accessibility</Tab>
               </TabList>
 
+              {/* ── Playground ── */}
               <TabPanel value={0}>
                 <Box sx={{ p: 3 }}>
+
+                  {/* Icon name */}
                   <Box>
                     <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ICON</OverlineSmall>
                     <Box component="input" type="text" value={selectedIcon}
@@ -242,20 +266,23 @@ export function IconShowcase() {
                       }} />
                     <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
                       Enter a MUI icon name.{' '}
-                      <Box component="a"
-                        href="https://mui.com/material-ui/material-icons/"
+                      <Box component="a" href="https://mui.com/material-ui/material-icons/"
                         target="_blank" rel="noopener noreferrer"
                         sx={{ color: 'var(--Text-Primary)', textDecoration: 'underline', '&:hover': { color: 'var(--Header-Primary)' } }}>
                         Browse MUI Icons ↗
                       </Box>
                     </Caption>
                   </Box>
+
+                  {/* Style */}
                   <Box sx={{ mt: 3 }}>
                     <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</OverlineSmall>
                     <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
                       {STYLES.map((s) => <ControlButton key={s} label={STYLE_LABELS[s]} selected={style===s} onClick={() => setStyle(s)} />)}
                     </Stack>
                   </Box>
+
+                  {/* Color */}
                   <Box sx={{ mt: 3 }}>
                     <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
                     <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
@@ -277,6 +304,8 @@ export function IconShowcase() {
                       })}
                     </Stack>
                   </Box>
+
+                  {/* Size */}
                   <Box sx={{ mt: 3 }}>
                     <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</OverlineSmall>
                     <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
@@ -294,6 +323,28 @@ export function IconShowcase() {
                       </Box>
                     )}
                   </Box>
+
+                  {/* aria-label */}
+                  <Box sx={{ mt: 3 }}>
+                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ARIA LABEL</OverlineSmall>
+                    <Box component="input" type="text" value={ariaLabel}
+                      onChange={(e) => setAriaLabel(e.target.value)}
+                      placeholder={'Leave empty for decorative (aria-hidden)'}
+                      sx={{
+                        width: '100%', padding: '6px 10px', fontSize: '13px', fontFamily: 'inherit',
+                        border: '1px solid var(--Border)', borderRadius: '4px',
+                        backgroundColor: 'var(--Background)', color: 'var(--Text)',
+                        boxSizing: 'border-box',
+                        '&:focus': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px', borderColor: 'var(--Focus-Visible)' },
+                      }} />
+                    <Caption style={{ color: isMeaningful ? 'var(--Tags-Success-Text)' : 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
+                      {isMeaningful
+                        ? '✓ Meaningful — role="img" aria-label="' + ariaLabel.trim() + '"'
+                        : 'Decorative — aria-hidden="true" (invisible to screen readers)'}
+                    </Caption>
+                  </Box>
+
+                  {/* Disabled */}
                   <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box>
                       <Label>Disabled</Label>
@@ -304,45 +355,109 @@ export function IconShowcase() {
                 </Box>
               </TabPanel>
 
+              {/* ── Accessibility ── */}
               <TabPanel value={1}>
                 <Box sx={{ p: 3 }}>
                   <BodySmall color="quiet" style={{ marginBottom: 24 }}>
                     {STYLE_LABELS[style]} / {cap(color)} / {size === 'custom' ? customSize + 'px' : size}
+                    {isMeaningful ? ' / meaningful' : ' / decorative'}
                   </BodySmall>
+
                   <Stack spacing={3}>
+
+                    {/* Contrast */}
                     <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
                       <H5>Icon Contrast (WCAG 1.4.11 — 3:1)</H5>
-                      <BodySmall color="quiet" style={{ marginBottom: 16 }}>Non-text elements must contrast 3:1 against the page background.</BodySmall>
-                      <A11yRow label={'var(--Icons-' + C + ') vs. var(--Background)'}
-                        ratio={getContrast(contrastData.iconColor, contrastData.background)} threshold={3.0}
-                        note="Primary icon color against page background" />
+                      <BodySmall color="quiet" style={{ marginBottom: 16 }}>
+                        Non-text elements must contrast 3:1 against the page background.
+                      </BodySmall>
+                      <A11yRow
+                        label={'var(--Icons-' + C + ') vs. var(--Background)'}
+                        ratio={getContrast(contrastData.iconColor, contrastData.background)}
+                        threshold={3.0}
+                        note={importName + ' at ' + resolvedFontSize + ' in ' + cap(color) + ' color'}
+                      />
                       {isTwoTone && (
-                        <A11yRow label={'var(--Icons-Variant-' + C + ') vs. var(--Background)'}
-                          ratio={getContrast(contrastData.iconVariant, contrastData.background)} threshold={3.0}
-                          note="Two-tone secondary fill against page background" />
+                        <A11yRow
+                          label={'var(--Icons-Variant-' + C + ') vs. var(--Background)'}
+                          ratio={getContrast(contrastData.iconVariant, contrastData.background)}
+                          threshold={3.0}
+                          note="Two-tone secondary fill — must also meet 3:1"
+                        />
                       )}
                     </Box>
+
+                    {/* ARIA — dynamic, based on playground state */}
                     <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
                       <H5>ARIA and Semantics</H5>
                       <Stack spacing={0}>
-                        <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                          <BodySmall>Decorative icons:</BodySmall>
-                          <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>aria-hidden="true" — default. Invisible to screen readers.</Caption>
+
+                        {/* Current state */}
+                        <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)', backgroundColor: isMeaningful ? 'var(--Tags-Success-BG, rgba(0,200,0,0.05))' : 'transparent', px: 1, borderRadius: '4px' }}>
+                          <BodySmall style={{ fontWeight: 600 }}>
+                            Current icon — {isMeaningful ? 'meaningful ✓' : 'decorative'}
+                          </BodySmall>
+                          <Box component="pre" sx={{ fontFamily: 'monospace', fontSize: '11px', color: 'var(--Text-Quiet)', mt: 0.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>
+                            {isMeaningful ? meaningfulExample : decorativeExample}
+                          </Box>
                         </Box>
+
+                        {/* Decorative explanation */}
                         <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                          <BodySmall>Meaningful icons:</BodySmall>
-                          <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>{'<Icon aria-label="Delete item"> — sets role="img"'}</Caption>
+                          <BodySmall>Decorative (no aria-label):</BodySmall>
+                          <Caption style={{ color: 'var(--Text-Quiet)' }}>
+                            aria-hidden="true" is applied automatically. The icon is invisible to screen readers.
+                            Use this when the icon is purely visual — e.g. a decorative bullet or inline illustration.
+                          </Caption>
+                          <Box component="pre" sx={{ fontFamily: 'monospace', fontSize: '11px', color: 'var(--Text-Quiet)', mt: 0.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>
+                            {decorativeExample}
+                          </Box>
                         </Box>
+
+                        {/* Meaningful explanation */}
                         <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                          <BodySmall>Disabled state:</BodySmall>
-                          <Caption style={{ color: 'var(--Text-Quiet)' }}>Opacity 0.38 — visual cue only. Disable the wrapping interactive element.</Caption>
+                          <BodySmall>Meaningful (with aria-label):</BodySmall>
+                          <Caption style={{ color: 'var(--Text-Quiet)' }}>
+                            role="img" is added automatically. The label is announced by screen readers.
+                            Use this when the icon conveys information that is not present in surrounding text.
+                          </Caption>
+                          <Box component="pre" sx={{ fontFamily: 'monospace', fontSize: '11px', color: 'var(--Text-Quiet)', mt: 0.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>
+                            {meaningfulExample}
+                          </Box>
                         </Box>
+
+                        {/* Disabled */}
+                        <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
+                          <BodySmall>Disabled state{disabled ? ' ← current' : ''}:</BodySmall>
+                          <Caption style={{ color: 'var(--Text-Quiet)' }}>
+                            Opacity 0.38 — visual cue only. To disable an action, disable the wrapping interactive element (button, link), not the icon itself.
+                          </Caption>
+                        </Box>
+
+                        {/* Two-tone */}
+                        {isTwoTone && (
+                          <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
+                            <BodySmall>Two-tone{isTwoTone ? ' ← current' : ''}:</BodySmall>
+                            <Caption style={{ color: 'var(--Text-Quiet)' }}>
+                              Secondary fill uses var(--Icons-Variant-{C}). Both the primary and secondary fills must meet 3:1 contrast independently.
+                            </Caption>
+                          </Box>
+                        )}
+
+                        {/* Size note */}
                         <Box sx={{ py: 1.5 }}>
-                          <BodySmall>Two-tone:</BodySmall>
-                          <Caption style={{ color: 'var(--Text-Quiet)' }}>Secondary fill uses var(--Icons-Variant-Color). Both fills should meet 3:1.</Caption>
+                          <BodySmall>Touch target — {resolvedFontSize} icon{size === 'small' ? ' ⚠' : ' ✓'}:</BodySmall>
+                          <Caption style={{ color: 'var(--Text-Quiet)' }}>
+                            {size === 'small'
+                              ? 'Small icons (20px) need a 24px minimum target area around them (WCAG 2.5.5). Wrap in a button with padding.'
+                              : 'Icon is ' + resolvedFontSize + ' — meets 24px minimum. Ensure the wrapping interactive element also meets 24×24px.'}
+                          </Caption>
                         </Box>
+
                       </Stack>
                     </Box>
+
+                    {/* Size reference */}
                     <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
                       <H5>Size Reference</H5>
                       <Stack spacing={0}>
@@ -366,6 +481,7 @@ export function IconShowcase() {
                         ))}
                       </Stack>
                     </Box>
+
                   </Stack>
                 </Box>
               </TabPanel>

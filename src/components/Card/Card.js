@@ -47,6 +47,7 @@ export function Card({
   size = 'medium',
   orientation = 'vertical',
   clickable = false,
+  selected = false,
   onClick,
   href,
   className = '',
@@ -83,7 +84,7 @@ export function Card({
 
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
   const isHorizontal = orientation === 'horizontal';
-  const isClickable = clickable || !!onClick || !!href;
+  const isClickable = clickable || !!onClick || !!href || selected;
   const component = href ? 'a' : isClickable ? 'div' : 'div';
 
   return (
@@ -94,12 +95,14 @@ export function Card({
         onClick={isClickable ? onClick : undefined}
         role={isClickable ? 'button' : undefined}
         tabIndex={isClickable ? 0 : undefined}
+        aria-pressed={selected ? true : undefined}
         ref={ref}
         data-theme={dataTheme || undefined}
         data-surface="Container"
         className={
           'card card-' + variant + ' card-' + size + ' card-' + orientation
           + (isClickable ? ' card-clickable' : '')
+          + (selected ? ' card-selected' : '')
           + ' ' + className
         }
         sx={{
@@ -129,6 +132,15 @@ export function Card({
             '&:focus-visible': {
               outline: '3px solid var(--Focus-Visible)',
               outlineOffset: '-3px',
+            },
+          }),
+          // Selected state — overrides hover border/shadow to keep selection ring consistent
+          ...(selected && {
+            borderColor: 'var(--Buttons-Primary-Border)',
+            boxShadow: '0 0 0 2px var(--Buttons-Primary-Border)',
+            '&:hover': {
+              borderColor: 'var(--Buttons-Primary-Border)',
+              boxShadow: '0 0 0 2px var(--Buttons-Primary-Border)',
             },
           }),
           ...sx,
@@ -273,7 +285,7 @@ export function CardActions({
 export const DefaultCard    = (p) => <Card variant="default" {...p} />;
 export const SolidCard      = (p) => <Card variant="solid"   {...p} />;
 export const LightCard      = (p) => <Card variant="light"   {...p} />;
-export const SelectableCard = (p) => <Card clickable {...p} />;
+export const SelectableCard = (p) => <Card clickable selected={p.selected} {...p} />;
 export const StaticCard     = (p) => <Card {...p} />;
 
 export default Card;
