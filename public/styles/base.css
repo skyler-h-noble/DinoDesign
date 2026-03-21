@@ -1,6 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Gentium+Book+Basic&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Andada+Pro&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
 
 /* ========================================
  * Base CSS Variables
@@ -122,7 +120,24 @@
   --Buttons-Error-Light-Text: var(--Text-Surfaces-Error-Color-12);
   --Buttons-Error-Light-Border: var(--Border-Containers-Error-Color-11);
   --Buttons-Error-Light-Hover: var(--Hover-Error-Color-12);
-  --Buttons-Error-Light-Active: var(--Active-Error-12);
+  --Buttons-Error-Light-Active: var(--Active-Error-Color-12);
+  --Buttons-BlackWhite-Light-Button: var(--White);
+  --Buttons-BlackWhite-Light-Text: var(--Text-Surfaces-BW-Button-Color-1);
+  --Buttons-BlackWhite-Light-Hover: var(--Hover-Neutral-Color-13);
+  --Buttons-BlackWhite-Light-Active: var(--Active-Neutral-Color-14);
+  --Buttons-BlackWhite-Medium-Button: var(--Neutral-Color-1);
+  --Buttons-BlackWhite-Medium-Text: var(--Text-Surfaces-BW-Button-Color-14);
+  --Buttons-BlackWhite-Medium-Hover: var(--Hover-Neutral-Color-1);
+  --Buttons-BlackWhite-Medium-Active: var(--Active-Neutral-Color-1);
+  --Buttons-Default-Button: var(--Default-Button-Default-Medium-Button);
+  --Buttons-Default-Text: var(--Default-Button-Default-Medium-Text);
+  --Buttons-Default-Border: var(--Default-Button-Border-Surfaces-Default-Color-11);
+  --Buttons-Default-Hover: var(--Default-Button-Default-Medium-Hover);
+  --Buttons-Default-Active: var(--Default-Button-Default-Medium-Active);
+  --Buttons-Default-Light-Button: var(--Default-Button-Default-Light-Button);
+  --Buttons-Default-Light-Text: var(--Default-Button-Default-Light-Text);
+  --Buttons-Default-Light-Hover: var(--Default-Button-Default-Light-Hover);
+  --Buttons-Default-Light-Active: var(--Default-Button-Default-Light-Active);
   --Icons-Default: var(--Icon-Surfaces-Neutral-Color-11);
   --Icons-Default-Variant: var(--Icon-Variant-Surfaces-Neutral-Color-11);
   --Icons-Primary: var(--Icon-Surfaces-Primary-Color-11);
@@ -143,7 +158,7 @@
   --Icons-Error-Variant: var(--Icon-Variant-Surfaces-Error-Color-11);
 }
 
-[data-theme][data-theme="Default"] {
+:root {
   /* ========================================
    * Chart Colors
    * Direct hex values for data visualization
@@ -153,42 +168,42 @@
   --Chart-Lines: #e2e2e2;
 
   /* Solid Chart Colors */
-  --Chart-1: #ffebf3;
-  --Chart-2: #ffedc7;
-  --Chart-3: #ffe8db;
-  --Chart-4: #e6eeff;
-  --Chart-5: #ccfcd7;
-  --Chart-6: #ffeac2;
-  --Chart-7: #ffdfe5;
+  --Chart-1: #fdeee6;
+  --Chart-2: #ffece0;
+  --Chart-3: #ffebda;
+  --Chart-4: #eeefff;
+  --Chart-5: #dff7e4;
+  --Chart-6: #ffedd3;
+  --Chart-7: #ffe8e3;
   --Chart-8: #f1f1f1;
-  --Chart-9: #f8dbe5;
-  --Chart-10: #fddead;
+  --Chart-9: #f6ded2;
+  --Chart-10: #ffdbc9;
 
   /* Opaque Chart Colors (50% opacity) */
-  --Chart-1-Opaque: rgba(255, 235, 243, 0.5);
-  --Chart-2-Opaque: rgba(255, 237, 199, 0.5);
-  --Chart-3-Opaque: rgba(255, 232, 219, 0.5);
-  --Chart-4-Opaque: rgba(230, 238, 255, 0.5);
-  --Chart-5-Opaque: rgba(204, 252, 215, 0.5);
-  --Chart-6-Opaque: rgba(255, 234, 194, 0.5);
-  --Chart-7-Opaque: rgba(255, 223, 229, 0.5);
+  --Chart-1-Opaque: rgba(253, 238, 230, 0.5);
+  --Chart-2-Opaque: rgba(255, 236, 224, 0.5);
+  --Chart-3-Opaque: rgba(255, 235, 218, 0.5);
+  --Chart-4-Opaque: rgba(238, 239, 255, 0.5);
+  --Chart-5-Opaque: rgba(223, 247, 228, 0.5);
+  --Chart-6-Opaque: rgba(255, 237, 211, 0.5);
+  --Chart-7-Opaque: rgba(255, 232, 227, 0.5);
   --Chart-8-Opaque: rgba(241, 241, 241, 0.5);
-  --Chart-9-Opaque: rgba(248, 219, 229, 0.5);
-  --Chart-10-Opaque: rgba(253, 222, 173, 0.5);
+  --Chart-9-Opaque: rgba(246, 222, 210, 0.5);
+  --Chart-10-Opaque: rgba(255, 219, 201, 0.5);
 
   /* ========================================
    * Effect Levels (Box Shadows)
    * ======================================== */
 
 
- --Set-Font-Family-Header: "Gentium Book Basic", serif;
- --Set-Font-Family-Header-Weight: 800;
- --Set-Font-Family-Body: "IBM Plex Sans", sans-serif;
+ --Set-Font-Family-Header: "Open Sans", sans-serif;
+ --Set-Font-Family-Header-Weight: 600;
+ --Set-Font-Family-Body: "Open Sans", sans-serif;
  --Set-Font-Family-Body-Weight: 400;
  --Set-Font-Family-Body-Semibold-Weight: 600;
  --Set-Font-Family-Body-Bold-Weight: 700;
- --Set-Font-Family-Decorative: "Andada Pro", sans-serif;
- --Set-Font-Family-Decorative-Weight: 800;
+ --Set-Font-Family-Decorative: "Open Sans", sans-serif;
+ --Set-Font-Family-Decorative-Weight: 600;
 }
 
 
@@ -248,44 +263,29 @@
  * ======================================== */
 
 
-[data-surface] [data-surface="Surface"] {
-  --Background: var(--Surface);
-  --Effects: var(--Effect-Level-1);
-}
-
-[data-surface] [data-surface="Surface-Dim"] {
-  --Background: var(--Surface-Dim);
-  --Effects: var(--Effect-Level-1);
-}
-
-[data-surface] [data-surface="Surface-Bright"] {
-  --Background: var(--Surface-Bright);
-  --Effects: var(--Effect-Level-1);
-}
-
-[data-surface] [data-surface="Container"] {
+[data-surface="Container"] {
   --Background: var(--Container);
-  --Effects: var(--Effect-Level-2);
+  --Effects: var(--Effects-Level-2);
 }
 
-[data-surface] [data-surface="Container-Low"] {
+[data-surface="Container-Low"] {
   --Background: var(--Container-Low);
-  --Effects: var(--Effect-Level-2);
+  --Effects: var(--Effects-Level-1);
 }
 
-[data-surface] [data-surface="Container-Lowest"] {
+[data-surface="Container-Lowest"] {
   --Background: var(--Container-Lowest);
-  --Effects: var(--Effect-Level-2);
+  --Effects: var(--Effects-Level-negative-1);
 }
 
-[data-surface] [data-surface="Container-High"] {
+[data-surface="Container-High"] {
   --Background: var(--Container-High);
-  --Effects: var(--Effect-Level-2);
+  --Effects: var(--Effects-Level-3);
 }
 
-[data-surface] [data-surface="Container-Highest"] {
+[data-surface="Container-Highest"] {
   --Background: var(--Container-Highest);
-  --Effects: var(--Effect-Level-2);
+  --Effects: var(--Effects-Level-4);
 }
 
 /* ========================================
@@ -293,34 +293,27 @@
  * Maps --Background to surface types
  * ======================================== */
 
-[data-surface="Surface"] {
-  --Background: var(--Surface);
-}
-
-[data-surface="Surface-Dim"] {
-  --Background: var(--Surface-Dim);
-}
-
-[data-surface="Surface-Bright"] {
-  --Background: var(--Surface-Bright);
-}
-
 [data-surface="Container"] {
   --Background: var(--Container);
+  --Effects: var(--Effects-Level-2);
 }
 
 [data-surface="Container-Low"] {
   --Background: var(--Container-Low);
+  --Effects: var(--Effects-Level-1);
 }
 
 [data-surface="Container-Lowest"] {
   --Background: var(--Container-Lowest);
+  --Effects: var(--Effects-Level-negative-1);
 }
 
 [data-surface="Container-High"] {
   --Background: var(--Container-High);
+  --Effects: var(--Effects-Level-3);
 }
 
 [data-surface="Container-Highest"] {
   --Background: var(--Container-Highest);
+  --Effects: var(--Effects-Level-4);
 }
