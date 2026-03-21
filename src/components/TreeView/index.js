@@ -1,9 +1,8 @@
 // src/components/TreeView/index.js
 export {
   DynoTreeView,
-  DefaultTreeView,
   SolidTreeView,
-  LightTreeView,
+  OutlinedTreeView,
   DEFAULT_ITEMS,
 } from './TreeView';
 

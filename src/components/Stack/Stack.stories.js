@@ -1,178 +1,197 @@
 // src/components/Stack/Stack.stories.js
-import { Box, Typography } from '@mui/material';
-import {
-  Stack,
-  HStack,
-  VStack,
-  CenteredStack,
-  SpaceBetweenStack,
-  ResponsiveStack,
-  GridStack,
-  StackDivider,
-  InsetStack,
-  ScrollStack,
-  WrapStack,
-  StackShowcase,
-} from './Stack';
+import React from 'react';
+import { Box } from '@mui/material';
+import { DynoStack, HStack, VStack, WrapStack, CenteredStack, SpaceBetweenStack, ResponsiveStack } from './Stack';
 
-export default {
-  title: 'Layout/Stack',
-  component: Stack,
-};
+export default { title: 'Layout/Stack', component: DynoStack };
 
-// Basic Stacks
-export const BasicStack = {
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const Block = ({ children, height = 40, color = 'var(--Primary-Color-9, #dde)' }) => (
+  <Box sx={{
+    height, minWidth: 60, px: 2,
+    backgroundColor: color,
+    border: '1px solid var(--Border)',
+    borderRadius: 'var(--Style-Border-Radius)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    fontSize: '12px', color: 'var(--Text)', whiteSpace: 'nowrap',
+  }}>
+    {children}
+  </Box>
+);
+
+const SmallBlock = ({ children }) => (
+  <Box sx={{
+    height: 24, px: 1.5,
+    backgroundColor: 'var(--Tags-Info-BG, #dbeafe)',
+    border: '1px solid var(--Border)',
+    borderRadius: 'var(--Style-Border-Radius)',
+    display: 'flex', alignItems: 'center',
+    fontSize: '12px', color: 'var(--Text)',
+  }}
+    data-size="small"
+  >
+    {children}
+  </Box>
+);
+
+// ─── Stories ──────────────────────────────────────────────────────────────────
+
+export const Default = {
   render: () => (
-    <Stack spacing={2}>
-      <Box sx={{ p: 2, backgroundColor: 'var(--Container)' }}>Item 1</Box>
-      <Box sx={{ p: 2, backgroundColor: 'var(--Container)' }}>Item 2</Box>
-      <Box sx={{ p: 2, backgroundColor: 'var(--Container)' }}>Item 3</Box>
-    </Stack>
+    <Box sx={{ p: 4, maxWidth: 400 }}>
+      <DynoStack gap={2}>
+        <Block>Item A</Block>
+        <Block>Item B</Block>
+        <Block>Item C</Block>
+      </DynoStack>
+    </Box>
   ),
 };
 
-export const HorizontalStack = {
+export const Row = {
   render: () => (
-    <HStack spacing={2}>
-      <Box sx={{ p: 2, backgroundColor: 'var(--Container)', flex: 1 }}>Item 1</Box>
-      <Box sx={{ p: 2, backgroundColor: 'var(--Container)', flex: 1 }}>Item 2</Box>
-      <Box sx={{ p: 2, backgroundColor: 'var(--Container)', flex: 1 }}>Item 3</Box>
-    </HStack>
+    <Box sx={{ p: 4 }}>
+      <HStack gap={2}>
+        <Block>Left</Block>
+        <Block>Center</Block>
+        <Block>Right</Block>
+      </HStack>
+    </Box>
   ),
 };
 
-export const CenteredContent = {
+export const SmartGapEnforced = {
+  name: 'Smart Gap — Enforced (small children)',
   render: () => (
-    <CenteredStack spacing={2} sx={{ minHeight: 300, backgroundColor: 'var(--Container-Low)' }}>
-      <Box sx={{ p: 2, backgroundColor: 'var(--Container)' }}>Centered</Box>
-      <Box sx={{ p: 2, backgroundColor: 'var(--Container)' }}>Content</Box>
-    </CenteredStack>
+    <Box sx={{ p: 4, maxWidth: 400 }}>
+      <Box sx={{ mb: 1, fontSize: '12px', color: 'var(--Text-Quiet)' }}>
+        gap=&#123;0.5&#125; but small children → raised to var(--min-stack-gap)
+      </Box>
+      <DynoStack gap={0.5} direction="row" alignItems="center">
+        <SmallBlock>Terms</SmallBlock>
+        <SmallBlock>Privacy</SmallBlock>
+        <SmallBlock>Cookies</SmallBlock>
+      </DynoStack>
+    </Box>
+  ),
+};
+
+export const SmartGapDisabled = {
+  name: 'Smart Gap — Disabled (enforceMinGap=false)',
+  render: () => (
+    <Box sx={{ p: 4, maxWidth: 400 }}>
+      <Box sx={{ mb: 1, fontSize: '12px', color: 'var(--Text-Quiet)' }}>
+        enforceMinGap=false — gap used exactly as specified
+      </Box>
+      <DynoStack gap={0.5} direction="row" alignItems="center" enforceMinGap={false}>
+        <SmallBlock>Terms</SmallBlock>
+        <SmallBlock>Privacy</SmallBlock>
+        <SmallBlock>Cookies</SmallBlock>
+      </DynoStack>
+    </Box>
+  ),
+};
+
+export const MixedSizes = {
+  name: 'Mixed — Normal + Small children',
+  render: () => (
+    <Box sx={{ p: 4, maxWidth: 400 }}>
+      <Box sx={{ mb: 1, fontSize: '12px', color: 'var(--Text-Quiet)' }}>
+        One small child triggers enforcement for the whole stack
+      </Box>
+      <DynoStack gap={1}>
+        <Block height={40}>Normal button</Block>
+        <SmallBlock>Small link — triggers min gap</SmallBlock>
+        <Block height={40}>Another normal item</Block>
+      </DynoStack>
+    </Box>
+  ),
+};
+
+export const RowDirections = {
+  name: 'All Directions',
+  render: () => (
+    <Box sx={{ p: 4, display: 'flex', flexDirection: 'column', gap: 4 }}>
+      {['row', 'column', 'row-reverse', 'column-reverse'].map((dir) => (
+        <Box key={dir}>
+          <Box sx={{ mb: 1, fontSize: '12px', color: 'var(--Text-Quiet)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{dir}</Box>
+          <DynoStack direction={dir} gap={2} alignItems="center">
+            <Block>A</Block>
+            <Block>B</Block>
+            <Block>C</Block>
+          </DynoStack>
+        </Box>
+      ))}
+    </Box>
+  ),
+};
+
+export const Wrap = {
+  render: () => (
+    <Box sx={{ p: 4, maxWidth: 300 }}>
+      <WrapStack gap={1}>
+        {['React', 'TypeScript', 'MUI', 'Design System', 'Tokens', 'WCAG'].map((t) => (
+          <SmallBlock key={t}>{t}</SmallBlock>
+        ))}
+      </WrapStack>
+    </Box>
   ),
 };
 
 export const SpaceBetween = {
   render: () => (
-    <SpaceBetweenStack spacing={0} sx={{ p: 2, backgroundColor: 'var(--Container-Low)' }}>
-      <Box>Start</Box>
-      <Box>Middle</Box>
-      <Box>End</Box>
-    </SpaceBetweenStack>
+    <Box sx={{ p: 4, maxWidth: 400 }}>
+      <SpaceBetweenStack>
+        <Block>Left</Block>
+        <Block>Right</Block>
+      </SpaceBetweenStack>
+    </Box>
   ),
 };
 
-export const ResponsiveLayout = {
+export const Centered = {
   render: () => (
-    <ResponsiveStack
-      mobileDirection="column"
-      desktopDirection="row"
-      spacing={2}
-    >
-      <Box sx={{ p: 2, backgroundColor: 'var(--Container)', flex: 1 }}>
-        Mobile: Column, Desktop: Row
+    <Box sx={{ p: 4, height: 200, border: '1px dashed var(--Border)' }}>
+      <CenteredStack sx={{ height: '100%' }}>
+        <Block>Centered content</Block>
+      </CenteredStack>
+    </Box>
+  ),
+};
+
+export const Responsive = {
+  render: () => (
+    <Box sx={{ p: 4, maxWidth: 500 }}>
+      <Box sx={{ mb: 1, fontSize: '12px', color: 'var(--Text-Quiet)' }}>
+        column on xs, row on sm+
       </Box>
-      <Box sx={{ p: 2, backgroundColor: 'var(--Container)', flex: 1 }}>
-        Responsive Layout
+      <ResponsiveStack gap={2}>
+        <Block>First</Block>
+        <Block>Second</Block>
+        <Block>Third</Block>
+      </ResponsiveStack>
+    </Box>
+  ),
+};
+
+export const CustomMinGapToken = {
+  name: 'Custom minGapToken',
+  render: () => (
+    <Box sx={{ p: 4, maxWidth: 400 }}>
+      <Box sx={{ mb: 1, fontSize: '12px', color: 'var(--Text-Quiet)' }}>
+        Uses --my-custom-min-gap token instead of default
       </Box>
-    </ResponsiveStack>
+      <DynoStack
+        direction="row"
+        gap={0.5}
+        minGapToken="--my-custom-min-gap"
+        alignItems="center"
+      >
+        <SmallBlock>A</SmallBlock>
+        <SmallBlock>B</SmallBlock>
+        <SmallBlock>C</SmallBlock>
+      </DynoStack>
+    </Box>
   ),
-};
-
-export const WithDividers = {
-  render: () => (
-    <StackDivider spacing={2}>
-      <Box sx={{ p: 2 }}>Section 1</Box>
-      <Box sx={{ p: 2 }}>Section 2</Box>
-      <Box sx={{ p: 2 }}>Section 3</Box>
-    </StackDivider>
-  ),
-};
-
-export const GridLayout = {
-  render: () => (
-    <GridStack
-      items={Array.from({ length: 9 }, (_, i) => `Item ${i + 1}`)}
-      columns={3}
-      spacing={2}
-      renderItem={(item) => (
-        <Box sx={{ p: 2, backgroundColor: 'var(--Container)', textAlign: 'center' }}>
-          {item}
-        </Box>
-      )}
-    />
-  ),
-};
-
-export const WrappingItems = {
-  render: () => (
-    <WrapStack spacing={1}>
-      {Array.from({ length: 12 }).map((_, i) => (
-        <Box
-          key={i}
-          sx={{
-            p: 1,
-            backgroundColor: 'var(--Container)',
-            borderRadius: 1,
-            minWidth: '100px',
-            textAlign: 'center',
-          }}
-        >
-          Tag {i + 1}
-        </Box>
-      ))}
-    </WrapStack>
-  ),
-};
-
-export const ScrollableContent = {
-  render: () => (
-    <ScrollStack maxHeight={200}>
-      {Array.from({ length: 20 }).map((_, i) => (
-        <Box
-          key={i}
-          sx={{
-            p: 2,
-            backgroundColor: 'var(--Container)',
-            borderBottom: '1px solid var(--Border)',
-          }}
-        >
-          Item {i + 1}
-        </Box>
-      ))}
-    </ScrollStack>
-  ),
-};
-
-export const InsetContent = {
-  render: () => (
-    <InsetStack spacing={2} sx={{ backgroundColor: 'var(--Container-Low)' }}>
-      <Typography variant="h6">Content with Padding</Typography>
-      <Typography variant="body2">
-        This stack has consistent padding around its content using design system spacing variables.
-      </Typography>
-      <Box sx={{ p: 2, backgroundColor: 'var(--Container)', borderRadius: 1 }}>
-        Nested content
-      </Box>
-    </InsetStack>
-  ),
-};
-
-export const DifferentSpacings = {
-  render: () => (
-    <VStack spacing={1} sx={{ p: 2, backgroundColor: 'var(--Container-Low)' }}>
-      <Typography variant="subtitle2">Spacing Scale</Typography>
-      {[1, 2, 3, 4].map((spacing) => (
-        <Box key={spacing}>
-          <Typography variant="caption">Spacing: {spacing}</Typography>
-          <Stack spacing={spacing} sx={{ mt: 1 }}>
-            <Box sx={{ p: 1, backgroundColor: 'var(--Container)' }}>Item A</Box>
-            <Box sx={{ p: 1, backgroundColor: 'var(--Container)' }}>Item B</Box>
-          </Stack>
-        </Box>
-      ))}
-    </VStack>
-  ),
-};
-
-export const AllShowcase = {
-  render: () => <StackShowcase />,
 };

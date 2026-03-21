@@ -1,17 +1,18 @@
 // src/components/Stack/index.js
 export {
-  Stack,
+  DynoStack,
   HStack,
   VStack,
   CenteredStack,
   SpaceBetweenStack,
+  WrapStack,
   ResponsiveStack,
+  Stack,
   GridStack,
   StackDivider,
   InsetStack,
   ScrollStack,
-  WrapStack,
-  StackShowcase,
 } from './Stack';
 
+export { StackShowcase } from './StackShowcase';
 export { default } from './Stack';

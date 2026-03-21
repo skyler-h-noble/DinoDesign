@@ -1,4 +1,4 @@
-// src/pages/ComponentShowcase.js - COMPLETE WITH BUTTONS IN FOUNDATIONS
+// src/pages/ComponentShowcase.js
 
 import React, { useState } from 'react';
 import {
@@ -15,19 +15,19 @@ import {
 
 import { ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
 import * as MuiIcons from '@mui/icons-material';
-import { ButtonShowcase } from '../components/Button/ButtonShowcase';  
-import { ButtonGroupShowcase } from '../components/ButtonGroup/ButtonGroupShowcase';  
-import { InputShowcase } from '../components/Input/InputShowcase';    
-import { CheckboxShowcase } from '../components/Checkbox/CheckboxShowcase';   
-import { RadioShowcase } from '../components/Radio/RadioShowcase';   
-import { SliderShowcase } from '../components/Slider/SliderShowcase';   
-import { SwitchShowcase } from '../components/Switch/SwitchShowcase';  
-import { BadgeShowcase } from '../components/Badge/BadgeShowcase';  
-import { ChipShowcase } from '../components/Chip/ChipShowcase';  
-import { DividerShowcase } from '../components/Divider/DividerShowcase'; 
-import { TableShowcase } from '../components/Table/TableShowcase'; 
-import { ListShowcase } from '../components/List/ListShowcase'; 
-import { TooltipShowcase } from '../components/Tooltip/TooltipShowcase'; 
+import { ButtonShowcase } from '../components/Button/ButtonShowcase';
+import { ButtonGroupShowcase } from '../components/ButtonGroup/ButtonGroupShowcase';
+import { InputShowcase } from '../components/Input/InputShowcase';
+import { CheckboxShowcase } from '../components/Checkbox/CheckboxShowcase';
+import { RadioShowcase } from '../components/Radio/RadioShowcase';
+import { SliderShowcase } from '../components/Slider/SliderShowcase';
+import { SwitchShowcase } from '../components/Switch/SwitchShowcase';
+import { BadgeShowcase } from '../components/Badge/BadgeShowcase';
+import { ChipShowcase } from '../components/Chip/ChipShowcase';
+import { DividerShowcase } from '../components/Divider/DividerShowcase';
+import { TableShowcase } from '../components/Table/TableShowcase';
+import { ListShowcase } from '../components/List/ListShowcase';
+import { TooltipShowcase } from '../components/Tooltip/TooltipShowcase';
 import { ToggleButtonGroupShowcase } from '../components/ToggleButtonGroup/ToggleButtonGroupShowcase';
 import { TypographyShowcase } from '../components/Typography/TypographyShowcase';
 import { AccordionShowcase } from '../components/Accordion/AccordionShowcase';
@@ -62,6 +62,7 @@ import { ModalShowcase } from '../components/Modal/ModalShowcase';
 import { AvatarShowcase } from '../components/Avatar/AvatarShowcase';
 import { AutocompleteShowcase } from '../components/Autocomplete/AutocompleteShowcase';
 import { TreeViewShowcase } from '../components/TreeView/TreeViewShowcase';
+import { StackShowcase } from '../components/Stack/StackShowcase';
 
 import {
   Button,
@@ -137,6 +138,13 @@ const COMPONENT_CATEGORIES = [
     ],
   },
   {
+    name: 'LAYOUT',
+    icon: '📐',
+    items: [
+      { id: 'stack', label: 'Stack' },
+    ],
+  },
+  {
     name: 'SURFACES',
     icon: '📋',
     items: [
@@ -198,6 +206,7 @@ export function ComponentShowcase() {
   const [expandedCategories, setExpandedCategories] = useState({
     FOUNDATIONS: true,
     INPUTS: false,
+    LAYOUT: false,
     SURFACES: false,
     FEEDBACK: false,
     'DATA DISPLAY': false,
@@ -223,13 +232,7 @@ export function ComponentShowcase() {
       <AppBar
         mode="desktop"
         barColor="default"
-        sx={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 9999999,
-        }}
+        sx={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999999 }}
       />
 
       {/* Main Content Container */}
@@ -250,9 +253,7 @@ export function ComponentShowcase() {
               boxSizing: 'border-box',
             },
           }}
-          PaperProps={{
-            'data-surface': 'Surface-Dim',
-          }}
+          PaperProps={{ 'data-surface': 'Surface-Dim' }}
         >
           <Typography variant="h6" sx={{ px: 2, mb: 2, fontWeight: 700, color: 'var(--Text)' }}>
             Components
@@ -263,24 +264,18 @@ export function ComponentShowcase() {
                 <ListItemButton
                   onClick={() => toggleCategory(category.name)}
                   sx={{
-                    color: 'var(--Text)',
-                    fontWeight: 600,
-                    fontSize: '0.75rem',
-                    letterSpacing: '0.5px',
-                    py: 1.5,
+                    color: 'var(--Text)', fontWeight: 600, fontSize: '0.75rem',
+                    letterSpacing: '0.5px', py: 1.5,
                     '&:hover': { backgroundColor: 'var(--Container-Low)' },
                   }}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
                     <span>{category.icon}</span>
                     <span style={{ flex: 1 }}>{category.name}</span>
-                    <ExpandMoreIcon
-                      sx={{
-                        transform: expandedCategories[category.name] ? 'rotate(180deg)' : 'rotate(0deg)',
-                        transition: 'transform 0.2s',
-                        fontSize: '1.2rem',
-                      }}
-                    />
+                    <ExpandMoreIcon sx={{
+                      transform: expandedCategories[category.name] ? 'rotate(180deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.2s', fontSize: '1.2rem',
+                    }} />
                   </Box>
                 </ListItemButton>
 
@@ -292,14 +287,10 @@ export function ComponentShowcase() {
                         selected={activeSection === item.id}
                         onClick={() => setActiveSection(item.id)}
                         sx={{
-                          pl: 4,
-                          color: 'var(--Text)',
-                          fontSize: '0.875rem',
-                          py: 1,
+                          pl: 4, color: 'var(--Text)', fontSize: '0.875rem', py: 1,
                           '&:hover': { backgroundColor: 'var(--Container-Low)' },
                           '&.Mui-selected': {
-                            backgroundColor: 'var(--Primary-Color-11)',
-                            color: 'white',
+                            backgroundColor: 'var(--Primary-Color-11)', color: 'white',
                             '&:hover': { backgroundColor: 'var(--Primary-Color-11)' },
                           },
                         }}
@@ -338,6 +329,9 @@ export function ComponentShowcase() {
             {activeSection === 'numberfield' && <NumberFieldShowcase />}
             {activeSection === 'searchfield' && <SearchFieldShowcase />}
             {activeSection === 'transferlist' && <TransferListShowcase />}
+
+            {/* ============ LAYOUT ============ */}
+            {activeSection === 'stack' && <StackShowcase />}
 
             {/* ============ SURFACES ============ */}
             {activeSection === 'card' && <CardShowcase />}

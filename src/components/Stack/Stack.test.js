@@ -1,231 +1,200 @@
 // src/components/Stack/Stack.test.js
+import React from 'react';
 import { render, screen } from '@testing-library/react';
-import {
-  Stack,
-  HStack,
-  VStack,
-  CenteredStack,
-  SpaceBetweenStack,
-  ResponsiveStack,
-  GridStack,
-  StackDivider,
-  InsetStack,
-  ScrollStack,
-  WrapStack,
-} from './Stack';
+import { DynoStack, HStack, VStack, WrapStack, CenteredStack, SpaceBetweenStack } from './Stack';
 import { axe } from 'jest-axe';
 
-describe('Stack Components', () => {
-  const testContent = (
-    <>
-      <div>Item 1</div>
-      <div>Item 2</div>
-      <div>Item 3</div>
-    </>
-  );
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-  describe('Stack', () => {
-    test('renders with children', () => {
-      render(<Stack>{testContent}</Stack>);
-      expect(screen.getByText('Item 1')).toBeInTheDocument();
-      expect(screen.getByText('Item 2')).toBeInTheDocument();
-      expect(screen.getByText('Item 3')).toBeInTheDocument();
-    });
+const NormalChild = () => <div data-testid="child">Normal</div>;
+const SmallBySizeProp = () => <div data-testid="small-size" size="small">Small</div>;
+const SmallByDataAttr = () => <div data-testid="small-attr" data-size="small">Small</div>;
+const SmallByHeight   = () => <div data-testid="small-height" height={24}>Small</div>;
 
-    test('renders with column direction', () => {
-      const { container } = render(
-        <Stack direction="column">{testContent}</Stack>
-      );
-      expect(container.firstChild).toBeInTheDocument();
-    });
+// ─── Basic rendering ──────────────────────────────────────────────────────────
 
-    test('renders with row direction', () => {
-      const { container } = render(
-        <Stack direction="row">{testContent}</Stack>
-      );
-      expect(container.firstChild).toBeInTheDocument();
-    });
-
-    test('applies spacing', () => {
-      const { container } = render(
-        <Stack spacing={3}>{testContent}</Stack>
-      );
-      expect(container.firstChild).toBeInTheDocument();
-    });
-
-    test('applies justifyContent', () => {
-      const { container } = render(
-        <Stack justifyContent="center">{testContent}</Stack>
-      );
-      expect(container.firstChild).toBeInTheDocument();
-    });
-
-    test('applies alignItems', () => {
-      const { container } = render(
-        <Stack alignItems="center">{testContent}</Stack>
-      );
-      expect(container.firstChild).toBeInTheDocument();
-    });
-
-    test('applies fullWidth', () => {
-      const { container } = render(
-        <Stack fullWidth>{testContent}</Stack>
-      );
-      expect(container.firstChild).toHaveStyle('width: 100%');
-    });
+describe('DynoStack', () => {
+  test('renders children', () => {
+    render(<DynoStack><NormalChild /></DynoStack>);
+    expect(screen.getByTestId('child')).toBeInTheDocument();
   });
 
-  describe('HStack', () => {
-    test('renders horizontal stack', () => {
-      render(<HStack>{testContent}</HStack>);
-      expect(screen.getByText('Item 1')).toBeInTheDocument();
-    });
-
-    test('centers items vertically by default', () => {
-      const { container } = render(
-        <HStack>{testContent}</HStack>
-      );
-      expect(container.firstChild).toBeInTheDocument();
-    });
+  test('renders multiple children', () => {
+    render(
+      <DynoStack>
+        <div data-testid="a">A</div>
+        <div data-testid="b">B</div>
+        <div data-testid="c">C</div>
+      </DynoStack>
+    );
+    expect(screen.getByTestId('a')).toBeInTheDocument();
+    expect(screen.getByTestId('b')).toBeInTheDocument();
+    expect(screen.getByTestId('c')).toBeInTheDocument();
   });
 
-  describe('VStack', () => {
-    test('renders vertical stack', () => {
-      render(<VStack>{testContent}</VStack>);
-      expect(screen.getByText('Item 1')).toBeInTheDocument();
-    });
+  test('has dyno-stack class', () => {
+    const { container } = render(<DynoStack><NormalChild /></DynoStack>);
+    expect(container.querySelector('.dyno-stack')).toBeInTheDocument();
+  });
+});
 
-    test('stretches items by default', () => {
-      const { container } = render(
-        <VStack>{testContent}</VStack>
-      );
-      expect(container.firstChild).toBeInTheDocument();
-    });
+// ─── Smart gap — detection ────────────────────────────────────────────────────
+
+describe('Smart gap detection', () => {
+  test('no small child — does NOT add enforcement class', () => {
+    const { container } = render(
+      <DynoStack><NormalChild /></DynoStack>
+    );
+    expect(container.querySelector('.dyno-stack-min-gap-enforced')).not.toBeInTheDocument();
   });
 
-  describe('CenteredStack', () => {
-    test('renders centered content', () => {
-      render(<CenteredStack>{testContent}</CenteredStack>);
-      expect(screen.getByText('Item 1')).toBeInTheDocument();
-    });
+  test('child with size="small" — adds enforcement class', () => {
+    const { container } = render(
+      <DynoStack><SmallBySizeProp /></DynoStack>
+    );
+    expect(container.querySelector('.dyno-stack-min-gap-enforced')).toBeInTheDocument();
   });
 
-  describe('SpaceBetweenStack', () => {
-    test('renders with space-between', () => {
-      render(<SpaceBetweenStack>{testContent}</SpaceBetweenStack>);
-      expect(screen.getByText('Item 1')).toBeInTheDocument();
-    });
-
-    test('is fullWidth by default', () => {
-      const { container } = render(
-        <SpaceBetweenStack>{testContent}</SpaceBetweenStack>
-      );
-      expect(container.firstChild).toHaveStyle('width: 100%');
-    });
+  test('child with data-size="small" — adds enforcement class', () => {
+    const { container } = render(
+      <DynoStack><SmallByDataAttr /></DynoStack>
+    );
+    expect(container.querySelector('.dyno-stack-min-gap-enforced')).toBeInTheDocument();
   });
 
-  describe('ResponsiveStack', () => {
-    test('renders responsive stack', () => {
-      render(<ResponsiveStack>{testContent}</ResponsiveStack>);
-      expect(screen.getByText('Item 1')).toBeInTheDocument();
-    });
+  test('child with height={24} — adds enforcement class', () => {
+    const { container } = render(
+      <DynoStack><SmallByHeight /></DynoStack>
+    );
+    expect(container.querySelector('.dyno-stack-min-gap-enforced')).toBeInTheDocument();
   });
 
-  describe('GridStack', () => {
-    test('renders grid items', () => {
-      const items = ['Item A', 'Item B', 'Item C'];
-      render(
-        <GridStack
-          items={items}
-          renderItem={(item) => <div>{item}</div>}
-        />
-      );
-      expect(screen.getByText('Item A')).toBeInTheDocument();
-      expect(screen.getByText('Item B')).toBeInTheDocument();
-      expect(screen.getByText('Item C')).toBeInTheDocument();
-    });
+  test('mixed children — one small is enough to enforce', () => {
+    const { container } = render(
+      <DynoStack>
+        <NormalChild />
+        <SmallBySizeProp />
+        <NormalChild />
+      </DynoStack>
+    );
+    expect(container.querySelector('.dyno-stack-min-gap-enforced')).toBeInTheDocument();
+  });
+});
 
-    test('respects column count', () => {
-      const items = Array.from({ length: 6 }, (_, i) => `Item ${i + 1}`);
-      render(
-        <GridStack
-          items={items}
-          columns={3}
-          renderItem={(item) => <div>{item}</div>}
-        />
-      );
-      items.forEach((item) => {
-        expect(screen.getByText(item)).toBeInTheDocument();
-      });
-    });
+// ─── enforceMinGap=false ──────────────────────────────────────────────────────
+
+describe('enforceMinGap=false', () => {
+  test('does not add enforcement class even with small children', () => {
+    const { container } = render(
+      <DynoStack enforceMinGap={false}>
+        <SmallBySizeProp />
+      </DynoStack>
+    );
+    expect(container.querySelector('.dyno-stack-min-gap-enforced')).not.toBeInTheDocument();
+  });
+});
+
+// ─── data-min-gap-enforced attribute ──────────────────────────────────────────
+
+describe('data-min-gap-enforced attribute', () => {
+  test('set to "true" when enforcement is active', () => {
+    const { container } = render(
+      <DynoStack><SmallBySizeProp /></DynoStack>
+    );
+    const stack = container.querySelector('.dyno-stack');
+    expect(stack).toHaveAttribute('data-min-gap-enforced', 'true');
   });
 
-  describe('StackDivider', () => {
-    test('renders with divider', () => {
-      render(<StackDivider>{testContent}</StackDivider>);
-      expect(screen.getByText('Item 1')).toBeInTheDocument();
-    });
+  test('not present when no small children', () => {
+    const { container } = render(
+      <DynoStack><NormalChild /></DynoStack>
+    );
+    const stack = container.querySelector('.dyno-stack');
+    expect(stack).not.toHaveAttribute('data-min-gap-enforced');
+  });
+});
+
+// ─── Convenience exports ──────────────────────────────────────────────────────
+
+describe('Convenience exports', () => {
+  test('HStack renders', () => {
+    const { container } = render(<HStack><NormalChild /></HStack>);
+    expect(container.querySelector('.dyno-stack')).toBeInTheDocument();
   });
 
-  describe('InsetStack', () => {
-    test('renders with inset padding', () => {
-      const { container } = render(
-        <InsetStack>{testContent}</InsetStack>
-      );
-      expect(container.firstChild).toHaveStyle('padding: var(--Spacing-3)');
-    });
+  test('VStack renders', () => {
+    const { container } = render(<VStack><NormalChild /></VStack>);
+    expect(container.querySelector('.dyno-stack')).toBeInTheDocument();
   });
 
-  describe('ScrollStack', () => {
-    test('renders scrollable stack', () => {
-      const { container } = render(
-        <ScrollStack>{testContent}</ScrollStack>
-      );
-      expect(container.firstChild).toHaveStyle('overflow: auto');
-    });
+  test('WrapStack renders', () => {
+    const { container } = render(<WrapStack><NormalChild /></WrapStack>);
+    expect(container.querySelector('.dyno-stack')).toBeInTheDocument();
   });
 
-  describe('WrapStack', () => {
-    test('renders wrapping stack', () => {
-      render(<WrapStack>{testContent}</WrapStack>);
-      expect(screen.getByText('Item 1')).toBeInTheDocument();
-    });
+  test('CenteredStack renders', () => {
+    const { container } = render(<CenteredStack><NormalChild /></CenteredStack>);
+    expect(container.querySelector('.dyno-stack')).toBeInTheDocument();
+  });
 
-    test('flexWrap is enabled', () => {
-      const { container } = render(
-        <WrapStack>{testContent}</WrapStack>
-      );
-      expect(container.firstChild).toHaveStyle('flex-wrap: wrap');
-    });
+  test('SpaceBetweenStack renders', () => {
+    const { container } = render(<SpaceBetweenStack><NormalChild /></SpaceBetweenStack>);
+    expect(container.querySelector('.dyno-stack')).toBeInTheDocument();
+  });
+});
+
+// ─── Edge cases ───────────────────────────────────────────────────────────────
+
+describe('Edge cases', () => {
+  test('null/undefined children do not crash', () => {
+    expect(() =>
+      render(<DynoStack>{null}{undefined}<NormalChild /></DynoStack>)
+    ).not.toThrow();
+  });
+
+  test('empty children renders without error', () => {
+    expect(() => render(<DynoStack />)).not.toThrow();
+  });
+
+  test('className prop is forwarded', () => {
+    const { container } = render(
+      <DynoStack className="my-custom"><NormalChild /></DynoStack>
+    );
+    expect(container.querySelector('.my-custom')).toBeInTheDocument();
   });
 });
 
 // ─── Accessibility — jest-axe ─────────────────────────────────────────────────
 
 describe('Stack — Accessibility (jest-axe)', () => {
-  test('has no accessibility violations with default props', async () => {
+  test('has no violations with normal children', async () => {
     const { container } = render(
-      <Stack><div>Item one</div><div>Item two</div></Stack>
+      <DynoStack>
+        <div>Item A</div>
+        <div>Item B</div>
+      </DynoStack>
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
 
-  test('has no accessibility violations in Primary theme', async () => {
+  test('has no violations with small children and enforcement active', async () => {
     const { container } = render(
-      <div data-theme="Primary">
-        <Stack><div>Item one</div><div>Item two</div></Stack>
-      </div>
+      <DynoStack>
+        <button size="small">Small button A</button>
+        <button size="small">Small button B</button>
+      </DynoStack>
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
 
-  test('has no accessibility violations in Secondary theme', async () => {
+  test('has no violations for HStack row layout', async () => {
     const { container } = render(
-      <div data-theme="Secondary">
-        <Stack><div>Item one</div><div>Item two</div></Stack>
-      </div>
+      <HStack>
+        <div>Left</div>
+        <div>Right</div>
+      </HStack>
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();

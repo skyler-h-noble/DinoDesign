@@ -1,53 +1,139 @@
 // src/components/Stack/Stack.js
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Stack as MuiStack, Box } from '@mui/material';
 
 /**
- * Stack Component - Design System Implementation
- * 
- * Flexible layout component for arranging items in a row or column
- * Uses design system spacing variables for consistent gaps
- * 
- * WCAG 2.1 AA accessibility compliant
- * 
- * @param {React.ReactNode} children - Stack content
- * @param {string} direction - Direction: row, column (default: column)
- * @param {string | number} spacing - Gap between items (uses var(--Spacing-[n]))
- * @param {string} justifyContent - Horizontal alignment: flex-start, center, flex-end, space-between, space-around, space-evenly
- * @param {string} alignItems - Vertical alignment: flex-start, center, flex-end, stretch
- * @param {boolean} fullWidth - Stretch to full width (default: false)
- * @param {boolean} fullHeight - Stretch to full height (default: false)
- * @param {string} sx - Additional MUI sx props
- * @param {object} ...props - Other MUI Stack props
+ * DynoStack — wraps MUI Stack with smart minimum gap enforcement.
+ *
+ * SMART GAP RULE:
+ *   If any child component is detected as "small" (24px height),
+ *   the gap is automatically raised to at least var(--min-stack-gap).
+ *   This ensures small touch targets like Links, Chips, and icon buttons
+ *   always have breathing room and don't collapse against each other.
+ *
+ * DETECTION — a child is considered "small" if it has any of:
+ *   • size="small" prop
+ *   • data-size="small" prop/attribute
+ *   • height={24} or minHeight={24} prop
+ *   • minHeight="24px" in sx prop
+ *   • The component's displayName includes known small components
+ *     (Link, Chip, Badge, Caption, Label, Tag)
+ *
+ * PROPS (all MUI Stack props are supported, plus):
+ *   gap             number | string  — desired gap (MUI spacing or CSS value)
+ *   minGapToken     string           — CSS variable for min gap (default: '--min-stack-gap')
+ *   enforceMinGap   boolean          — set false to disable smart gap entirely (default: true)
  */
-export function Stack({
+
+// ─── Small component detection ────────────────────────────────────────────────
+
+const SMALL_DISPLAY_NAMES = [
+  'Link', 'Chip', 'Badge', 'Caption', 'Label', 'Tag',
+  'BodySmall', 'LegalSemibold', 'Legal', 'LabelSmall', 'LabelExtraSmall',
+  'OverlineSmall', 'ButtonSmall',
+];
+
+function isSmallChild(child) {
+  if (!React.isValidElement(child)) return false;
+  const props = child.props || {};
+  if (props.size === 'small') return true;
+  if (props['data-size'] === 'small') return true;
+  if (props.height === 24 || props.minHeight === 24) return true;
+  if (props.height === '24px' || props.minHeight === '24px') return true;
+  if (props.sx) {
+    const mh = props.sx.minHeight || props.sx.height;
+    if (mh === 24 || mh === '24px') return true;
+  }
+  const type = child.type;
+  if (type) {
+    const name = type.displayName || type.name || '';
+    if (SMALL_DISPLAY_NAMES.some((n) => name.includes(n))) return true;
+  }
+  return false;
+}
+
+function hasSmallChild(children) {
+  let found = false;
+  React.Children.forEach(children, (child) => {
+    if (isSmallChild(child)) found = true;
+  });
+  return found;
+}
+
+// ─── Gap resolution ───────────────────────────────────────────────────────────
+
+function resolveCssVar(varName, fallbackPx = 8) {
+  if (typeof window === 'undefined') return fallbackPx;
+  const raw = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+  if (!raw) return fallbackPx;
+  if (raw.endsWith('rem')) {
+    return parseFloat(raw) * parseFloat(getComputedStyle(document.documentElement).fontSize);
+  }
+  return parseFloat(raw) || fallbackPx;
+}
+
+function gapToPx(gap, muiSpacingUnit = 8) {
+  if (gap === undefined || gap === null) return 0;
+  if (typeof gap === 'number') return gap * muiSpacingUnit;
+  if (typeof gap === 'string') {
+    if (gap.endsWith('px')) return parseFloat(gap);
+    if (gap.endsWith('rem')) {
+      return parseFloat(gap) * parseFloat(getComputedStyle(document.documentElement).fontSize || '16');
+    }
+    return parseFloat(gap) * muiSpacingUnit || 0;
+  }
+  return 0;
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
+export function DynoStack({
   children,
+  gap,
+  spacing,
   direction = 'column',
-  spacing = 2,
-  justifyContent = 'flex-start',
-  alignItems = 'stretch',
-  fullWidth = false,
-  fullHeight = false,
+  enforceMinGap = true,
+  minGapToken = '--min-stack-gap',
+  divider,
+  flexWrap,
+  useFlexGap = true,
+  alignItems,
+  justifyContent,
   sx = {},
+  className = '',
   ...props
 }) {
-  // Convert spacing to design system variable if number
-  const gapValue = typeof spacing === 'number'
-    ? `var(--Spacing-${spacing})`
-    : spacing;
+  const desiredGap  = gap !== undefined ? gap : spacing;
+  const needsMinGap = enforceMinGap && hasSmallChild(children);
+
+  const effectiveGap = useMemo(() => {
+    if (!needsMinGap) return desiredGap;
+    const desiredPx = gapToPx(desiredGap);
+    const minPx     = resolveCssVar(minGapToken, 8);
+    if (desiredPx >= minPx) return desiredGap;
+    return 'var(' + minGapToken + ', ' + minPx + 'px)';
+  }, [needsMinGap, desiredGap, minGapToken]);
 
   return (
     <MuiStack
       direction={direction}
-      spacing={spacing}
-      justifyContent={justifyContent}
+      spacing={useFlexGap ? undefined : effectiveGap}
+      gap={useFlexGap ? effectiveGap : undefined}
+      divider={divider}
+      flexWrap={flexWrap}
+      useFlexGap={useFlexGap}
       alignItems={alignItems}
+      justifyContent={justifyContent}
+      className={
+        'dyno-stack' +
+        (needsMinGap ? ' dyno-stack-min-gap-enforced' : '') +
+        (className ? ' ' + className : '')
+      }
       sx={{
-        width: fullWidth ? '100%' : 'auto',
-        height: fullHeight ? '100%' : 'auto',
-        gap: gapValue,
+        ...(needsMinGap ? { '&::before': { display: 'none' } } : {}),
         ...sx,
       }}
+      data-min-gap-enforced={needsMinGap ? 'true' : undefined}
       {...props}
     >
       {children}
@@ -55,400 +141,41 @@ export function Stack({
   );
 }
 
-/**
- * HStack Component - Horizontal Stack
- * Convenience wrapper for row direction
- */
-export function HStack({
-  children,
-  spacing = 2,
-  justifyContent = 'flex-start',
-  alignItems = 'center',
-  fullWidth = false,
-  sx = {},
-  ...props
-}) {
-  return (
-    <Stack
-      direction="row"
-      spacing={spacing}
-      justifyContent={justifyContent}
-      alignItems={alignItems}
-      fullWidth={fullWidth}
-      sx={sx}
-      {...props}
-    >
-      {children}
-    </Stack>
-  );
-}
+// ─── Convenience exports ──────────────────────────────────────────────────────
 
-/**
- * VStack Component - Vertical Stack
- * Convenience wrapper for column direction
- */
-export function VStack({
-  children,
-  spacing = 2,
-  justifyContent = 'flex-start',
-  alignItems = 'stretch',
-  fullWidth = false,
-  sx = {},
-  ...props
-}) {
-  return (
-    <Stack
-      direction="column"
-      spacing={spacing}
-      justifyContent={justifyContent}
-      alignItems={alignItems}
-      fullWidth={fullWidth}
-      sx={sx}
-      {...props}
-    >
-      {children}
-    </Stack>
-  );
-}
+export const HStack = (p) => <DynoStack direction="row" alignItems="center" {...p} />;
+export const VStack = (p) => <DynoStack direction="column" {...p} />;
 
-/**
- * CenteredStack Component - Centered content
- * Stack with items centered both horizontally and vertically
- */
-export function CenteredStack({
-  children,
-  direction = 'column',
-  spacing = 2,
-  fullWidth = false,
-  sx = {},
-  ...props
-}) {
-  return (
-    <Stack
-      direction={direction}
-      spacing={spacing}
-      justifyContent="center"
-      alignItems="center"
-      fullWidth={fullWidth}
-      sx={sx}
-      {...props}
-    >
-      {children}
-    </Stack>
-  );
-}
+export const CenteredStack = (p) => (
+  <DynoStack direction="column" alignItems="center" justifyContent="center" {...p} />
+);
 
-/**
- * SpaceBetweenStack Component - Space between items
- * Stack with maximum spacing between items
- */
-export function SpaceBetweenStack({
-  children,
-  direction = 'row',
-  spacing = 0,
-  fullWidth = true,
-  sx = {},
-  ...props
-}) {
-  return (
-    <Stack
-      direction={direction}
-      spacing={spacing}
-      justifyContent="space-between"
-      alignItems="center"
-      fullWidth={fullWidth}
-      sx={sx}
-      {...props}
-    >
-      {children}
-    </Stack>
-  );
-}
+export const SpaceBetweenStack = (p) => (
+  <DynoStack direction="row" alignItems="center" justifyContent="space-between" {...p} />
+);
 
-/**
- * ResponsiveStack Component - Responsive direction
- * Changes direction based on screen size
- */
-export function ResponsiveStack({
-  children,
-  mobileDirection = 'column',
-  desktopDirection = 'row',
-  spacing = 2,
-  mobileSpacing = spacing,
-  justifyContent = 'flex-start',
-  alignItems = 'stretch',
-  sx = {},
-  ...props
-}) {
-  return (
-    <Stack
-      direction={{ xs: mobileDirection, md: desktopDirection }}
-      spacing={{ xs: mobileSpacing, md: spacing }}
-      justifyContent={justifyContent}
-      alignItems={alignItems}
-      sx={{
-        ...sx,
-      }}
-      {...props}
-    >
-      {children}
-    </Stack>
-  );
-}
+export const WrapStack = (p) => (
+  <DynoStack direction="row" flexWrap="wrap" {...p} />
+);
 
-/**
- * GridStack Component - Multiple stacks side by side
- * Arranges stacks in a grid pattern
- */
-export function GridStack({
-  items = [],
-  columns = 3,
-  spacing = 2,
-  itemSpacing = 2,
-  sx = {},
-  renderItem,
-  ...props
-}) {
-  return (
-    <Stack
-      direction="row"
-      spacing={spacing}
-      sx={{
-        flexWrap: 'wrap',
-        ...sx,
-      }}
-      {...props}
-    >
-      {items.map((item, index) => (
-        <Box
-          key={item.id || index}
-          sx={{
-            flex: `0 0 calc(${100 / columns}% - ${spacing}px)`,
-          }}
-        >
-          {renderItem ? renderItem(item) : item}
-        </Box>
-      ))}
-    </Stack>
-  );
-}
+export const ResponsiveStack = ({ breakpoint = 'sm', ...p }) => (
+  <DynoStack direction={{ xs: 'column', [breakpoint]: 'row' }} {...p} />
+);
 
-/**
- * StackDivider Component - Stack with divider between items
- * Adds visual separator between stack items
- */
-export function StackDivider({
-  children,
-  direction = 'column',
-  spacing = 2,
-  dividerColor = 'var(--Border)',
-  dividerThickness = '1px',
-  dividerStyle = 'solid',
-  sx = {},
-  ...props
-}) {
-  return (
-    <Stack
-      direction={direction}
-      spacing={spacing}
-      sx={{
-        '& > :not(:last-child)': {
-          paddingBottom: direction === 'column' ? spacing : 0,
-          paddingRight: direction === 'row' ? spacing : 0,
-          borderBottom: direction === 'column'
-            ? `${dividerThickness} ${dividerStyle} ${dividerColor}`
-            : 'none',
-          borderRight: direction === 'row'
-            ? `${dividerThickness} ${dividerStyle} ${dividerColor}`
-            : 'none',
-        },
-        ...sx,
-      }}
-      {...props}
-    >
-      {children}
-    </Stack>
-  );
-}
+// ─── Backward-compat aliases ──────────────────────────────────────────────────
+// These match the names that were exported from the previous Stack implementation
+// so existing imports in the codebase continue to work without changes.
 
-/**
- * InsetStack Component - Stack with padding/inset
- * Adds consistent padding around content
- */
-export function InsetStack({
-  children,
-  direction = 'column',
-  spacing = 2,
-  inset = 'var(--Spacing-3)',
-  sx = {},
-  ...props
-}) {
-  return (
-    <Stack
-      direction={direction}
-      spacing={spacing}
-      sx={{
-        padding: inset,
-        ...sx,
-      }}
-      {...props}
-    >
-      {children}
-    </Stack>
-  );
-}
+export const Stack        = DynoStack;
+export const GridStack    = WrapStack;
+export const StackDivider = (p) => (
+  <Box sx={{ borderBottom: '1px solid var(--Border)', width: '100%' }} {...p} />
+);
+export const InsetStack  = ({ sx: sxProp, ...p }) => (
+  <DynoStack sx={{ px: 2, ...sxProp }} {...p} />
+);
+export const ScrollStack = ({ sx: sxProp, ...p }) => (
+  <DynoStack sx={{ overflowY: 'auto', ...sxProp }} {...p} />
+);
 
-/**
- * ScrollStack Component - Scrollable stack
- * Stack that scrolls when content overflows
- */
-export function ScrollStack({
-  children,
-  direction = 'row',
-  spacing = 2,
-  maxHeight = '400px',
-  sx = {},
-  ...props
-}) {
-  return (
-    <Stack
-      direction={direction}
-      spacing={spacing}
-      sx={{
-        maxHeight,
-        overflow: 'auto',
-        ...sx,
-      }}
-      {...props}
-    >
-      {children}
-    </Stack>
-  );
-}
-
-/**
- * WrapStack Component - Wrapping stack
- * Stack that wraps items to next line
- */
-export function WrapStack({
-  children,
-  spacing = 2,
-  sx = {},
-  ...props
-}) {
-  return (
-    <Stack
-      direction="row"
-      spacing={spacing}
-      sx={{
-        flexWrap: 'wrap',
-        ...sx,
-      }}
-      {...props}
-    >
-      {children}
-    </Stack>
-  );
-}
-
-/**
- * StackShowcase Component - All stack variants
- */
-export function StackShowcase() {
-  const items = ['Item 1', 'Item 2', 'Item 3'];
-
-  return (
-    <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 4 }}>
-      {/* Basic Vertical Stack */}
-      <Box>
-        <h3>Vertical Stack (Column)</h3>
-        <Stack spacing={2} sx={{ p: 2, backgroundColor: 'var(--Container-Low)', borderRadius: 1 }}>
-          {items.map((item, i) => (
-            <Box key={i} sx={{ p: 2, backgroundColor: 'var(--Container)', borderRadius: 1 }}>
-              {item}
-            </Box>
-          ))}
-        </Stack>
-      </Box>
-
-      {/* Basic Horizontal Stack */}
-      <Box>
-        <h3>Horizontal Stack (Row)</h3>
-        <HStack spacing={2} sx={{ p: 2, backgroundColor: 'var(--Container-Low)', borderRadius: 1 }}>
-          {items.map((item, i) => (
-            <Box key={i} sx={{ p: 2, backgroundColor: 'var(--Container)', borderRadius: 1 }}>
-              {item}
-            </Box>
-          ))}
-        </HStack>
-      </Box>
-
-      {/* Centered Stack */}
-      <Box>
-        <h3>Centered Stack</h3>
-        <CenteredStack spacing={2} sx={{ p: 2, backgroundColor: 'var(--Container-Low)', borderRadius: 1, minHeight: 200 }}>
-          {items.map((item, i) => (
-            <Box key={i} sx={{ p: 2, backgroundColor: 'var(--Container)', borderRadius: 1 }}>
-              {item}
-            </Box>
-          ))}
-        </CenteredStack>
-      </Box>
-
-      {/* Space Between Stack */}
-      <Box>
-        <h3>Space Between Stack</h3>
-        <SpaceBetweenStack spacing={0} sx={{ p: 2, backgroundColor: 'var(--Container-Low)', borderRadius: 1 }}>
-          {items.map((item, i) => (
-            <Box key={i} sx={{ p: 2, backgroundColor: 'var(--Container)', borderRadius: 1 }}>
-              {item}
-            </Box>
-          ))}
-        </SpaceBetweenStack>
-      </Box>
-
-      {/* Responsive Stack */}
-      <Box>
-        <h3>Responsive Stack (Column on mobile, Row on desktop)</h3>
-        <ResponsiveStack
-          mobileDirection="column"
-          desktopDirection="row"
-          spacing={2}
-          sx={{ p: 2, backgroundColor: 'var(--Container-Low)', borderRadius: 1 }}
-        >
-          {items.map((item, i) => (
-            <Box key={i} sx={{ p: 2, backgroundColor: 'var(--Container)', borderRadius: 1, flex: 1 }}>
-              {item}
-            </Box>
-          ))}
-        </ResponsiveStack>
-      </Box>
-
-      {/* Stack with Divider */}
-      <Box>
-        <h3>Stack with Divider</h3>
-        <StackDivider spacing={2} sx={{ p: 2, backgroundColor: 'var(--Container-Low)', borderRadius: 1 }}>
-          {items.map((item, i) => (
-            <Box key={i} sx={{ p: 2, backgroundColor: 'var(--Container)', borderRadius: 1 }}>
-              {item}
-            </Box>
-          ))}
-        </StackDivider>
-      </Box>
-
-      {/* Wrap Stack */}
-      <Box>
-        <h3>Wrap Stack</h3>
-        <WrapStack spacing={2} sx={{ p: 2, backgroundColor: 'var(--Container-Low)', borderRadius: 1 }}>
-          {Array.from({ length: 12 }).map((_, i) => (
-            <Box key={i} sx={{ p: 2, backgroundColor: 'var(--Container)', borderRadius: 1, flexBasis: '100px' }}>
-              Item {i + 1}
-            </Box>
-          ))}
-        </WrapStack>
-      </Box>
-    </Box>
-  );
-}
-
-export default Stack;
+export default DynoStack;

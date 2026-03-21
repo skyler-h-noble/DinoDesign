@@ -19,6 +19,11 @@ import { Box } from '@mui/material';
  *
  * STATES: hover → var(--Link-Hover), visited → var(--Link-Visited)
  * DISABLED: opacity 0.5, pointer-events none
+ *
+ * TOUCH TARGET:
+ *   minHeight: 24px, minWidth: 24px — meets WCAG 2.5.8.
+ *   display: inline-flex + alignItems: center so min dimensions
+ *   take effect without breaking inline text flow.
  */
 
 const STYLE_MAP = {
@@ -81,12 +86,11 @@ const STYLE_MAP = {
 };
 
 const COLOR_MAP = {
-  primary:  { base: 'var(--Link)', hover: 'var(--Link-Hover)', visited: 'var(--Link-Visited)' },
-  standard: { base: 'var(--Text)', hover: 'var(--Link-Hover)', visited: 'var(--Link-Visited)' },
+  primary:  { base: 'var(--Link)',       hover: 'var(--Link-Hover)', visited: 'var(--Link-Visited)' },
+  standard: { base: 'var(--Text)',       hover: 'var(--Link-Hover)', visited: 'var(--Link-Visited)' },
   quiet:    { base: 'var(--Text-Quiet)', hover: 'var(--Link-Hover)', visited: 'var(--Link-Visited)' },
 };
 
-// Exported for showcase use
 export const LINK_STYLES = Object.keys(STYLE_MAP);
 export const LINK_COLORS = Object.keys(COLOR_MAP);
 
@@ -103,10 +107,9 @@ export function Link({
   sx = {},
   ...props
 }) {
-  const typo = STYLE_MAP[textStyle] || STYLE_MAP.body;
-  const colors = COLOR_MAP[color] || COLOR_MAP.primary;
+  const typo   = STYLE_MAP[textStyle] || STYLE_MAP.body;
+  const colors = COLOR_MAP[color]     || COLOR_MAP.primary;
 
-  // Auto-add rel="noopener noreferrer" for external links
   const resolvedRel = target === '_blank'
     ? (rel || 'noopener noreferrer')
     : rel;
@@ -121,53 +124,58 @@ export function Link({
       aria-disabled={disabled || undefined}
       tabIndex={disabled ? -1 : undefined}
       className={
-        'link link-' + textStyle + ' link-color-' + color
-        + (disabled ? ' link-disabled' : '')
-        + ' ' + className
+        'link link-' + textStyle + ' link-color-' + color +
+        (disabled ? ' link-disabled' : '') +
+        ' ' + className
       }
       sx={{
-        // Typography
-        fontFamily: typo.fontFamily,
-        lineHeight: typo.lineHeight,
-        fontSize: typo.fontSize,
-        fontWeight: typo.fontWeight,
+        // ── Typography ───────────────────────────────────────────
+        fontFamily:    typo.fontFamily,
+        lineHeight:    typo.lineHeight,
+        fontSize:      typo.fontSize,
+        fontWeight:    typo.fontWeight,
         letterSpacing: typo.letterSpacing,
 
-        // Always underlined
-        textDecoration: 'underline',
-        textUnderlineOffset: '3px',
+        // ── Always underlined ────────────────────────────────────
+        textDecoration:          'underline',
+        textUnderlineOffset:     '3px',
         textDecorationThickness: '1px',
 
-        // Color
-        color: colors.base,
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.5 : 1,
+        // ── Color ────────────────────────────────────────────────
+        color:         colors.base,
+        cursor:        disabled ? 'not-allowed' : 'pointer',
+        opacity:       disabled ? 0.5 : 1,
         pointerEvents: disabled ? 'none' : 'auto',
 
-        // Transitions
+        // ── Touch target (WCAG 2.5.8) ────────────────────────────
+        // inline-flex keeps the link flowing in text while allowing
+        // min-height / min-width to take effect on the element box.
+        display:     'inline-flex',
+        alignItems:  'center',
+        minHeight:   '24px',
+        minWidth:    '24px',
+
+        // ── Transitions ──────────────────────────────────────────
         transition: 'color 0.15s ease, text-decoration-color 0.15s ease',
 
-        // States
+        // ── States ───────────────────────────────────────────────
         ...(!disabled && {
           '&:hover': {
-            color: colors.hover,
+            color:                   colors.hover,
             textDecorationThickness: '2px',
           },
           '&:visited': {
             color: colors.visited,
           },
           '&:focus-visible': {
-            outline: '3px solid var(--Focus-Visible)',
+            outline:       '3px solid var(--Focus-Visible)',
             outlineOffset: '2px',
-            borderRadius: '2px',
+            borderRadius:  '2px',
           },
           '&:active': {
             textDecorationThickness: '2px',
           },
         }),
-
-        // Inline by default
-        display: 'inline',
 
         ...sx,
       }}

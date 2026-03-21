@@ -85,9 +85,9 @@ function buildVariantMap() {
 // --- Sizing ------------------------------------------------------------------
 
 const SIZE_MAP = {
-  small:  { box: 16, dot: 8,  labelSize: '13px', gap: 6,  touchTarget: 28 },
-  medium: { box: 20, dot: 10, labelSize: '15px', gap: 8,  touchTarget: 32 },
-  large:  { box: 24, dot: 12, labelSize: '17px', gap: 10, touchTarget: 40 },
+  small:  { box: 16, dot: 8,    labelSize: '13px', gap: 6,  touchTarget: 28 },
+  medium: { box: 20, dot: 9.5,  labelSize: '15px', gap: 8,  touchTarget: 32 },
+  large:  { box: 24, dot: 12,   labelSize: '17px', gap: 10, touchTarget: 40 },
 };
 
 // --- Custom Radio Icons ------------------------------------------------------
