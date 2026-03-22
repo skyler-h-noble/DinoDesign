@@ -75,16 +75,16 @@ export function Card({
 
   const bg = isDefault ? 'var(--Background)' : 'var(--Surface)';
 
+  const s = SIZE_MAP[size] || SIZE_MAP.medium;
+  const isHorizontal = orientation === 'horizontal';
+  const isClickable = clickable || !!onClick || !!href || selected;
+  const component = href ? 'a' : isClickable ? 'div' : 'div';
+
   // Default: Border-Variant when static → Buttons-Default-Border when clickable
   // Solid/Light: always Border
   const borderColor = isDefault
     ? (isClickable ? 'var(--Buttons-Default-Border)' : 'var(--Border-Variant)')
     : 'var(--Border)';
-
-  const s = SIZE_MAP[size] || SIZE_MAP.medium;
-  const isHorizontal = orientation === 'horizontal';
-  const isClickable = clickable || !!onClick || !!href;
-  const component = href ? 'a' : isClickable ? 'div' : 'div';
 
   return (
     <CardContext.Provider value={{ variant, color, size, orientation }}>
