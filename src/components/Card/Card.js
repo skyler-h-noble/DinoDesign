@@ -8,14 +8,16 @@ import { Box } from '@mui/material';
  * VARIANTS:
  *   default   No data-theme. bg: var(--Background), border: var(--Border-Variant).
  *             Clickable → border: var(--Buttons-Default-Border).
- *   solid     data-theme={Color}. bg: var(--Surface), border: var(--Border).
- *   light     data-theme={Color}-Light. bg: var(--Surface), border: var(--Border).
+ *   solid     data-theme={Color}. bg: var(--Surface), border: var(--Border-Variant).
+ *             Clickable → border: var(--Border).
+ *   light     data-theme={Color}-Light. bg: var(--Surface), border: var(--Border-Variant).
+ *             Clickable → border: var(--Border).
  *
  * ALL CARDS: data-surface="Container"
  *
  * SIZES: small | medium | large  (padding: Sizing-1/2/3, gap + font-size scale)
  * ORIENTATION: vertical | horizontal
- * CLICKABLE: adds hover/active/focus, upgrades border from Border-Variant → Buttons-Default-Border
+ * CLICKABLE: adds hover/active/focus. Focus ring is outset 3px with calc(--Card-Radius + 3px).
  */
 
 const SOLID_THEME_MAP = {
@@ -47,6 +49,7 @@ export function Card({
   size = 'medium',
   orientation = 'vertical',
   clickable = false,
+  selected = false,
   onClick,
   href,
   className = '',
@@ -80,11 +83,14 @@ export function Card({
   const isClickable = clickable || !!onClick || !!href || selected;
   const component = href ? 'a' : isClickable ? 'div' : 'div';
 
-  // Default: Border-Variant when static → Buttons-Default-Border when clickable
-  // Solid/Light: always Border
-  const borderColor = isDefault
-    ? (isClickable ? 'var(--Buttons-Default-Border)' : 'var(--Border-Variant)')
-    : 'var(--Border)';
+  // Non-clickable: always Border-Variant regardless of variant
+  // Clickable default: Buttons-Default-Border
+  // Clickable solid/light: Border
+  const borderColor = !isClickable
+    ? 'var(--Border-Variant)'
+    : isDefault
+      ? 'var(--Buttons-Default-Border)'
+      : 'var(--Border)';
 
   return (
     <CardContext.Provider value={{ variant, color, size, orientation }}>
@@ -94,12 +100,14 @@ export function Card({
         onClick={isClickable ? onClick : undefined}
         role={isClickable ? 'button' : undefined}
         tabIndex={isClickable ? 0 : undefined}
+        aria-pressed={selected ? true : undefined}
         ref={ref}
         data-theme={dataTheme || undefined}
         data-surface="Container"
         className={
           'card card-' + variant + ' card-' + size + ' card-' + orientation
           + (isClickable ? ' card-clickable' : '')
+          + (selected ? ' card-selected' : '')
           + ' ' + className
         }
         sx={{
@@ -128,7 +136,16 @@ export function Card({
             },
             '&:focus-visible': {
               outline: '3px solid var(--Focus-Visible)',
-              outlineOffset: '-3px',
+              outlineOffset: '3px',
+              borderRadius: 'calc(var(--Card-Radius) + 3px)',
+            },
+          }),
+          ...(selected && {
+            borderColor: 'var(--Buttons-Primary-Border)',
+            boxShadow: '0 0 0 2px var(--Buttons-Primary-Border)',
+            '&:hover': {
+              borderColor: 'var(--Buttons-Primary-Border)',
+              boxShadow: '0 0 0 2px var(--Buttons-Primary-Border)',
             },
           }),
           ...sx,
@@ -273,7 +290,7 @@ export function CardActions({
 export const DefaultCard    = (p) => <Card variant="default" {...p} />;
 export const SolidCard      = (p) => <Card variant="solid"   {...p} />;
 export const LightCard      = (p) => <Card variant="light"   {...p} />;
-export const SelectableCard = (p) => <Card clickable {...p} />;
+export const SelectableCard = (p) => <Card clickable selected={p.selected} {...p} />;
 export const StaticCard     = (p) => <Card {...p} />;
 
 export default Card;
