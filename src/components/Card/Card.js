@@ -7,7 +7,7 @@ import { Box } from '@mui/material';
  *
  * VARIANTS:
  *   default   No data-theme. bg: var(--Background), border: var(--Border-Variant).
- *             Clickable → border: var(--Border).
+ *             Clickable → border: var(--Buttons-Default-Border).
  *   solid     data-theme={Color}. bg: var(--Surface), border: var(--Border).
  *   light     data-theme={Color}-Light. bg: var(--Surface), border: var(--Border).
  *
@@ -15,7 +15,7 @@ import { Box } from '@mui/material';
  *
  * SIZES: small | medium | large  (padding: Sizing-1/2/3, gap + font-size scale)
  * ORIENTATION: vertical | horizontal
- * CLICKABLE: adds hover/active/focus, upgrades border from Border-Variant → Border
+ * CLICKABLE: adds hover/active/focus, upgrades border from Border-Variant → Buttons-Default-Border
  */
 
 const SOLID_THEME_MAP = {
@@ -47,7 +47,6 @@ export function Card({
   size = 'medium',
   orientation = 'vertical',
   clickable = false,
-  selected = false,
   onClick,
   href,
   className = '',
@@ -76,15 +75,15 @@ export function Card({
 
   const bg = isDefault ? 'var(--Background)' : 'var(--Surface)';
 
-  // Default: Border-Variant unless clickable → Border
+  // Default: Border-Variant when static → Buttons-Default-Border when clickable
   // Solid/Light: always Border
-  const borderColor = isDefault && !clickable
-    ? 'var(--Border-Variant)'
+  const borderColor = isDefault
+    ? (isClickable ? 'var(--Buttons-Default-Border)' : 'var(--Border-Variant)')
     : 'var(--Border)';
 
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
   const isHorizontal = orientation === 'horizontal';
-  const isClickable = clickable || !!onClick || !!href || selected;
+  const isClickable = clickable || !!onClick || !!href;
   const component = href ? 'a' : isClickable ? 'div' : 'div';
 
   return (
@@ -95,14 +94,12 @@ export function Card({
         onClick={isClickable ? onClick : undefined}
         role={isClickable ? 'button' : undefined}
         tabIndex={isClickable ? 0 : undefined}
-        aria-pressed={selected ? true : undefined}
         ref={ref}
         data-theme={dataTheme || undefined}
         data-surface="Container"
         className={
           'card card-' + variant + ' card-' + size + ' card-' + orientation
           + (isClickable ? ' card-clickable' : '')
-          + (selected ? ' card-selected' : '')
           + ' ' + className
         }
         sx={{
@@ -123,7 +120,7 @@ export function Card({
           ...(isClickable && {
             cursor: 'pointer',
             '&:hover': {
-              borderColor: 'var(--Border)',
+              borderColor: 'var(--Buttons-Default-Border)',
               boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
             },
             '&:active': {
@@ -132,15 +129,6 @@ export function Card({
             '&:focus-visible': {
               outline: '3px solid var(--Focus-Visible)',
               outlineOffset: '-3px',
-            },
-          }),
-          // Selected state — overrides hover border/shadow to keep selection ring consistent
-          ...(selected && {
-            borderColor: 'var(--Buttons-Primary-Border)',
-            boxShadow: '0 0 0 2px var(--Buttons-Primary-Border)',
-            '&:hover': {
-              borderColor: 'var(--Buttons-Primary-Border)',
-              boxShadow: '0 0 0 2px var(--Buttons-Primary-Border)',
             },
           }),
           ...sx,
@@ -285,7 +273,7 @@ export function CardActions({
 export const DefaultCard    = (p) => <Card variant="default" {...p} />;
 export const SolidCard      = (p) => <Card variant="solid"   {...p} />;
 export const LightCard      = (p) => <Card variant="light"   {...p} />;
-export const SelectableCard = (p) => <Card clickable selected={p.selected} {...p} />;
+export const SelectableCard = (p) => <Card clickable {...p} />;
 export const StaticCard     = (p) => <Card {...p} />;
 
 export default Card;

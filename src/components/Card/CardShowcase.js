@@ -137,7 +137,7 @@ export function CardShowcase() {
   };
   const getBorderToken = () => {
     if (!isDefault) return 'var(--Border)';
-    return clickable ? 'var(--Border)' : 'var(--Border-Variant)';
+    return (clickable || selected) ? 'var(--Buttons-Default-Border)' : 'var(--Border-Variant)';
   };
 
   const generateCode = () => {
@@ -301,7 +301,7 @@ export function CardShowcase() {
                 <Label>Clickable</Label>
                 <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>
                   {isDefault
-                    ? 'Adds hover/focus. Upgrades border from var(--Border-Variant) \u2192 var(--Border).'
+                    ? 'Adds hover/focus. Upgrades border from var(--Border-Variant) \u2192 var(--Buttons-Default-Border).'
                     : 'Adds hover shadow, active scale, 3px inset focus ring.'}
                 </Caption>
               </Box>
@@ -362,7 +362,12 @@ export function CardShowcase() {
               <H5>Container Boundary</H5>
               <BodySmall color="quiet" style={{ marginBottom: 16 }}>Card must be distinguishable from page (WCAG 1.4.11, 3:1)</BodySmall>
               <A11yRow label="Border vs. page var(--Background)"
-                ratio={getContrast(isDefault && !clickable ? contrastData.borderVariant : contrastData.border, contrastData.background)} threshold={3.0}
+                ratio={getContrast(
+                  (clickable || selected)
+                    ? getCssVar('--Buttons-Default-Border')
+                    : (isDefault ? contrastData.borderVariant : contrastData.border),
+                  contrastData.background
+                )} threshold={3.0}
                 note={'Border token: ' + getBorderToken()} />
             </Box>
 
@@ -403,7 +408,7 @@ export function CardShowcase() {
                 <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
                   <BodySmall>Clickable card:</BodySmall>
                   <Caption style={{ color: 'var(--Text-Quiet)' }}>
-                    role="button", tabIndex=0. Enter and Space activate. Hover adds shadow, active scales to 0.995. Default variant upgrades border from var(--Border-Variant) to var(--Border) for stronger affordance.
+                    role="button", tabIndex=0. Enter and Space activate. Hover adds shadow, active scales to 0.995. Default variant upgrades border from var(--Border-Variant) to var(--Buttons-Default-Border) for stronger affordance.
                   </Caption>
                 </Box>
                 <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
