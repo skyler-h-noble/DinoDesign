@@ -125,6 +125,7 @@ export function CardShowcase() {
   const [size, setSize] = useState('medium');
   const [orientation, setOrientation] = useState('vertical');
   const [clickable, setClickable] = useState(false);
+  const [selected, setSelected] = useState(false);
   const [contrastData, setContrastData] = useState({});
 
   const isDefault = variant === 'default';
@@ -145,6 +146,7 @@ export function CardShowcase() {
     if (size !== 'medium') parts.push('size="' + size + '"');
     if (orientation !== 'vertical') parts.push('orientation="horizontal"');
     if (clickable) parts.push('clickable');
+    if (selected) parts.push('selected');
     return '<Card ' + parts.join(' ') + '>\n  <CardContent>\n    <H5>Card Title</H5>\n    <Body>Card description goes here.</Body>\n  </CardContent>\n  <CardActions>\n    <button>Action</button>\n  </CardActions>\n</Card>';
   };
 
@@ -185,6 +187,7 @@ export function CardShowcase() {
                   size={size}
                   orientation={orientation}
                   clickable={clickable}
+                  selected={selected}
                   onClick={clickable ? () => {} : undefined}
                 >
                   {orientation === 'horizontal' && (
@@ -302,8 +305,22 @@ export function CardShowcase() {
                     : 'Adds hover shadow, active scale, 3px inset focus ring.'}
                 </Caption>
               </Box>
-              <Switch checked={clickable} onChange={(e) => setClickable(e.target.checked)} size="small" />
+              <Switch checked={clickable} onChange={(e) => { setClickable(e.target.checked); if (!e.target.checked) setSelected(false); }} size="small" />
             </Box>
+
+            {/* Selected — only shown when clickable is on */}
+            {clickable && (
+              <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                pl: 2, borderLeft: '2px solid var(--Buttons-Primary-Border)' }}>
+                <Box>
+                  <Label>Selected</Label>
+                  <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>
+                    Applies var(--Buttons-Primary-Border) ring. Sets aria-pressed="true".
+                  </Caption>
+                </Box>
+                <Switch checked={selected} onChange={(e) => setSelected(e.target.checked)} size="small" />
+              </Box>
+            )}
           </Grid>
         </Grid>
       )}
@@ -315,6 +332,7 @@ export function CardShowcase() {
           <BodySmall color="quiet" style={{ marginBottom: 32 }}>
             Based on current settings: {variant} / {size} / {orientation}
             {clickable ? ' / clickable' : ''}
+            {selected ? ' / selected' : ''}
             {!isDefault ? ' \u2014 data-theme="' + getThemeName() + '"' : ''}
           </BodySmall>
 
@@ -356,6 +374,11 @@ export function CardShowcase() {
                 <A11yRow label="Focus: var(--Focus-Visible) vs. card background"
                   ratio={getContrast(contrastData.focusVisible, isDefault ? contrastData.background : contrastData.surface)} threshold={3.0}
                   note="3px inset focus ring" />
+                {selected && (
+                  <A11yRow label="Selected ring: var(--Buttons-Primary-Border) vs. card background"
+                    ratio={getContrast(getCssVar('--Buttons-Primary-Border'), isDefault ? contrastData.background : contrastData.surface)} threshold={3.0}
+                    note="border-color + 0 0 0 2px box-shadow — must meet 3:1 (WCAG 1.4.11)" />
+                )}
               </Box>
             )}
 
@@ -381,6 +404,12 @@ export function CardShowcase() {
                   <BodySmall>Clickable card:</BodySmall>
                   <Caption style={{ color: 'var(--Text-Quiet)' }}>
                     role="button", tabIndex=0. Enter and Space activate. Hover adds shadow, active scales to 0.995. Default variant upgrades border from var(--Border-Variant) to var(--Border) for stronger affordance.
+                  </Caption>
+                </Box>
+                <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
+                  <BodySmall>Selected card:</BodySmall>
+                  <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>
+                    aria-pressed="true". Border and box-shadow use var(--Buttons-Primary-Border). Hover state is locked to the selection ring to prevent visual conflict.
                   </Caption>
                 </Box>
                 <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>

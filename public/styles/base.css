@@ -168,28 +168,28 @@
   --Chart-Lines: #e2e2e2;
 
   /* Solid Chart Colors */
-  --Chart-1: #fdeee6;
-  --Chart-2: #ffece0;
-  --Chart-3: #ffebda;
+  --Chart-1: #f2f1e4;
+  --Chart-2: #fdeee6;
+  --Chart-3: #fbeeed;
   --Chart-4: #eeefff;
   --Chart-5: #dff7e4;
   --Chart-6: #ffedd3;
   --Chart-7: #ffe8e3;
   --Chart-8: #f1f1f1;
-  --Chart-9: #f6ded2;
-  --Chart-10: #ffdbc9;
+  --Chart-9: #e5e3cf;
+  --Chart-10: #f6ded2;
 
   /* Opaque Chart Colors (50% opacity) */
-  --Chart-1-Opaque: rgba(253, 238, 230, 0.5);
-  --Chart-2-Opaque: rgba(255, 236, 224, 0.5);
-  --Chart-3-Opaque: rgba(255, 235, 218, 0.5);
+  --Chart-1-Opaque: rgba(242, 241, 228, 0.5);
+  --Chart-2-Opaque: rgba(253, 238, 230, 0.5);
+  --Chart-3-Opaque: rgba(251, 238, 237, 0.5);
   --Chart-4-Opaque: rgba(238, 239, 255, 0.5);
   --Chart-5-Opaque: rgba(223, 247, 228, 0.5);
   --Chart-6-Opaque: rgba(255, 237, 211, 0.5);
   --Chart-7-Opaque: rgba(255, 232, 227, 0.5);
   --Chart-8-Opaque: rgba(241, 241, 241, 0.5);
-  --Chart-9-Opaque: rgba(246, 222, 210, 0.5);
-  --Chart-10-Opaque: rgba(255, 219, 201, 0.5);
+  --Chart-9-Opaque: rgba(229, 227, 207, 0.5);
+  --Chart-10-Opaque: rgba(246, 222, 210, 0.5);
 
   /* ========================================
    * Effect Levels (Box Shadows)
