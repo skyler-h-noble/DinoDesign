@@ -8,9 +8,11 @@ import {
   H2, H5, BodySmall, Caption, Label, OverlineSmall
 } from './Typography';
 import { Button } from '../Button/Button';
-import { Switch } from '../Switch/Switch';
+import { Checkbox } from '../Checkbox/Checkbox';
 import { Input } from '../Input/Input';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
+import { PreviewSurface } from '../PreviewSurface';
+import { BackgroundPicker } from '../BackgroundPicker';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -38,10 +40,12 @@ const STYLE_LABELS = {
   'caption-bold': 'Caption Bold',
   'legal':        'Legal',
   'legal-semibold': 'Legal Semibold',
-  'overline':     'Overline',
+  'overline':       'Overline Medium',
+  'overline-small': 'Overline Small',
   'overline-large': 'Overline Large',
-  'button':       'Button',
-  'button-small': 'Button Small',
+  'button':              'Button Standard',
+  'button-small':        'Button Small',
+  'button-extra-small':  'Button Extra Small',
   'number-large':  'Number Large',
   'number-medium': 'Number Medium',
   'number-small':  'Number Small',
@@ -57,8 +61,8 @@ const STYLE_GROUPS = {
   Label:         ['label', 'label-small', 'label-large'],
   Caption:       ['caption', 'caption-bold'],
   Legal:         ['legal', 'legal-semibold'],
-  Overline:      ['overline', 'overline-large'],
-  Button:        ['button', 'button-small'],
+  Overline:      ['overline-small', 'overline', 'overline-large'],
+  Button:        ['button-extra-small', 'button-small', 'button'],
   Number:        ['number-large', 'number-medium', 'number-small'],
 };
 
@@ -145,10 +149,12 @@ const STYLE_CONFIG = {
   'caption-bold':        { defaultColor: 'quiet',    defaultWidth: 'hug' },
   'legal':               { defaultColor: 'quiet',    defaultWidth: 'hug' },
   'legal-semibold':      { defaultColor: 'quiet',    defaultWidth: 'hug' },
+  'overline-small':      { defaultColor: 'quiet',    defaultWidth: 'hug' },
   'overline':            { defaultColor: 'quiet',    defaultWidth: 'hug' },
   'overline-large':      { defaultColor: 'quiet',    defaultWidth: 'hug' },
-  'button':              { defaultColor: 'standard', defaultWidth: 'hug' },
+  'button-extra-small':  { defaultColor: 'standard', defaultWidth: 'hug' },
   'button-small':        { defaultColor: 'standard', defaultWidth: 'hug' },
+  'button':              { defaultColor: 'standard', defaultWidth: 'hug' },
   'number-large':        { defaultColor: 'standard', defaultWidth: 'hug' },
   'number-medium':       { defaultColor: 'standard', defaultWidth: 'hug' },
   'number-small':        { defaultColor: 'standard', defaultWidth: 'hug' },
@@ -225,7 +231,7 @@ function CopyButton({ code }) {
 
 function ControlButton({ label, selected, onClick }) {
   return (
-    <Button variant={selected ? 'primary' : 'primary-outline'} size="small" onClick={onClick}>
+    <Button variant={selected ? 'default' : 'default-outline'} size="small" onClick={onClick}>
       {label}
     </Button>
   );
@@ -239,6 +245,8 @@ export function TypographyShowcase() {
   const [width, setWidth]         = useState('');
   const [sampleText, setSampleText] = useState(SAMPLE_TEXT);
   const [noWrap, setNoWrap]       = useState(false);
+  const [bgTheme, setBgTheme]     = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
   const [contrastData, setContrastData] = useState({});
 
   const isHeading = HEADING_STYLES.has(textStyle);
@@ -290,11 +298,7 @@ export function TypographyShowcase() {
         <Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, pr: { md: 3 } }}>
 
           {/* Preview */}
-          <Box sx={{
-            p: 4, display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
-            minHeight: 160, backgroundColor: 'var(--Background)',
-            borderBottom: '1px solid var(--Border)',
-          }}>
+          <PreviewSurface theme={bgTheme} surface={bgSurface}>
             <Box sx={{ width: '100%', overflow: 'hidden' }}>
               <Typography
                 textStyle={textStyle}
@@ -305,7 +309,7 @@ export function TypographyShowcase() {
                 {sampleText}
               </Typography>
             </Box>
-          </Box>
+          </PreviewSurface>
 
           {/* JSX Code */}
           <Box sx={{ backgroundColor: '#1e1e1e', borderRadius: '8px', overflow: 'hidden', mt: 2 }}>
@@ -337,6 +341,16 @@ export function TypographyShowcase() {
               {/* ── Playground ── */}
               <TabPanel value={0}>
                 <Box sx={{ p: 3 }}>
+
+                  {/* Background */}
+                  <Box sx={{ mb: 3 }}>
+                    <BackgroundPicker
+                      theme={bgTheme}
+                      onThemeChange={setBgTheme}
+                      surface={bgSurface}
+                      onSurfaceChange={setBgSurface}
+                    />
+                  </Box>
 
                   {/* Color */}
                   <Box sx={{ mt: 0, mb: 3 }}>
@@ -373,7 +387,7 @@ export function TypographyShowcase() {
 
                   {/* Style groups */}
                   {Object.entries(STYLE_GROUPS).map(([group, styles]) => (
-                    <Box key={group} sx={{ mt: group === 'Headings' ? 0 : 3 }}>
+                    <Box key={group} sx={{ mt: group === 'Headings' ? 2 : 3 }}>
                       <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                         {'STYLE — ' + group.toUpperCase()}
                       </OverlineSmall>
@@ -417,8 +431,12 @@ export function TypographyShowcase() {
                       <Label>noWrap</Label>
                       <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Truncate with ellipsis on overflow</Caption>
                     </Box>
-                    <Switch checked={noWrap} onChange={(e) => setNoWrap(e.target.checked)}
-                      size="small" aria-label="Toggle noWrap" />
+                    <Checkbox
+                      checked={noWrap}
+                      onChange={(e) => setNoWrap(e.target.checked)}
+                      size="small"
+                      aria-label="Toggle noWrap"
+                    />
                   </Box>
                 </Box>
               </TabPanel>

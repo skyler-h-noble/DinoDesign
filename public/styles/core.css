@@ -1,34 +1,78 @@
+:root {
+  --Body-Font-Family: var(--Set-Font-Family-Body);
+  --Font-Family-Body: var(--Set-Font-Family-Body);
+  --Header-Font-Family: var(--Set-Font-Family-Header);
+  --Font-Family-Header: var(--Set-Font-Family-Header);
+  --Header-Font-Weight: var(--Set-Font-Family-Header-Weight);
+  --Decorative-Font-Family: var(--Set-Font-Family-Decorative);
+  --Decorative-Font-Weight: var(--Set-Font-Family-Decorative-Weight);
+  --Body-Font-Weight: var(--Set-Font-Family-Body-Weight);
+  --Body-Semibold-Font-Weight: var(--Set-Font-Family-Body-Semibold-Weight);
+  --Body-Bold-Font-Weight: var(--Set-Font-Family-Body-Bold-Weight);
+  --Cognitive-Multiplier: 1;
+}
+
 /* Platform Font Overrides */
 [data-platform="IOS-Mobile"][data-fonts] {
-  --Platform-Family-Body: var(--Set-Font-Family-Body);
-  --Platform-Family-Header: var(--Set-Font-Family-Header);
-  --Platform-Family-Decorative: var(--Set-Font-Family-Decorative);
+  --Body-Font-Family: var(--Set-Font-Family-Body);
+  --Header-Font-Family: var(--Set-Font-Family-Header);
+  --Header-Font-Weight: var(--Set-Font-Family-Header-Weight);
+  --Decorative-Font-Family: var(--Set-Font-Family-Decorative);
+  --Decorative-Font-Weight: var(--Set-Font-Family-Decorative-Weight);
+  --Body-Font-Weight: var(--Set-Font-Family-Body-Weight);
+  --Body-Semibold-Font-Weight: var(--Set-Font-Family-Body-Semibold-Weight);
+  --Body-Bold-Font-Weight: var(--Set-Font-Family-Body-Bold-Weight);
 }
 [data-platform="IOS-Tablet"][data-fonts] {
-  --Platform-Family-Body: var(--Set-Font-Family-Body);
-  --Platform-Family-Header: var(--Set-Font-Family-Header);
-  --Platform-Family-Decorative: var(--Set-Font-Family-Decorative);
+  --Body-Font-Family: var(--Set-Font-Family-Body);
+  --Header-Font-Family: var(--Set-Font-Family-Header);
+  --Header-Font-Weight: var(--Set-Font-Family-Header-Weight);
+  --Decorative-Font-Family: var(--Set-Font-Family-Decorative);
+  --Decorative-Font-Weight: var(--Set-Font-Family-Decorative-Weight);
+  --Body-Font-Weight: var(--Set-Font-Family-Body-Weight);
+  --Body-Semibold-Font-Weight: var(--Set-Font-Family-Body-Semibold-Weight);
+  --Body-Bold-Font-Weight: var(--Set-Font-Family-Body-Bold-Weight);
 }
 [data-platform="Android"][data-fonts] {
-  --Platform-Family-Body: var(--Set-Font-Family-Body);
-  --Platform-Family-Header: var(--Set-Font-Family-Header);
-  --Platform-Family-Decorative: var(--Set-Font-Family-Decorative);
+  --Body-Font-Family: var(--Set-Font-Family-Body);
+  --Header-Font-Family: var(--Set-Font-Family-Header);
+  --Header-Font-Weight: var(--Set-Font-Family-Header-Weight);
+  --Decorative-Font-Family: var(--Set-Font-Family-Decorative);
+  --Decorative-Font-Weight: var(--Set-Font-Family-Decorative-Weight);
+  --Body-Font-Weight: var(--Set-Font-Family-Body-Weight);
+  --Body-Semibold-Font-Weight: var(--Set-Font-Family-Body-Semibold-Weight);
+  --Body-Bold-Font-Weight: var(--Set-Font-Family-Body-Bold-Weight);
 }
 
 [data-platform="IOS-Mobile"][data-fonts="Default"] {
-  --Platform-Family-Body: "SF Pro";
-  --Platform-Family-Header: "SF Pro";
-  --Platform-Family-Decorative: "SF Pro";
+  --Body-Font-Family: "SF Pro";
+  --Header-Font-Family: "SF Pro";
+  --Header-Font-Weight: var(--Set-Font-Family-Header-Weight);
+  --Decorative-Font-Family: "SF Pro";
+  --Decorative-Font-Weight: var(--Set-Font-Family-Decorative-Weight);
+  --Body-Font-Weight: var(--Set-Font-Family-Body-Weight);
+  --Body-Semibold-Font-Weight: var(--Set-Font-Family-Body-Semibold-Weight);
+  --Body-Bold-Font-Weight: var(--Set-Font-Family-Body-Bold-Weight);
 }
 [data-platform="IOS-Tablet"][data-fonts="Default"] {
-  --Platform-Family-Body: "SF Pro";
-  --Platform-Family-Header: "SF Pro";
-  --Platform-Family-Decorative: "SF Pro";
+  --Body-Font-Family: "SF Pro";
+  --Header-Font-Family: "SF Pro";
+  --Header-Font-Weight: var(--Set-Font-Family-Header-Weight);
+  --Decorative-Font-Family: "SF Pro";
+  --Decorative-Font-Weight: var(--Set-Font-Family-Decorative-Weight);
+  --Body-Font-Weight: var(--Set-Font-Family-Body-Weight);
+  --Body-Semibold-Font-Weight: var(--Set-Font-Family-Body-Semibold-Weight);
+  --Body-Bold-Font-Weight: var(--Set-Font-Family-Body-Bold-Weight);
 }
 [data-platform="Android"][data-fonts="Default"] {
-  --Platform-Font-Family-Body: "Roboto";
-  --Platform-Font-Family-Header: "Roboto";
-  --Platform-Font-Family-Decorative: "Roboto";
+  --Body-Font-Family: "Roboto";
+  --Header-Font-Family: "Roboto";
+  --Header-Font-Weight: var(--Set-Font-Family-Header-Weight);
+  --Decorative-Font-Family: "Roboto";
+  --Decorative-Font-Weight: var(--Set-Font-Family-Decorative-Weight);
+  --Body-Font-Weight: var(--Set-Font-Family-Body-Weight);
+  --Body-Semibold-Font-Weight: var(--Set-Font-Family-Body-Semibold-Weight);
+  --Body-Bold-Font-Weight: var(--Set-Font-Family-Body-Bold-Weight);
 }
 
 /* Desktop Defaults */
@@ -37,10 +81,10 @@
   --Platform-Label: "Desktop";
   --Button-Height: 32px;
   --Min-Button-Width: 80px;
-  --Set-Font-Family-Header: 'sans-serif', serif;
-  --Set-Font-Family-Header-Weight: 700;
-  --Set-Font-Family-Decorative: 'sans-serif', sans-serif;
-  --Set-Font-Family-Body: 'sans-serif', sans-serif;
+  --Set-Font-Family-Header: 'Playfair Display SC', serif;
+  --Set-Font-Family-Header-Weight: 200;
+  --Set-Font-Family-Decorative: 'Frank Ruhl Libre', sans-serif;
+  --Set-Font-Family-Body: 'Instrument Sans', sans-serif;
   --Set-Font-Family-Body-Weight: 400;
   --Set-Font-Family-Body-Semibold-Weight: 600;
   --Set-Font-Family-Body-Bold-Weight: 700;
@@ -208,7 +252,6 @@
 
 /* Decorative Font Application */
 /* Typography variants: Header uses body font by default, Decorative Header uses decorative font */
-/* In "surface-components" mode, surface-level elements get decorative font automatically */
 
 [data-surface="Surface"] [data-decorative],
 [data-surface="Surface-Dim"] [data-decorative],
@@ -218,7 +261,6 @@
   --Font-Family-Header-Weight: var(--Set-Font-Family-Header-Weight);
   --Font-Family-Overline: var(--Set-Font-Family-Decorative);
 }
-
 
 /* Explicit decorative variants — always available regardless of mode */
 [data-typography="decorative-header"] {

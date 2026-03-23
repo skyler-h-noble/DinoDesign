@@ -1,6 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Bitter&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Rufina&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display+SC&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre&display=swap');
 
 /* ========================================
  * Base CSS Variables
@@ -28,7 +28,7 @@
   --Surface-Bright: var(--Primary-Background-11-Surface-Bright);
   --Header: var(--Header-Surfaces-Primary-Color-11);
   --Text: var(--Text-Surfaces-Primary-Color-11);
-  --Text-Quiet: var(--Quiet-Surfaces-Primary-Color-11);
+  --Quiet: var(--Quiet-Surfaces-Primary-Color-11);
   --Border: var(--Border-Surfaces-Primary-Color-11);
   --Border-Variant: var(--Border-Variant-Surfaces-Primary-Color-11);
   --Hotlink: var(--Text-Surfaces-Info-Color-11);
@@ -122,7 +122,24 @@
   --Buttons-Error-Light-Text: var(--Text-Surfaces-Error-Color-12);
   --Buttons-Error-Light-Border: var(--Border-Containers-Error-Color-11);
   --Buttons-Error-Light-Hover: var(--Hover-Error-Color-12);
-  --Buttons-Error-Light-Active: var(--Active-Error-12);
+  --Buttons-Error-Light-Active: var(--Active-Error-Color-12);
+  --Buttons-BlackWhite-Light-Button: var(--White);
+  --Buttons-BlackWhite-Light-Text: var(--Text-Surfaces-BW-Button-Color-1);
+  --Buttons-BlackWhite-Light-Hover: var(--Hover-Neutral-Color-13);
+  --Buttons-BlackWhite-Light-Active: var(--Active-Neutral-Color-14);
+  --Buttons-BlackWhite-Medium-Button: var(--Neutral-Color-1);
+  --Buttons-BlackWhite-Medium-Text: var(--Text-Surfaces-BW-Button-Color-14);
+  --Buttons-BlackWhite-Medium-Hover: var(--Hover-Neutral-Color-1);
+  --Buttons-BlackWhite-Medium-Active: var(--Active-Neutral-Color-1);
+  --Buttons-Default-Button: var(--Default-Button-Default-Medium-Button);
+  --Buttons-Default-Text: var(--Default-Button-Default-Medium-Text);
+  --Buttons-Default-Border: var(--Default-Button-Border-Surfaces-Default-Color-11);
+  --Buttons-Default-Hover: var(--Default-Button-Default-Medium-Hover);
+  --Buttons-Default-Active: var(--Default-Button-Default-Medium-Active);
+  --Buttons-Default-Light-Button: var(--Default-Button-Default-Light-Button);
+  --Buttons-Default-Light-Text: var(--Default-Button-Default-Light-Text);
+  --Buttons-Default-Light-Hover: var(--Default-Button-Default-Light-Hover);
+  --Buttons-Default-Light-Active: var(--Default-Button-Default-Light-Active);
   --Icons-Default: var(--Icon-Surfaces-Neutral-Color-11);
   --Icons-Default-Variant: var(--Icon-Variant-Surfaces-Neutral-Color-11);
   --Icons-Primary: var(--Icon-Surfaces-Primary-Color-11);
@@ -143,7 +160,7 @@
   --Icons-Error-Variant: var(--Icon-Variant-Surfaces-Error-Color-11);
 }
 
-[data-theme][data-theme="Default"] {
+:root {
   /* ========================================
    * Chart Colors
    * Direct hex values for data visualization
@@ -153,174 +170,78 @@
   --Chart-Lines: #e2e2e2;
 
   /* Solid Chart Colors */
-  --Chart-1: #e8f2ff;
-  --Chart-2: #efefff;
-  --Chart-3: #ffeedb;
-  --Chart-4: #eeecff;
-  --Chart-5: #d1fcd3;
-  --Chart-6: #ffe9c3;
-  --Chart-7: #ffe0dc;
+  --Chart-1: #f8f0dc;
+  --Chart-2: #ffebe6;
+  --Chart-3: #ebf3ea;
+  --Chart-4: #eeefff;
+  --Chart-5: #dff7e4;
+  --Chart-6: #ffedd3;
+  --Chart-7: #ffe8e3;
   --Chart-8: #f1f1f1;
-  --Chart-9: #cde5ff;
-  --Chart-10: #dde1ff;
+  --Chart-9: #eee2be;
+  --Chart-10: #ffd9d2;
 
   /* Opaque Chart Colors (50% opacity) */
-  --Chart-1-Opaque: rgba(232, 242, 255, 0.5);
-  --Chart-2-Opaque: rgba(239, 239, 255, 0.5);
-  --Chart-3-Opaque: rgba(255, 238, 219, 0.5);
-  --Chart-4-Opaque: rgba(238, 236, 255, 0.5);
-  --Chart-5-Opaque: rgba(209, 252, 211, 0.5);
-  --Chart-6-Opaque: rgba(255, 233, 195, 0.5);
-  --Chart-7-Opaque: rgba(255, 224, 220, 0.5);
+  --Chart-1-Opaque: rgba(248, 240, 220, 0.5);
+  --Chart-2-Opaque: rgba(255, 235, 230, 0.5);
+  --Chart-3-Opaque: rgba(235, 243, 234, 0.5);
+  --Chart-4-Opaque: rgba(238, 239, 255, 0.5);
+  --Chart-5-Opaque: rgba(223, 247, 228, 0.5);
+  --Chart-6-Opaque: rgba(255, 237, 211, 0.5);
+  --Chart-7-Opaque: rgba(255, 232, 227, 0.5);
   --Chart-8-Opaque: rgba(241, 241, 241, 0.5);
-  --Chart-9-Opaque: rgba(205, 229, 255, 0.5);
-  --Chart-10-Opaque: rgba(221, 225, 255, 0.5);
+  --Chart-9-Opaque: rgba(238, 226, 190, 0.5);
+  --Chart-10-Opaque: rgba(255, 217, 210, 0.5);
 
   /* ========================================
    * Effect Levels (Box Shadows)
    * ======================================== */
 
 
- --Set-Font-Family-Header: "Bitter", serif;
+ --Set-Font-Family-Header: "Playfair Display SC", serif;
  --Set-Font-Family-Header-Weight: 200;
- --Set-Font-Family-Body: "Rufina", cursive;
+ --Set-Font-Family-Body: "Instrument Sans", sans-serif;
  --Set-Font-Family-Body-Weight: 400;
  --Set-Font-Family-Body-Semibold-Weight: 600;
  --Set-Font-Family-Body-Bold-Weight: 700;
- --Set-Font-Family-Decorative: "DM Serif Display", serif;
- --Set-Font-Family-Decorative-Weight: 400;
+ --Set-Font-Family-Decorative: "Frank Ruhl Libre", serif;
+ --Set-Font-Family-Decorative-Weight: 200;
 }
 
 
-/* ========================================
- * Style Variants
- * Use data-style attribute to apply
- * ======================================== */
-
-[data-style] {
-  --Shadow-1: 0px 0px 0px 1px #eeeeee;
-  --Shadow-2: 0px 0px 0px 0px rgba(0, 0, 0, 0.0);
-  --Style-Border-Radius: 8px;
-  --Style-Gradient-Color-1: var(--Buttons-Primary-Button);
-  --Style-Gradient-Color-2: var(--Buttons-Primary-Button);
-  --Style-Gradient-Angle: 0;
+:root {
+  --Button-Radius: 8px;
+  --Card-Radius: 11px;
+  --Card-Padding: 16px;
 }
 
-[data-style="Professional"] {
-  --Shadow-1: 0px 0px 0px 1px #eeeeee;
-  --Shadow-2: 0px 0px 0px 0px rgba(0, 0, 0, 0.0);
-  --Style-Border-Radius: 4px;
-  --Style-Gradient-Color-1: var(--Buttons-Primary-Button);
-  --Style-Gradient-Color-2: var(--Buttons-Primary-Button);
-  --Style-Gradient-Angle: 0;
-}
-
-[data-style="Modern"] {
-  --Shadow-1: 0px 0px 0px 1px #eeeeee;
-  --Shadow-2: 0px 0px 0px 0px rgba(0, 0, 0, 0.0);
-  --Style-Border-Radius: 8px;
-  --Style-Gradient-Color-1: var(--Buttons-Primary-Button);
-  --Style-Gradient-Color-2: var(--Buttons-Primary-Button);
-  --Style-Gradient-Angle: 0;
-}
-
-[data-style="Bold"] {
-  --Shadow-1: 0px 0px 0px 1px #eeeeee;
-  --Shadow-2: 0px 0px 0px 0px rgba(0, 0, 0, 0.0);
-  --Style-Border-Radius: 16px;
-  --Style-Gradient-Color-1: var(--Buttons-Primary-Button);
-  --Style-Gradient-Color-2: var(--Buttons-Primary-Button);
-  --Style-Gradient-Angle: 0;
-}
-
-[data-style="Playful"] {
-  --Shadow-1: 0px 0px 0px 1px #eeeeee;
-  --Shadow-2: 0px 0px 0px 0px rgba(0, 0, 0, 0.0);
-  --Style-Border-Radius: 40px;
-  --Style-Gradient-Color-1: var(--Buttons-Primary-Button);
-  --Style-Gradient-Color-2: var(--Buttons-Primary-Button);
-  --Style-Gradient-Angle: 0;
-}
-
-/* ========================================
- * Surfaces/Containers Data Attributes
- * Use data-surface attribute to apply
- * ======================================== */
-
-
-[data-surface] [data-surface="Surface"] {
-  --Background: var(--Surface);
-  --Effects: var(--Effect-Level-1);
-}
-
-[data-surface] [data-surface="Surface-Dim"] {
-  --Background: var(--Surface-Dim);
-  --Effects: var(--Effect-Level-1);
-}
-
-[data-surface] [data-surface="Surface-Bright"] {
-  --Background: var(--Surface-Bright);
-  --Effects: var(--Effect-Level-1);
-}
-
-[data-surface] [data-surface="Container"] {
-  --Background: var(--Container);
-  --Effects: var(--Effect-Level-2);
-}
-
-[data-surface] [data-surface="Container-Low"] {
-  --Background: var(--Container-Low);
-  --Effects: var(--Effect-Level-2);
-}
-
-[data-surface] [data-surface="Container-Lowest"] {
-  --Background: var(--Container-Lowest);
-  --Effects: var(--Effect-Level-2);
-}
-
-[data-surface] [data-surface="Container-High"] {
-  --Background: var(--Container-High);
-  --Effects: var(--Effect-Level-2);
-}
-
-[data-surface] [data-surface="Container-Highest"] {
-  --Background: var(--Container-Highest);
-  --Effects: var(--Effect-Level-2);
-}
 
 /* ========================================
  * Surface Background Mapping
  * Maps --Background to surface types
  * ======================================== */
 
-[data-surface="Surface"] {
-  --Background: var(--Surface);
-}
-
-[data-surface="Surface-Dim"] {
-  --Background: var(--Surface-Dim);
-}
-
-[data-surface="Surface-Bright"] {
-  --Background: var(--Surface-Bright);
-}
-
 [data-surface="Container"] {
   --Background: var(--Container);
+  --Dropshadow-Color: 20, 20, 20;
 }
 
 [data-surface="Container-Low"] {
   --Background: var(--Container-Low);
+  --Dropshadow-Color: 20, 20, 20;
 }
 
 [data-surface="Container-Lowest"] {
   --Background: var(--Container-Lowest);
+  --Dropshadow-Color: 20, 20, 20;
 }
 
 [data-surface="Container-High"] {
   --Background: var(--Container-High);
+  --Dropshadow-Color: 20, 20, 20;
 }
 
 [data-surface="Container-Highest"] {
   --Background: var(--Container-Highest);
+  --Dropshadow-Color: 20, 20, 20;
 }

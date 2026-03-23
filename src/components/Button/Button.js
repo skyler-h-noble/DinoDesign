@@ -218,7 +218,7 @@ function getSizingStyles({ size, iconOnly, letterNumber, avatar }) {
   // Icon / Avatar — no padding, fixed square
   if (iconOnly) {
     const squareSize = size === 'small' ? '24px' : 
-                       size === 'large' ? '56px' : 
+                       size === 'large' ? '64px' : 
                        'var(--Button-Height)';
     const fontSize = avatar
       ? (size === 'small' ? '12px' : size === 'large' ? '18px' : '14px')
@@ -234,9 +234,13 @@ function getSizingStyles({ size, iconOnly, letterNumber, avatar }) {
 
   // Letter / Number — no maxWidth, grows with content, no padding on shell
   if (letterNumber) {
+    const letterHeight = size === 'small' ? '24px'
+                       : size === 'large' ? '64px'
+                       : 'var(--Button-Height)';
     return {
       ...base,
-      minWidth: size === 'medium' ? 'var(--Button-Height)' : base.minWidth,
+      minHeight: letterHeight,
+      minWidth:  letterHeight,
       padding: '0',
     };
   }
@@ -341,7 +345,7 @@ export function Button({
     if (avatar && children) {
       // Avatar must fill entire button
       const avatarSize = size === 'small' ? '24px' : 
-                        size === 'large' ? '56px' : 
+                        size === 'large' ? '64px' : 
                         'var(--Button-Height)';
       const avatarFontSize = size === 'small' ? '12px' :
                              size === 'large' ? '18px' : '14px';

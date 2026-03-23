@@ -5,207 +5,534 @@ import { Box } from '@mui/material';
 /**
  * Typography Component
  *
- * STYLES (textStyle prop):
- *   h1..h6         Header font family, H{n}-* design token vars
- *   body / body-medium            Body font family, Body-* vars
- *   body-semibold / body-medium-semibold
- *   body-bold / body-medium-bold
- *   body-small                   Body-Small-* vars
- *   body-small-semibold
- *   body-small-bold
- *   body-large                   Body-Large-* vars
- *   body-large-semibold
- *   body-large-bold
- *   button         Font-Family-Body, Button-* vars
- *   label          Font-Family-Body, Label-* vars
- *   caption        Small helper text (Body-Small vars, quiet default)
- *   overline       Small uppercase text (Label vars, uppercase)
+ * All font values are driven by CSS custom properties so that a single
+ * [data-platform="Desktop|IOS-Mobile|IOS-Tablet|Android"] attribute on
+ * the root element swaps every style automatically via typography-tokens.css.
  *
- * HEADER COLORS (for h1–h6):
- *   default    var(--Header)
- *   primary    var(--Header-Primary)
- *   secondary  var(--Header-Secondary)
- *   tertiary   var(--Header-Tertiary)
- *   neutral    var(--Header-Neutral)
- *   info       var(--Header-Info)
- *   success    var(--Header-Success)
- *   warning    var(--Header-Warning)
- *   error      var(--Header-Error)
+ * STYLE MAP KEYS (textStyle prop):
  *
- * TEXT COLORS (for body, label, caption, overline):
- *   default    var(--Text)
- *   quiet      var(--Quiet)
- *   primary    var(--Text-Primary)
- *   secondary  var(--Text-Secondary)
- *   tertiary   var(--Text-Tertiary)
- *   neutral    var(--Text-Neutral)
- *   info       var(--Text-Info)
- *   success    var(--Text-Success)
- *   warning    var(--Text-Warning)
- *   error      var(--Text-Error)
+ *   Display
+ *     display-large | display-small
+ *
+ *   Headers
+ *     h1 | h2 | h3 | h4 | h5 | h6
+ *
+ *   Subtitles
+ *     subtitle-large | subtitle | subtitle-small
+ *
+ *   Body
+ *     body-small | body-small-semibold | body-small-bold
+ *     body       | body-semibold       | body-bold         (medium)
+ *     body-large | body-large-semibold | body-large-bold
+ *
+ *   Captions
+ *     caption | caption-bold
+ *
+ *   Labels
+ *     label-extra-small | label-small | label | label-large
+ *
+ *   Legal
+ *     legal | legal-semibold
+ *
+ *   Overline
+ *     overline-small | overline | overline-large
+ *
+ *   Number
+ *     number-small | number-medium | number-large
+ *
+ *   Buttons
+ *     button-extra-small | button-small | button
+ *
+ * HEADER COLORS (h1–h6, display, subtitle):
+ *   default | primary | secondary | tertiary | neutral |
+ *   info | success | warning | error
+ *
+ * TEXT COLORS (all other styles):
+ *   default | quiet | primary | secondary | tertiary | neutral |
+ *   info | success | warning | error
  *
  * WIDTH:
- *   hug   inline, fit-content (default for inline styles)
- *   fill  block, width 100% (default for block styles)
+ *   hug   inline, fit-content
+ *   fill  block, width 100% (default for block-level styles)
  */
 
+// ─── Token helpers ────────────────────────────────────────────────────────────
+
+const ff  = (token) => `var(--Font-Family-${token})`;
+const fs  = (token) => `var(--${token}-Font-Size)`;
+const fw  = (token) => `var(--${token}-Font-Weight)`;
+const lh  = (token) => `calc(var(--${token}-Line-Height) * var(--Cognitive-Multiplier, 1))`;
+const lhr = (token) => `var(--${token}-Line-Height)`;   // no multiplier (UI chrome)
+const ls  = (token) => `var(--${token}-Letter-Spacing)`;
+
+// ─── Style Map ────────────────────────────────────────────────────────────────
+
 const STYLE_MAP = {
+
+  // ── Display ──────────────────────────────────────────────────────────────
+  'display-large': {
+    component: 'h1',
+    fontFamily: ff('Header'),
+    fontSize: fs('Display-Large'),
+    fontWeight: fw('Display-Large'),
+    lineHeight: lh('Display-Large'),
+    letterSpacing: ls('Display-Large'),
+    defaultColor: 'header',
+    defaultWidth: 'fill',
+  },
+  'display-small': {
+    component: 'h2',
+    fontFamily: ff('Header'),
+    fontSize: fs('Display-Small'),
+    fontWeight: fw('Display-Small'),
+    lineHeight: lh('Display-Small'),
+    letterSpacing: ls('Display-Small'),
+    defaultColor: 'header',
+    defaultWidth: 'fill',
+  },
+
+  // ── Headers ───────────────────────────────────────────────────────────────
   h1: {
     component: 'h1',
-    fontFamily: 'var(--Font-Family-Header)',
-    lineHeight: 'calc(var(--H1-Line-Height) * var(--Cognitive-Multiplier, 1))',
-    fontSize: 'var(--H1-Font-Size)',
-    fontWeight: 'var(--H1-Font-Weight)',
-    letterSpacing: 'var(--H1-Letter-Spacing)',
+    fontFamily: ff('Header'),
+    fontSize: fs('H1'),
+    fontWeight: fw('H1'),
+    lineHeight: lh('H1'),
+    letterSpacing: ls('H1'),
     defaultColor: 'header',
     defaultWidth: 'fill',
   },
   h2: {
     component: 'h2',
-    fontFamily: 'var(--Font-Family-Header)',
-    lineHeight: 'calc(var(--H2-Line-Height) * var(--Cognitive-Multiplier, 1))',
-    fontSize: 'var(--H2-Font-Size)',
-    fontWeight: 'var(--H2-Font-Weight)',
-    letterSpacing: 'var(--H2-Letter-Spacing)',
+    fontFamily: ff('Header'),
+    fontSize: fs('H2'),
+    fontWeight: fw('H2'),
+    lineHeight: lh('H2'),
+    letterSpacing: ls('H2'),
     defaultColor: 'header',
     defaultWidth: 'fill',
   },
   h3: {
     component: 'h3',
-    fontFamily: 'var(--Font-Family-Header)',
-    lineHeight: 'calc(var(--H3-Line-Height) * var(--Cognitive-Multiplier, 1))',
-    fontSize: 'var(--H3-Font-Size)',
-    fontWeight: 'var(--H3-Font-Weight)',
-    letterSpacing: 'var(--H3-Letter-Spacing)',
+    fontFamily: ff('Header'),
+    fontSize: fs('H3'),
+    fontWeight: fw('H3'),
+    lineHeight: lh('H3'),
+    letterSpacing: ls('H3'),
     defaultColor: 'header',
     defaultWidth: 'fill',
   },
   h4: {
     component: 'h4',
-    fontFamily: 'var(--Font-Family-Header)',
-    lineHeight: 'calc(var(--H4-Line-Height) * var(--Cognitive-Multiplier, 1))',
-    fontSize: 'var(--H4-Font-Size)',
-    fontWeight: 'var(--H4-Font-Weight)',
-    letterSpacing: 'var(--H4-Letter-Spacing)',
+    fontFamily: ff('Header'),
+    fontSize: fs('H4'),
+    fontWeight: fw('H4'),
+    lineHeight: lh('H4'),
+    letterSpacing: ls('H4'),
     defaultColor: 'header',
     defaultWidth: 'fill',
   },
   h5: {
     component: 'h5',
-    fontFamily: 'var(--Font-Family-Header)',
-    lineHeight: 'calc(var(--H5-Line-Height) * var(--Cognitive-Multiplier, 1))',
-    fontSize: 'var(--H5-Font-Size)',
-    fontWeight: 'var(--H5-Font-Weight)',
-    letterSpacing: 'var(--H5-Letter-Spacing)',
+    fontFamily: ff('Header'),
+    fontSize: fs('H5'),
+    fontWeight: fw('H5'),
+    lineHeight: lh('H5'),
+    letterSpacing: ls('H5'),
     defaultColor: 'header',
     defaultWidth: 'fill',
   },
   h6: {
     component: 'h6',
-    fontFamily: 'var(--Font-Family-Header)',
-    lineHeight: 'calc(var(--H6-Line-Height) * var(--Cognitive-Multiplier, 1))',
-    fontSize: 'var(--H6-Font-Size)',
-    fontWeight: 'var(--H6-Font-Weight)',
-    letterSpacing: 'var(--H6-Letter-Spacing)',
+    fontFamily: ff('Header'),
+    fontSize: fs('H6'),
+    fontWeight: fw('H6'),
+    lineHeight: lh('H6'),
+    letterSpacing: ls('H6'),
     defaultColor: 'header',
     defaultWidth: 'fill',
   },
-  body: {
+
+  // ── Subtitles ─────────────────────────────────────────────────────────────
+  'subtitle-large': {
     component: 'p',
-    fontFamily: 'var(--Body-Font-Family)',
-    lineHeight: 'calc(var(--Body-Line-Height) * var(--Cognitive-Multiplier, 1))',
-    fontSize: 'var(--Body-Font-Size)',
-    fontWeight: 'var(--Body-Font-Weight)',
-    letterSpacing: 'var(--Body-Letter-Spacing)',
-    defaultColor: 'standard',
+    fontFamily: ff('Body'),
+    fontSize: fs('Subtitle-Large'),
+    fontWeight: fw('Subtitle-Large'),
+    lineHeight: lh('Subtitle-Large'),
+    letterSpacing: ls('Subtitle-Large'),
+    defaultColor: 'header',
     defaultWidth: 'fill',
   },
+  subtitle: {
+    component: 'p',
+    fontFamily: ff('Body'),
+    fontSize: fs('Subtitle-Small'),
+    fontWeight: fw('Subtitle-Small'),
+    lineHeight: lh('Subtitle-Small'),
+    letterSpacing: ls('Subtitle-Small'),
+    defaultColor: 'header',
+    defaultWidth: 'fill',
+  },
+  'subtitle-small': {
+    component: 'p',
+    fontFamily: ff('Body'),
+    fontSize: fs('Subtitle-Small'),
+    fontWeight: fw('Subtitle-Small'),
+    lineHeight: lh('Subtitle-Small'),
+    letterSpacing: ls('Subtitle-Small'),
+    defaultColor: 'header',
+    defaultWidth: 'fill',
+  },
+
+  // ── Body Small ────────────────────────────────────────────────────────────
   'body-small': {
     component: 'p',
-    fontFamily: 'var(--Body-Font-Family)',
-    lineHeight: 'calc(var(--Body-Small-Line-Height) * var(--Cognitive-Multiplier, 1))',
-    fontSize: 'var(--Body-Small-Font-Size)',
-    fontWeight: 'var(--Body-Font-Weight)',
-    letterSpacing: 'var(--Body-Small-Letter-Spacing)',
+    fontFamily: ff('Body'),
+    fontSize: fs('Body-Small'),
+    fontWeight: fw('Body-Small'),
+    lineHeight: lh('Body-Small'),
+    letterSpacing: ls('Body-Small'),
     defaultColor: 'standard',
     defaultWidth: 'fill',
   },
-  'body-large': {
+  'body-small-semibold': {
     component: 'p',
-    fontFamily: 'var(--Body-Font-Family)',
-    lineHeight: 'calc(var(--Body-Large-Line-Height) * var(--Cognitive-Multiplier, 1))',
-    fontSize: 'var(--Body-Large-Font-Size)',
-    fontWeight: 'var(--Body-Font-Weight)',
-    letterSpacing: 'var(--Body-Large-Letter-Spacing)',
+    fontFamily: ff('Body'),
+    fontSize: fs('Body-Small'),
+    fontWeight: fw('Body-Small-Semibold'),
+    lineHeight: lh('Body-Small'),
+    letterSpacing: ls('Body-Small'),
+    defaultColor: 'standard',
+    defaultWidth: 'fill',
+  },
+  'body-small-bold': {
+    component: 'p',
+    fontFamily: ff('Body'),
+    fontSize: fs('Body-Small'),
+    fontWeight: fw('Body-Small-Bold'),
+    lineHeight: lh('Body-Small'),
+    letterSpacing: ls('Body-Small'),
+    defaultColor: 'standard',
+    defaultWidth: 'fill',
+  },
+
+  // ── Body Medium ───────────────────────────────────────────────────────────
+  body: {
+    component: 'p',
+    fontFamily: ff('Body'),
+    fontSize: fs('Body-Medium'),
+    fontWeight: fw('Body-Medium'),
+    lineHeight: lh('Body-Medium'),
+    letterSpacing: ls('Body-Medium'),
+    defaultColor: 'standard',
+    defaultWidth: 'fill',
+  },
+  'body-medium': {
+    component: 'p',
+    fontFamily: ff('Body'),
+    fontSize: fs('Body-Medium'),
+    fontWeight: fw('Body-Medium'),
+    lineHeight: lh('Body-Medium'),
+    letterSpacing: ls('Body-Medium'),
     defaultColor: 'standard',
     defaultWidth: 'fill',
   },
   'body-semibold': {
     component: 'p',
-    fontFamily: 'var(--Body-Font-Family)',
-    lineHeight: 'calc(var(--Body-Line-Height) * var(--Cognitive-Multiplier, 1))',
-    fontSize: 'var(--Body-Font-Size)',
-    fontWeight: 'var(--Body-Semibold-Font-Weight)',
-    letterSpacing: 'var(--Body-Letter-Spacing)',
+    fontFamily: ff('Body'),
+    fontSize: fs('Body-Medium'),
+    fontWeight: fw('Body-Medium-Semibold'),
+    lineHeight: lh('Body-Medium'),
+    letterSpacing: ls('Body-Medium'),
+    defaultColor: 'standard',
+    defaultWidth: 'fill',
+  },
+  'body-medium-semibold': {
+    component: 'p',
+    fontFamily: ff('Body'),
+    fontSize: fs('Body-Medium'),
+    fontWeight: fw('Body-Medium-Semibold'),
+    lineHeight: lh('Body-Medium'),
+    letterSpacing: ls('Body-Medium'),
     defaultColor: 'standard',
     defaultWidth: 'fill',
   },
   'body-bold': {
     component: 'p',
-    fontFamily: 'var(--Body-Font-Family)',
-    lineHeight: 'calc(var(--Body-Line-Height) * var(--Cognitive-Multiplier, 1))',
-    fontSize: 'var(--Body-Font-Size)',
-    fontWeight: 'var(--Body-Bold-Font-Weight)',
-    letterSpacing: 'var(--Body-Letter-Spacing)',
+    fontFamily: ff('Body'),
+    fontSize: fs('Body-Medium'),
+    fontWeight: fw('Body-Medium-Bold'),
+    lineHeight: lh('Body-Medium'),
+    letterSpacing: ls('Body-Medium'),
     defaultColor: 'standard',
     defaultWidth: 'fill',
   },
-  button: {
+  'body-medium-bold': {
+    component: 'p',
+    fontFamily: ff('Body'),
+    fontSize: fs('Body-Medium'),
+    fontWeight: fw('Body-Medium-Bold'),
+    lineHeight: lh('Body-Medium'),
+    letterSpacing: ls('Body-Medium'),
+    defaultColor: 'standard',
+    defaultWidth: 'fill',
+  },
+
+  // ── Body Large ────────────────────────────────────────────────────────────
+  'body-large': {
+    component: 'p',
+    fontFamily: ff('Body'),
+    fontSize: fs('Body-Large'),
+    fontWeight: fw('Body-Large'),
+    lineHeight: lh('Body-Large'),
+    letterSpacing: ls('Body-Large'),
+    defaultColor: 'standard',
+    defaultWidth: 'fill',
+  },
+  'body-large-semibold': {
+    component: 'p',
+    fontFamily: ff('Body'),
+    fontSize: fs('Body-Large'),
+    fontWeight: fw('Body-Large-Semibold'),
+    lineHeight: lh('Body-Large'),
+    letterSpacing: ls('Body-Large'),
+    defaultColor: 'standard',
+    defaultWidth: 'fill',
+  },
+  'body-large-bold': {
+    component: 'p',
+    fontFamily: ff('Body'),
+    fontSize: fs('Body-Large'),
+    fontWeight: fw('Body-Large-Bold'),
+    lineHeight: lh('Body-Large'),
+    letterSpacing: ls('Body-Large'),
+    defaultColor: 'standard',
+    defaultWidth: 'fill',
+  },
+
+  // ── Captions ──────────────────────────────────────────────────────────────
+  caption: {
     component: 'span',
-    fontFamily: 'var(--Font-Family-Body)',
-    lineHeight: 'var(--Button-Line-Height)',
-    fontSize: 'var(--Button-Font-Size)',
-    fontWeight: 'var(--Button-Font-Weight)',
-    letterSpacing: 'var(--Button-Letter-Spacing)',
+    fontFamily: ff('Body'),
+    fontSize: fs('Caption'),
+    fontWeight: fw('Caption'),
+    lineHeight: lh('Caption'),
+    letterSpacing: ls('Caption'),
+    defaultColor: 'quiet',
+    defaultWidth: 'hug',
+  },
+  'caption-bold': {
+    component: 'span',
+    fontFamily: ff('Body'),
+    fontSize: fs('Caption'),
+    fontWeight: fw('Caption-Bold'),
+    lineHeight: lh('Caption'),
+    letterSpacing: ls('Caption'),
+    defaultColor: 'quiet',
+    defaultWidth: 'hug',
+  },
+
+  // ── Labels ────────────────────────────────────────────────────────────────
+  'label-extra-small': {
+    component: 'label',
+    fontFamily: ff('Body'),
+    fontSize: fs('Label-ExtraSmall'),
+    fontWeight: fw('Label-ExtraSmall'),
+    lineHeight: lhr('Label-ExtraSmall'),
+    letterSpacing: ls('Label-ExtraSmall'),
+    defaultColor: 'standard',
+    defaultWidth: 'hug',
+  },
+  'label-small': {
+    component: 'label',
+    fontFamily: ff('Body'),
+    fontSize: fs('Label-Small'),
+    fontWeight: fw('Label-Small'),
+    lineHeight: lhr('Label-Small'),
+    letterSpacing: ls('Label-Small'),
     defaultColor: 'standard',
     defaultWidth: 'hug',
   },
   label: {
     component: 'label',
-    fontFamily: 'var(--Font-Family-Body)',
-    lineHeight: 'var(--Label-Line-Height)',
-    fontSize: 'var(--Label-Font-Size)',
-    fontWeight: 'var(--Label-Font-Weight)',
-    letterSpacing: 'var(--Label-Letter-Spacing)',
+    fontFamily: ff('Body'),
+    fontSize: fs('Label-Medium'),
+    fontWeight: fw('Label-Medium'),
+    lineHeight: lhr('Label-Medium'),
+    letterSpacing: ls('Label-Medium'),
     defaultColor: 'standard',
     defaultWidth: 'hug',
   },
-  caption: {
+  'label-medium': {
+    component: 'label',
+    fontFamily: ff('Body'),
+    fontSize: fs('Label-Medium'),
+    fontWeight: fw('Label-Medium'),
+    lineHeight: lhr('Label-Medium'),
+    letterSpacing: ls('Label-Medium'),
+    defaultColor: 'standard',
+    defaultWidth: 'hug',
+  },
+  'label-large': {
+    component: 'label',
+    fontFamily: ff('Body'),
+    fontSize: fs('Label-Large'),
+    fontWeight: fw('Label-Large'),
+    lineHeight: lhr('Label-Large'),
+    letterSpacing: ls('Label-Large'),
+    defaultColor: 'standard',
+    defaultWidth: 'hug',
+  },
+
+  // ── Legal ─────────────────────────────────────────────────────────────────
+  legal: {
     component: 'span',
-    fontFamily: 'var(--Body-Font-Family)',
-    lineHeight: 'calc(var(--Body-Small-Line-Height) * var(--Cognitive-Multiplier, 1))',
-    fontSize: 'var(--Body-Small-Font-Size)',
-    fontWeight: 'var(--Body-Font-Weight)',
-    letterSpacing: 'var(--Body-Small-Letter-Spacing)',
+    fontFamily: ff('Body'),
+    fontSize: fs('Legal'),
+    fontWeight: fw('Legal'),
+    lineHeight: lh('Legal'),
+    letterSpacing: ls('Legal'),
+    defaultColor: 'quiet',
+    defaultWidth: 'hug',
+  },
+  'legal-semibold': {
+    component: 'span',
+    fontFamily: ff('Body'),
+    fontSize: fs('Legal'),
+    fontWeight: fw('Legal-Semibold'),
+    lineHeight: lh('Legal'),
+    letterSpacing: ls('Legal'),
+    defaultColor: 'quiet',
+    defaultWidth: 'hug',
+  },
+
+  // ── Overline ──────────────────────────────────────────────────────────────
+  'overline-small': {
+    component: 'span',
+    fontFamily: ff('Body'),
+    fontSize: fs('Overline-Small'),
+    fontWeight: fw('Overline-Small'),
+    lineHeight: lhr('Overline-Small'),
+    letterSpacing: ls('Overline-Small'),
+    textTransform: 'uppercase',
     defaultColor: 'quiet',
     defaultWidth: 'hug',
   },
   overline: {
     component: 'span',
-    fontFamily: 'var(--Font-Family-Body)',
-    lineHeight: 'var(--Label-Line-Height)',
-    fontSize: 'var(--Label-Font-Size)',
-    fontWeight: 'var(--Label-Font-Weight)',
-    letterSpacing: '0.08em',
+    fontFamily: ff('Body'),
+    fontSize: fs('Overline-Medium'),
+    fontWeight: fw('Overline-Medium'),
+    lineHeight: lhr('Overline-Medium'),
+    letterSpacing: ls('Overline-Medium'),
     textTransform: 'uppercase',
     defaultColor: 'quiet',
+    defaultWidth: 'hug',
+  },
+  'overline-medium': {
+    component: 'span',
+    fontFamily: ff('Body'),
+    fontSize: fs('Overline-Medium'),
+    fontWeight: fw('Overline-Medium'),
+    lineHeight: lhr('Overline-Medium'),
+    letterSpacing: ls('Overline-Medium'),
+    textTransform: 'uppercase',
+    defaultColor: 'quiet',
+    defaultWidth: 'hug',
+  },
+  'overline-large': {
+    component: 'span',
+    fontFamily: ff('Body'),
+    fontSize: fs('Overline-Large'),
+    fontWeight: fw('Overline-Large'),
+    lineHeight: lhr('Overline-Large'),
+    letterSpacing: ls('Overline-Large'),
+    textTransform: 'uppercase',
+    defaultColor: 'quiet',
+    defaultWidth: 'hug',
+  },
+
+  // ── Number ────────────────────────────────────────────────────────────────
+  'number-small': {
+    component: 'span',
+    fontFamily: ff('Body'),
+    fontSize: fs('Number-Small'),
+    fontWeight: fw('Number-Small'),
+    lineHeight: lhr('Number-Small'),
+    letterSpacing: ls('Number-Small'),
+    fontVariantNumeric: 'tabular-nums',
+    defaultColor: 'standard',
+    defaultWidth: 'hug',
+  },
+  'number-medium': {
+    component: 'span',
+    fontFamily: ff('Body'),
+    fontSize: fs('Number-Medium'),
+    fontWeight: fw('Number-Medium'),
+    lineHeight: lhr('Number-Medium'),
+    letterSpacing: ls('Number-Medium'),
+    fontVariantNumeric: 'tabular-nums',
+    defaultColor: 'standard',
+    defaultWidth: 'hug',
+  },
+  'number-large': {
+    component: 'span',
+    fontFamily: ff('Body'),
+    fontSize: fs('Number-Large'),
+    fontWeight: fw('Number-Large'),
+    lineHeight: lhr('Number-Large'),
+    letterSpacing: ls('Number-Large'),
+    fontVariantNumeric: 'tabular-nums',
+    defaultColor: 'standard',
+    defaultWidth: 'hug',
+  },
+
+  // ── Buttons ───────────────────────────────────────────────────────────────
+  'button-extra-small': {
+    component: 'span',
+    fontFamily: ff('Body'),
+    fontSize: fs('Button-ExtraSmall'),
+    fontWeight: fw('Button-ExtraSmall'),
+    lineHeight: lhr('Button-ExtraSmall'),
+    letterSpacing: ls('Button-ExtraSmall'),
+    defaultColor: 'standard',
+    defaultWidth: 'hug',
+  },
+  'button-small': {
+    component: 'span',
+    fontFamily: ff('Body'),
+    fontSize: fs('Button-Small'),
+    fontWeight: fw('Button-Small'),
+    lineHeight: lhr('Button-Small'),
+    letterSpacing: ls('Button-Small'),
+    defaultColor: 'standard',
+    defaultWidth: 'hug',
+  },
+  button: {
+    component: 'span',
+    fontFamily: ff('Body'),
+    fontSize: fs('Button-Standard'),
+    fontWeight: fw('Button-Standard'),
+    lineHeight: lhr('Button-Standard'),
+    letterSpacing: ls('Button-Standard'),
+    defaultColor: 'standard',
+    defaultWidth: 'hug',
+  },
+  'button-standard': {
+    component: 'span',
+    fontFamily: ff('Body'),
+    fontSize: fs('Button-Standard'),
+    fontWeight: fw('Button-Standard'),
+    lineHeight: lhr('Button-Standard'),
+    letterSpacing: ls('Button-Standard'),
+    defaultColor: 'standard',
     defaultWidth: 'hug',
   },
 };
 
 // ─── Color Maps ───────────────────────────────────────────────────────────────
 
-// Header colors — h1..h6
 const HEADER_COLOR_MAP = {
   header:    'var(--Header)',
   default:   'var(--Header)',
@@ -219,11 +546,10 @@ const HEADER_COLOR_MAP = {
   error:     'var(--Header-Error)',
 };
 
-// Text colors — body, label, caption, overline, button
 const TEXT_COLOR_MAP = {
   standard:  'var(--Text)',
   default:   'var(--Text)',
-  quiet:     'var(--Quiet)',
+  quiet:     'var(--Text-Quiet)',
   primary:   'var(--Text-Primary)',
   secondary: 'var(--Text-Secondary)',
   tertiary:  'var(--Text-Tertiary)',
@@ -234,7 +560,11 @@ const TEXT_COLOR_MAP = {
   error:     'var(--Text-Error)',
 };
 
-const HEADING_STYLES = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
+const HEADING_STYLES = new Set([
+  'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+  'display-large', 'display-small',
+  'subtitle-large', 'subtitle', 'subtitle-small',
+]);
 
 function resolveColor(textStyle, color, defaultColor) {
   const isHeading = HEADING_STYLES.has(textStyle);
@@ -243,11 +573,14 @@ function resolveColor(textStyle, color, defaultColor) {
   return colorMap[key] || (isHeading ? HEADER_COLOR_MAP.header : TEXT_COLOR_MAP.standard);
 }
 
-// Exported for showcase use
+// ─── Exports for Showcase ─────────────────────────────────────────────────────
+
 export const TYPOGRAPHY_STYLES = Object.keys(STYLE_MAP);
 
 export const HEADER_COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
 export const TEXT_COLORS   = ['default', 'quiet', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+
+// ─── Core Component ───────────────────────────────────────────────────────────
 
 export function Typography({
   children,
@@ -264,12 +597,9 @@ export function Typography({
   const config = STYLE_MAP[textStyle] || STYLE_MAP.body;
 
   const colorValue = resolveColor(textStyle, color, config.defaultColor);
-
   const resolvedWidth = width || config.defaultWidth;
   const isFill = resolvedWidth === 'fill';
-
   const resolvedComponent = component || config.component;
-
   const colorKey = color || config.defaultColor;
 
   return (
@@ -282,22 +612,23 @@ export function Typography({
         ' ' + className
       }
       sx={{
-        fontFamily: config.fontFamily,
-        lineHeight: config.lineHeight,
-        fontSize: config.fontSize,
-        fontWeight: config.fontWeight,
-        letterSpacing: config.letterSpacing,
-        textTransform: config.textTransform || 'none',
-        color: colorValue,
-        display: isFill ? 'block' : 'inline',
-        width: isFill ? '100%' : 'auto',
-        margin: 0,
-        marginBottom: gutterBottom ? '0.5em' : 0,
-        padding: 0,
+        fontFamily:        config.fontFamily,
+        fontSize:          config.fontSize,
+        fontWeight:        config.fontWeight,
+        lineHeight:        config.lineHeight,
+        letterSpacing:     config.letterSpacing,
+        textTransform:     config.textTransform     || 'none',
+        fontVariantNumeric: config.fontVariantNumeric || 'normal',
+        color:             colorValue,
+        display:           isFill ? 'block' : 'inline',
+        width:             isFill ? '100%' : 'auto',
+        margin:            0,
+        marginBottom:      gutterBottom ? '0.5em' : 0,
+        padding:           0,
         ...(noWrap && {
-          overflow: 'hidden',
+          overflow:     'hidden',
           textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
+          whiteSpace:   'nowrap',
         }),
         ...sx,
       }}
@@ -308,68 +639,76 @@ export function Typography({
   );
 }
 
-/* ─── Convenience Shortcuts ─── */
-
-// Headings
-export const H1 = ({ children, ...p }) => <Typography textStyle="h1" {...p}>{children}</Typography>;
-export const H2 = ({ children, ...p }) => <Typography textStyle="h2" {...p}>{children}</Typography>;
-export const H3 = ({ children, ...p }) => <Typography textStyle="h3" {...p}>{children}</Typography>;
-export const H4 = ({ children, ...p }) => <Typography textStyle="h4" {...p}>{children}</Typography>;
-export const H5 = ({ children, ...p }) => <Typography textStyle="h5" {...p}>{children}</Typography>;
-export const H6 = ({ children, ...p }) => <Typography textStyle="h6" {...p}>{children}</Typography>;
-export const Heading = H4;
+// ─── Convenience Exports ──────────────────────────────────────────────────────
 
 // Display
-export const DisplayLarge = ({ children, ...p }) => <Typography textStyle="h1" {...p}>{children}</Typography>;
-export const DisplaySmall = ({ children, ...p }) => <Typography textStyle="h2" {...p}>{children}</Typography>;
+export const DisplayLarge = (p) => <Typography textStyle="display-large" {...p} />;
+export const DisplaySmall = (p) => <Typography textStyle="display-small" {...p} />;
 
-// Subtitle
-export const Subtitle       = ({ children, ...p }) => <Typography textStyle="h6" {...p}>{children}</Typography>;
-export const SubtitleLarge  = ({ children, ...p }) => <Typography textStyle="h5" {...p}>{children}</Typography>;
-export const Subtitle1      = ({ children, ...p }) => <Typography textStyle="h5" {...p}>{children}</Typography>;
-export const Subtitle2      = ({ children, ...p }) => <Typography textStyle="h6" {...p}>{children}</Typography>;
+// Headers
+export const H1 = (p) => <Typography textStyle="h1" {...p} />;
+export const H2 = (p) => <Typography textStyle="h2" {...p} />;
+export const H3 = (p) => <Typography textStyle="h3" {...p} />;
+export const H4 = (p) => <Typography textStyle="h4" {...p} />;
+export const H5 = (p) => <Typography textStyle="h5" {...p} />;
+export const H6 = (p) => <Typography textStyle="h6" {...p} />;
+export const Heading = H4;
 
-// Body
-export const Body              = ({ children, ...p }) => <Typography textStyle="body"          {...p}>{children}</Typography>;
-export const BodySmall         = ({ children, ...p }) => <Typography textStyle="body-small"    {...p}>{children}</Typography>;
-export const BodyLarge         = ({ children, ...p }) => <Typography textStyle="body-large"    {...p}>{children}</Typography>;
-export const BodySemibold      = ({ children, ...p }) => <Typography textStyle="body-semibold" {...p}>{children}</Typography>;
-export const BodyBold          = ({ children, ...p }) => <Typography textStyle="body-bold"     {...p}>{children}</Typography>;
-export const BodySmallSemibold = ({ children, ...p }) => <Typography textStyle="body-small" sx={{ fontWeight: 'var(--Body-Semibold-Font-Weight)', ...p.sx }} {...p}>{children}</Typography>;
-export const BodySmallBold     = ({ children, ...p }) => <Typography textStyle="body-small" sx={{ fontWeight: 'var(--Body-Bold-Font-Weight)', ...p.sx }}    {...p}>{children}</Typography>;
-export const BodyLargeSemibold = ({ children, ...p }) => <Typography textStyle="body-large" sx={{ fontWeight: 'var(--Body-Semibold-Font-Weight)', ...p.sx }} {...p}>{children}</Typography>;
-export const BodyLargeBold     = ({ children, ...p }) => <Typography textStyle="body-large" sx={{ fontWeight: 'var(--Body-Bold-Font-Weight)', ...p.sx }}    {...p}>{children}</Typography>;
+// Subtitles
+export const SubtitleLarge = (p) => <Typography textStyle="subtitle-large" {...p} />;
+export const Subtitle      = (p) => <Typography textStyle="subtitle"       {...p} />;
+export const SubtitleSmall = (p) => <Typography textStyle="subtitle-small" {...p} />;
+export const Subtitle1     = SubtitleLarge;
+export const Subtitle2     = Subtitle;
+
+// Body Small
+export const BodySmall         = (p) => <Typography textStyle="body-small"          {...p} />;
+export const BodySmallSemibold = (p) => <Typography textStyle="body-small-semibold" {...p} />;
+export const BodySmallBold     = (p) => <Typography textStyle="body-small-bold"     {...p} />;
+
+// Body Medium
+export const Body              = (p) => <Typography textStyle="body"          {...p} />;
+export const BodyMedium        = (p) => <Typography textStyle="body"          {...p} />;
+export const BodySemibold      = (p) => <Typography textStyle="body-semibold" {...p} />;
+export const BodyBold          = (p) => <Typography textStyle="body-bold"     {...p} />;
 export const Body1 = Body;
 export const Body2 = BodySmall;
 
-// Label
-export const Label           = ({ children, ...p }) => <Typography textStyle="label" {...p}>{children}</Typography>;
-export const LabelSmall      = ({ children, ...p }) => <Typography textStyle="label" sx={{ fontSize: 'calc(var(--Label-Font-Size) * 0.85)', ...p.sx }} {...p}>{children}</Typography>;
-export const LabelLarge      = ({ children, ...p }) => <Typography textStyle="label" sx={{ fontSize: 'calc(var(--Label-Font-Size) * 1.15)', ...p.sx }} {...p}>{children}</Typography>;
-export const LabelExtraSmall = ({ children, ...p }) => <Typography textStyle="label" sx={{ fontSize: 'calc(var(--Label-Font-Size) * 0.75)', ...p.sx }} {...p}>{children}</Typography>;
+// Body Large
+export const BodyLarge         = (p) => <Typography textStyle="body-large"          {...p} />;
+export const BodyLargeSemibold = (p) => <Typography textStyle="body-large-semibold" {...p} />;
+export const BodyLargeBold     = (p) => <Typography textStyle="body-large-bold"     {...p} />;
 
-// Caption
-export const Caption     = ({ children, ...p }) => <Typography textStyle="caption" {...p}>{children}</Typography>;
-export const CaptionBold = ({ children, ...p }) => <Typography textStyle="caption" sx={{ fontWeight: 'var(--Body-Bold-Font-Weight)', ...p.sx }} {...p}>{children}</Typography>;
+// Captions
+export const Caption     = (p) => <Typography textStyle="caption"      {...p} />;
+export const CaptionBold = (p) => <Typography textStyle="caption-bold" {...p} />;
+
+// Labels
+export const LabelExtraSmall = (p) => <Typography textStyle="label-extra-small" {...p} />;
+export const LabelSmall      = (p) => <Typography textStyle="label-small"       {...p} />;
+export const Label           = (p) => <Typography textStyle="label"             {...p} />;
+export const LabelMedium     = (p) => <Typography textStyle="label"             {...p} />;
+export const LabelLarge      = (p) => <Typography textStyle="label-large"       {...p} />;
 
 // Legal
-export const Legal         = ({ children, ...p }) => <Typography textStyle="caption" sx={{ fontSize: '11px', ...p.sx }} {...p}>{children}</Typography>;
-export const LegalSemibold = ({ children, ...p }) => <Typography textStyle="caption" sx={{ fontSize: '11px', fontWeight: 'var(--Body-Semibold-Font-Weight)', ...p.sx }} {...p}>{children}</Typography>;
-
-// Button typography (not to be confused with the Button component)
-export const ButtonTypography = ({ children, ...p }) => <Typography textStyle="button" {...p}>{children}</Typography>;
-export const ButtonSmall      = ({ children, ...p }) => <Typography textStyle="button" sx={{ fontSize: 'calc(var(--Button-Font-Size) * 0.85)', ...p.sx }} {...p}>{children}</Typography>;
-export const Button           = ButtonTypography; // backwards compat alias
+export const Legal         = (p) => <Typography textStyle="legal"          {...p} />;
+export const LegalSemibold = (p) => <Typography textStyle="legal-semibold" {...p} />;
 
 // Overline
-export const Overline       = ({ children, ...p }) => <Typography textStyle="overline" {...p}>{children}</Typography>;
-export const OverlineSmall  = ({ children, ...p }) => <Typography textStyle="overline" {...p}>{children}</Typography>;
-export const OverlineMedium = ({ children, ...p }) => <Typography textStyle="overline" {...p}>{children}</Typography>;
-export const OverlineLarge  = ({ children, ...p }) => <Typography textStyle="overline" sx={{ fontSize: 'calc(var(--Label-Font-Size) * 1.15)', ...p.sx }} {...p}>{children}</Typography>;
+export const OverlineSmall  = (p) => <Typography textStyle="overline-small"  {...p} />;
+export const Overline       = (p) => <Typography textStyle="overline"        {...p} />;
+export const OverlineMedium = (p) => <Typography textStyle="overline"        {...p} />;
+export const OverlineLarge  = (p) => <Typography textStyle="overline-large"  {...p} />;
 
 // Number
-export const NumberLarge  = ({ children, ...p }) => <Typography textStyle="body-large" sx={{ fontVariantNumeric: 'tabular-nums', fontWeight: 'var(--Body-Semibold-Font-Weight)', ...p.sx }} {...p}>{children}</Typography>;
-export const NumberMedium = ({ children, ...p }) => <Typography textStyle="body"       sx={{ fontVariantNumeric: 'tabular-nums', fontWeight: 'var(--Body-Semibold-Font-Weight)', ...p.sx }} {...p}>{children}</Typography>;
-export const NumberSmall  = ({ children, ...p }) => <Typography textStyle="body-small" sx={{ fontVariantNumeric: 'tabular-nums', fontWeight: 'var(--Body-Semibold-Font-Weight)', ...p.sx }} {...p}>{children}</Typography>;
+export const NumberSmall  = (p) => <Typography textStyle="number-small"  {...p} />;
+export const NumberMedium = (p) => <Typography textStyle="number-medium" {...p} />;
+export const NumberLarge  = (p) => <Typography textStyle="number-large"  {...p} />;
+
+// Buttons
+export const ButtonExtraSmall = (p) => <Typography textStyle="button-extra-small" {...p} />;
+export const ButtonSmall      = (p) => <Typography textStyle="button-small"       {...p} />;
+export const ButtonTypography = (p) => <Typography textStyle="button"             {...p} />;
+export const Button           = ButtonTypography; // backwards compat alias
 
 export default Typography;

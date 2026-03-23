@@ -1,0 +1,580 @@
+/* typography-tokens.css
+ * Auto-generated — do not edit by hand.
+ * Apply [data-platform="Desktop"] etc to your root element.
+ */
+
+[data-platform="Desktop"] {
+
+  /* Display */
+  --Display-Small-Font-Size:     42px;
+  --Display-Small-Font-Weight:   600;
+  --Display-Small-Line-Height:   42px;
+  --Display-Small-Letter-Spacing: 0px;
+  --Display-Large-Font-Size:     48px;
+  --Display-Large-Font-Weight:   600;
+  --Display-Large-Line-Height:   48px;
+  --Display-Large-Letter-Spacing: 0px;
+
+  /* Headers */
+  --H1-Font-Size:     32px;
+  --H1-Font-Weight:   600;
+  --H1-Line-Height:   32px;
+  --H1-Letter-Spacing: 1.25px;
+  --H2-Font-Size:     28px;
+  --H2-Font-Weight:   600;
+  --H2-Line-Height:   28px;
+  --H2-Letter-Spacing: 1.25px;
+  --H3-Font-Size:     24px;
+  --H3-Font-Weight:   600;
+  --H3-Line-Height:   24px;
+  --H3-Letter-Spacing: 0px;
+  --H4-Font-Size:     20px;
+  --H4-Font-Weight:   600;
+  --H4-Line-Height:   20px;
+  --H4-Letter-Spacing: 0px;
+  --H5-Font-Size:     18px;
+  --H5-Font-Weight:   600;
+  --H5-Line-Height:   18px;
+  --H5-Letter-Spacing: 0px;
+  --H6-Font-Size:     16px;
+  --H6-Font-Weight:   600;
+  --H6-Line-Height:   16px;
+  --H6-Letter-Spacing: 0px;
+
+  /* Subtitle */
+  --Subtitle-Small-Font-Size:     16px;
+  --Subtitle-Small-Font-Weight:   700;
+  --Subtitle-Small-Line-Height:   24px;
+  --Subtitle-Small-Letter-Spacing: 0px;
+  --Subtitle-Large-Font-Size:     18px;
+  --Subtitle-Large-Font-Weight:   700;
+  --Subtitle-Large-Line-Height:   32px;
+  --Subtitle-Large-Letter-Spacing: 0px;
+
+  /* Body */
+  --Body-Small-Font-Size:     14px;
+  --Body-Small-Font-Weight:   500;
+  --Body-Small-Line-Height:   21px;
+  --Body-Small-Letter-Spacing: 0px;
+  --Body-Small-Semibold-Font-Weight: 600;
+  --Body-Small-Bold-Font-Weight: 700;
+  --Body-Medium-Font-Size:     16px;
+  --Body-Medium-Font-Weight:   500;
+  --Body-Medium-Line-Height:   24px;
+  --Body-Medium-Letter-Spacing: 0px;
+  --Body-Medium-Semibold-Font-Weight: 600;
+  --Body-Medium-Bold-Font-Weight: 700;
+  --Body-Large-Font-Size:     18px;
+  --Body-Large-Font-Weight:   500;
+  --Body-Large-Line-Height:   27px;
+  --Body-Large-Letter-Spacing: 0px;
+  --Body-Large-Semibold-Font-Weight: 600;
+  --Body-Large-Bold-Font-Weight: 700;
+
+  /* Caption */
+  --Caption-Font-Size:     14px;
+  --Caption-Font-Weight:   500;
+  --Caption-Line-Height:   21px;
+  --Caption-Letter-Spacing: 0px;
+  --Caption-Bold-Font-Weight: 700;
+
+  /* Label */
+  --Label-ExtraSmall-Font-Size:     11px;
+  --Label-ExtraSmall-Font-Weight:   600;
+  --Label-ExtraSmall-Line-Height:   16.5px;
+  --Label-ExtraSmall-Letter-Spacing: 0px;
+  --Label-Small-Font-Size:     12.5px;
+  --Label-Small-Font-Weight:   600;
+  --Label-Small-Line-Height:   18.75px;
+  --Label-Small-Letter-Spacing: 0px;
+  --Label-Medium-Font-Size:     16px;
+  --Label-Medium-Font-Weight:   600;
+  --Label-Medium-Line-Height:   24px;
+  --Label-Medium-Letter-Spacing: 0px;
+  --Label-Large-Font-Size:     18px;
+  --Label-Large-Font-Weight:   600;
+  --Label-Large-Line-Height:   27px;
+  --Label-Large-Letter-Spacing: 0px;
+
+  /* Legal */
+  --Legal-Font-Size:     10px;
+  --Legal-Font-Weight:   400;
+  --Legal-Line-Height:   15px;
+  --Legal-Letter-Spacing: 0px;
+  --Legal-Semibold-Font-Weight: 600;
+
+  /* Overline */
+  --Overline-Small-Font-Size:     14px;
+  --Overline-Small-Font-Weight:   500;
+  --Overline-Small-Line-Height:   21px;
+  --Overline-Small-Letter-Spacing: 0px;
+  --Overline-Medium-Font-Size:     16px;
+  --Overline-Medium-Font-Weight:   600;
+  --Overline-Medium-Line-Height:   24px;
+  --Overline-Medium-Letter-Spacing: 0px;
+  --Overline-Large-Font-Size:     18px;
+  --Overline-Large-Font-Weight:   600;
+  --Overline-Large-Line-Height:   27px;
+  --Overline-Large-Letter-Spacing: 0px;
+
+  /* Number */
+  --Number-Small-Font-Size:     16px;
+  --Number-Small-Font-Weight:   700;
+  --Number-Small-Line-Height:   16px;
+  --Number-Small-Letter-Spacing: 0px;
+  --Number-Medium-Font-Size:     28px;
+  --Number-Medium-Font-Weight:   700;
+  --Number-Medium-Line-Height:   28px;
+  --Number-Medium-Letter-Spacing: 0px;
+  --Number-Large-Font-Size:     36px;
+  --Number-Large-Font-Weight:   700;
+  --Number-Large-Line-Height:   36px;
+  --Number-Large-Letter-Spacing: 0px;
+
+  /* Button */
+  --Button-ExtraSmall-Font-Size:     11px;
+  --Button-ExtraSmall-Font-Weight:   600;
+  --Button-ExtraSmall-Line-Height:   11px;
+  --Button-ExtraSmall-Letter-Spacing: 0px;
+  --Button-Small-Font-Size:     14px;
+  --Button-Small-Font-Weight:   600;
+  --Button-Small-Line-Height:   14px;
+  --Button-Small-Letter-Spacing: 0px;
+  --Button-Standard-Font-Size:     16px;
+  --Button-Standard-Font-Weight:   600;
+  --Button-Standard-Line-Height:   16px;
+  --Button-Standard-Letter-Spacing: 0px;
+
+}
+
+[data-platform="IOS-Mobile"] {
+
+  /* Display */
+  --Display-Small-Font-Size:     28px;
+  --Display-Small-Font-Weight:   600;
+  --Display-Small-Line-Height:   28px;
+  --Display-Small-Letter-Spacing: 0px;
+  --Display-Large-Font-Size:     28px;
+  --Display-Large-Font-Weight:   600;
+  --Display-Large-Line-Height:   28px;
+  --Display-Large-Letter-Spacing: 0px;
+
+  /* Headers */
+  --H1-Font-Size:     28px;
+  --H1-Font-Weight:   600;
+  --H1-Line-Height:   28px;
+  --H1-Letter-Spacing: 0px;
+  --H2-Font-Size:     26px;
+  --H2-Font-Weight:   600;
+  --H2-Line-Height:   26px;
+  --H2-Letter-Spacing: 0px;
+  --H3-Font-Size:     24px;
+  --H3-Font-Weight:   600;
+  --H3-Line-Height:   24px;
+  --H3-Letter-Spacing: 0px;
+  --H4-Font-Size:     20px;
+  --H4-Font-Weight:   600;
+  --H4-Line-Height:   20px;
+  --H4-Letter-Spacing: 0px;
+  --H5-Font-Size:     18px;
+  --H5-Font-Weight:   600;
+  --H5-Line-Height:   18px;
+  --H5-Letter-Spacing: 0px;
+  --H6-Font-Size:     16px;
+  --H6-Font-Weight:   600;
+  --H6-Line-Height:   16px;
+  --H6-Letter-Spacing: 0px;
+
+  /* Subtitle */
+  --Subtitle-Small-Font-Size:     16px;
+  --Subtitle-Small-Font-Weight:   700;
+  --Subtitle-Small-Line-Height:   24px;
+  --Subtitle-Small-Letter-Spacing: 0px;
+  --Subtitle-Large-Font-Size:     16px;
+  --Subtitle-Large-Font-Weight:   700;
+  --Subtitle-Large-Line-Height:   24px;
+  --Subtitle-Large-Letter-Spacing: 0px;
+
+  /* Body */
+  --Body-Small-Font-Size:     14px;
+  --Body-Small-Font-Weight:   500;
+  --Body-Small-Line-Height:   21px;
+  --Body-Small-Letter-Spacing: 0px;
+  --Body-Small-Semibold-Font-Weight: 600;
+  --Body-Small-Bold-Font-Weight: 700;
+  --Body-Medium-Font-Size:     16px;
+  --Body-Medium-Font-Weight:   600;
+  --Body-Medium-Line-Height:   24px;
+  --Body-Medium-Letter-Spacing: 0px;
+  --Body-Medium-Semibold-Font-Weight: 600;
+  --Body-Medium-Bold-Font-Weight: 700;
+  --Body-Large-Font-Size:     18px;
+  --Body-Large-Font-Weight:   600;
+  --Body-Large-Line-Height:   27px;
+  --Body-Large-Letter-Spacing: 0px;
+  --Body-Large-Semibold-Font-Weight: 600;
+  --Body-Large-Bold-Font-Weight: 700;
+
+  /* Caption */
+  --Caption-Font-Size:     14px;
+  --Caption-Font-Weight:   500;
+  --Caption-Line-Height:   21px;
+  --Caption-Letter-Spacing: 0px;
+  --Caption-Bold-Font-Weight: 700;
+
+  /* Label */
+  --Label-ExtraSmall-Font-Size:     11px;
+  --Label-ExtraSmall-Font-Weight:   600;
+  --Label-ExtraSmall-Line-Height:   16.5px;
+  --Label-ExtraSmall-Letter-Spacing: 0px;
+  --Label-Small-Font-Size:     12.5px;
+  --Label-Small-Font-Weight:   600;
+  --Label-Small-Line-Height:   18.75px;
+  --Label-Small-Letter-Spacing: 0px;
+  --Label-Medium-Font-Size:     16px;
+  --Label-Medium-Font-Weight:   600;
+  --Label-Medium-Line-Height:   24px;
+  --Label-Medium-Letter-Spacing: 0px;
+  --Label-Large-Font-Size:     18px;
+  --Label-Large-Font-Weight:   600;
+  --Label-Large-Line-Height:   27px;
+  --Label-Large-Letter-Spacing: 0px;
+
+  /* Legal */
+  --Legal-Font-Size:     10px;
+  --Legal-Font-Weight:   400;
+  --Legal-Line-Height:   15px;
+  --Legal-Letter-Spacing: 0px;
+  --Legal-Semibold-Font-Weight: 600;
+
+  /* Overline */
+  --Overline-Small-Font-Size:     14px;
+  --Overline-Small-Font-Weight:   500;
+  --Overline-Small-Line-Height:   21px;
+  --Overline-Small-Letter-Spacing: 0px;
+  --Overline-Medium-Font-Size:     16px;
+  --Overline-Medium-Font-Weight:   600;
+  --Overline-Medium-Line-Height:   24px;
+  --Overline-Medium-Letter-Spacing: 0px;
+  --Overline-Large-Font-Size:     18px;
+  --Overline-Large-Font-Weight:   600;
+  --Overline-Large-Line-Height:   27px;
+  --Overline-Large-Letter-Spacing: 0px;
+
+  /* Number */
+  --Number-Small-Font-Size:     16px;
+  --Number-Small-Font-Weight:   700;
+  --Number-Small-Line-Height:   16px;
+  --Number-Small-Letter-Spacing: 0px;
+  --Number-Medium-Font-Size:     28px;
+  --Number-Medium-Font-Weight:   700;
+  --Number-Medium-Line-Height:   28px;
+  --Number-Medium-Letter-Spacing: 0px;
+  --Number-Large-Font-Size:     18px;
+  --Number-Large-Font-Weight:   700;
+  --Number-Large-Line-Height:   27px;
+  --Number-Large-Letter-Spacing: 0px;
+
+  /* Button */
+  --Button-ExtraSmall-Font-Size:     11px;
+  --Button-ExtraSmall-Font-Weight:   600;
+  --Button-ExtraSmall-Line-Height:   11px;
+  --Button-ExtraSmall-Letter-Spacing: 0px;
+  --Button-Small-Font-Size:     14px;
+  --Button-Small-Font-Weight:   600;
+  --Button-Small-Line-Height:   14px;
+  --Button-Small-Letter-Spacing: 0px;
+  --Button-Standard-Font-Size:     16px;
+  --Button-Standard-Font-Weight:   600;
+  --Button-Standard-Line-Height:   16px;
+  --Button-Standard-Letter-Spacing: 0px;
+
+}
+
+[data-platform="IOS-Tablet"] {
+
+  /* Display */
+  --Display-Small-Font-Size:     28px;
+  --Display-Small-Font-Weight:   600;
+  --Display-Small-Line-Height:   28px;
+  --Display-Small-Letter-Spacing: 0px;
+  --Display-Large-Font-Size:     28px;
+  --Display-Large-Font-Weight:   600;
+  --Display-Large-Line-Height:   28px;
+  --Display-Large-Letter-Spacing: 0px;
+
+  /* Headers */
+  --H1-Font-Size:     28px;
+  --H1-Font-Weight:   600;
+  --H1-Line-Height:   28px;
+  --H1-Letter-Spacing: 0px;
+  --H2-Font-Size:     26px;
+  --H2-Font-Weight:   600;
+  --H2-Line-Height:   26px;
+  --H2-Letter-Spacing: 0px;
+  --H3-Font-Size:     24px;
+  --H3-Font-Weight:   600;
+  --H3-Line-Height:   24px;
+  --H3-Letter-Spacing: 0px;
+  --H4-Font-Size:     20px;
+  --H4-Font-Weight:   600;
+  --H4-Line-Height:   20px;
+  --H4-Letter-Spacing: 0px;
+  --H5-Font-Size:     18px;
+  --H5-Font-Weight:   600;
+  --H5-Line-Height:   18px;
+  --H5-Letter-Spacing: 0px;
+  --H6-Font-Size:     16px;
+  --H6-Font-Weight:   600;
+  --H6-Line-Height:   16px;
+  --H6-Letter-Spacing: 0px;
+
+  /* Subtitle */
+  --Subtitle-Small-Font-Size:     16px;
+  --Subtitle-Small-Font-Weight:   700;
+  --Subtitle-Small-Line-Height:   24px;
+  --Subtitle-Small-Letter-Spacing: 0px;
+  --Subtitle-Large-Font-Size:     18px;
+  --Subtitle-Large-Font-Weight:   700;
+  --Subtitle-Large-Line-Height:   32px;
+  --Subtitle-Large-Letter-Spacing: 0px;
+
+  /* Body */
+  --Body-Small-Font-Size:     14px;
+  --Body-Small-Font-Weight:   500;
+  --Body-Small-Line-Height:   21px;
+  --Body-Small-Letter-Spacing: 0px;
+  --Body-Small-Semibold-Font-Weight: 600;
+  --Body-Small-Bold-Font-Weight: 700;
+  --Body-Medium-Font-Size:     16px;
+  --Body-Medium-Font-Weight:   500;
+  --Body-Medium-Line-Height:   24px;
+  --Body-Medium-Letter-Spacing: 0px;
+  --Body-Medium-Semibold-Font-Weight: 600;
+  --Body-Medium-Bold-Font-Weight: 700;
+  --Body-Large-Font-Size:     18px;
+  --Body-Large-Font-Weight:   600;
+  --Body-Large-Line-Height:   27px;
+  --Body-Large-Letter-Spacing: 0px;
+  --Body-Large-Semibold-Font-Weight: 600;
+  --Body-Large-Bold-Font-Weight: 700;
+
+  /* Caption */
+  --Caption-Font-Size:     14px;
+  --Caption-Font-Weight:   500;
+  --Caption-Line-Height:   21px;
+  --Caption-Letter-Spacing: 0px;
+  --Caption-Bold-Font-Weight: 700;
+
+  /* Label */
+  --Label-ExtraSmall-Font-Size:     11px;
+  --Label-ExtraSmall-Font-Weight:   600;
+  --Label-ExtraSmall-Line-Height:   16.5px;
+  --Label-ExtraSmall-Letter-Spacing: 0px;
+  --Label-Small-Font-Size:     12.5px;
+  --Label-Small-Font-Weight:   600;
+  --Label-Small-Line-Height:   18.75px;
+  --Label-Small-Letter-Spacing: 0px;
+  --Label-Medium-Font-Size:     16px;
+  --Label-Medium-Font-Weight:   600;
+  --Label-Medium-Line-Height:   24px;
+  --Label-Medium-Letter-Spacing: 0px;
+  --Label-Large-Font-Size:     18px;
+  --Label-Large-Font-Weight:   600;
+  --Label-Large-Line-Height:   27px;
+  --Label-Large-Letter-Spacing: 0px;
+
+  /* Legal */
+  --Legal-Font-Size:     10px;
+  --Legal-Font-Weight:   400;
+  --Legal-Line-Height:   15px;
+  --Legal-Letter-Spacing: 0px;
+  --Legal-Semibold-Font-Weight: 600;
+
+  /* Overline */
+  --Overline-Small-Font-Size:     14px;
+  --Overline-Small-Font-Weight:   500;
+  --Overline-Small-Line-Height:   21px;
+  --Overline-Small-Letter-Spacing: 0px;
+  --Overline-Medium-Font-Size:     16px;
+  --Overline-Medium-Font-Weight:   600;
+  --Overline-Medium-Line-Height:   24px;
+  --Overline-Medium-Letter-Spacing: 0px;
+  --Overline-Large-Font-Size:     18px;
+  --Overline-Large-Font-Weight:   600;
+  --Overline-Large-Line-Height:   27px;
+  --Overline-Large-Letter-Spacing: 0px;
+
+  /* Number */
+  --Number-Small-Font-Size:     16px;
+  --Number-Small-Font-Weight:   700;
+  --Number-Small-Line-Height:   16px;
+  --Number-Small-Letter-Spacing: 0px;
+  --Number-Medium-Font-Size:     28px;
+  --Number-Medium-Font-Weight:   700;
+  --Number-Medium-Line-Height:   16px;
+  --Number-Medium-Letter-Spacing: 0px;
+  --Number-Large-Font-Size:     36px;
+  --Number-Large-Font-Weight:   700;
+  --Number-Large-Line-Height:   36px;
+  --Number-Large-Letter-Spacing: 0px;
+
+  /* Button */
+  --Button-ExtraSmall-Font-Size:     11px;
+  --Button-ExtraSmall-Font-Weight:   600;
+  --Button-ExtraSmall-Line-Height:   28px;
+  --Button-ExtraSmall-Letter-Spacing: 0px;
+  --Button-Small-Font-Size:     14px;
+  --Button-Small-Font-Weight:   600;
+  --Button-Small-Line-Height:   16px;
+  --Button-Small-Letter-Spacing: 0px;
+  --Button-Standard-Font-Size:     16px;
+  --Button-Standard-Font-Weight:   600;
+  --Button-Standard-Line-Height:   16px;
+  --Button-Standard-Letter-Spacing: 0px;
+
+}
+
+[data-platform="Android"] {
+
+  /* Display */
+  --Display-Small-Font-Size:     28px;
+  --Display-Small-Font-Weight:   600;
+  --Display-Small-Line-Height:   28px;
+  --Display-Small-Letter-Spacing: 0px;
+  --Display-Large-Font-Size:     28px;
+  --Display-Large-Font-Weight:   600;
+  --Display-Large-Line-Height:   28px;
+  --Display-Large-Letter-Spacing: 0px;
+
+  /* Headers */
+  --H1-Font-Size:     28px;
+  --H1-Font-Weight:   600;
+  --H1-Line-Height:   28px;
+  --H1-Letter-Spacing: 0px;
+  --H2-Font-Size:     26px;
+  --H2-Font-Weight:   600;
+  --H2-Line-Height:   26px;
+  --H2-Letter-Spacing: 0px;
+  --H3-Font-Size:     24px;
+  --H3-Font-Weight:   600;
+  --H3-Line-Height:   24px;
+  --H3-Letter-Spacing: 0px;
+  --H4-Font-Size:     20px;
+  --H4-Font-Weight:   600;
+  --H4-Line-Height:   20px;
+  --H4-Letter-Spacing: 0px;
+  --H5-Font-Size:     18px;
+  --H5-Font-Weight:   600;
+  --H5-Line-Height:   18px;
+  --H5-Letter-Spacing: 0px;
+  --H6-Font-Size:     16px;
+  --H6-Font-Weight:   600;
+  --H6-Line-Height:   16px;
+  --H6-Letter-Spacing: 0px;
+
+  /* Subtitle */
+  --Subtitle-Small-Font-Size:     16px;
+  --Subtitle-Small-Font-Weight:   700;
+  --Subtitle-Small-Line-Height:   24px;
+  --Subtitle-Small-Letter-Spacing: 0px;
+  --Subtitle-Large-Font-Size:     18px;
+  --Subtitle-Large-Font-Weight:   700;
+  --Subtitle-Large-Line-Height:   32px;
+  --Subtitle-Large-Letter-Spacing: 0px;
+
+  /* Body */
+  --Body-Small-Font-Size:     14px;
+  --Body-Small-Font-Weight:   500;
+  --Body-Small-Line-Height:   21px;
+  --Body-Small-Letter-Spacing: 0px;
+  --Body-Small-Semibold-Font-Weight: 600;
+  --Body-Small-Bold-Font-Weight: 700;
+  --Body-Medium-Font-Size:     16px;
+  --Body-Medium-Font-Weight:   500;
+  --Body-Medium-Line-Height:   24px;
+  --Body-Medium-Letter-Spacing: 0px;
+  --Body-Medium-Semibold-Font-Weight: 600;
+  --Body-Medium-Bold-Font-Weight: 700;
+  --Body-Large-Font-Size:     18px;
+  --Body-Large-Font-Weight:   600;
+  --Body-Large-Line-Height:   27px;
+  --Body-Large-Letter-Spacing: 0px;
+  --Body-Large-Semibold-Font-Weight: 600;
+  --Body-Large-Bold-Font-Weight: 700;
+
+  /* Caption */
+  --Caption-Font-Size:     14px;
+  --Caption-Font-Weight:   500;
+  --Caption-Line-Height:   21px;
+  --Caption-Letter-Spacing: 0px;
+  --Caption-Bold-Font-Weight: 700;
+
+  /* Label */
+  --Label-ExtraSmall-Font-Size:     11px;
+  --Label-ExtraSmall-Font-Weight:   600;
+  --Label-ExtraSmall-Line-Height:   16.5px;
+  --Label-ExtraSmall-Letter-Spacing: 0px;
+  --Label-Small-Font-Size:     12.5px;
+  --Label-Small-Font-Weight:   600;
+  --Label-Small-Line-Height:   18.75px;
+  --Label-Small-Letter-Spacing: 0px;
+  --Label-Medium-Font-Size:     16px;
+  --Label-Medium-Font-Weight:   600;
+  --Label-Medium-Line-Height:   24px;
+  --Label-Medium-Letter-Spacing: 0px;
+  --Label-Large-Font-Size:     18px;
+  --Label-Large-Font-Weight:   600;
+  --Label-Large-Line-Height:   27px;
+  --Label-Large-Letter-Spacing: 0px;
+
+  /* Legal */
+  --Legal-Font-Size:     10px;
+  --Legal-Font-Weight:   400;
+  --Legal-Line-Height:   15px;
+  --Legal-Letter-Spacing: 0px;
+  --Legal-Semibold-Font-Weight: 600;
+
+  /* Overline */
+  --Overline-Small-Font-Size:     14px;
+  --Overline-Small-Font-Weight:   500;
+  --Overline-Small-Line-Height:   21px;
+  --Overline-Small-Letter-Spacing: 0px;
+  --Overline-Medium-Font-Size:     16px;
+  --Overline-Medium-Font-Weight:   600;
+  --Overline-Medium-Line-Height:   24px;
+  --Overline-Medium-Letter-Spacing: 0px;
+  --Overline-Large-Font-Size:     18px;
+  --Overline-Large-Font-Weight:   600;
+  --Overline-Large-Line-Height:   27px;
+  --Overline-Large-Letter-Spacing: 0px;
+
+  /* Number */
+  --Number-Small-Font-Size:     16px;
+  --Number-Small-Font-Weight:   700;
+  --Number-Small-Line-Height:   16px;
+  --Number-Small-Letter-Spacing: 0px;
+  --Number-Medium-Font-Size:     28px;
+  --Number-Medium-Font-Weight:   700;
+  --Number-Medium-Line-Height:   16px;
+  --Number-Medium-Letter-Spacing: 0px;
+  --Number-Large-Font-Size:     36px;
+  --Number-Large-Font-Weight:   700;
+  --Number-Large-Line-Height:   36px;
+  --Number-Large-Letter-Spacing: 0px;
+
+  /* Button */
+  --Button-ExtraSmall-Font-Size:     11px;
+  --Button-ExtraSmall-Font-Weight:   600;
+  --Button-ExtraSmall-Line-Height:   28px;
+  --Button-ExtraSmall-Letter-Spacing: 0px;
+  --Button-Small-Font-Size:     14px;
+  --Button-Small-Font-Weight:   600;
+  --Button-Small-Line-Height:   16px;
+  --Button-Small-Letter-Spacing: 0px;
+  --Button-Standard-Font-Size:     16px;
+  --Button-Standard-Font-Weight:   600;
+  --Button-Standard-Line-Height:   16px;
+  --Button-Standard-Letter-Spacing: 0px;
+
+}

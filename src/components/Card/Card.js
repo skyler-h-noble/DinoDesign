@@ -5,17 +5,19 @@ import { Box } from '@mui/material';
 /**
  * Card Component
  *
- * VARIANTS:
- *   default   No data-theme. bg: var(--Background), border: var(--Border-Variant).
- *             Clickable → border: var(--Buttons-Default-Border).
- *   solid     data-theme={Color}. bg: var(--Surface), border: var(--Border-Variant).
- *             Clickable → border: var(--Border).
- *   light     data-theme={Color}-Light. bg: var(--Surface), border: var(--Border-Variant).
- *             Clickable → border: var(--Border).
+ * VARIANTS + DATA ATTRIBUTES:
+ *   default   No data-theme.              data-surface="Container"    bg: var(--Background)
+ *   solid     data-theme="{Color}"        data-surface="Surface"      bg: var(--Surface)
+ *   light     data-theme="{Color}-Light"  data-surface="Surface"      bg: var(--Surface)
+ *   dark      data-theme="{Color}"        data-surface="Surface-Dimmest"  bg: var(--Surface)
  *
- * ALL CARDS: data-surface="Container"
+ * BORDERS:
+ *   not clickable                → 1px solid var(--Border-Variant)
+ *   clickable                    → 1px solid var(--Buttons-Default-Border)
+ *   clickable + selected         → 2px solid var(--Buttons-Default-Border)
+ *   elevated                     → class card-elevated only, no border change
  *
- * SIZES: small | medium | large  (padding: Sizing-1/2/3, gap + font-size scale)
+ * SIZES: small | medium | large  (padding: var(--Card-Padding) for all, gap + font-size scale)
  * ORIENTATION: vertical | horizontal
  * CLICKABLE: adds hover/active/focus. Focus ring is outset 3px with calc(--Card-Radius + 3px).
  */
@@ -28,11 +30,16 @@ const LIGHT_THEME_MAP = {
   primary: 'Primary-Light', secondary: 'Secondary-Light', tertiary: 'Tertiary-Light', neutral: 'Neutral-Light',
   info: 'Info-Light', success: 'Success-Light', warning: 'Warning-Light', error: 'Error-Light',
 };
+// Dark uses the same theme name as solid but data-surface="Surface-Dimmest"
+const DARK_THEME_MAP = {
+  primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
+  info: 'Info-Medium', success: 'Success-Medium', warning: 'Warning-Medium', error: 'Error-Medium',
+};
 
 const SIZE_MAP = {
-  small:  { gap: '8px',  fontSize: '13px', padding: 'var(--Sizing-1)' },
-  medium: { gap: '12px', fontSize: '14px', padding: 'var(--Sizing-2)' },
-  large:  { gap: '16px', fontSize: '16px', padding: 'var(--Sizing-3)' },
+  small:  { gap: '8px',  fontSize: '13px', padding: 'var(--Card-Padding)' },
+  medium: { gap: '12px', fontSize: '14px', padding: 'var(--Card-Padding)' },
+  large:  { gap: '16px', fontSize: '16px', padding: 'var(--Card-Padding)' },
 };
 
 /* ─── Context ─── */
@@ -50,6 +57,7 @@ export function Card({
   orientation = 'vertical',
   clickable = false,
   selected = false,
+  elevated = false,
   onClick,
   href,
   className = '',
@@ -59,6 +67,7 @@ export function Card({
   const isDefault = variant === 'default';
   const isSolid = variant === 'solid';
   const isLight = variant === 'light';
+  const isDark  = variant === 'dark';
 
   // Inherit data-theme from nearest ancestor, unless explicitly overridden
   const ref = useRef(null);
@@ -74,23 +83,30 @@ export function Card({
       ? SOLID_THEME_MAP[color]
       : isLight
         ? LIGHT_THEME_MAP[color]
-        : inheritedTheme);
+        : isDark
+          ? DARK_THEME_MAP[color]
+          : inheritedTheme);
 
-  const bg = isDefault ? 'var(--Background)' : 'var(--Surface)';
+  // data-surface per variant
+  const dataSurface = isDefault ? 'Container' : isDark ? 'Surface-Dimmest' : 'Surface';
+
+  const bg = 'var(--Background)';
 
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
   const isHorizontal = orientation === 'horizontal';
   const isClickable = clickable || !!onClick || !!href || selected;
   const component = href ? 'a' : isClickable ? 'div' : 'div';
 
-  // Non-clickable: always Border-Variant regardless of variant
-  // Clickable default: Buttons-Default-Border
-  // Clickable solid/light: Border
-  const borderColor = !isClickable
-    ? 'var(--Border-Variant)'
-    : isDefault
-      ? 'var(--Buttons-Default-Border)'
-      : 'var(--Border)';
+  // Border rules:
+  //   not clickable                    → 1px solid var(--Border-Variant)
+  //   clickable (not selected)         → 1px solid var(--Buttons-Default-Border)
+  //   clickable + selected             → 2px solid var(--Buttons-Default-Border)
+  //   elevated                         → class only, no border change
+  const borderStyle = !isClickable
+    ? '1px solid var(--Border-Variant)'
+    : selected
+      ? '2px solid var(--Buttons-Default-Border)'
+      : '1px solid var(--Buttons-Default-Border)';
 
   return (
     <CardContext.Provider value={{ variant, color, size, orientation }}>
@@ -103,11 +119,12 @@ export function Card({
         aria-pressed={selected ? true : undefined}
         ref={ref}
         data-theme={dataTheme || undefined}
-        data-surface="Container"
+        data-surface={dataSurface}
         className={
           'card card-' + variant + ' card-' + size + ' card-' + orientation
           + (isClickable ? ' card-clickable' : '')
-          + (selected ? ' card-selected' : '')
+          + (selected   ? ' card-selected'  : '')
+          + (elevated   ? ' card-elevated'  : '')
           + ' ' + className
         }
         sx={{
@@ -116,7 +133,7 @@ export function Card({
           gap: s.gap,
           padding: s.padding,
           backgroundColor: bg,
-          border: '1px solid ' + borderColor,
+          border: borderStyle,
           borderRadius: 'var(--Card-Radius)',
           fontSize: s.fontSize,
           fontFamily: 'inherit',
@@ -141,10 +158,8 @@ export function Card({
             },
           }),
           ...(selected && {
-            borderColor: 'var(--Buttons-Primary-Border)',
             boxShadow: '0 0 0 2px var(--Buttons-Primary-Border)',
             '&:hover': {
-              borderColor: 'var(--Buttons-Primary-Border)',
               boxShadow: '0 0 0 2px var(--Buttons-Primary-Border)',
             },
           }),
@@ -290,6 +305,7 @@ export function CardActions({
 export const DefaultCard    = (p) => <Card variant="default" {...p} />;
 export const SolidCard      = (p) => <Card variant="solid"   {...p} />;
 export const LightCard      = (p) => <Card variant="light"   {...p} />;
+export const DarkCard       = (p) => <Card variant="dark"    {...p} />;
 export const SelectableCard = (p) => <Card clickable selected={p.selected} {...p} />;
 export const StaticCard     = (p) => <Card {...p} />;
 

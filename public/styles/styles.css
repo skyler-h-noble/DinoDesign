@@ -1,12 +1,26 @@
-.btn-primary-outline .MuiButton-icon{
-    margin-right: 4px;
-    margin-left: 0px;
+/* Overrides */
+:root {
+--Shadow-1: 0.5px 1px 1px rgba(var(--Dropshadow-Color), 0.28);
+--Shadow-2: 1px 2px 2px rgba(var(--Dropshadow-Color), 0.22), 2px 4px 4px rgba(var(--Dropshadow-Color), 0.22);
+--Shadow-3: 1px 2px 2px rgba(var(--Dropshadow-Color), 0.17), 2px 4px 4px rgba(var(--Dropshadow-Color), 0.17), 4px 8px 8px rgba(var(--Dropshadow-Color), 0.17);
+--Shadow-4: 1px 2px 2px rgba(var(--Dropshadow-Color), 0.13), 2px 4px 4px rgba(var(--Dropshadow-Color), 0.13), 4px 8px 8px rgba(var(--Dropshadow-Color), 0.13), 8px 16px 16px rgba(var(--Dropshadow-Color), 0.13);
+--Shadow-5: 1px 2px 2px rgba(var(--Dropshadow-Color), 0.1), 2px 4px 4px rgba(var(--Dropshadow-Color), 0.1), 4px 8px 8px rgba(var(--Dropshadow-Color), 0.1), 8px 16px 16px rgba(var(--Dropshadow-Color), 0.1), 16px 32px 32px rgba(var(--Dropshadow-Color), 0.1);
 }
 
-.MuiButton-sizeSmall .MuiSvgIcon-root {
-    font-size: 1rem;
+[data-surface="Surface"] .card, [data-surface="Surface"].card  {
+  box-shadow: 0.5px 1px 1px rgba(var(--Dropshadow-Color), 0.28);
 }
 
-[class*="btn-"] .MuiButton-iconSizeSmall .MuiSvgIcon-root, [class*="btn-"] .MuiButton-iconSizeSmall>* {
-    font-size: .75rem !important;
+[data-surface="Surface"] .card.elevated, [data-surface="Surface"].card.elevated , [data-surface="Surface"] .card-clickable, [data-surface="Surface"].card-clickable, [data-surface="Surface"] .button, [data-surface="Surface"].button   {
+  box-shadow: 1px 2px 2px rgba(var(--Dropshadow-Color), 0.22), 2px 4px 4px rgba(var(--Dropshadow-Color), 0.22);
 }
+
+[data-surface="Surface"] .card.elevated:hover, [data-surface="Surface"].card.elevated:hover, [data-surface="Surface"] .card-clickable:hover , [data-surface="Surface"].card-clickable:hover, [data-surface="Surface"] button:hover , [data-surface="Surface"]button:hover, [data-surface="Surface"] button.elevated , [data-surface="Surface"]button.elevated   {
+  box-shadow: 1px 2px 2px rgba(var(--Dropshadow-Color), 0.17), 2px 4px 4px rgba(var(--Dropshadow-Color), 0.17), 4px 8px 8px rgba(var(--Dropshadow-Color), 0.17);
+}
+
+[data-surface="Surface"] button.elevated:hover , [data-surface="Surface"]button.elevated:hover  {
+--Shadow-4: 1px 2px 2px rgba(var(--Dropshadow-Color), 0.13), 2px 4px 4px rgba(var(--Dropshadow-Color), 0.13), 4px 8px 8px rgba(var(--Dropshadow-Color), 0.13), 8px 16px 16px rgba(var(--Dropshadow-Color), 0.13);
+}
+
+
