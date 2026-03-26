@@ -38,9 +38,9 @@ import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography } from
  *   Active:     var(--Background-Active)
  *
  * ─── SIZES ───────────────────────────────────────────────────────────────────
- *   small:  20px minHeight, 4px padding
- *   medium: var(--Button-Height) minHeight, 4px padding
- *   large:  56px minHeight, var(--Sizing-Half) var(--Sizing-2) padding
+ *   small:  var(--Small-Button-Height) minHeight, var(--Sizing-Half) var(--Sizing-1) padding
+ *   medium: var(--Button-Height) minHeight, var(--Button-Min-Width) minWidth, var(--Sizing-Half) var(--Sizing-1) padding
+ *   large:  var(--Large-Button-Height) minHeight, var(--Sizing-Half) var(--Sizing-2) padding
  *
  * ─── CONTENT TYPES ───────────────────────────────────────────────────────────
  *   text:       Typography wrapper, padding on button shell
@@ -54,15 +54,23 @@ import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography } from
 const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
+// Bevel inset shadow — shared across all solid variants
+// --_bevel is set on the element; --_height is set per size
+const BEVEL_SHADOW = [
+  'inset 0 var(--_bevel) var(--_bevel) color-mix(in srgb, var(--Buttons-Default-Highlight) var(--Button-Bevel-Opacity), transparent)',
+  'inset 0 calc(-1 * var(--_bevel)) var(--_bevel) color-mix(in srgb, var(--Buttons-Default-Lowlight) var(--Button-Bevel-Opacity), transparent)',
+].join(', ');
+
 // ─── Variant Style Builders ───────────────────────────────────────────────────
 
 function solidStyles(color) {
   const C = cap(color);
+  const solidShadow = `var(--Shadow-1), var(--Shadow-2), var(--Effect-Level-3), ${BEVEL_SHADOW}`;
   return {
     backgroundColor: `var(--Buttons-${C}-Button)`,
     color: `var(--Buttons-${C}-Text)`,
     border: `2px solid var(--Buttons-${C}-Border)`,
-    boxShadow: 'var(--Shadow-1), var(--Shadow-2), var(--Effect-Level-3)',
+    boxShadow: solidShadow,
     position: 'relative',
     zIndex: 1,
     '& .MuiTouchRipple-rippleVisible': {
@@ -71,7 +79,7 @@ function solidStyles(color) {
     },
     '&:hover': {
       backgroundColor: `var(--Buttons-${C}-Hover)`,
-      boxShadow: 'var(--Shadow-1), var(--Shadow-2), var(--Effect-Level-3)',
+      boxShadow: solidShadow,
     },
     '&:active': {
       backgroundColor: 'var(--Buttons-Primary-Active)',
@@ -196,56 +204,64 @@ function buildVariantMap(isTextContent) {
 }
 
 // ─── Sizing ───────────────────────────────────────────────────────────────────
-// All styles share identical minHeight/minWidth per size
+// Token-driven dimensions per size tier.
 // Padding rules:
-//   text          → 0 var(--Sizing-1) on button shell
+//   text          → var(--Sizing-Half) var(--Sizing-1) on button shell
 //   letter/number → 0 on button shell; 4px padding on inner text box
 //   icon/avatar   → 0 on button shell; no inner wrapper
+//
+// minHeight / square size per tier:
+//   small  → var(--Small-Button-Height)
+//   medium → var(--Button-Height)         minWidth for text: var(--Button-Min-Width)
+//   large  → var(--Large-Button-Height)
+
+const SIZE_HEIGHT = {
+  small:  'var(--Small-Button-Height)',
+  medium: 'var(--Button-Height)',
+  large:  'var(--Large-Button-Height)',
+};
 
 const SIZE_BASE = {
-  small:  { minHeight: '24px', minWidth: '24px',  fontSize: '13px' },
-  large:  { minHeight: '56px', minWidth: '56px',  fontSize: '17px' },
+  small:  { minHeight: 'var(--Small-Button-Height)', minWidth: 'var(--Small-Button-Height)', fontSize: '13px', '--_height': 'var(--Small-Button-Height)' },
+  large:  { minHeight: 'var(--Large-Button-Height)', minWidth: 'var(--Large-Button-Height)', fontSize: '17px', '--_height': 'var(--Large-Button-Height)' },
   medium: {
     minHeight: 'var(--Button-Height)',
-    minWidth:  'max(var(--Min-Button-Width), var(--Button-Height))',
-    fontSize: '15px',
+    minWidth:  'var(--Button-Min-Width)',
+    fontSize:  '15px',
+    '--_height': 'var(--Button-Height)',
   },
 };
 
 function getSizingStyles({ size, iconOnly, letterNumber, avatar }) {
-  const base = SIZE_BASE[size] || SIZE_BASE.medium;
+  const base       = SIZE_BASE[size] || SIZE_BASE.medium;
+  const squareSize = SIZE_HEIGHT[size] || SIZE_HEIGHT.medium;
 
-  // Icon / Avatar — no padding, fixed square
+  // Icon / Avatar — fixed square, no padding
   if (iconOnly) {
-    const squareSize = size === 'small' ? '24px' : 
-                       size === 'large' ? '64px' : 
-                       'var(--Button-Height)';
     const fontSize = avatar
       ? (size === 'small' ? '12px' : size === 'large' ? '18px' : '14px')
       : (size === 'small' ? '1rem' : base.fontSize);
     return {
       minHeight: squareSize,
-      minWidth: squareSize,
-      maxWidth: squareSize,
+      minWidth:  squareSize,
+      maxWidth:  squareSize,
       fontSize,
       padding: '0',
+      '--_height': squareSize,
     };
   }
 
-  // Letter / Number — no maxWidth, grows with content, no padding on shell
+  // Letter / Number — square minimum, grows with content, no padding on shell
   if (letterNumber) {
-    const letterHeight = size === 'small' ? '24px'
-                       : size === 'large' ? '64px'
-                       : 'var(--Button-Height)';
     return {
       ...base,
-      minHeight: letterHeight,
-      minWidth:  letterHeight,
+      minHeight: squareSize,
+      minWidth:  squareSize,
       padding: '0',
     };
   }
 
-  // Text — horizontal padding on shell
+  // Text — minHeight from token, minWidth from SIZE_BASE (--Button-Min-Width / token)
   return {
     ...base,
     padding: size === 'large'
@@ -343,12 +359,8 @@ export function Button({
   // Avatar variant: circular with sized MuiAvatar - matches button size exactly
   const renderStartIcon = () => {
     if (avatar && children) {
-      // Avatar must fill entire button
-      const avatarSize = size === 'small' ? '24px' : 
-                        size === 'large' ? '64px' : 
-                        'var(--Button-Height)';
-      const avatarFontSize = size === 'small' ? '12px' :
-                             size === 'large' ? '18px' : '14px';
+      const avatarSize     = SIZE_HEIGHT[size] || SIZE_HEIGHT.medium;
+      const avatarFontSize = size === 'small' ? '12px' : size === 'large' ? '18px' : '14px';
       return (
         <MuiAvatar
           sx={{
@@ -390,11 +402,16 @@ export function Button({
       className={`btn-${variant} ${className}`}
       role="button"
       sx={{
-        borderRadius: avatar ? '50%' : 'var(--Style-Border-Radius)',
+        borderRadius: avatar
+          ? 'var(--Large-Button-Height)'
+          : (iconOnly || swatch)
+            ? 'var(--Button-Icon-Radius)'
+            : 'var(--Button-Radius)',
         textTransform: 'none',
         fontWeight: 'inherit',
         lineHeight: 1,
         transition: 'background-color 0.15s ease-in-out, border-color 0.15s ease-in-out',
+        '--_bevel': 'calc(var(--Button-Bevel) * var(--_height) / 100)',
 
         ...sizingStyles,
         ...variantStyles,
@@ -410,7 +427,6 @@ export function Button({
           marginLeft: '0px !important',
           marginRight: avatar ? '0px !important' : '4px !important',
         },
-        // Avatar font size override — MUI's .MuiAvatar-root default wins over sx
         ...(avatar && {
           '& .MuiAvatar-root': {
             fontSize: size === 'small' ? '12px' : size === 'large' ? '18px' : '14px',

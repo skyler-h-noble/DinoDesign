@@ -82,7 +82,7 @@ function CopyButton({ code }) {
 function ControlButton({ label, selected, onClick, disabled: isDisabled }) {
   return (
     <Button
-      variant={selected ? 'primary' : 'primary-outline'}
+      variant={selected ? 'default' : 'primary-outline'}
       size="small"
       onClick={onClick}
       disabled={isDisabled}
