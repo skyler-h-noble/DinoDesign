@@ -1,17 +1,21 @@
 :root {
-  --Dropshadow-Color: rgba(0, 0, 0, 0.1);
-  --Effects-Level-0: none;
-  --Effects-Level-1: 0 1px 2px 0 var(--Dropshadow-Color);
-  --Effects-Level-2: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 var(--Dropshadow-Color);
-  --Effects-Level-3: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px var(--Dropshadow-Color);
-  --Effects-Level-4: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px var(--Dropshadow-Color);
-  --Effects-Level-5: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px var(--Dropshadow-Color);
 
-  --Shadow-1: 0px 0px 0px 1px #eeeeee;
-  --Shadow-2: 0px 0px 0px 0px rgba(0, 0, 0, 0.0);
-  --Button-Radius: 12px;
+  /* Button */
+  --Button-Radius: 4px;
+  --Button-Icon-Radius: 4px;
+  --Button-Height: 36px;
+  --Small-Button-Height: 24px;
+  --Large-Button-Height: 56px;
+  --Button-Min-Width: 60px;
+  --Button-Bevel: 0%;
+  --Button-Bevel-Px: 0px;
+  --Button-Bevel-Opacity: 50%;
+  --Button-Bevel-Shadow: none;
   --Style-Border-Radius: var(--Button-Radius);
-  --Card-Radius: 16px;
+
+  /* Card */
+  --Card-Radius: 8px;
+  --Card-Focus-Radius: 11px;
   --Card-Padding: 16px;
   --Style-Gradient-Color-1: var(--Buttons-Primary-Button);
   --Style-Gradient-Color-2: var(--Buttons-Primary-Button);

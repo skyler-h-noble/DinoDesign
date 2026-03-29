@@ -1,6 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display+SC&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Linden+Hill&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Karla&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
 
 /* ========================================
  * Base CSS Variables
@@ -170,41 +170,47 @@
   --Chart-Lines: #e2e2e2;
 
   /* Solid Chart Colors */
-  --Chart-1: #f8f0dc;
-  --Chart-2: #ffebe6;
-  --Chart-3: #ebf3ea;
+  --Chart-1: #fdeee6;
+  --Chart-2: #ffece0;
+  --Chart-3: #ffebda;
   --Chart-4: #eeefff;
   --Chart-5: #dff7e4;
   --Chart-6: #ffedd3;
   --Chart-7: #ffe8e3;
   --Chart-8: #f1f1f1;
-  --Chart-9: #eee2be;
-  --Chart-10: #ffd9d2;
+  --Chart-9: #f6ded2;
+  --Chart-10: #ffdbc9;
 
   /* Opaque Chart Colors (50% opacity) */
-  --Chart-1-Opaque: rgba(248, 240, 220, 0.5);
-  --Chart-2-Opaque: rgba(255, 235, 230, 0.5);
-  --Chart-3-Opaque: rgba(235, 243, 234, 0.5);
+  --Chart-1-Opaque: rgba(253, 238, 230, 0.5);
+  --Chart-2-Opaque: rgba(255, 236, 224, 0.5);
+  --Chart-3-Opaque: rgba(255, 235, 218, 0.5);
   --Chart-4-Opaque: rgba(238, 239, 255, 0.5);
   --Chart-5-Opaque: rgba(223, 247, 228, 0.5);
   --Chart-6-Opaque: rgba(255, 237, 211, 0.5);
   --Chart-7-Opaque: rgba(255, 232, 227, 0.5);
   --Chart-8-Opaque: rgba(241, 241, 241, 0.5);
-  --Chart-9-Opaque: rgba(238, 226, 190, 0.5);
-  --Chart-10-Opaque: rgba(255, 217, 210, 0.5);
+  --Chart-9-Opaque: rgba(246, 222, 210, 0.5);
+  --Chart-10-Opaque: rgba(255, 219, 201, 0.5);
 
   /* ========================================
    * Effect Levels (Box Shadows)
    * ======================================== */
 
+  --Effect-Level-0: none;
+  --Effect-Level-1: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --Effect-Level-2: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --Effect-Level-3: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --Effect-Level-4: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --Effect-Level-5: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 
- --Set-Font-Family-Header: "Playfair Display SC", serif;
+ --Set-Font-Family-Header: "Linden Hill", sans-serif;
  --Set-Font-Family-Header-Weight: 200;
- --Set-Font-Family-Body: "Instrument Sans", sans-serif;
+ --Set-Font-Family-Body: "Karla", sans-serif;
  --Set-Font-Family-Body-Weight: 400;
  --Set-Font-Family-Body-Semibold-Weight: 600;
  --Set-Font-Family-Body-Bold-Weight: 700;
- --Set-Font-Family-Decorative: "Frank Ruhl Libre", serif;
+ --Set-Font-Family-Decorative: "Righteous", serif;
  --Set-Font-Family-Decorative-Weight: 200;
 }
 

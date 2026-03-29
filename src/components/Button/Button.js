@@ -7,69 +7,73 @@ import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography } from
  * Button Component
  * Full-featured button with complete design system integration
  *
+ * ─── STRUCTURE (matches Figma) ─────────────────────────────────────────────────
+ *
+ * Button-Container (outer)
+ *   border: 1px solid var(--Buttons-{Color}-Border)
+ *   border-radius: var(--Button-Radius)
+ *   box-shadow: elevation (5 dropshadow layers)
+ *   padding: 1px (gap between border and inner)
+ *
+ *   Button-Contents (inner)
+ *     background: var(--Buttons-{Color}-Button)
+ *     border-radius: var(--Button-Inner-Radius)  ← radius - 1
+ *     contains: Slot (icon) + Typography + Slot2 (icon)
+ *
+ *     Bevel Overlay (pseudo-element)
+ *       pointer-events: none
+ *       inset shadow: highlight top-left, lowlight bottom-right
+ *
  * ─── VARIANTS ────────────────────────────────────────────────────────────────
  *
  * SOLID   — variant="{color}"
- *   BG:         var(--Buttons-{Color}-Button)
- *   Border:     2px solid var(--Buttons-{Color}-Button)
- *   Text:       var(--Buttons-{Color}-Text)
- *   Hover:      var(--Buttons-{Color}-Hover)
- *   Active:     var(--Buttons-{Color}-Active)
- *
  * OUTLINE — variant="{color}-outline"
- *   BG:         transparent
- *   Border:     2px solid var(--Buttons-{Color}-Button)
- *   Text:       var(--Text)
- *   Hover:      var(--Surface-Dim)
- *   Active:     var(--Surface-Dim)
- *
  * LIGHT   — variant="{color}-light"
- *   BG:         var(--{Color}-Color-11)
- *   Border:     2px solid var(--Buttons-{Color}-Button)
- *   Text:       var(--Text-{Color}-Color-11)
- *   Hover:      var(--Hover-{Color}-Color-11)
- *   Active:     var(--Active-{Color}-Color-11)
- *
  * GHOST   — variant="ghost"
- *   BG:         transparent
- *   Border:     2px solid transparent
- *   Text:       var(--Hotlink), underlined
- *   Hover:      var(--Background-Hover)
- *   Active:     var(--Background-Active)
  *
  * ─── SIZES ───────────────────────────────────────────────────────────────────
- *   small:  var(--Small-Button-Height) minHeight, var(--Sizing-Half) var(--Sizing-1) padding
- *   medium: var(--Button-Height) minHeight, var(--Button-Min-Width) minWidth, var(--Sizing-Half) var(--Sizing-1) padding
- *   large:  var(--Large-Button-Height) minHeight, var(--Sizing-Half) var(--Sizing-2) padding
+ *   small:  var(--Small-Button-Height)
+ *   medium: var(--Button-Height)
+ *   large:  var(--Large-Button-Height)
  *
  * ─── CONTENT TYPES ───────────────────────────────────────────────────────────
- *   text:       Typography wrapper, padding on button shell
- *   number:     letterNumber prop, padding on inner text box
- *   letter:     letterNumber prop, padding on inner text box
- *   icon:       iconOnly prop, no padding
- *   avatar:     avatar prop, circular, no padding
- *   swatch:     swatch prop, square color block, no content, wrappable in Tooltip
+ *   text, number/letter, icon, avatar, swatch
  */
 
 const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
-// Bevel inset shadow — shared across all solid variants
-// --_bevel is set on the element; --_height is set per size
-const BEVEL_SHADOW = [
-  'inset 0 var(--_bevel) var(--_bevel) color-mix(in srgb, var(--Buttons-Default-Highlight) var(--Button-Bevel-Opacity), transparent)',
-  'inset 0 calc(-1 * var(--_bevel)) var(--_bevel) color-mix(in srgb, var(--Buttons-Default-Lowlight) var(--Button-Bevel-Opacity), transparent)',
+// ─── Elevation Shadow (matches Figma's 5-layer dropshadow) ──────────────────
+
+const ELEVATION_SHADOW = [
+  'var(--Shadow-1-offset-x, 0px) var(--Shadow-1-offset-y, 1px) var(--Shadow-1-blur-radius, 0px) var(--Shadow-1-spread-radius, 0px) var(--Dropshadow-Color-1)',
+  'var(--Shadow-2-offset-x, 1px) var(--Shadow-2-offset-y, 2px) var(--Shadow-2-blur-radius, 2px) var(--Shadow-2-spread-radius, 0px) var(--Dropshadow-Color-2)',
+  'var(--Shadow-3-offset-x, 2px) var(--Shadow-3-offset-y, 4px) var(--Shadow-3-blur-radius, 4px) var(--Shadow-3-spread-radius, 0px) var(--Dropshadow-Color-3)',
+  'var(--Shadow-4-offset-x, 0px) var(--Shadow-4-offset-y, 0px) var(--Shadow-4-blur-radius, 0px) var(--Shadow-4-spread-radius, 0px) var(--Dropshadow-Color-4)',
+  'var(--Shadow-1-offset-x, 0px) var(--Shadow-1-offset-y, 1px) var(--Shadow-1-blur-radius, 0px) var(--Shadow-1-spread-radius, 0px) var(--Dropshadow-Color-5)',
 ].join(', ');
+
+// ─── Bevel Shadow (per-color, per-size) ─────────────────────────────────────
+// Uses --_bevel (computed from % × height) and per-color Highlight/Lowlight
+
+function bevelShadow(color) {
+  const C = cap(color);
+  return [
+    `inset calc(-1 * var(--_bevel)) calc(-1 * var(--_bevel)) var(--_bevel) var(--Buttons-${C}-Highlight)`,
+    `inset var(--_bevel) var(--_bevel) var(--_bevel) var(--Buttons-${C}-Lowlight)`,
+  ].join(', ');
+}
 
 // ─── Variant Style Builders ───────────────────────────────────────────────────
 
 function solidStyles(color) {
   const C = cap(color);
-  const solidShadow = `var(--Shadow-1), var(--Shadow-2), var(--Effect-Level-3), ${BEVEL_SHADOW}`;
+  const bevel = bevelShadow(color);
+  const solidShadow = `${ELEVATION_SHADOW}, ${bevel}`;
   return {
     backgroundColor: `var(--Buttons-${C}-Button)`,
     color: `var(--Buttons-${C}-Text)`,
-    border: `2px solid var(--Buttons-${C}-Border)`,
+    border: `1px solid var(--Buttons-${C}-Border)`,
     boxShadow: solidShadow,
     position: 'relative',
     zIndex: 1,
@@ -82,21 +86,17 @@ function solidStyles(color) {
       boxShadow: solidShadow,
     },
     '&:active': {
-      backgroundColor: 'var(--Buttons-Primary-Active)',
+      backgroundColor: `var(--Buttons-${C}-Active)`,
+      boxShadow: bevel, // No elevation on press
     },
     '&.Mui-focusVisible': {
-      backgroundColor: 'var(--Focus-Visible)',
+      backgroundColor: `var(--Buttons-${C}-Button)`,
+      outline: '2px solid var(--Focus-Visible)',
+      outlineOffset: '2px',
     },
-    '& .MuiTouchRipple-root': {
-      zIndex: -1,
-    },
-    '& .MuiTypography-root': {
-      zIndex: 1,
-    }, 
-    '& .MuiButton-icon': {
-      zIndex: 1,
-    }, 
-
+    '& .MuiTouchRipple-root': { zIndex: -1 },
+    '& .MuiTypography-root': { zIndex: 1 },
+    '& .MuiButton-icon': { zIndex: 1 },
   };
 }
 
@@ -104,21 +104,23 @@ function outlineStyles(color) {
   const C = cap(color);
   return {
     backgroundColor: 'transparent',
-    color: 'var(--Text)',
-    border: `2px solid var(--Buttons-${C}-Border)`,
+    color: `var(--Buttons-${C}-Text, var(--Text))`,
+    border: `1px solid var(--Buttons-${C}-Border)`,
     boxShadow: 'none',
     '& .MuiTouchRipple-rippleVisible': {
-      color: 'var(--Surface-Dim)',
+      color: `var(--Buttons-${C}-Hover)`,
     },
     '&:hover': {
-      backgroundColor: 'var(--Buttons-Primary-Hover',
+      backgroundColor: `var(--Buttons-${C}-Hover)`,
       boxShadow: 'none',
     },
     '&:active': {
-      backgroundColor: 'var(--Buttons-Primary-Active)',
+      backgroundColor: `var(--Buttons-${C}-Active)`,
     },
     '&.Mui-focusVisible': {
-      backgroundColor: 'var(--Focus-Visible)',
+      backgroundColor: 'transparent',
+      outline: '2px solid var(--Focus-Visible)',
+      outlineOffset: '2px',
     },
   };
 }
@@ -128,20 +130,23 @@ function lightStyles(color) {
   return {
     backgroundColor: `var(--${C}-Color-11)`,
     color: `var(--Text-${C}-Color-11)`,
-    border: `2px solid var(--Buttons-${C}-Border)`,
-    boxShadow: 'var(--Shadow-1), var(--Shadow-2), var(--Effect-Level-3)',
+    border: `1px solid var(--Buttons-${C}-Border)`,
+    boxShadow: ELEVATION_SHADOW,
     '& .MuiTouchRipple-rippleVisible': {
       color: `var(--Hover-${C}-Color-11)`,
     },
     '&:hover': {
       backgroundColor: `var(--Hover-${C}-Color-11)`,
-      boxShadow: 'var(--Shadow-1), var(--Shadow-2), var(--Effect-Level-3)',
+      boxShadow: ELEVATION_SHADOW,
     },
     '&:active': {
       backgroundColor: `var(--Active-${C}-Color-11)`,
+      boxShadow: 'none',
     },
     '&.Mui-focusVisible': {
-      backgroundColor: `var(--Active-${C}-Color-11)`,
+      backgroundColor: `var(--${C}-Color-11)`,
+      outline: '2px solid var(--Focus-Visible)',
+      outlineOffset: '2px',
     },
   };
 }
@@ -150,22 +155,20 @@ function ghostStyles(isTextContent) {
   return {
     backgroundColor: 'transparent',
     color: 'var(--Hotlink)',
-    border: '2px solid transparent',
+    border: '1px solid transparent',
     boxShadow: 'none',
-    // Underline for text/letter/number, not for icons
     ...(isTextContent && {
       '& .MuiButton-root, & span, &': { textDecoration: 'underline' },
       textDecoration: 'underline',
     }),
     '& .MuiTouchRipple-rippleVisible': {
-      color: 'var(--Background-Hover)',
+      color: 'var(--Hover)',
     },
-    // Icons explicitly excluded from underline
     '& .MuiButton-startIcon, & .MuiButton-endIcon': {
       textDecoration: 'none',
     },
     '&:hover': {
-      backgroundColor: 'var(--Background-Hover)',
+      backgroundColor: 'var(--Hover)',
       boxShadow: 'none',
       ...(isTextContent && {
         textDecoration: 'none',
@@ -173,14 +176,16 @@ function ghostStyles(isTextContent) {
       }),
     },
     '&:active': {
-      backgroundColor: 'var(--Background-Active)',
+      backgroundColor: 'var(--Active)',
       ...(isTextContent && {
         textDecoration: 'none',
         '& span': { textDecoration: 'none' },
       }),
     },
     '&.Mui-focusVisible': {
-      backgroundColor: 'var(--Background-Active)',
+      backgroundColor: 'transparent',
+      outline: '2px solid var(--Focus-Visible)',
+      outlineOffset: '2px',
       ...(isTextContent && {
         textDecoration: 'none',
         '& span': { textDecoration: 'none' },
@@ -204,16 +209,6 @@ function buildVariantMap(isTextContent) {
 }
 
 // ─── Sizing ───────────────────────────────────────────────────────────────────
-// Token-driven dimensions per size tier.
-// Padding rules:
-//   text          → var(--Sizing-Half) var(--Sizing-1) on button shell
-//   letter/number → 0 on button shell; 4px padding on inner text box
-//   icon/avatar   → 0 on button shell; no inner wrapper
-//
-// minHeight / square size per tier:
-//   small  → var(--Small-Button-Height)
-//   medium → var(--Button-Height)         minWidth for text: var(--Button-Min-Width)
-//   large  → var(--Large-Button-Height)
 
 const SIZE_HEIGHT = {
   small:  'var(--Small-Button-Height)',
@@ -242,9 +237,8 @@ function getSizingStyles({ size, iconOnly, letterNumber, avatar }) {
       ? (size === 'small' ? '12px' : size === 'large' ? '18px' : '14px')
       : (size === 'small' ? '1rem' : base.fontSize);
     return {
-      minHeight: squareSize,
-      minWidth:  squareSize,
-      maxWidth:  squareSize,
+      height:  squareSize,
+      width:   squareSize,
       fontSize,
       padding: '0',
       '--_height': squareSize,
@@ -261,7 +255,7 @@ function getSizingStyles({ size, iconOnly, letterNumber, avatar }) {
     };
   }
 
-  // Text — minHeight from token, minWidth from SIZE_BASE (--Button-Min-Width / token)
+  // Text — minHeight from token, minWidth from SIZE_BASE
   return {
     ...base,
     padding: size === 'large'
@@ -288,31 +282,24 @@ export function Button({
   sx = {},
   ...props
 }) {
-  // avatar/swatch implies iconOnly sizing
   const isIconOnly     = iconOnly || avatar || swatch;
-  const isTextContent  = !isIconOnly;  // text, letter, number all get ghost underline
-  
-  // Icon, Letter, Number, Avatar, Swatch cannot be full width
+  const isTextContent  = !isIconOnly;
   const effectiveFullWidth = fullWidth && !isIconOnly && !letterNumber;
-  
-  // Ghost avatars/swatches are not clickable-looking, fallback to primary
-  const effectiveVariant = ((avatar || swatch) && (variant === 'ghost' || variant === 'text')) 
-    ? 'primary' 
+
+  // Ghost avatars/swatches fallback to primary
+  const effectiveVariant = ((avatar || swatch) && (variant === 'ghost' || variant === 'text'))
+    ? 'primary'
     : variant;
-  
+
   const variantMap     = buildVariantMap(isTextContent);
   const variantStyles  = variantMap[effectiveVariant] || variantMap.default;
   const sizingStyles   = getSizingStyles({ size, iconOnly: isIconOnly, letterNumber, avatar });
 
-  // Typography component: small for small size, regular otherwise
   const TypographyComp = size === 'small' ? ButtonSmallTypography : ButtonTypography;
 
-  // Wrap text children in typography, adjust padding based on icon presence
   const renderChildren = () => {
-    // Icon/avatar — render as-is, no wrapper
     if (isIconOnly) return children;
 
-    // Letter/Number — 4px padding on inner text box
     if (letterNumber) {
       return (
         <Box
@@ -331,7 +318,6 @@ export function Button({
       );
     }
 
-    // Text — wrap in typography, padding adjusts based on icon position
     if (typeof children === 'string' || typeof children === 'number') {
       const hasLeft  = !!startIcon;
       const hasRight = !!endIcon;
@@ -356,7 +342,6 @@ export function Button({
     return children;
   };
 
-  // Avatar variant: circular with sized MuiAvatar - matches button size exactly
   const renderStartIcon = () => {
     if (avatar && children) {
       const avatarSize     = SIZE_HEIGHT[size] || SIZE_HEIGHT.medium;
@@ -410,13 +395,13 @@ export function Button({
         textTransform: 'none',
         fontWeight: 'inherit',
         lineHeight: 1,
-        transition: 'background-color 0.15s ease-in-out, border-color 0.15s ease-in-out',
+        transition: 'background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out',
         '--_bevel': 'calc(var(--Button-Bevel) * var(--_height) / 100)',
 
         ...sizingStyles,
         ...variantStyles,
 
-        // Force padding override — MUI's default 6px 16px wins via class specificity
+        // Force padding override
         '&.MuiButton-root': {
           padding: sizingStyles.padding ?? '0 var(--Sizing-1)',
         },
@@ -450,6 +435,7 @@ export function Button({
           backgroundColor: variantStyles.backgroundColor,
           color: variantStyles.color,
           border: variantStyles.border,
+          boxShadow: 'none',
         },
 
         ...(effectiveFullWidth && { width: '100%' }),
