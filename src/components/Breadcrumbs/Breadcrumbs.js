@@ -60,7 +60,7 @@ export function Breadcrumbs({
           background: 'none', border: 'none', padding: '2px 4px',
           cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit',
           color: 'var(--Text-Quiet)', borderRadius: '4px',
-          '&:hover': { backgroundColor: 'var(--Surface-Dim)', color: 'var(--Text)' },
+          '&:hover': { backgroundColor: 'var(--Hover)', color: 'var(--Text)' },
           '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '1px' },
         }}
       >

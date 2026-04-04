@@ -13,8 +13,8 @@ import { Box } from '@mui/material';
  *
  * VARIANTS (on Menu popup):
  *   default   No data-theme. bg: var(--Background), border: var(--Border).
- *   solid     data-theme={Color}, data-surface="Surface". bg: var(--Surface), border: var(--Border).
- *   light     data-theme={Color}-Light. bg: var(--Surface), border: var(--Border).
+ *   solid     data-theme={Color}, data-surface="Surface". bg: var(--Background), border: var(--Border).
+ *   light     data-theme={Color}-Light. bg: var(--Background), border: var(--Border).
  *
  * ALL MENUS: outlined (1px solid var(--Border)), border-radius: var(--Style-Border-Radius)
  * SIZES: small | medium | large
@@ -125,7 +125,7 @@ export function MenuButton({
         cursor: 'pointer',
         transition: 'background-color 0.15s ease, border-color 0.15s ease',
         '&:hover': {
-          backgroundColor: 'var(--Surface-Dim)',
+          backgroundColor: 'var(--Hover)',
           borderColor: 'var(--Border)',
         },
         '&:focus-visible': {
@@ -175,7 +175,7 @@ export function Menu({
       ? LIGHT_THEME_MAP[color]
       : null;
 
-  const bg = isDefault ? 'var(--Background)' : 'var(--Surface)';
+  const bg = isDefault ? 'var(--Background)' : 'var(--Background)';
 
   // Focus first item when opened
   useEffect(() => {
@@ -325,7 +325,7 @@ export function MenuItem({
         fontSize: 'inherit',
         fontFamily: 'inherit',
         color: disabled ? 'var(--Text-Quiet)' : 'var(--Text)',
-        backgroundColor: selected ? 'var(--Surface-Dim)' : 'transparent',
+        backgroundColor: selected ? 'var(--Hover)' : 'transparent',
         cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 0.5 : 1,
         outline: 'none',
@@ -333,10 +333,10 @@ export function MenuItem({
         userSelect: 'none',
         ...(!disabled && {
           '&:hover': {
-            backgroundColor: 'var(--Surface-Dim)',
+            backgroundColor: 'var(--Hover)',
           },
           '&:focus-visible': {
-            backgroundColor: 'var(--Surface-Dim)',
+            backgroundColor: 'var(--Hover)',
             outline: '3px solid var(--Focus-Visible)',
             outlineOffset: '-3px',
           },

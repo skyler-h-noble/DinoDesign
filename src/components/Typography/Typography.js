@@ -58,7 +58,7 @@ import { Box } from '@mui/material';
 
 // ─── Token helpers ────────────────────────────────────────────────────────────
 
-const ff  = (token) => `var(--Font-Family-${token})`;
+const ff  = (token) => `var(--${token}-Font-Family)`;
 const fs  = (token) => `var(--${token}-Font-Size)`;
 const fw  = (token) => `var(--${token}-Font-Weight)`;
 const lh  = (token) => `calc(var(--${token}-Line-Height) * var(--Cognitive-Multiplier, 1))`;
@@ -512,8 +512,8 @@ const STYLE_MAP = {
   button: {
     component: 'span',
     fontFamily: ff('Body'),
-    fontSize: fs('Button-Standard'),
-    fontWeight: fw('Button-Standard'),
+    fontSize: fs('Button'),
+    fontWeight: fw('Body'),
     lineHeight: lhr('Button-Standard'),
     letterSpacing: ls('Button-Standard'),
     defaultColor: 'standard',
@@ -522,8 +522,8 @@ const STYLE_MAP = {
   'button-standard': {
     component: 'span',
     fontFamily: ff('Body'),
-    fontSize: fs('Button-Standard'),
-    fontWeight: fw('Button-Standard'),
+    fontSize: fs('Button'),
+    fontWeight: fw('Body'),
     lineHeight: lhr('Button-Standard'),
     letterSpacing: ls('Button-Standard'),
     defaultColor: 'standard',

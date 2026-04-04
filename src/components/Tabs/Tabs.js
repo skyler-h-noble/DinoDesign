@@ -11,21 +11,19 @@ import { Box } from '@mui/material';
  * TabPanel  — content pane shown when tab is selected
  *
  * DATA ATTRIBUTES (on Tabs wrapper):
- *   Always:   data-surface="Surface"
- *   standard  data-theme="Default". Indicator: var(--Buttons-{Color}-Border). All 8 colors.
- *   solid     data-theme={Color} on Tabs wrapper.
- *   light     data-theme={Color}-Light on Tabs wrapper.
+ *   standard  No data-theme, no data-surface. Indicator: var(--Buttons-{Color}-Border).
+ *   solid     data-theme="{Color}", data-surface="Surface".
+ *   light     data-theme="{Color}-Light", data-surface="Surface".
+ *   dark      data-theme="{Color}", data-surface="Surface-Dimmest".
  *
  * TABS (individual):
- *   No data attributes on individual tabs. Theme context from Tabs wrapper.
  *   Unselected: text var(--Text-Quiet), fontWeight 400
  *   Selected:   text var(--Text), fontWeight 600
- *   Indicator (3px all sizes):
- *     Standard: var(--Buttons-{Color}-Border) bottom/right border
- *     Solid/Light: var(--Text) bottom/right border (resolved within themed context)
+ *   Indicator (3px): var(--Buttons-{Color}-Border) for standard, var(--Text) for solid/light/dark
  *   Hover: var(--Hover)
  *   Active: var(--Active)
- *   Focus: var(--Focus-Visible)
+ *   Focus: 3px inset var(--Focus-Visible)
+ *   TabList border: var(--Border-Variant)
  *
  * SIZES: small | medium | large
  * ORIENTATION: horizontal | vertical
@@ -34,12 +32,17 @@ import { Box } from '@mui/material';
  */
 
 const SOLID_THEME_MAP = {
-  primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
+  primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary',
+  white: 'White', black: 'Black',
   info: 'Info-Medium', success: 'Success-Medium', warning: 'Warning-Medium', error: 'Error-Medium',
 };
 const LIGHT_THEME_MAP = {
-  primary: 'Primary-Light', secondary: 'Secondary-Light', tertiary: 'Tertiary-Light', neutral: 'Neutral-Light',
+  primary: 'Primary-Light', secondary: 'Secondary-Light', tertiary: 'Tertiary-Light',
   info: 'Info-Light', success: 'Success-Light', warning: 'Warning-Light', error: 'Error-Light',
+};
+const DARK_THEME_MAP = {
+  primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary',
+  info: 'Info-Medium', success: 'Success-Medium', warning: 'Warning-Medium', error: 'Error-Medium',
 };
 
 const SIZE_MAP = {
@@ -90,21 +93,11 @@ export function Tabs({
     }
   }, [controlled, onChange]);
 
-  const isSolid = variant === 'solid';
-  const isLight = variant === 'light';
-  const dataTheme = isSolid
-    ? SOLID_THEME_MAP[color]
-    : isLight
-      ? LIGHT_THEME_MAP[color]
-      : 'Default';
-
   return (
     <TabsContext.Provider value={{ value, setValue, variant, color, size, orientation, scrollable, tabsId }}>
       <Box
-        data-surface="Surface"
-        data-theme={dataTheme}
         className={'tabs tabs-' + orientation + ' tabs-' + size + ' tabs-' + variant
-          + (isSolid || isLight ? ' tabs-' + color : '')
+          + (variant !== 'standard' ? ' tabs-' + color : '')
           + (scrollable ? ' tabs-scrollable' : '') + ' ' + className}
         sx={{
           display: 'flex',
@@ -134,6 +127,20 @@ export function TabList({
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const isHorizontal = orientation === 'horizontal';
+  const isStandard = variant === 'standard';
+  const isSolid = variant === 'solid';
+  const isLight = variant === 'light';
+  const isDark = variant === 'dark';
+
+  // Theme/surface for the TabList (and individual Tabs inherit via context)
+  const dataTheme = isStandard ? undefined
+    : isSolid ? SOLID_THEME_MAP[color]
+    : isLight ? LIGHT_THEME_MAP[color]
+    : isDark ? DARK_THEME_MAP[color]
+    : undefined;
+  const dataSurface = isStandard ? undefined
+    : isDark ? 'Surface-Dimmest'
+    : 'Surface';
 
   // Scroll state detection
   const updateScrollState = useCallback(() => {
@@ -225,6 +232,8 @@ export function TabList({
   return (
     <Box
       ref={tabListRef}
+      data-theme={dataTheme || undefined}
+      data-surface={dataSurface || undefined}
       className={
         'tab-list tab-list-' + variant + ' tab-list-' + size + ' tab-list-' + orientation
         + (scrollable ? ' tab-list-scrollable' : '')
@@ -236,11 +245,12 @@ export function TabList({
         flexDirection: isHorizontal ? 'row' : 'column',
         gap: 0,
         position: 'relative',
+        backgroundColor: 'var(--Background)',
         ...(isHorizontal && {
-          borderBottom: '1px solid var(--Border)',
+          borderBottom: '1px solid var(--Border-Variant)',
         }),
         ...(!isHorizontal && {
-          borderRight: '1px solid var(--Border)',
+          borderRight: '1px solid var(--Border-Variant)',
         }),
         ...sx,
       }}
@@ -328,16 +338,30 @@ export function Tab({
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
   const isHorizontal = orientation === 'horizontal';
   const isStandard = variant === 'standard';
-  const C = { primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
-    info: 'Info', success: 'Success', warning: 'Warning', error: 'Error' }[color] || 'Primary';
+  const isSolid = variant === 'solid';
+  const isLight = variant === 'light';
+  const isDark = variant === 'dark';
+  const C = { default: 'Default', primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary',
+    neutral: 'Neutral', white: 'White', black: 'Black',
+    info: 'Info', success: 'Success', warning: 'Warning', error: 'Error' }[color] || 'Default';
 
   const resolvedValue = tabValue !== undefined ? tabValue : _index;
   const isSelected = value === resolvedValue;
 
-  // Standard: color-specific indicator. Solid/Light: var(--Text) resolves within themed context.
+  // Standard: color-specific indicator. Solid/Light/Dark: var(--Text) resolves within themed context.
   const indicatorColor = isStandard
     ? 'var(--Buttons-' + C + '-Border)'
     : 'var(--Text)';
+
+  // data-theme/data-surface on each Tab for themed variants
+  const tabDataTheme = isStandard ? undefined
+    : isSolid ? SOLID_THEME_MAP[color]
+    : isLight ? LIGHT_THEME_MAP[color]
+    : isDark ? DARK_THEME_MAP[color]
+    : undefined;
+  const tabDataSurface = isStandard ? undefined
+    : isDark ? 'Surface-Dimmest'
+    : 'Surface';
 
   const tabId = 'tab-' + tabsId + '-' + resolvedValue;
   const panelId = 'tabpanel-' + tabsId + '-' + resolvedValue;
@@ -351,6 +375,8 @@ export function Tab({
       component="button"
       role="tab"
       id={tabId}
+      data-theme={tabDataTheme || undefined}
+      data-surface={tabDataSurface || undefined}
       aria-selected={isSelected}
       aria-controls={panelId}
       aria-disabled={disabled || undefined}
@@ -377,8 +403,12 @@ export function Tab({
         color: isSelected ? 'var(--Text)' : 'var(--Text-Quiet)',
         backgroundColor: 'transparent',
         border: 'none',
-        borderBottom: isHorizontal && isSelected ? s.indicatorThickness + ' solid ' + indicatorColor : 'none',
-        borderRight: !isHorizontal && isSelected ? s.indicatorThickness + ' solid ' + indicatorColor : 'none',
+        borderBottom: isHorizontal
+          ? (isSelected ? s.indicatorThickness + ' solid ' + indicatorColor : s.indicatorThickness + ' solid transparent')
+          : 'none',
+        borderRight: !isHorizontal
+          ? (isSelected ? s.indicatorThickness + ' solid ' + indicatorColor : s.indicatorThickness + ' solid transparent')
+          : 'none',
         cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 0.5 : 1,
         position: 'relative',
@@ -387,17 +417,23 @@ export function Tab({
         flexShrink: 0,
         whiteSpace: 'nowrap',
 
-        // Offset the tab-list bottom border for selected
-        ...(isHorizontal && isSelected && {
+        // Offset the tab-list border for indicator alignment
+        ...(isHorizontal && {
           marginBottom: '-1px',
         }),
-        ...(!isHorizontal && isSelected && {
+        ...(!isHorizontal && {
           marginRight: '-1px',
         }),
 
         ...(!disabled && {
           '&:hover': {
             backgroundColor: 'var(--Hover)',
+            ...(isHorizontal && !isSelected && {
+              borderBottomColor: 'var(--Border-Variant)',
+            }),
+            ...(!isHorizontal && !isSelected && {
+              borderRightColor: 'var(--Border-Variant)',
+            }),
           },
           '&:active': {
             backgroundColor: 'var(--Active)',
@@ -458,7 +494,7 @@ export function TabPanel({
       aria-labelledby={tabId}
       className={'tab-panel tab-panel-' + size + ' ' + className}
       sx={{
-        padding: '16px 0',
+        padding: '16px',
         fontSize: s.fontSize,
         fontFamily: 'inherit',
         color: 'var(--Text)',

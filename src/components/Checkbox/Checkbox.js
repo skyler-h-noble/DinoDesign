@@ -26,7 +26,7 @@ import { Body, BodySmall } from '../Typography';
  *   - FormControlLabel automatically associates the label with the input
  */
 
-const COLORS = ['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // --- Variant Style Builders --------------------------------------------------
@@ -36,7 +36,7 @@ function solidStyles(color) {
   return {
     unchecked: {
       backgroundColor: 'transparent',
-      border: '2px solid var(--Buttons-' + C + '-Border)',
+      border: '2px solid var(--Quiet)',
     },
     checked: {
       backgroundColor: 'var(--Buttons-' + C + '-Button)',
@@ -55,14 +55,14 @@ function outlineStyles(color) {
   return {
     unchecked: {
       backgroundColor: 'transparent',
-      border: '2px solid var(--Buttons-' + C + '-Border)',
+      border: '2px solid var(--Quiet)',
     },
     checked: {
       backgroundColor: 'transparent',
       border: '2px solid var(--Buttons-' + C + '-Border)',
     },
     hover: {
-      backgroundColor: 'var(--Buttons-Primary-Hover)',
+      backgroundColor: 'var(--Hover)',
       border: '2px solid var(--Buttons-' + C + '-Border)',
     },
     icon: 'var(--Text)',
@@ -73,29 +73,36 @@ function lightStyles(color) {
   const C = cap(color);
   return {
     unchecked: {
-      backgroundColor: 'var(--' + C + '-Color-11)',
-      border: '2px solid var(--Buttons-' + C + '-Border)',
+      backgroundColor: 'var(--Background)',
+      border: '2px solid var(--Quiet)',
     },
     checked: {
-      backgroundColor: 'var(--' + C + '-Color-11)',
+      backgroundColor: 'var(--Buttons-' + C + '-Button)',
       border: '2px solid var(--Buttons-' + C + '-Border)',
     },
     hover: {
-      backgroundColor: 'var(--Hover-' + C + '-Color-11)',
+      backgroundColor: 'var(--Hover)',
       border: '2px solid var(--Buttons-' + C + '-Border)',
     },
-    icon: 'var(--Text-' + C + '-Color-11)',
+    icon: 'var(--Buttons-' + C + '-Text)',
+    dataTheme: C + '-Light',
   };
 }
 
 function buildVariantMap() {
   const map = {};
-  map['primary'] = solidStyles('primary');
+  // Solid variants for all colors
   COLORS.forEach((color) => {
+    map[color] = solidStyles(color);
+    map[color + '-solid']   = solidStyles(color);
     map[color + '-outline'] = outlineStyles(color);
     map[color + '-light']   = lightStyles(color);
   });
+  // Shorthand aliases
+  map['primary'] = solidStyles('primary');
   map['outline'] = outlineStyles('primary');
+  map['solid']   = solidStyles('primary');
+  map['light']   = lightStyles('primary');
   return map;
 }
 
@@ -114,10 +121,13 @@ function CheckboxBoxIcon({ size, variant, checked, indeterminate }) {
   const styles = variantMap[variant] || variantMap.primary;
   const sizeConfig = SIZE_MAP[size] || SIZE_MAP.medium;
   const boxStyles = (checked || indeterminate) ? styles.checked : styles.unchecked;
+  // Light variants get a data-theme for theme-scoped backgrounds
+  const dataTheme = styles.dataTheme && !(checked || indeterminate) ? styles.dataTheme : undefined;
 
   return (
     <Box
       className="chk-box-icon"
+      data-theme={dataTheme}
       sx={{
         width: sizeConfig.box,
         height: sizeConfig.box,
@@ -211,6 +221,7 @@ export function Checkbox({
         color: 'inherit',
         transition: 'background-color 0.15s ease-in-out',
         '&.Mui-checked, &.MuiCheckbox-indeterminate': { color: 'inherit' },
+        '&:hover': { backgroundColor: 'transparent' },
         '&:hover .chk-box-icon': { ...styles.hover },
         '&.Mui-focusVisible .chk-box-icon': {
           outline: '2px solid var(--Focus-Visible)',
@@ -262,8 +273,15 @@ export function Checkbox({
   return checkboxElement;
 }
 
-// Convenience Exports - Primary
+// Convenience Exports - Default
+export const DefaultCheckbox          = (p) => <Checkbox variant="default"            {...p} />;
+export const DefaultSolidCheckbox     = (p) => <Checkbox variant="default-solid"      {...p} />;
+export const DefaultOutlineCheckbox   = (p) => <Checkbox variant="default-outline"    {...p} />;
+export const DefaultLightCheckbox     = (p) => <Checkbox variant="default-light"      {...p} />;
+
+// Solid (Primary)
 export const PrimaryCheckbox          = (p) => <Checkbox variant="primary"            {...p} />;
+export const PrimarySolidCheckbox     = (p) => <Checkbox variant="primary-solid"      {...p} />;
 
 // Outline
 export const PrimaryOutlineCheckbox   = (p) => <Checkbox variant="primary-outline"    {...p} />;
@@ -274,6 +292,15 @@ export const InfoOutlineCheckbox      = (p) => <Checkbox variant="info-outline" 
 export const SuccessOutlineCheckbox   = (p) => <Checkbox variant="success-outline"    {...p} />;
 export const WarningOutlineCheckbox   = (p) => <Checkbox variant="warning-outline"    {...p} />;
 export const ErrorOutlineCheckbox     = (p) => <Checkbox variant="error-outline"      {...p} />;
+
+// Solid (all colors)
+export const SecondarySolidCheckbox   = (p) => <Checkbox variant="secondary-solid"    {...p} />;
+export const TertiarySolidCheckbox    = (p) => <Checkbox variant="tertiary-solid"     {...p} />;
+export const NeutralSolidCheckbox     = (p) => <Checkbox variant="neutral-solid"      {...p} />;
+export const InfoSolidCheckbox        = (p) => <Checkbox variant="info-solid"         {...p} />;
+export const SuccessSolidCheckbox     = (p) => <Checkbox variant="success-solid"      {...p} />;
+export const WarningSolidCheckbox     = (p) => <Checkbox variant="warning-solid"      {...p} />;
+export const ErrorSolidCheckbox       = (p) => <Checkbox variant="error-solid"        {...p} />;
 
 // Light
 export const PrimaryLightCheckbox     = (p) => <Checkbox variant="primary-light"      {...p} />;
@@ -287,5 +314,6 @@ export const ErrorLightCheckbox       = (p) => <Checkbox variant="error-light"  
 
 // Aliases
 export const OutlineCheckbox = (p) => <Checkbox variant="primary-outline" {...p} />;
+export const SolidCheckbox   = (p) => <Checkbox variant="primary-solid"   {...p} />;
 
 export default Checkbox;

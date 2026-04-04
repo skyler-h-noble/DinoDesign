@@ -1,5 +1,5 @@
 // src/components/TreeView/TreeViewShowcase.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
@@ -18,17 +18,17 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H5, BodySmall, Caption, OverlineSmall,
+  H2, H5, BodySmall, Caption, Label, OverlineSmall,
 } from '../Typography';
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
 
-const COLORS = ['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
-
-const DEFAULT_JSON = JSON.stringify(DEFAULT_ITEMS, null, 2);
+const COLOR_GROUPS = [
+  { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
+  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+];
 
 // ─── Sample data with icons ───────────────────────────────────────────────────
-// Icons are React elements — injected by the showcase, not from JSON
 
 const ICON_DOT = (color) => (
   <Box sx={{
@@ -50,10 +50,10 @@ const ITEMS_WITH_ICONS = [
         icon: <FolderOpenIcon />,
         badge: ICON_DOT('var(--Warning-Text, orange)'),
         children: [
-          { id: '1-1-1', label: 'Invoice',         icon: <PictureAsPdfIcon /> },
-          { id: '1-1-2', label: 'Meeting notes',   icon: <InsertDriveFileIcon /> },
-          { id: '1-1-3', label: 'Tasks list',      icon: <InsertDriveFileIcon /> },
-          { id: '1-1-4', label: 'Equipment',       icon: <PictureAsPdfIcon /> },
+          { id: '1-1-1', label: 'Invoice',          icon: <PictureAsPdfIcon /> },
+          { id: '1-1-2', label: 'Meeting notes',    icon: <InsertDriveFileIcon /> },
+          { id: '1-1-3', label: 'Tasks list',       icon: <InsertDriveFileIcon /> },
+          { id: '1-1-4', label: 'Equipment',        icon: <PictureAsPdfIcon /> },
           { id: '1-1-5', label: 'Video conference', icon: <VideoLibraryIcon /> },
         ],
       },
@@ -73,6 +73,8 @@ const ITEMS_WITH_ICONS = [
   { id: '4', label: 'Trash',   icon: <DeleteIcon />,  disabled: true },
 ];
 
+const DEFAULT_JSON = JSON.stringify(DEFAULT_ITEMS, null, 2);
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function getLuminance(hex) {
@@ -88,12 +90,6 @@ function getContrast(h1, h2) {
   const l1 = getLuminance(h1), l2 = getLuminance(h2);
   return ((Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05)).toFixed(2);
 }
-function getCssVar(v) {
-  if (typeof window === 'undefined') return null;
-  return getComputedStyle(document.documentElement).getPropertyValue(v).trim() || null;
-}
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
 
 function ContrastBadge({ ratio, threshold }) {
   if (!ratio) return <Caption style={{ color: 'var(--Text-Quiet)' }}>--</Caption>;
@@ -141,36 +137,38 @@ function CopyButton({ code }) {
 
 function ControlButton({ label, selected, onClick }) {
   return (
-    <Button variant={selected ? 'primary' : 'primary-outline'} size="small" onClick={onClick}>
+    <Button variant={selected ? 'default' : 'default-outline'} size="small" onClick={onClick}>
       {label}
     </Button>
   );
 }
 
-function ColorSwatch({ color, selected, onClick }) {
+function ColorSwatchButton({ color, selected, onClick }) {
+  const C = cap(color);
   return (
     <Box
       component="button"
       onClick={() => onClick(color)}
-      aria-label={'Select ' + color}
+      aria-label={'Select ' + C}
       aria-pressed={selected}
-      title={color}
+      title={C}
       sx={{
-        width: 36, height: 36, borderRadius: '4px',
-        backgroundColor: 'var(--Buttons-' + cap(color) + '-Button, var(--Primary-Color-10))',
+        width: 'var(--Button-Height)', height: 'var(--Button-Height)', borderRadius: '4px',
+        backgroundColor: 'var(--Buttons-' + C + '-Button)',
         border: selected ? '2px solid var(--Text)' : '2px solid transparent',
         outline: selected ? '2px solid var(--Focus-Visible)' : '2px solid transparent',
         outlineOffset: '1px', cursor: 'pointer', flexShrink: 0,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         transition: 'transform 0.1s ease', '&:hover': { transform: 'scale(1.1)' },
-      }}
-    >
-      {selected && <CheckIcon sx={{ fontSize: 16, color: 'white', pointerEvents: 'none' }} />}
+      }}>
+      {selected && (
+        <CheckIcon sx={{ fontSize: 16, color: 'var(--Buttons-' + C + '-Text)', pointerEvents: 'none' }} />
+      )}
     </Box>
   );
 }
 
-// ─── JSON Editor ──────────────────────────────────────────────────────────────
+// ─── JSON Editor ─────────────────────────────────────────────────────────────
 
 function JsonEditor({ value, onChange }) {
   const [text, setText] = useState(value);
@@ -207,17 +205,12 @@ function JsonEditor({ value, onChange }) {
         rows={10}
         sx={{
           width: '100%',
-          fontFamily: 'monospace',
-          fontSize: '11px',
+          fontFamily: 'monospace', fontSize: '11px',
           backgroundColor: '#1e1e1e',
           color: error ? '#f87171' : '#e5e7eb',
           border: '1px solid ' + (error ? '#f87171' : '#333'),
-          borderRadius: '6px',
-          padding: '10px',
-          resize: 'vertical',
-          outline: 'none',
-          boxSizing: 'border-box',
-          lineHeight: 1.5,
+          borderRadius: '6px', padding: '10px',
+          resize: 'vertical', outline: 'none', boxSizing: 'border-box', lineHeight: 1.5,
           '&:focus': { borderColor: 'var(--Focus-Visible)' },
         }}
       />
@@ -226,17 +219,14 @@ function JsonEditor({ value, onChange }) {
           JSON error: {error}
         </Caption>
       )}
-      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
-        Supported fields: id, label, disabled, children. Icons are added via the toggle above.
-      </Caption>
     </Box>
   );
 }
 
-// ─── Main Showcase ────────────────────────────────────────────────────────────
+// ─── Main Showcase ───────────────────────────────────────────────────────────
 
 export function TreeViewShowcase() {
-  const [selectionStyle, setSelectionStyle] = useState('solid');
+  const [variant, setVariant] = useState('default');
   const [color, setColor]                   = useState('primary');
   const [density, setDensity]               = useState('default');
   const [animation, setAnimation]           = useState('slide');
@@ -248,32 +238,42 @@ export function TreeViewShowcase() {
   const [bgTheme, setBgTheme]               = useState(null);
   const [contrastData, setContrastData]     = useState({});
 
+  const previewRef = useRef(null);
+
   const colorToken = cap(color);
   const activeItems = showIcons ? ITEMS_WITH_ICONS : jsonItems;
 
+  const getElVar = useCallback((el, varName) => {
+    if (!el) return null;
+    return getComputedStyle(el).getPropertyValue(varName).trim() || null;
+  }, []);
+
   useEffect(() => {
-    setContrastData({
-      text:         getCssVar('--Text'),
-      textQuiet:    getCssVar('--Text-Quiet'),
-      background:   getCssVar('--Background'),
-      border:       getCssVar('--Border'),
-      focusVisible: getCssVar('--Focus-Visible'),
-      activeBtn:    getCssVar('--Buttons-' + colorToken + '-Button'),
-      activeBorder: getCssVar('--Buttons-' + colorToken + '-Border'),
-    });
-  }, [color]);
+    const timer = setTimeout(() => {
+      const el = previewRef.current;
+      setContrastData({
+        text:         getElVar(el, '--Text'),
+        textQuiet:    getElVar(el, '--Text-Quiet'),
+        background:   getElVar(el, '--Background'),
+        border:       getElVar(el, '--Border'),
+        focusVisible: getElVar(el, '--Focus-Visible'),
+        activeBtn:    getElVar(el, '--Buttons-' + colorToken + '-Button'),
+        activeBorder: getElVar(el, '--Buttons-' + colorToken + '-Border'),
+      });
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [color, bgTheme, getElVar, colorToken]);
 
   const generateCode = () => {
     const lines = ['<DynoTreeView'];
-    lines.push('  color="' + color + '"');
-    if (selectionStyle !== 'solid')  lines.push('  selectionStyle="' + selectionStyle + '"');
+    if (color !== 'default') lines.push('  color="' + color + '"');
+    if (variant !== 'default') lines.push('  variant="' + variant + '"');
     if (density !== 'default')       lines.push('  density="' + density + '"');
     if (animation !== 'slide')       lines.push('  animation="' + animation + '"');
     if (selectionMode !== 'single')  lines.push('  selectionMode="' + selectionMode + '"');
     if (checkboxSel)                 lines.push('  checkboxSelection');
     if (disableSel)                  lines.push('  disableSelection');
-    if (showIcons)                   lines.push('  items={itemsWithIcons}  {/* icon field per node */}');
-    else                             lines.push('  items={treeData}');
+    lines.push('  items={treeData}');
     lines.push('/>');
     return lines.join('\n');
   };
@@ -287,11 +287,11 @@ export function TreeViewShowcase() {
         {/* ── LEFT: Preview + Code ── */}
         <Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, pr: { md: 3 } }}>
 
-          <PreviewSurface theme={bgTheme}>
+          <PreviewSurface ref={previewRef} theme={bgTheme}>
             <Box sx={{ width: '100%', maxWidth: 360 }}>
               <DynoTreeView
                 color={color}
-                selectionStyle={selectionStyle}
+                variant={variant}
                 density={density}
                 animation={animation}
                 selectionMode={selectionMode}
@@ -332,48 +332,53 @@ export function TreeViewShowcase() {
 
               {/* ── Playground ── */}
               <TabPanel value={0}>
-                <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <Box sx={{ p: 3 }}>
 
-                  <BackgroundPicker value={bgTheme} onChange={setBgTheme} />
+                  {/* Background */}
+                  <Box sx={{ mb: 3 }}>
+                    <BackgroundPicker value={bgTheme} onChange={setBgTheme} />
+                  </Box>
 
-                  {/* Selection Style */}
+                  {/* Style */}
                   <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SELECTION STYLE</OverlineSmall>
+                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</OverlineSmall>
                     <Stack direction="row" spacing={1}>
-                      <ControlButton label="Solid"    selected={selectionStyle === 'solid'}    onClick={() => setSelectionStyle('solid')} />
-                      <ControlButton label="Outlined" selected={selectionStyle === 'outlined'} onClick={() => setSelectionStyle('outlined')} />
+                      <ControlButton label="Default" selected={variant === 'default'} onClick={() => setVariant('default')} />
+                      <ControlButton label="Solid"   selected={variant === 'solid'}   onClick={() => setVariant('solid')} />
+                      <ControlButton label="Light"   selected={variant === 'light'}   onClick={() => setVariant('light')} />
                     </Stack>
-                    <Caption style={{ color: 'var(--Text-Quiet)', marginTop: 6, display: 'block' }}>
-                      Active item: {selectionStyle === 'solid'
-                        ? 'var(--Buttons-' + colorToken + '-Button) bg + border'
-                        : 'var(--Background) + var(--Buttons-' + colorToken + '-Border) border'}
-                    </Caption>
                   </Box>
 
-                  {/* Color */}
-                  <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
-                    <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-                      {COLORS.map((c) => (
-                        <ColorSwatch key={c} color={c} selected={color === c} onClick={setColor} />
-                      ))}
-                    </Stack>
-                    <Caption style={{ color: 'var(--Text-Quiet)', marginTop: 6, display: 'block' }}>
-                      Active uses var(--Buttons-{colorToken}-Button) / var(--Buttons-{colorToken}-Border)
-                    </Caption>
-                  </Box>
+                  {/* Color — hidden for default variant */}
+                  {variant !== 'default' && (
+                    <Box sx={{ mt: 3 }}>
+                      <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
+                      <Stack spacing={1.5}>
+                        {COLOR_GROUPS.map((group) => (
+                          <Box key={group.label}>
+                            <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 4, fontWeight: 600 }}>{group.label}</Caption>
+                            <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
+                              {group.colors.map((c) => (
+                                <ColorSwatchButton key={c} color={c} selected={color === c} onClick={setColor} />
+                              ))}
+                            </Stack>
+                          </Box>
+                        ))}
+                      </Stack>
+                    </Box>
+                  )}
 
                   {/* Density */}
-                  <Box>
+                  <Box sx={{ mt: 3 }}>
                     <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>DENSITY</OverlineSmall>
                     <Stack direction="row" spacing={1}>
-                      <ControlButton label="Compact (24px)" selected={density === 'compact'} onClick={() => setDensity('compact')} />
-                      <ControlButton label="Default (32px)" selected={density === 'default'} onClick={() => setDensity('default')} />
+                      <ControlButton label="Compact" selected={density === 'compact'} onClick={() => setDensity('compact')} />
+                      <ControlButton label="Default" selected={density === 'default'} onClick={() => setDensity('default')} />
                     </Stack>
                   </Box>
 
                   {/* Animation */}
-                  <Box>
+                  <Box sx={{ mt: 3 }}>
                     <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ANIMATION</OverlineSmall>
                     <Stack direction="row" spacing={1}>
                       {['none', 'slide', 'spring'].map((a) => (
@@ -383,7 +388,7 @@ export function TreeViewShowcase() {
                   </Box>
 
                   {/* Selection mode */}
-                  <Box>
+                  <Box sx={{ mt: 3 }}>
                     <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SELECTION MODE</OverlineSmall>
                     <Stack direction="row" spacing={1}>
                       <ControlButton label="Single" selected={selectionMode === 'single'} onClick={() => setSelectionMode('single')} />
@@ -392,52 +397,38 @@ export function TreeViewShowcase() {
                   </Box>
 
                   {/* Toggles */}
-                  <Box>
+                  <Box sx={{ mt: 3 }}>
                     <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>OPTIONS</OverlineSmall>
-                    <Stack spacing={1.5}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Box>
-                          <BodySmall>Show icons</BodySmall>
-                          <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>
-                            Loads icon sample data — add icon: &lt;Icon /&gt; per node
-                          </Caption>
-                        </Box>
-                        <Switch
-                          checked={showIcons}
-                          onChange={(e) => setShowIcons(e.target.checked)}
-                          size="small"
-                        />
+
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box>
+                        <Label>Show Icons</Label>
+                        <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Load sample data with icons and badges</Caption>
                       </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <BodySmall>Checkbox selection</BodySmall>
-                        <Switch checked={checkboxSel} onChange={(e) => setCheckboxSel(e.target.checked)} size="small" />
+                      <Switch checked={showIcons} onChange={(e) => setShowIcons(e.target.checked)} size="small" aria-label="Show icons" />
+                    </Box>
+
+                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box>
+                        <Label>Checkbox Selection</Label>
+                        <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Show checkboxes for each item</Caption>
                       </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <BodySmall>Disable selection</BodySmall>
-                        <Switch checked={disableSel} onChange={(e) => setDisableSel(e.target.checked)} size="small" />
+                      <Switch checked={checkboxSel} onChange={(e) => setCheckboxSel(e.target.checked)} size="small" aria-label="Checkbox selection" />
+                    </Box>
+
+                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box>
+                        <Label>Disable Selection</Label>
+                        <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Items are not selectable</Caption>
                       </Box>
-                    </Stack>
+                      <Switch checked={disableSel} onChange={(e) => setDisableSel(e.target.checked)} size="small" aria-label="Disable selection" />
+                    </Box>
                   </Box>
 
                   {/* JSON editor — only shown when icons are off */}
                   {!showIcons && (
-                    <JsonEditor value={DEFAULT_JSON} onChange={setJsonItems} />
-                  )}
-
-                  {/* Icon data shape reference */}
-                  {showIcons && (
-                    <Box sx={{ backgroundColor: '#1e1e1e', borderRadius: '6px', p: 2 }}>
-                      <Caption style={{ color: '#9ca3af', display: 'block', marginBottom: 6 }}>Icon item shape</Caption>
-                      <Box component="code" sx={{ fontFamily: 'monospace', fontSize: '11px', color: '#e5e7eb', whiteSpace: 'pre', display: 'block' }}>
-{`{
-  id: "1",
-  label: "Documents",
-  icon: <FolderIcon />,
-  badge: <DotBadge />,
-  disabled: false,
-  children: [...]
-}`}
-                      </Box>
+                    <Box sx={{ mt: 3 }}>
+                      <JsonEditor value={DEFAULT_JSON} onChange={setJsonItems} />
                     </Box>
                   )}
 
@@ -447,72 +438,38 @@ export function TreeViewShowcase() {
               {/* ── Accessibility ── */}
               <TabPanel value={1}>
                 <Box sx={{ p: 3 }}>
-                  <BodySmall color="quiet" style={{ marginBottom: 24 }}>
-                    {selectionStyle} / {color} — active uses var(--Buttons-{colorToken}-Button)
-                  </BodySmall>
-
                   <Stack spacing={3}>
 
                     <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
                       <H5>Text Contrast (WCAG 1.4.3 — 4.5:1)</H5>
-                      <BodySmall color="quiet" style={{ marginBottom: 16 }}>
-                        Item labels must meet 4.5:1 against their backgrounds in all states.
-                      </BodySmall>
                       <A11yRow
-                        label="Resting: var(--Text-Quiet) vs. var(--Background)"
+                        label="Resting: var(--Text-Quiet) vs. background"
                         ratio={getContrast(contrastData.textQuiet, contrastData.background)}
                         threshold={4.5}
                         note="Unselected items use Text-Quiet"
                       />
                       <A11yRow
-                        label="Hover: var(--Text) vs. var(--Background)"
+                        label="Hover: var(--Text) vs. background"
                         ratio={getContrast(contrastData.text, contrastData.background)}
                         threshold={4.5}
-                        note="Hover keeps var(--Background), changes to var(--Text)"
+                        note="Hovered items use var(--Text)"
                       />
                       <A11yRow
                         label={'Active (solid): var(--Text) vs. var(--Buttons-' + colorToken + '-Button)'}
                         ratio={getContrast(contrastData.text, contrastData.activeBtn)}
                         threshold={4.5}
-                        note={'Solid active background: var(--Buttons-' + colorToken + '-Button)'}
+                        note="Selected item with solid fill"
                       />
                     </Box>
 
                     <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
                       <H5>Focus Indicator (WCAG 2.4.11 — 3:1)</H5>
-                      <BodySmall color="quiet" style={{ marginBottom: 16 }}>
-                        2px inset focus ring using var(--Focus-Visible) on each item.
-                      </BodySmall>
                       <A11yRow
-                        label="var(--Focus-Visible) vs. var(--Background)"
+                        label="var(--Focus-Visible) vs. background"
                         ratio={getContrast(contrastData.focusVisible, contrastData.background)}
                         threshold={3.0}
                         note="outline: 2px solid var(--Focus-Visible); outline-offset: -2px"
                       />
-                    </Box>
-
-                    <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
-                      <H5>Touch Target (WCAG 2.5.5)</H5>
-                      <BodySmall color="quiet" style={{ marginBottom: 16 }}>
-                        Minimum 24px (compact) or 32px (default). WCAG recommends 44px for touch.
-                      </BodySmall>
-                      {[
-                        { label: 'Compact density', size: 24 },
-                        { label: 'Default density', size: 32 },
-                      ].map(({ label, size }) => (
-                        <Box key={label} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                          <BodySmall style={{ color: 'var(--Text)' }}>{label} — {size}px</BodySmall>
-                          <Box sx={{ display: 'flex', gap: 0.5 }}>
-                            {[['Desktop', size >= 24], ['iOS', size >= 44], ['Android', size >= 48]].map(([p, pass]) => (
-                              <Box key={p} sx={{
-                                px: 1, py: 0.25, borderRadius: '4px', fontSize: '11px', fontWeight: 700,
-                                backgroundColor: pass ? 'var(--Tags-Success-BG)' : 'var(--Tags-Warning-BG)',
-                                color: pass ? 'var(--Tags-Success-Text)' : 'var(--Tags-Warning-Text)',
-                              }}>{p} {pass ? '✓' : '~'}</Box>
-                            ))}
-                          </Box>
-                        </Box>
-                      ))}
                     </Box>
 
                     <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>

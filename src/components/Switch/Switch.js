@@ -34,7 +34,7 @@ function solidStyles(color) {
     trackOff:       'var(--Border-Variant)',
     trackOffBorder: 'none',
     hoverOn:        'var(--Buttons-' + C + '-Hover)',
-    hoverOff:       'var(--Surface-Dim)',
+    hoverOff:       'var(--Hover)',
     activeOn:       'var(--Buttons-' + C + '-Active)',
     activeOff:      'var(--Border)',
   };
@@ -49,7 +49,7 @@ function outlineStyles(color) {
     trackOff:       'transparent',
     trackOffBorder: '2px solid var(--Border-Variant)',
     hoverOn:        'var(--Buttons-' + C + '-Hover)',
-    hoverOff:       'var(--Surface-Dim)',
+    hoverOff:       'var(--Hover)',
     activeOn:       'var(--Buttons-' + C + '-Active)',
     activeOff:      'var(--Border)',
   };
@@ -64,7 +64,7 @@ function lightStyles(color) {
     trackOff:       'var(--Border-Variant)',
     trackOffBorder: 'none',
     hoverOn:        'var(--Hover-' + C + '-Color-11)',
-    hoverOff:       'var(--Surface-Dim)',
+    hoverOff:       'var(--Hover)',
     activeOn:       'var(--Buttons-' + C + '-Active)',
     activeOff:      'var(--Border)',
   };

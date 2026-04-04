@@ -188,6 +188,7 @@ export function Radio({
         color: 'inherit',
         transition: 'background-color 0.15s ease-in-out',
         '&.Mui-checked': { color: 'inherit' },
+        '&:hover': { backgroundColor: 'transparent' },
         '&:hover .radio-circle-icon': { ...styles.hover },
         '&.Mui-focusVisible .radio-circle-icon': {
           outline: '2px solid var(--Focus-Visible)',

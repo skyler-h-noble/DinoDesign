@@ -19,7 +19,7 @@ export {
   // Legal
   Legal, LegalSemibold,
   // Button typography
-  Button, ButtonSmall,
+  Button, ButtonSmall, ButtonExtraSmall,
   // Overline
   Overline, OverlineSmall, OverlineMedium, OverlineLarge,
   // Number

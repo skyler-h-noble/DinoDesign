@@ -82,9 +82,9 @@ export function Table({
       base.backgroundColor = 'var(--Buttons-' + C + '-Button)';
       base.color = 'var(--Buttons-' + C + '-Text)';
     } else if (isSolid) {
-      base.backgroundColor = 'var(--Surface-Dim)';
+      base.backgroundColor = 'var(--Hover)';
     } else {
-      base.backgroundColor = 'var(--Surface)';
+      base.backgroundColor = 'var(--Background)';
     }
 
     if (stickyHeader) {
@@ -112,9 +112,9 @@ export function Table({
       base.backgroundColor = 'var(--Buttons-' + C + '-Button)';
       base.color = 'var(--Buttons-' + C + '-Text)';
     } else if (isSolid) {
-      base.backgroundColor = 'var(--Surface-Dim)';
+      base.backgroundColor = 'var(--Hover)';
     } else {
-      base.backgroundColor = 'var(--Surface)';
+      base.backgroundColor = 'var(--Background)';
     }
 
     if (stickyFooter) {

@@ -19,12 +19,12 @@ import { List, ListItem } from '../List/List';
  *
  * TOKENS:
  *   Container:       bg var(--Background), border 1px solid var(--Border)
- *   Header:          bg var(--Surface-Dim), border-bottom var(--Border)
+ *   Header:          bg var(--Hover), border-bottom var(--Border)
  *   Move buttons:    bg var(--Buttons-Default-Light-Button), border var(--Buttons-Default-Border),
  *                    text var(--Buttons-Default-Light-Text)
  *   Hover:           var(--Buttons-Default-Hover)
  *   Active:          var(--Buttons-Default-Active)
- *   Selected row:    bg var(--Surface-Dim)
+ *   Selected row:    bg var(--Hover)
  *
  * ACCESSIBILITY:
  *   - Empty state renders as <li> to satisfy aria-required-children for role="list"
@@ -137,7 +137,7 @@ export function TransferList({
         <Box sx={{
           display: 'flex', alignItems: 'center', gap: 1,
           px: 1.5, py: 1,
-          backgroundColor: 'var(--Surface-Dim)',
+          backgroundColor: 'var(--Hover)',
           borderBottom: '1px solid var(--Border)',
         }}>
           {isEnhanced && (
@@ -181,8 +181,8 @@ export function TransferList({
                   }
                   sx={{
                     cursor: disabled ? 'not-allowed' : 'pointer',
-                    backgroundColor: isItemChecked ? 'var(--Surface-Dim)' : 'transparent',
-                    '&:hover': !disabled ? { backgroundColor: 'var(--Surface-Dim)' } : {},
+                    backgroundColor: isItemChecked ? 'var(--Hover)' : 'transparent',
+                    '&:hover': !disabled ? { backgroundColor: 'var(--Hover)' } : {},
                   }}
                 >
                   {item}

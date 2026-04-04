@@ -63,14 +63,14 @@ const STYLE_MAP = {
     letterSpacing: 'var(--Body-Letter-Spacing)',
   },
   button: {
-    fontFamily: 'var(--Font-Family-Body)',
+    fontFamily: 'var(--Body-Font-Family)',
     lineHeight: 'var(--Button-Line-Height)',
     fontSize: 'var(--Button-Font-Size)',
     fontWeight: 'var(--Button-Font-Weight)',
     letterSpacing: 'var(--Button-Letter-Spacing)',
   },
   label: {
-    fontFamily: 'var(--Font-Family-Body)',
+    fontFamily: 'var(--Body-Font-Family)',
     lineHeight: 'var(--Label-Line-Height)',
     fontSize: 'var(--Label-Font-Size)',
     fontWeight: 'var(--Label-Font-Weight)',

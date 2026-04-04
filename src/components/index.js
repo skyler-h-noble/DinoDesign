@@ -52,6 +52,8 @@ export {
 export { Colors } from './Colors';
 export { Spacing } from './Spacing';
 export { Icon, IconShowcase } from './Icon';
+export { IconBadge } from './IconBadge';
+export { IconBadgeShowcase } from './IconBadge/IconBadgeShowcase';
 
 // ========== BUTTONS ==========
 export { Button } from './Button';
@@ -126,6 +128,7 @@ export { Paper } from './Paper';
 export { Dialog, AlertDialog, FormDialog, DialogShowcase } from './Dialog';
 export { Modal } from './Modal';
 export { Drawer, DrawerClose, DrawerHeader, DrawerContent, DrawerShowcase } from './Drawer';
+export { DropZone } from './DropZone';
 
 // ========== FEEDBACK ==========
 export { Alert, AlertShowcase } from './Alert';
@@ -147,13 +150,14 @@ export { Header } from './Header';
 export { Footer } from './Footer';
 export { Sidebar } from './Sidebar';
 export { MainLayout } from './MainLayout';
-export { Accordion } from './Accordion';
+export { Accordion, AccordionSummary, AccordionDetails, AccordionGroup } from './Accordion';
 
 // ========== TREE VIEW ==========
 export {
   DynoTreeView,
+  DefaultTreeView,
   SolidTreeView,
-  OutlinedTreeView,
+  LightTreeView,
   DEFAULT_ITEMS,
   TreeViewShowcase,
 } from './TreeView';

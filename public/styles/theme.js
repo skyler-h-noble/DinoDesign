@@ -54,7 +54,7 @@ const theme = createTheme({
     },
     
     grey: {
-      50: 'var(--Neutral-Color-13)',
+      50: 'var(--Neutral-Color-12)',
       100: 'var(--Neutral-Color-12)',
       200: 'var(--Neutral-Color-11)',
       300: 'var(--Neutral-Color-10)',
@@ -70,7 +70,7 @@ const theme = createTheme({
     },
     
     background: {
-      default: 'var(--Surface)',
+      default: 'var(--Background)',
       paper: 'var(--Container)',
     },
     

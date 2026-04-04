@@ -19,15 +19,16 @@ import { Box } from '@mui/material';
  * both the theme and surface.
  */
 
-export function PreviewSurface({
+export const PreviewSurface = React.forwardRef(function PreviewSurface({
   theme     = null,
   surface   = 'Surface',
   children,
   minHeight = 160,
   sx        = {},
-}) {
+}, ref) {
   return (
     <Box
+      ref={ref}
       data-theme={theme || undefined}
       data-surface={surface}
       sx={{
@@ -42,6 +43,6 @@ export function PreviewSurface({
       {children}
     </Box>
   );
-}
+});
 
 export default PreviewSurface;

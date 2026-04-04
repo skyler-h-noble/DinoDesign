@@ -131,7 +131,7 @@ export function SettingsPanel() {
                         sx={{
                           p: 1.5, borderRadius: 'var(--Style-Border-Radius)', cursor: 'pointer',
                           border: isSel ? '2px solid var(--Buttons-Primary-Button)' : '1px solid var(--Border)',
-                          backgroundColor: isSel ? 'var(--Surface)' : 'transparent',
+                          backgroundColor: isSel ? 'var(--Background)' : 'transparent',
                           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                           transition: 'all 0.15s ease', '&:hover': { backgroundColor: 'var(--Hover)' },
                         }}>

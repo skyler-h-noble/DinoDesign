@@ -97,6 +97,8 @@ export function Select({
 
   const wrapperRef = useRef(null);
   const triggerRef = useRef(null);
+  const [parentTheme, setParentTheme] = useState(null);
+  const [parentSurface, setParentSurface] = useState(null);
 
   const isControlled = controlledValue !== undefined;
   const currentValue = isControlled ? controlledValue : internalValue;
@@ -119,8 +121,15 @@ export function Select({
   }, [isControlled, onChange]);
 
   const toggleOpen = useCallback(() => {
-    if (!disabled) setOpen((p) => !p);
-  }, [disabled]);
+    if (disabled) return;
+    setOpen((prev) => {
+      if (!prev) {
+        // Compute position synchronously before render so dropdown appears correctly
+        setDropdownPos(getDropdownPos());
+      }
+      return !prev;
+    });
+  }, [disabled, getDropdownPos]);
 
   // Close on outside click
   useEffect(() => {
@@ -137,24 +146,42 @@ export function Select({
     return () => document.removeEventListener('mousedown', handler);
   }, [open]);
 
-  // Smart positioning: measure space above/below and choose direction
-  useEffect(() => {
-    if (!open || !triggerRef.current) return;
-
+  // Compute position for the dropdown
+  const getDropdownPos = useCallback(() => {
+    if (!triggerRef.current) return { top: 0, left: 0, width: 0 };
     const rect = triggerRef.current.getBoundingClientRect();
+    console.log('[Select] rect:', { top: rect.top, bottom: rect.bottom, left: rect.left, width: rect.width, windowH: window.innerHeight });
     const spaceBelow = window.innerHeight - rect.bottom;
     const spaceAbove = rect.top;
     const direction = spaceBelow >= DROPDOWN_MAX_HEIGHT || spaceBelow >= spaceAbove ? 'down' : 'up';
-
-    setDropdownPos({
-      top: rect.bottom + window.scrollY + 4,
-      bottom: window.innerHeight - rect.top + (window.innerHeight - window.scrollY - window.innerHeight) + 4,
-      left: rect.left + window.scrollX,
+    return {
+      top: direction === 'down' ? rect.bottom + 4 : undefined,
+      bottom: direction === 'up' ? (window.innerHeight - rect.top + 4) : undefined,
+      left: rect.left,
       width: rect.width,
-      triggerTop: rect.top + window.scrollY,
       direction,
-    });
-  }, [open]);
+    };
+  }, []);
+
+  // Capture parent theme/surface and reposition on scroll/resize
+  useEffect(() => {
+    if (!open || !triggerRef.current) return;
+
+    // Capture closest data-theme and data-surface from the trigger's ancestors
+    const themeEl = triggerRef.current.closest('[data-theme]');
+    const surfaceEl = triggerRef.current.closest('[data-surface]');
+    setParentTheme(themeEl?.getAttribute('data-theme') || null);
+    setParentSurface(surfaceEl?.getAttribute('data-surface') || null);
+
+    // Force re-render on scroll/resize to update position
+    const forceUpdate = () => setDropdownPos(getDropdownPos());
+    window.addEventListener('scroll', forceUpdate, true);
+    window.addEventListener('resize', forceUpdate);
+    return () => {
+      window.removeEventListener('scroll', forceUpdate, true);
+      window.removeEventListener('resize', forceUpdate);
+    };
+  }, [open, getDropdownPos]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Escape') { setOpen(false); return; }
@@ -168,18 +195,18 @@ export function Select({
   const dropdown = open ? ReactDOM.createPortal(
     <Box
       data-select-dropdown
+      data-theme={parentTheme || undefined}
+      data-surface={parentSurface || undefined}
       role="listbox"
       aria-label={label || 'Options'}
       sx={{
-        position: 'absolute',
-        top: dropdownPos.direction === 'down' ? dropdownPos.top + 'px' : 'unset',
-        bottom: dropdownPos.direction === 'up'
-          ? (window.innerHeight - dropdownPos.triggerTop + 4) + 'px'
-          : 'unset',
-        left: dropdownPos.left + 'px',
+        position: 'fixed',
+        top: dropdownPos.top ?? 'unset',
+        bottom: dropdownPos.bottom ?? 'unset',
+        left: dropdownPos.left,
         width: dropdownPos.width + 'px',
         backgroundColor: 'var(--Background)',
-        border: '1px solid var(--Border)',
+        border: '1px solid var(--Buttons-Default-Border)',
         borderRadius: 'var(--Style-Border-Radius)',
         boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
         zIndex: 99999,

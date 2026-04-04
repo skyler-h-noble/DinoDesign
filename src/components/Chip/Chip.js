@@ -49,8 +49,8 @@ function outlineStyles(color) {
     bg:       'var(--Background)',
     text:     'var(--Text)',
     border:   '1px solid var(--Buttons-' + C + '-Border)',
-    hoverBg:  'var(--Surface-Dim)',
-    activeBg: 'var(--Surface-Dim)',
+    hoverBg:  'var(--Hover)',
+    activeBg: 'var(--Hover)',
   };
 }
 

@@ -1,6 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Linden+Hill&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Karla&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Kalam&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rubik&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
 
 /* ========================================
  * Base CSS Variables
@@ -36,38 +36,38 @@
   --Hover: var(--Hover-Primary-Color-11);
   --Active: var(--Active-Primary-Color-11);
   --Focus-Visible: var(--Focus-Visible-Surfaces-Color-11);
-  --Buttons-Primary-Hover: var(--Primary-Button-Surfaces-Background-11-Hover);
-  --Buttons-Primary-Active: var(--Primary-Button-Surfaces-Background-11-Active);
+  --Buttons-Primary-Hover: #f9fdfd;
+  --Buttons-Primary-Active: #f9fdfd;
   --Buttons-Primary-Light-Button: var(--Primary-Color-12);
   --Buttons-Primary-Light-Text: var(--Text-Surfaces-Primary-Color-12);
   --Buttons-Primary-Light-Border: var(--Border-Surfaces-Primary-Color-12);
-  --Buttons-Primary-Light-Hover: var(--Hover-Primary-Color-12);
-  --Buttons-Primary-Light-Active: var(--Active-Primary-Color-12);
+  --Buttons-Primary-Light-Hover: #FFFFFF;
+  --Buttons-Primary-Light-Active: #FFFFFF;
   --Buttons-Secondary-Button: var(--Secondary-Color-9);
   --Buttons-Secondary-Text: var(--Text-Surfaces-Secondary-Color-9);
   --Buttons-Secondary-Border: var(--Border-Surfaces-Secondary-Color-11);
-  --Buttons-Secondary-Hover: var(--Hover-Secondary-Color-9);
-  --Buttons-Secondary-Active: var(--Active-Secondary-Color-9);
+  --Buttons-Secondary-Hover: #d7f7f2;
+  --Buttons-Secondary-Active: #d7f7f2;
   --Buttons-Secondary-Light-Button: var(--Secondary-Color-12);
   --Buttons-Secondary-Light-Text: var(--Text-Surfaces-Secondary-Color-12);
   --Buttons-Secondary-Light-Border: var(--Border-Surfaces-Secondary-Color-11);
-  --Buttons-Secondary-Light-Hover: var(--Hover-Secondary-Color-12);
-  --Buttons-Secondary-Light-Active: var(--Active-Secondary-Color-12);
+  --Buttons-Secondary-Light-Hover: #FFFFFF;
+  --Buttons-Secondary-Light-Active: #FFFFFF;
   --Buttons-Tertiary-Button: var(--Tertiary-Color-9);
   --Buttons-Tertiary-Text: var(--Text-Surfaces-Tertiary-Color-9);
   --Buttons-Tertiary-Border: var(--Border-Surfaces-Tertiary-Color-11);
-  --Buttons-Tertiary-Hover: var(--Hover-Tertiary-Color-9);
-  --Buttons-Tertiary-Active: var(--Active-Tertiary-Color-9);
+  --Buttons-Tertiary-Hover: #e7f3f6;
+  --Buttons-Tertiary-Active: #e7f3f6;
   --Buttons-Tertiary-Light-Button: var(--Tertiary-Color-12);
   --Buttons-Tertiary-Light-Text: var(--Text-Surfaces-Tertiary-Color-12);
   --Buttons-Tertiary-Light-Border: var(--Border-Surfaces-Tertiary-Color-11);
-  --Buttons-Tertiary-Light-Hover: var(--Hover-Tertiary-Color-12);
-  --Buttons-Tertiary-Light-Active: var(--Active-Tertiary-Color-12);
+  --Buttons-Tertiary-Light-Hover: #FFFFFF;
+  --Buttons-Tertiary-Light-Active: #FFFFFF;
   --Buttons-Primary-Button: var(--Primary-Button-Containers-Background-11-Button);
   --Buttons-Primary-Text: var(--Primary-Button-Containers-Background-11-Text);
   --Buttons-Primary-Border: var(--Border-Containers-Primary-Color-11);
-  --Buttons-Primary-Hover: var(--Primary-Button-Containers-Background-11-Hover);
-  --Buttons-Primary-Active: var(--Primary-Button-Containers-Background-9-Active);
+  --Buttons-Primary-Hover: #f9fdfd;
+  --Buttons-Primary-Active: #f9fdfd;
   --Buttons-Primary-Light-Border: var(--Border-Containers-Primary-Color-12);
   --Buttons-Secondary-Border: var(--Border-Containers-Secondary-Color-11);
   --Buttons-Secondary-Light-Border: var(--Border-Containers-Secondary-Color-11);
@@ -76,70 +76,66 @@
   --Buttons-Neutral-Button: var(--Neutral-Color-9);
   --Buttons-Neutral-Text: var(--Text-Surfaces-Neutral-Color-9);
   --Buttons-Neutral-Border: var(--Border-Containers-Neutral-Color-11);
-  --Buttons-Neutral-Hover: var(--Hover-Neutral-Color-9);
-  --Buttons-Neutral-Active: var(--Active-Neutral-Color-9);
+  --Buttons-Neutral-Hover: #f1f1f1;
+  --Buttons-Neutral-Active: #f1f1f1;
   --Buttons-Neutral-Light-Button: var(--Neutral-Color-12);
   --Buttons-Neutral-Light-Text: var(--Text-Surfaces-Neutral-Color-12);
   --Buttons-Neutral-Light-Border: var(--Border-Containers-Neutral-Color-11);
-  --Buttons-Neutral-Light-Hover: var(--Hover-Neutral-Color-12);
-  --Buttons-Neutral-Light-Active: var(--Active-Neutral-Color-12);
+  --Buttons-Neutral-Light-Hover: #FFFFFF;
+  --Buttons-Neutral-Light-Active: #FFFFFF;
   --Buttons-Info-Button: var(--Info-Color-9);
   --Buttons-Info-Text: var(--Text-Surfaces-Info-Color-9);
   --Buttons-Info-Border: var(--Border-Containers-Info-Color-11);
-  --Buttons-Info-Hover: var(--Hover-Info-Color-9);
-  --Buttons-Info-Active: var(--Active-Info-Color-9);
+  --Buttons-Info-Hover: #eeefff;
+  --Buttons-Info-Active: #eeefff;
   --Buttons-Info-Light-Button: var(--Info-Color-12);
   --Buttons-Info-Light-Text: var(--Text-Surfaces-Info-Color-12);
   --Buttons-Info-Light-Border: var(--Border-Containers-Info-Color-11);
-  --Buttons-Info-Light-Hover: var(--Hover-Info-Color-12);
-  --Buttons-Info-Light-Active: var(--Active-Info-Color-12);
+  --Buttons-Info-Light-Hover: #FFFFFF;
+  --Buttons-Info-Light-Active: #FFFFFF;
   --Buttons-Success-Button: var(--Success-Color-9);
   --Buttons-Success-Text: var(--Text-Surfaces-Success-Color-9);
   --Buttons-Success-Border: var(--Border-Containers-Success-Color-11);
-  --Buttons-Success-Hover: var(--Hover-Success-Color-9);
-  --Buttons-Success-Active: var(--Active-Success-Color-9);
+  --Buttons-Success-Hover: #dff7e4;
+  --Buttons-Success-Active: #dff7e4;
   --Buttons-Success-Light-Button: var(--Success-Color-12);
   --Buttons-Success-Light-Text: var(--Text-Surfaces-Success-Color-12);
   --Buttons-Success-Light-Border: var(--Border-Containers-Success-Color-11);
-  --Buttons-Success-Light-Hover: var(--Hover-Success-Color-12);
-  --Buttons-Success-Light-Active: var(--Active-Success-Color-12);
+  --Buttons-Success-Light-Hover: #FFFFFF;
+  --Buttons-Success-Light-Active: #FFFFFF;
   --Buttons-Warning-Button: var(--Warning-Color-9);
   --Buttons-Warning-Text: var(--Text-Surfaces-Warning-Color-9);
   --Buttons-Warning-Border: var(--Border-Containers-Warning-Color-11);
-  --Buttons-Warning-Hover: var(--Hover-Warning-Color-9);
-  --Buttons-Warning-Active: var(--Active-Warning-Color-9);
+  --Buttons-Warning-Hover: #ffedd3;
+  --Buttons-Warning-Active: #ffedd3;
   --Buttons-Warning-Light-Button: var(--Warning-Color-12);
   --Buttons-Warning-Light-Text: var(--Text-Surfaces-Warning-Color-12);
   --Buttons-Warning-Light-Border: var(--Border-Containers-Warning-Color-11);
-  --Buttons-Warning-Light-Hover: var(--Hover-Warning-Color-12);
-  --Buttons-Warning-Light-Active: var(--Active-Warning-Color-12);
+  --Buttons-Warning-Light-Hover: #FFFFFF;
+  --Buttons-Warning-Light-Active: #FFFFFF;
   --Buttons-Error-Button: var(--Error-Color-9);
   --Buttons-Error-Text: var(--Text-Surfaces-Error-Color-9);
   --Buttons-Error-Border: var(--Border-Containers-Error-Color-11);
-  --Buttons-Error-Hover: var(--Hover-Error-Color-9);
-  --Buttons-Error-Active: var(--Active-Error-Color-9);
+  --Buttons-Error-Hover: #ffe8e3;
+  --Buttons-Error-Active: #ffe8e3;
   --Buttons-Error-Light-Button: var(--Error-Color-12);
   --Buttons-Error-Light-Text: var(--Text-Surfaces-Error-Color-12);
   --Buttons-Error-Light-Border: var(--Border-Containers-Error-Color-11);
-  --Buttons-Error-Light-Hover: var(--Hover-Error-Color-12);
-  --Buttons-Error-Light-Active: var(--Active-Error-Color-12);
+  --Buttons-Error-Light-Hover: #FFFFFF;
+  --Buttons-Error-Light-Active: #FFFFFF;
   --Buttons-BlackWhite-Light-Button: var(--White);
   --Buttons-BlackWhite-Light-Text: var(--Text-Surfaces-BW-Button-Color-1);
-  --Buttons-BlackWhite-Light-Hover: var(--Hover-Neutral-Color-13);
-  --Buttons-BlackWhite-Light-Active: var(--Active-Neutral-Color-14);
+  --Buttons-BlackWhite-Light-Hover: #FFFFFF;
+  --Buttons-BlackWhite-Light-Active: #FFFFFF;
   --Buttons-BlackWhite-Medium-Button: var(--Neutral-Color-1);
-  --Buttons-BlackWhite-Medium-Text: var(--Text-Surfaces-BW-Button-Color-14);
-  --Buttons-BlackWhite-Medium-Hover: var(--Hover-Neutral-Color-1);
-  --Buttons-BlackWhite-Medium-Active: var(--Active-Neutral-Color-1);
+  --Buttons-BlackWhite-Medium-Text: var(--Text-Surfaces-BW-Button-Color-12);
+  --Buttons-BlackWhite-Medium-Hover: #000000;
+  --Buttons-BlackWhite-Medium-Active: #000000;
   --Buttons-Default-Button: var(--Default-Button-Default-Medium-Button);
   --Buttons-Default-Text: var(--Default-Button-Default-Medium-Text);
   --Buttons-Default-Border: var(--Default-Button-Border-Surfaces-Default-Color-11);
-  --Buttons-Default-Hover: var(--Default-Button-Default-Medium-Hover);
-  --Buttons-Default-Active: var(--Default-Button-Default-Medium-Active);
-  --Buttons-Default-Light-Button: var(--Default-Button-Default-Light-Button);
-  --Buttons-Default-Light-Text: var(--Default-Button-Default-Light-Text);
-  --Buttons-Default-Light-Hover: var(--Default-Button-Default-Light-Hover);
-  --Buttons-Default-Light-Active: var(--Default-Button-Default-Light-Active);
+  --Buttons-Default-Hover: #b9ede4;
+  --Buttons-Default-Active: #b9ede4;
   --Icons-Default: var(--Icon-Surfaces-Neutral-Color-11);
   --Icons-Default-Variant: var(--Icon-Variant-Surfaces-Neutral-Color-11);
   --Icons-Primary: var(--Icon-Surfaces-Primary-Color-11);
@@ -170,28 +166,28 @@
   --Chart-Lines: #e2e2e2;
 
   /* Solid Chart Colors */
-  --Chart-1: #fdeee6;
-  --Chart-2: #ffece0;
-  --Chart-3: #ffebda;
+  --Chart-1: #e9f3f3;
+  --Chart-2: #d7f7f2;
+  --Chart-3: #e7f3f6;
   --Chart-4: #eeefff;
   --Chart-5: #dff7e4;
   --Chart-6: #ffedd3;
   --Chart-7: #ffe8e3;
   --Chart-8: #f1f1f1;
-  --Chart-9: #f6ded2;
-  --Chart-10: #ffdbc9;
+  --Chart-9: #d6e5e5;
+  --Chart-10: #b9ede4;
 
   /* Opaque Chart Colors (50% opacity) */
-  --Chart-1-Opaque: rgba(253, 238, 230, 0.5);
-  --Chart-2-Opaque: rgba(255, 236, 224, 0.5);
-  --Chart-3-Opaque: rgba(255, 235, 218, 0.5);
+  --Chart-1-Opaque: rgba(233, 243, 243, 0.5);
+  --Chart-2-Opaque: rgba(215, 247, 242, 0.5);
+  --Chart-3-Opaque: rgba(231, 243, 246, 0.5);
   --Chart-4-Opaque: rgba(238, 239, 255, 0.5);
   --Chart-5-Opaque: rgba(223, 247, 228, 0.5);
   --Chart-6-Opaque: rgba(255, 237, 211, 0.5);
   --Chart-7-Opaque: rgba(255, 232, 227, 0.5);
   --Chart-8-Opaque: rgba(241, 241, 241, 0.5);
-  --Chart-9-Opaque: rgba(246, 222, 210, 0.5);
-  --Chart-10-Opaque: rgba(255, 219, 201, 0.5);
+  --Chart-9-Opaque: rgba(214, 229, 229, 0.5);
+  --Chart-10-Opaque: rgba(185, 237, 228, 0.5);
 
   /* ========================================
    * Effect Levels (Box Shadows)
@@ -204,13 +200,13 @@
   --Effect-Level-4: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --Effect-Level-5: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 
- --Set-Font-Family-Header: "Linden Hill", sans-serif;
+ --Set-Font-Family-Header: "Kalam", sans-serif;
  --Set-Font-Family-Header-Weight: 200;
- --Set-Font-Family-Body: "Karla", sans-serif;
+ --Set-Font-Family-Body: "Rubik", sans-serif;
  --Set-Font-Family-Body-Weight: 400;
  --Set-Font-Family-Body-Semibold-Weight: 600;
  --Set-Font-Family-Body-Bold-Weight: 700;
- --Set-Font-Family-Decorative: "Righteous", serif;
+ --Set-Font-Family-Decorative: "Special Elite", sans-serif;
  --Set-Font-Family-Decorative-Weight: 200;
 }
 
@@ -229,25 +225,20 @@
 
 [data-surface="Container"] {
   --Background: var(--Container);
-  --Dropshadow-Color: 20, 20, 20;
 }
 
 [data-surface="Container-Low"] {
   --Background: var(--Container-Low);
-  --Dropshadow-Color: 20, 20, 20;
 }
 
 [data-surface="Container-Lowest"] {
   --Background: var(--Container-Lowest);
-  --Dropshadow-Color: 20, 20, 20;
 }
 
 [data-surface="Container-High"] {
   --Background: var(--Container-High);
-  --Dropshadow-Color: 20, 20, 20;
 }
 
 [data-surface="Container-Highest"] {
   --Background: var(--Container-Highest);
-  --Dropshadow-Color: 20, 20, 20;
 }

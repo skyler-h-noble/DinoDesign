@@ -10,8 +10,8 @@ import { Box } from '@mui/material';
  *
  * VARIANTS:
  *   default   No data-theme. bg: var(--Background), border: var(--Border-Variant).
- *   solid     data-theme={Color}. bg: var(--Surface), border: var(--Border).
- *   light     data-theme={Color}-Light. bg: var(--Surface), border: var(--Border).
+ *   solid     data-theme={Color}. bg: var(--Background), border: var(--Border).
+ *   light     data-theme={Color}-Light. bg: var(--Background), border: var(--Border).
  *
  * ALL SHEETS: data-surface="Container"
  *
@@ -62,7 +62,7 @@ export function Sheet({
       ? LIGHT_THEME_MAP[color]
       : null;
 
-  const bg = isDefault ? 'var(--Background)' : 'var(--Surface)';
+  const bg = isDefault ? 'var(--Background)' : 'var(--Background)';
   const borderColor = isDefault ? 'var(--Border-Variant)' : 'var(--Border)';
 
   return (

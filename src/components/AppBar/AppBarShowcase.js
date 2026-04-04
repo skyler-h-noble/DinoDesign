@@ -3,9 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
-import { AppBar, DesktopAppBar, MobileAppBar } from './AppBar';
+import { DesktopAppBar, MobileAppBar } from './AppBar';
 import { Button } from '../Button/Button';
-import { Switch } from '../Switch/Switch';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
@@ -15,15 +14,14 @@ import {
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 
-const BAR_COLORS = ['default', 'primary', 'primary-light', 'primary-medium', 'primary-dark', 'white', 'black'];
+const BAR_COLORS = ['default', 'primary', 'primary-light', 'white', 'black'];
+const SURFACES = ['Surface', 'Surface-Bright', 'Surface-Dim', 'Surface-Dimmest'];
 const THEME_MAP = {
   'default':        'App-Bar',
   'primary':        'Primary',
   'primary-light':  'Primary-Light',
-  'primary-medium': 'Primary-Medium',
-  'primary-dark':   'Primary-Dark',
-  'white':          'Neutral',
-  'black':          'Neutral-Dark',
+  'white':          'White',
+  'black':          'Black',
 };
 
 function getLuminance(hex) {
@@ -88,17 +86,16 @@ function CopyButton({ code }) {
 
 function ControlButton({ label, selected, onClick }) {
   return (
-    <Button variant={selected ? 'primary' : 'primary-outline'} size="small" onClick={onClick}>
+    <Button variant={selected ? 'default' : 'default-outline'} size="small" onClick={onClick}>
       {label}
     </Button>
   );
 }
 
-// Swatch for bar colors — uses the theme map
 function BarColorSwatch({ color, selected, onClick }) {
   const dataTheme = THEME_MAP[color] || 'App-Bar';
   return (
-    <Box component="button" data-theme={dataTheme} data-surface="Surface-Bright"
+    <Box component="button" data-theme={dataTheme} data-surface="Surface"
       onClick={() => onClick(color)} aria-label={'Select ' + color} aria-pressed={selected} title={color}
       sx={{
         width: 'var(--Button-Height, 36px)', height: 'var(--Button-Height, 36px)', borderRadius: '4px',
@@ -115,15 +112,16 @@ function BarColorSwatch({ color, selected, onClick }) {
 }
 
 export function AppBarShowcase() {
-  const [mode, setMode]                   = useState('desktop');
-  const [barColor, setBarColor]           = useState('default');
-  const [loginType, setLoginType]         = useState('login');
-  const [menuType, setMenuType]           = useState('hamburger');
-  const [brandType, setBrandType]         = useState('name');
+  const [mode, setMode]                     = useState('desktop');
+  const [barColor, setBarColor]             = useState('default');
+  const [surface, setSurface]               = useState('Surface');
+  const [loginType, setLoginType]           = useState('login');
+  const [menuType, setMenuType]             = useState('hamburger');
+  const [brandType, setBrandType]           = useState('name');
   const [searchPosition, setSearchPosition] = useState('right');
-  const [mobileVariant, setMobileVariant] = useState('search');
-  const [bgTheme, setBgTheme]             = useState(null);
-  const [contrastData, setContrastData]   = useState({});
+  const [mobileVariant, setMobileVariant]   = useState('search');
+  const [bgTheme, setBgTheme]               = useState(null);
+  const [contrastData, setContrastData]     = useState({});
 
   const isDesktop = mode === 'desktop';
   const dataTheme = THEME_MAP[barColor] || 'App-Bar';
@@ -132,15 +130,17 @@ export function AppBarShowcase() {
     if (isDesktop) {
       const props = [];
       if (barColor !== 'default')      props.push('barColor="' + barColor + '"');
-      if (loginType !== 'login')        props.push('loginType="' + loginType + '"');
-      if (menuType !== 'hamburger')     props.push('menuType="' + menuType + '"');
-      if (brandType !== 'name')         props.push('brandType="' + brandType + '"');
-      if (searchPosition !== 'right')   props.push('searchPosition="' + searchPosition + '"');
+      if (surface !== 'Surface')       props.push('surface="' + surface + '"');
+      if (loginType !== 'login')       props.push('loginType="' + loginType + '"');
+      if (menuType !== 'hamburger')    props.push('menuType="' + menuType + '"');
+      if (brandType !== 'name')        props.push('brandType="' + brandType + '"');
+      if (searchPosition !== 'right')  props.push('searchPosition="' + searchPosition + '"');
       const propsStr = props.length ? '\n  ' + props.join('\n  ') + '\n' : '';
       return '<AppBar mode="desktop"' + (propsStr ? propsStr : ' ') + 'companyName="My App" />';
     } else {
       const props = ['mode="mobile"', 'mobileVariant="' + mobileVariant + '"'];
       if (barColor !== 'default') props.push('barColor="' + barColor + '"');
+      if (surface !== 'Surface')  props.push('surface="' + surface + '"');
       return '<AppBar\n  ' + props.join('\n  ') + '\n  title="Page Title"\n/>';
     }
   };
@@ -155,7 +155,7 @@ export function AppBarShowcase() {
     data.hover        = getCssVar('--Hover');
     data.active       = getCssVar('--Active');
     setContrastData(data);
-  }, [barColor, mode]);
+  }, [barColor, surface, mode]);
 
   return (
     <Box sx={{ pb: 8 }}>
@@ -163,15 +163,15 @@ export function AppBarShowcase() {
 
       <Grid container sx={{ mt: 2, alignItems: 'flex-start' }}>
 
-        {/* ── LEFT: Preview + Code ── */}
+        {/* -- LEFT: Preview + Code -- */}
         <Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, pr: { md: 3 } }}>
 
-          {/* Preview */}
           <PreviewSurface theme={bgTheme}>
             <Box sx={{ width: '100%', maxWidth: isDesktop ? '100%' : 420, overflow: 'hidden' }}>
               {isDesktop ? (
                 <DesktopAppBar
                   barColor={barColor}
+                  surface={surface}
                   loginType={loginType}
                   menuType={menuType}
                   brandType={brandType}
@@ -182,6 +182,7 @@ export function AppBarShowcase() {
               ) : (
                 <MobileAppBar
                   barColor={barColor}
+                  surface={surface}
                   mobileVariant={mobileVariant}
                   companyName="My App"
                   title="Page Title"
@@ -208,7 +209,7 @@ export function AppBarShowcase() {
           </Box>
         </Grid>
 
-        {/* ── RIGHT: Tabs ── */}
+        {/* -- RIGHT: Tabs -- */}
         <Grid item sx={{ width: { xs: '100%', md: '45%' }, flexShrink: 0 }}>
           <Box sx={{ backgroundColor: 'var(--Background)', overflow: 'hidden' }}>
 
@@ -246,7 +247,20 @@ export function AppBarShowcase() {
                       ))}
                     </Stack>
                     <Caption style={{ color: 'var(--Text-Quiet)', marginTop: 6, display: 'block' }}>
-                      {dataTheme ? 'data-theme="' + dataTheme + '"' : ''}
+                      data-theme="{dataTheme}"
+                    </Caption>
+                  </Box>
+
+                  {/* Surface */}
+                  <Box sx={{ mt: 3 }}>
+                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SURFACE</OverlineSmall>
+                    <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
+                      {SURFACES.map((s) => (
+                        <ControlButton key={s} label={s.replace('Surface-', '').replace('Surface', 'Default')} selected={surface === s} onClick={() => setSurface(s)} />
+                      ))}
+                    </Stack>
+                    <Caption style={{ color: 'var(--Text-Quiet)', marginTop: 6, display: 'block' }}>
+                      data-surface="{surface}"
                     </Caption>
                   </Box>
 
@@ -317,7 +331,7 @@ export function AppBarShowcase() {
               <TabPanel value={1}>
                 <Box sx={{ p: 3 }}>
                   <BodySmall color="quiet" style={{ marginBottom: 24 }}>
-                    {mode} / {barColor} {!isDesktop ? '/ ' + mobileVariant : ''} — data-theme="{dataTheme}" data-surface="Surface-Bright"
+                    {mode} / {barColor} / {surface}{!isDesktop ? ' / ' + mobileVariant : ''} — data-theme="{dataTheme}" data-surface="{surface}"
                   </BodySmall>
 
                   <Stack spacing={3}>
@@ -332,7 +346,7 @@ export function AppBarShowcase() {
                         label="Resting: var(--Text) vs. var(--Background)"
                         ratio={getContrast(contrastData.text, contrastData.background)}
                         threshold={4.5}
-                        note={'data-theme="' + dataTheme + '" data-surface="Surface-Bright"'}
+                        note={'data-theme="' + dataTheme + '" data-surface="' + surface + '"'}
                       />
                       <A11yRow
                         label="On hover: var(--Text) vs. var(--Hover)"
@@ -351,9 +365,6 @@ export function AppBarShowcase() {
                     {/* Focus Indicator */}
                     <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
                       <H5>Focus Indicator (WCAG 2.4.11 — 3:1)</H5>
-                      <BodySmall color="quiet" style={{ marginBottom: 16 }}>
-                        3px focus ring on all interactive elements — does not overlap adjacent elements.
-                      </BodySmall>
                       <A11yRow
                         label="var(--Focus-Visible) vs. var(--Background)"
                         ratio={getContrast(contrastData.focusVisible, contrastData.background)}
@@ -365,9 +376,6 @@ export function AppBarShowcase() {
                     {/* Touch Target */}
                     <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
                       <H5>Touch Target Area (WCAG 2.5.5)</H5>
-                      <BodySmall color="quiet" style={{ marginBottom: 16 }}>
-                        Icon buttons are 40×40px. AppBar height is 64px desktop, 64px mobile.
-                      </BodySmall>
                       {[
                         { label: 'Icon button', size: 40, note: 'width: 40px, height: 40px' },
                         { label: 'AppBar (desktop)', size: 64, note: 'height: 64px' },
@@ -386,17 +394,17 @@ export function AppBarShowcase() {
                               <Box sx={{ px: 1, py: 0.25, borderRadius: '4px', fontSize: '11px', fontWeight: 700,
                                 backgroundColor: passDesktop ? 'var(--Tags-Success-BG)' : 'var(--Tags-Error-BG)',
                                 color: passDesktop ? 'var(--Tags-Success-Text)' : 'var(--Tags-Error-Text)' }}>
-                                Desktop {passDesktop ? '✓' : '✗'}
+                                Desktop {passDesktop ? 'Y' : 'N'}
                               </Box>
                               <Box sx={{ px: 1, py: 0.25, borderRadius: '4px', fontSize: '11px', fontWeight: 700,
                                 backgroundColor: passIOS ? 'var(--Tags-Success-BG)' : 'var(--Tags-Warning-BG)',
                                 color: passIOS ? 'var(--Tags-Success-Text)' : 'var(--Tags-Warning-Text)' }}>
-                                iOS {passIOS ? '✓' : '~'}
+                                iOS {passIOS ? 'Y' : '~'}
                               </Box>
                               <Box sx={{ px: 1, py: 0.25, borderRadius: '4px', fontSize: '11px', fontWeight: 700,
                                 backgroundColor: passAndroid ? 'var(--Tags-Success-BG)' : 'var(--Tags-Warning-BG)',
                                 color: passAndroid ? 'var(--Tags-Success-Text)' : 'var(--Tags-Warning-Text)' }}>
-                                Android {passAndroid ? '✓' : '~'}
+                                Android {passAndroid ? 'Y' : '~'}
                               </Box>
                             </Box>
                           </Box>
@@ -421,9 +429,15 @@ export function AppBarShowcase() {
                           </Caption>
                         </Box>
                         <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                          <BodySmall>Theme attribute:</BodySmall>
+                          <BodySmall>Theme + Surface:</BodySmall>
                           <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>
-                            {'data-theme="' + dataTheme + '" data-surface="Surface-Bright"'}
+                            {'data-theme="' + dataTheme + '" data-surface="' + surface + '"'}
+                          </Caption>
+                        </Box>
+                        <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
+                          <BodySmall>Shadow:</BodySmall>
+                          <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>
+                            box-shadow: var(--Effect-Level-1)
                           </Caption>
                         </Box>
                         <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>

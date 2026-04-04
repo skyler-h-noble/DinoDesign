@@ -358,6 +358,14 @@ import {
 
 ### ✅ DO
 ```jsx
+// Always use DynoDesign components for layout and interaction — never raw HTML
+<HStack spacing={2}>            // instead of <div style={{ display: 'flex', gap: 16 }}>
+<Button variant="outline" color="default">  // instead of <button style={{ border: '1px solid var(--Border)' }}>
+<Body>                          // instead of <p> or <span>
+<BodySmall>                     // instead of <span style={{ fontSize: 14 }}>
+<Caption>                       // instead of <small> or <span style={{ fontSize: 12 }}>
+<H2>                            // instead of <h2>
+
 // Use token variables for all colors
 style={{ background: 'var(--Buttons-Primary-Button)', color: 'var(--Buttons-Primary-Text)' }}
 
@@ -374,11 +382,18 @@ style={{ borderRadius: 'var(--Style-Border-Radius)' }}
 style={{ background: 'var(--Background)' }}
 
 // Import components from the library
-import { Button, Card, Alert } from './components';
+import { Button, Card, Alert, H2, Body, HStack } from './components';
 ```
 
 ### ❌ NEVER DO
 ```jsx
+// Never use raw HTML elements when a DynoDesign component exists
+<button style={...}>                    // ← use <Button>
+<div style={{ display: 'flex' }}>       // ← use <HStack> or <VStack>
+<span style={{ fontSize: 14 }}>        // ← use <BodySmall>, <Label>, <Caption>
+<p>                                     // ← use <Body>
+<h2>                                    // ← use <H2>
+
 // Never hardcode hex colors
 style={{ background: '#006b5a', color: '#ffffff' }}
 

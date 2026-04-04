@@ -1,5 +1,5 @@
 // src/components/Card/CardShowcase.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
@@ -16,22 +16,28 @@ import {
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 
-const COLORS = ['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+const SOLID_COLORS = ['primary', 'secondary', 'tertiary', 'info', 'success', 'warning', 'error'];
+const LIGHT_COLORS = ['primary', 'secondary', 'tertiary', 'info', 'success', 'warning', 'error'];
+const DARK_COLORS  = ['primary', 'secondary', 'tertiary', 'info', 'success', 'warning', 'error'];
+
+const COLOR_GROUPS = [
+  { label: 'Theme', colors: ['primary', 'secondary', 'tertiary'] },
+  { label: 'Core', colors: ['white', 'black'] },
+  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+];
 
 const SOLID_THEME_MAP = {
-  primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
-  info: 'Info-Medium', success: 'Success-Medium', warning: 'Warning-Medium', error: 'Error-Medium',
-};
-const LIGHT_THEME_MAP = {
-  primary: 'Primary-Light', secondary: 'Secondary-Light', tertiary: 'Tertiary-Light', neutral: 'Neutral-Light',
-  info: 'Info-Light', success: 'Success-Light', warning: 'Warning-Light', error: 'Error-Light',
-};
-const DARK_THEME_MAP = {
-  primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
+  primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary',
   info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
 };
+const LIGHT_THEME_MAP = {
+  primary: 'Primary-Light', secondary: 'Secondary-Light', tertiary: 'Tertiary-Light',
+  info: 'Info-Light', success: 'Success-Light', warning: 'Warning-Light', error: 'Error-Light',
+};
+// Dark uses same theme map as solid
+const DARK_THEME_MAP = SOLID_THEME_MAP;
 
-// ── Contrast helpers ──────────────────────────────────────────────────────────
+// -- Contrast helpers --
 
 function getLuminance(hex) {
   const clean = hex.replace('#', '');
@@ -51,7 +57,7 @@ function getCssVar(varName) {
   return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
 }
 
-// ── Sub-components ────────────────────────────────────────────────────────────
+// -- Sub-components --
 
 function ContrastBadge({ ratio, threshold }) {
   if (!ratio) return <Caption style={{ color: 'var(--Text-Quiet)' }}>--</Caption>;
@@ -97,12 +103,17 @@ function CopyButton({ code }) {
   );
 }
 
+function ControlButton({ label, selected, onClick }) {
+  return (
+    <Button variant={selected ? 'default' : 'default-outline'} size="small" onClick={onClick}>
+      {label}
+    </Button>
+  );
+}
+
 function ColorSwatchButton({ color, selected, onClick, variant }) {
-  const dataTheme = variant === 'light'
-    ? LIGHT_THEME_MAP[color]
-    : variant === 'dark'
-      ? DARK_THEME_MAP[color]
-      : SOLID_THEME_MAP[color];
+  const themeMap = variant === 'light' ? LIGHT_THEME_MAP : variant === 'dark' ? DARK_THEME_MAP : SOLID_THEME_MAP;
+  const dataTheme = themeMap[color] || undefined;
   const dataSurface = variant === 'dark' ? 'Surface-Dimmest' : 'Surface';
 
   return (
@@ -129,16 +140,6 @@ function ColorSwatchButton({ color, selected, onClick, variant }) {
   );
 }
 
-function ControlButton({ label, selected, onClick }) {
-  return (
-    <Button variant={selected ? 'default' : 'default-outline'} size="small" onClick={onClick}>
-      {label}
-    </Button>
-  );
-}
-
-// ── Indented checkbox row (used for Selected and Elevated under Clickable) ───
-
 function IndentedCheckRow({ label, caption, checked, onChange }) {
   return (
     <Box sx={{
@@ -159,7 +160,7 @@ function IndentedCheckRow({ label, caption, checked, onChange }) {
   );
 }
 
-// ── Main showcase ─────────────────────────────────────────────────────────────
+// -- Main showcase --
 
 export function CardShowcase() {
   const [variant, setVariant]         = useState('default');
@@ -175,17 +176,42 @@ export function CardShowcase() {
 
   const isDefault = variant === 'default';
 
+  // Available colors depend on variant
+  const availableColors = variant === 'solid' ? SOLID_COLORS
+    : variant === 'light' ? LIGHT_COLORS
+    : variant === 'dark' ? DARK_COLORS
+    : [];
+
+  // Reset color if not available in new variant
+  const handleVariantChange = (v) => {
+    setVariant(v);
+    if (v === 'default') return;
+    const colors = v === 'solid' ? SOLID_COLORS : v === 'light' ? LIGHT_COLORS : DARK_COLORS;
+    if (!colors.includes(color)) setColor(colors[0]);
+  };
+
   const getThemeName = () => {
-    if (variant === 'solid') return SOLID_THEME_MAP[color] || '';
+    if (variant === 'solid') return SOLID_THEME_MAP[color] || 'none';
     if (variant === 'light') return LIGHT_THEME_MAP[color] || '';
     if (variant === 'dark')  return DARK_THEME_MAP[color]  || '';
     return '';
   };
 
+  const getSurfaceName = () => {
+    if (isDefault) return 'Container';
+    if (variant === 'dark') return 'Surface-Dimmest';
+    if (variant === 'light') return 'Surface';
+    return 'Surface';
+  };
+
   const getBorderToken = () => {
-    if (elevated) return 'var(--Buttons-Default-Border) [2px]';
     if (clickable || selected) return 'var(--Buttons-Default-Border)';
     return 'var(--Border-Variant)';
+  };
+
+  const getShadowLevel = () => {
+    if (elevated) return 'Level 3 / Level 4 hover';
+    return 'Level 2 / Level 3 hover';
   };
 
   const generateCode = () => {
@@ -209,17 +235,35 @@ export function CardShowcase() {
     );
   };
 
+  const previewRef = useRef(null);
+  const cardInnerRef = useRef(null);
+
+  const getElVar = useCallback((el, varName) => {
+    if (!el) return null;
+    return getComputedStyle(el).getPropertyValue(varName).trim();
+  }, []);
+
   useEffect(() => {
-    const data = {};
-    data.text          = getCssVar('--Text');
-    data.textQuiet     = getCssVar('--Text-Quiet');
-    data.surface       = getCssVar('--Surface');
-    data.background    = getCssVar('--Background');
-    data.border        = getCssVar('--Border');
-    data.borderVariant = getCssVar('--Border-Variant');
-    data.focusVisible  = getCssVar('--Focus-Visible');
-    setContrastData(data);
-  }, [variant, color]);
+    // Wait a tick for DOM to update with new theme/surface attributes
+    const timer = setTimeout(() => {
+      const preview = previewRef.current;
+      const cardInner = cardInnerRef.current;
+      const data = {};
+      // Card inner tokens (text, border etc. within the card's themed context)
+      data.text          = getElVar(cardInner, '--Text');
+      data.textQuiet     = getElVar(cardInner, '--Text-Quiet');
+      data.border        = getElVar(cardInner, '--Border');
+      data.borderVariant = getElVar(cardInner, '--Border-Variant');
+      data.focusVisible  = getElVar(cardInner, '--Focus-Visible');
+      data.cardBg        = getElVar(cardInner, '--Background');
+      // Page background (from the preview surface, reflecting user's bg picker)
+      data.pageBg        = getElVar(preview, '--Background');
+      data.pageBorder    = getElVar(preview, '--Buttons-Default-Border');
+      data.selectedBorder = getElVar(cardInner, '--Buttons-' + (isDefault ? 'Default' : cap(color)) + '-Border');
+      setContrastData(data);
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [variant, color, bgTheme, bgSurface, clickable, selected, getElVar, isDefault]);
 
   return (
     <Box sx={{ pb: 8 }}>
@@ -227,11 +271,16 @@ export function CardShowcase() {
 
       <Grid container sx={{ mt: 2, alignItems: 'flex-start' }}>
 
-        {/* ── LEFT: Preview + Code ── */}
+        {/* -- LEFT: Preview + Code -- */}
         <Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, pr: { md: 3 } }}>
 
-          <PreviewSurface theme={bgTheme} surface={bgSurface}>
-            <Box sx={{ width: '100%', maxWidth: orientation === 'horizontal' ? 480 : 320 }}>
+          <PreviewSurface ref={previewRef} theme={bgTheme} surface={bgSurface}>
+            <Box
+              ref={cardInnerRef}
+              data-theme={isDefault ? undefined : (variant === 'light' ? LIGHT_THEME_MAP[color] : SOLID_THEME_MAP[color])}
+              data-surface={getSurfaceName()}
+              sx={{ width: '100%', maxWidth: orientation === 'horizontal' ? 480 : 320 }}
+            >
               <Card
                 variant={variant}
                 color={color}
@@ -249,7 +298,7 @@ export function CardShowcase() {
                       backgroundColor: 'var(--Surface-Dim)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
-                      <Box sx={{ fontSize: '32px', opacity: 0.4 }}>📷</Box>
+                      <Box sx={{ fontSize: '32px', opacity: 0.4 }}>IMG</Box>
                     </Box>
                   </CardOverflow>
                 )}
@@ -260,7 +309,7 @@ export function CardShowcase() {
                       backgroundColor: 'var(--Surface-Dim)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
-                      <Box sx={{ fontSize: '32px', opacity: 0.4 }}>📷</Box>
+                      <Box sx={{ fontSize: '32px', opacity: 0.4 }}>IMG</Box>
                     </Box>
                   </CardOverflow>
                 )}
@@ -300,7 +349,7 @@ export function CardShowcase() {
           </Box>
         </Grid>
 
-        {/* ── RIGHT: Tabs ── */}
+        {/* -- RIGHT: Tabs -- */}
         <Grid item sx={{ width: { xs: '100%', md: '45%' }, flexShrink: 0 }}>
           <Box sx={{ backgroundColor: 'var(--Background)', overflow: 'hidden' }}>
 
@@ -310,7 +359,7 @@ export function CardShowcase() {
                 <Tab>Accessibility</Tab>
               </TabList>
 
-              {/* ── Playground ── */}
+              {/* -- Playground -- */}
               <TabPanel value={0}>
                 <Box sx={{ p: 3 }}>
 
@@ -329,26 +378,30 @@ export function CardShowcase() {
                     <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</OverlineSmall>
                     <Stack direction="row" spacing={1}>
                       {['default', 'solid', 'light', 'dark'].map((s) => (
-                        <ControlButton key={s} label={cap(s)} selected={variant === s} onClick={() => setVariant(s)} />
+                        <ControlButton key={s} label={cap(s)} selected={variant === s} onClick={() => handleVariantChange(s)} />
                       ))}
                     </Stack>
-                    <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
-                      {isDefault
-                        ? 'No theme — inherits from parent context.'
-                        : variant === 'dark'
-                          ? 'Dark — data-theme="{Color}" · data-surface="Surface-Dimmest".'
-                          : cap(variant) + ' — themed card with scoped color tokens.'}
-                    </Caption>
                   </Box>
 
                   {/* Color */}
                   {!isDefault && (
                     <Box sx={{ mt: 3 }}>
                       <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
-                      <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-                        {COLORS.map((c) => (
-                          <ColorSwatchButton key={c} color={c} variant={variant} selected={color === c} onClick={setColor} />
-                        ))}
+                      <Stack spacing={1.5}>
+                        {COLOR_GROUPS.map((group) => {
+                          const visible = group.colors.filter((c) => availableColors.includes(c));
+                          if (visible.length === 0) return null;
+                          return (
+                            <Box key={group.label}>
+                              <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 4, fontWeight: 600 }}>{group.label}</Caption>
+                              <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
+                                {visible.map((c) => (
+                                  <ColorSwatchButton key={c} color={c} variant={variant} selected={color === c} onClick={setColor} />
+                                ))}
+                              </Stack>
+                            </Box>
+                          );
+                        })}
                       </Stack>
                     </Box>
                   )}
@@ -361,9 +414,6 @@ export function CardShowcase() {
                         <ControlButton key={s} label={cap(s)} selected={size === s} onClick={() => setSize(s)} />
                       ))}
                     </Stack>
-                    <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
-                      Padding: var(--Card-Padding). Gap and font-size scale with size.
-                    </Caption>
                   </Box>
 
                   {/* Orientation */}
@@ -374,11 +424,6 @@ export function CardShowcase() {
                         <ControlButton key={o} label={cap(o)} selected={orientation === o} onClick={() => setOrientation(o)} />
                       ))}
                     </Stack>
-                    <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
-                      {orientation === 'vertical'
-                        ? 'flex-direction: column. Image stacks above content.'
-                        : 'flex-direction: row. Image sits beside content.'}
-                    </Caption>
                   </Box>
 
                   {/* States */}
@@ -390,9 +435,7 @@ export function CardShowcase() {
                       <Box>
                         <Label>Clickable</Label>
                         <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>
-                          {isDefault
-                            ? 'Upgrades border from var(--Border-Variant) → var(--Buttons-Default-Border).'
-                            : 'Adds hover shadow, active scale, focus ring.'}
+                          Adds hover shadow (Level 3), active press, focus ring.
                         </Caption>
                       </Box>
                       <Checkbox
@@ -410,7 +453,7 @@ export function CardShowcase() {
                     {clickable && (
                       <IndentedCheckRow
                         label="Selected"
-                        caption='Applies var(--Buttons-Primary-Border) ring. Sets aria-pressed="true".'
+                        caption={'2px border + ring using var(--Buttons-' + (isDefault ? 'Default' : cap(color)) + '-Border). Sets aria-pressed="true".'}
                         checked={selected}
                         onChange={setSelected}
                       />
@@ -421,7 +464,7 @@ export function CardShowcase() {
                       <Box>
                         <Label>Elevated</Label>
                         <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>
-                          Adds card-elevated class. Border becomes 2px solid var(--Buttons-Default-Border).
+                          Shadow: {getShadowLevel()}.
                         </Caption>
                       </Box>
                       <Checkbox
@@ -436,127 +479,128 @@ export function CardShowcase() {
                 </Box>
               </TabPanel>
 
-              {/* ── Accessibility ── */}
+              {/* -- Accessibility -- */}
               <TabPanel value={1}>
                 <Box sx={{ p: 3 }}>
                   <BodySmall color="quiet" style={{ marginBottom: 24 }}>
-                    {variant} / {size} / {orientation}
+                    {variant} / {!isDefault ? color + ' / ' : ''}{size} / {orientation}
                     {clickable ? ' / clickable' : ''}
                     {selected ? ' / selected' : ''}
                     {elevated ? ' / elevated' : ''}
                     {!isDefault ? ' — data-theme="' + getThemeName() + '"' : ''}
+                    {' — data-surface="' + getSurfaceName() + '"'}
                   </BodySmall>
 
                   <Stack spacing={3}>
 
                     {/* Text Readability */}
                     <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
-                      <H5>Text Readability (WCAG 1.4.3 — 4.5:1)</H5>
+                      <H5><a href="https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--Hotlink)', textDecoration: 'none' }}>Text Readability (WCAG 1.4.3 — 4.5:1)</a></H5>
                       <BodySmall color="quiet" style={{ marginBottom: 16 }}>
                         Card text must be readable against the card background.
                       </BodySmall>
-                      {isDefault ? (
-                        <>
-                          <A11yRow
-                            label="var(--Text) vs. var(--Background)"
-                            ratio={getContrast(contrastData.text, contrastData.background)}
-                            threshold={4.5}
-                            note="Primary text on default card"
-                          />
-                          <A11yRow
-                            label="var(--Text-Quiet) vs. var(--Background)"
-                            ratio={getContrast(contrastData.textQuiet, contrastData.background)}
-                            threshold={4.5}
-                            note="Secondary text on default card"
-                          />
-                        </>
-                      ) : (
-                        <A11yRow
-                          label="var(--Text) vs. var(--Surface)"
-                          ratio={getContrast(contrastData.text, contrastData.surface)}
-                          threshold={4.5}
-                          note={'Text within data-theme="' + getThemeName() + '"'}
-                        />
-                      )}
+                      <A11yRow
+                        label="var(--Text) vs. card background"
+                        ratio={getContrast(contrastData.text, contrastData.cardBg)}
+                        threshold={4.5}
+                        note="Primary text on card"
+                      />
+                      <A11yRow
+                        label="var(--Text-Quiet) vs. card background"
+                        ratio={getContrast(contrastData.textQuiet, contrastData.cardBg)}
+                        threshold={4.5}
+                        note="Secondary text on card"
+                      />
                     </Box>
 
                     {/* Container Boundary */}
                     <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
-                      <H5>Container Boundary (WCAG 1.4.11 — 3:1)</H5>
+                      <H5><a href="https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--Hotlink)', textDecoration: 'none' }}>Container Boundary (WCAG 1.4.11 — 3:1)</a></H5>
                       <BodySmall color="quiet" style={{ marginBottom: 16 }}>
                         Card must be distinguishable from the page background.
                       </BodySmall>
+                      {(clickable || selected) && (
+                        <A11yRow
+                          label="Card border vs. page background"
+                          ratio={getContrast(contrastData.pageBorder, contrastData.pageBg)}
+                          threshold={3.0}
+                          note={'Border: var(--Buttons-Default-Border)'}
+                        />
+                      )}
                       <A11yRow
-                        label="Border vs. var(--Background)"
-                        ratio={getContrast(
-                          (elevated || clickable || selected)
-                            ? getCssVar('--Buttons-Default-Border')
-                            : contrastData.borderVariant,
-                          contrastData.background,
-                        )}
+                        label="Card background vs. page background"
+                        ratio={getContrast(contrastData.cardBg, contrastData.pageBg)}
                         threshold={3.0}
-                        note={'Border token: ' + getBorderToken()}
+                        note="Card surface must be distinguishable from page"
+                      />
+                      <A11yRow
+                        label="Elevation shadow"
+                        ratio={null}
+                        threshold={3.0}
+                        note={getShadowLevel() + ' — shadow inherits parent dropshadow-color'}
                       />
                     </Box>
 
                     {/* Interactive States */}
                     {clickable && (
                       <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
-                        <H5>Interactive States (WCAG 1.4.11 — 3:1)</H5>
+                        <H5><a href="https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--Hotlink)', textDecoration: 'none' }}>Interactive States (WCAG 1.4.11 — 3:1)</a></H5>
                         <BodySmall color="quiet" style={{ marginBottom: 16 }}>
                           Focus ring and selection indicator must contrast 3:1 against card background.
                         </BodySmall>
                         <A11yRow
-                          label="Focus: var(--Focus-Visible) vs. card background"
-                          ratio={getContrast(contrastData.focusVisible, isDefault ? contrastData.background : contrastData.surface)}
+                          label="Focus ring vs. page background"
+                          ratio={getContrast(contrastData.focusVisible, contrastData.pageBg)}
                           threshold={3.0}
-                          note="outline: 3px solid var(--Focus-Visible); outline-offset: 3px; border-radius: calc(var(--Card-Radius) + 3px)"
+                          note="outline: 3px solid var(--Focus-Visible); outline-offset: 3px"
                         />
                         {selected && (
                           <A11yRow
-                            label="Selected ring: var(--Buttons-Primary-Border) vs. card background"
-                            ratio={getContrast(getCssVar('--Buttons-Primary-Border'), isDefault ? contrastData.background : contrastData.surface)}
+                            label="Selected border vs. page background"
+                            ratio={getContrast(contrastData.selectedBorder, contrastData.pageBg)}
                             threshold={3.0}
-                            note="border-color + box-shadow: 0 0 0 2px var(--Buttons-Primary-Border)"
+                            note={'2px solid var(--Buttons-' + (isDefault ? 'Default' : cap(color)) + '-Border)'}
                           />
                         )}
                       </Box>
                     )}
 
-                    {/* ARIA and Semantics */}
+                    {/* Structure */}
                     <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
-                      <H5>ARIA and Semantics</H5>
+                      <H5>Structure and ARIA</H5>
                       <Stack spacing={0}>
                         <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                          <BodySmall>Surface attribute:</BodySmall>
-                          <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>
-                            data-surface="Container" on all cards
+                          <BodySmall>Two-layer structure:</BodySmall>
+                          <Caption style={{ color: 'var(--Text-Quiet)' }}>
+                            Outer shell (no data-surface) inherits parent dropshadow-color for shadows. Inner content has data-theme + data-surface.
                           </Caption>
                         </Box>
-                        {!isDefault && (
-                          <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                            <BodySmall>Theme attribute:</BodySmall>
-                            <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>
-                              {'data-theme="' + getThemeName() + '"'}
-                            </Caption>
-                          </Box>
-                        )}
+                        <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
+                          <BodySmall>Inner content:</BodySmall>
+                          <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>
+                            {isDefault
+                              ? 'data-surface="Container" — bg: var(--Background), color: var(--Text)'
+                              : 'data-theme="' + getThemeName() + '" data-surface="' + getSurfaceName() + '"'}
+                          </Caption>
+                        </Box>
+                        <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
+                          <BodySmall>Elevation:</BodySmall>
+                          <Caption style={{ color: 'var(--Text-Quiet)' }}>
+                            {elevated
+                              ? 'Effect-Level-3 rest, Effect-Level-4 hover, Effect-Level-2 active.'
+                              : 'Effect-Level-2 rest, Effect-Level-3 hover, Effect-Level-1 active.'}
+                          </Caption>
+                        </Box>
                         <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
                           <BodySmall>Clickable card:</BodySmall>
                           <Caption style={{ color: 'var(--Text-Quiet)' }}>
-                            role="button", tabIndex=0. Enter and Space activate. Hover adds shadow, active scales to 0.995.
+                            role="button", tabIndex=0. Enter and Space activate. Active scales to 0.995.
                           </Caption>
                         </Box>
                         <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
                           <BodySmall>Selected card:</BodySmall>
                           <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>
-                            aria-pressed="true". Ring: var(--Buttons-Primary-Border). Hover locked to selection ring.
-                          </Caption>
-                        </Box>
-                        <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                          <BodySmall>Elevated card:</BodySmall>
-                          <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>
-                            Adds class card-elevated. Border: 2px solid var(--Buttons-Default-Border). Independent of clickable/selected.
+                            {'aria-pressed="true". Border: 2px solid var(--Buttons-' + (isDefault ? 'Default' : cap(color)) + '-Border). Ring matches.'}
                           </Caption>
                         </Box>
                         <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
@@ -565,41 +609,15 @@ export function CardShowcase() {
                             outline: 3px solid var(--Focus-Visible); outline-offset: 3px; border-radius: calc(var(--Card-Radius) + 3px)
                           </Caption>
                         </Box>
-                        <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                          <BodySmall>CardOverflow:</BodySmall>
-                          <Caption style={{ color: 'var(--Text-Quiet)' }}>
-                            Bleeds content to card edges via negative margins matching var(--Card-Padding). Adapts to orientation.
-                          </Caption>
-                        </Box>
                         <Box sx={{ py: 1.5 }}>
-                          <BodySmall>CardCover:</BodySmall>
-                          <Caption style={{ color: 'var(--Text-Quiet)' }}>
-                            Absolutely positioned behind CardContent (z-index: 0). Images use object-fit: cover. Overlaid content must maintain contrast.
+                          <BodySmall>Inner radius:</BodySmall>
+                          <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>
+                            calc(var(--Card-Radius) - 1px) — accounts for border width
                           </Caption>
                         </Box>
                       </Stack>
                     </Box>
 
-                    {/* Size Reference */}
-                    <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
-                      <H5>Size Reference</H5>
-                      <Stack spacing={0}>
-                        {[
-                          { label: 'Small',  gap: '8px',  fontSize: '13px' },
-                          { label: 'Medium', gap: '12px', fontSize: '14px' },
-                          { label: 'Large',  gap: '16px', fontSize: '16px' },
-                        ].map(({ label, gap, fontSize }, i, arr) => (
-                          <Box key={label} sx={{ py: 1.5, borderBottom: i < arr.length - 1 ? '1px solid var(--Border)' : 'none' }}>
-                            <BodySmall>
-                              {label}{size === label.toLowerCase() ? ' ← current' : ''}
-                            </BodySmall>
-                            <Caption style={{ color: 'var(--Text-Quiet)' }}>
-                              var(--Card-Padding) padding · {gap} gap · {fontSize} text
-                            </Caption>
-                          </Box>
-                        ))}
-                      </Stack>
-                    </Box>
 
                   </Stack>
                 </Box>

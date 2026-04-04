@@ -8,11 +8,11 @@ import { Tooltip as MuiTooltip, Box } from '@mui/material';
  * STYLES:
  *   solid    data-theme: Primary | Secondary | Tertiary | Neutral |
  *            Info-Medium | Success-Medium | Warning-Medium | Error-Medium
- *            bg: var(--Surface)  text: var(--Text)  border: none
+ *            bg: var(--Background)  text: var(--Text)  border: none
  *
  *   light    data-theme: Primary-Light | Secondary-Light | Tertiary-Light | Neutral-Light |
  *            Info-Light | Success-Light | Warning-Light | Error-Light
- *            bg: var(--Surface)  text: var(--Text)  border: none
+ *            bg: var(--Background)  text: var(--Text)  border: none
  *
  *   outline  No data-theme. bg: var(--Background)  text: var(--Text)
  *            border: 1px solid var(--Buttons-{C}-Border)
@@ -83,14 +83,14 @@ export function Tooltip({
       : null;
 
   // Build tooltip styles
-  const tooltipBg = isOutline ? 'var(--Background)' : 'var(--Surface)';
+  const tooltipBg = isOutline ? 'var(--Background)' : 'var(--Background)';
   const tooltipText = isOutline ? 'var(--Text)' : 'var(--Text)';
   const tooltipBorder = isOutline
     ? '1px solid var(--Buttons-' + C + '-Border)'
     : 'none';
 
   // Arrow color must match tooltip background
-  const arrowColor = isOutline ? 'var(--Background)' : 'var(--Surface)';
+  const arrowColor = isOutline ? 'var(--Background)' : 'var(--Background)';
   const arrowBorder = isOutline ? 'var(--Buttons-' + C + '-Border)' : 'transparent';
 
   // Controlled vs uncontrolled

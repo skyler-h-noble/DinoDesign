@@ -15,6 +15,11 @@ import {
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+const COLOR_GROUPS = [
+  { label: 'Default', colors: ['default'] },
+  { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
+  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+];
 const STYLES = ['solid', 'outline', 'ghost'];
 const CONTENT_TYPES = ['text', 'number', 'letter', 'icon', 'avatar', 'swatch'];
 
@@ -151,6 +156,7 @@ export function ButtonShowcase() {
   const [iconPosition, setIconPosition] = useState('left');
   const [buttonText, setButtonText]     = useState('Button');
   const [iconName, setIconName]         = useState('Add');
+  const [elevated, setElevated]         = useState(false);
   const [disabled, setDisabled]         = useState(false);
   const [loading, setLoading]           = useState(false);
   const [fullWidth, setFullWidth]       = useState(false);
@@ -162,7 +168,7 @@ export function ButtonShowcase() {
   const noColorPicker = isGhost;
 
   const sizeDetails = {
-    small:  { totalHeight: '32px',              note: '32px — meets WCAG 2.2 AA minimum.' },
+    small:  { totalHeight: '32px',              note: '' },
     medium: { totalHeight: 'var(--Button-Height)', note: 'Default design system height.' },
     large:  { totalHeight: '64px',              note: '64px — touch-friendly.' },
   };
@@ -180,7 +186,7 @@ export function ButtonShowcase() {
   };
 
   const getButtonProps = () => {
-    const p = { variant: getVariant(), size, disabled, fullWidth };
+    const p = { variant: getVariant(), size, elevated, disabled, fullWidth };
     if (contentType === 'icon') {
       p.iconOnly = true;
       p.children = getIconComponent();
@@ -213,6 +219,7 @@ export function ButtonShowcase() {
     if (p.letterNumber) parts.push('letterNumber');
     if (p.avatar)      parts.push('avatar');
     if (p.swatch)      parts.push('swatch');
+    if (p.elevated)    parts.push('elevated');
     if (p.disabled)    parts.push('disabled');
     if (p.fullWidth)   parts.push('fullWidth');
     if (p.startIcon)   parts.push('startIcon={<' + iconName + 'Icon />}');
@@ -307,10 +314,17 @@ export function ButtonShowcase() {
                   {/* Color */}
                   <Box sx={{ mt: 3 }}>
                     <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
-                    <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-                      {COLORS.map((c) => (
-                        <ColorSwatchButton key={c} color={c} selected={color === c}
-                          disabled={noColorPicker} onClick={setColor} isOutlineMode={style === 'outline'} />
+                    <Stack spacing={1.5}>
+                      {COLOR_GROUPS.map((group) => (
+                        <Box key={group.label}>
+                          <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 4, fontWeight: 600 }}>{group.label}</Caption>
+                          <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
+                            {group.colors.map((c) => (
+                              <ColorSwatchButton key={c} color={c} selected={color === c}
+                                disabled={noColorPicker} onClick={setColor} isOutlineMode={style === 'outline'} />
+                            ))}
+                          </Stack>
+                        </Box>
                       ))}
                     </Stack>
                   </Box>
@@ -332,10 +346,10 @@ export function ButtonShowcase() {
                       ))}
                     </Stack>
                     <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
-                      {contentType === 'swatch'  ? 'Square color block — use with Tooltip for labels.' :
-                       contentType === 'icon'    ? 'Icon only — requires aria-label.' :
+                      {contentType === 'icon'    ? 'Icon only — requires aria-label.' :
                        contentType === 'avatar'  ? 'Circular with initial letter.' :
                        contentType === 'letter' || contentType === 'number' ? 'Single character in square button.' :
+                       contentType === 'swatch'  ? '' :
                        'Text label with optional icon.'}
                     </Caption>
                   </Box>
@@ -370,7 +384,7 @@ export function ButtonShowcase() {
                     <Box sx={{ mt: 2 }}>
                       <TextInput label="Icon Name" value={iconName} onChange={setIconName} placeholder="Add" />
                       <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 4 }}>
-                        MUI icon name (e.g. Add, Edit, Delete, Save, Send, Star)
+                        <a href="https://mui.com/material-ui/material-icons/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--Hotlink)' }}>Material icon</a> name (e.g. Add, Edit, Delete, Save, Send, Star)
                       </Caption>
                     </Box>
                   )}
@@ -389,7 +403,17 @@ export function ButtonShowcase() {
                   </Box>
 
                   {/* Toggles */}
-                  <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    opacity: isGhost ? 0.4 : 1 }}>
+                    <Box>
+                      <Label>Elevated</Label>
+                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Higher shadow levels (Level 2/3)</Caption>
+                    </Box>
+                    <Switch checked={elevated} onChange={(e) => setElevated(e.target.checked)}
+                      size="small" aria-label="Elevated" disabled={isGhost} />
+                  </Box>
+
+                  <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box>
                       <Label>Disabled</Label>
                       <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Button is non-interactive</Caption>

@@ -1,7 +1,7 @@
 // src/components/Button/Button.js
 import React from 'react';
 import { Button as MuiButton, Avatar as MuiAvatar, Box, GlobalStyles } from '@mui/material';
-import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography } from '../Typography';
+import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography, ButtonExtraSmall as ButtonExtraSmallTypography } from '../Typography';
 
 /**
  * Button Component
@@ -43,15 +43,9 @@ import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography } from
 const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
-// ─── Elevation Shadow (matches Figma's 5-layer dropshadow) ──────────────────
-
-const ELEVATION_SHADOW = [
-  'var(--Shadow-1-offset-x, 0px) var(--Shadow-1-offset-y, 1px) var(--Shadow-1-blur-radius, 0px) var(--Shadow-1-spread-radius, 0px) var(--Dropshadow-Color-1)',
-  'var(--Shadow-2-offset-x, 1px) var(--Shadow-2-offset-y, 2px) var(--Shadow-2-blur-radius, 2px) var(--Shadow-2-spread-radius, 0px) var(--Dropshadow-Color-2)',
-  'var(--Shadow-3-offset-x, 2px) var(--Shadow-3-offset-y, 4px) var(--Shadow-3-blur-radius, 4px) var(--Shadow-3-spread-radius, 0px) var(--Dropshadow-Color-3)',
-  'var(--Shadow-4-offset-x, 0px) var(--Shadow-4-offset-y, 0px) var(--Shadow-4-blur-radius, 0px) var(--Shadow-4-spread-radius, 0px) var(--Dropshadow-Color-4)',
-  'var(--Shadow-1-offset-x, 0px) var(--Shadow-1-offset-y, 1px) var(--Shadow-1-blur-radius, 0px) var(--Shadow-1-spread-radius, 0px) var(--Dropshadow-Color-5)',
-].join(', ');
+// ─── Effect Levels (from base.css) ──────────────────────────────────────────
+// Normal buttons:   Level 1 resting, Level 2 hover
+// Elevated buttons: Level 2 resting, Level 3 hover
 
 // ─── Bevel Shadow (per-color, per-size) ─────────────────────────────────────
 // Uses --_bevel (computed from % × height) and per-color Highlight/Lowlight
@@ -59,22 +53,25 @@ const ELEVATION_SHADOW = [
 function bevelShadow(color) {
   const C = cap(color);
   return [
-    `inset calc(-1 * var(--_bevel)) calc(-1 * var(--_bevel)) var(--_bevel) var(--Buttons-${C}-Highlight)`,
-    `inset var(--_bevel) var(--_bevel) var(--_bevel) var(--Buttons-${C}-Lowlight)`,
+    `inset calc(-1 * var(--_bevel)) calc(-1 * var(--_bevel)) var(--_bevel) rgba(var(--Buttons-${C}-Lowlight), var(--Button-Bevel-Opacity, 0.5))`,
+    `inset var(--_bevel) var(--_bevel) var(--_bevel) rgba(var(--Buttons-${C}-Highlight), var(--Button-Bevel-Opacity, 0.5))`,
   ].join(', ');
 }
 
 // ─── Variant Style Builders ───────────────────────────────────────────────────
 
-function solidStyles(color) {
+function solidStyles(color, elevated = false) {
   const C = cap(color);
   const bevel = bevelShadow(color);
-  const solidShadow = `${ELEVATION_SHADOW}, ${bevel}`;
+  const restLevel = elevated ? 'var(--Effect-Level-2)' : 'var(--Effect-Level-1)';
+  const hoverLevel = elevated ? 'var(--Effect-Level-3)' : 'var(--Effect-Level-2)';
+  const restShadow = `${bevel}, ${restLevel}`;
+  const hoverShadow = `${bevel}, ${hoverLevel}`;
   return {
     backgroundColor: `var(--Buttons-${C}-Button)`,
     color: `var(--Buttons-${C}-Text)`,
     border: `1px solid var(--Buttons-${C}-Border)`,
-    boxShadow: solidShadow,
+    boxShadow: restShadow,
     position: 'relative',
     zIndex: 1,
     '& .MuiTouchRipple-rippleVisible': {
@@ -83,7 +80,7 @@ function solidStyles(color) {
     },
     '&:hover': {
       backgroundColor: `var(--Buttons-${C}-Hover)`,
-      boxShadow: solidShadow,
+      boxShadow: hoverShadow,
     },
     '&:active': {
       backgroundColor: `var(--Buttons-${C}-Active)`,
@@ -104,7 +101,7 @@ function outlineStyles(color) {
   const C = cap(color);
   return {
     backgroundColor: 'transparent',
-    color: `var(--Buttons-${C}-Text, var(--Text))`,
+    color: 'var(--Text)',
     border: `1px solid var(--Buttons-${C}-Border)`,
     boxShadow: 'none',
     '& .MuiTouchRipple-rippleVisible': {
@@ -125,19 +122,21 @@ function outlineStyles(color) {
   };
 }
 
-function lightStyles(color) {
+function lightStyles(color, elevated = false) {
   const C = cap(color);
+  const restLevel = elevated ? 'var(--Effect-Level-2)' : 'var(--Effect-Level-1)';
+  const hoverLevel = elevated ? 'var(--Effect-Level-3)' : 'var(--Effect-Level-2)';
   return {
     backgroundColor: `var(--${C}-Color-11)`,
     color: `var(--Text-${C}-Color-11)`,
     border: `1px solid var(--Buttons-${C}-Border)`,
-    boxShadow: ELEVATION_SHADOW,
+    boxShadow: restLevel,
     '& .MuiTouchRipple-rippleVisible': {
       color: `var(--Hover-${C}-Color-11)`,
     },
     '&:hover': {
       backgroundColor: `var(--Hover-${C}-Color-11)`,
-      boxShadow: ELEVATION_SHADOW,
+      boxShadow: hoverLevel,
     },
     '&:active': {
       backgroundColor: `var(--Active-${C}-Color-11)`,
@@ -194,14 +193,14 @@ function ghostStyles(isTextContent) {
   };
 }
 
-function buildVariantMap(isTextContent) {
+function buildVariantMap(isTextContent, elevated = false) {
   const map = {};
   COLORS.forEach((color) => {
-    map[color]                = solidStyles(color);
+    map[color]                = solidStyles(color, elevated);
     map[`${color}-outline`]   = outlineStyles(color);
-    map[`${color}-light`]     = lightStyles(color);
+    map[`${color}-light`]     = lightStyles(color, elevated);
   });
-  map['danger']         = solidStyles('error');
+  map['danger']         = solidStyles('error', elevated);
   map['outline']        = outlineStyles('default');
   map['ghost']          = ghostStyles(isTextContent);
   map['text']           = ghostStyles(isTextContent);
@@ -231,14 +230,16 @@ function getSizingStyles({ size, iconOnly, letterNumber, avatar }) {
   const base       = SIZE_BASE[size] || SIZE_BASE.medium;
   const squareSize = SIZE_HEIGHT[size] || SIZE_HEIGHT.medium;
 
-  // Icon / Avatar — fixed square, no padding
+  // Icon / Avatar — fixed square, no padding, no min-width/height
   if (iconOnly) {
     const fontSize = avatar
-      ? (size === 'small' ? '12px' : size === 'large' ? '18px' : '14px')
-      : (size === 'small' ? '1rem' : base.fontSize);
+      ? (size === 'small' ? 'var(--Button-ExtraSmall-Font-Size)' : size === 'large' ? '18px' : '14px')
+      : (size === 'small' ? '0.875rem' : base.fontSize);
     return {
       height:  squareSize,
       width:   squareSize,
+      minWidth: 'unset',
+      minHeight: 'unset',
       fontSize,
       padding: '0',
       '--_height': squareSize,
@@ -269,12 +270,14 @@ function getSizingStyles({ size, iconOnly, letterNumber, avatar }) {
 export function Button({
   variant = 'default',
   size = 'medium',
+  elevated = false,
   fullWidth = false,
   disabled = false,
   iconOnly = false,
   letterNumber = false,
   avatar = false,
   swatch = false,
+  swatchColor,
   startIcon,
   endIcon,
   children,
@@ -291,7 +294,7 @@ export function Button({
     ? 'primary'
     : variant;
 
-  const variantMap     = buildVariantMap(isTextContent);
+  const variantMap     = buildVariantMap(isTextContent, elevated);
   const variantStyles  = variantMap[effectiveVariant] || variantMap.default;
   const sizingStyles   = getSizingStyles({ size, iconOnly: isIconOnly, letterNumber, avatar });
 
@@ -301,8 +304,9 @@ export function Button({
     if (isIconOnly) return children;
 
     if (letterNumber) {
+      const LetterComp = size === 'small' ? ButtonExtraSmallTypography : TypographyComp;
       return (
-        <Box
+        <LetterComp
           component="span"
           sx={{
             display: 'inline-flex',
@@ -314,7 +318,7 @@ export function Button({
           }}
         >
           {children}
-        </Box>
+        </LetterComp>
       );
     }
 
@@ -345,7 +349,7 @@ export function Button({
   const renderStartIcon = () => {
     if (avatar && children) {
       const avatarSize     = SIZE_HEIGHT[size] || SIZE_HEIGHT.medium;
-      const avatarFontSize = size === 'small' ? '12px' : size === 'large' ? '18px' : '14px';
+      const avatarFontSize = size === 'small' ? 'var(--Button-ExtraSmall-Font-Size)' : size === 'large' ? '18px' : '14px';
       return (
         <MuiAvatar
           sx={{
@@ -414,7 +418,7 @@ export function Button({
         },
         ...(avatar && {
           '& .MuiAvatar-root': {
-            fontSize: size === 'small' ? '12px' : size === 'large' ? '18px' : '14px',
+            fontSize: size === 'small' ? 'var(--Button-ExtraSmall-Font-Size)' : size === 'large' ? '18px' : '14px',
           },
         }),
         '& .MuiButton-endIcon': {
@@ -438,12 +442,34 @@ export function Button({
           boxShadow: 'none',
         },
 
+        ...(swatch && {
+          border: '1px solid var(--Buttons-Default-Border)',
+          padding: '1px',
+          width: SIZE_HEIGHT[size] || SIZE_HEIGHT.medium,
+          height: SIZE_HEIGHT[size] || SIZE_HEIGHT.medium,
+          minWidth: 'unset',
+          minHeight: 'unset',
+          backgroundColor: 'transparent !important',
+          '&:hover': { backgroundColor: 'transparent !important' },
+          '&:hover .btn-swatch-inner': { filter: 'brightness(0.9)' },
+        }),
         ...(effectiveFullWidth && { width: '100%' }),
         ...sx,
       }}
       {...props}
+      {...(swatch ? { style: { backgroundColor: 'transparent' } } : {})}
     >
-      {avatar || swatch ? null : renderChildren()}
+      {avatar ? null : swatch ? (
+        <Box
+          className="btn-swatch-inner"
+          style={{
+            width: '100%',
+            height: '100%',
+            borderRadius: 'calc(var(--Button-Icon-Radius) - 2px)',
+            ...(swatchColor ? { backgroundColor: swatchColor } : {}),
+          }}
+        />
+      ) : renderChildren()}
     </MuiButton>
     </>
   );

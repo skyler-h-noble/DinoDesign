@@ -1,6 +1,7 @@
 // src/components/Alert/Alert.js
 import React from 'react';
 import { Box } from '@mui/material';
+import { Body, BodySmall } from '../Typography';
 
 /**
  * Alert Component
@@ -86,7 +87,11 @@ export function Alert({
         </Box>
       )}
       <Box className="alert-message" sx={{ flex: 1, minWidth: 0 }}>
-        {children}
+        {typeof children === 'string' ? (
+          size === 'small'
+            ? <BodySmall>{children}</BodySmall>
+            : <Body>{children}</Body>
+        ) : children}
       </Box>
       {endDecorator && (
         <Box
@@ -108,7 +113,6 @@ export function Alert({
     fontSize: s.fontSize,
     fontFamily: 'inherit',
     lineHeight: 1.5,
-    width: '100%',
   };
 
   // ── Standard: no border, no theme, no background ──
@@ -162,7 +166,7 @@ export function Alert({
       sx={{
         border: '1px solid var(--Border)',
         borderRadius: s.borderRadius,
-        width: '100%',
+        overflow: 'hidden',
         ...sx,
       }}
       {...props}

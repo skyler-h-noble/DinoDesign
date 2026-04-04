@@ -11,10 +11,10 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
  *             Closed summary: var(--Quiet). Open summary: var(--Text)
  *
  *   solid     data-theme={Color} data-surface="Surface"
- *             bg: var(--Surface), text: var(--Text), border: none
+ *             bg: var(--Background), text: var(--Text), border: none
  *
  *   light     data-theme={Color}-Light
- *             bg: var(--Surface), text: var(--Text), border: none
+ *             bg: var(--Background), text: var(--Text), border: none
  *
  * SIZES: small | medium | large
  * COLORS: 8 brand colors (primary..error)
@@ -66,7 +66,7 @@ export function AccordionGroup({
       ? LIGHT_THEME_MAP[color]
       : null; // default variant inherits data-theme from PreviewSurface wrapper
 
-  const containerBg = isDefault ? 'var(--Background)' : 'var(--Surface)';
+  const containerBg = isDefault ? 'var(--Background)' : 'var(--Background)';
   const containerBorder = '1px solid var(--Border)';
 
   return (
@@ -191,7 +191,7 @@ export function AccordionSummary({
         transition: 'color 0.2s ease, background-color 0.15s ease',
         borderRadius: 0,
         '&:hover': !disabled ? {
-          backgroundColor: isDefault ? 'var(--Surface-Dim)' : 'var(--Surface-Dim)',
+          backgroundColor: isDefault ? 'var(--Hover)' : 'var(--Hover)',
           '& .MuiSvgIcon-root': { fill: 'var(--Text)' },
         } : {},
         '&:active .MuiSvgIcon-root': { fill: 'var(--Text)' },

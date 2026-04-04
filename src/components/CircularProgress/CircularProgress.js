@@ -20,7 +20,8 @@ import { Box } from '@mui/material';
  */
 
 const COLOR_LABEL_MAP = {
-  primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
+  default: 'Default', primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary',
+  white: 'Neutral', black: 'Neutral',
   info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
 };
 

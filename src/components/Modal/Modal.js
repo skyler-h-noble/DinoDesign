@@ -234,7 +234,8 @@ export function Modal({
         <Box sx={{
           flex: 1, overflowY: 'auto',
           px: isFullscreen ? 4 : s.padding,
-          py: isFullscreen ? 3 : '16px',
+          pt: isFullscreen ? 3 : '16px',
+          pb: isFullscreen ? 3 : s.padding,
           color: 'var(--Text)',
           fontSize: size === 'small' ? '13px' : '14px',
           lineHeight: 1.6,
