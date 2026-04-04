@@ -120,11 +120,26 @@ export function Select({
     triggerRef.current?.focus();
   }, [isControlled, onChange]);
 
+  // Compute position for the dropdown — must be defined before toggleOpen
+  const getDropdownPos = useCallback(() => {
+    if (!triggerRef.current) return { top: 0, left: 0, width: 0 };
+    const rect = triggerRef.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    const direction = spaceBelow >= DROPDOWN_MAX_HEIGHT || spaceBelow >= spaceAbove ? 'down' : 'up';
+    return {
+      top: direction === 'down' ? rect.bottom + 4 : undefined,
+      bottom: direction === 'up' ? (window.innerHeight - rect.top + 4) : undefined,
+      left: rect.left,
+      width: rect.width,
+      direction,
+    };
+  }, []);
+
   const toggleOpen = useCallback(() => {
     if (disabled) return;
     setOpen((prev) => {
       if (!prev) {
-        // Compute position synchronously before render so dropdown appears correctly
         setDropdownPos(getDropdownPos());
       }
       return !prev;
@@ -145,23 +160,6 @@ export function Select({
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [open]);
-
-  // Compute position for the dropdown
-  const getDropdownPos = useCallback(() => {
-    if (!triggerRef.current) return { top: 0, left: 0, width: 0 };
-    const rect = triggerRef.current.getBoundingClientRect();
-    console.log('[Select] rect:', { top: rect.top, bottom: rect.bottom, left: rect.left, width: rect.width, windowH: window.innerHeight });
-    const spaceBelow = window.innerHeight - rect.bottom;
-    const spaceAbove = rect.top;
-    const direction = spaceBelow >= DROPDOWN_MAX_HEIGHT || spaceBelow >= spaceAbove ? 'down' : 'up';
-    return {
-      top: direction === 'down' ? rect.bottom + 4 : undefined,
-      bottom: direction === 'up' ? (window.innerHeight - rect.top + 4) : undefined,
-      left: rect.left,
-      width: rect.width,
-      direction,
-    };
-  }, []);
 
   // Capture parent theme/surface and reposition on scroll/resize
   useEffect(() => {

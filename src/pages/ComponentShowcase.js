@@ -1,19 +1,12 @@
 // src/pages/ComponentShowcase.js
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Box,
   Container,
   Drawer,
-  List,
-  ListItemButton,
-  ListItemText,
-  Stack,
-  Grid,
-  Collapse,
 } from '@mui/material';
 
-import { ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
 import * as MuiIcons from '@mui/icons-material';
 import { ButtonShowcase } from '../components/Button/ButtonShowcase';
 import { ButtonGroupShowcase } from '../components/ButtonGroup/ButtonGroupShowcase';
@@ -103,24 +96,25 @@ import {
   Typography,
   Spacing,
   Fab,
+  DynoTreeView,
 } from '../components';
 import { useThemeMode } from '../theme/useThemeMode';
 
 const DRAWER_WIDTH = 320;
 
-const COMPONENT_CATEGORIES = [
+const NAV_ITEMS = [
   {
-    name: 'FOUNDATIONS',
-    icon: '🎨',
-    items: [
+    id: 'foundations',
+    label: 'Foundations',
+    children: [
       { id: 'typography', label: 'Typography' },
       { id: 'icons', label: 'Icons' },
     ],
   },
   {
-    name: 'INPUTS',
-    icon: '⌨️',
-    items: [
+    id: 'inputs',
+    label: 'Inputs',
+    children: [
       { id: 'buttons', label: 'Button' },
       { id: 'fab', label: 'FAB' },
       { id: 'buttongroup', label: 'Button Group' },
@@ -139,16 +133,16 @@ const COMPONENT_CATEGORIES = [
     ],
   },
   {
-    name: 'LAYOUT',
-    icon: '📐',
-    items: [
+    id: 'layout',
+    label: 'Layout',
+    children: [
       { id: 'stack', label: 'Stack' },
     ],
   },
   {
-    name: 'SURFACES',
-    icon: '📋',
-    items: [
+    id: 'surfaces',
+    label: 'Surfaces',
+    children: [
       { id: 'card', label: 'Card' },
       { id: 'box', label: 'Box' },
       { id: 'sheet', label: 'Sheet' },
@@ -157,9 +151,9 @@ const COMPONENT_CATEGORIES = [
     ],
   },
   {
-    name: 'FEEDBACK',
-    icon: '⚠️',
-    items: [
+    id: 'feedback',
+    label: 'Feedback',
+    children: [
       { id: 'alert', label: 'Alert' },
       { id: 'circularprogress', label: 'Circular Progress' },
       { id: 'linearprogress', label: 'Linear Progress' },
@@ -169,9 +163,9 @@ const COMPONENT_CATEGORIES = [
     ],
   },
   {
-    name: 'DATA DISPLAY',
-    icon: '📊',
-    items: [
+    id: 'datadisplay',
+    label: 'Data Display',
+    children: [
       { id: 'avatar', label: 'Avatar' },
       { id: 'badge', label: 'Badge' },
       { id: 'chip', label: 'Chip' },
@@ -183,9 +177,9 @@ const COMPONENT_CATEGORIES = [
     ],
   },
   {
-    name: 'NAVIGATION',
-    icon: '🧭',
-    items: [
+    id: 'navigation',
+    label: 'Navigation',
+    children: [
       { id: 'link', label: 'Link' },
       { id: 'appbar', label: 'App Bar' },
       { id: 'bottomnav', label: 'Bottom Navigation' },
@@ -204,29 +198,14 @@ const COMPONENT_CATEGORIES = [
 
 export function ComponentShowcase() {
   const { mode, switchMode } = useThemeMode('light');
-  const [activeSection, setActiveSection] = useState('colors');
-  const [expandedCategories, setExpandedCategories] = useState({
-    FOUNDATIONS: true,
-    INPUTS: false,
-    LAYOUT: false,
-    SURFACES: false,
-    FEEDBACK: false,
-    'DATA DISPLAY': false,
-    NAVIGATION: false,
-    UTILS: false,
-  });
+  const [activeSection, setActiveSection] = useState('buttons');
 
-  const [modalOpen, setModalOpen] = useState(false);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [sliderValue, setSliderValue] = useState(50);
-  const [selectedCountry, setSelectedCountry] = useState('');
-
-  const toggleCategory = (categoryName) => {
-    setExpandedCategories((prev) => ({
-      ...prev,
-      [categoryName]: !prev[categoryName],
-    }));
-  };
+  const handleTreeSelect = useCallback((event, itemId) => {
+    // Only navigate for leaf items (not category headers)
+    if (itemId && !NAV_ITEMS.some((cat) => cat.id === itemId)) {
+      setActiveSection(itemId);
+    }
+  }, []);
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', flexDirection: 'column' }}>
@@ -240,7 +219,7 @@ export function ComponentShowcase() {
       {/* Main Content Container */}
       <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden', mt: 7.5 }}>
 
-        {/* Sidebar Drawer */}
+        {/* Sidebar */}
         <Drawer
           variant="permanent"
           sx={{
@@ -250,61 +229,25 @@ export function ComponentShowcase() {
               width: DRAWER_WIDTH,
               background: 'var(--Background)',
               color: 'var(--Text)',
-              borderRight: '1px solid var(--Neutral-Color-10)',
+              borderRight: '1px solid var(--Border)',
               pt: 9.5,
               boxSizing: 'border-box',
             },
           }}
           PaperProps={{ 'data-surface': 'Surface-Dim' }}
         >
-          <Typography variant="h6" sx={{ px: 2, mb: 2, fontWeight: 700, color: 'var(--Text)' }}>
-            Components
-          </Typography>
-          <List sx={{ flex: 1, overflow: 'auto', p: 0 }}>
-            {COMPONENT_CATEGORIES.map((category) => (
-              <Box key={category.name}>
-                <ListItemButton
-                  onClick={() => toggleCategory(category.name)}
-                  sx={{
-                    color: 'var(--Text)', fontWeight: 600, fontSize: '0.75rem',
-                    letterSpacing: '0.5px', py: 1.5,
-                    '&:hover': { backgroundColor: 'var(--Container-Low)' },
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
-                    <span>{category.icon}</span>
-                    <span style={{ flex: 1 }}>{category.name}</span>
-                    <ExpandMoreIcon sx={{
-                      transform: expandedCategories[category.name] ? 'rotate(180deg)' : 'rotate(0deg)',
-                      transition: 'transform 0.2s', fontSize: '1.2rem',
-                    }} />
-                  </Box>
-                </ListItemButton>
-
-                <Collapse in={expandedCategories[category.name]} timeout="auto" unmountOnExit>
-                  <List component="div" disablePadding>
-                    {category.items.map((item) => (
-                      <ListItemButton
-                        key={item.id}
-                        selected={activeSection === item.id}
-                        onClick={() => setActiveSection(item.id)}
-                        sx={{
-                          pl: 4, color: 'var(--Text)', fontSize: '0.875rem', py: 1,
-                          '&:hover': { backgroundColor: 'var(--Container-Low)' },
-                          '&.Mui-selected': {
-                            backgroundColor: 'var(--Primary-Color-11)', color: 'white',
-                            '&:hover': { backgroundColor: 'var(--Primary-Color-11)' },
-                          },
-                        }}
-                      >
-                        <ListItemText primary={item.label} />
-                      </ListItemButton>
-                    ))}
-                  </List>
-                </Collapse>
-              </Box>
-            ))}
-          </List>
+          <Box sx={{ flex: 1, overflow: 'auto', p: 1 }}>
+            <DynoTreeView
+              items={NAV_ITEMS}
+              variant="default"
+              selectedItems={activeSection}
+              onSelectedItemsChange={handleTreeSelect}
+              defaultExpandedItems={['inputs']}
+              animation="slide"
+              aria-label="Component navigation"
+              sx={{ border: 'none', borderRadius: 0 }}
+            />
+          </Box>
         </Drawer>
 
         {/* Main Content Area */}
