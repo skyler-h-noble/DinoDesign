@@ -13,6 +13,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import {
   H2, H4, H5, Body, BodySmall, Caption, Label, OverlineSmall
 } from '../Typography';
+import { useDynoDesign } from '../../DynoDesignProvider';
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 
@@ -200,6 +201,7 @@ const outlineBtnSx = {
 
 export function DialogShowcase() {
   const [mainTab, setMainTab] = useState(0);
+  const { theme: currentTheme, style: currentStyle, surface: currentSurface } = useDynoDesign();
 
   // Dialog state
   const [open, setOpen] = useState(false);
@@ -313,6 +315,7 @@ export function DialogShowcase() {
                 transitionDuration={transitionSpeed}
                 aria-labelledby="dialog-title"
                 aria-describedby="dialog-description"
+                style={{ zIndex: 10000000 }}
                 slotProps={{
                   backdrop: {
                     sx: {
@@ -321,6 +324,9 @@ export function DialogShowcase() {
                   },
                 }}
                 PaperProps={{
+                  'data-theme': currentTheme,
+                  'data-style': currentStyle,
+                  'data-surface': currentSurface,
                   sx: {
                     ...dialogPaperSx,
                     ...(isFullScreen && { borderRadius: 0, border: 'none' }),

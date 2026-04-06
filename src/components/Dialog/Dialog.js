@@ -7,6 +7,7 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { Box } from '@mui/material';
+import { useDynoDesign } from '../../DynoDesignProvider';
 
 /**
  * Dialog Component
@@ -145,6 +146,13 @@ export function Dialog({
 }) {
   const TransitionComponent = transition ? TRANSITION_MAP[transition] : undefined;
 
+  // Get current theme context so the portal inherits the right tokens
+  let dynoCtx;
+  try { dynoCtx = useDynoDesign(); } catch { dynoCtx = null; }
+  const currentTheme = dynoCtx?.theme || 'Default';
+  const currentStyle = dynoCtx?.style || 'Modern';
+  const currentSurface = dynoCtx?.surface || 'Surface';
+
   const handleClose = (event, reason) => {
     if (alert && reason === 'backdropClick') return;
     if (alert && reason === 'escapeKeyDown') return;
@@ -167,6 +175,7 @@ export function Dialog({
       aria-labelledby={titleId}
       aria-describedby={contentId}
       className={'dialog dialog-' + maxWidth + (fullScreen ? ' dialog-fullscreen' : '') + (alert ? ' dialog-alert' : '') + (className ? ' ' + className : '')}
+      style={{ zIndex: 10000000 }}
       slotProps={{
         backdrop: {
           sx: { backgroundColor: nonModal ? 'transparent' : 'rgba(0,0,0,0.5)' },
@@ -174,6 +183,9 @@ export function Dialog({
       }}
       PaperProps={{
         ...PaperProps,
+        'data-theme': currentTheme,
+        'data-style': currentStyle,
+        'data-surface': currentSurface,
         sx: {
           ...paperSx,
           ...(fullScreen && { borderRadius: 0, border: 'none' }),

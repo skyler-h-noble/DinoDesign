@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Box } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import { useDynoDesign } from '../../DynoDesignProvider';
 
 /**
  * Modal Component
@@ -89,6 +90,12 @@ export function Modal({
   const previousFocusRef = useRef(null);
   const [visible, setVisible] = useState(false);
 
+  // Get current theme context so the portal inherits the right tokens
+  let dynoCtx;
+  try { dynoCtx = useDynoDesign(); } catch { dynoCtx = null; }
+  const providerTheme = dynoCtx?.theme || 'Default';
+  const providerStyle = dynoCtx?.style || 'Modern';
+
   const isDefault = variant === 'default';
   const isSoft = variant === 'soft';
   const isSolid = variant === 'solid';
@@ -143,7 +150,7 @@ export function Modal({
         aria-hidden="true"
         onClick={closeOnBackdrop ? onClose : undefined}
         sx={{
-          position: 'fixed', inset: 0, zIndex: 1400,
+          position: 'fixed', inset: 0, zIndex: 10000000,
           backgroundColor: 'rgba(0,0,0,0.5)',
           ...(animationName && {
             animation: animationName + '-backdrop ' + speed + ' ease-out forwards',
@@ -159,13 +166,14 @@ export function Modal({
         ref={modalRef}
         tabIndex={-1}
         data-surface="Container-High"
-        data-theme={dataTheme || undefined}
+        data-theme={dataTheme || providerTheme}
+        data-style={providerStyle}
         className={'modal modal-' + variant + ' modal-' + size + ' modal-' + layout +
           (isSoft || isSolid ? ' modal-' + color : '') +
           (className ? ' ' + className : '')}
         sx={{
           position: 'fixed',
-          zIndex: 1401,
+          zIndex: 10000001,
           outline: 'none',
           fontFamily: 'inherit',
           // Layout
