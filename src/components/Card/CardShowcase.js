@@ -16,22 +16,22 @@ import {
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 
-const SOLID_COLORS = ['primary', 'secondary', 'tertiary', 'info', 'success', 'warning', 'error'];
-const LIGHT_COLORS = ['primary', 'secondary', 'tertiary', 'info', 'success', 'warning', 'error'];
-const DARK_COLORS  = ['primary', 'secondary', 'tertiary', 'info', 'success', 'warning', 'error'];
+const SOLID_COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+const LIGHT_COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+const DARK_COLORS  = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
 
 const COLOR_GROUPS = [
-  { label: 'Theme', colors: ['primary', 'secondary', 'tertiary'] },
-  { label: 'Core', colors: ['white', 'black'] },
+  { label: 'Default', colors: ['default'] },
+  { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
   { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
 ];
 
 const SOLID_THEME_MAP = {
-  primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary',
+  default: 'Default', primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
   info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
 };
 const LIGHT_THEME_MAP = {
-  primary: 'Primary-Light', secondary: 'Secondary-Light', tertiary: 'Tertiary-Light',
+  default: 'Default', primary: 'Primary-Light', secondary: 'Secondary-Light', tertiary: 'Tertiary-Light', neutral: 'Neutral-Light',
   info: 'Info-Light', success: 'Success-Light', warning: 'Warning-Light', error: 'Error-Light',
 };
 // Dark uses same theme map as solid

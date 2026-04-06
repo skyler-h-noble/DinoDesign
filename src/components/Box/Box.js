@@ -36,8 +36,8 @@ const PADDING_MAP = {
 
 export function Box({
   children,
-  variant = 'default',
-  color = 'primary',
+  variant = 'solid',
+  color = 'default',
   padding = 'md',
   elevated = false,
   clickable = false,
@@ -47,22 +47,17 @@ export function Box({
   sx = {},
   ...props
 }) {
-  const isDefault = variant === 'default';
-  const C = cap(color);
+  const C = cap(color === 'default' ? 'Default' : color);
 
   // Theme for inner content
-  const dataTheme = isDefault
-    ? undefined
-    : variant === 'light'
-      ? C + '-Light'
-      : C;
+  const dataTheme = variant === 'light'
+    ? (color === 'default' ? 'Default' : C + '-Light')
+    : C;
 
   // Surface for inner content
-  const dataSurface = isDefault
-    ? 'Container'
-    : variant === 'dark'
-      ? 'Surface-Dimmest'
-      : 'Surface';
+  const dataSurface = variant === 'dark'
+    ? 'Surface-Dimmest'
+    : 'Surface';
 
   const p = PADDING_MAP[padding] !== undefined ? PADDING_MAP[padding] : PADDING_MAP.md;
   const isClickable = clickable || !!onClick;

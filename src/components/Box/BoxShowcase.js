@@ -16,6 +16,7 @@ import {
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
 
 const COLOR_GROUPS = [
+  { label: 'Default', colors: ['default'] },
   { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
   { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
 ];
@@ -75,7 +76,7 @@ function ColorSwatchButton({ color, selected, onClick, variant }) {
 
 /* ── Main Showcase ── */
 export function BoxShowcase() {
-  const [variant, setVariant]     = useState('default');
+  const [variant, setVariant]     = useState('solid');
   const [color, setColor]         = useState('primary');
   const [padding, setPadding]     = useState('md');
   const [elevated, setElevated]   = useState(false);
@@ -83,11 +84,10 @@ export function BoxShowcase() {
   const [bgTheme, setBgTheme]     = useState(null);
   const [bgSurface, setBgSurface] = useState('Surface');
 
-  const isDefault = variant === 'default';
 
   const generateCode = () => {
     const parts = ['variant="' + variant + '"'];
-    if (!isDefault) parts.push('color="' + color + '"');
+    if (color !== 'default') parts.push('color="' + color + '"');
     if (padding !== 'md') parts.push('padding="' + padding + '"');
     if (elevated) parts.push('elevated');
     if (clickable) parts.push('clickable onClick={handleClick}');
@@ -167,15 +167,14 @@ export function BoxShowcase() {
                   <MuiBox>
                     <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</OverlineSmall>
                     <Stack direction="row" spacing={1}>
-                      {['default', 'solid', 'light', 'dark'].map((v) => (
+                      {['solid', 'light', 'dark'].map((v) => (
                         <ControlButton key={v} label={cap(v)} selected={variant === v} onClick={() => setVariant(v)} />
                       ))}
                     </Stack>
                   </MuiBox>
 
                   {/* Color */}
-                  {!isDefault && (
-                    <MuiBox sx={{ mt: 3 }}>
+                  <MuiBox sx={{ mt: 3 }}>
                       <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
                       <Stack spacing={1.5}>
                         {COLOR_GROUPS.map((group) => (
@@ -190,7 +189,6 @@ export function BoxShowcase() {
                         ))}
                       </Stack>
                     </MuiBox>
-                  )}
 
                   {/* Padding */}
                   <MuiBox sx={{ mt: 3 }}>

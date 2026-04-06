@@ -34,11 +34,11 @@ import { Box } from '@mui/material';
  */
 
 const SOLID_THEME_MAP = {
-  primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary',
+  default: 'Default', primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
   info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
 };
 const LIGHT_THEME_MAP = {
-  primary: 'Primary-Light', secondary: 'Secondary-Light', tertiary: 'Tertiary-Light',
+  default: 'Default', primary: 'Primary-Light', secondary: 'Secondary-Light', tertiary: 'Tertiary-Light', neutral: 'Neutral-Light',
   info: 'Info-Light', success: 'Success-Light', warning: 'Warning-Light', error: 'Error-Light',
 };
 // Dark uses same theme map as solid — difference is the surface level
