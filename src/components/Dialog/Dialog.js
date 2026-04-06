@@ -58,7 +58,7 @@ const TRANSITION_MAP = {
 
 /* ─── Styled tokens ─── */
 const paperSx = {
-  backgroundColor: 'var(--Container)',
+  backgroundColor: 'var(--Background)',
   color: 'var(--Text)',
   border: '1px solid var(--Border)',
   borderRadius: 'var(--Style-Border-Radius)',
