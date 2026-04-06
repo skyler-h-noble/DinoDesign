@@ -1,42 +1,34 @@
 // src/components/Toolbar/Toolbar.js
 import React, { useState, useCallback } from 'react';
 import { Box } from '@mui/material';
+import { Button } from '../Button/Button';
+import { Icon } from '../Icon/Icon';
 
 /**
  * Toolbar Component
  *
- * THEME: data-surface="Surface", data-theme per barColor:
- *   default → Nav-Bar, primary → Primary, primary-light → Primary-Light,
- *   primary-medium → Primary-Medium, primary-dark → Primary-Dark,
- *   white → Neutral, black → Neutral-Dark
+ * TYPES:
+ *   floating     — pill shape (borderRadius 56px), padding 16px, shadow Level-2
+ *   contextual   — standard border-radius, padding 8px, no shadow
  *
- * MODES:
- *   icon     Icon button toolbar (toggle selection)
- *   basic    Two action buttons: outlined (left) + solid (right)
+ * COLORS: default | primary | primary-light | white | black
+ *   default → data-theme="Default"
+ *   primary → data-theme="Primary"
+ *   primary-light → data-theme="Primary-Light"
+ *   white → data-theme="White"
+ *   black → data-theme="Black"
  *
- * ICON MODE:
- *   Selected:   bg var(--Buttons-Default-Button), icon var(--Buttons-Default-Text),
- *               border 1px solid var(--Buttons-Default-Border)
- *   Unselected: icon var(--Text-Quiet), bg transparent
- *   Hover: var(--Hover), Active: var(--Active)
- *
- * BASIC MODE:
- *   Left:  bg transparent, border 1px solid var(--Buttons-Default-Border), text var(--Text)
- *   Right: bg var(--Buttons-Default-Button), text var(--Buttons-Default-Text),
- *          border 1px solid var(--Buttons-Default-Border)
+ * FAB: optional FAB button positioned to the right of the floating toolbar
  *
  * ORIENTATION: horizontal | vertical
- * FAB/SPEEDDIAL: optional — shown when ≤4 icon items
  */
 
-const BAR_THEME_MAP = {
-  default: 'Nav-Bar',
+const THEME_MAP = {
+  default: 'Default',
   primary: 'Primary',
   'primary-light': 'Primary-Light',
-  'primary-medium': 'Primary-Medium',
-  'primary-dark': 'Primary-Dark',
-  white: 'Neutral',
-  black: 'Neutral-Dark',
+  white: 'White',
+  black: 'Black',
 };
 
 export function Toolbar({
@@ -44,12 +36,10 @@ export function Toolbar({
   value: controlledValue,
   defaultValue,
   onChange,
-  mode = 'icon',
+  type = 'floating',
   orientation = 'horizontal',
-  barColor = 'default',
+  color = 'default',
   fab,
-  basicLeft,
-  basicRight,
   className = '',
   sx = {},
   ...props
@@ -64,152 +54,74 @@ export function Toolbar({
     onChange?.(next);
   }, [isControlled, activeIndex, onChange]);
 
-  const dataTheme = BAR_THEME_MAP[barColor] || BAR_THEME_MAP.default;
+  const dataTheme = THEME_MAP[color] || THEME_MAP.default;
   const isVertical = orientation === 'vertical';
-  const isBasic = mode === 'basic';
+  const isFloating = type === 'floating';
 
-  return (
+  const toolbar = (
     <Box
       role="toolbar"
       aria-orientation={orientation}
       aria-label="Toolbar"
       data-theme={dataTheme}
       data-surface="Surface"
-      className={'toolbar toolbar-' + mode + ' toolbar-' + orientation +
-        ' toolbar-' + barColor +
-        (className ? ' ' + className : '')}
+      className={'toolbar toolbar-' + type + ' toolbar-' + orientation + ' toolbar-' + color + ' ' + className}
       sx={{
         display: 'inline-flex',
         flexDirection: isVertical ? 'column' : 'row',
         alignItems: 'center',
-        gap: isBasic ? 1 : 0.5,
+        gap: '4px',
         backgroundColor: 'var(--Background)',
-        border: '1px solid var(--Border)',
-        borderRadius: isVertical ? '999px' : 'var(--Style-Border-Radius)',
-        padding: isBasic ? '6px 8px' : '6px',
+        border: '1px solid var(--Border-Variant)',
+        borderRadius: isFloating ? '56px' : 'var(--Style-Border-Radius)',
+        padding: isFloating ? '8px 16px' : '8px',
         fontFamily: 'inherit',
         flexShrink: 0,
+        ...(isFloating && { boxShadow: 'var(--Effect-Level-2)' }),
         ...sx,
       }}
       {...props}
     >
-      {isBasic ? (
-        /* ─── Basic mode: two action buttons ─── */
-        <>
-          {/* Left — outlined */}
-          <Box
-            component="button" type="button"
-            onClick={basicLeft?.onClick}
-            aria-label={basicLeft?.label || 'Back'}
-            sx={{
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              gap: '6px',
-              height: 36, px: 2,
-              borderRadius: 'var(--Style-Border-Radius)',
-              backgroundColor: 'transparent',
-              border: '1px solid var(--Buttons-Default-Border)',
-              color: 'var(--Text)',
-              fontSize: '14px', fontFamily: 'inherit', fontWeight: 600,
-              cursor: 'pointer', outline: 'none',
-              transition: 'background-color 0.15s ease',
-              '&:hover': { backgroundColor: 'var(--Hover)' },
-              '&:active': { backgroundColor: 'var(--Active)' },
-              '&:focus-visible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '2px' },
-              '& .MuiSvgIcon-root': { fontSize: 18 },
-            }}
+      {items.map((item, index) => {
+        const isSelected = activeIndex === index;
+        return (
+          <Button
+            key={item.key || index}
+            iconOnly
+            variant={isSelected ? 'default' : 'ghost'}
+            size="small"
+            onClick={() => handleSelect(index)}
+            aria-label={item.label}
+            aria-checked={isSelected}
+            role="radio"
           >
-            {basicLeft?.icon}
-            {basicLeft?.label || 'Back'}
-          </Box>
-
-          {/* Right — solid */}
-          <Box
-            component="button" type="button"
-            onClick={basicRight?.onClick}
-            aria-label={basicRight?.label || 'Next'}
-            sx={{
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              gap: '6px',
-              height: 36, px: 2,
-              borderRadius: 'var(--Style-Border-Radius)',
-              backgroundColor: 'var(--Buttons-Default-Button)',
-              border: '1px solid var(--Buttons-Default-Border)',
-              color: 'var(--Buttons-Default-Text)',
-              fontSize: '14px', fontFamily: 'inherit', fontWeight: 600,
-              cursor: 'pointer', outline: 'none',
-              transition: 'background-color 0.15s ease',
-              '&:hover': { backgroundColor: 'var(--Hover)' },
-              '&:active': { backgroundColor: 'var(--Active)' },
-              '&:focus-visible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '2px' },
-              '& .MuiSvgIcon-root': { fontSize: 18 },
-            }}
-          >
-            {basicRight?.label || 'Next'}
-            {basicRight?.icon}
-          </Box>
-        </>
-      ) : (
-        /* ─── Icon mode: toggleable icon buttons + optional FAB ─── */
-        <>
-          {items.map((item, index) => {
-            const isSelected = activeIndex === index;
-            return (
-              <Box
-                key={item.key || index}
-                component="button" type="button"
-                role="radio"
-                aria-checked={isSelected}
-                aria-label={item.label}
-                onClick={() => handleSelect(index)}
-                sx={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  width: 40, height: 40,
-                  borderRadius: '50%',
-                  backgroundColor: isSelected ? 'var(--Buttons-Default-Button)' : 'transparent',
-                  border: isSelected ? '1px solid var(--Buttons-Default-Border)' : '1px solid transparent',
-                  color: isSelected ? 'var(--Buttons-Default-Text)' : 'var(--Text-Quiet)',
-                  cursor: 'pointer', outline: 'none',
-                  flexShrink: 0,
-                  transition: 'background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease',
-                  '&:hover': !isSelected ? { backgroundColor: 'var(--Hover)' } : {},
-                  '&:active': !isSelected ? { backgroundColor: 'var(--Active)' } : {},
-                  '&:focus-visible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '2px' },
-                  '& .MuiSvgIcon-root': { fontSize: 24 },
-                }}
-              >
-                {item.icon}
-              </Box>
-            );
-          })}
-
-          {/* FAB slot */}
-          {fab && (
-            <Box
-              component="button" type="button"
-              aria-label={fab.label || 'Action'}
-              onClick={fab.onClick}
-              sx={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                width: 40, height: 40,
-                borderRadius: '50%',
-                backgroundColor: 'var(--Buttons-Default-Button)',
-                border: '1px solid var(--Buttons-Default-Border)',
-                color: 'var(--Buttons-Default-Text)',
-                cursor: 'pointer', outline: 'none', flexShrink: 0,
-                transition: 'background-color 0.15s ease',
-                '&:hover': { backgroundColor: 'var(--Hover)' },
-                '&:active': { backgroundColor: 'var(--Active)' },
-                '&:focus-visible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '2px' },
-                '& .MuiSvgIcon-root': { fontSize: 24 },
-              }}
-            >
-              {fab.icon}
-            </Box>
-          )}
-        </>
-      )}
+            <Icon size="small" sx={{ color: 'inherit' }}>{item.icon}</Icon>
+          </Button>
+        );
+      })}
     </Box>
   );
+
+  // With FAB: toolbar + FAB side by side
+  if (fab && isFloating) {
+    return (
+      <Box sx={{ display: 'inline-flex', flexDirection: isVertical ? 'column' : 'row', alignItems: 'center', gap: 1 }}>
+        {toolbar}
+        <Button
+          iconOnly
+          variant="default"
+          size="large"
+          onClick={fab.onClick}
+          aria-label={fab.label || 'Action'}
+          sx={{ borderRadius: '50%', width: 56, height: 56, minWidth: 'unset', minHeight: 'unset' }}
+        >
+          <Icon size="medium" sx={{ color: 'inherit' }}>{fab.icon}</Icon>
+        </Button>
+      </Box>
+    );
+  }
+
+  return toolbar;
 }
 
 export default Toolbar;
