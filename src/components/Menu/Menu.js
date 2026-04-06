@@ -98,7 +98,10 @@ export function MenuButton({ children, className = '', sx = {}, ...props }) {
       }}
       {...props}
     >
-      {children}
+      {typeof children === 'string' ? (
+        size === 'small' ? <BodySmall style={{ color: 'inherit', fontWeight: 600 }}>{children}</BodySmall>
+          : <Body style={{ color: 'inherit', fontWeight: 600 }}>{children}</Body>
+      ) : children}
       <Icon size="small" sx={{ color: 'var(--Quiet)', transition: 'transform 0.2s ease', transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}>
         <ExpandMoreIcon />
       </Icon>

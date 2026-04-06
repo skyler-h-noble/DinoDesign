@@ -1,6 +1,7 @@
 // src/components/Stepper/Stepper.js
 import React, { createContext, useContext } from 'react';
 import { Box } from '@mui/material';
+import { BodySmall, Caption } from '../Typography';
 
 /**
  * Stepper Component
@@ -25,8 +26,10 @@ import { Box } from '@mui/material';
  * DASHED: incomplete connector paths rendered dashed
  */
 
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
 const COLOR_LABEL_MAP = {
-  primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
+  default: 'Default', primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
   info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
 };
 
@@ -264,22 +267,20 @@ export function Step({
         flexShrink: 0,
       }}>
         {indicatorEl}
-        {displayLabel && (
-          <Box
-            className="step-label"
-            sx={{
-              fontSize: s.labelFontSize,
-              fontFamily: 'inherit',
+        {displayLabel && (() => {
+          const LabelComp = size === 'small' ? Caption : BodySmall;
+          return (
+            <LabelComp style={{
               fontWeight: isActive ? 600 : 400,
-              color: (isActive || isCompleted) ? 'var(--Text)' : 'var(--Text-Quiet)',
+              color: (isActive || isCompleted) ? 'var(--Text)' : 'var(--Quiet)',
               textAlign: isHorizontal ? 'center' : 'left',
               whiteSpace: 'nowrap',
               lineHeight: 1.3,
-            }}
-          >
-            {displayLabel}
-          </Box>
-        )}
+            }}>
+              {displayLabel}
+            </LabelComp>
+          );
+        })()}
       </Box>
 
       {/* Connector */}
