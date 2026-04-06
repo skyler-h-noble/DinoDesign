@@ -4,8 +4,9 @@ export {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  DefaultAccordionGroup,
   SolidAccordionGroup,
+  LightAccordionGroup,
+  DarkAccordionGroup,
 } from './Accordion';
 
 export { AccordionShowcase } from './AccordionShowcase';
