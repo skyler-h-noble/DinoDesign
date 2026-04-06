@@ -1,6 +1,7 @@
 // src/components/Breadcrumbs/Breadcrumbs.js
 import React, { Children, isValidElement } from 'react';
 import { Box } from '@mui/material';
+import { BodySmall, Caption } from '../Typography';
 
 /**
  * Breadcrumbs Component
@@ -59,7 +60,7 @@ export function Breadcrumbs({
           display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
           background: 'none', border: 'none', padding: '2px 4px',
           cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit',
-          color: 'var(--Text-Quiet)', borderRadius: '4px',
+          color: 'var(--Quiet)', borderRadius: '4px',
           '&:hover': { backgroundColor: 'var(--Hover)', color: 'var(--Text)' },
           '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '1px' },
         }}
@@ -80,7 +81,7 @@ export function Breadcrumbs({
       className="breadcrumb-separator"
       sx={{
         display: 'inline-flex', alignItems: 'center',
-        color: 'var(--Text-Quiet)', userSelect: 'none',
+        color: 'var(--Quiet)', userSelect: 'none',
         fontSize: 'inherit', lineHeight: 1, flexShrink: 0,
       }}
     >
@@ -103,7 +104,7 @@ export function Breadcrumbs({
         sx={{
           display: 'inline-flex', alignItems: 'center',
           ...(isLast && { color: 'var(--Text)', fontWeight: 600 }),
-          ...(!isLast && { color: 'var(--Text-Quiet)' }),
+          ...(!isLast && { color: 'var(--Quiet)' }),
           // Truncate long crumbs
           maxWidth: '200px',
           '& > *': { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
