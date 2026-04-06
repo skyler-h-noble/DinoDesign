@@ -480,11 +480,11 @@ export function CardShowcase() {
               <TabPanel value={1}>
                 <Box sx={{ p: 3 }}>
                   <BodySmall color="quiet" style={{ marginBottom: 24 }}>
-                    {variant} / {!isDefault ? color + ' / ' : ''}{size} / {orientation}
+                    {variant} / {color} / {size} / {orientation}
                     {clickable ? ' / clickable' : ''}
                     {selected ? ' / selected' : ''}
                     {elevated ? ' / elevated' : ''}
-                    {!isDefault ? ' — data-theme="' + getThemeName() + '"' : ''}
+                    {' — data-theme="' + getThemeName() + '"'}
                     {' — data-surface="' + getSurfaceName() + '"'}
                   </BodySmall>
 
