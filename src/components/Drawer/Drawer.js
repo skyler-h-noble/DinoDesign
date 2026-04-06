@@ -1,43 +1,31 @@
 // src/components/Drawer/Drawer.js
 import React, { useEffect, useRef, useCallback } from 'react';
 import { Box } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import { Button } from '../Button/Button';
+import { Icon } from '../Icon/Icon';
+import { useDynoDesign } from '../../DynoDesignProvider';
 
 /**
  * Drawer Component
  *
  * A navigation panel that slides in from an edge of the viewport.
+ * No color prop — content (TreeView, nav items, etc.) handles its own theming.
  *
- * VARIANTS:
- *   standard  No data-theme. bg: var(--Background), border: var(--Border).
- *   solid     data-theme={Color}. bg: var(--Background), border: var(--Border).
- *   light     data-theme={Color}-Light. bg: var(--Background), border: var(--Border).
- *
- * SIZES: small | medium | large  — controls width (left/right) or height (top/bottom)
+ * SIZES: small (240px) | medium (320px) | large (420px)
  * ANCHOR: left | right | top | bottom
- * BORDER: var(--Border) on the edge opposite the anchor
  *
- * Uses a backdrop overlay. Closes on Escape, backdrop click, or close button.
+ * The drawer inherits the provider's theme context and uses Surface-Dim
+ * for the background, matching the sidebar pattern.
+ *
+ * Closes on Escape, backdrop click, or close button.
  * Focus is trapped within the drawer while open.
  */
-
-const SOLID_THEME_MAP = {
-  primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
-  info: 'Info-Medium', success: 'Success-Medium', warning: 'Warning-Medium', error: 'Error-Medium',
-};
-const LIGHT_THEME_MAP = {
-  primary: 'Primary-Light', secondary: 'Secondary-Light', tertiary: 'Tertiary-Light', neutral: 'Neutral-Light',
-  info: 'Info-Light', success: 'Success-Light', warning: 'Warning-Light', error: 'Error-Light',
-};
 
 const SIZE_DIMENSION = {
   small:  { width: '240px', height: '200px' },
   medium: { width: '320px', height: '280px' },
   large:  { width: '420px', height: '380px' },
-};
-const SIZE_PADDING = {
-  small:  '12px',
-  medium: '16px',
-  large:  '24px',
 };
 
 const BORDER_EDGE = {
@@ -61,13 +49,10 @@ const SLIDE_CLOSED = {
   bottom: 'translateY(100%)',
 };
 
-/* ─── Drawer ─── */
 export function Drawer({
   children,
   open = false,
   onClose,
-  variant = 'standard',
-  color = 'primary',
   size = 'medium',
   anchor = 'left',
   hideBackdrop = false,
@@ -77,27 +62,20 @@ export function Drawer({
 }) {
   const drawerRef = useRef(null);
   const previousFocus = useRef(null);
-
-  const isStandard = variant === 'standard';
-  const isSolid = variant === 'solid';
-  const isLight = variant === 'light';
   const isHorizontal = anchor === 'left' || anchor === 'right';
 
-  const dataTheme = isSolid
-    ? SOLID_THEME_MAP[color]
-    : isLight
-      ? LIGHT_THEME_MAP[color]
-      : null;
+  // Get provider theme for the portal
+  let dynoCtx;
+  try { dynoCtx = useDynoDesign(); } catch { dynoCtx = null; }
+  const providerTheme = dynoCtx?.theme || 'Default';
+  const providerStyle = dynoCtx?.style || 'Modern';
 
   const dim = SIZE_DIMENSION[size] || SIZE_DIMENSION.medium;
-  const pad = SIZE_PADDING[size] || SIZE_PADDING.medium;
 
   // Escape closes
   useEffect(() => {
     if (!open) return;
-    const handler = (e) => {
-      if (e.key === 'Escape') onClose?.();
-    };
+    const handler = (e) => { if (e.key === 'Escape') onClose?.(); };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [open, onClose]);
@@ -106,7 +84,6 @@ export function Drawer({
   useEffect(() => {
     if (open) {
       previousFocus.current = document.activeElement;
-      // Focus first focusable element inside drawer
       requestAnimationFrame(() => {
         const focusable = drawerRef.current?.querySelector(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
@@ -152,13 +129,10 @@ export function Drawer({
       {/* Backdrop */}
       {!hideBackdrop && (
         <Box
-          className="drawer-backdrop"
           onClick={() => onClose?.()}
           aria-hidden="true"
           sx={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 1299,
+            position: 'fixed', inset: 0, zIndex: 10000000,
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
             transition: 'opacity 0.3s ease',
           }}
@@ -171,16 +145,14 @@ export function Drawer({
         role="dialog"
         aria-modal="true"
         tabIndex={-1}
-        data-theme={dataTheme || undefined}
+        data-theme={providerTheme}
+        data-style={providerStyle}
+        data-surface="Surface-Dim"
         onKeyDown={handleKeyDown}
-        className={
-          'drawer drawer-' + variant + ' drawer-' + size + ' drawer-' + anchor
-          + (isSolid || isLight ? ' drawer-' + color : '')
-          + ' ' + className
-        }
+        className={'drawer drawer-' + size + ' drawer-' + anchor + ' ' + className}
         sx={{
           position: 'fixed',
-          zIndex: 1300,
+          zIndex: 10000001,
           ...POSITION_MAP[anchor],
           ...(isHorizontal
             ? { width: dim.width, height: '100%' }
@@ -188,7 +160,7 @@ export function Drawer({
           backgroundColor: 'var(--Background)',
           color: 'var(--Text)',
           ...BORDER_EDGE[anchor],
-          boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+          boxShadow: 'var(--Effect-Level-3)',
           display: 'flex',
           flexDirection: 'column',
           outline: 'none',
@@ -209,68 +181,24 @@ export function Drawer({
 }
 
 /* ─── DrawerClose ─── */
-export function DrawerClose({
-  onClick,
-  className = '',
-  sx = {},
-  ...props
-}) {
+export function DrawerClose({ onClick, className = '', sx = {}, ...props }) {
   return (
-    <Box
-      component="button"
-      aria-label="Close drawer"
-      onClick={onClick}
-      className={'drawer-close ' + className}
-      sx={{
-        position: 'absolute',
-        top: '12px',
-        right: '12px',
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '32px',
-        height: '32px',
-        borderRadius: '50%',
-        border: 'none',
-        backgroundColor: 'transparent',
-        color: 'var(--Text)',
-        cursor: 'pointer',
-        fontSize: '18px',
-        lineHeight: 1,
-        fontFamily: 'inherit',
-        transition: 'background-color 0.15s ease',
-        '&:hover': { backgroundColor: 'var(--Hover)' },
-        '&:active': { backgroundColor: 'var(--Active)' },
-        '&:focus-visible': {
-          outline: '3px solid var(--Focus-Visible)',
-          outlineOffset: '-3px',
-        },
-        ...sx,
-      }}
-      {...props}
-    >
-      ✕
+    <Box sx={{ position: 'absolute', top: '12px', right: '12px', zIndex: 1, ...sx }} className={className} {...props}>
+      <Button iconOnly variant="ghost" size="small" onClick={onClick} aria-label="Close drawer">
+        <Icon size="small"><CloseIcon /></Icon>
+      </Button>
     </Box>
   );
 }
 
 /* ─── DrawerHeader ─── */
-export function DrawerHeader({
-  children,
-  className = '',
-  sx = {},
-  ...props
-}) {
+export function DrawerHeader({ children, className = '', sx = {}, ...props }) {
   return (
     <Box
       className={'drawer-header ' + className}
       sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '16px',
-        borderBottom: '1px solid var(--Border)',
-        flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '16px', borderBottom: '1px solid var(--Border)', flexShrink: 0,
         ...sx,
       }}
       {...props}
@@ -281,21 +209,11 @@ export function DrawerHeader({
 }
 
 /* ─── DrawerContent ─── */
-export function DrawerContent({
-  children,
-  className = '',
-  sx = {},
-  ...props
-}) {
+export function DrawerContent({ children, className = '', sx = {}, ...props }) {
   return (
     <Box
       className={'drawer-content ' + className}
-      sx={{
-        flex: 1,
-        overflowY: 'auto',
-        padding: '16px',
-        ...sx,
-      }}
+      sx={{ flex: 1, overflowY: 'auto', padding: '16px', ...sx }}
       {...props}
     >
       {children}

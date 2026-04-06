@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Box } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import { Icon } from '../Icon/Icon';
-import { BodySmall, Caption } from '../Typography';
+import { ButtonSmall, Button as ButtonTypography, BodyLarge } from '../Typography';
 
 /**
  * Avatar Component
@@ -58,7 +58,8 @@ export function Avatar({
   const isFallback = !hasSrc && !hasInitials;
   const isClickable = clickable || !!onClick;
 
-  const bg = hasSrc ? 'transparent' : 'var(--Buttons-' + C + '-Border)';
+  const bg = hasSrc ? 'transparent' : 'var(--Buttons-' + C + '-Button)';
+  const borderColor = 'var(--Buttons-' + C + '-Border)';
   const textColor = 'var(--Buttons-' + C + '-Text)';
 
   const component = isClickable ? 'button' : 'div';
@@ -85,9 +86,9 @@ export function Avatar({
         fontFamily: 'inherit', fontWeight: 600,
         overflow: 'hidden',
         flexShrink: 0,
+        border: '1px solid ' + borderColor,
         // Button reset
         ...(isClickable && {
-          border: '2px solid var(--Buttons-Default-Border)',
           cursor: 'pointer',
           outline: 'none',
           padding: 0,
@@ -95,9 +96,6 @@ export function Avatar({
           '&:hover': { backgroundColor: hasSrc ? 'rgba(0,0,0,0.08)' : 'var(--Buttons-Default-Hover)' },
           '&:active': { backgroundColor: hasSrc ? 'rgba(0,0,0,0.15)' : 'var(--Buttons-Default-Active)' },
           '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px' },
-        }),
-        ...(!isClickable && {
-          border: 'none',
         }),
         ...sx,
       }}
@@ -116,13 +114,16 @@ export function Avatar({
           }}
         />
       )}
-      {hasInitials && (
-        <Caption style={{ color: 'inherit', fontWeight: 600, lineHeight: 1 }} aria-hidden="true">
-          {initials.slice(0, 2).toUpperCase()}
-        </Caption>
-      )}
+      {hasInitials && (() => {
+        const TextComp = size === 'small' ? ButtonSmall : size === 'large' ? BodyLarge : ButtonTypography;
+        return (
+          <TextComp style={{ color: 'inherit', fontWeight: 600, lineHeight: 1 }} aria-hidden="true">
+            {initials.slice(0, 2).toUpperCase()}
+          </TextComp>
+        );
+      })()}
       {isFallback && (
-        <Icon size={size === 'large' ? 'medium' : 'small'} sx={{ color: 'inherit' }}>
+        <Icon size={size} sx={{ color: 'inherit' }}>
           <PersonIcon />
         </Icon>
       )}
