@@ -1,6 +1,7 @@
 // src/components/Tabs/Tabs.js
 import React, { createContext, useContext, useState, useRef, useCallback, useId, useEffect } from 'react';
 import { Box } from '@mui/material';
+import { BodySmall, Caption } from '../Typography';
 
 /**
  * Tabs Component Suite
@@ -31,18 +32,19 @@ import { Box } from '@mui/material';
  * ICON ONLY: tabs show only icon, no text
  */
 
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
 const SOLID_THEME_MAP = {
-  primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary',
-  white: 'White', black: 'Black',
-  info: 'Info-Medium', success: 'Success-Medium', warning: 'Warning-Medium', error: 'Error-Medium',
+  default: 'Default', primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
+  info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
 };
 const LIGHT_THEME_MAP = {
-  primary: 'Primary-Light', secondary: 'Secondary-Light', tertiary: 'Tertiary-Light',
+  default: 'Default', primary: 'Primary-Light', secondary: 'Secondary-Light', tertiary: 'Tertiary-Light', neutral: 'Neutral-Light',
   info: 'Info-Light', success: 'Success-Light', warning: 'Warning-Light', error: 'Error-Light',
 };
 const DARK_THEME_MAP = {
-  primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary',
-  info: 'Info-Medium', success: 'Success-Medium', warning: 'Warning-Medium', error: 'Error-Medium',
+  default: 'Default', primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
+  info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
 };
 
 const SIZE_MAP = {
@@ -400,7 +402,7 @@ export function Tab({
         fontFamily: 'inherit',
         fontWeight: isSelected ? 600 : 400,
         lineHeight: 1.3,
-        color: isSelected ? 'var(--Text)' : 'var(--Text-Quiet)',
+        color: isSelected ? 'var(--Text)' : 'var(--Quiet)',
         backgroundColor: 'transparent',
         border: 'none',
         borderBottom: isHorizontal
@@ -455,9 +457,10 @@ export function Tab({
           {startDecorator}
         </Box>
       )}
-      {!iconOnly && children && (
-        <Box component="span" className="tab-label">{children}</Box>
-      )}
+      {!iconOnly && children && (() => {
+        const LabelComp = size === 'small' ? Caption : BodySmall;
+        return <LabelComp style={{ color: 'inherit', fontWeight: 'inherit' }}>{children}</LabelComp>;
+      })()}
       {endDecorator && (
         <Box
           className="tab-end-decorator"
