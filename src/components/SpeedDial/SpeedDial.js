@@ -3,29 +3,24 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Box, Tooltip as MuiTooltip } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
+import { Icon } from '../Icon/Icon';
 
 /**
  * SpeedDial Component
  *
- * A floating action button that reveals 3–6 related actions.
+ * VARIANTS:
+ *   solid     FAB + actions: bg var(--Buttons-{C}-Button), border var(--Buttons-{C}-Border)
+ *   outline   FAB + actions: bg transparent, border var(--Buttons-{C}-Border)
  *
- * VARIANTS (FAB + action buttons):
- *   solid   FAB: bg --Buttons-{C}-Button, text --Buttons-{C}-Text, border --Buttons-{C}-Border
- *           Actions: bg --Buttons-{C}-Button, text --Buttons-{C}-Text
- *   light   FAB: bg --Buttons-{C}-Light-Button, text --Buttons-{C}-Light-Text, border --Buttons-{C}-Light-Border
- *           Actions: bg --Buttons-{C}-Light-Button, text --Buttons-{C}-Light-Text
+ * COLORS: default | primary | secondary | tertiary | neutral | info | success | warning | error
  *
- * DIRECTION: up (default), down, left, right
- * SPEED: Stagger delay per action in ms (default 50)
+ * DIRECTION: up | down | left | right
  * TOOLTIPS: Optional labels shown beside actions
  *
  * Accessibility: role="menu", FAB has aria-expanded/aria-haspopup, actions are role="menuitem"
  */
 
-const COLOR_MAP = {
-  primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
-  info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
-};
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 const FAB_SIZE = 56;
 const ACTION_SIZE = 40;
@@ -34,7 +29,7 @@ const GAP = 12;
 export function SpeedDial({
   actions = [],
   variant = 'solid',
-  color = 'primary',
+  color = 'default',
   direction = 'up',
   speed = 50,
   showTooltips = true,
@@ -53,15 +48,13 @@ export function SpeedDial({
   const isOpen = isControlled ? controlledOpen : internalOpen;
   const containerRef = useRef(null);
 
-  const C = COLOR_MAP[color] || 'Primary';
+  const C = cap(color === 'default' ? 'Default' : color);
   const isSolid = variant === 'solid';
 
   // Token references
-  const fabBg = isSolid ? 'var(--Buttons-' + C + '-Button)' : 'var(--Buttons-' + C + '-Light-Button)';
-  const fabText = isSolid ? 'var(--Buttons-' + C + '-Text)' : 'var(--Buttons-' + C + '-Light-Text)';
-  const fabBorder = isSolid ? 'var(--Buttons-' + C + '-Border)' : 'var(--Buttons-' + C + '-Light-Border)';
-  const fabHover = isSolid ? 'var(--Buttons-' + C + '-Hover)' : 'var(--Buttons-' + C + '-Light-Hover)';
-  const fabActive = isSolid ? 'var(--Buttons-' + C + '-Active)' : 'var(--Buttons-' + C + '-Light-Active)';
+  const fabBg = isSolid ? 'var(--Buttons-' + C + '-Button)' : 'transparent';
+  const fabText = isSolid ? 'var(--Buttons-' + C + '-Text)' : 'var(--Buttons-' + C + '-Border)';
+  const fabBorder = 'var(--Buttons-' + C + '-Border)';
 
   const handleToggle = useCallback(() => {
     if (isOpen) {
@@ -107,7 +100,6 @@ export function SpeedDial({
 
   const isVertical = direction === 'up' || direction === 'down';
 
-  // Compute action position offsets
   const getActionOffset = (index) => {
     const distance = FAB_SIZE / 2 + GAP + ACTION_SIZE / 2 + index * (ACTION_SIZE + GAP);
     switch (direction) {
@@ -119,84 +111,42 @@ export function SpeedDial({
     }
   };
 
-  // Tooltip placement
-  const tooltipPlacement = direction === 'up' || direction === 'down'
-    ? 'left'
-    : direction === 'left' ? 'top' : 'top';
+  const tooltipPlacement = direction === 'up' || direction === 'down' ? 'left' : 'top';
 
-  // Container sizing
-  const containerSx = {
-    position: 'relative',
-    display: 'inline-flex',
-    overflow: 'visible',
-    width: isVertical ? FAB_SIZE + 'px' : 'auto',
-    height: isVertical ? 'auto' : FAB_SIZE + 'px',
-    ...sx,
-  };
-
-  const fabSx = {
-    width: FAB_SIZE + 'px',
-    height: FAB_SIZE + 'px',
+  const btnSx = {
     borderRadius: '50%',
     border: '1px solid ' + fabBorder,
     backgroundColor: fabBg,
     color: fabText,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    fontSize: '24px',
-    outline: 'none',
-    position: 'relative',
-    zIndex: 2,
-    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-    transition: 'background-color 0.15s ease, transform 0.2s ease',
-    '&:hover': { backgroundColor: fabHover },
-    '&:active': { backgroundColor: fabActive },
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    cursor: 'pointer', outline: 'none',
+    boxShadow: 'var(--Effect-Level-1)',
+    transition: 'box-shadow 0.15s ease, transform 0.15s ease',
+    '&:hover': { boxShadow: 'var(--Effect-Level-2)' },
     '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px' },
   };
 
-  const actionBtnSx = {
-    width: ACTION_SIZE + 'px',
-    height: ACTION_SIZE + 'px',
-    borderRadius: '50%',
-    border: '1px solid ' + fabBorder,
-    backgroundColor: fabBg,
-    color: fabText,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    fontSize: '20px',
-    outline: 'none',
-    boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
-    transition: 'background-color 0.15s ease, transform 0.15s ease, opacity 0.2s ease',
-    '&:hover': { backgroundColor: fabHover, transform: 'scale(1.1)' },
-    '&:active': { backgroundColor: fabActive },
-    '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px' },
-  };
-
-  const defaultIcon = icon || <AddIcon sx={{ fontSize: 'inherit' }} />;
-  const defaultOpenIcon = openIcon || <CloseIcon sx={{ fontSize: 'inherit' }} />;
+  const defaultIcon = icon || <Icon size="medium" sx={{ color: 'inherit' }}><AddIcon /></Icon>;
+  const defaultOpenIcon = openIcon || <Icon size="medium" sx={{ color: 'inherit' }}><CloseIcon /></Icon>;
 
   return (
     <Box
       ref={containerRef}
       className={'speed-dial speed-dial-' + variant + ' speed-dial-' + color + ' speed-dial-' + direction + ' ' + className}
-      sx={containerSx}
+      sx={{
+        position: 'relative', display: 'inline-flex', overflow: 'visible',
+        width: isVertical ? FAB_SIZE + 'px' : 'auto',
+        height: isVertical ? 'auto' : FAB_SIZE + 'px',
+        ...sx,
+      }}
       {...props}
     >
       {/* FAB */}
       <Box
-        component="button"
-        type="button"
-        role="button"
-        aria-label={ariaLabel}
-        aria-expanded={isOpen}
-        aria-haspopup="menu"
+        component="button" type="button"
+        aria-label={ariaLabel} aria-expanded={isOpen} aria-haspopup="menu"
         onClick={handleToggle}
-        className="speed-dial-fab"
-        sx={fabSx}
+        sx={{ ...btnSx, width: FAB_SIZE, height: FAB_SIZE, position: 'relative', zIndex: 2, fontSize: '24px' }}
       >
         <Box sx={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -208,34 +158,27 @@ export function SpeedDial({
       </Box>
 
       {/* Actions */}
-      <Box
-        role="menu"
-        className="speed-dial-actions"
-        sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none', overflow: 'visible' }}
-      >
+      <Box role="menu" sx={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'visible' }}>
         {actions.map((action, index) => {
           const offset = getActionOffset(index);
           const delay = index * speed;
           const actionEl = (
             <Box
-              component="button"
-              type="button"
-              role="menuitem"
+              component="button" type="button" role="menuitem"
               aria-label={action.name || 'Action ' + (index + 1)}
               onClick={() => handleActionClick(action, index)}
-              className="speed-dial-action"
+              key={action.key || index}
               sx={{
-                ...actionBtnSx,
-                position: 'absolute',
-                ...offset,
+                ...btnSx,
+                width: ACTION_SIZE, height: ACTION_SIZE, fontSize: '20px',
+                position: 'absolute', ...offset,
                 opacity: isOpen ? 1 : 0,
                 transform: isOpen ? 'scale(1)' : 'scale(0.3)',
                 transitionDelay: isOpen ? delay + 'ms' : '0ms',
                 pointerEvents: isOpen ? 'auto' : 'none',
               }}
-              key={action.key || index}
             >
-              {action.icon || <AddIcon sx={{ fontSize: 'inherit' }} />}
+              {action.icon || <Icon size="small" sx={{ color: 'inherit' }}><AddIcon /></Icon>}
             </Box>
           );
 
@@ -248,16 +191,7 @@ export function SpeedDial({
                 arrow
                 open={isOpen ? undefined : false}
                 slotProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: 'var(--Container)',
-                      color: 'var(--Text)',
-                      fontSize: '12px',
-                      fontWeight: 500,
-                      border: '1px solid var(--Border)',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
-                    },
-                  },
+                  tooltip: { sx: { backgroundColor: 'var(--Container)', color: 'var(--Text)', fontSize: '12px', fontWeight: 500, border: '1px solid var(--Border)', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' } },
                   arrow: { sx: { color: 'var(--Container)' } },
                 }}
               >
