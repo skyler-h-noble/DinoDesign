@@ -5,100 +5,82 @@ import { Box } from '@mui/material';
 /**
  * Sheet Component
  *
- * A generic surface container supporting design system variants.
- * Equivalent to MUI Paper but with data-theme integration.
+ * A generic surface container matching Card/Box two-layer structure.
  *
  * VARIANTS:
- *   default   No data-theme. bg: var(--Background), border: var(--Border-Variant).
- *   solid     data-theme={Color}. bg: var(--Background), border: var(--Border).
- *   light     data-theme={Color}-Light. bg: var(--Background), border: var(--Border).
+ *   solid     data-theme="{Theme}" data-surface="Surface"
+ *   light     data-theme="{Theme}-Light" data-surface="Surface"
+ *   dark      data-theme="{Theme}" data-surface="Surface-Dimmest"
  *
- * ALL SHEETS: data-surface="Container"
+ * COLORS: default | primary | secondary | tertiary | neutral | info | success | warning | error
  *
- * PROPS:
- *   variant      default | solid | light
- *   color        primary | secondary | tertiary | neutral | info | success | warning | error
- *   elevation    0 | 1 | 2 | 3  (box-shadow depth)
- *   bordered     boolean (default true — show border)
- *   rounded      boolean (default true — use var(--Style-Border-Radius))
- *   component    HTML element override (default 'div')
+ * STRUCTURE:
+ *   Outer shell — border, border-radius, box-shadow
+ *   Inner content — data-theme + data-surface, background, text
+ *
+ * Shadow: Effect-Level-2 rest, Effect-Level-3 hover
  */
 
-const SOLID_THEME_MAP = {
-  primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
-  info: 'Info-Medium', success: 'Success-Medium', warning: 'Warning-Medium', error: 'Error-Medium',
-};
-const LIGHT_THEME_MAP = {
-  primary: 'Primary-Light', secondary: 'Secondary-Light', tertiary: 'Tertiary-Light', neutral: 'Neutral-Light',
-  info: 'Info-Light', success: 'Success-Light', warning: 'Warning-Light', error: 'Error-Light',
-};
-
-const ELEVATION_MAP = {
-  0: 'none',
-  1: '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
-  2: '0 4px 6px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.04)',
-  3: '0 10px 15px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.04)',
-};
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export function Sheet({
   children,
-  variant = 'default',
-  color = 'primary',
-  elevation = 0,
-  bordered = true,
-  rounded = true,
+  variant = 'solid',
+  color = 'default',
+  elevated = false,
   component = 'div',
   className = '',
   sx = {},
   ...props
 }) {
-  const isDefault = variant === 'default';
-  const isSolid = variant === 'solid';
-  const isLight = variant === 'light';
+  const C = cap(color === 'default' ? 'Default' : color);
 
-  const dataTheme = isSolid
-    ? SOLID_THEME_MAP[color]
-    : isLight
-      ? LIGHT_THEME_MAP[color]
-      : null;
+  const dataTheme = variant === 'light'
+    ? (color === 'default' ? 'Default' : C + '-Light')
+    : C;
 
-  const bg = isDefault ? 'var(--Background)' : 'var(--Background)';
-  const borderColor = isDefault ? 'var(--Border-Variant)' : 'var(--Border)';
+  const dataSurface = variant === 'dark' ? 'Surface-Dimmest' : 'Surface';
+
+  const restShadow = elevated ? 'var(--Effect-Level-3)' : 'var(--Effect-Level-2)';
+  const hoverShadow = elevated ? 'var(--Effect-Level-4)' : 'var(--Effect-Level-3)';
 
   return (
     <Box
       component={component}
-      data-theme={dataTheme || undefined}
-      data-surface="Container"
-      className={
-        'sheet sheet-' + variant
-        + (isSolid || isLight ? ' sheet-' + color : '')
-        + (bordered ? ' sheet-bordered' : '')
-        + (rounded ? ' sheet-rounded' : '')
-        + ' sheet-elevation-' + elevation
-        + ' ' + className
-      }
+      className={'sheet sheet-' + variant + ' sheet-' + color +
+        (elevated ? ' sheet-elevated' : '') +
+        (className ? ' ' + className : '')}
       sx={{
-        backgroundColor: bg,
-        border: bordered ? '1px solid ' + borderColor : 'none',
-        borderRadius: rounded ? 'var(--Style-Border-Radius)' : 0,
-        boxShadow: ELEVATION_MAP[elevation] || 'none',
-        color: 'var(--Text)',
-        padding: 'var(--Card-Padding)',
-        position: 'relative',
+        border: '1px solid var(--Border-Variant)',
+        borderRadius: 'var(--Style-Border-Radius)',
+        boxShadow: restShadow,
         overflow: 'hidden',
+        transition: 'box-shadow 0.2s ease',
+        '&:hover': { boxShadow: hoverShadow },
         ...sx,
       }}
       {...props}
     >
-      {children}
+      <Box
+        data-theme={dataTheme}
+        data-surface={dataSurface}
+        sx={{
+          backgroundColor: 'var(--Background)',
+          color: 'var(--Text)',
+          padding: 'var(--Card-Padding)',
+          borderRadius: 'calc(var(--Style-Border-Radius) - 1px)',
+          fontFamily: 'inherit',
+        }}
+      >
+        {children}
+      </Box>
     </Box>
   );
 }
 
 /* ─── Convenience Exports ─── */
-export const DefaultSheet = (p) => <Sheet variant="default" {...p} />;
-export const SolidSheet   = (p) => <Sheet variant="solid"   {...p} />;
-export const LightSheet   = (p) => <Sheet variant="light"   {...p} />;
+export const SolidSheet = (p) => <Sheet variant="solid" {...p} />;
+export const LightSheet = (p) => <Sheet variant="light" {...p} />;
+export const DarkSheet  = (p) => <Sheet variant="dark"  {...p} />;
 
 export default Sheet;
