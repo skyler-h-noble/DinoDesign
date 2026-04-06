@@ -248,12 +248,8 @@ export function TabList({
         gap: 0,
         position: 'relative',
         backgroundColor: 'var(--Background)',
-        ...(isHorizontal && {
-          borderBottom: '1px solid var(--Border-Variant)',
-        }),
-        ...(!isHorizontal && {
-          borderRight: '1px solid var(--Border-Variant)',
-        }),
+        padding: '4px',
+        borderRadius: 'var(--Style-Border-Radius)',
         ...sx,
       }}
       {...props}
@@ -396,11 +392,11 @@ export function Tab({
         alignItems: 'center',
         justifyContent: 'center',
         gap: s.gap,
-        padding: iconOnly ? s.py + ' ' + s.py : s.py + ' ' + s.px,
+        padding: iconOnly ? 'calc(' + s.py + ' + 4px) ' + s.py + ' ' + s.py : 'calc(' + s.py + ' + 4px) ' + s.px + ' ' + s.py + ' ' + s.px,
         minHeight: s.minHeight,
         fontSize: s.fontSize,
         fontFamily: 'inherit',
-        fontWeight: isSelected ? 600 : 400,
+        fontWeight: 500,
         lineHeight: 1.3,
         color: isSelected ? 'var(--Text)' : 'var(--Quiet)',
         backgroundColor: 'transparent',
@@ -419,23 +415,10 @@ export function Tab({
         flexShrink: 0,
         whiteSpace: 'nowrap',
 
-        // Offset the tab-list border for indicator alignment
-        ...(isHorizontal && {
-          marginBottom: '-1px',
-        }),
-        ...(!isHorizontal && {
-          marginRight: '-1px',
-        }),
 
         ...(!disabled && {
           '&:hover': {
             backgroundColor: 'var(--Hover)',
-            ...(isHorizontal && !isSelected && {
-              borderBottomColor: 'var(--Border-Variant)',
-            }),
-            ...(!isHorizontal && !isSelected && {
-              borderRightColor: 'var(--Border-Variant)',
-            }),
           },
           '&:active': {
             backgroundColor: 'var(--Active)',
