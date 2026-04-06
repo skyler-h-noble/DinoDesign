@@ -51,7 +51,8 @@ const THEME_GROUPS = [
 const ALL_OPTIONS = THEME_GROUPS.flatMap(g => g.options);
 
 const CARD_SURFACES      = ['Surface', 'Surface-Bright', 'Surface-Dim', 'Surface-Dimmest'];
-const CONTAINER_SURFACES = ['Container', 'Container-Low', 'Container-Lowest', 'Container-High', 'Container-Highest'];
+const CONTAINER_SURFACES = ['Container', 'Container-Highest', 'Container-High', 'Container-Low', 'Container-Lowest'];
+const ALL_SURFACES       = [...CARD_SURFACES, ...CONTAINER_SURFACES];
 
 const selectSx = {
   height: 'var(--Button-Height)',
@@ -76,7 +77,7 @@ export function BackgroundPicker({
   onThemeChange,
   surface         = 'Surface',
   onSurfaceChange,
-  surfaces        = CARD_SURFACES,
+  surfaces        = ALL_SURFACES,
 }) {
   const handleThemeSelect = (e) => {
     const raw = e.target.value;
@@ -135,6 +136,6 @@ export function BackgroundPicker({
 }
 
 // Surface option sets exported for use in other showcases
-export { CARD_SURFACES, CONTAINER_SURFACES };
+export { CARD_SURFACES, CONTAINER_SURFACES, ALL_SURFACES };
 
 export default BackgroundPicker;

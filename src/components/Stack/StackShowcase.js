@@ -211,7 +211,7 @@ function Playground() {
       <Grid item xs={12} md={5}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
 
-          <BackgroundPicker value={bgTheme} onChange={setBgTheme} />
+          <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} />
 
           <Box>
             <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>CHILDREN</OverlineSmall>

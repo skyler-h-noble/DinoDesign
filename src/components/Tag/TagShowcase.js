@@ -207,7 +207,7 @@ export function TagShowcase() {
 
                   {/* Background */}
                   <Box sx={{ mb: 3 }}>
-                    <BackgroundPicker value={bgTheme} onChange={setBgTheme} />
+                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} />
                   </Box>
 
                   {/* Color swatches */}

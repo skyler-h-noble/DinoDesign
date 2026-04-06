@@ -5,6 +5,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import * as MuiIcons from '@mui/icons-material';
 import { Button } from './Button';
+import { Icon } from '../Icon/Icon';
 import { Switch } from '../Switch/Switch';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
@@ -160,8 +161,17 @@ export function ButtonShowcase() {
   const [disabled, setDisabled]         = useState(false);
   const [loading, setLoading]           = useState(false);
   const [fullWidth, setFullWidth]       = useState(false);
+  const [swatchColor, setSwatchColor]   = useState('');
   const [contrastData, setContrastData] = useState({});
   const [bgTheme, setBgTheme]           = useState(null);
+
+  // Set default swatch color from primary brand color on mount
+  useEffect(() => {
+    if (!swatchColor) {
+      const primary = getCssVar('--Primary-Color-5');
+      if (primary) setSwatchColor(primary);
+    }
+  }, [swatchColor]);
 
   const isGhost = style === 'ghost';
   const effectiveColor = isGhost ? 'primary' : color;
@@ -182,7 +192,7 @@ export function ButtonShowcase() {
 
   const getIconComponent = () => {
     const IconComp = MuiIcons[iconName] || MuiIcons['Add'];
-    return <IconComp aria-hidden="true" alt="" fontSize="small" />;
+    return <Icon size="small"><IconComp /></Icon>;
   };
 
   const getButtonProps = () => {
@@ -199,6 +209,7 @@ export function ButtonShowcase() {
     }
     if (contentType === 'swatch') {
       p.swatch = true;
+      if (swatchColor) p.swatchColor = swatchColor;
       return p;
     }
     if (contentType === 'letter' || contentType === 'number') {
@@ -218,7 +229,7 @@ export function ButtonShowcase() {
     if (p.iconOnly)    parts.push('iconOnly');
     if (p.letterNumber) parts.push('letterNumber');
     if (p.avatar)      parts.push('avatar');
-    if (p.swatch)      parts.push('swatch');
+    if (p.swatch)      { parts.push('swatch'); if (p.swatchColor) parts.push('swatchColor="' + p.swatchColor + '"'); }
     if (p.elevated)    parts.push('elevated');
     if (p.disabled)    parts.push('disabled');
     if (p.fullWidth)   parts.push('fullWidth');
@@ -294,7 +305,7 @@ export function ButtonShowcase() {
 
                   {/* Background */}
                   <Box sx={{ mb: 3 }}>
-                    <BackgroundPicker value={bgTheme} onChange={setBgTheme} />
+                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} />
                   </Box>
 
                   {/* Style */}
@@ -353,6 +364,18 @@ export function ButtonShowcase() {
                        'Text label with optional icon.'}
                     </Caption>
                   </Box>
+
+                  {/* Swatch color input */}
+                  {contentType === 'swatch' && (
+                    <Box sx={{ mt: 2 }}>
+                      <TextInput
+                        label="Swatch Color (hex)"
+                        value={swatchColor}
+                        onChange={setSwatchColor}
+                        placeholder="#ae8443"
+                      />
+                    </Box>
+                  )}
 
                   {/* Button text input */}
                   {['text', 'letter', 'number', 'avatar'].includes(contentType) && (

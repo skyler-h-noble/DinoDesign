@@ -21,7 +21,6 @@ import { DividerShowcase } from '../components/Divider/DividerShowcase';
 import { TableShowcase } from '../components/Table/TableShowcase';
 import { ListShowcase } from '../components/List/ListShowcase';
 import { TooltipShowcase } from '../components/Tooltip/TooltipShowcase';
-import { ToggleButtonGroupShowcase } from '../components/ToggleButtonGroup/ToggleButtonGroupShowcase';
 import { TypographyShowcase } from '../components/Typography/TypographyShowcase';
 import { AccordionShowcase } from '../components/Accordion/AccordionShowcase';
 import { SheetShowcase } from '../components/Sheet/SheetShowcase';
@@ -60,7 +59,6 @@ import { TagShowcase } from '../components/Tag/TagShowcase';
 
 import {
   Button,
-  ToggleButtonGroup,
   Input,
   Card,
   Paper,
@@ -118,7 +116,6 @@ const NAV_ITEMS = [
       { id: 'buttons', label: 'Button' },
       { id: 'fab', label: 'FAB' },
       { id: 'buttongroup', label: 'Button Group' },
-      { id: 'togglebuttongroup', label: 'Toggle Button Group' },
       { id: 'input', label: 'Input' },
       { id: 'select', label: 'Select' },
       { id: 'autocomplete', label: 'Autocomplete' },
@@ -262,7 +259,6 @@ export function ComponentShowcase() {
             {activeSection === 'buttons' && <ButtonShowcase />}
             {activeSection === 'fab' && <FabShowcase />}
             {activeSection === 'buttongroup' && <ButtonGroupShowcase />}
-            {activeSection === 'togglebuttongroup' && <ToggleButtonGroupShowcase />}
             {activeSection === 'select' && <SelectShowcase />}
             {activeSection === 'autocomplete' && <AutocompleteShowcase />}
             {activeSection === 'checkbox' && <CheckboxShowcase />}

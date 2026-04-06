@@ -7,10 +7,10 @@
   --Small-Button-Height: 24px;
   --Large-Button-Height: 56px;
   --Button-Min-Width: 60px;
-  --Button-Bevel: 10%;
-  --Button-Bevel-Px: 4px;
-  --Button-Bevel-Opacity: 78%;
-  --Button-Bevel-Shadow: inset -4px -4px 4px color-mix(in srgb, var(--Buttons-Default-Highlight, #ffffff) 78%, transparent), inset 4px 4px 4px color-mix(in srgb, var(--Buttons-Default-Lowlight, #000000) 78%, transparent);
+  --Button-Bevel: 0;
+  --Button-Bevel-Px: 0px;
+  --Button-Bevel-Opacity: 0.5;
+  --Button-Bevel-Shadow: none;
   --Style-Border-Radius: var(--Button-Radius);
 
   /* Card */

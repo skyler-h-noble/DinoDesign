@@ -196,10 +196,8 @@ export function ButtonGroup({
     return React.cloneElement(clonedButton, { key: index });
   });
 
-  // ── Container border ──────────────────────────────────────────────────────
-  const containerBorder = isGhost
-    ? 'none'
-    : '1px solid ' + btnBorder;
+  // ── Container — no border on the outer wrapper ──────────────────────────
+  const containerBorder = 'none';
 
   return (
     <Box

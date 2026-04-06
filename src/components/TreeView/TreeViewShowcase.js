@@ -336,7 +336,7 @@ export function TreeViewShowcase() {
 
                   {/* Background */}
                   <Box sx={{ mb: 3 }}>
-                    <BackgroundPicker value={bgTheme} onChange={setBgTheme} />
+                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} />
                   </Box>
 
                   {/* Style */}
