@@ -309,8 +309,8 @@ export function DynoTreeView({
         onItemExpansionToggle={onItemExpansionToggle}
         onItemSelectionToggle={onItemSelectionToggle}
         slots={{
-          expandIcon:   () => <Icon size="small"><ChevronRightIcon /></Icon>,
-          collapseIcon: () => <Icon size="small"><ExpandMoreIcon /></Icon>,
+          expandIcon:   () => <Icon size="small" sx={{ color: 'inherit' }}><ChevronRightIcon /></Icon>,
+          collapseIcon: () => <Icon size="small" sx={{ color: 'inherit' }}><ExpandMoreIcon /></Icon>,
           ...slots,
         }}
         sx={{

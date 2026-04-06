@@ -6,53 +6,37 @@ import { Body, BodySmall } from '../Typography';
 /**
  * Alert Component
  *
- * Displays brief, non-interrupting messages.
- *
  * VARIANTS:
- *   standard  No colors, no border, no data-theme. Plain text on page background.
- *   outline   Colored border: var(--Buttons-{Color}-Border). No data-theme. No fill.
- *   light     Outer border wrapper: var(--Border) (page-level).
- *             Inner: data-theme="{Color}-Light" data-surface="Surface".
- *   solid     Outer border wrapper: var(--Border) (page-level).
- *             Inner: data-theme="{Color}" data-surface="Surface".
+ *   solid     data-theme="{Theme}" data-surface="Surface"
+ *   light     data-theme="{Theme}-Light" data-surface="Surface"
  *
- * The outer border on Light/Solid sits OUTSIDE the themed context so it uses the
- * page-level --Border, not the theme-scoped one.
+ * COLORS: default | primary | secondary | tertiary | neutral | info | success | warning | error
  *
- * COLORS: 8 brand colors (primary–error). Standard ignores color.
- * SIZES:  small (12px text, 8px/12px pad), medium (14px, 12px/16px), large (16px, 14px/20px)
+ * STRUCTURE:
+ *   Outer shell — border var(--Buttons-{C}-Border), border-radius, Effect-Level-3 shadow
+ *   Inner content — data-theme + data-surface, bg var(--Background), color var(--Text)
+ *
+ * SIZES: small | medium | large
  *
  * SLOTS:
  *   startDecorator — icon or avatar before message
  *   endDecorator   — icon, link, or button after message
- *   children       — message content
  *
  * Accessibility: role="alert" for live-region announcement.
  */
 
-const SOLID_THEME_MAP = {
-  primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
-  info: 'Info-Medium', success: 'Success-Medium', warning: 'Warning-Medium', error: 'Error-Medium',
-};
-const LIGHT_THEME_MAP = {
-  primary: 'Primary-Light', secondary: 'Secondary-Light', tertiary: 'Tertiary-Light', neutral: 'Neutral-Light',
-  info: 'Info-Light', success: 'Success-Light', warning: 'Warning-Light', error: 'Error-Light',
-};
-const COLOR_LABEL_MAP = {
-  primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
-  info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
-};
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 const SIZE_MAP = {
-  small:  { px: '12px', py: '8px',  fontSize: '13px', iconSize: '18px', gap: '8px',  borderRadius: 'var(--Style-Border-Radius)' },
-  medium: { px: '16px', py: '12px', fontSize: '14px', iconSize: '20px', gap: '10px', borderRadius: 'var(--Style-Border-Radius)' },
-  large:  { px: '20px', py: '14px', fontSize: '16px', iconSize: '22px', gap: '12px', borderRadius: 'var(--Style-Border-Radius)' },
+  small:  { px: '12px', py: '8px',  fontSize: '13px', iconSize: '18px', gap: '8px' },
+  medium: { px: '16px', py: '12px', fontSize: '14px', iconSize: '20px', gap: '10px' },
+  large:  { px: '20px', py: '14px', fontSize: '16px', iconSize: '22px', gap: '12px' },
 };
 
 export function Alert({
   children,
-  variant = 'standard',
-  color = 'primary',
+  variant = 'light',
+  color = 'info',
   size = 'medium',
   startDecorator,
   endDecorator,
@@ -60,22 +44,16 @@ export function Alert({
   sx = {},
   ...props
 }) {
-  const C = COLOR_LABEL_MAP[color] || 'Primary';
+  const C = cap(color === 'default' ? 'Default' : color);
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
 
-  const isStandard = variant === 'standard';
-  const isOutline = variant === 'outline';
-  const isLight = variant === 'light';
-  const isSolid = variant === 'solid';
-  const isThemed = isLight || isSolid;
+  const dataTheme = variant === 'light'
+    ? (color === 'default' ? 'Default' : C + '-Light')
+    : C;
 
-  const dataTheme = isSolid
-    ? SOLID_THEME_MAP[color]
-    : isLight
-      ? LIGHT_THEME_MAP[color]
-      : null;
+  const dataSurface = 'Surface';
+  const borderToken = 'var(--Buttons-' + C + '-Border)';
 
-  // Inner content shared by all variants
   const innerContent = (
     <>
       {startDecorator && (
@@ -104,82 +82,34 @@ export function Alert({
     </>
   );
 
-  // Shared inner styles (layout, text, padding)
-  const innerSx = {
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: s.gap,
-    padding: s.py + ' ' + s.px,
-    fontSize: s.fontSize,
-    fontFamily: 'inherit',
-    lineHeight: 1.5,
-  };
-
-  // ── Standard: no border, no theme, no background ──
-  if (isStandard) {
-    return (
-      <Box
-        role="alert"
-        className={'alert alert-standard alert-' + size + ' ' + className}
-        sx={{
-          ...innerSx,
-          color: 'var(--Text)',
-          backgroundColor: 'transparent',
-          borderRadius: s.borderRadius,
-          ...sx,
-        }}
-        {...props}
-      >
-        {innerContent}
-      </Box>
-    );
-  }
-
-  // ── Outline: colored border, no theme, no fill ──
-  if (isOutline) {
-    return (
-      <Box
-        role="alert"
-        className={'alert alert-outline alert-' + size + ' alert-' + color + ' ' + className}
-        sx={{
-          ...innerSx,
-          color: 'var(--Text)',
-          backgroundColor: 'transparent',
-          border: '1px solid var(--Buttons-' + C + '-Border)',
-          borderRadius: s.borderRadius,
-          ...sx,
-        }}
-        {...props}
-      >
-        {innerContent}
-      </Box>
-    );
-  }
-
-  // ── Light / Solid: outer border wrapper (page --Border), inner themed area ──
   return (
     <Box
       role="alert"
-      className={
-        'alert alert-' + variant + ' alert-' + size + ' alert-' + color + ' ' + className
-      }
+      className={'alert alert-' + variant + ' alert-' + size + ' alert-' + color + ' ' + className}
       sx={{
-        border: '1px solid var(--Border)',
-        borderRadius: s.borderRadius,
+        border: '1px solid ' + borderToken,
+        borderRadius: 'var(--Style-Border-Radius)',
         overflow: 'hidden',
+        boxShadow: 'var(--Effect-Level-3)',
         ...sx,
       }}
       {...props}
     >
       <Box
         data-theme={dataTheme}
-        data-surface="Surface"
+        data-surface={dataSurface}
         className="alert-inner"
         sx={{
-          ...innerSx,
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: s.gap,
+          padding: s.py + ' ' + s.px,
+          fontSize: s.fontSize,
+          fontFamily: 'inherit',
+          lineHeight: 1.5,
           color: 'var(--Text)',
           backgroundColor: 'var(--Background)',
-          borderRadius: 'inherit',
+          borderRadius: 'calc(var(--Style-Border-Radius) - 1px)',
         }}
       >
         {innerContent}
@@ -187,5 +117,9 @@ export function Alert({
     </Box>
   );
 }
+
+/* ─── Convenience Exports ─── */
+export const SolidAlert = (p) => <Alert variant="solid" {...p} />;
+export const LightAlert = (p) => <Alert variant="light" {...p} />;
 
 export default Alert;
