@@ -154,7 +154,7 @@ export function Step({
         minWidth: s.indicator + 'px',
         minHeight: s.indicator + 'px',
         borderRadius: '50%',
-        border: '1px solid ' + borderToken,
+        border: (isActive ? '2px' : '1px') + ' solid ' + borderToken,
         backgroundColor: bgToken,
         color: textToken,
         fontSize: s.fontSize,
@@ -239,51 +239,63 @@ export function Step({
     />
   ) : null;
 
+  const labelEl = displayLabel ? (() => {
+    const LabelComp = size === 'small' ? Caption : BodySmall;
+    return (
+      <LabelComp style={{
+        fontWeight: isActive ? 600 : 400,
+        color: (isActive || isCompleted) ? 'var(--Text)' : 'var(--Quiet)',
+        textAlign: isHorizontal ? 'center' : 'left',
+        whiteSpace: 'nowrap',
+        lineHeight: 1.3,
+      }}>
+        {displayLabel}
+      </LabelComp>
+    );
+  })() : null;
+
+  if (isHorizontal) {
+    // Horizontal: indicator row (circles + connectors) separate from labels
+    return (
+      <Box
+        component="li"
+        className={'step step-' + size + ' step-horizontal' +
+          (isActive ? ' step-active' : '') + (isCompleted ? ' step-completed' : '') +
+          (isIncomplete ? ' step-incomplete' : '') + ' ' + className}
+        sx={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          flex: !isLast ? 1 : 'none',
+          ...sx,
+        }}
+        {...props}
+      >
+        {/* Indicator + Connector row */}
+        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', flexShrink: 0 }}>
+            {indicatorEl}
+          </Box>
+          {connectorEl}
+        </Box>
+        {/* Label below */}
+        {labelEl && <Box sx={{ mt: '4px' }}>{labelEl}</Box>}
+      </Box>
+    );
+  }
+
+  // Vertical
   return (
     <Box
       component="li"
-      className={
-        'step step-' + size + ' step-' + orientation
-        + (isActive ? ' step-active' : '')
-        + (isCompleted ? ' step-completed' : '')
-        + (isIncomplete ? ' step-incomplete' : '')
-        + ' ' + className
-      }
-      sx={{
-        display: 'flex',
-        flexDirection: isHorizontal ? 'row' : 'column',
-        alignItems: isHorizontal ? 'center' : 'flex-start',
-        flex: isHorizontal && !isLast ? 1 : 'none',
-        ...sx,
-      }}
+      className={'step step-' + size + ' step-vertical' +
+        (isActive ? ' step-active' : '') + (isCompleted ? ' step-completed' : '') +
+        (isIncomplete ? ' step-incomplete' : '') + ' ' + className}
+      sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', ...sx }}
       {...props}
     >
-      {/* Indicator + Label cluster */}
-      <Box sx={{
-        display: 'flex',
-        flexDirection: isHorizontal ? 'column' : 'row',
-        alignItems: 'center',
-        gap: '4px',
-        flexShrink: 0,
-      }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         {indicatorEl}
-        {displayLabel && (() => {
-          const LabelComp = size === 'small' ? Caption : BodySmall;
-          return (
-            <LabelComp style={{
-              fontWeight: isActive ? 600 : 400,
-              color: (isActive || isCompleted) ? 'var(--Text)' : 'var(--Quiet)',
-              textAlign: isHorizontal ? 'center' : 'left',
-              whiteSpace: 'nowrap',
-              lineHeight: 1.3,
-            }}>
-              {displayLabel}
-            </LabelComp>
-          );
-        })()}
+        {labelEl}
       </Box>
-
-      {/* Connector */}
       {connectorEl}
     </Box>
   );

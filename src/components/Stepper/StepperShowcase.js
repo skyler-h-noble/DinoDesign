@@ -21,7 +21,7 @@ const COLOR_GROUPS = [
   { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
 ];
 
-const STEPS = ['Account', 'Details', 'Review', 'Confirm'];
+const STEPS = ['Account', 'Details', 'Review', 'Confirm', 'Complete', 'Done'];
 
 /* ── Helpers ── */
 function CopyButton({ code }) {
@@ -77,6 +77,7 @@ export function StepperShowcase() {
   const [color, setColor]               = useState('default');
   const [size, setSize]                 = useState('medium');
   const [orientation, setOrientation]   = useState('horizontal');
+  const [stepCount, setStepCount]       = useState(4);
   const [activeStep, setActiveStep]     = useState(1);
   const [clickable, setClickable]       = useState(false);
   const [dashed, setDashed]             = useState(false);
@@ -93,7 +94,7 @@ export function StepperShowcase() {
     if (dashed) parts.push('dashedIncomplete');
     return (
       '<Stepper ' + parts.join(' ') + '>\n' +
-      STEPS.map((s) => '  <Step label="' + s + '" />').join('\n') + '\n' +
+      STEPS.slice(0, stepCount).map((s) => '  <Step label="' + s + '" />').join('\n') + '\n' +
       '</Stepper>'
     );
   };
@@ -117,7 +118,7 @@ export function StepperShowcase() {
                 onStepClick={clickable ? setActiveStep : undefined}
                 dashedIncomplete={dashed}
               >
-                {STEPS.map((step) => (
+                {STEPS.slice(0, stepCount).map((step) => (
                   <Step key={step} label={step} />
                 ))}
               </Stepper>
@@ -154,11 +155,22 @@ export function StepperShowcase() {
                     <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
                   </Box>
 
-                  {/* Active Step */}
+                  {/* Steps */}
                   <Box>
+                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STEPS</OverlineSmall>
+                    <Stack direction="row" spacing={1}>
+                      {[2, 3, 4, 5, 6].map((n) => (
+                        <ControlButton key={n} label={String(n)} selected={stepCount === n}
+                          onClick={() => { setStepCount(n); if (activeStep >= n) setActiveStep(n - 1); }} />
+                      ))}
+                    </Stack>
+                  </Box>
+
+                  {/* Active Step */}
+                  <Box sx={{ mt: 3 }}>
                     <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ACTIVE STEP</OverlineSmall>
                     <Stack direction="row" spacing={1}>
-                      {STEPS.map((step, i) => (
+                      {STEPS.slice(0, stepCount).map((step, i) => (
                         <ControlButton key={i} label={String(i + 1)} selected={activeStep === i} onClick={() => setActiveStep(i)} />
                       ))}
                     </Stack>
