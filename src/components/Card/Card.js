@@ -58,8 +58,8 @@ export const useCardContext = () => useContext(CardContext);
 /* --- Card --- */
 export function Card({
   children,
-  variant = 'default',
-  color = 'primary',
+  variant = 'solid',
+  color = 'default',
   size = 'medium',
   orientation = 'vertical',
   clickable = false,
@@ -72,20 +72,15 @@ export function Card({
   sx = {},
   ...props
 }) {
-  const isDefault = variant === 'default';
-  const isDark  = variant === 'dark';
+  const isDark = variant === 'dark';
 
   // Theme for inner content
-  // solid + dark use {Theme}, light uses {Theme}-Light
-  const dataTheme = isDefault
-    ? undefined
-    : variant === 'light'
-      ? LIGHT_THEME_MAP[color]
-      : SOLID_THEME_MAP[color];
+  const dataTheme = variant === 'light'
+    ? LIGHT_THEME_MAP[color]
+    : SOLID_THEME_MAP[color];
 
   // Surface for inner content
-  // solid + light use Surface, dark uses Surface-Dimmest
-  const dataSurface = isDefault ? 'Container' : isDark ? 'Surface-Dimmest' : 'Surface';
+  const dataSurface = isDark ? 'Surface-Dimmest' : 'Surface';
 
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
   const isHorizontal = orientation === 'horizontal';
@@ -95,8 +90,8 @@ export function Card({
 
   // Border color token — selected uses theme-specific border
   const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-  const borderColorToken = selected && !isDefault
-    ? `var(--Buttons-${cap(color === 'default' ? 'default' : color)}-Border, var(--Buttons-Default-Border))`
+  const borderColorToken = selected
+    ? `var(--Buttons-${cap(color === 'default' ? 'Default' : color)}-Border)`
     : 'var(--Buttons-Default-Border)';
 
   const borderStyle = !isClickable

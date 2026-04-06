@@ -163,8 +163,8 @@ function IndentedCheckRow({ label, caption, checked, onChange }) {
 // -- Main showcase --
 
 export function CardShowcase() {
-  const [variant, setVariant]         = useState('default');
-  const [color, setColor]             = useState('primary');
+  const [variant, setVariant]         = useState('solid');
+  const [color, setColor]             = useState('default');
   const [size, setSize]               = useState('medium');
   const [orientation, setOrientation] = useState('vertical');
   const [clickable, setClickable]     = useState(false);
@@ -174,7 +174,6 @@ export function CardShowcase() {
   const [bgSurface, setBgSurface]     = useState('Surface');
   const [contrastData, setContrastData] = useState({});
 
-  const isDefault = variant === 'default';
 
   // Available colors depend on variant
   const availableColors = variant === 'solid' ? SOLID_COLORS
@@ -198,7 +197,7 @@ export function CardShowcase() {
   };
 
   const getSurfaceName = () => {
-    if (isDefault) return 'Container';
+    
     if (variant === 'dark') return 'Surface-Dimmest';
     if (variant === 'light') return 'Surface';
     return 'Surface';
@@ -216,7 +215,7 @@ export function CardShowcase() {
 
   const generateCode = () => {
     const parts = ['variant="' + variant + '"'];
-    if (!isDefault) parts.push('color="' + color + '"');
+    parts.push('color="' + color + '"');
     if (size !== 'medium') parts.push('size="' + size + '"');
     if (orientation !== 'vertical') parts.push('orientation="horizontal"');
     if (clickable) parts.push('clickable');
@@ -259,11 +258,11 @@ export function CardShowcase() {
       // Page background (from the preview surface, reflecting user's bg picker)
       data.pageBg        = getElVar(preview, '--Background');
       data.pageBorder    = getElVar(preview, '--Buttons-Default-Border');
-      data.selectedBorder = getElVar(cardInner, '--Buttons-' + (isDefault ? 'Default' : cap(color)) + '-Border');
+      data.selectedBorder = getElVar(cardInner, '--Buttons-' + cap(color) + '-Border');
       setContrastData(data);
     }, 50);
     return () => clearTimeout(timer);
-  }, [variant, color, bgTheme, bgSurface, clickable, selected, getElVar, isDefault]);
+  }, [variant, color, bgTheme, bgSurface, clickable, selected, getElVar]);
 
   return (
     <Box sx={{ pb: 8 }}>
@@ -277,7 +276,7 @@ export function CardShowcase() {
           <PreviewSurface ref={previewRef} theme={bgTheme} surface={bgSurface}>
             <Box
               ref={cardInnerRef}
-              data-theme={isDefault ? undefined : (variant === 'light' ? LIGHT_THEME_MAP[color] : SOLID_THEME_MAP[color])}
+              data-theme={(variant === 'light' ? LIGHT_THEME_MAP[color] : SOLID_THEME_MAP[color])}
               data-surface={getSurfaceName()}
               sx={{ width: '100%', maxWidth: orientation === 'horizontal' ? 480 : 320 }}
             >
@@ -377,15 +376,14 @@ export function CardShowcase() {
                   <Box>
                     <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</OverlineSmall>
                     <Stack direction="row" spacing={1}>
-                      {['default', 'solid', 'light', 'dark'].map((s) => (
+                      {['solid', 'light', 'dark'].map((s) => (
                         <ControlButton key={s} label={cap(s)} selected={variant === s} onClick={() => handleVariantChange(s)} />
                       ))}
                     </Stack>
                   </Box>
 
                   {/* Color */}
-                  {!isDefault && (
-                    <Box sx={{ mt: 3 }}>
+                  <Box sx={{ mt: 3 }}>
                       <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
                       <Stack spacing={1.5}>
                         {COLOR_GROUPS.map((group) => {
@@ -404,7 +402,6 @@ export function CardShowcase() {
                         })}
                       </Stack>
                     </Box>
-                  )}
 
                   {/* Size */}
                   <Box sx={{ mt: 3 }}>
@@ -453,7 +450,7 @@ export function CardShowcase() {
                     {clickable && (
                       <IndentedCheckRow
                         label="Selected"
-                        caption={'2px border + ring using var(--Buttons-' + (isDefault ? 'Default' : cap(color)) + '-Border). Sets aria-pressed="true".'}
+                        caption={'2px border + ring using var(--Buttons-' + cap(color) + '-Border). Sets aria-pressed="true".'}
                         checked={selected}
                         onChange={setSelected}
                       />
@@ -559,7 +556,7 @@ export function CardShowcase() {
                             label="Selected border vs. page background"
                             ratio={getContrast(contrastData.selectedBorder, contrastData.pageBg)}
                             threshold={3.0}
-                            note={'2px solid var(--Buttons-' + (isDefault ? 'Default' : cap(color)) + '-Border)'}
+                            note={'2px solid var(--Buttons-' + cap(color) + '-Border)'}
                           />
                         )}
                       </Box>
@@ -578,9 +575,7 @@ export function CardShowcase() {
                         <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
                           <BodySmall>Inner content:</BodySmall>
                           <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>
-                            {isDefault
-                              ? 'data-surface="Container" — bg: var(--Background), color: var(--Text)'
-                              : 'data-theme="' + getThemeName() + '" data-surface="' + getSurfaceName() + '"'}
+                            {'data-theme="' + getThemeName() + '" data-surface="' + getSurfaceName() + '"'}
                           </Caption>
                         </Box>
                         <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
@@ -600,7 +595,7 @@ export function CardShowcase() {
                         <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
                           <BodySmall>Selected card:</BodySmall>
                           <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>
-                            {'aria-pressed="true". Border: 2px solid var(--Buttons-' + (isDefault ? 'Default' : cap(color)) + '-Border). Ring matches.'}
+                            {'aria-pressed="true". Border: 2px solid var(--Buttons-' + cap(color) + '-Border). Ring matches.'}
                           </Caption>
                         </Box>
                         <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
