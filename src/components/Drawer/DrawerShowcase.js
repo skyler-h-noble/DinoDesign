@@ -126,7 +126,7 @@ export function DrawerShowcase() {
           </Drawer>
         </Grid>
 
-        <Grid item sx={{ width: { xs: '100%', md: '45%' }, flexShrink: 0 }}>
+        <Grid item sx={{ width: { xs: '100%', md: '45%' }, flexShrink: 0, position: 'sticky', top: 80, alignSelf: 'flex-start', maxHeight: 'calc(100vh - 100px)', overflowY: 'auto' }}>
           <Box sx={{ backgroundColor: 'var(--Background)', overflow: 'hidden' }}>
             <Tabs defaultValue={0} variant="standard" color="primary">
               <TabList>
