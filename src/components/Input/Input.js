@@ -17,7 +17,7 @@ import { Body, BodySmall } from '../Typography';
  * Full-featured text input with complete design system integration
  *
  * --- SURFACE -----------------------------------------------------------------
- *   data-surface="Container-Lowest" on wrapper and input root
+ *   data-surface="Container" on wrapper and input root
  *
  * --- VARIANTS ----------------------------------------------------------------
  *
@@ -63,21 +63,33 @@ function outlineStyles(color) {
   };
 }
 
+function lightStyles(color) {
+  const C = cap(color);
+  return {
+    bg: 'var(--Buttons-' + C + '-Light-Button, var(--Background))',
+    border: 'var(--Buttons-' + C + '-Border)',
+    text: 'var(--Text)',
+    focusBg: 'var(--Buttons-' + C + '-Light-Button, var(--Background))',
+  };
+}
+
 function buildVariantMap() {
   const map = {};
   COLORS.forEach((color) => {
     map[color + '-outline'] = outlineStyles(color);
+    map[color + '-light']   = lightStyles(color);
   });
   map['outline'] = outlineStyles('primary');
+  map['light']   = lightStyles('primary');
   return map;
 }
 
 // --- Sizing ------------------------------------------------------------------
 
 const SIZE_MAP = {
-  small:  { height: '32px',                   fontSize: '13px', labelSize: '13px', padding: '4px 8px',        iconSize: 16 },
-  medium: { height: 'var(--Button-Height)',    fontSize: '15px', labelSize: '15px', padding: '6px 12px',       iconSize: 18 },
-  large:  { height: '56px',                   fontSize: '17px', labelSize: '17px', padding: '8px 16px',       iconSize: 20 },
+  small:  { height: 'var(--Small-Button-Height)', fontSize: '13px', labelSize: '13px', padding: '4px 8px',  iconSize: 16 },
+  medium: { height: 'var(--Button-Height)',        fontSize: '15px', labelSize: '15px', padding: '6px 12px', iconSize: 18 },
+  large:  { height: 'var(--Large-Button-Height)',  fontSize: '17px', labelSize: '17px', padding: '8px 16px', iconSize: 20 },
 };
 
 const FLOATING_SIZE_MAP = {
@@ -139,9 +151,18 @@ export function Input({
   const variantMap = buildVariantMap();
   const styles = variantMap[variant] || variantMap['primary-outline'];
   const isFloating = labelPosition === 'floating';
+  const isLight = variant.endsWith('-light');
+  const activeTextColor = colorName === 'primary' && color === 'default' ? 'var(--Text)' : 'var(--Text-' + C + ')';
   const sizeConfig = isFloating
     ? (FLOATING_SIZE_MAP[size] || FLOATING_SIZE_MAP.medium)
     : (SIZE_MAP[size] || SIZE_MAP.medium);
+
+  // Extract color name from variant (e.g. "primary-outline" → "primary")
+  const colorName = variant.replace(/-outline$/, '').replace(/-light$/, '');
+  const C = cap(colorName);
+
+  // Light variant theme attributes for inner div
+  const lightTheme = isLight ? C + '-Light' : undefined;
 
   // Validation state overrides border color
   const validationConfig = validation ? VALIDATION_COLORS[validation] : null;
@@ -192,107 +213,116 @@ export function Input({
   return (
     <Box
       className={'inp-' + variant + ' ' + className}
-      data-surface="Container-Lowest"
       sx={{ width: fullWidth ? '100%' : 'auto', ...sx }}
     >
       {renderStandardLabel()}
-      <MuiTextField
-        value={value}
-        defaultValue={defaultValue}
-        onChange={onChange}
-        name={name}
-        type={type}
-        disabled={disabled}
-        placeholder={placeholder}
-        multiline={multiline}
-        rows={rows}
-        maxRows={maxRows}
-        fullWidth={fullWidth}
-        label={isFloating ? label : undefined}
-        variant="outlined"
-        size={size === 'small' ? 'small' : 'medium'}
-        inputProps={mergedInputProps}
-        InputProps={{
-          'data-surface': 'Container-Lowest',
-          startAdornment: startAdornment ? (
-            <InputAdornment position="start">{startAdornment}</InputAdornment>
-          ) : undefined,
-          endAdornment: renderEndAdornment(),
-        }}
-        sx={{
-          '& .MuiOutlinedInput-root': {
-            backgroundColor: styles.bg,
-            color: styles.text,
-            fontSize: sizeConfig.fontSize,
-            minHeight: multiline ? 'auto' : sizeConfig.height,
-            padding: 0,
-            borderRadius: 'var(--Style-Border-Radius)',
-            transition: 'background-color 0.15s ease-in-out, border-color 0.15s ease-in-out',
 
-            '& fieldset': {
-              border: '2px solid ' + effectiveBorder,
-              transition: 'border-color 0.15s ease-in-out',
-            },
+      {/* Outer border shell — provides contrast against page background */}
+      <Box sx={{
+        border: '1px solid ' + effectiveBorder,
+        borderRadius: 'var(--Style-Border-Radius)',
+        overflow: 'hidden',
+        transition: 'border-color 0.15s ease-in-out',
+        boxShadow: 'var(--Effect-Level-1)',
+        '&:hover': { boxShadow: 'var(--Effect-Level-2)' },
+        '&:focus-within': {
+          outline: '2px solid var(--Focus-Visible)',
+          outlineOffset: '2px',
+        },
+      }}>
 
-            '&:hover fieldset': {
-              borderColor: validationConfig ? validationConfig.border : styles.border,
-            },
+        {/* Inner themed surface — for light variant gets data-theme/data-surface */}
+        <Box
+          {...(isLight ? { 'data-theme': lightTheme, 'data-surface': 'Surface-Dim' } : { 'data-surface': 'Container' })}
+        >
+          <MuiTextField
+            value={value}
+            defaultValue={defaultValue}
+            onChange={onChange}
+            name={name}
+            type={type}
+            disabled={disabled}
+            placeholder={placeholder}
+            multiline={multiline}
+            rows={rows}
+            maxRows={maxRows}
+            fullWidth
+            label={isFloating ? label : undefined}
+            variant="outlined"
+            size={size === 'small' ? 'small' : 'medium'}
+            inputProps={mergedInputProps}
+            InputProps={{
+              startAdornment: startAdornment ? (
+                <InputAdornment position="start">{startAdornment}</InputAdornment>
+              ) : undefined,
+              endAdornment: renderEndAdornment(),
+            }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: 'var(--Background)',
+                color: 'var(--Quiet)',
+                fontSize: sizeConfig.fontSize,
+                minHeight: multiline ? 'auto' : sizeConfig.height,
+                padding: 0,
+                borderRadius: 0,
+                transition: 'color 0.15s ease-in-out',
 
-            '&.Mui-focused': {
-              backgroundColor: styles.focusBg,
-              '& fieldset': {
-                border: '2px solid ' + effectiveBorder,
-                boxShadow: '0 0 0 1px ' + effectiveBorder,
+                '& fieldset': {
+                  border: 'none',
+                },
+
+                '&.Mui-focused': {
+                  color: activeTextColor,
+                },
+
+                // Filled state — text color changes
+                '&:not(.Mui-focused) .MuiOutlinedInput-input:not(:placeholder-shown)': {
+                  color: activeTextColor,
+                },
+
+                '&.Mui-disabled': {
+                  opacity: 0.6,
+                  cursor: 'not-allowed',
+                },
+
+                '& input': {
+                  padding: sizeConfig.padding,
+                  color: 'inherit',
+                  '&::placeholder': { color: 'var(--Quiet)', opacity: 1 },
+                },
+
+                '& textarea': {
+                  padding: sizeConfig.padding,
+                  color: 'inherit',
+                  '&::placeholder': { color: 'var(--Quiet)', opacity: 1 },
+                },
+
+                '& .MuiInputAdornment-root': { color: 'var(--Quiet)' },
               },
-            },
 
-            '&.Mui-disabled': {
-              opacity: 0.6,
-              cursor: 'not-allowed',
-              '& fieldset': { borderColor: effectiveBorder },
-            },
+              '& .MuiInputLabel-root': {
+                color: 'var(--Quiet)',
+                fontSize: sizeConfig.fontSize,
+                transformOrigin: 'top left',
+                transform: 'translate(' + (sizeConfig.leftPad || 14) + 'px, 16px) scale(1)',
+                '&.MuiInputLabel-shrink': {
+                  transform: 'translate(' + (sizeConfig.leftPad || 14) + 'px, 6px) scale(0.75)',
+                  color: 'var(--Quiet)',
+                },
+                '&.Mui-focused': { color: activeTextColor },
+                '&.Mui-disabled': { color: 'var(--Quiet)', opacity: 0.6 },
+              },
 
-            '& input': {
-              padding: sizeConfig.padding,
-              color: 'inherit',
-              '&::placeholder': { color: 'var(--Quiet)', opacity: 1 },
-            },
+              '& .MuiOutlinedInput-notchedOutline legend': { display: 'none' },
+              '& .MuiOutlinedInput-notchedOutline': { top: 0 },
 
-            '& textarea': {
-              padding: sizeConfig.padding,
-              color: 'inherit',
-              '&::placeholder': { color: 'var(--Quiet)', opacity: 1 },
-            },
-
-            '& .MuiInputAdornment-root': { color: styles.text },
-          },
-
-          '& .MuiInputLabel-root': {
-            color: 'var(--Quiet)',
-            fontSize: sizeConfig.fontSize,
-            transformOrigin: 'top left',
-            transform: 'translate(' + (sizeConfig.leftPad || 14) + 'px, 16px) scale(1)',
-            '&.MuiInputLabel-shrink': {
-              transform: 'translate(' + (sizeConfig.leftPad || 14) + 'px, 6px) scale(0.75)',
-              color: 'var(--Quiet)',
-            },
-            '&.Mui-focused': { color: 'var(--Hotlink)' },
-            '&.Mui-disabled': { color: 'var(--Quiet)', opacity: 0.6 },
-          },
-
-          '& .MuiOutlinedInput-notchedOutline legend': { display: 'none' },
-          '& .MuiOutlinedInput-notchedOutline': { top: 0 },
-
-          '& .MuiOutlinedInput-root.Mui-focused': { outline: 'none' },
-          '& .MuiOutlinedInput-root:focus-within': {
-            '& fieldset': {
-              outline: '2px solid var(--Focus-Visible)',
-              outlineOffset: '2px',
-            },
-          },
-        }}
-        {...props}
-      />
+              '& .MuiOutlinedInput-root.Mui-focused': { outline: 'none' },
+              '& .MuiOutlinedInput-root:focus-within': { outline: 'none' },
+            }}
+            {...props}
+          />
+        </Box>
+      </Box>
 
       {(validation && validationMessage) ? (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px', marginLeft: '2px' }}>
@@ -323,7 +353,13 @@ export const SuccessOutlineInput   = (p) => <Input variant="success-outline"   {
 export const WarningOutlineInput   = (p) => <Input variant="warning-outline"   {...p} />;
 export const ErrorOutlineInput     = (p) => <Input variant="error-outline"     {...p} />;
 
+export const PrimaryLightInput   = (p) => <Input variant="primary-light"   {...p} />;
+export const SecondaryLightInput = (p) => <Input variant="secondary-light" {...p} />;
+export const TertiaryLightInput  = (p) => <Input variant="tertiary-light"  {...p} />;
+export const NeutralLightInput   = (p) => <Input variant="neutral-light"   {...p} />;
+
 export const OutlineInput = (p) => <Input variant="primary-outline" {...p} />;
 export const PrimaryInput = (p) => <Input variant="primary-outline" {...p} />;
+export const LightInput   = (p) => <Input variant="primary-light"   {...p} />;
 
 export default Input;

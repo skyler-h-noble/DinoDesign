@@ -23,32 +23,15 @@ import { Body, BodySmall } from '../Typography';
  * RANGE: pass value={[20, 80]} for a two-thumb range slider
  */
 
-const COLORS = ['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
-// --- Variant Style Builders --------------------------------------------------
+// --- Style Builder -----------------------------------------------------------
 
-function solidStyles(color) {
+function colorStyles(color) {
   const C = cap(color);
   return {
     thumb:          'var(--Buttons-' + C + '-Button)',
-    thumbHover:     'var(--Buttons-' + C + '-Hover)',
-    thumbActive:    'var(--Buttons-' + C + '-Active)',
-    thumbBorder:    '1px solid var(--Buttons-' + C + '-Border)',
-    track:          'var(--Buttons-' + C + '-Button)',
-    trackBorder:    '1px solid var(--Buttons-' + C + '-Border)',
-    rail:           'var(--Border-Variant)',
-    valueLabel:     'var(--Buttons-' + C + '-Text)',
-    valueLabelText: 'var(--Buttons-' + C + '-Button)',
-  };
-}
-
-function lightStyles(color) {
-  const C = cap(color);
-  return {
-    thumb:          'var(--Buttons-' + C + '-Button)',
-    thumbHover:     'var(--Buttons-' + C + '-Hover)',
-    thumbActive:    'var(--Buttons-' + C + '-Active)',
     thumbBorder:    '1px solid var(--Buttons-' + C + '-Border)',
     track:          'var(--Buttons-' + C + '-Button)',
     trackBorder:    '1px solid var(--Buttons-' + C + '-Border)',
@@ -61,8 +44,7 @@ function lightStyles(color) {
 function buildVariantMap() {
   const map = {};
   COLORS.forEach((color) => {
-    map[color]              = solidStyles(color);
-    map[color + '-light']   = lightStyles(color);
+    map[color] = colorStyles(color);
   });
   return map;
 }
@@ -168,8 +150,8 @@ export function Slider({
         borderRadius: '50%',
         backgroundColor: styles.thumb,
         border: styles.thumbBorder || 'none',
-        boxShadow: 'var(--Shadow-1), var(--Shadow-2)',
-        transition: 'background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out',
+        boxShadow: 'var(--Effect-Level-1)',
+        transition: 'box-shadow 0.15s ease-in-out',
         // Centered by default (single slider)
         top: '50%',
         left: '50%',
@@ -177,11 +159,11 @@ export function Slider({
       },
 
       '&:hover::before': {
-        backgroundColor: styles.thumbHover,
+        boxShadow: 'var(--Effect-Level-2)',
       },
 
       '&.Mui-active::before': {
-        backgroundColor: styles.thumbActive,
+        boxShadow: 'var(--Effect-Level-1)',
       },
 
       '&.Mui-focusVisible': {
@@ -190,7 +172,7 @@ export function Slider({
         borderRadius: '50%',
       },
       '&.Mui-focusVisible::before': {
-        boxShadow: 'var(--Shadow-1), var(--Shadow-2)',
+        boxShadow: 'var(--Effect-Level-2)',
       },
     },
 
@@ -321,25 +303,15 @@ export function Slider({
 
 // ─── Convenience Exports ──────────────────────────────────────────────────────
 
-// Solid
-export const PrimarySlider                = (p) => <Slider variant="primary"              {...p} />;
-export const SecondarySlider              = (p) => <Slider variant="secondary"            {...p} />;
-export const TertiarySlider               = (p) => <Slider variant="tertiary"             {...p} />;
-export const NeutralSlider                = (p) => <Slider variant="neutral"              {...p} />;
-export const InfoSlider                   = (p) => <Slider variant="info"                 {...p} />;
-export const SuccessSlider                = (p) => <Slider variant="success"              {...p} />;
-export const WarningSlider                = (p) => <Slider variant="warning"              {...p} />;
-export const ErrorSlider                  = (p) => <Slider variant="error"                {...p} />;
-
-// Light
-export const PrimaryLightSlider           = (p) => <Slider variant="primary-light"        {...p} />;
-export const SecondaryLightSlider         = (p) => <Slider variant="secondary-light"      {...p} />;
-export const TertiaryLightSlider          = (p) => <Slider variant="tertiary-light"       {...p} />;
-export const NeutralLightSlider           = (p) => <Slider variant="neutral-light"        {...p} />;
-export const InfoLightSlider              = (p) => <Slider variant="info-light"           {...p} />;
-export const SuccessLightSlider           = (p) => <Slider variant="success-light"        {...p} />;
-export const WarningLightSlider           = (p) => <Slider variant="warning-light"        {...p} />;
-export const ErrorLightSlider             = (p) => <Slider variant="error-light"          {...p} />;
+export const DefaultSlider   = (p) => <Slider variant="default"   {...p} />;
+export const PrimarySlider   = (p) => <Slider variant="primary"   {...p} />;
+export const SecondarySlider = (p) => <Slider variant="secondary" {...p} />;
+export const TertiarySlider  = (p) => <Slider variant="tertiary"  {...p} />;
+export const NeutralSlider   = (p) => <Slider variant="neutral"   {...p} />;
+export const InfoSlider      = (p) => <Slider variant="info"      {...p} />;
+export const SuccessSlider   = (p) => <Slider variant="success"   {...p} />;
+export const WarningSlider   = (p) => <Slider variant="warning"   {...p} />;
+export const ErrorSlider     = (p) => <Slider variant="error"     {...p} />;
 
 // Legacy exports for backwards compatibility
 export const SliderInput = Slider;

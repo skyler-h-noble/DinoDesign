@@ -123,6 +123,7 @@ export function TagShowcase() {
   const [labelText, setLabelText]       = useState('New');
   const [allCaps, setAllCaps]           = useState(false);
   const [bgTheme, setBgTheme]           = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
   const [contrastData, setContrastData] = useState({});
 
   const C = TAG_COLOR_TOKEN_MAP[color] || 'Primary';
@@ -207,7 +208,7 @@ export function TagShowcase() {
 
                   {/* Background */}
                   <Box sx={{ mb: 3 }}>
-                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} />
+                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
                   </Box>
 
                   {/* Color swatches */}

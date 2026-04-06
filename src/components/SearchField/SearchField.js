@@ -3,28 +3,23 @@ import React, { useState, useRef } from 'react';
 import { Box } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
+import { Icon } from '../Icon/Icon';
 
 /**
  * SearchField Component
  *
  * STRUCTURE:
- *   <Box border="1px solid var(--Border)" borderRadius>       — border parent
- *     <Box data-surface="Container-Lowest">                   — surface scoping
- *       <SearchIcon />
+ *   <Box border="1px solid var(--Buttons-{C}-Border)">   — outer border shell
+ *     <Box data-surface="Container">                      — surface scoping
+ *       <Icon><SearchIcon /></Icon>
  *       <input />
- *       <CloseIcon />  (when has value)
+ *       <Icon><CloseIcon /></Icon>  (when has value)
  *     </Box>
  *   </Box>
  *
- * STATES:
- *   Idle:    icon + placeholder = var(--Text-Quiet)
- *   Focused: icon + text = var(--Text)
- *   Filled:  icon + text = var(--Text), clear button visible
+ * COLORS: default | primary | secondary | tertiary | neutral | info | success | warning | error
  *
- * SIZES:
- *   small   36px, 13px font
- *   medium  40px, 14px font (default)
- *   large   48px, 15px font
+ * SIZES: small | medium | large (matches button heights)
  *
  * Accessibility:
  *   role="searchbox", aria-label
@@ -32,10 +27,12 @@ import CloseIcon from '@mui/icons-material/Close';
  *   Escape clears, Enter submits
  */
 
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
 const SIZE_MAP = {
-  small:  { height: 36, fontSize: '13px', iconSize: 18, px: 12 },
-  medium: { height: 40, fontSize: '14px', iconSize: 20, px: 16 },
-  large:  { height: 48, fontSize: '15px', iconSize: 22, px: 16 },
+  small:  { height: 'var(--Small-Button-Height)', fontSize: '13px', iconSize: 18, px: 12 },
+  medium: { height: 'var(--Button-Height)',        fontSize: '14px', iconSize: 20, px: 16 },
+  large:  { height: 'var(--Large-Button-Height)',  fontSize: '15px', iconSize: 22, px: 16 },
 };
 
 export function SearchField({
@@ -48,6 +45,7 @@ export function SearchField({
   onSubmit,
   placeholder = 'Search\u2026',
   size = 'medium',
+  color = 'default',
   showClearButton = true,
   disabled = false,
   ariaLabel = 'Search',
@@ -63,6 +61,11 @@ export function SearchField({
   const currentValue = isControlled ? controlledValue : internalValue;
   const hasValue = currentValue.length > 0;
   const isActive = focused || hasValue;
+
+  const effectiveColor = color === 'default' ? 'primary' : color;
+  const C = cap(effectiveColor);
+  const borderToken = 'var(--Buttons-' + C + '-Border)';
+  const activeTextColor = color === 'default' ? 'var(--Text)' : 'var(--Text-' + C + ')';
 
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
 
@@ -94,10 +97,6 @@ export function SearchField({
     if (e.key === 'Escape' && hasValue) handleClear();
   };
 
-  const quietColor = 'var(--Text-Quiet)';
-  const activeColor = 'var(--Text)';
-  const iconColor = isActive ? activeColor : quietColor;
-
   return (
     <Box
       className={'search-field search-field-' + size +
@@ -107,37 +106,42 @@ export function SearchField({
         (className ? ' ' + className : '')}
       sx={{
         display: 'inline-flex',
-        border: '1px solid var(--Border)',
-        borderRadius: s.height / 2 + 'px',
-        overflow: 'hidden',
-        opacity: disabled ? 0.5 : 1,
-        transition: 'border-color 0.15s ease',
-        ...(focused && { borderColor: 'var(--Focus-Visible)' }),
         ...sx,
       }}
       {...props}
     >
+      {/* Outer border shell */}
+      <Box sx={{
+        border: '1px solid ' + borderToken,
+        borderRadius: 'var(--Style-Border-Radius)',
+        overflow: 'hidden',
+        opacity: disabled ? 0.5 : 1,
+        transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
+        boxShadow: 'var(--Effect-Level-1)',
+        '&:hover': { boxShadow: 'var(--Effect-Level-2)' },
+        width: '100%',
+        '&:focus-within': {
+          outline: '2px solid var(--Focus-Visible)',
+          outlineOffset: '2px',
+        },
+      }}>
+
+      {/* Inner surface */}
       <Box
-        data-surface="Container-Lowest"
+        data-surface="Container"
         sx={{
           display: 'flex',
           alignItems: 'center',
           gap: 1,
           width: '100%',
-          height: s.height + 'px',
+          minHeight: s.height,
           px: s.px + 'px',
           backgroundColor: 'var(--Background)',
-          borderRadius: 'inherit',
         }}
       >
-        <SearchIcon
-          sx={{
-            fontSize: s.iconSize,
-            color: iconColor,
-            flexShrink: 0,
-            transition: 'color 0.15s ease',
-          }}
-        />
+        <Icon size="small" sx={{ color: isActive ? activeTextColor : 'var(--Quiet)', flexShrink: 0, transition: 'color 0.15s ease' }}>
+          <SearchIcon />
+        </Icon>
 
         <Box
           component="input"
@@ -157,17 +161,18 @@ export function SearchField({
             border: 'none',
             outline: 'none',
             backgroundColor: 'transparent',
-            color: activeColor,
+            color: isActive ? activeTextColor : 'var(--Quiet)',
             fontSize: s.fontSize,
-            fontFamily: 'inherit',
+            fontFamily: 'var(--Body-Font-Family)',
+            fontWeight: 'var(--Body-Font-Weight)',
             minWidth: 0,
             '&::placeholder': {
-              color: quietColor,
+              color: 'var(--Quiet)',
               opacity: 1,
+              fontFamily: 'var(--Body-Font-Family)',
+              fontWeight: 'var(--Body-Font-Weight)',
             },
-            '&:disabled': {
-              cursor: 'not-allowed',
-            },
+            '&:disabled': { cursor: 'not-allowed' },
           }}
         />
 
@@ -178,33 +183,22 @@ export function SearchField({
             aria-label="Clear search"
             onClick={handleClear}
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: s.iconSize + 4,
-              height: s.iconSize + 4,
-              borderRadius: '50%',
-              border: 'none',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: s.iconSize + 4, height: s.iconSize + 4,
+              borderRadius: '50%', border: 'none',
               backgroundColor: 'transparent',
-              color: quietColor,
-              cursor: 'pointer',
-              flexShrink: 0,
-              padding: 0,
+              color: 'var(--Quiet)', cursor: 'pointer', flexShrink: 0, padding: 0,
               transition: 'color 0.15s ease, background-color 0.15s ease',
-              '&:hover': {
-                backgroundColor: 'var(--Hover, rgba(0,0,0,0.06))',
-                color: activeColor,
-              },
-              '&:focus-visible': {
-                outline: '2px solid var(--Focus-Visible)',
-                outlineOffset: '1px',
-              },
+              '&:hover': { backgroundColor: 'var(--Hover)', color: activeTextColor },
+              '&:focus-visible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px' },
             }}
           >
-            <CloseIcon sx={{ fontSize: s.iconSize - 2 }} />
+            <Icon size="small"><CloseIcon /></Icon>
           </Box>
         )}
       </Box>
+
+      </Box>{/* end outer border shell */}
     </Box>
   );
 }

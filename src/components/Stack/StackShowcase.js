@@ -121,6 +121,7 @@ function Playground() {
   const [enforceMinGap, setEnforce] = useState(true);
   const [flexWrap, setFlexWrap]     = useState(false);
   const [bgTheme, setBgTheme]       = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
 
   const childSets = {
     small:  {
@@ -211,7 +212,7 @@ function Playground() {
       <Grid item xs={12} md={5}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
 
-          <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} />
+          <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
 
           <Box>
             <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>CHILDREN</OverlineSmall>

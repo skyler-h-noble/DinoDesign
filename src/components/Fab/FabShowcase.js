@@ -105,6 +105,7 @@ export function FabShowcase() {
   const [animate, setAnimate] = useState(false);
   const [disabled, setDisabled] = useState(false);
   const [bgTheme, setBgTheme] = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
 
   const effectiveColor = color === 'default' ? 'tertiary' : color;
   const getIconEl = () => {
@@ -181,7 +182,7 @@ export function FabShowcase() {
 
                   {/* Background */}
                   <Box sx={{ mb: 3 }}>
-                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} />
+                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
                   </Box>
 
                   {/* Color */}

@@ -3,50 +3,48 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Box } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CloseIcon from '@mui/icons-material/Close';
+import CheckIcon from '@mui/icons-material/Check';
+import { Icon } from '../Icon/Icon';
+import { Body, BodySmall } from '../Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 
 /**
  * Autocomplete Component
  *
- * STYLES:
- *   default   No theme. border inherit, active var(--Buttons-Default-Border)
- *   solid     Selected: bg var(--Buttons-Default-Button), text var(--Buttons-Default-Text)
+ * VARIANTS:
+ *   outline   Outer border shell + data-surface="Container"
+ *   light     Outer border shell + data-theme="{C}-Light" data-surface="Surface-Dim"
+ *
+ * COLORS: default | primary | secondary | tertiary | neutral | info | success | warning | error
  *
  * LABEL: top | floating | none
- * SIZES: small (32/48px), medium (40/56px), large (56/64px)
- * ASYNC: loading prop shows spinner, loadingText displayed
+ * SIZES: small | medium | large (matches button heights)
+ * ASYNC: loading prop shows spinner
  * FEATURES: clearable, freeSolo, disabled, helper text
  *
- * Surface: data-surface="Container-Lowest"
- * Dropdown: z-index 9999
+ * Focus: outline on outer shell via :focus-within
  */
 
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
 const SIZE_MAP = {
-  small:  { height: 32, fontSize: '13px', padding: '4px 8px', iconSize: 16 },
-  medium: { height: 40, fontSize: '14px', padding: '6px 12px', iconSize: 18 },
-  large:  { height: 56, fontSize: '16px', padding: '8px 16px', iconSize: 20 },
+  small:  { height: 'var(--Small-Button-Height)', fontSize: '13px', padding: '4px 8px', iconSize: 16 },
+  medium: { height: 'var(--Button-Height)',        fontSize: '14px', padding: '6px 12px', iconSize: 18 },
+  large:  { height: 'var(--Large-Button-Height)',  fontSize: '16px', padding: '8px 16px', iconSize: 20 },
 };
 
 const FLOATING_SIZE_MAP = {
-  small:  { height: 48, fontSize: '13px', padding: '20px 12px 4px', leftPad: 12 },
-  medium: { height: 56, fontSize: '14px', padding: '22px 14px 6px', leftPad: 14 },
-  large:  { height: 64, fontSize: '16px', padding: '24px 16px 6px', leftPad: 16 },
+  small:  { height: '48px', fontSize: '13px', padding: '20px 12px 4px', leftPad: 12 },
+  medium: { height: '56px', fontSize: '14px', padding: '22px 14px 6px', leftPad: 14 },
+  large:  { height: '64px', fontSize: '16px', padding: '24px 16px 6px', leftPad: 16 },
 };
 
-function getOptionStyles(style, isHighlighted, isSelected) {
+function getOptionStyles(isHighlighted, isSelected) {
   if (isSelected) {
-    if (style === 'solid') {
-      return {
-        backgroundColor: 'var(--Buttons-Default-Button)',
-        color: 'var(--Buttons-Default-Text)',
-        fontWeight: 600,
-      };
-    }
     return {
       backgroundColor: 'transparent',
       color: 'var(--Text)',
       fontWeight: 600,
-      border: '1px solid var(--Buttons-Default-Border)',
     };
   }
   if (isHighlighted) {
@@ -67,9 +65,10 @@ export function Autocomplete({
   placeholder = 'Type to search',
   helperText,
   size = 'medium',
-  style: selectionStyle = 'default',
+  variant = 'outline',         // 'outline' | 'light'
+  color = 'primary',           // 'default' | 'primary' | ...
   loading = false,
-  loadingText = 'Loading…',
+  loadingText = 'Loading\u2026',
   noOptionsText = 'No options',
   freeSolo = false,
   clearable = true,
@@ -79,6 +78,12 @@ export function Autocomplete({
   sx = {},
   ...props
 }) {
+  const effectiveColor = color === 'default' ? 'primary' : color;
+  const C = cap(effectiveColor);
+  const isLight = variant === 'light';
+  const borderToken = 'var(--Buttons-' + C + '-Border)';
+  const activeTextColor = color === 'default' ? 'var(--Text)' : 'var(--Text-' + C + ')';
+
   const [internalValue, setInternalValue] = useState(defaultValue);
   const [internalInput, setInternalInput] = useState(
     defaultValue ? (typeof defaultValue === 'string' ? defaultValue : defaultValue.label || '') : ''
@@ -104,8 +109,8 @@ export function Autocomplete({
   // Filter options
   const filtered = currentInput
     ? options.filter((opt) => {
-        const label = typeof opt === 'string' ? opt : opt.label;
-        return label.toLowerCase().includes(currentInput.toLowerCase());
+        const lbl = typeof opt === 'string' ? opt : opt.label;
+        return lbl.toLowerCase().includes(currentInput.toLowerCase());
       })
     : options;
 
@@ -115,11 +120,10 @@ export function Autocomplete({
   }, [isControlledInput, onInputChange]);
 
   const selectOption = useCallback((opt) => {
-    const val = opt;
-    const label = typeof opt === 'string' ? opt : opt.label;
-    if (!isControlledValue) setInternalValue(val);
-    setInput(label);
-    onChange?.(val);
+    const lbl = typeof opt === 'string' ? opt : opt.label;
+    if (!isControlledValue) setInternalValue(opt);
+    setInput(lbl);
+    onChange?.(opt);
     setOpen(false);
     setHighlightIndex(-1);
     inputRef.current?.focus();
@@ -166,13 +170,10 @@ export function Autocomplete({
     }
   };
 
-  const borderColor = (open || focused) ? 'var(--Buttons-Default-Border)' : 'inherit';
-
   return (
     <Box
       ref={wrapperRef}
-      data-surface="Container-Lowest"
-      className={'autocomplete autocomplete-' + size + ' autocomplete-label-' + labelPosition + ' autocomplete-style-' + selectionStyle +
+      className={'autocomplete autocomplete-' + size + ' autocomplete-variant-' + variant +
         (open ? ' autocomplete-open' : '') +
         (disabled ? ' autocomplete-disabled' : '') +
         (className ? ' ' + className : '')}
@@ -180,22 +181,48 @@ export function Autocomplete({
       {...props}
     >
       {/* Top label */}
-      {isTop && label && (
-        <Box sx={{ display: 'block', marginBottom: '6px', color: disabled ? 'var(--Text-Quiet)' : 'var(--Text)', fontSize: sizeConfig.fontSize, fontWeight: 500, opacity: disabled ? 0.6 : 1 }}>
-          {label}
-        </Box>
-      )}
+      {isTop && label && (() => {
+        const LabelComp = size === 'small' ? BodySmall : Body;
+        return (
+          <LabelComp
+            component="label"
+            style={{
+              display: 'block', marginBottom: '6px',
+              color: disabled ? 'var(--Quiet)' : 'var(--Text)',
+              fontWeight: 500,
+              opacity: disabled ? 0.6 : 1,
+            }}
+          >
+            {label}
+          </LabelComp>
+        );
+      })()}
+
+      {/* Outer border shell */}
+      <Box sx={{
+        border: '1px solid ' + borderToken,
+        borderRadius: 'var(--Style-Border-Radius)',
+        overflow: 'hidden',
+        transition: 'border-color 0.15s ease',
+        boxShadow: 'var(--Effect-Level-1)',
+        '&:hover': { boxShadow: 'var(--Effect-Level-2)' },
+        opacity: disabled ? 0.5 : 1,
+        '&:focus-within': {
+          outline: '2px solid var(--Focus-Visible)',
+          outlineOffset: '2px',
+        },
+      }}>
+
+      {/* Inner themed surface */}
+      <Box
+        {...(isLight ? { 'data-theme': C + '-Light', 'data-surface': 'Surface-Dim' } : { 'data-surface': 'Container' })}
+      >
 
       {/* Input container */}
       <Box sx={{
         position: 'relative', display: 'flex', alignItems: 'center',
-        height: sizeConfig.height + 'px',
-        border: '1px solid ' + borderColor,
-        borderRadius: 'var(--Style-Border-Radius)',
+        minHeight: sizeConfig.height,
         backgroundColor: 'var(--Background)',
-        transition: 'border-color 0.15s ease',
-        opacity: disabled ? 0.5 : 1,
-        '&:focus-within': { borderColor: 'var(--Buttons-Default-Border)' },
       }}>
         {/* Floating label */}
         {isFloating && label && (
@@ -205,7 +232,7 @@ export function Autocomplete({
             left: (sizeConfig.leftPad || 14) + 'px',
             transform: hasValue || focused ? 'scale(0.75)' : 'translateY(-50%)',
             transformOrigin: 'top left',
-            color: focused ? 'var(--Hotlink)' : 'var(--Text-Quiet)',
+            color: focused ? activeTextColor : 'var(--Quiet)',
             fontSize: sizeConfig.fontSize, fontWeight: 400,
             pointerEvents: 'none', zIndex: 1,
             transition: 'top 0.15s ease, transform 0.15s ease, color 0.15s ease',
@@ -235,18 +262,25 @@ export function Autocomplete({
           sx={{
             flex: 1, border: 'none', outline: 'none',
             backgroundColor: 'transparent',
-            color: 'var(--Text)', fontSize: sizeConfig.fontSize,
-            fontFamily: 'inherit',
+            color: (hasValue || focused) ? activeTextColor : 'var(--Quiet)',
+            fontSize: sizeConfig.fontSize,
+            fontFamily: 'var(--Body-Font-Family)',
+            fontWeight: 'var(--Body-Font-Weight)',
             padding: sizeConfig.padding,
             minWidth: 0,
-            '&::placeholder': { color: 'var(--Text-Quiet)', opacity: 1 },
+            '&::placeholder': {
+              color: 'var(--Quiet)',
+              opacity: 1,
+              fontFamily: 'var(--Body-Font-Family)',
+              fontWeight: 'var(--Body-Font-Weight)',
+            },
             '&:disabled': { cursor: 'not-allowed' },
           }}
         />
 
         {/* Loading spinner */}
         {loading && open && (
-          <CircularProgress size={16} sx={{ mr: 1, color: 'var(--Text-Quiet)' }} />
+          <CircularProgress size={16} sx={{ mr: 1, color: 'var(--Quiet)' }} />
         )}
 
         {/* Clear button */}
@@ -256,7 +290,7 @@ export function Autocomplete({
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               width: 20, height: 20, borderRadius: '50%', mr: 0.5,
               border: 'none', backgroundColor: 'transparent',
-              color: 'var(--Text-Quiet)', cursor: 'pointer',
+              color: 'var(--Quiet)', cursor: 'pointer',
               '&:hover': { color: 'var(--Text)', backgroundColor: 'var(--Hover)' },
               '&:focus-visible': { outline: '2px solid var(--Focus-Visible)' },
             }}>
@@ -270,7 +304,7 @@ export function Autocomplete({
           sx={{
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             width: 28, height: '100%', border: 'none', backgroundColor: 'transparent',
-            color: 'var(--Text-Quiet)', cursor: disabled ? 'not-allowed' : 'pointer',
+            color: 'var(--Quiet)', cursor: disabled ? 'not-allowed' : 'pointer',
           }}>
           <ExpandMoreIcon sx={{
             fontSize: (sizeConfig.iconSize || 18) + 'px',
@@ -280,26 +314,30 @@ export function Autocomplete({
         </Box>
       </Box>
 
+      </Box>{/* end inner themed surface */}
+      </Box>{/* end outer border shell */}
+
       {/* Helper text */}
       {helperText && (
-        <Box sx={{ fontSize: '12px', color: 'var(--Text-Quiet)', mt: '4px', ml: '2px' }}>{helperText}</Box>
+        <Box sx={{ fontSize: '12px', color: 'var(--Quiet)', mt: '4px', ml: '2px' }}>{helperText}</Box>
       )}
 
       {/* Dropdown */}
       {open && (
         <Box role="listbox" aria-label={label || 'Options'} sx={{
           position: 'absolute', top: '100%', left: 0, right: 0, mt: 0.5,
-          backgroundColor: 'var(--Background)', border: '1px solid var(--Border)',
+          backgroundColor: 'var(--Background)',
+          border: '1px solid var(--Buttons-Default-Border)',
           borderRadius: 'var(--Style-Border-Radius)',
           boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
           zIndex: 9999, maxHeight: 240, overflowY: 'auto', py: 0.5,
         }}>
           {loading ? (
-            <Box sx={{ px: 1.5, py: 2, textAlign: 'center', fontSize: sizeConfig.fontSize, color: 'var(--Text-Quiet)' }}>
+            <Box sx={{ px: 1.5, py: 2, textAlign: 'center', fontSize: sizeConfig.fontSize, color: 'var(--Quiet)' }}>
               {loadingText}
             </Box>
           ) : filtered.length === 0 ? (
-            <Box sx={{ px: 1.5, py: 2, textAlign: 'center', fontSize: sizeConfig.fontSize, color: 'var(--Text-Quiet)' }}>
+            <Box sx={{ px: 1.5, py: 2, textAlign: 'center', fontSize: sizeConfig.fontSize, color: 'var(--Quiet)' }}>
               {noOptionsText}
             </Box>
           ) : (
@@ -309,7 +347,7 @@ export function Autocomplete({
               const selectedLabel = currentValue ? (typeof currentValue === 'string' ? currentValue : currentValue.label) : null;
               const isSelected = optLabel === selectedLabel;
               const isHighlighted = idx === highlightIndex;
-              const styles = getOptionStyles(selectionStyle, isHighlighted, isSelected);
+              const styles = getOptionStyles(isHighlighted, isSelected);
 
               return (
                 <Box key={optValue || optLabel} role="option" aria-selected={isSelected}
@@ -317,15 +355,15 @@ export function Autocomplete({
                   onMouseEnter={() => setHighlightIndex(idx)}
                   sx={{
                     display: 'flex', alignItems: 'center', gap: 1,
-                    px: 1.5, py: 1, mx: 0.5, borderRadius: '4px',
+                    px: 1.5, py: 0, mx: 0.5, minHeight: sizeConfig.height,
+                    borderRadius: '4px',
                     cursor: 'pointer', fontSize: sizeConfig.fontSize, fontFamily: 'inherit',
-                    border: '1px solid transparent',
                     ...styles,
                     transition: 'background-color 0.1s ease',
                     '&:active': { backgroundColor: 'var(--Active)' },
                   }}>
-                  <Box sx={{ flex: 1 }}>{optLabel}</Box>
-                  {isSelected && <Box sx={{ fontSize: '14px', opacity: 0.6, flexShrink: 0 }}>✓</Box>}
+                  <BodySmall style={{ flex: 1, color: 'inherit', fontWeight: 'inherit' }}>{optLabel}</BodySmall>
+                  {isSelected && <Icon size="small" sx={{ opacity: 0.6, flexShrink: 0 }}><CheckIcon /></Icon>}
                 </Box>
               );
             })

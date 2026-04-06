@@ -20,63 +20,48 @@ import { Body, BodySmall } from '../Typography';
  * STATES: checked | unchecked | disabled | hover | active | focus-visible
  */
 
-const COLORS = ['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // --- Variant Style Builders --------------------------------------------------
 
-function solidStyles(color) {
-  const C = cap(color);
-  return {
-    thumb:          'var(--Buttons-' + C + '-Button)',
-    trackOn:        'var(--Buttons-' + C + '-Border)',
-    trackOnBorder:  'none',
-    trackOff:       'var(--Border-Variant)',
-    trackOffBorder: 'none',
-    hoverOn:        'var(--Buttons-' + C + '-Hover)',
-    hoverOff:       'var(--Hover)',
-    activeOn:       'var(--Buttons-' + C + '-Active)',
-    activeOff:      'var(--Border)',
-  };
-}
-
 function outlineStyles(color) {
   const C = cap(color);
   return {
+    type: 'outline',
+    color: C,
     thumb:          'var(--Buttons-' + C + '-Border)',
     trackOn:        'transparent',
-    trackOnBorder:  '2px solid var(--Buttons-' + C + '-Border)',
+    trackOnBorder:  '1px solid var(--Buttons-' + C + '-Border)',
     trackOff:       'transparent',
-    trackOffBorder: '2px solid var(--Border-Variant)',
-    hoverOn:        'var(--Buttons-' + C + '-Hover)',
-    hoverOff:       'var(--Hover)',
-    activeOn:       'var(--Buttons-' + C + '-Active)',
-    activeOff:      'var(--Border)',
+    trackOffBorder: '1px solid var(--Border-Variant)',
   };
 }
 
 function lightStyles(color) {
   const C = cap(color);
   return {
+    type: 'light',
+    color: C,
     thumb:          'var(--Buttons-' + C + '-Border)',
-    trackOn:        'var(--' + C + '-Color-11)',
-    trackOnBorder:  'none',
+    trackOn:        'var(--Background)',
+    trackOnBorder:  '1px solid var(--Buttons-' + C + '-Border)',
     trackOff:       'var(--Border-Variant)',
     trackOffBorder: 'none',
-    hoverOn:        'var(--Hover-' + C + '-Color-11)',
-    hoverOff:       'var(--Hover)',
-    activeOn:       'var(--Buttons-' + C + '-Active)',
-    activeOff:      'var(--Border)',
+    dataTheme:      C + '-Light',
   };
 }
 
 function buildVariantMap() {
   const map = {};
   COLORS.forEach((color) => {
-    map[color]              = solidStyles(color);
     map[color + '-outline'] = outlineStyles(color);
     map[color + '-light']   = lightStyles(color);
   });
+  map['primary']  = outlineStyles('primary');
+  map['default']  = outlineStyles('default');
+  map['outline']  = outlineStyles('primary');
+  map['light']    = lightStyles('primary');
   return map;
 }
 
@@ -151,13 +136,11 @@ export function Switch({
         width: '100%',
       },
 
-      // ON state — thumb uses variant color
-      // Outline checked: left 3px + width calc(100% - 6px) so thumb clears both borders
+      // ON state
       '&.Mui-checked': {
         justifyContent: 'flex-end',
         transform: 'none',
         color: styles.thumb,
-        ...(isOutline && { left: '3px', width: 'calc(100% - 6px)' }),
 
         '& + .MuiSwitch-track': {
           backgroundColor: styles.trackOn,
@@ -166,34 +149,15 @@ export function Switch({
         },
       },
 
-      // Hover OFF
+      // Hover — no color change, just shadow level 2 on thumb
       '&:hover': {
         backgroundColor: 'transparent',
-        '& + .MuiSwitch-track': {
-          backgroundColor: styles.hoverOff,
-        },
       },
-
-      // Hover ON
+      '&:hover .MuiSwitch-thumb': {
+        boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+      },
       '&.Mui-checked:hover': {
         backgroundColor: 'transparent',
-        '& + .MuiSwitch-track': {
-          backgroundColor: styles.hoverOn,
-          border: styles.trackOnBorder,
-          opacity: 1,
-        },
-      },
-
-      // Active OFF
-      '&:active + .MuiSwitch-track': {
-        backgroundColor: styles.activeOff,
-      },
-
-      // Active ON
-      '&.Mui-checked:active + .MuiSwitch-track': {
-        backgroundColor: styles.activeOn,
-        border: styles.trackOnBorder,
-        opacity: 1,
       },
 
       // Focus visible
@@ -218,8 +182,9 @@ export function Switch({
     '& .MuiSwitch-thumb': {
       width: sc.thumb,
       height: sc.thumb,
-      boxShadow: 'none',
+      boxShadow: '0 1px 2px rgba(0,0,0,0.15)',
       border: 'none',
+      transition: 'box-shadow 0.15s ease',
     },
 
     '& .MuiSwitch-track': {
@@ -239,6 +204,8 @@ export function Switch({
     ...sx,
   };
 
+  const isLight = variant.includes('-light') || variant === 'light';
+
   const switchElement = (
     <MuiSwitch
       checked={checked}
@@ -254,6 +221,10 @@ export function Switch({
       className={'switch-' + variant + ' ' + className}
       sx={switchSx}
       disableRipple
+      {...(isLight && styles.dataTheme ? {
+        'data-theme': styles.dataTheme,
+        'data-surface': 'Surface-Dim',
+      } : {})}
       {...props}
     />
   );

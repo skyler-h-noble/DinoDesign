@@ -3,17 +3,15 @@ export {
   Slider,
   SliderInput,
   RangeSlider,
-  // Primary
+  DefaultSlider,
   PrimarySlider,
-  // Light
-  PrimaryLightSlider,
-  SecondaryLightSlider,
-  TertiaryLightSlider,
-  NeutralLightSlider,
-  InfoLightSlider,
-  SuccessLightSlider,
-  WarningLightSlider,
-  ErrorLightSlider,
+  SecondarySlider,
+  TertiarySlider,
+  NeutralSlider,
+  InfoSlider,
+  SuccessSlider,
+  WarningSlider,
+  ErrorSlider,
 } from './Slider';
 
 export { SliderShowcase } from './SliderShowcase';

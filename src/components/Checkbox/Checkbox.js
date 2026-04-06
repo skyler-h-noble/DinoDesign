@@ -31,78 +31,38 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // --- Variant Style Builders --------------------------------------------------
 
-function solidStyles(color) {
-  const C = cap(color);
-  return {
-    unchecked: {
-      backgroundColor: 'transparent',
-      border: '2px solid var(--Quiet)',
-    },
-    checked: {
-      backgroundColor: 'var(--Buttons-' + C + '-Button)',
-      border: '2px solid var(--Buttons-' + C + '-Border)',
-    },
-    hover: {
-      backgroundColor: 'var(--Buttons-' + C + '-Hover)',
-      border: '2px solid var(--Buttons-' + C + '-Border)',
-    },
-    icon: 'var(--Buttons-' + C + '-Text)',
-  };
-}
-
 function outlineStyles(color) {
   const C = cap(color);
   return {
-    unchecked: {
-      backgroundColor: 'transparent',
-      border: '2px solid var(--Quiet)',
-    },
-    checked: {
-      backgroundColor: 'transparent',
-      border: '2px solid var(--Buttons-' + C + '-Border)',
-    },
-    hover: {
-      backgroundColor: 'var(--Hover)',
-      border: '2px solid var(--Buttons-' + C + '-Border)',
-    },
-    icon: 'var(--Text)',
+    type: 'outline',
+    color: C,
+    borderToken: 'var(--Buttons-' + C + '-Border)',
+    icon: 'var(--Text-' + C + ')',
   };
 }
 
 function lightStyles(color) {
   const C = cap(color);
   return {
-    unchecked: {
-      backgroundColor: 'var(--Background)',
-      border: '2px solid var(--Quiet)',
-    },
-    checked: {
-      backgroundColor: 'var(--Buttons-' + C + '-Button)',
-      border: '2px solid var(--Buttons-' + C + '-Border)',
-    },
-    hover: {
-      backgroundColor: 'var(--Hover)',
-      border: '2px solid var(--Buttons-' + C + '-Border)',
-    },
-    icon: 'var(--Buttons-' + C + '-Text)',
+    type: 'light',
+    color: C,
+    borderToken: 'var(--Buttons-' + C + '-Border)',
+    icon: 'var(--Text-' + C + ')',
     dataTheme: C + '-Light',
   };
 }
 
 function buildVariantMap() {
   const map = {};
-  // Solid variants for all colors
   COLORS.forEach((color) => {
-    map[color] = solidStyles(color);
-    map[color + '-solid']   = solidStyles(color);
     map[color + '-outline'] = outlineStyles(color);
     map[color + '-light']   = lightStyles(color);
   });
-  // Shorthand aliases
-  map['primary'] = solidStyles('primary');
-  map['outline'] = outlineStyles('primary');
-  map['solid']   = solidStyles('primary');
-  map['light']   = lightStyles('primary');
+  // Shorthand aliases — default to outline
+  map['primary']  = outlineStyles('primary');
+  map['default']  = outlineStyles('default');
+  map['outline']  = outlineStyles('primary');
+  map['light']    = lightStyles('primary');
   return map;
 }
 
@@ -120,34 +80,52 @@ function CheckboxBoxIcon({ size, variant, checked, indeterminate }) {
   const variantMap = buildVariantMap();
   const styles = variantMap[variant] || variantMap.primary;
   const sizeConfig = SIZE_MAP[size] || SIZE_MAP.medium;
-  const boxStyles = (checked || indeterminate) ? styles.checked : styles.unchecked;
-  // Light variants get a data-theme for theme-scoped backgrounds
-  const dataTheme = styles.dataTheme && !(checked || indeterminate) ? styles.dataTheme : undefined;
+  const isActive = checked || indeterminate;
+  const isLight = styles.type === 'light';
+
+  // Outer border always uses the themed border token
+  const outerBorder = styles.borderToken;
+
+  // Inner data attributes for light variant
+  const innerAttrs = isLight
+    ? { 'data-theme': styles.dataTheme, 'data-surface': 'Surface-Dim' }
+    : {};
 
   return (
     <Box
       className="chk-box-icon"
-      data-theme={dataTheme}
       sx={{
         width: sizeConfig.box,
         height: sizeConfig.box,
         borderRadius: 'var(--Checkbox-Radius, 4px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        transition: 'background-color 0.15s ease-in-out, border-color 0.15s ease-in-out',
+        border: '2px solid ' + outerBorder,
+        overflow: 'hidden',
         flexShrink: 0,
-        boxShadow: (checked || indeterminate) ? 'var(--Shadow-1), var(--Shadow-2)' : 'none',
-        ...boxStyles,
+        transition: 'border-color 0.15s ease-in-out',
       }}
     >
-      {(checked || indeterminate) && (
-        indeterminate ? (
-          <RemoveIcon sx={{ fontSize: sizeConfig.icon, color: styles.icon }} />
-        ) : (
-          <CheckIcon sx={{ fontSize: sizeConfig.icon, color: styles.icon }} />
-        )
-      )}
+      {/* Inner themed surface */}
+      <Box
+        {...innerAttrs}
+        sx={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'var(--Background)',
+          color: 'var(--Text)',
+          transition: 'background-color 0.15s ease-in-out',
+        }}
+      >
+        {isActive && (
+          indeterminate ? (
+            <RemoveIcon sx={{ fontSize: sizeConfig.icon, color: styles.icon }} />
+          ) : (
+            <CheckIcon sx={{ fontSize: sizeConfig.icon, color: styles.icon }} />
+          )
+        )}
+      </Box>
     </Box>
   );
 }
@@ -222,7 +200,6 @@ export function Checkbox({
         transition: 'background-color 0.15s ease-in-out',
         '&.Mui-checked, &.MuiCheckbox-indeterminate': { color: 'inherit' },
         '&:hover': { backgroundColor: 'transparent' },
-        '&:hover .chk-box-icon': { ...styles.hover },
         '&.Mui-focusVisible .chk-box-icon': {
           outline: '2px solid var(--Focus-Visible)',
           outlineOffset: '2px',

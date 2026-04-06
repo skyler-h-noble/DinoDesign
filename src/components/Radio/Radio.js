@@ -29,7 +29,7 @@ import { Body, BodySmall } from '../Typography';
  *   - Use RadioGroup with a label for grouped radio buttons
  */
 
-const COLORS = ['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // --- Variant Style Builders --------------------------------------------------
@@ -37,18 +37,9 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 function outlineStyles(color) {
   const C = cap(color);
   return {
-    unchecked: {
-      backgroundColor: 'transparent',
-      border: '2px solid var(--Buttons-' + C + '-Border)',
-    },
-    checked: {
-      backgroundColor: 'transparent',
-      border: '2px solid var(--Buttons-' + C + '-Border)',
-    },
-    hover: {
-      backgroundColor: 'var(--Buttons-Primary-Hover)',
-      border: '2px solid var(--Buttons-' + C + '-Border)',
-    },
+    type: 'outline',
+    color: C,
+    borderToken: 'var(--Buttons-' + C + '-Border)',
     dot: 'var(--Buttons-' + C + '-Border)',
   };
 }
@@ -56,19 +47,11 @@ function outlineStyles(color) {
 function lightStyles(color) {
   const C = cap(color);
   return {
-    unchecked: {
-      backgroundColor: 'var(--' + C + '-Color-11)',
-      border: '2px solid var(--Buttons-' + C + '-Border)',
-    },
-    checked: {
-      backgroundColor: 'var(--' + C + '-Color-11)',
-      border: '2px solid var(--Buttons-' + C + '-Border)',
-    },
-    hover: {
-      backgroundColor: 'var(--Hover-' + C + '-Color-11)',
-      border: '2px solid var(--Buttons-' + C + '-Border)',
-    },
+    type: 'light',
+    color: C,
+    borderToken: 'var(--Buttons-' + C + '-Border)',
     dot: 'var(--Buttons-' + C + '-Border)',
+    dataTheme: C + '-Light',
   };
 }
 
@@ -78,7 +61,10 @@ function buildVariantMap() {
     map[color + '-outline'] = outlineStyles(color);
     map[color + '-light']   = lightStyles(color);
   });
-  map['outline'] = outlineStyles('primary');
+  map['primary']  = outlineStyles('primary');
+  map['default']  = outlineStyles('default');
+  map['outline']  = outlineStyles('primary');
+  map['light']    = lightStyles('primary');
   return map;
 }
 
@@ -96,7 +82,12 @@ function RadioCircleIcon({ size, variant, checked }) {
   const variantMap = buildVariantMap();
   const styles = variantMap[variant] || variantMap['primary-outline'];
   const sizeConfig = SIZE_MAP[size] || SIZE_MAP.medium;
-  const boxStyles = checked ? styles.checked : styles.unchecked;
+  const isLight = styles.type === 'light';
+
+  // Inner data attributes for light variant
+  const innerAttrs = isLight
+    ? { 'data-theme': styles.dataTheme, 'data-surface': 'Surface-Dim' }
+    : {};
 
   return (
     <Box
@@ -105,26 +96,38 @@ function RadioCircleIcon({ size, variant, checked }) {
         width: sizeConfig.box,
         height: sizeConfig.box,
         borderRadius: '50%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        transition: 'background-color 0.15s ease-in-out, border-color 0.15s ease-in-out',
+        border: '2px solid ' + styles.borderToken,
+        overflow: 'hidden',
         flexShrink: 0,
-        boxShadow: checked ? 'var(--Shadow-1), var(--Shadow-2)' : 'none',
-        ...boxStyles,
+        transition: 'border-color 0.15s ease-in-out',
       }}
     >
-      {checked && (
-        <Box
-          sx={{
-            width: sizeConfig.dot,
-            height: sizeConfig.dot,
-            borderRadius: '50%',
-            backgroundColor: styles.dot,
-            transition: 'transform 0.15s ease-in-out',
-          }}
-        />
-      )}
+      {/* Inner themed surface */}
+      <Box
+        {...innerAttrs}
+        sx={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'var(--Background)',
+          borderRadius: '50%',
+          transition: 'background-color 0.15s ease-in-out',
+        }}
+      >
+        {checked && (
+          <Box
+            sx={{
+              width: sizeConfig.dot,
+              height: sizeConfig.dot,
+              borderRadius: '50%',
+              backgroundColor: styles.dot,
+              transition: 'transform 0.15s ease-in-out',
+            }}
+          />
+        )}
+      </Box>
     </Box>
   );
 }
@@ -189,7 +192,6 @@ export function Radio({
         transition: 'background-color 0.15s ease-in-out',
         '&.Mui-checked': { color: 'inherit' },
         '&:hover': { backgroundColor: 'transparent' },
-        '&:hover .radio-circle-icon': { ...styles.hover },
         '&.Mui-focusVisible .radio-circle-icon': {
           outline: '2px solid var(--Focus-Visible)',
           outlineOffset: '2px',

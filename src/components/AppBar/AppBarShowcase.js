@@ -121,6 +121,7 @@ export function AppBarShowcase() {
   const [searchPosition, setSearchPosition] = useState('right');
   const [mobileVariant, setMobileVariant]   = useState('search');
   const [bgTheme, setBgTheme]               = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
   const [contrastData, setContrastData]     = useState({});
 
   const isDesktop = mode === 'desktop';
@@ -225,7 +226,7 @@ export function AppBarShowcase() {
 
                   {/* Background */}
                   <Box sx={{ mb: 3 }}>
-                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} />
+                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
                   </Box>
 
                   {/* Mode */}

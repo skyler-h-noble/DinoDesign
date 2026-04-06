@@ -3,6 +3,9 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { Box } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import CheckIcon from '@mui/icons-material/Check';
+import { Icon } from '../Icon/Icon';
+import { Body, BodySmall } from '../Typography';
 
 /**
  * Select Component
@@ -19,10 +22,12 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
  * Smart positioning: opens downward if space allows, upward otherwise.
  */
 
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
 const SIZE_MAP = {
-  small:  { height: 32, fontSize: '13px', padding: '4px 8px', iconSize: 16 },
-  medium: { height: 40, fontSize: '14px', padding: '6px 12px', iconSize: 18 },
-  large:  { height: 56, fontSize: '16px', padding: '8px 16px', iconSize: 20 },
+  small:  { height: 'var(--Small-Button-Height)', fontSize: '13px', padding: '4px 8px', iconSize: 16 },
+  medium: { height: 'var(--Button-Height)',        fontSize: '14px', padding: '6px 12px', iconSize: 18 },
+  large:  { height: 'var(--Large-Button-Height)',  fontSize: '16px', padding: '8px 16px', iconSize: 20 },
 };
 
 const FLOATING_SIZE_MAP = {
@@ -73,6 +78,8 @@ export function Select({
   label,
   labelPosition = 'top',
   size = 'medium',
+  variant = 'outline',        // 'outline' | 'light'
+  color = 'primary',          // 'default' | 'primary' | 'secondary' | ...
   selectionStyle = 'default',
   mode = 'standard',
   placeholder = 'Select\u2026',
@@ -85,6 +92,11 @@ export function Select({
   sx = {},
   ...props
 }) {
+  const effectiveColor = color === 'default' ? 'primary' : color;
+  const C = cap(effectiveColor);
+  const isLight = variant === 'light';
+  const borderToken = 'var(--Buttons-' + C + '-Border)';
+  const activeTextColor = color === 'default' ? 'var(--Text)' : 'var(--Text-' + C + ')';
   const [internalValue, setInternalValue] = useState(defaultValue);
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -187,7 +199,6 @@ export function Select({
     if (!open && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) { e.preventDefault(); setOpen(true); }
   };
 
-  const borderColor = (open || focused) ? 'var(--Buttons-Default-Border)' : 'inherit';
 
   // The dropdown rendered into document.body via portal
   const dropdown = open ? ReactDOM.createPortal(
@@ -230,7 +241,8 @@ export function Select({
               onClick={() => handleSelect(optValue)}
               sx={{
                 display: 'flex', alignItems: 'center', gap: 1,
-                px: 1.5, py: 1, mx: 0.5,
+                px: 1.5, py: 0, mx: 0.5,
+                minHeight: sizeConfig.height,
                 cursor: 'pointer',
                 fontSize: sizeConfig.fontSize,
                 fontFamily: 'inherit',
@@ -250,9 +262,9 @@ export function Select({
                 }} />
               )}
               {(!isColor || showColorLabels) && (
-                <Box sx={{ flex: 1 }}>{optLabel}</Box>
+                <BodySmall style={{ flex: 1, color: 'inherit', fontWeight: 'inherit' }}>{optLabel}</BodySmall>
               )}
-              {isSelected && <Box sx={{ fontSize: '14px', flexShrink: 0, opacity: 0.6 }}>✓</Box>}
+              {isSelected && <Icon size="small" sx={{ opacity: 0.6, flexShrink: 0 }}><CheckIcon /></Icon>}
             </Box>
             {showDividers && !isLast && (
               <Box aria-hidden="true" sx={{ height: '1px', backgroundColor: 'var(--Border)', mx: 1, my: 0.25 }} />
@@ -267,11 +279,11 @@ export function Select({
   return (
     <Box
       ref={wrapperRef}
-      data-surface="Container-Lowest"
       className={
         'select-wrapper select-' + size +
         ' select-label-' + labelPosition +
         ' select-style-' + selectionStyle +
+        ' select-variant-' + variant +
         (open ? ' select-open' : '') +
         (disabled ? ' select-disabled' : '') +
         (className ? ' ' + className : '')
@@ -280,16 +292,41 @@ export function Select({
       {...props}
     >
       {/* Top label */}
-      {isTop && label && (
-        <Box sx={{
-          display: 'block', marginBottom: '6px',
-          color: disabled ? 'var(--Text-Quiet)' : 'var(--Text)',
-          fontSize: sizeConfig.fontSize, fontWeight: 500,
-          opacity: disabled ? 0.6 : 1,
-        }}>
-          {label}
-        </Box>
-      )}
+      {isTop && label && (() => {
+        const LabelComp = size === 'small' ? BodySmall : Body;
+        return (
+          <LabelComp
+            component="label"
+            style={{
+              display: 'block', marginBottom: '6px',
+              color: disabled ? 'var(--Quiet)' : 'var(--Text)',
+              fontWeight: 500,
+              opacity: disabled ? 0.6 : 1,
+            }}
+          >
+            {label}
+          </LabelComp>
+        );
+      })()}
+
+      {/* Outer border shell */}
+      <Box sx={{
+        border: '1px solid ' + borderToken,
+        borderRadius: 'var(--Style-Border-Radius)',
+        overflow: 'hidden',
+        transition: 'border-color 0.15s ease',
+        boxShadow: 'var(--Effect-Level-1)',
+        '&:hover': { boxShadow: 'var(--Effect-Level-2)' },
+        '&:focus-within': {
+          outline: '2px solid var(--Focus-Visible)',
+          outlineOffset: '2px',
+        },
+      }}>
+
+      {/* Inner themed surface */}
+      <Box
+        {...(isLight ? { 'data-theme': C + '-Light', 'data-surface': 'Surface-Dim' } : { 'data-surface': 'Container' })}
+      >
 
       {/* Trigger */}
       <Box
@@ -307,20 +344,19 @@ export function Select({
         onBlur={() => setFocused(false)}
         sx={{
           display: 'flex', alignItems: 'center', gap: 1,
-          width: fullWidth ? '100%' : 'auto', minWidth: 140,
-          height: sizeConfig.height + 'px',
+          width: '100%', minWidth: 140,
+          height: sizeConfig.height,
           padding: sizeConfig.padding,
           backgroundColor: 'var(--Background)',
-          border: '1px solid ' + borderColor,
-          borderRadius: 'var(--Style-Border-Radius)',
-          color: hasValue ? 'var(--Text)' : 'var(--Text-Quiet)',
+          border: 'none',
+          borderRadius: 0,
+          color: (hasValue || open) ? activeTextColor : 'var(--Quiet)',
           fontSize: sizeConfig.fontSize,
           fontFamily: 'inherit',
           cursor: disabled ? 'not-allowed' : 'pointer',
           opacity: disabled ? 0.5 : 1,
           outline: 'none', textAlign: 'left', position: 'relative',
-          transition: 'border-color 0.15s ease',
-          '&:focus-visible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '2px' },
+          transition: 'color 0.15s ease',
         }}
       >
         {startDecoration && (
@@ -337,7 +373,7 @@ export function Select({
             left: (sizeConfig.leftPad || 14) + (startDecoration ? 32 : 0) + 'px',
             transform: hasValue || open ? 'scale(0.75)' : 'translateY(-50%)',
             transformOrigin: 'top left',
-            color: open ? 'var(--Hotlink)' : 'var(--Text-Quiet)',
+            color: open ? activeTextColor : 'var(--Quiet)',
             fontSize: sizeConfig.fontSize, fontWeight: 400,
             pointerEvents: 'none',
             transition: 'top 0.15s ease, transform 0.15s ease, color 0.15s ease',
@@ -354,10 +390,12 @@ export function Select({
           {isColor && hasValue ? (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Box sx={{ width: 20, height: 20, borderRadius: '4px', backgroundColor: currentValue, border: '1px solid var(--Border)', flexShrink: 0 }} />
-              {showColorLabels && <Box component="span">{selectedLabel}</Box>}
+              {showColorLabels && <BodySmall style={{ color: 'inherit' }}>{selectedLabel}</BodySmall>}
             </Box>
           ) : (
-            hasValue ? selectedLabel : (isFloating && label ? '' : placeholder)
+            <BodySmall style={{ color: 'inherit' }}>
+              {hasValue ? selectedLabel : (isFloating && label ? '' : placeholder)}
+            </BodySmall>
           )}
         </Box>
 
@@ -368,6 +406,9 @@ export function Select({
           transition: 'transform 0.2s ease', flexShrink: 0,
         }} />
       </Box>
+
+      </Box>{/* end inner themed surface */}
+      </Box>{/* end outer border shell */}
 
       {/* Portal dropdown — renders into document.body to escape overflow:hidden */}
       {dropdown}

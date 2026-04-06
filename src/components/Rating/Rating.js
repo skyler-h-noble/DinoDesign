@@ -1,9 +1,10 @@
 // src/components/Rating/Rating.js
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Box } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import StarHalfIcon from '@mui/icons-material/StarHalf';
+import { BodySmall, Caption } from '../Typography';
 
 /**
  * Rating Component
@@ -28,7 +29,7 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 const COLOR_MAP = {
   default: 'Default',
-  primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary',
+  primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
   info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
 };
 
@@ -65,8 +66,9 @@ export function Rating({
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
 
   const filledColor = 'var(--Buttons-' + C + '-Button)';
-  const hoverColor = 'var(--Buttons-' + C + '-Hover)';
-  const emptyColor = 'var(--Text-Quiet)';
+  const filledBorder = 'var(--Buttons-' + C + '-Border)';
+  const emptyBorder = 'var(--Quiet)';
+  const hoverBorder = 'var(--Buttons-' + C + '-Border)';
 
   const handleClick = (newValue) => {
     if (!isInteractive) return;
@@ -82,47 +84,63 @@ export function Rating({
     setHoverValue(val);
   };
 
+  const getStarStyles = (isFilled, isHalfFilled) => {
+    if (isFilled || isHalfFilled) {
+      return {
+        color: filledColor,
+        filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.15))',
+        '& .MuiSvgIcon-root': {
+          stroke: filledBorder,
+          strokeWidth: 0.5,
+        },
+      };
+    }
+    return {
+      color: 'transparent',
+      '& .MuiSvgIcon-root': {
+        stroke: emptyBorder,
+        strokeWidth: 1,
+      },
+    };
+  };
+
+  const hoverStarSx = isInteractive ? {
+    '&:hover': {
+      '& .MuiSvgIcon-root': {
+        stroke: hoverBorder,
+        strokeWidth: 1,
+      },
+    },
+  } : {};
+
   const renderStar = (index) => {
     const starValue = index + 1;
     const halfValue = index + 0.5;
 
     const isFilled = displayValue !== null && starValue <= displayValue;
     const isHalfFilled = displayValue !== null && !isFilled && isHalf && halfValue <= displayValue;
-    const isHovering = hoverValue !== null;
 
-    const starColor = (isFilled || isHalfFilled)
-      ? (isHovering ? hoverColor : filledColor)
-      : emptyColor;
-
-    const IconComponent = isHalfFilled ? StarHalfIcon : (isFilled ? StarIcon : StarBorderIcon);
+    const IconComponent = isHalfFilled ? StarHalfIcon : StarIcon;
+    const starStyles = getStarStyles(isFilled, isHalfFilled);
 
     if (isHalf && isInteractive) {
-      // Half-precision: split star into two click zones
       return (
         <Box
           key={index}
-          sx={{ position: 'relative', display: 'inline-flex', cursor: 'pointer' }}
+          sx={{ position: 'relative', display: 'inline-flex', cursor: 'pointer', ...starStyles, ...hoverStarSx }}
           onMouseLeave={() => setHoverValue(null)}
         >
-          {/* Left half */}
           <Box
-            sx={{
-              position: 'absolute', left: 0, top: 0, width: '50%', height: '100%',
-              zIndex: 1, cursor: 'pointer',
-            }}
+            sx={{ position: 'absolute', left: 0, top: 0, width: '50%', height: '100%', zIndex: 1, cursor: 'pointer' }}
             onMouseEnter={() => handleHalf(index, true)}
             onClick={() => handleClick(halfValue)}
           />
-          {/* Right half */}
           <Box
-            sx={{
-              position: 'absolute', right: 0, top: 0, width: '50%', height: '100%',
-              zIndex: 1, cursor: 'pointer',
-            }}
+            sx={{ position: 'absolute', right: 0, top: 0, width: '50%', height: '100%', zIndex: 1, cursor: 'pointer' }}
             onMouseEnter={() => handleHalf(index, false)}
             onClick={() => handleClick(starValue)}
           />
-          <IconComponent sx={{ fontSize: s.iconSize, color: starColor, transition: 'color 0.1s ease' }} />
+          <IconComponent sx={{ fontSize: s.iconSize, transition: 'color 0.1s ease, filter 0.1s ease' }} />
         </Box>
       );
     }
@@ -143,8 +161,7 @@ export function Rating({
           if (!isInteractive) return;
           if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
             e.preventDefault();
-            const next = Math.min((currentValue || 0) + precision, max);
-            handleClick(next);
+            handleClick(Math.min((currentValue || 0) + precision, max));
           }
           if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
             e.preventDefault();
@@ -157,10 +174,12 @@ export function Rating({
           border: 'none', backgroundColor: 'transparent', padding: 0,
           cursor: isInteractive ? 'pointer' : 'default',
           outline: 'none',
+          ...starStyles,
+          ...hoverStarSx,
           '&:focus-visible': isInteractive ? { outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px', borderRadius: '2px' } : {},
         }}
       >
-        <IconComponent sx={{ fontSize: s.iconSize, color: starColor, transition: 'color 0.1s ease' }} />
+        <IconComponent sx={{ fontSize: s.iconSize, transition: 'color 0.1s ease, filter 0.1s ease' }} />
       </Box>
     );
   };
@@ -184,9 +203,9 @@ export function Rating({
     >
       {Array.from({ length: max }, (_, i) => renderStar(i))}
       {currentValue === null && !hoverValue && (
-        <Box component="span" sx={{ fontSize: size === 'small' ? '11px' : '13px', color: 'var(--Text-Quiet)', ml: 0.5 }}>
+        <Caption style={{ color: 'var(--Quiet)', marginLeft: 4 }}>
           {emptyLabel}
-        </Box>
+        </Caption>
       )}
     </Box>
   );

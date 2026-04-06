@@ -5,26 +5,25 @@ import { Box as MuiBox } from '@mui/material';
 /**
  * Box Component
  *
- * A theme-aware container. Sets data-theme to scope CSS variables.
+ * Theme-aware container matching Card's two-layer structure.
  *
- * COLORS (32 options — 8 families × 4 tones):
- *   Base:   Primary, Secondary, Tertiary, Neutral, Info, Success, Warning, Error
- *   Light:  Primary-Light, Secondary-Light, … Error-Light
- *   Medium: Primary-Medium, Secondary-Medium, … Error-Medium
- *   Dark:   Primary-Dark, Secondary-Dark, … Error-Dark
+ * VARIANTS:
+ *   default   No theme. data-surface="Container". bg var(--Background).
+ *   solid     data-theme="{Theme}" data-surface="Surface". bg var(--Background).
+ *   light     data-theme="{Theme}-Light" data-surface="Surface". bg var(--Background).
+ *   dark      data-theme="{Theme}" data-surface="Surface-Dimmest". bg var(--Background).
  *
- * Each sets data-theme="{Color}" which scopes:
- *   bg: var(--Background)
- *   text: var(--Text)
- *   border: var(--Border)
+ * COLORS: primary | secondary | tertiary | neutral | info | success | warning | error
  *
- * PADDING: none, xs, sm, md, lg, xl
- * BORDER RADIUS: none, sm, md, lg, full
- * ELEVATION: 0–4
- * BORDER: optional 1px solid var(--Border)
+ * STRUCTURE:
+ *   Outer shell — border, border-radius, box-shadow
+ *   Inner content — data-theme + data-surface, background, text
  *
- * Renders as <div> by default. Supports component prop.
+ * PADDING: none | xs | sm | md | lg | xl
+ * ELEVATION: Level 1 rest, Level 2 hover (when clickable or elevated)
  */
+
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 const PADDING_MAP = {
   none: 0,
@@ -35,65 +34,91 @@ const PADDING_MAP = {
   xl: 6,
 };
 
-const RADIUS_MAP = {
-  none: '0px',
-  sm: '4px',
-  md: 'var(--Style-Border-Radius, 8px)',
-  lg: '16px',
-  full: '9999px',
-};
-
-const ELEVATION_MAP = {
-  0: 'none',
-  1: '0 1px 3px rgba(0,0,0,0.08)',
-  2: '0 2px 8px rgba(0,0,0,0.12)',
-  3: '0 4px 16px rgba(0,0,0,0.16)',
-  4: '0 8px 32px rgba(0,0,0,0.20)',
-};
-
 export function Box({
   children,
-  color,
+  variant = 'default',
+  color = 'primary',
   padding = 'md',
-  borderRadius = 'md',
-  elevation = 0,
-  border = false,
+  elevated = false,
+  clickable = false,
+  onClick,
   component = 'div',
   className = '',
   sx = {},
   ...props
 }) {
-  const dataAttrs = {};
-  if (color) {
-    dataAttrs['data-theme'] = color;
-    dataAttrs['data-surface'] = 'Surface';
-  }
+  const isDefault = variant === 'default';
+  const C = cap(color);
+
+  // Theme for inner content
+  const dataTheme = isDefault
+    ? undefined
+    : variant === 'light'
+      ? C + '-Light'
+      : C;
+
+  // Surface for inner content
+  const dataSurface = isDefault
+    ? 'Container'
+    : variant === 'dark'
+      ? 'Surface-Dimmest'
+      : 'Surface';
 
   const p = PADDING_MAP[padding] !== undefined ? PADDING_MAP[padding] : PADDING_MAP.md;
-  const r = RADIUS_MAP[borderRadius] || RADIUS_MAP.md;
-  const shadow = ELEVATION_MAP[elevation] || ELEVATION_MAP[0];
+  const isClickable = clickable || !!onClick;
+
+  const restShadow = elevated ? 'var(--Effect-Level-3)' : 'var(--Effect-Level-2)';
+  const hoverShadow = elevated ? 'var(--Effect-Level-4)' : 'var(--Effect-Level-3)';
 
   return (
     <MuiBox
       component={component}
-      {...dataAttrs}
-      className={'themed-box' +
-        (color ? ' themed-box-' + color.toLowerCase() : '') +
-        (border ? ' themed-box-bordered' : '') +
+      onClick={isClickable ? onClick : undefined}
+      role={isClickable ? 'button' : undefined}
+      tabIndex={isClickable ? 0 : undefined}
+      className={'dyno-box dyno-box-' + variant +
+        (isClickable ? ' dyno-box-clickable' : '') +
+        (elevated ? ' dyno-box-elevated' : '') +
         (className ? ' ' + className : '')}
       sx={{
-        backgroundColor: color ? 'var(--Background)' : undefined,
-        color: color ? 'var(--Text)' : undefined,
-        padding: p,
-        borderRadius: r,
-        boxShadow: shadow,
-        ...(border && { border: '1px solid var(--Border)' }),
-        fontFamily: 'inherit',
+        border: '1px solid var(--Border-Variant)',
+        borderRadius: 'var(--Style-Border-Radius)',
+        boxShadow: restShadow,
+        overflow: 'hidden',
+        transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
+        ...(isClickable && {
+          cursor: 'pointer',
+          '&:hover': {
+            borderColor: 'var(--Buttons-Default-Border)',
+            boxShadow: hoverShadow,
+          },
+          '&:active': { transform: 'scale(0.995)' },
+          '&:focus-visible': {
+            outline: '3px solid var(--Focus-Visible)',
+            outlineOffset: '3px',
+          },
+        }),
+        ...(!isClickable && {
+          '&:hover': { boxShadow: hoverShadow },
+        }),
         ...sx,
       }}
       {...props}
     >
-      {children}
+      {/* Inner content — scoped theme and surface */}
+      <MuiBox
+        data-theme={dataTheme || undefined}
+        data-surface={dataSurface}
+        sx={{
+          padding: p,
+          backgroundColor: 'var(--Background)',
+          color: 'var(--Text)',
+          fontFamily: 'inherit',
+          borderRadius: 'calc(var(--Style-Border-Radius) - 1px)',
+        }}
+      >
+        {children}
+      </MuiBox>
     </MuiBox>
   );
 }

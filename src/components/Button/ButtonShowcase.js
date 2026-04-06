@@ -164,6 +164,7 @@ export function ButtonShowcase() {
   const [swatchColor, setSwatchColor]   = useState('');
   const [contrastData, setContrastData] = useState({});
   const [bgTheme, setBgTheme]           = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
 
   // Set default swatch color from primary brand color on mount
   useEffect(() => {
@@ -305,7 +306,7 @@ export function ButtonShowcase() {
 
                   {/* Background */}
                   <Box sx={{ mb: 3 }}>
-                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} />
+                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
                   </Box>
 
                   {/* Style */}

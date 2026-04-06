@@ -155,7 +155,6 @@ export { Accordion, AccordionSummary, AccordionDetails, AccordionGroup } from '.
 // ========== TREE VIEW ==========
 export {
   DynoTreeView,
-  DefaultTreeView,
   SolidTreeView,
   LightTreeView,
   DEFAULT_ITEMS,

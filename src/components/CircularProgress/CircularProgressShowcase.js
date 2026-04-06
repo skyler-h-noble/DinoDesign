@@ -93,6 +93,7 @@ export function CircularProgressShowcase() {
   const [value, setValue] = useState(65);
   const [showLabel, setShowLabel] = useState(false);
   const [bgTheme, setBgTheme] = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
 
   const generateCode = () => {
     const parts = [];
@@ -156,7 +157,7 @@ export function CircularProgressShowcase() {
 
                   {/* Background */}
                   <Box sx={{ mb: 3 }}>
-                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} />
+                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
                   </Box>
 
                   {/* Color */}

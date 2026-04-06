@@ -24,6 +24,7 @@ import {
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
 
 const COLOR_GROUPS = [
+  { label: 'Default', colors: ['default'] },
   { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
   { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
 ];
@@ -226,7 +227,7 @@ function JsonEditor({ value, onChange }) {
 // ─── Main Showcase ───────────────────────────────────────────────────────────
 
 export function TreeViewShowcase() {
-  const [variant, setVariant] = useState('default');
+  const [variant, setVariant] = useState('solid');
   const [color, setColor]                   = useState('primary');
   const [density, setDensity]               = useState('default');
   const [animation, setAnimation]           = useState('slide');
@@ -236,6 +237,7 @@ export function TreeViewShowcase() {
   const [showIcons, setShowIcons]           = useState(false);
   const [jsonItems, setJsonItems]           = useState(DEFAULT_ITEMS);
   const [bgTheme, setBgTheme]               = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
   const [contrastData, setContrastData]     = useState({});
 
   const previewRef = useRef(null);
@@ -336,37 +338,34 @@ export function TreeViewShowcase() {
 
                   {/* Background */}
                   <Box sx={{ mb: 3 }}>
-                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} />
+                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
                   </Box>
 
                   {/* Style */}
                   <Box>
                     <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</OverlineSmall>
                     <Stack direction="row" spacing={1}>
-                      <ControlButton label="Default" selected={variant === 'default'} onClick={() => setVariant('default')} />
-                      <ControlButton label="Solid"   selected={variant === 'solid'}   onClick={() => setVariant('solid')} />
-                      <ControlButton label="Light"   selected={variant === 'light'}   onClick={() => setVariant('light')} />
+                      <ControlButton label="Solid" selected={variant === 'solid'} onClick={() => setVariant('solid')} />
+                      <ControlButton label="Light" selected={variant === 'light'} onClick={() => setVariant('light')} />
                     </Stack>
                   </Box>
 
-                  {/* Color — hidden for default variant */}
-                  {variant !== 'default' && (
-                    <Box sx={{ mt: 3 }}>
-                      <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
-                      <Stack spacing={1.5}>
-                        {COLOR_GROUPS.map((group) => (
-                          <Box key={group.label}>
-                            <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 4, fontWeight: 600 }}>{group.label}</Caption>
-                            <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-                              {group.colors.map((c) => (
-                                <ColorSwatchButton key={c} color={c} selected={color === c} onClick={setColor} />
-                              ))}
-                            </Stack>
-                          </Box>
-                        ))}
-                      </Stack>
-                    </Box>
-                  )}
+                  {/* Color */}
+                  <Box sx={{ mt: 3 }}>
+                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
+                    <Stack spacing={1.5}>
+                      {COLOR_GROUPS.map((group) => (
+                        <Box key={group.label}>
+                          <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 4, fontWeight: 600 }}>{group.label}</Caption>
+                          <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
+                            {group.colors.map((c) => (
+                              <ColorSwatchButton key={c} color={c} selected={color === c} onClick={setColor} />
+                            ))}
+                          </Stack>
+                        </Box>
+                      ))}
+                    </Stack>
+                  </Box>
 
                   {/* Density */}
                   <Box sx={{ mt: 3 }}>

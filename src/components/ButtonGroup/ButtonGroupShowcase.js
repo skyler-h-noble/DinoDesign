@@ -110,6 +110,7 @@ export function ButtonGroupShowcase() {
   const [fullWidth, setFullWidth]       = useState(false);
   const [selectedBtn, setSelectedBtn]   = useState('week');
   const [bgTheme, setBgTheme]           = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
 
   const getIconEl = () => {
     const IconComp = MuiIcons[iconName] || MuiIcons['Add'];
@@ -217,7 +218,7 @@ export function ButtonGroupShowcase() {
 
                   {/* Background */}
                   <Box sx={{ mb: 3 }}>
-                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} />
+                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
                   </Box>
 
                   {/* Style */}

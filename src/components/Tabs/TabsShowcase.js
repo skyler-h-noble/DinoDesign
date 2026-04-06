@@ -177,6 +177,7 @@ export function TabsShowcase() {
   const [tabLabels, setTabLabels] = useState(DEFAULT_LABELS.slice(0, 3));
   const [tabIcons, setTabIcons] = useState([0, 1, 2]);
   const [bgTheme, setBgTheme] = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
   const [contrastData, setContrastData] = useState({});
 
   const isStandard = variant === 'standard';
@@ -329,7 +330,7 @@ export function TabsShowcase() {
 
                   {/* Background */}
                   <Box sx={{ mb: 3 }}>
-                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} />
+                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
                   </Box>
 
                   {/* Style */}

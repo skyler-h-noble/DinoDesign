@@ -141,6 +141,7 @@ export function AccordionShowcase() {
   const [disabled, setDisabled]         = useState(false);
   const [contrastData, setContrastData] = useState({});
   const [bgTheme, setBgTheme] = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
 
   const isDefaultVariant = variant === 'default';
   const isDefaultColor   = color === 'default';
@@ -237,7 +238,7 @@ export function AccordionShowcase() {
 
                   {/* Background */}
                   <Box sx={{ mb: 3 }}>
-                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} />
+                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
                   </Box>
 
                   {/* Style */}

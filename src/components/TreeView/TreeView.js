@@ -61,7 +61,7 @@ function getItemSx(d) {
       minHeight:       d.minHeight,
       fontSize:        d.fontSize,
       fontFamily:      'inherit',
-      color:           'var(--Text-Quiet)',
+      color:           'var(--Quiet)',
       padding:         '0 8px',
       borderRadius:    'var(--Style-Border-Radius)',
       border:          '1px solid transparent',
@@ -116,10 +116,10 @@ function getItemSx(d) {
       width:      '100%',
     },
 
-    // Expand/collapse icon
+    // Expand/collapse icon — inherits text color
     '& > .MuiTreeItem-content .MuiTreeItem-iconContainer': {
       width:   d.iconSize + 'px',
-      color:   'var(--Text-Quiet)',
+      color:   'inherit',
       zIndex:  1,
     },
 
@@ -143,7 +143,7 @@ function ItemLabel({ item, d, isCompact }) {
       width:      '100%',
     }}>
       {item.icon && (
-        <Icon size="small" sx={{ color: 'inherit', opacity: 0.8, flexShrink: 0 }}>
+        <Icon size="small" sx={{ color: 'inherit', flexShrink: 0 }}>
           {item.icon}
         </Icon>
       )}
@@ -209,7 +209,7 @@ function renderItems(items = [], density = 'default', color = 'primary', variant
 export function DynoTreeView({
   // Style
   color          = 'default',
-  variant        = 'default',   // 'default' | 'solid' | 'light'
+  variant        = 'solid',     // 'solid' | 'light'
   density        = 'default',   // 'compact' | 'default'
   animation      = 'slide',     // 'none' | 'slide' | 'spring'
 
@@ -256,11 +256,9 @@ export function DynoTreeView({
 
   // Compute data-theme based on variant
   const colorToken = cap(color);
-  const dataTheme = effectiveVariant === 'default'
-    ? 'Default'
-    : effectiveVariant === 'light'
-      ? colorToken + '-Light'
-      : colorToken;
+  const dataTheme = effectiveVariant === 'light'
+    ? colorToken + '-Light'
+    : colorToken;
 
   // Track selection internally so ItemLabel knows which items are selected
   const [internalSelected, setInternalSelected] = useState(
@@ -375,8 +373,7 @@ export const DEFAULT_ITEMS = [
 
 // ─── Convenience exports ──────────────────────────────────────────────────────
 
-export const DefaultTreeView = (p) => <DynoTreeView variant="default" {...p} />;
-export const SolidTreeView   = (p) => <DynoTreeView variant="solid"   {...p} />;
-export const LightTreeView   = (p) => <DynoTreeView variant="light"   {...p} />;
+export const SolidTreeView = (p) => <DynoTreeView variant="solid" {...p} />;
+export const LightTreeView = (p) => <DynoTreeView variant="light" {...p} />;
 
 export default DynoTreeView;
