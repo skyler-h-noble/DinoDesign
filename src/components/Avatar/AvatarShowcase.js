@@ -1,23 +1,29 @@
 // src/components/Avatar/AvatarShowcase.js
-import React, { useState, useRef } from 'react';
-import {
-  Box, Stack, Grid, Tabs, Tab, Tooltip, IconButton as MuiIconButton, Switch,
-} from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import { Avatar, AvatarGroup } from './Avatar';
+import { Button } from '../Button/Button';
+import { Switch } from '../Switch/Switch';
+import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
+import { PreviewSurface } from '../PreviewSurface';
+import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H4, H5, BodySmall, Caption, Label, OverlineSmall
+  H2, H5, BodySmall, Caption, Label, OverlineSmall,
 } from '../Typography';
 
-const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
-const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
-const COLOR_MAP = {
-  default: 'Default', primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
-  info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
-};
+const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
 
-/* --- Helpers --- */
+const COLOR_GROUPS = [
+  { label: 'Default', colors: ['default'] },
+  { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
+  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+];
+
+const CONTENT_TYPES = ['initials', 'fallback', 'image'];
+
+/* ── Helpers ── */
 function CopyButton({ code }) {
   const [copied, setCopied] = useState(false);
   const handleCopy = async () => {
@@ -25,354 +31,215 @@ function CopyButton({ code }) {
     catch (err) { console.error('Copy failed:', err); }
   };
   return (
-    <Tooltip title={copied ? 'Copied!' : 'Copy code'}>
-      <MuiIconButton size="small" onClick={handleCopy}
-        sx={{ color: copied ? '#4ade80' : '#9ca3af', '&:hover': { backgroundColor: '#333', color: '#e5e7eb' } }}>
-        {copied ? <CheckIcon fontSize="small" /> : <ContentCopyIcon fontSize="small" />}
-      </MuiIconButton>
-    </Tooltip>
+    <Button iconOnly variant="ghost" size="small" onClick={handleCopy}
+      aria-label={copied ? 'Copied' : 'Copy code'} title={copied ? 'Copied!' : 'Copy code'}
+      sx={{ color: copied ? '#4ade80' : '#9ca3af' }}>
+      {copied ? <CheckIcon fontSize="small" /> : <ContentCopyIcon fontSize="small" />}
+    </Button>
   );
 }
-function ControlButton({ label, selected, onClick, disabled }) {
+
+function ControlButton({ label, selected, onClick }) {
   return (
-    <Box component="button" onClick={onClick} disabled={disabled}
-      sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        border: '2px solid var(--Buttons-Primary-Button)', borderRadius: 'var(--Style-Border-Radius)',
-        backgroundColor: selected ? 'var(--Buttons-Primary-Button)' : 'transparent',
-        color: selected ? 'var(--Buttons-Primary-Text)' : 'var(--Text)',
-        padding: '4px 12px', fontSize: '14px',
-        fontFamily: 'inherit', fontWeight: 500, whiteSpace: 'nowrap', flexShrink: 0,
-        opacity: disabled ? 0.4 : 1,
-        transition: 'background-color 0.15s ease, color 0.15s ease',
-        '&:hover': { backgroundColor: disabled ? 'transparent' : (selected ? 'var(--Buttons-Primary-Hover)' : 'var(--Surface-Dim)') },
-        '&:focus-visible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '2px' } }}>
+    <Button variant={selected ? 'default' : 'default-outline'} size="small" onClick={onClick}>
       {label}
-    </Box>
+    </Button>
   );
 }
-function TextInput({ value, onChange, placeholder, label: inputLabel, sx: sxOverride }) {
-  return (
-    <Box>
-      {inputLabel && <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 4 }}>{inputLabel}</Caption>}
-      <Box component="input" type="text" value={value}
-        onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
-        sx={{
-          width: '100%', padding: '6px 10px', fontSize: '13px', fontFamily: 'inherit',
-          border: '1px solid var(--Border)', borderRadius: '4px',
-          backgroundColor: 'var(--Background)', color: 'var(--Text)', outline: 'none',
-          '&:focus': { borderColor: 'var(--Focus-Visible)' },
-          ...sxOverride,
-        }}
-      />
-    </Box>
-  );
-}
+
 function ColorSwatchButton({ color, selected, onClick }) {
-  const C = COLOR_MAP[color] || 'Default';
+  const C = cap(color);
   return (
-    <Tooltip title={C} arrow>
-      <Box onClick={() => onClick(color)} role="button" aria-label={'Select ' + C} aria-pressed={selected}
-        sx={{ width: 32, height: 32, borderRadius: '4px',
-          backgroundColor: 'var(--Buttons-' + C + '-Button)',
-          border: selected ? '2px solid var(--Text)' : '2px solid transparent',
-          outline: selected ? '2px solid var(--Focus-Visible)' : '2px solid transparent',
-          outlineOffset: '1px', cursor: 'pointer', flexShrink: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transition: 'transform 0.1s ease', '&:hover': { transform: 'scale(1.1)' } }}>
-        {selected && <CheckIcon sx={{ fontSize: 16, color: 'var(--Buttons-' + C + '-Text)' }} />}
-      </Box>
-    </Tooltip>
+    <Box
+      component="button"
+      onClick={() => onClick(color)}
+      aria-label={'Select ' + C}
+      aria-pressed={selected}
+      title={C}
+      sx={{
+        width: 'var(--Button-Height)', height: 'var(--Button-Height)', borderRadius: '4px',
+        backgroundColor: 'var(--Buttons-' + C + '-Button)',
+        border: selected ? '2px solid var(--Text)' : '2px solid transparent',
+        outline: selected ? '2px solid var(--Focus-Visible)' : '2px solid transparent',
+        outlineOffset: '1px', cursor: 'pointer', flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        transition: 'transform 0.1s ease', '&:hover': { transform: 'scale(1.1)' },
+      }}>
+      {selected && (
+        <CheckIcon sx={{ fontSize: 16, color: 'var(--Buttons-' + C + '-Text)', pointerEvents: 'none' }} />
+      )}
+    </Box>
   );
 }
 
+/* ── Main Showcase ── */
 export function AvatarShowcase() {
-  const [mainTab, setMainTab] = useState(0);
+  const [color, setColor]             = useState('default');
+  const [size, setSize]               = useState('medium');
+  const [contentType, setContentType] = useState('initials');
+  const [clickable, setClickable]     = useState(false);
+  const [showGroup, setShowGroup]     = useState(false);
+  const [bgTheme, setBgTheme]         = useState(null);
+  const [bgSurface, setBgSurface]     = useState('Surface');
 
-  const [content, setContent] = useState('initials');
-  const [initials, setInitials] = useState('AB');
-  const [imageSrc, setImageSrc] = useState('');
-  const [color, setColor] = useState('default');
-  const [size, setSize] = useState('medium');
-  const [clickable, setClickable] = useState(false);
-
-  const fileInputRef = useRef(null);
-
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => setImageSrc(ev.target.result);
-    reader.readAsDataURL(file);
+  const getAvatarProps = () => {
+    const p = { color, size, clickable };
+    if (contentType === 'initials') p.initials = 'LN';
+    if (contentType === 'image') p.src = 'https://i.pravatar.cc/150?img=3';
+    if (contentType === 'image') p.alt = 'User avatar';
+    return p;
   };
-
-  const clearImage = () => {
-    setImageSrc('');
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-
-  const C = COLOR_MAP[color] || 'Default';
 
   const generateCode = () => {
     const parts = [];
-    if (content === 'image' && imageSrc) parts.push('src="[image-url]"');
-    if (content === 'initials') parts.push('initials="' + initials + '"');
     if (color !== 'default') parts.push('color="' + color + '"');
     if (size !== 'medium') parts.push('size="' + size + '"');
+    if (contentType === 'initials') parts.push('initials="LN"');
+    if (contentType === 'image') parts.push('src="..." alt="User avatar"');
     if (clickable) parts.push('clickable onClick={handleClick}');
+
+    if (showGroup) {
+      return '<AvatarGroup max={3}>\n  <Avatar ' + parts.join(' ') + ' />\n  <Avatar initials="AB" />\n  <Avatar initials="CD" />\n  <Avatar initials="EF" />\n</AvatarGroup>';
+    }
     return '<Avatar ' + parts.join(' ') + ' />';
   };
 
   return (
     <Box sx={{ pb: 8 }}>
       <H2>Avatar</H2>
-      <Tabs value={mainTab} onChange={(e, v) => setMainTab(v)}
-        sx={{ mt: 3, mb: 0, borderBottom: '1px solid var(--Border)',
-          '& .MuiTabs-indicator': { backgroundColor: 'var(--Buttons-Primary-Button)', height: 3 },
-          '& .MuiTab-root': { color: 'var(--Text-Quiet)', textTransform: 'none', fontWeight: 500, '&.Mui-selected': { color: 'var(--Text)' } } }}>
-        <Tab label="Playground" />
-        <Tab label="Accessibility" />
-      </Tabs>
 
-      {mainTab === 0 && (
-        <Grid container sx={{ minHeight: 400 }}>
-          {/* Preview */}
-          <Grid item sx={{ width: { xs: '100%', md: 'calc((100vw - 432px) / 2)' }, flexShrink: 0 }}>
-            <Box sx={{ p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              minHeight: 300, backgroundColor: 'var(--Background)', borderBottom: '1px solid var(--Border)', gap: 3 }}>
+      <Grid container sx={{ mt: 2, alignItems: 'flex-start' }}>
 
-              <Avatar
-                key={'av-' + content + '-' + color + '-' + size + '-' + clickable + '-' + imageSrc}
-                src={content === 'image' ? imageSrc || undefined : undefined}
-                initials={content === 'initials' ? initials : undefined}
-                color={color}
-                size={size}
-                clickable={clickable}
-                onClick={clickable ? () => {} : undefined}
-              />
-            </Box>
+        <Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, pr: { md: 3 } }}>
 
-            {/* Code */}
-            <Box sx={{ backgroundColor: '#1e1e1e', borderBottom: '1px solid var(--Border)' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, py: 1, borderBottom: '1px solid #333' }}>
-                <Caption style={{ color: '#9ca3af' }}>JSX</Caption>
-                <CopyButton code={generateCode()} />
-              </Box>
-              <Box sx={{ p: 2, overflow: 'auto', maxHeight: 200 }}>
-                <Box component="code" sx={{ fontFamily: 'monospace', fontSize: '13px', color: '#e5e7eb', whiteSpace: 'pre', display: 'block' }}>{generateCode()}</Box>
-              </Box>
-            </Box>
-          </Grid>
-
-          {/* Controls */}
-          <Grid item sx={{ width: { xs: 'calc(100vw - 432px)', md: 'calc((100vw - 432px) / 2)' }, flexShrink: 0, p: 3, backgroundColor: 'var(--Container)', overflowY: 'auto' }}>
-            <H4>Playground</H4>
-
-            {/* Content */}
-            <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>CONTENT</OverlineSmall>
-              <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-                <ControlButton label="Initials" selected={content === 'initials'} onClick={() => setContent('initials')} />
-                <ControlButton label="Image" selected={content === 'image'} onClick={() => setContent('image')} />
-                <ControlButton label="Fallback" selected={content === 'fallback'} onClick={() => setContent('fallback')} />
-              </Stack>
-              <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
-                {content === 'initials' ? 'Up to 2 characters displayed.' :
-                 content === 'image' ? 'Upload a photo. Falls back to icon if image fails.' :
-                 'No image or initials — shows person icon.'}
-              </Caption>
-            </Box>
-
-            {/* Initials input */}
-            {content === 'initials' && (
-              <Box sx={{ mt: 2 }}>
-                <TextInput label="Initials" value={initials} onChange={(v) => setInitials(v.slice(0, 2))} placeholder="AB" />
-              </Box>
+          <PreviewSurface theme={bgTheme} surface={bgSurface}>
+            {showGroup ? (
+              <AvatarGroup max={3} size={size}>
+                <Avatar {...getAvatarProps()} />
+                <Avatar color={color} size={size} initials="AB" />
+                <Avatar color={color} size={size} initials="CD" />
+                <Avatar color={color} size={size} initials="EF" />
+              </AvatarGroup>
+            ) : (
+              <Avatar {...getAvatarProps()} />
             )}
+          </PreviewSurface>
 
-            {/* Image upload */}
-            {content === 'image' && (
-              <Box sx={{ mt: 2 }}>
-                <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 6 }}>Upload Image</Caption>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Box
-                    component="button" type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    sx={{
-                      display: 'inline-flex', alignItems: 'center', px: 2, py: 0.75,
-                      backgroundColor: 'var(--Buttons-Default-Light-Button)',
-                      border: '1px solid var(--Buttons-Default-Border)',
-                      color: 'var(--Buttons-Default-Light-Text)',
-                      borderRadius: 'var(--Style-Border-Radius)',
-                      fontSize: '13px', fontFamily: 'inherit', fontWeight: 500,
-                      cursor: 'pointer',
-                      '&:hover': { backgroundColor: 'var(--Buttons-Default-Hover)' },
-                      '&:focus-visible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '2px' },
-                    }}
-                  >
-                    Choose File
-                  </Box>
-                  {imageSrc && (
-                    <Box
-                      component="button" type="button"
-                      onClick={clearImage}
-                      sx={{
-                        display: 'inline-flex', alignItems: 'center', px: 1.5, py: 0.75,
-                        backgroundColor: 'transparent',
-                        border: '1px solid var(--Border)',
-                        color: 'var(--Text-Quiet)',
-                        borderRadius: 'var(--Style-Border-Radius)',
-                        fontSize: '12px', fontFamily: 'inherit',
-                        cursor: 'pointer',
-                        '&:hover': { color: 'var(--Text)' },
-                      }}
-                    >
-                      Clear
-                    </Box>
-                  )}
-                </Box>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  style={{ display: 'none' }}
-                />
-                {imageSrc && <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 4 }}>Image loaded.</Caption>}
-                {!imageSrc && <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 4 }}>No image — will show fallback icon.</Caption>}
-              </Box>
-            )}
-
-            {/* Color */}
-            <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
-              <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-                {COLORS.map((c) => (
-                  <ColorSwatchButton key={c} color={c} selected={color === c} onClick={setColor} />
-                ))}
-              </Stack>
-              <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
-                {'bg: var(--Buttons-{C}-Border), text: var(--Buttons-{C}-Text).'}
-              </Caption>
+          <Box sx={{ backgroundColor: '#1e1e1e', borderRadius: '8px', overflow: 'hidden', mt: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              px: 2, py: 1, borderBottom: '1px solid #333' }}>
+              <Caption style={{ color: '#9ca3af' }}>JSX</Caption>
+              <CopyButton code={generateCode()} />
             </Box>
-
-            {/* Size */}
-            <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</OverlineSmall>
-              <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-                {['small', 'medium', 'large'].map((s) => (
-                  <ControlButton key={s} label={cap(s)} selected={size === s} onClick={() => setSize(s)} />
-                ))}
-              </Stack>
-              <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
-                {size === 'small' ? '32px.' : size === 'medium' ? '40px (default).' : '56px.'}
-              </Caption>
-            </Box>
-
-            {/* Options */}
-            <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>OPTIONS</OverlineSmall>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5 }}>
-                <Box>
-                  <Label>Clickable</Label>
-                  <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Adds border, hover, active, focus states.</Caption>
-                </Box>
-                <Switch checked={clickable} onChange={(e) => setClickable(e.target.checked)} size="small" />
+            <Box sx={{ p: 2, overflow: 'hidden' }}>
+              <Box component="code" sx={{ fontFamily: 'monospace', fontSize: '11px', color: '#e5e7eb',
+                whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxWidth: '100%', display: 'block' }}>
+                {generateCode()}
               </Box>
             </Box>
-          </Grid>
+          </Box>
         </Grid>
-      )}
 
-      {/* == ACCESSIBILITY == */}
-      {mainTab === 1 && (
-        <Box sx={{ p: 4 }}>
-          <H4>Accessibility Requirements</H4>
-          <BodySmall color="quiet" style={{ marginBottom: 32 }}>
-            {cap(content)} · {C} · {cap(size)}{clickable ? ' · Clickable' : ''}
-          </BodySmall>
+        <Grid item sx={{ width: { xs: '100%', md: '45%' }, flexShrink: 0 }}>
+          <Box sx={{ backgroundColor: 'var(--Background)', overflow: 'hidden' }}>
+            <Tabs defaultValue={0} variant="standard" color="primary">
+              <TabList>
+                <Tab>Playground</Tab>
+                <Tab>Accessibility</Tab>
+              </TabList>
 
-          <Stack spacing={4}>
-            <Box sx={{ p: 3, backgroundColor: 'var(--Container)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
-              <H5>ARIA and Semantics</H5>
-              <Stack spacing={0}>
-                <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                  <BodySmall>Non-clickable:</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>
-                    {'role="img" aria-label="[initials or alt text]"'}
-                  </Caption>
-                </Box>
-                <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                  <BodySmall>Clickable:</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>
-                    {'<button role="button" aria-label="[name]"> — focusable, interactive.'}
-                  </Caption>
-                </Box>
-                <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                  <BodySmall>Image:</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)' }}>
-                    {'<img> with alt text. onError fallback to person icon.'}
-                  </Caption>
-                </Box>
-                <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                  <BodySmall>Initials:</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)' }}>
-                    aria-hidden="true" on the text span. aria-label on the container provides accessible name.
-                  </Caption>
-                </Box>
-                <Box sx={{ py: 1.5 }}>
-                  <BodySmall>Focus:</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)' }}>3px solid var(--Focus-Visible), 2px offset. Clickable only.</Caption>
-                </Box>
-              </Stack>
-            </Box>
+              <TabPanel value={0}>
+                <Box sx={{ p: 3 }}>
 
-            <Box sx={{ p: 3, backgroundColor: 'var(--Container)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
-              <H5>Token Reference</H5>
-              <Stack spacing={0}>
-                <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                  <BodySmall>Background:</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>{'var(--Buttons-{C}-Border)'}</Caption>
-                </Box>
-                <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                  <BodySmall>Text / Icon:</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>{'var(--Buttons-{C}-Text)'}</Caption>
-                </Box>
-                <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                  <BodySmall>Clickable border:</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>var(--Buttons-Default-Border)</Caption>
-                </Box>
-                <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                  <BodySmall>Hover / Active:</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>var(--Buttons-Default-Hover) / var(--Buttons-Default-Active)</Caption>
-                </Box>
-                <Box sx={{ py: 1.5 }}>
-                  <BodySmall>Sizes:</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)' }}>Small 32px, Medium 40px, Large 56px.</Caption>
-                </Box>
-              </Stack>
-            </Box>
+                  <Box sx={{ mb: 3 }}>
+                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+                  </Box>
 
-            <Box sx={{ p: 3, backgroundColor: 'var(--Container)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
-              <H5>Content Fallback</H5>
-              <Stack spacing={0}>
-                <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                  <BodySmall>Priority:</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)' }}>Image (src) → Initials → Person icon fallback.</Caption>
+                  {/* Color */}
+                  <Box>
+                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
+                    <Stack spacing={1.5}>
+                      {COLOR_GROUPS.map((group) => (
+                        <Box key={group.label}>
+                          <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 4, fontWeight: 600 }}>{group.label}</Caption>
+                          <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
+                            {group.colors.map((c) => (
+                              <ColorSwatchButton key={c} color={c} selected={color === c} onClick={setColor} />
+                            ))}
+                          </Stack>
+                        </Box>
+                      ))}
+                    </Stack>
+                  </Box>
+
+                  {/* Size */}
+                  <Box sx={{ mt: 3 }}>
+                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</OverlineSmall>
+                    <Stack direction="row" spacing={1}>
+                      {['small', 'medium', 'large'].map((s) => (
+                        <ControlButton key={s} label={cap(s)} selected={size === s} onClick={() => setSize(s)} />
+                      ))}
+                    </Stack>
+                  </Box>
+
+                  {/* Content */}
+                  <Box sx={{ mt: 3 }}>
+                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>CONTENT</OverlineSmall>
+                    <Stack direction="row" spacing={1}>
+                      {CONTENT_TYPES.map((ct) => (
+                        <ControlButton key={ct} label={cap(ct)} selected={contentType === ct} onClick={() => setContentType(ct)} />
+                      ))}
+                    </Stack>
+                  </Box>
+
+                  {/* Options */}
+                  <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box>
+                      <Label>Clickable</Label>
+                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Interactive with hover/focus states</Caption>
+                    </Box>
+                    <Switch variant="default-outline" checked={clickable} onChange={(e) => setClickable(e.target.checked)}
+                      size="small" aria-label="Clickable" />
+                  </Box>
+
+                  <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box>
+                      <Label>Group</Label>
+                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Show as AvatarGroup with overflow</Caption>
+                    </Box>
+                    <Switch variant="default-outline" checked={showGroup} onChange={(e) => setShowGroup(e.target.checked)}
+                      size="small" aria-label="Show group" />
+                  </Box>
                 </Box>
-                <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                  <BodySmall>Image error:</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)' }}>If image fails to load, automatically falls back to person icon.</Caption>
+              </TabPanel>
+
+              <TabPanel value={1}>
+                <Box sx={{ p: 3 }}>
+                  <Stack spacing={3}>
+                    <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
+                      <H5>ARIA and Semantics</H5>
+                      <Stack spacing={0}>
+                        {[
+                          { label: 'Role',      value: 'role="img" (static) or role="button" (clickable)' },
+                          { label: 'Label',     value: 'aria-label from alt, initials, or "Avatar"' },
+                          { label: 'Image',     value: 'alt text on <img>. Falls back to initials or icon on error.' },
+                          { label: 'Clickable', value: 'Rendered as <button>. Focus ring: 3px solid var(--Focus-Visible).' },
+                          { label: 'Group',     value: 'role="group" aria-label="Avatar group, N avatars"' },
+                        ].map(({ label, value }) => (
+                          <Box key={label} sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
+                            <BodySmall>{label}:</BodySmall>
+                            <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>{value}</Caption>
+                          </Box>
+                        ))}
+                      </Stack>
+                    </Box>
+                  </Stack>
                 </Box>
-                <Box sx={{ py: 1.5 }}>
-                  <BodySmall>AvatarGroup:</BodySmall>
-                  <Caption style={{ color: 'var(--Text-Quiet)' }}>Stacks with negative margin overlap. Shows "+N" overflow avatar when exceeding max.</Caption>
-                </Box>
-              </Stack>
-            </Box>
-          </Stack>
-        </Box>
-      )}
+              </TabPanel>
+            </Tabs>
+          </Box>
+        </Grid>
+      </Grid>
     </Box>
   );
 }

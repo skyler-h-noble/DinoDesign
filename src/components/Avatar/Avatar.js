@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { Box } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
+import { Icon } from '../Icon/Icon';
+import { BodySmall, Caption } from '../Typography';
 
 /**
  * Avatar Component
@@ -115,12 +117,14 @@ export function Avatar({
         />
       )}
       {hasInitials && (
-        <Box component="span" aria-hidden="true">
+        <Caption style={{ color: 'inherit', fontWeight: 600, lineHeight: 1 }} aria-hidden="true">
           {initials.slice(0, 2).toUpperCase()}
-        </Box>
+        </Caption>
       )}
       {isFallback && (
-        <PersonIcon sx={{ fontSize: s.iconSize + 'px' }} aria-hidden="true" />
+        <Icon size={size === 'large' ? 'medium' : 'small'} sx={{ color: 'inherit' }}>
+          <PersonIcon />
+        </Icon>
       )}
     </Box>
   );
