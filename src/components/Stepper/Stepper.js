@@ -216,8 +216,10 @@ export function Step({
           ? {
               height: s.connectorThickness + 'px',
               minWidth: '20px',
-              alignSelf: 'center',
-              margin: '0 8px',
+              alignSelf: 'flex-start',
+              marginTop: (s.indicator / 2 - s.connectorThickness / 2) + 'px',
+              marginLeft: '8px',
+              marginRight: '8px',
             }
           : {
               width: s.connectorThickness + 'px',
@@ -255,7 +257,6 @@ export function Step({
   })() : null;
 
   if (isHorizontal) {
-    // Horizontal: indicator row (circles + connectors) separate from labels
     return (
       <Box
         component="li"
@@ -263,21 +264,19 @@ export function Step({
           (isActive ? ' step-active' : '') + (isCompleted ? ' step-completed' : '') +
           (isIncomplete ? ' step-incomplete' : '') + ' ' + className}
         sx={{
-          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          display: 'flex', alignItems: 'center',
           flex: !isLast ? 1 : 'none',
           ...sx,
         }}
         {...props}
       >
-        {/* Indicator + Connector row */}
-        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-          <Box sx={{ display: 'flex', justifyContent: 'center', flexShrink: 0 }}>
-            {indicatorEl}
-          </Box>
-          {connectorEl}
+        {/* Circle + label column */}
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+          {indicatorEl}
+          {labelEl && <Box sx={{ mt: '4px' }}>{labelEl}</Box>}
         </Box>
-        {/* Label below */}
-        {labelEl && <Box sx={{ mt: '4px' }}>{labelEl}</Box>}
+        {/* Connector — centered to circle via negative margin for label height */}
+        {connectorEl}
       </Box>
     );
   }
