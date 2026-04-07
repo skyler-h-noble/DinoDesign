@@ -1,5 +1,5 @@
 // src/components/NumberField/NumberField.js
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Box } from '@mui/material';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -86,10 +86,88 @@ export function NumberField({
     onChange?.(v);
   }, [isControlled, onChange, min, max]);
 
-  const increment = () => { if (!disabled) setValue(current + step); };
-  const decrement = () => { if (!disabled) setValue(current - step); };
+  // Keep latest value in a ref so press-and-hold intervals don't see a stale closure.
+  const currentRef = useRef(current);
+  currentRef.current = current;
+
+  const stepBy = useCallback((dir) => {
+    if (disabled) return;
+    const base = typeof currentRef.current === 'number' ? currentRef.current : parseFloat(currentRef.current) || 0;
+    const next = base + dir * step;
+    if (min !== undefined && dir < 0 && base <= min) return;
+    if (max !== undefined && dir > 0 && base >= max) return;
+    setValue(next);
+  }, [disabled, step, min, max, setValue]);
+
+  const increment = () => stepBy(1);
+  const decrement = () => stepBy(-1);
   const atMin = min !== undefined && current <= min;
   const atMax = max !== undefined && current >= max;
+
+  // Press-and-hold to repeat. Initial delay then accelerating interval.
+  const holdTimeoutRef = useRef(null);
+  const holdIntervalRef = useRef(null);
+
+  const stopHold = useCallback(() => {
+    if (holdTimeoutRef.current) { clearTimeout(holdTimeoutRef.current); holdTimeoutRef.current = null; }
+    if (holdIntervalRef.current) { clearInterval(holdIntervalRef.current); holdIntervalRef.current = null; }
+  }, []);
+
+  const startHold = useCallback((dir) => {
+    if (disabled) return;
+    stopHold();
+    // First tick fires immediately on press.
+    stepBy(dir);
+    // After a short delay, begin repeating.
+    holdTimeoutRef.current = setTimeout(() => {
+      let interval = 120;
+      let ticks = 0;
+      const tick = () => {
+        stepBy(dir);
+        ticks += 1;
+        // Accelerate after sustained hold.
+        if (ticks === 10 && interval > 60) {
+          clearInterval(holdIntervalRef.current);
+          interval = 60;
+          holdIntervalRef.current = setInterval(tick, interval);
+        } else if (ticks === 30 && interval > 30) {
+          clearInterval(holdIntervalRef.current);
+          interval = 30;
+          holdIntervalRef.current = setInterval(tick, interval);
+        }
+      };
+      holdIntervalRef.current = setInterval(tick, interval);
+    }, 400);
+  }, [disabled, stepBy, stopHold]);
+
+  useEffect(() => stopHold, [stopHold]);
+
+  const holdHandlers = (dir) => ({
+    onPointerDown: (e) => {
+      // Only respond to primary button / touch / pen.
+      if (e.button !== undefined && e.button !== 0) return;
+      e.preventDefault();
+      try { e.currentTarget.setPointerCapture?.(e.pointerId); } catch (_) {}
+      startHold(dir);
+    },
+    onPointerUp: (e) => {
+      try { e.currentTarget.releasePointerCapture?.(e.pointerId); } catch (_) {}
+      stopHold();
+    },
+    onPointerCancel: stopHold,
+    onPointerLeave: stopHold,
+    // Keyboard accessibility: hold Enter/Space to repeat.
+    onKeyDown: (e) => {
+      if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) {
+        e.preventDefault();
+        startHold(dir);
+      }
+    },
+    onKeyUp: (e) => {
+      if (e.key === 'Enter' || e.key === ' ') stopHold();
+    },
+    onBlur: stopHold,
+  });
 
   const handleInputChange = (e) => {
     const raw = e.target.value;
@@ -225,12 +303,12 @@ export function NumberField({
 
             {/* Up/Down steppers */}
             <Box sx={{ display: 'flex', flexDirection: 'column', borderLeft: '1px solid ' + borderToken }}>
-              <Box component="button" type="button" aria-label="Increase" onClick={increment}
+              <Box component="button" type="button" aria-label="Increase" {...holdHandlers(1)}
                 disabled={disabled || atMax}
                 sx={{ ...stepperSx, flex: 1, width: 32, borderBottom: '1px solid ' + borderToken }}>
                 <Icon size="small"><KeyboardArrowUpIcon /></Icon>
               </Box>
-              <Box component="button" type="button" aria-label="Decrease" onClick={decrement}
+              <Box component="button" type="button" aria-label="Decrease" {...holdHandlers(-1)}
                 disabled={disabled || atMin}
                 sx={{ ...stepperSx, flex: 1, width: 32 }}>
                 <Icon size="small"><KeyboardArrowDownIcon /></Icon>
@@ -266,7 +344,7 @@ export function NumberField({
         opacity: disabled ? 0.5 : 1,
       }}>
         {/* Decrement */}
-        <Box component="button" type="button" aria-label="Decrease" onClick={decrement}
+        <Box component="button" type="button" aria-label="Decrease" {...holdHandlers(-1)}
           disabled={disabled || atMin}
           sx={{
             ...stepperSx,
@@ -321,7 +399,7 @@ export function NumberField({
         </Box>
 
         {/* Increment */}
-        <Box component="button" type="button" aria-label="Increase" onClick={increment}
+        <Box component="button" type="button" aria-label="Increase" {...holdHandlers(1)}
           disabled={disabled || atMax}
           sx={{
             ...stepperSx,

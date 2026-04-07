@@ -152,7 +152,6 @@ export function Input({
   const styles = variantMap[variant] || variantMap['primary-outline'];
   const isFloating = labelPosition === 'floating';
   const isLight = variant.endsWith('-light');
-  const activeTextColor = colorName === 'primary' && color === 'default' ? 'var(--Text)' : 'var(--Text-' + C + ')';
   const sizeConfig = isFloating
     ? (FLOATING_SIZE_MAP[size] || FLOATING_SIZE_MAP.medium)
     : (SIZE_MAP[size] || SIZE_MAP.medium);
@@ -160,6 +159,7 @@ export function Input({
   // Extract color name from variant (e.g. "primary-outline" → "primary")
   const colorName = variant.replace(/-outline$/, '').replace(/-light$/, '');
   const C = cap(colorName);
+  const activeTextColor = 'var(--Text)';
 
   // Light variant theme attributes for inner div
   const lightTheme = isLight ? C + '-Light' : undefined;
