@@ -298,6 +298,30 @@ import {
 <Button variant="primary-light">Secondary Action</Button>
 ```
 
+### ButtonGroup
+```jsx
+// Purely presentational — visually groups Buttons (shared border, spacing).
+// Does NOT manage selection. Each child Button owns its own onClick + variant.
+// Props: variant, size, disabled, orientation, spacing, fullWidth
+//   (variant/size on the group are inherited as defaults by children)
+//
+// For a segmented selector, drive the selected state in the parent and
+// flip each child's variant between solid and -outline:
+<ButtonGroup variant="primary" size="small">
+  <Button
+    variant={mode === 'light' ? 'primary' : 'primary-outline'}
+    onClick={() => setMode('light')}
+  >Light</Button>
+  <Button
+    variant={mode === 'dark' ? 'primary' : 'primary-outline'}
+    onClick={() => setMode('dark')}
+  >Dark</Button>
+</ButtonGroup>
+
+// ❌ Do NOT pass `value` / `onChange` to ButtonGroup — it has no controlled
+//    selection API. Use ToggleButtonGroup if you want managed selection.
+```
+
 ### Card
 ```jsx
 // Always sets data-surface="Container" internally
