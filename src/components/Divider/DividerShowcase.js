@@ -122,7 +122,10 @@ export function DividerShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H2>Divider</H2>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
+        <H2>Divider</H2>
+        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
 
       <Grid container sx={{ mt: 2, alignItems: 'flex-start' }}>
 
@@ -183,10 +186,6 @@ export function DividerShowcase() {
 
               <TabPanel value={0}>
                 <Box sx={{ p: 3 }}>
-
-                  <Box sx={{ mb: 3 }}>
-                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
-                  </Box>
 
                   {/* Color */}
                   <Box>

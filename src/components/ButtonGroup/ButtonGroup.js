@@ -212,7 +212,9 @@ export function ButtonGroup({
         width:          fullWidth ? '100%' : 'auto',
         border:         containerBorder,
         borderRadius:   'var(--Style-Border-Radius)',
-        overflow:       'hidden',
+        // No overflow:hidden — would clip button borders, focus rings, and
+        // the outline-offset on focus-visible. Connected-mode corner shaping
+        // is already handled per-button via the borderRadius logic above.
         ...sx,
       }}
       {...props}

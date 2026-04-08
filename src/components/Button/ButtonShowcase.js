@@ -263,7 +263,10 @@ export function ButtonShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H2>Buttons</H2>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
+        <H2>Buttons</H2>
+        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
 
       <Grid container sx={{ mt: 2, alignItems: 'flex-start' }}>
 
@@ -303,11 +306,6 @@ export function ButtonShowcase() {
               {/* ── Playground ── */}
               <TabPanel value={0}>
                 <Box sx={{ p: 3 }}>
-
-                  {/* Background */}
-                  <Box sx={{ mb: 3 }}>
-                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
-                  </Box>
 
                   {/* Style */}
                   <Box>
