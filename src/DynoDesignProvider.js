@@ -157,8 +157,12 @@ async function resolveCSS(source) {
  *                                defaultSurface, darkTheme }
  */
 async function fetchThemeManifest(themeURL) {
-  const base = themeURL.replace(/\/$/, ''); // strip trailing slash
-  const manifestURL = `${base}/theme.json`;
+  // If themeURL already points to a .json file (e.g. a Firebase Storage URL), use it directly.
+  // Otherwise treat it as a folder and append /theme.json (legacy path-based hosting).
+  const isManifestUrl = /\.json(\?|$)/.test(themeURL);
+  const manifestURL = isManifestUrl ? themeURL : `${themeURL.replace(/\/$/, '')}/theme.json`;
+  // Folder base (used only for path-based fallback when manifest values are relative filenames)
+  const base = themeURL.replace(/\/$/, '').replace(/\/theme\.json(\?.*)?$/, '');
 
   const res = await fetch(manifestURL);
   if (!res.ok) {
@@ -167,8 +171,13 @@ async function fetchThemeManifest(themeURL) {
 
   const manifest = await res.json();
 
-  // Resolve each filename to a full URL
-  const resolve = (filename) => filename ? `${base}/${filename}` : null;
+  // Resolve each manifest entry. If it's already a full URL, pass it through unchanged.
+  // Otherwise, treat it as a relative filename and join it with the folder base.
+  const resolve = (value) => {
+    if (!value) return null;
+    if (/^https?:\/\//i.test(value)) return value;
+    return `${base}/${value}`;
+  };
 
   return {
     foundationURL:  resolve(manifest.foundation),
