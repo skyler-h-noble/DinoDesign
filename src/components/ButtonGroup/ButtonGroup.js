@@ -171,7 +171,16 @@ export function ButtonGroup({
     };
 
     const clonedButton = React.cloneElement(child, {
-      variant: child.props.variant ?? (isGhost ? 'ghost' : color + '-outline'),
+      // Selected → filled (solidStyles applies the per-variant bevel).
+      // Unselected → outline (flat). Ghost group stays ghost on both.
+      // An explicit child.variant always wins.
+      variant: child.props.variant ?? (
+        isGhost
+          ? 'ghost'
+          : isSelected
+            ? color
+            : color + '-outline'
+      ),
       size:    child.props.size ?? size,
       disabled: child.props.disabled ?? disabled,
       onClick: handleClick(childValue, child.props.onClick),
