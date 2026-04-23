@@ -187,6 +187,8 @@ export function Radio({
       disableRipple
       sx={{
         padding: (sizeConfig.touchTarget - sizeConfig.box) / 2 + 'px',
+        minWidth: 24,
+        minHeight: 24,
         borderRadius: '50%',
         color: 'inherit',
         transition: 'background-color 0.15s ease-in-out',

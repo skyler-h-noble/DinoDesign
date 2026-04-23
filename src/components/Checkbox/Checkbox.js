@@ -195,6 +195,8 @@ export function Checkbox({
       disableRipple
       sx={{
         padding: (sizeConfig.touchTarget - sizeConfig.box) / 2 + 'px',
+        minWidth: 24,
+        minHeight: 24,
         borderRadius: 'var(--Checkbox-Radius, 4px)',
         color: 'inherit',
         transition: 'background-color 0.15s ease-in-out',
