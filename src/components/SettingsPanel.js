@@ -65,7 +65,7 @@ export function SettingsPanel() {
       <Drawer anchor="right" open={panelOpen} onClose={() => setPanelOpen(false)}
         hideBackdrop
         ModalProps={{ keepMounted: true }}
-        sx={{ zIndex: 1400 }}
+        sx={{ zIndex: 99999999 }}
         PaperProps={{
           sx: {
             width: 320,

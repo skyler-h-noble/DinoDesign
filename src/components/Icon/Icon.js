@@ -73,8 +73,8 @@ export function Icon({
     ? (typeof customFontSize === 'number' ? customFontSize + 'px' : customFontSize)
     : SIZE_MAP[size] || SIZE_MAP.medium;
 
-  // Color token
-  const colorToken = 'var(--Icons-' + C + ')';
+  // Color token — 'default' inherits from parent (e.g. Button text color)
+  const colorToken = color === 'default' ? 'inherit' : 'var(--Icons-' + C + ')';
   // Two-tone variant token (used for secondary fill in TwoTone icons)
   const variantToken = 'var(--Icons-Variant-' + C + ')';
 

@@ -57,6 +57,20 @@ const ANIMATION_MAP = {
 /** Builds MUI sx for each TreeItem */
 function getItemSx(d) {
   return {
+    // Remove default focus outline from the li
+    outline: 'none',
+
+    // When the li is focused, style the content child with the focus ring
+    '&.Mui-focused > .MuiTreeItem-content': {
+      outline:       '3px solid var(--Focus-Visible)',
+      outlineOffset: '-3px',
+    },
+
+    '&:focus-visible > .MuiTreeItem-content': {
+      outline:       '3px solid var(--Focus-Visible)',
+      outlineOffset: '-3px',
+    },
+
     '& > .MuiTreeItem-content': {
       minHeight:       d.minHeight,
       fontSize:        d.fontSize,
@@ -65,43 +79,28 @@ function getItemSx(d) {
       padding:         '0 8px',
       borderRadius:    'var(--Style-Border-Radius)',
       border:          '1px solid transparent',
-      transition:      'color 0.15s ease, border-color 0.15s ease',
+      transition:      'color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease',
       backgroundColor: 'transparent',
+      outline:         'none',
 
       '&:hover': {
-        color:       'var(--Text)',
-        borderColor: 'var(--Border)',
+        color:           'var(--Text)',
+        backgroundColor: 'var(--Hover)',
       },
 
-      '&.Mui-focused, &:focus-visible': {
-        color:       'var(--Text)',
-        borderColor: 'var(--Border)',
-        outline:     'none !important',
+      '&:active': {
+        color:           'var(--Text)',
+        backgroundColor: 'var(--Active)',
       },
 
       '&.Mui-selected': {
-        borderColor:     'var(--Border)',
         color:           'var(--Text)',
         fontWeight:      600,
-        backgroundColor: 'var(--Background)',
+        backgroundColor: 'var(--Active)',
         padding:         '0 8px',
         '&:hover': {
-          borderColor:     'var(--Border)',
-          backgroundColor: 'var(--Background)',
+          backgroundColor: 'var(--Hover)',
         },
-      },
-
-      '&.Mui-selected.Mui-focused, &.Mui-selected:focus-visible': {
-        borderColor:     'var(--Border)',
-        backgroundColor: 'var(--Background)',
-        padding:         '0 8px',
-        outline:         'none !important',
-      },
-
-      // Focus-visible 3px inset — keyboard only
-      '&:focus-visible': {
-        outline:       '3px solid var(--Focus-Visible)',
-        outlineOffset: '-3px',
       },
 
       '&.Mui-disabled': { opacity: 0.45 },
@@ -173,24 +172,12 @@ function renderItems(items = [], density = 'default', color = 'primary', variant
   const colorToken = cap(color);
 
   return items.map((item) => {
-    const isSelected = selectedIds.includes(item.id);
-
-    // When selected, the .MuiTreeItem-content (first child of <li>) gets
-    // data-theme and data-surface so var(--Background) resolves correctly
-    const contentProps = isSelected ? {
-      'data-theme':   colorToken,
-      'data-surface':  variant === 'light' ? 'Surface' : 'Surface-Dimmest',
-    } : {};
-
     return (
       <TreeItem
         key={item.id}
         itemId={item.id}
         disabled={item.disabled}
         label={<ItemLabel item={item} d={d} isCompact={isCompact} />}
-        slotProps={{
-          content: contentProps,
-        }}
         sx={{
           ...getItemSx(d),
           ...(item.sx || {}),

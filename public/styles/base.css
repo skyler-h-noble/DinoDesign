@@ -130,11 +130,11 @@
   --Buttons-BlackWhite-Medium-Text: var(--Text-Surfaces-BW-Button-Color-12);
   --Buttons-BlackWhite-Medium-Hover: #000000;
   --Buttons-BlackWhite-Medium-Active: #000000;
-  --Buttons-Default-Button: var(--Default-Button-Default-Medium-Button);
-  --Buttons-Default-Text: var(--Default-Button-Default-Medium-Text);
-  --Buttons-Default-Border: var(--Default-Button-Border-Surfaces-Default-Color-11);
-  --Buttons-Default-Hover: #f5dddd;
-  --Buttons-Default-Active: #f5dddd;
+  --Buttons-Default-Button: var(--Container);
+  --Buttons-Default-Text: var(--Text);
+  --Buttons-Default-Border: var(--Border);
+  --Buttons-Default-Hover: var(--Hover);
+  --Buttons-Default-Active: var(--Active);
   --Icons-Default: var(--Icon-Surfaces-Neutral-Color-11);
   --Icons-Default-Variant: var(--Icon-Variant-Surfaces-Neutral-Color-11);
   --Icons-Primary: var(--Icon-Surfaces-Primary-Color-11);

@@ -29,6 +29,7 @@ import { BreadcrumbsShowcase } from '../components/Breadcrumbs/BreadcrumbsShowca
 import { MenuShowcase } from '../components/Menu/MenuShowcase';
 import { StepperShowcase } from '../components/Stepper/StepperShowcase';
 import { CardShowcase } from '../components/Card/CardShowcase';
+import { GradientShowcase } from '../components/Gradient/GradientShowcase';
 import { TabsShowcase } from '../components/Tabs/TabsShowcase';
 import { DrawerShowcase } from '../components/Drawer/DrawerShowcase';
 import { SnackbarShowcase } from '../components/Snackbar/SnackbarShowcase';
@@ -96,7 +97,15 @@ import {
   Fab,
   DynoTreeView,
 } from '../components';
+import { DynoDesignProvider } from '../DynoDesignProvider';
+import { useAuth } from '../AuthProvider';
+import { NotificationProvider } from '../components/NotificationProvider';
+import { NotificationBell } from '../components/NotificationBell';
+import { OverridesProvider } from '../components/OverridesProvider';
+import { LoginDialog } from '../components/LoginDialog';
 import { useThemeMode } from '../theme/useThemeMode';
+
+const SUPABASE_STORAGE_BASE = 'https://aqpmdqlhffjakkznxudv.supabase.co/storage/v1/object/public/design-system';
 
 const DRAWER_WIDTH = 320;
 
@@ -141,6 +150,7 @@ const NAV_ITEMS = [
     label: 'Surfaces',
     children: [
       { id: 'card', label: 'Card' },
+      { id: 'gradient', label: 'Gradient' },
       { id: 'box', label: 'Box' },
       { id: 'sheet', label: 'Sheet' },
       { id: 'accordion', label: 'Accordion' },
@@ -193,63 +203,117 @@ const NAV_ITEMS = [
   },
 ];
 
-export function ComponentShowcase() {
+function ShowcaseInner() {
+  const { user, signOut } = useAuth();
   const { mode, switchMode } = useThemeMode('light');
   const [activeSection, setActiveSection] = useState('buttons');
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
+
+  // Theme URL from ?user= param
+  const params = new URLSearchParams(window.location.search);
+  const userParam = params.get('user');
+  const userId = user?.uid || userParam;
+  const themeURL = userId ? SUPABASE_STORAGE_BASE + '/' + userId : undefined;
 
   const handleTreeSelect = useCallback((event, itemId) => {
-    // Only navigate for leaf items (not category headers)
     if (itemId && !NAV_ITEMS.some((cat) => cat.id === itemId)) {
       setActiveSection(itemId);
+      setMobileOpen(false);
     }
   }, []);
 
+  const sidebarContent = (
+    <Box sx={{ flex: 1, overflow: 'auto', p: 1 }}>
+      <DynoTreeView
+        items={NAV_ITEMS}
+        variant="default"
+        color="default"
+        selectedItems={activeSection}
+        onSelectedItemsChange={handleTreeSelect}
+        defaultExpandedItems={['inputs']}
+        animation="slide"
+        aria-label="Component navigation"
+        sx={{ border: 'none', borderRadius: 0 }}
+      />
+    </Box>
+  );
+
+  const drawerPaperSx = {
+    width: DRAWER_WIDTH,
+    background: 'var(--Background)',
+    color: 'var(--Text)',
+    borderRight: '1px solid var(--Border)',
+    pt: 9.5,
+    boxSizing: 'border-box',
+  };
+
   return (
+    <DynoDesignProvider
+      themeURL={themeURL}
+      defaultTheme="Default"
+      defaultSurface="Surface"
+      defaultStyle="Modern"
+    >
+    <NotificationProvider>
+    <OverridesProvider dsId={userId}>
     <Box sx={{ display: 'flex', minHeight: '100vh', flexDirection: 'column' }}>
       {/* App Bar */}
       <AppBar
         mode="desktop"
         barColor="default"
+        onMenuClick={() => setMobileOpen(!mobileOpen)}
+        user={user}
+        onLogin={() => setLoginOpen(true)}
+        onSignOut={signOut}
+        showRightButtons={!!user}
+        rightButtons={user ? [
+          { icon: <NotificationBell />, label: 'Notifications', raw: true },
+        ] : []}
         sx={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999999 }}
       />
 
-      {/* Main Content Container */}
-      <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden', mt: 7.5 }}>
+      <LoginDialog open={loginOpen} onClose={() => setLoginOpen(false)} />
 
-        {/* Sidebar */}
+      {/* Main Content Container */}
+      <Box sx={{ display: 'flex', flex: 1, mt: 7.5 }}>
+
+        {/* Desktop Sidebar — hidden below md */}
         <Drawer
           variant="permanent"
           sx={{
+            display: { xs: 'none', md: 'block' },
             width: DRAWER_WIDTH,
             flexShrink: 0,
-            '& .MuiDrawer-paper': {
-              width: DRAWER_WIDTH,
-              background: 'var(--Background)',
-              color: 'var(--Text)',
-              borderRight: '1px solid var(--Border)',
-              pt: 9.5,
-              boxSizing: 'border-box',
-            },
+            '& .MuiDrawer-paper': drawerPaperSx,
           }}
           PaperProps={{ 'data-surface': 'Surface-Dim' }}
         >
-          <Box sx={{ flex: 1, overflow: 'auto', p: 1 }}>
-            <DynoTreeView
-              items={NAV_ITEMS}
-              variant="default"
-              selectedItems={activeSection}
-              onSelectedItemsChange={handleTreeSelect}
-              defaultExpandedItems={['inputs']}
-              animation="slide"
-              aria-label="Component navigation"
-              sx={{ border: 'none', borderRadius: 0 }}
-            />
-          </Box>
+          {sidebarContent}
+        </Drawer>
+
+        {/* Mobile Sidebar — shown below md */}
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={() => setMobileOpen(false)}
+          ModalProps={{ keepMounted: true }}
+          sx={{
+            display: { xs: 'block', md: 'none' },
+            '& .MuiDrawer-paper': drawerPaperSx,
+          }}
+          PaperProps={{ 'data-surface': 'Surface-Dim' }}
+        >
+          {sidebarContent}
         </Drawer>
 
         {/* Main Content Area */}
-        <Box component="main" sx={{ flex: 1, overflow: 'auto', p: 4, backgroundColor: 'var(--Surface)' }}>
-          <Container maxWidth="lg">
+        <Box component="main" sx={{
+          flex: 1, minWidth: 0, overflow: 'hidden',
+          px: 3, py: 2,
+          backgroundColor: 'var(--Surface)',
+        }}>
+          <Box sx={{ maxWidth: '100%' }}>
 
             {/* ============ FOUNDATIONS ============ */}
             {activeSection === 'typography' && <TypographyShowcase />}
@@ -276,6 +340,7 @@ export function ComponentShowcase() {
 
             {/* ============ SURFACES ============ */}
             {activeSection === 'card' && <CardShowcase />}
+            {activeSection === 'gradient' && <GradientShowcase />}
             {activeSection === 'box' && <BoxShowcase />}
             {activeSection === 'sheet' && <SheetShowcase />}
             {activeSection === 'accordion' && <AccordionShowcase />}
@@ -313,13 +378,22 @@ export function ComponentShowcase() {
             {activeSection === 'drawer' && <DrawerShowcase />}
             {activeSection === 'speeddial' && <SpeedDialShowcase />}
 
-          </Container>
+          </Box>
         </Box>
       </Box>
 
       {/* Settings Panel */}
       <SettingsPanel />
     </Box>
+    </OverridesProvider>
+    </NotificationProvider>
+    </DynoDesignProvider>
+  );
+}
+
+export function ComponentShowcase() {
+  return (
+      <ShowcaseInner />
   );
 }
 

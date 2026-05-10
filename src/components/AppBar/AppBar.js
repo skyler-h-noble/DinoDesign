@@ -53,6 +53,10 @@ function DesktopAppBar({
   searchPosition = 'right', companyName = 'Company',
   navLinks = ['Home', 'Products', 'About'],
   rightButtons = [], showRightButtons = false,
+  onMenuClick,
+  user,
+  onLogin,
+  onSignOut,
   children,
   className = '', sx = {},
 }) {
@@ -87,7 +91,7 @@ function DesktopAppBar({
       {children || (
         <>
           {effectiveMenu === 'hamburger' && (
-            <AppBarIconButton ariaLabel="Open navigation menu" onClick={() => setDrawerOpen(true)}>
+            <AppBarIconButton ariaLabel="Open navigation menu" onClick={onMenuClick || (() => setDrawerOpen(true))}>
               <MenuIcon sx={{ fontSize: 'inherit' }} />
             </AppBarIconButton>
           )}
@@ -115,16 +119,36 @@ function DesktopAppBar({
           {searchPosition === 'right' && searchField}
 
           {showRightButtons && rightButtons.length > 0 && (
-            <Box sx={{ display: 'flex', gap: 0.5 }}>
-              {rightButtons.map((btn, i) => (
-                <AppBarIconButton key={i} ariaLabel={btn.label || 'Action ' + (i + 1)}>
-                  {btn.icon}
-                </AppBarIconButton>
-              ))}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              {rightButtons.map((btn, i) =>
+                btn.raw ? (
+                  <React.Fragment key={i}>{btn.icon}</React.Fragment>
+                ) : (
+                  <AppBarIconButton key={i} ariaLabel={btn.label || 'Action ' + (i + 1)}>
+                    {btn.icon}
+                  </AppBarIconButton>
+                )
+              )}
             </Box>
           )}
 
-          {loginType === 'avatar' ? (
+          {user ? (
+            <Button variant="ghost" size="small" onClick={onSignOut} aria-label="Sign out"
+              startIcon={
+                user.photoURL ? (
+                  <Box component="img" src={user.photoURL} alt=""
+                    sx={{ width: 24, height: 24, borderRadius: '50%' }} />
+                ) : (
+                  <AccountCircleIcon sx={{ fontSize: 24 }} />
+                )
+              }>
+              {user.displayName?.split(' ')[0] || 'Account'}
+            </Button>
+          ) : onLogin ? (
+            <Button variant="default-outline" size="small" onClick={onLogin}>
+              Login
+            </Button>
+          ) : loginType === 'avatar' ? (
             <Button iconOnly variant="ghost" size="medium" aria-label="Account">
               <AccountCircleIcon sx={{ fontSize: 28 }} />
             </Button>

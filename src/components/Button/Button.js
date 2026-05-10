@@ -70,7 +70,7 @@ function solidStyles(color, elevated = false) {
   return {
     backgroundColor: `var(--Buttons-${C}-Button)`,
     color: `var(--Buttons-${C}-Text)`,
-    border: `1px solid var(--Buttons-${C}-Border)`,
+    border: `var(--Button-Border-Width) solid var(--Buttons-${C}-Border)`,
     boxShadow: restShadow,
     position: 'relative',
     zIndex: 1,
@@ -102,7 +102,7 @@ function outlineStyles(color) {
   return {
     backgroundColor: 'transparent',
     color: 'var(--Text)',
-    border: `1px solid var(--Buttons-${C}-Border)`,
+    border: `var(--Button-Border-Width) solid var(--Buttons-${C}-Border)`,
     boxShadow: 'none',
     '& .MuiTouchRipple-rippleVisible': {
       color: `var(--Buttons-${C}-Hover)`,
@@ -129,7 +129,7 @@ function lightStyles(color, elevated = false) {
   return {
     backgroundColor: `var(--${C}-Color-11)`,
     color: `var(--Text-${C}-Color-11)`,
-    border: `1px solid var(--Buttons-${C}-Border)`,
+    border: `var(--Button-Border-Width) solid var(--Buttons-${C}-Border)`,
     boxShadow: restLevel,
     '& .MuiTouchRipple-rippleVisible': {
       color: `var(--Hover-${C}-Color-11)`,
@@ -323,12 +323,6 @@ export function Button({
     }
 
     if (typeof children === 'string' || typeof children === 'number') {
-      const hasLeft  = !!startIcon;
-      const hasRight = !!endIcon;
-      const paddingLeft  = hasLeft  ? '0' : 'var(--Sizing-Half)';
-      const paddingRight = hasRight ? '0' : 'var(--Sizing-Half)';
-      const textPadding  = `0 ${paddingRight} 0 ${paddingLeft}`;
-
       return (
         <TypographyComp
           component="span"
@@ -336,7 +330,7 @@ export function Button({
             color: 'inherit',
             lineHeight: 'inherit',
             letterSpacing: 'inherit',
-            padding: textPadding,
+            ...(size === 'medium' && { margin: '1px 0 0 0' }),
           }}
         >
           {children}
@@ -399,6 +393,8 @@ export function Button({
         textTransform: 'none',
         fontWeight: 'inherit',
         lineHeight: 1,
+        whiteSpace: 'nowrap',
+        flexShrink: 0,
         transition: 'background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out',
         '--_bevel': 'calc(var(--Button-Bevel) * var(--_height) / 100)',
 
@@ -410,9 +406,10 @@ export function Button({
           padding: sizingStyles.padding ?? '0 var(--Sizing-1)',
         },
 
-        // Icon margins
+        // Icon margins + color inheritance
         '& .MuiButton-startIcon': {
           display: 'inherit',
+          color: 'inherit',
           marginLeft: '0px !important',
           marginRight: avatar ? '0px !important' : '4px !important',
         },
@@ -423,9 +420,11 @@ export function Button({
         }),
         '& .MuiButton-endIcon': {
           display: 'inherit',
+          color: 'inherit',
           marginLeft: '4px !important',
           marginRight: '0px !important',
         },
+        '& .MuiSvgIcon-root': { color: 'inherit' },
 
         '&:focus-visible, &.Mui-focusVisible': {
           outline: '2px solid var(--Focus-Visible)',

@@ -480,7 +480,7 @@ export function TabPanel({
       aria-labelledby={tabId}
       className={'tab-panel tab-panel-' + size + ' ' + className}
       sx={{
-        padding: '16px',
+        paddingTop: '16px',
         fontSize: s.fontSize,
         fontFamily: 'inherit',
         color: 'var(--Text)',

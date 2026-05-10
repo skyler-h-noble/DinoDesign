@@ -503,7 +503,7 @@ const STYLE_MAP = {
     component: 'span',
     fontFamily: ff('Body'),
     fontSize: fs('Button-Small'),
-    fontWeight: fw('Button-Small'),
+    fontWeight: 500,
     lineHeight: lhr('Button-Small'),
     letterSpacing: ls('Button-Small'),
     defaultColor: 'standard',

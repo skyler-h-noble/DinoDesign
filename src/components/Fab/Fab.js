@@ -119,7 +119,7 @@ export function Fab({
           // Tokens
           backgroundColor: tokens.bg,
           color: tokens.text,
-          border: '1px solid ' + tokens.border,
+          border: 'var(--Button-Border-Width) solid ' + tokens.border,
           boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
           // Typography
           fontSize: s.fontSize,
@@ -146,7 +146,8 @@ export function Fab({
         <Box sx={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: s.iconSize + 'px',
-          '& .MuiSvgIcon-root': { fontSize: 'inherit' },
+          color: 'inherit',
+          '& .MuiSvgIcon-root': { fontSize: 'inherit', color: 'inherit' },
         }}>
           {iconEl}
         </Box>

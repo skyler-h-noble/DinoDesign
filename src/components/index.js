@@ -122,9 +122,11 @@ export { SpeedDial, SpeedDialShowcase } from './SpeedDial';
 
 // ========== SURFACES & CARDS ==========
 export { Card, SelectableCard } from './Card';
+export { Gradient, LinearGradient, RadialGradient, MeshGradient, MeshCardGradient } from './Gradient';
 export { Paper } from './Paper';
 
 // ========== DIALOGS & MODALS ==========
+export { Popover } from './Popover';
 export { Dialog, AlertDialog, FormDialog, DialogShowcase } from './Dialog';
 export { Modal } from './Modal';
 export { Drawer, DrawerClose, DrawerHeader, DrawerContent, DrawerShowcase } from './Drawer';

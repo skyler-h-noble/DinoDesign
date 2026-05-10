@@ -124,7 +124,7 @@ export function ButtonGroup({
     // ── Per-button sx ─────────────────────────────────────────────────────
     const positionalSx = isConnected && count > 1 ? {
       borderRadius,
-      ...(!isFirst && (isHorizontal ? { marginLeft: '-1px' } : { marginTop: '-1px' })),
+      ...(!isFirst && (isHorizontal ? { marginLeft: 'calc(-1 * var(--Button-Border-Width))' } : { marginTop: 'calc(-1 * var(--Button-Border-Width))' })),
       position: 'relative',
       '&:hover, &:focus-visible': { zIndex: 1 },
     } : {};

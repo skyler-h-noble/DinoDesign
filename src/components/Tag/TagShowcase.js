@@ -148,7 +148,7 @@ export function TagShowcase() {
     <Box sx={{ pb: 8 }}>
       <H2>Tag</H2>
 
-      <Grid container sx={{ mt: 2, alignItems: 'flex-start' }}>
+      <Grid container sx={{ mt: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
         {/* ── LEFT: Preview + Code ── */}
         <Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, pr: { md: 3 } }}>

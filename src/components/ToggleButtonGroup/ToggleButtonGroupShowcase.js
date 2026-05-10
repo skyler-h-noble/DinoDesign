@@ -121,7 +121,7 @@ function ColorSwatchButton({ color, selected, onClick }) {
           width: 'var(--Button-Height)', height: 'var(--Button-Height)',
           borderRadius: '4px',
           backgroundColor: 'var(--Buttons-' + C + '-Button)',
-          border: selected ? '2px solid var(--Text)' : '2px solid transparent',
+          border: selected ? '2px solid var(--Text)' : '1px solid var(--Border)',
           outline: selected ? '2px solid var(--Focus-Visible)' : '2px solid transparent',
           cursor: 'pointer',
           flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',

@@ -22,6 +22,7 @@ import { BodySmall } from '../Typography';
  *
  * PROPS:
  *   color      string    One of the above colors (default: 'primary')
+ *   width      string    'hug' (default) fits content, 'fill' stretches to container
  *   allCaps    boolean   Transforms text to uppercase (default: false)
  *   children   node      Tag label text
  *   className  string
@@ -46,12 +47,14 @@ const COLOR_TOKEN_MAP = {
 
 export function Tag({
   color = 'primary',
+  width = 'hug',
   allCaps = false,
   children,
   className = '',
   sx = {},
   ...props
 }) {
+  const isFill = width === 'fill';
   const C    = COLOR_TOKEN_MAP[color] || 'Primary';
   const bg   = 'var(--Tag-' + C + '-BG)';
   const text = 'var(--Tag-' + C + '-Text)';
@@ -61,13 +64,15 @@ export function Tag({
       component="span"
       className={'tag tag-' + color + (className ? ' ' + className : '')}
       sx={{
-        display:         'inline-flex',
+        display:         isFill ? 'flex' : 'inline-flex',
         alignItems:      'center',
+        justifyContent:  isFill ? 'center' : 'flex-start',
         height:          '24px',
         px:              '8px',
         borderRadius:    0,
         backgroundColor: bg,
         color:           text,
+        width:           isFill ? '100%' : 'auto',
         flexShrink:      0,
         userSelect:      'none',
         ...sx,

@@ -86,7 +86,7 @@ export function Avatar({
         fontFamily: 'inherit', fontWeight: 600,
         overflow: 'hidden',
         flexShrink: 0,
-        border: '1px solid ' + borderColor,
+        border: '2px solid ' + borderColor,
         // Button reset
         ...(isClickable && {
           cursor: 'pointer',

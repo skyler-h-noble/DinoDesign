@@ -33,6 +33,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "dev-api": "node dev-server.js",
     "build:app": "react-scripts build",
     "build:lib": "rollup -c rollup.config.js",
     "build": "npm run build:lib",
@@ -100,6 +101,7 @@
   "dependencies": {
     "@mui/x-tree-view": "^8.27.2",
     "eslint-plugin-react-hooks": "^7.0.1",
+    "firebase": "^12.13.0",
     "react-router-dom": "^7.13.1",
     "react-scripts": "^5.0.1"
   },

@@ -38,34 +38,36 @@ const FLOATING_SIZE_MAP = {
 
 const DROPDOWN_MAX_HEIGHT = 240;
 
-function getSelectedStyles(selectionStyle, isSelected) {
+function getSelectedStyles(selectionStyle, isSelected, colorName) {
+  const C = cap(colorName || 'default');
   if (!isSelected) {
     return {
-      color: 'var(--Text-Quiet)',
+      color: 'var(--Text)',
       backgroundColor: 'transparent',
       border: '1px solid transparent',
     };
   }
   if (selectionStyle === 'solid') {
     return {
-      backgroundColor: 'var(--Buttons-Default-Button)',
-      color: 'var(--Buttons-Default-Text)',
-      border: '1px solid var(--Buttons-Default-Border)',
+      backgroundColor: 'var(--Buttons-' + C + '-Button)',
+      color: 'var(--Buttons-' + C + '-Text)',
+      border: '1px solid var(--Buttons-' + C + '-Border)',
       fontWeight: 600,
     };
   }
   if (selectionStyle === 'light') {
     return {
-      backgroundColor: 'var(--Buttons-Default-Light-Button)',
-      color: 'var(--Buttons-Default-Light-Text)',
-      border: '1px solid var(--Buttons-Default-Light-Border)',
+      backgroundColor: 'var(--Buttons-' + C + '-Light-Button)',
+      color: 'var(--Buttons-' + C + '-Light-Text)',
+      border: '1px solid var(--Buttons-' + C + '-Light-Border)',
       fontWeight: 600,
     };
   }
+  // default selection style
   return {
-    color: 'var(--Text)',
-    backgroundColor: 'transparent',
-    border: '1px solid var(--Buttons-Default-Border)',
+    backgroundColor: 'var(--Buttons-' + C + '-Button)',
+    color: 'var(--Buttons-' + C + '-Text)',
+    border: '1px solid var(--Buttons-' + C + '-Border)',
     fontWeight: 600,
   };
 }
@@ -193,16 +195,52 @@ export function Select({
     };
   }, [open, getDropdownPos]);
 
+  const dropdownRef = useRef(null);
+
+  const focusOption = useCallback((dir) => {
+    const container = dropdownRef.current;
+    if (!container) return;
+    const items = container.querySelectorAll('[role="option"]');
+    if (!items.length) return;
+    const active = container.querySelector('[role="option"]:focus');
+    let idx = Array.prototype.indexOf.call(items, active);
+    if (dir === 'down') idx = idx < items.length - 1 ? idx + 1 : 0;
+    else idx = idx > 0 ? idx - 1 : items.length - 1;
+    items[idx].focus();
+  }, []);
+
   const handleKeyDown = (e) => {
-    if (e.key === 'Escape') { setOpen(false); return; }
+    if (e.key === 'Escape') { setOpen(false); triggerRef.current?.focus(); return; }
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleOpen(); return; }
-    if (!open && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) { e.preventDefault(); setOpen(true); }
+    if (!open && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) { e.preventDefault(); setOpen(true); return; }
+    if (open && e.key === 'ArrowDown') { e.preventDefault(); focusOption('down'); }
+    if (open && e.key === 'ArrowUp') { e.preventDefault(); focusOption('up'); }
   };
 
+  const handleOptionKeyDown = (e, optValue) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleSelect(optValue); return; }
+    if (e.key === 'ArrowDown') { e.preventDefault(); focusOption('down'); }
+    if (e.key === 'ArrowUp') { e.preventDefault(); focusOption('up'); }
+    if (e.key === 'Escape') { setOpen(false); triggerRef.current?.focus(); }
+  };
+
+
+  // Focus selected or first option when dropdown opens
+  useEffect(() => {
+    if (!open) return;
+    requestAnimationFrame(() => {
+      const container = dropdownRef.current;
+      if (!container) return;
+      const selected = container.querySelector('[aria-selected="true"]');
+      const first = container.querySelector('[role="option"]');
+      (selected || first)?.focus();
+    });
+  }, [open]);
 
   // The dropdown rendered into document.body via portal
   const dropdown = open ? ReactDOM.createPortal(
     <Box
+      ref={dropdownRef}
       data-select-dropdown
       data-theme={parentTheme || undefined}
       data-surface={parentSurface || undefined}
@@ -229,35 +267,42 @@ export function Select({
         const optLabel = typeof opt === 'string' ? opt : opt.label;
         const optColor = typeof opt === 'object' ? opt.color : null;
         const isSelected = optValue === currentValue;
-        const styles = getSelectedStyles(selectionStyle, isSelected);
+        const styles = getSelectedStyles(selectionStyle, isSelected, effectiveColor);
         const isLast = idx === options.length - 1;
 
         return (
           <React.Fragment key={optValue}>
             <Box
               role="option"
+              tabIndex={-1}
               aria-selected={isSelected}
               aria-label={isColor && !showColorLabels ? optLabel : undefined}
               onClick={() => handleSelect(optValue)}
+              onKeyDown={(e) => handleOptionKeyDown(e, optValue)}
               sx={{
                 display: 'flex', alignItems: 'center', gap: 1,
-                px: 1.5, py: 0, mx: 0.5,
+                px: 1.5, py: 0, mx: 0.5, my: '1px',
                 minHeight: sizeConfig.height,
                 cursor: 'pointer',
                 fontSize: sizeConfig.fontSize,
                 fontFamily: 'inherit',
                 borderRadius: '4px',
+                outline: 'none',
                 ...styles,
                 transition: 'background-color 0.1s ease',
-                '&:hover': !isSelected ? { backgroundColor: 'var(--Hover)' } : {},
-                '&:active': !isSelected ? { backgroundColor: 'var(--Active)' } : {},
+                '&:hover': !isSelected ? { backgroundColor: 'var(--Buttons-' + C + '-Hover)', color: 'var(--Buttons-' + C + '-Text)' } : {},
+                '&:active': !isSelected ? { backgroundColor: 'var(--Buttons-' + C + '-Active)', color: 'var(--Buttons-' + C + '-Text)' } : {},
+                '&:focus-visible': {
+                  outline: '2px solid var(--Focus-Visible)',
+                  outlineOffset: '2px',
+                },
               }}
             >
               {isColor && optColor && (
                 <Box sx={{
                   width: 20, height: 20, borderRadius: '4px',
                   backgroundColor: optColor,
-                  border: isSelected ? '2px solid var(--Buttons-Default-Border)' : '1px solid var(--Border)',
+                  border: isSelected ? '2px solid var(--Buttons-' + C + '-Border)' : '1px solid var(--Border)',
                   flexShrink: 0,
                 }} />
               )}
