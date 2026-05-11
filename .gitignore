@@ -6,3 +6,7 @@ build/
 
 *storybook.log
 storybook-static
+
+# Local env files
+.env.local
+.env*.local
