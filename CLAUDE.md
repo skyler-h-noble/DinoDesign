@@ -378,6 +378,71 @@ import {
 
 ---
 
+## Flagging Missing Components
+
+The library has gaps. If a piece of UI you need isn't already in the import
+list above — don't invent it inline. Surface it so it can be added to the
+library for every consumer.
+
+Use this exact comment format above the spot where the missing piece would
+live (the literal `MISSING-LIB-COMPONENT` tag is greppable, so reviews and the
+`/ScanComponents` slash command can find it):
+
+```tsx
+// MISSING-LIB-COMPONENT: <ComponentName>
+// Needed for: <one line on the use case>
+// Proposed API: <props sketch>
+// Lib-track: open an issue / PR against @dynodesign/components
+```
+
+Then either:
+
+- **Trivial, one-off**: inline a minimal implementation under the tag so the
+  feature isn't blocked.
+- **Reusable** (used in 2+ places, has its own state, portals, or needs
+  keyboard a11y): stop and tell the user. Confirm whether to add it to the
+  lib first, or inline with a tracked follow-up.
+
+After tagging and implementing (either path), **ask the user** if they want
+to share the component back with DynoDesign for review:
+
+> "I've tagged `<ComponentName>` as a missing lib component. Want me to
+> submit a proposal to the DynoDesign admin dashboard for review? If they
+> accept it, your inline copy can be replaced in a future package update."
+
+If the user says yes, run `/ShareComponent <ComponentName>` (see below). If
+no, leave the tag in place — the next contributor or a future
+`/ScanComponents` pass will surface it again.
+
+### Scanning for outstanding gaps
+
+Two Claude Code slash commands ship with this package:
+
+- `/ScanComponents` — runs `grep -rn "MISSING-LIB-COMPONENT" src/` and groups
+  the results by file, so you can see what's been tagged across the codebase
+  at a glance.
+- `/ShareComponent [Name]` — generates a submission package (proposed API +
+  inline implementation + source pointer) for a tagged component, asks the
+  user to confirm, then POSTs it to the DynoDesign admin dashboard for
+  review.
+
+To install them in your project after `npm install @dynodesign/components`:
+
+```bash
+mkdir -p .claude/commands
+cp node_modules/@dynodesign/components/.claude/commands/*.md \
+  .claude/commands/
+```
+
+Then restart Claude Code and type `/ScanComponents` or `/ShareComponent`.
+(The same scan works from a plain shell without Claude Code:
+`grep -rn "MISSING-LIB-COMPONENT" src/`.)
+
+Empty `/ScanComponents` result → codebase is fully covered. Matches → those
+are the components the library still needs to grow.
+
+---
+
 ## Rules for AI-Generated Code
 
 ### ✅ DO
