@@ -102,7 +102,17 @@ import { NotificationProvider } from '../components/NotificationProvider';
 import { NotificationBell } from '../components/NotificationBell';
 import { useThemeMode } from '../theme/useThemeMode';
 
-const SUPABASE_STORAGE_BASE = 'https://aqpmdqlhffjakkznxudv.supabase.co/storage/v1/object/public/design-system';
+// Firebase Storage public-read URL for a design system's theme.json. The
+// studio (dinodesign-studio) uploads each generated file to
+// design-systems/{uuid}/{filename} in the dino-design bucket, and theme.json
+// in turn lists absolute Firebase URLs for every CSS file — so we only need
+// to construct the manifest URL here; the Provider follows the rest.
+const FIREBASE_STORAGE_BUCKET = 'dino-design.firebasestorage.app';
+const FIREBASE_STORAGE_ROOT   = 'design-systems';
+function themeManifestUrl(userId) {
+  const path = `${FIREBASE_STORAGE_ROOT}/${userId}/theme.json`;
+  return `https://firebasestorage.googleapis.com/v0/b/${FIREBASE_STORAGE_BUCKET}/o/${encodeURIComponent(path)}?alt=media`;
+}
 
 const DRAWER_WIDTH = 320;
 
@@ -228,7 +238,7 @@ function ShowcaseInner() {
   // Theme URL from ?user= param (auth removed — themes load by URL param only)
   const params = new URLSearchParams(window.location.search);
   const userParam = params.get('user');
-  const themeURL = userParam ? SUPABASE_STORAGE_BASE + '/' + userParam : undefined;
+  const themeURL = userParam ? themeManifestUrl(userParam) : undefined;
 
   const handleTreeSelect = useCallback((event, itemId) => {
     if (itemId && !NAV_ITEMS.some((cat) => cat.id === itemId)) {
