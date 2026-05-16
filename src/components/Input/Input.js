@@ -17,7 +17,7 @@ import { Body, BodySmall } from '../Typography';
  * Full-featured text input with complete design system integration
  *
  * --- SURFACE -----------------------------------------------------------------
- *   data-surface="Container" on wrapper and input root
+ *   data-surface="Surface-Bright" on wrapper and input root (light variant: Surface-Dim)
  *
  * --- VARIANTS ----------------------------------------------------------------
  *
@@ -233,7 +233,7 @@ export function Input({
 
         {/* Inner themed surface — for light variant gets data-theme/data-surface */}
         <Box
-          {...(isLight ? { 'data-theme': lightTheme, 'data-surface': 'Surface-Dim' } : { 'data-surface': 'Container' })}
+          {...(isLight ? { 'data-theme': lightTheme, 'data-surface': 'Surface-Dim' } : { 'data-surface': 'Surface-Bright' })}
         >
           <MuiTextField
             value={value}

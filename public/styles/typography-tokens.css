@@ -1,3 +1,11 @@
+/* ============================================================================
+ * typography-tokens.css — STATIC: lib-owned, do not regenerate per design system.
+ * Platform-scaled type sizes (Desktop / IOS-Mobile / etc.) — does NOT
+ * reference any brand value, so the same file works for every design system.
+ * The "Auto-generated" note below refers to the template itself being
+ * auto-generated upstream, not per-design-system regeneration.
+ * ============================================================================ */
+
 /* typography-tokens.css
  * Auto-generated — do not edit by hand.
  * Apply [data-platform="Desktop"] etc to your root element.

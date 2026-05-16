@@ -45,7 +45,16 @@ function AppBarIconButton({ children, onClick, ariaLabel }) {
   );
 }
 
-/* --- Desktop AppBar --- */
+/* --- Desktop AppBar ---
+ * Slot props (override hardcoded defaults when provided):
+ *   brand        — string or ReactNode shown in the brand spot (overrides companyName)
+ *   onBrandClick — click handler for the brand (makes it a button)
+ *   centerSlot   — ReactNode replacing the default search/tabs in the middle
+ *   endSlot      — ReactNode replacing the default right buttons + login on the right
+ *
+ * When a slot is NOT provided, the previous hardcoded UI renders unchanged
+ * (backward compatible).
+ */
 function DesktopAppBar({
   barColor = 'default',
   surface = 'Surface',
@@ -57,6 +66,13 @@ function DesktopAppBar({
   user,
   onLogin,
   onSignOut,
+  brand,
+  onBrandClick,
+  centerSlot,
+  endSlot,
+  searchValue,
+  onSearchChange,
+  searchPlaceholder = 'Search...',
   children,
   className = '', sx = {},
 }) {
@@ -66,8 +82,10 @@ function DesktopAppBar({
 
   const searchField = (
     <SearchField
-      placeholder="Search..."
+      placeholder={searchPlaceholder}
       size="medium"
+      value={searchValue}
+      onChange={onSearchChange}
       sx={{ flex: searchPosition === 'left' ? '0 1 400px' : '0 1 280px', minWidth: 0 }}
     />
   );
@@ -96,66 +114,108 @@ function DesktopAppBar({
             </AppBarIconButton>
           )}
 
-          {brandType === 'logo' ? (
+          {/* Brand: slot overrides default rendering */}
+          {brand !== undefined ? (
+            onBrandClick ? (
+              <Box
+                component="button"
+                type="button"
+                onClick={onBrandClick}
+                sx={{
+                  background: 'transparent', border: 'none', padding: 0,
+                  cursor: 'pointer', color: 'inherit', font: 'inherit',
+                  fontWeight: 700, fontSize: '18px',
+                  whiteSpace: 'nowrap', flexShrink: 0,
+                }}
+              >
+                {brand}
+              </Box>
+            ) : (
+              <Box sx={{ fontWeight: 700, fontSize: '18px', whiteSpace: 'nowrap', flexShrink: 0 }}>{brand}</Box>
+            )
+          ) : brandType === 'logo' ? (
             <Box sx={{ width: 32, height: 32, borderRadius: '6px', backgroundColor: 'var(--Text)', opacity: 0.8, flexShrink: 0 }} aria-label="Company logo" />
           ) : (
             <Box sx={{ fontWeight: 700, fontSize: '18px', whiteSpace: 'nowrap', flexShrink: 0 }}>{companyName}</Box>
           )}
 
-          {searchPosition === 'left' && searchField}
-
-          {effectiveMenu === 'expanded' && (
-            <Tabs defaultValue={0} variant="standard" color="default" sx={{ ml: 2, minHeight: 0 }}>
-              <TabList aria-label="Main navigation">
-                {navLinks.map((link) => (
-                  <Tab key={link}>{link}</Tab>
-                ))}
-              </TabList>
-            </Tabs>
-          )}
-
-          <Box sx={{ flex: 1 }} />
-
-          {searchPosition === 'right' && searchField}
-
-          {showRightButtons && rightButtons.length > 0 && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              {rightButtons.map((btn, i) =>
-                btn.raw ? (
-                  <React.Fragment key={i}>{btn.icon}</React.Fragment>
-                ) : (
-                  <AppBarIconButton key={i} ariaLabel={btn.label || 'Action ' + (i + 1)}>
-                    {btn.icon}
-                  </AppBarIconButton>
-                )
-              )}
-            </Box>
-          )}
-
-          {user ? (
-            <Button variant="ghost" size="small" onClick={onSignOut} aria-label="Sign out"
-              startIcon={
-                user.photoURL ? (
-                  <Box component="img" src={user.photoURL} alt=""
-                    sx={{ width: 24, height: 24, borderRadius: '50%' }} />
-                ) : (
-                  <AccountCircleIcon sx={{ fontSize: 24 }} />
-                )
-              }>
-              {user.displayName?.split(' ')[0] || 'Account'}
-            </Button>
-          ) : onLogin ? (
-            <Button variant="default-outline" size="small" onClick={onLogin}>
-              Login
-            </Button>
-          ) : loginType === 'avatar' ? (
-            <Button iconOnly variant="ghost" size="medium" aria-label="Account">
-              <AccountCircleIcon sx={{ fontSize: 28 }} />
-            </Button>
+          {/* Center: slot overrides default search/tabs.
+              Uses equal-flex spacers on both sides so the slot stays visually
+              centered in the AppBar regardless of brand or end-slot widths. */}
+          {centerSlot !== undefined ? (
+            <>
+              <Box sx={{ flex: 1 }} />
+              <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                {centerSlot}
+              </Box>
+              <Box sx={{ flex: 1 }} />
+            </>
           ) : (
-            <Button variant="default-outline" size="small">
-              Login
-            </Button>
+            <>
+              {searchPosition === 'left' && searchField}
+
+              {effectiveMenu === 'expanded' && (
+                <Tabs defaultValue={0} variant="standard" color="default" sx={{ ml: 2, minHeight: 0 }}>
+                  <TabList aria-label="Main navigation">
+                    {navLinks.map((link) => (
+                      <Tab key={link}>{link}</Tab>
+                    ))}
+                  </TabList>
+                </Tabs>
+              )}
+
+              <Box sx={{ flex: 1 }} />
+
+              {searchPosition === 'right' && searchField}
+            </>
+          )}
+
+          {/* End: slot overrides default right buttons + login.
+              Wrap consumer children in a flex container with an 8px gap so
+              multiple direct children space themselves consistently without
+              each consumer needing its own HStack/Box wrapper. */}
+          {endSlot !== undefined ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              {endSlot}
+            </Box>
+          ) : (
+            <>
+              {showRightButtons && rightButtons.length > 0 && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  {rightButtons.map((btn, i) =>
+                    btn.raw ? (
+                      <React.Fragment key={i}>{btn.icon}</React.Fragment>
+                    ) : (
+                      <AppBarIconButton key={i} ariaLabel={btn.label || 'Action ' + (i + 1)}>
+                        {btn.icon}
+                      </AppBarIconButton>
+                    )
+                  )}
+                </Box>
+              )}
+
+              {user ? (
+                <Button variant="ghost" size="small" onClick={onSignOut} aria-label="Sign out"
+                  startIcon={
+                    user.photoURL ? (
+                      <Box component="img" src={user.photoURL} alt=""
+                        sx={{ width: 24, height: 24, borderRadius: '50%' }} />
+                    ) : (
+                      <AccountCircleIcon sx={{ fontSize: 24 }} />
+                    )
+                  }>
+                  {user.displayName?.split(' ')[0] || 'Account'}
+                </Button>
+              ) : onLogin ? (
+                <Button variant="default-outline" size="small" onClick={onLogin}>
+                  Login
+                </Button>
+              ) : loginType === 'avatar' ? (
+                <Button iconOnly variant="ghost" size="medium" aria-label="Account">
+                  <AccountCircleIcon sx={{ fontSize: 28 }} />
+                </Button>
+              ) : null}
+            </>
           )}
         </>
       )}

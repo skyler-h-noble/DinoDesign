@@ -73,14 +73,28 @@ export function Card({
   ...props
 }) {
   const isDark = variant === 'dark';
+  // Default-color cards inherit the parent theme and override Container
+  // surface so they pick up the consumer's card-coloring choice (white/black/
+  // tonal). Themed cards (color="primary" etc.) stamp their own theme +
+  // Surface so the card paints the brand color directly.
+  const isDefaultColor = color === 'default';
 
-  // Theme for inner content
-  const dataTheme = variant === 'light'
-    ? LIGHT_THEME_MAP[color]
-    : SOLID_THEME_MAP[color];
+  // Theme for inner content — omitted for default-color cards so the parent
+  // theme inherits through.
+  const dataTheme = isDefaultColor
+    ? ''
+    : variant === 'light'
+      ? LIGHT_THEME_MAP[color]
+      : SOLID_THEME_MAP[color];
 
-  // Surface for inner content
-  const dataSurface = isDark ? 'Surface-Dimmest' : 'Surface';
+  // Surface for inner content — Container for default-color cards so they
+  // respect the consumer's card-coloring tokens; Surface (or Surface-Dimmest
+  // for dark variant) for themed cards.
+  const dataSurface = isDefaultColor
+    ? 'Container'
+    : isDark
+      ? 'Surface-Dimmest'
+      : 'Surface';
 
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
   const isHorizontal = orientation === 'horizontal';
@@ -159,6 +173,10 @@ export function Card({
               zIndex: 10,
               boxShadow: 'var(--Effect-Level-4)',
               transform: 'scale(1.02)',
+              // Thicker border on active so the outer shell visually grows
+              // along with the scale (a 1px border at 1.02x is imperceptible).
+              borderWidth: '2px',
+              borderColor: 'var(--Buttons-Primary-Border)',
             },
             '&:focus-visible': {
               outline: '3px solid var(--Focus-Visible)',

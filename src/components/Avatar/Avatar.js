@@ -32,15 +32,19 @@ const COLOR_MAP = {
 };
 
 const SIZE_MAP = {
-  small:  { size: 32, fontSize: '13px', iconSize: 18 },
-  medium: { size: 40, fontSize: '15px', iconSize: 22 },
-  large:  { size: 56, fontSize: '20px', iconSize: 28 },
+  'xxx-small': { size: 16, fontSize: '9px',  iconSize: 10 },
+  'xx-small':  { size: 20, fontSize: '10px', iconSize: 12 },
+  'x-small':   { size: 24, fontSize: '11px', iconSize: 14 },
+  small:       { size: 32, fontSize: '13px', iconSize: 18 },
+  medium:      { size: 40, fontSize: '15px', iconSize: 22 },
+  large:       { size: 56, fontSize: '20px', iconSize: 28 },
 };
 
 export function Avatar({
   src,
   alt,
   initials,
+  icon,
   color = 'default',
   size = 'medium',
   clickable = false,
@@ -124,7 +128,7 @@ export function Avatar({
       })()}
       {isFallback && (
         <Icon size={size} sx={{ color: 'inherit' }}>
-          <PersonIcon />
+          {icon || <PersonIcon />}
         </Icon>
       )}
     </Box>

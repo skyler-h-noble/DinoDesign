@@ -191,6 +191,9 @@ async function fetchThemeManifest(themeURL) {
     defaultStyle:   manifest.defaultStyle   ?? null,
     defaultSurface: manifest.defaultSurface ?? null,
     darkTheme:      manifest.darkTheme      ?? null,
+    // Human-readable design system name — surfaced on the context so consumers
+    // (AppBar brand, page headers, etc.) can display it.
+    name:           manifest.name           ?? null,
   };
 }
 
@@ -317,6 +320,7 @@ export function DynoDesignProvider({
           defaultStyle:   manifest.defaultStyle,
           defaultSurface: manifest.defaultSurface,
           darkTheme:      manifest.darkTheme,
+          name:           manifest.name,
         });
       })
       .catch(err => {
@@ -449,10 +453,12 @@ export function DynoDesignProvider({
     isDark, cssStatus, cssError,
     setTheme, setStyle, setSurface, toggleDarkMode,
     themes: DYNO_THEMES, styles: DYNO_STYLES, surfaces: DYNO_SURFACES,
+    name: manifestThemeConfig.name ?? null,
   }), [
     activeTheme, styleVariant, rootSurface, isDark,
     cssStatus, cssError,
     setTheme, setStyle, setSurface, toggleDarkMode,
+    manifestThemeConfig.name,
   ]);
 
   // ── Render ─────────────────────────────────────────────────────────────────

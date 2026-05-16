@@ -3,6 +3,11 @@ import React, { useState } from 'react';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import EmailIcon from '@mui/icons-material/Email';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { Input } from './Input';
 import { Button } from '../Button/Button';
 import { Switch } from '../Switch/Switch';
@@ -10,7 +15,7 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H5, BodySmall, Caption, Label, OverlineSmall,
+  H2, H5, H6, BodySmall, Caption, Label, OverlineSmall,
 } from '../Typography';
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
@@ -23,6 +28,31 @@ const COLOR_GROUPS = [
 
 const STYLES = ['outline', 'light'];
 const VALIDATIONS = ['none', 'info', 'success', 'warning', 'error'];
+
+/* ── Adornment presets ── */
+const START_ADORNMENTS = {
+  none:     { label: 'None',     node: null, code: null },
+  search:   { label: 'Search',   node: <SearchIcon style={{ fontSize: 18, color: 'var(--Quiet)' }} />,        code: '<SearchIcon />' },
+  currency: { label: 'Currency', node: <AttachMoneyIcon style={{ fontSize: 18, color: 'var(--Quiet)' }} />,   code: '<AttachMoneyIcon />' },
+  email:    { label: 'Email',    node: <EmailIcon style={{ fontSize: 18, color: 'var(--Quiet)' }} />,         code: '<EmailIcon />' },
+};
+
+const END_ADORNMENTS = {
+  none:    { label: 'None',    node: null, code: null },
+  clear:   { label: 'Clear',   node: (
+    <Button iconOnly variant="ghost" size="small" aria-label="Clear">
+      <ClearIcon style={{ fontSize: 16 }} />
+    </Button>
+  ), code: '<Button iconOnly variant="ghost" size="small"><ClearIcon /></Button>' },
+  reveal:  { label: 'Reveal',  node: (
+    <Button iconOnly variant="ghost" size="small" aria-label="Show password">
+      <VisibilityIcon style={{ fontSize: 16 }} />
+    </Button>
+  ), code: '<Button iconOnly variant="ghost" size="small"><VisibilityIcon /></Button>' },
+  copy:    { label: 'Copy',    node: (
+    <Button variant="ghost" size="small" sx={{ minWidth: 0, padding: '2px 8px' }}>Copy</Button>
+  ), code: '<Button variant="ghost" size="small">Copy</Button>' },
+};
 
 /* ── Helpers ── */
 function CopyButton({ code }) {
@@ -104,6 +134,8 @@ export function InputShowcase() {
   const [disabled, setDisabled]         = useState(false);
   const [fullWidth, setFullWidth]       = useState(true);
   const [multiline, setMultiline]       = useState(false);
+  const [startAdorn, setStartAdorn]     = useState('none');
+  const [endAdorn, setEndAdorn]         = useState('none');
   const [bgTheme, setBgTheme]           = useState(null);
   const [bgSurface, setBgSurface] = useState('Surface');
 
@@ -124,6 +156,8 @@ export function InputShowcase() {
     if (disabled) parts.push('disabled');
     if (fullWidth) parts.push('fullWidth');
     if (multiline) parts.push('multiline rows={3}');
+    if (startAdorn !== 'none') parts.push('startAdornment={' + START_ADORNMENTS[startAdorn].code + '}');
+    if (endAdorn !== 'none')   parts.push('endAdornment={' + END_ADORNMENTS[endAdorn].code + '}');
     return '<Input\n  ' + parts.join('\n  ') + '\n/>';
   };
 
@@ -151,6 +185,8 @@ export function InputShowcase() {
                 fullWidth={fullWidth}
                 multiline={multiline}
                 rows={multiline ? 3 : undefined}
+                startAdornment={START_ADORNMENTS[startAdorn].node}
+                endAdornment={END_ADORNMENTS[endAdorn].node}
               />
             </Box>
           </PreviewSurface>
@@ -236,6 +272,29 @@ export function InputShowcase() {
                       {['standard', 'floating'].map((lp) => (
                         <ControlButton key={lp} label={cap(lp)} selected={labelPosition === lp} onClick={() => setLabelPosition(lp)} />
                       ))}
+                    </Stack>
+                  </Box>
+
+                  {/* Adornments */}
+                  <Box sx={{ mt: 3 }}>
+                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ADORNMENTS</OverlineSmall>
+                    <Stack spacing={1.5}>
+                      <Box>
+                        <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 4, fontWeight: 600 }}>Start</Caption>
+                        <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
+                          {Object.keys(START_ADORNMENTS).map((k) => (
+                            <ControlButton key={k} label={START_ADORNMENTS[k].label} selected={startAdorn === k} onClick={() => setStartAdorn(k)} />
+                          ))}
+                        </Stack>
+                      </Box>
+                      <Box>
+                        <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 4, fontWeight: 600 }}>End</Caption>
+                        <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
+                          {Object.keys(END_ADORNMENTS).map((k) => (
+                            <ControlButton key={k} label={END_ADORNMENTS[k].label} selected={endAdorn === k} onClick={() => setEndAdorn(k)} />
+                          ))}
+                        </Stack>
+                      </Box>
                     </Stack>
                   </Box>
 

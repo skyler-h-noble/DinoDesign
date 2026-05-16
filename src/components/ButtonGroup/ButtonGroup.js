@@ -138,7 +138,7 @@ export function ButtonGroup({
 
     // ── Unselected styles ─────────────────────────────────────────────────
     const unselectedSx = !isSelected ? {
-      color:           'var(--Text-Quiet)',
+      color:           'var(--Quiet)',
       backgroundColor: 'transparent',
       '&:hover': {
         backgroundColor: 'var(--Hover)',
@@ -147,7 +147,7 @@ export function ButtonGroup({
       },
       '&:active': {
         backgroundColor: 'var(--Active)',
-        color:           'var(--Text)',
+        color:           'var(--Buttons-Default-Text)',
       },
     } : {};
 

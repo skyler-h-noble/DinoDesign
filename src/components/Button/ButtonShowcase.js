@@ -6,6 +6,8 @@ import CheckIcon from '@mui/icons-material/Check';
 import * as MuiIcons from '@mui/icons-material';
 import { Button } from './Button';
 import { Icon } from '../Icon/Icon';
+import { Avatar } from '../Avatar/Avatar';
+import { Input } from '../Input/Input';
 import { Switch } from '../Switch/Switch';
 import { Select } from '../Select/Select';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
@@ -14,8 +16,6 @@ import { BackgroundPicker } from '../BackgroundPicker';
 import {
   H2, H5, BodySmall, Caption, Label, OverlineSmall
 } from '../Typography';
-import { useNotifications } from '../NotificationProvider';
-import { useOverrides } from '../OverridesProvider';
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
@@ -216,32 +216,34 @@ function ColorSwatchButton({ color, selected, disabled: isDisabled, onClick, isO
   );
 }
 
-function TextInput({ value, onChange, placeholder, label: inputLabel }) {
+// Thin wrapper around the design-system Input so call sites in this showcase
+// stay terse — same (value, onChange-as-string, placeholder, label) signature.
+function TextInput({ value, onChange, placeholder, label }) {
   return (
-    <Box>
-      {inputLabel && <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 4 }}>{inputLabel}</Caption>}
-      <Box component="input" type="text" value={value}
-        onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
-        sx={{
-          width: '100%', padding: '6px 10px', fontSize: '13px', fontFamily: 'inherit',
-          border: '1px solid var(--Border)', borderRadius: '4px', boxSizing: 'border-box',
-          backgroundColor: 'var(--Background)', color: 'var(--Text)', outline: 'none',
-          '&:focus': { borderColor: 'var(--Focus-Visible)' },
-        }}
-      />
-    </Box>
+    <Input
+      label={label}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      variant="primary-outline"
+      size="small"
+      fullWidth
+    />
   );
 }
 
 /* ── Main Showcase ── */
 export function ButtonShowcase() {
-  const { addNotification, clearAll } = useNotifications();
-  const { setOverride, removeOverride, clearOverrides, syncToFirestore, synced, hasOverrides } = useOverrides();
   const [style, setStyle]               = useState('solid');
   const [color, setColor]               = useState('default');
   const [contentType, setContentType]   = useState('text');
   const [size, setSize]                 = useState('medium');
-  const [iconPosition, setIconPosition] = useState('left');
+  const [startSlot, setStartSlot]       = useState('icon');     // 'none' | 'icon' | 'avatar'
+  const [endSlot, setEndSlot]           = useState('none');     // 'none' | 'icon' | 'avatar'
+  const [startAvatarType, setStartAvatarType] = useState('letters'); // 'letters' | 'icon' | 'image'
+  const [endAvatarType,   setEndAvatarType]   = useState('letters');
+  const [avatarLetters, setAvatarLetters]     = useState('AB');
+  const [avatarImageUrl, setAvatarImageUrl]   = useState('https://i.pravatar.cc/300?u=dinodesign');
   const [buttonText, setButtonText]     = useState('Button');
   const [iconName, setIconName]         = useState('Add');
   const [elevated, setElevated]         = useState(false);
@@ -249,6 +251,8 @@ export function ButtonShowcase() {
   const [loading, setLoading]           = useState(false);
   const [fullWidth, setFullWidth]       = useState(false);
   const [swatchColor, setSwatchColor]   = useState('#505b45');
+  const [badge, setBadge]               = useState(false);
+  const [badgeContent, setBadgeContent] = useState('3');
   const [contrastData, setContrastData] = useState({});
   const [bgTheme, setBgTheme]           = useState(null);
   const [bgSurface, setBgSurface] = useState('Surface');
@@ -279,11 +283,37 @@ export function ButtonShowcase() {
 
   const getIconComponent = () => {
     const IconComp = MuiIcons[iconName] || MuiIcons['Add'];
-    return <Icon size="small"><IconComp /></Icon>;
+    return <Icon><IconComp /></Icon>;
+  };
+
+  const getAvatarComponent = (type) => {
+    if (type === 'image') {
+      return <Avatar src={avatarImageUrl} alt="Avatar" color="default" />;
+    }
+    if (type === 'icon') {
+      // Fixed User (Person) icon — no input needed
+      return <Avatar color="default" icon={<MuiIcons.Person />} />;
+    }
+    // letters (default)
+    const letters = (avatarLetters || 'A').slice(0, 2).toUpperCase();
+    return <Avatar initials={letters} color="default" />;
+  };
+
+  const renderSlot = (slot, avatarType) => {
+    if (slot === 'icon')   return getIconComponent();
+    if (slot === 'avatar') return getAvatarComponent(avatarType);
+    return undefined;
   };
 
   const getButtonProps = () => {
     const p = { variant: getVariant(), size, elevated, disabled, fullWidth };
+    if (badge) {
+      p.badge = true;
+      // Try to coerce to a number so Badge's `max` cap kicks in for counts;
+      // fall back to the raw string for status text ("New", "!").
+      const asNum = Number(badgeContent);
+      p.badgeContent = badgeContent !== '' && !Number.isNaN(asNum) ? asNum : badgeContent;
+    }
     if (contentType === 'icon') {
       p.iconOnly = true;
       p.children = getIconComponent();
@@ -307,9 +337,22 @@ export function ButtonShowcase() {
       return p;
     }
     p.children = loading ? 'Loading...' : (buttonText || 'Button');
-    if (iconPosition === 'left'  && iconName) p.startIcon = getIconComponent();
-    if (iconPosition === 'right' && iconName) p.endIcon   = getIconComponent();
+    const start = renderSlot(startSlot, startAvatarType);
+    const end   = renderSlot(endSlot,   endAvatarType);
+    if (start) p.startDecorator = start;
+    if (end)   p.endDecorator   = end;
     return p;
+  };
+
+  const slotJsx = (slot, avatarType) => {
+    if (slot === 'icon') return '<Icon><' + iconName + 'Icon /></Icon>';
+    if (slot === 'avatar') {
+      if (avatarType === 'image') return '<Avatar src="' + avatarImageUrl + '" />';
+      if (avatarType === 'icon')  return '<Avatar icon={<PersonIcon />} />';
+      const letters = (avatarLetters || 'A').slice(0, 2).toUpperCase();
+      return '<Avatar initials="' + letters + '" />';
+    }
+    return null;
   };
 
   const generateCode = () => {
@@ -322,8 +365,15 @@ export function ButtonShowcase() {
     if (p.elevated)    parts.push('elevated');
     if (p.disabled)    parts.push('disabled');
     if (p.fullWidth)   parts.push('fullWidth');
-    if (p.startIcon)   parts.push('startIcon={<' + iconName + 'Icon />}');
-    if (p.endIcon)     parts.push('endIcon={<' + iconName + 'Icon />}');
+    if (p.badge) {
+      parts.push('badge');
+      const c = p.badgeContent;
+      if (c !== undefined && c !== '') {
+        parts.push(typeof c === 'number' ? 'badgeContent={' + c + '}' : 'badgeContent="' + c + '"');
+      }
+    }
+    if (p.startDecorator) parts.push('startDecorator={' + slotJsx(startSlot, startAvatarType) + '}');
+    if (p.endDecorator)   parts.push('endDecorator={' + slotJsx(endSlot,   endAvatarType)   + '}');
     const children = typeof p.children === 'string' ? p.children : '';
     return '<Button ' + parts.join(' ') + '>' + children + '</Button>';
   };
@@ -411,7 +461,6 @@ export function ButtonShowcase() {
             <Tabs defaultValue={0} variant="standard" color="primary">
               <TabList>
                 <Tab>Playground</Tab>
-                <Tab>Settings</Tab>
                 <Tab>Accessibility</Tab>
               </TabList>
 
@@ -501,21 +550,102 @@ export function ButtonShowcase() {
                     </Box>
                   )}
 
-                  {/* Icon position (text only) */}
+                  {/* Start decorative slot (text only) */}
                   {contentType === 'text' && (
                     <Box sx={{ mt: 3 }}>
-                      <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ICON POSITION</OverlineSmall>
+                      <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>START DECORATIVE SLOT</OverlineSmall>
                       <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', rowGap: 1 }}>
-                        {[['none', 'None'], ['left', 'Left'], ['right', 'Right']].map(([val, lbl]) => (
-                          <ControlButton key={val} label={lbl} selected={iconPosition === val}
-                            onClick={() => setIconPosition(val)} />
+                        {[['none', 'None'], ['icon', 'Icon'], ['avatar', 'Avatar']].map(([val, lbl]) => (
+                          <ControlButton key={val} label={lbl} selected={startSlot === val} onClick={() => setStartSlot(val)} />
                         ))}
                       </Stack>
+
+                      {startSlot === 'icon' && (
+                        <Box sx={{ mt: 2 }}>
+                          <TextInput label="Icon Name" value={iconName} onChange={setIconName} placeholder="Add" />
+                          <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 4 }}>
+                            <a href="https://mui.com/material-ui/material-icons/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--Hotlink)' }}>Material icon</a> name (e.g. Add, Edit, Delete, Save, Send, Star)
+                          </Caption>
+                        </Box>
+                      )}
+
+                      {startSlot === 'avatar' && (
+                        <Box sx={{ mt: 2 }}>
+                          <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 6, fontWeight: 600 }}>Avatar Content</Caption>
+                          <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', rowGap: 1 }}>
+                            {[['letters', 'Letters'], ['icon', 'Icon'], ['image', 'Image']].map(([val, lbl]) => (
+                              <ControlButton key={val} label={lbl} selected={startAvatarType === val} onClick={() => setStartAvatarType(val)} />
+                            ))}
+                          </Stack>
+                          {startAvatarType === 'letters' && (
+                            <Box sx={{ mt: 2 }}>
+                              <TextInput label="Letters (max 2)" value={avatarLetters}
+                                onChange={(v) => setAvatarLetters(v.slice(0, 2))} placeholder="AB" />
+                            </Box>
+                          )}
+                          {startAvatarType === 'image' && (
+                            <Box sx={{ mt: 2 }}>
+                              <TextInput label="Image URL" value={avatarImageUrl}
+                                onChange={setAvatarImageUrl} placeholder="https://example.com/avatar.jpg" />
+                              <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 4 }}>
+                                Defaults to a sample image. Replace with your own URL or asset path in code.
+                              </Caption>
+                            </Box>
+                          )}
+                        </Box>
+                      )}
                     </Box>
                   )}
 
-                  {/* Icon name */}
-                  {(contentType === 'icon' || (contentType === 'text' && iconPosition !== 'none')) && (
+                  {/* End decorative slot (text only) */}
+                  {contentType === 'text' && (
+                    <Box sx={{ mt: 3 }}>
+                      <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>END DECORATIVE SLOT</OverlineSmall>
+                      <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', rowGap: 1 }}>
+                        {[['none', 'None'], ['icon', 'Icon'], ['avatar', 'Avatar']].map(([val, lbl]) => (
+                          <ControlButton key={val} label={lbl} selected={endSlot === val} onClick={() => setEndSlot(val)} />
+                        ))}
+                      </Stack>
+
+                      {endSlot === 'icon' && (
+                        <Box sx={{ mt: 2 }}>
+                          <TextInput label="Icon Name" value={iconName} onChange={setIconName} placeholder="Add" />
+                          <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 4 }}>
+                            <a href="https://mui.com/material-ui/material-icons/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--Hotlink)' }}>Material icon</a> name (e.g. Add, Edit, Delete, Save, Send, Star)
+                          </Caption>
+                        </Box>
+                      )}
+
+                      {endSlot === 'avatar' && (
+                        <Box sx={{ mt: 2 }}>
+                          <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 6, fontWeight: 600 }}>Avatar Content</Caption>
+                          <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', rowGap: 1 }}>
+                            {[['letters', 'Letters'], ['icon', 'Icon'], ['image', 'Image']].map(([val, lbl]) => (
+                              <ControlButton key={val} label={lbl} selected={endAvatarType === val} onClick={() => setEndAvatarType(val)} />
+                            ))}
+                          </Stack>
+                          {endAvatarType === 'letters' && (
+                            <Box sx={{ mt: 2 }}>
+                              <TextInput label="Letters (max 2)" value={avatarLetters}
+                                onChange={(v) => setAvatarLetters(v.slice(0, 2))} placeholder="AB" />
+                            </Box>
+                          )}
+                          {endAvatarType === 'image' && (
+                            <Box sx={{ mt: 2 }}>
+                              <TextInput label="Image URL" value={avatarImageUrl}
+                                onChange={setAvatarImageUrl} placeholder="https://example.com/avatar.jpg" />
+                              <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 4 }}>
+                                Defaults to a sample image. Replace with your own URL or asset path in code.
+                              </Caption>
+                            </Box>
+                          )}
+                        </Box>
+                      )}
+                    </Box>
+                  )}
+
+                  {/* Icon name for icon-only buttons */}
+                  {contentType === 'icon' && (
                     <Box sx={{ mt: 2 }}>
                       <TextInput label="Icon Name" value={iconName} onChange={setIconName} placeholder="Add" />
                       <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 4 }}>
@@ -577,95 +707,36 @@ export function ButtonShowcase() {
                       disabled={['icon', 'letter', 'number', 'avatar', 'swatch'].includes(contentType)} />
                   </Box>
 
-                </Box>
-              </TabPanel>
-
-              {/* ── Settings (Advanced Design Dashboard) ── */}
-              <TabPanel value={1}>
-                <Box sx={{ p: 3 }}>
-                  <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 4 }}>ADVANCED DESIGN DASHBOARD</OverlineSmall>
-                  <H5 style={{ marginBottom: 8 }}>Component Variables</H5>
-                  <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 16 }}>
-                    Edit CSS custom properties for this component. Changes apply live and affect all buttons on the page.
-                  </Caption>
-
-                  {[
-                    { token: '--Button-Border-Width', label: 'Border Width', placeholder: '2px' },
-                    { token: '--Button-Radius', label: 'Border Radius', placeholder: '4px' },
-                    { token: '--Button-Icon-Radius', label: 'Icon Button Radius', placeholder: '4px' },
-                    { token: '--Button-Height', label: 'Height (Medium)', placeholder: '36px' },
-                    { token: '--Small-Button-Height', label: 'Height (Small)', placeholder: '24px' },
-                    { token: '--Large-Button-Height', label: 'Height (Large)', placeholder: '56px' },
-                    { token: '--Button-Min-Width', label: 'Min Width', placeholder: '60px' },
-                    { token: '--Button-Bevel', label: 'Bevel Amount', placeholder: '0' },
-                  ].map(({ token, label, placeholder }) => {
-                    const current = typeof window !== 'undefined'
-                      ? getComputedStyle(document.documentElement).getPropertyValue(token).trim()
-                      : '';
-                    return (
-                      <Box key={token} sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                        <Box sx={{ flex: 1 }}>
-                          <BodySmall>{label}</BodySmall>
-                          <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>{token}</Caption>
-                        </Box>
-                        <Box component="input" type="text" defaultValue={current} placeholder={placeholder}
-                          onBlur={(e) => {
-                            const val = e.target.value.trim();
-                            if (val) {
-                              setOverride(token, val);
-                              addNotification({
-                                title: 'Button variable updated',
-                                message: token + ' changed to ' + val,
-                                variables: [token],
-                              });
-                            } else {
-                              removeOverride(token);
-                            }
-                          }}
-                          onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
-                          sx={{
-                            width: 80, padding: '4px 8px', fontSize: '13px', fontFamily: 'monospace',
-                            border: '1px solid var(--Border)', borderRadius: '4px', boxSizing: 'border-box',
-                            backgroundColor: 'var(--Background)', color: 'var(--Text)', outline: 'none',
-                            textAlign: 'right',
-                            '&:focus': { borderColor: 'var(--Focus-Visible)' },
-                          }}
-                        />
-                      </Box>
-                    );
-                  })}
-
-                  <Box sx={{ mt: 3, display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
-                    <Button variant="default-outline" size="small" onClick={() => {
-                      clearOverrides();
-                      clearAll();
-                    }}>
-                      Reset to Defaults
-                    </Button>
-                    <Button variant="primary" size="small" onClick={async () => {
-                      const ok = await syncToFirestore();
-                      if (ok) {
-                        addNotification({
-                          title: 'Synced to Studio',
-                          message: 'Overrides pushed to Firestore',
-                          variables: [],
-                        });
-                      }
-                    }}
-                      disabled={synced || !hasOverrides}>
-                      {synced ? 'Synced' : 'Push to Studio'}
-                    </Button>
+                  <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box>
+                      <Label>Badge</Label>
+                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>
+                        Count or status pill anchored to the button corner
+                      </Caption>
+                    </Box>
+                    <Switch checked={badge} onChange={(e) => setBadge(e.target.checked)}
+                      size="small" aria-label="Badge" />
                   </Box>
-                  {!synced && hasOverrides && (
-                    <Caption style={{ color: 'var(--Buttons-Warning-Button)', display: 'block', marginTop: 8 }}>
-                      Unsaved changes — push to Studio to sync with Figma.
-                    </Caption>
+
+                  {badge && (
+                    <Box sx={{ mt: 2 }}>
+                      <TextInput
+                        label="Badge Content"
+                        value={badgeContent}
+                        onChange={setBadgeContent}
+                        placeholder="3"
+                      />
+                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 4 }}>
+                        Numbers ({'>'}99 shows "99+"); short strings render as a pill.
+                      </Caption>
+                    </Box>
                   )}
+
                 </Box>
               </TabPanel>
 
               {/* ── Accessibility ── */}
-              <TabPanel value={2}>
+              <TabPanel value={1}>
                 <Box sx={{ p: 3 }}>
                   <BodySmall color="quiet" style={{ marginBottom: 24 }}>
                     {cap(style)} / {cap(effectiveColor)} / {cap(size)} / {cap(contentType)}
@@ -795,12 +866,12 @@ export function ButtonShowcase() {
                           </Box>
                           <PassFailBadge pass={true} />
                         </Box>
-                      ) : contentType === 'text' && iconPosition !== 'none' ? (
+                      ) : contentType === 'text' && (startSlot !== 'none' || endSlot !== 'none') ? (
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', py: 1.5, borderBottom: '1px solid var(--Border)' }}>
                           <Box>
-                            <BodySmall>Button has text + icon</BodySmall>
+                            <BodySmall>Button has text + decorator</BodySmall>
                             <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>
-                              Button text is the accessible name. Icon must have aria-hidden="true" and NO alt or aria-label.
+                              Button text is the accessible name. Icons must have aria-hidden="true" and avatars are decorative.
                             </Caption>
                           </Box>
                           <PassFailBadge pass={true} />

@@ -116,7 +116,9 @@ export function Select({
 
   const isControlled = controlledValue !== undefined;
   const currentValue = isControlled ? controlledValue : internalValue;
-  const selectedOption = options.find((o) => (typeof o === 'string' ? o : o.value) === currentValue);
+  // Flatten groups so lookups and counts work whether options are flat or grouped
+  const flatOptions = options.flatMap((o) => (o && Array.isArray(o.options)) ? o.options : [o]);
+  const selectedOption = flatOptions.find((o) => (typeof o === 'string' ? o : o.value) === currentValue);
   const selectedLabel = selectedOption ? (typeof selectedOption === 'string' ? selectedOption : selectedOption.label) : '';
   const hasValue = currentValue !== '' && currentValue != null;
 
@@ -254,7 +256,7 @@ export function Select({
         width: dropdownPos.width + 'px',
         backgroundColor: 'var(--Background)',
         border: '1px solid var(--Buttons-Default-Border)',
-        borderRadius: 'var(--Style-Border-Radius)',
+        borderRadius: '4px',
         boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
         zIndex: 99999,
         maxHeight: DROPDOWN_MAX_HEIGHT + 'px',
@@ -262,61 +264,92 @@ export function Select({
         py: 0.5,
       }}
     >
-      {options.map((opt, idx) => {
-        const optValue = typeof opt === 'string' ? opt : opt.value;
-        const optLabel = typeof opt === 'string' ? opt : opt.label;
-        const optColor = typeof opt === 'object' ? opt.color : null;
-        const isSelected = optValue === currentValue;
-        const styles = getSelectedStyles(selectionStyle, isSelected, effectiveColor);
-        const isLast = idx === options.length - 1;
+      {(() => {
+        const renderOption = (opt, idx, total) => {
+          const optValue = typeof opt === 'string' ? opt : opt.value;
+          const optLabel = typeof opt === 'string' ? opt : opt.label;
+          const optColor = typeof opt === 'object' ? opt.color : null;
+          const isSelected = optValue === currentValue;
+          const styles = getSelectedStyles(selectionStyle, isSelected, effectiveColor);
+          const isLast = idx === total - 1;
 
-        return (
-          <React.Fragment key={optValue}>
-            <Box
-              role="option"
-              tabIndex={-1}
-              aria-selected={isSelected}
-              aria-label={isColor && !showColorLabels ? optLabel : undefined}
-              onClick={() => handleSelect(optValue)}
-              onKeyDown={(e) => handleOptionKeyDown(e, optValue)}
-              sx={{
-                display: 'flex', alignItems: 'center', gap: 1,
-                px: 1.5, py: 0, mx: 0.5, my: '1px',
-                minHeight: sizeConfig.height,
-                cursor: 'pointer',
-                fontSize: sizeConfig.fontSize,
-                fontFamily: 'inherit',
-                borderRadius: '4px',
-                outline: 'none',
-                ...styles,
-                transition: 'background-color 0.1s ease',
-                '&:hover': !isSelected ? { backgroundColor: 'var(--Buttons-' + C + '-Hover)', color: 'var(--Buttons-' + C + '-Text)' } : {},
-                '&:active': !isSelected ? { backgroundColor: 'var(--Buttons-' + C + '-Active)', color: 'var(--Buttons-' + C + '-Text)' } : {},
-                '&:focus-visible': {
-                  outline: '2px solid var(--Focus-Visible)',
-                  outlineOffset: '2px',
-                },
-              }}
-            >
-              {isColor && optColor && (
-                <Box sx={{
-                  width: 20, height: 20, borderRadius: '4px',
-                  backgroundColor: optColor,
-                  border: isSelected ? '2px solid var(--Buttons-' + C + '-Border)' : '1px solid var(--Border)',
-                  flexShrink: 0,
-                }} />
+          return (
+            <React.Fragment key={optValue}>
+              <Box
+                role="option"
+                tabIndex={-1}
+                aria-selected={isSelected}
+                aria-label={isColor && !showColorLabels ? optLabel : undefined}
+                onClick={() => handleSelect(optValue)}
+                onKeyDown={(e) => handleOptionKeyDown(e, optValue)}
+                sx={{
+                  display: 'flex', alignItems: 'center', gap: 1,
+                  px: 1.5, py: 0, mx: 0.5, my: '1px',
+                  minHeight: sizeConfig.height,
+                  cursor: 'pointer',
+                  fontSize: sizeConfig.fontSize,
+                  fontFamily: 'inherit',
+                  borderRadius: '4px',
+                  outline: 'none',
+                  ...styles,
+                  transition: 'background-color 0.1s ease',
+                  '&:hover': !isSelected ? { backgroundColor: 'var(--Buttons-' + C + '-Hover)', color: 'var(--Buttons-' + C + '-Text)' } : {},
+                  '&:active': !isSelected ? { backgroundColor: 'var(--Buttons-' + C + '-Active)', color: 'var(--Buttons-' + C + '-Text)' } : {},
+                  '&:focus-visible': {
+                    outline: '2px solid var(--Focus-Visible)',
+                    outlineOffset: '2px',
+                  },
+                }}
+              >
+                {isColor && optColor && (
+                  <Box sx={{
+                    width: 20, height: 20, borderRadius: '4px',
+                    backgroundColor: optColor,
+                    border: isSelected ? '2px solid var(--Buttons-' + C + '-Border)' : '1px solid var(--Border)',
+                    flexShrink: 0,
+                  }} />
+                )}
+                {(!isColor || showColorLabels) && (
+                  <BodySmall style={{ flex: 1, color: 'inherit', fontWeight: 'inherit' }}>{optLabel}</BodySmall>
+                )}
+                {isSelected && <Icon size="small" sx={{ opacity: 0.6, flexShrink: 0 }}><CheckIcon /></Icon>}
+              </Box>
+              {showDividers && !isLast && (
+                <Box aria-hidden="true" sx={{ height: '1px', backgroundColor: 'var(--Border)', mx: 1, my: 0.25 }} />
               )}
-              {(!isColor || showColorLabels) && (
-                <BodySmall style={{ flex: 1, color: 'inherit', fontWeight: 'inherit' }}>{optLabel}</BodySmall>
-              )}
-              {isSelected && <Icon size="small" sx={{ opacity: 0.6, flexShrink: 0 }}><CheckIcon /></Icon>}
-            </Box>
-            {showDividers && !isLast && (
-              <Box aria-hidden="true" sx={{ height: '1px', backgroundColor: 'var(--Border)', mx: 1, my: 0.25 }} />
-            )}
-          </React.Fragment>
-        );
-      })}
+            </React.Fragment>
+          );
+        };
+
+        return options.map((opt, gIdx) => {
+          // Group: has an `options` array of children
+          if (opt && Array.isArray(opt.options)) {
+            const groupItems = opt.options;
+            return (
+              <React.Fragment key={'group-' + (opt.label || gIdx)}>
+                <Box
+                  role="presentation"
+                  sx={{
+                    px: 1.5,
+                    pt: gIdx === 0 ? 0.75 : 1.25,
+                    pb: 0.5,
+                    fontSize: '11px',
+                    fontFamily: 'inherit',
+                    fontWeight: 700,
+                    letterSpacing: '0.06em',
+                    textTransform: 'uppercase',
+                    color: 'var(--Text-Quiet)',
+                  }}
+                >
+                  {opt.label}
+                </Box>
+                {groupItems.map((child, cIdx) => renderOption(child, cIdx, groupItems.length))}
+              </React.Fragment>
+            );
+          }
+          return renderOption(opt, gIdx, options.length);
+        });
+      })()}
     </Box>,
     document.body
   ) : null;

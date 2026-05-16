@@ -67,7 +67,7 @@ const ls  = (token) => `var(--${token}-Letter-Spacing)`;
 
 // ─── Style Map ────────────────────────────────────────────────────────────────
 
-const STYLE_MAP = {
+export const STYLE_MAP = {
 
   // ── Display ──────────────────────────────────────────────────────────────
   'display-large': {
@@ -596,6 +596,18 @@ export function Typography({
 }) {
   const config = STYLE_MAP[textStyle] || STYLE_MAP.body;
 
+  // Derive the size token (e.g. "Body-Medium") from the fontSize var, so
+  // `text-decoration` and `text-transform` can be overridden per style via
+  // CSS custom properties without baking them into STYLE_MAP entries.
+  const sizeTokenMatch = typeof config.fontSize === 'string' ? config.fontSize.match(/--([\w-]+)-Font-Size/) : null;
+  const sizeToken = sizeTokenMatch ? sizeTokenMatch[1] : null;
+  const textDecorationValue = sizeToken
+    ? 'var(--' + sizeToken + '-Text-Decoration, ' + (config.textDecoration || 'none') + ')'
+    : (config.textDecoration || 'none');
+  const textTransformValue = sizeToken
+    ? 'var(--' + sizeToken + '-Text-Transform, ' + (config.textTransform || 'none') + ')'
+    : (config.textTransform || 'none');
+
   const colorValue = resolveColor(textStyle, color, config.defaultColor);
   const resolvedWidth = width || config.defaultWidth;
   const isFill = resolvedWidth === 'fill';
@@ -617,7 +629,8 @@ export function Typography({
         fontWeight:        config.fontWeight,
         lineHeight:        config.lineHeight,
         letterSpacing:     config.letterSpacing,
-        textTransform:     config.textTransform     || 'none',
+        textDecoration:    textDecorationValue,
+        textTransform:     textTransformValue,
         fontVariantNumeric: config.fontVariantNumeric || 'normal',
         color:             colorValue,
         display:           isFill ? 'block' : 'inline',

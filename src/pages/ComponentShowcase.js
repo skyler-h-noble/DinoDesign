@@ -97,12 +97,9 @@ import {
   Fab,
   DynoTreeView,
 } from '../components';
-import { DynoDesignProvider } from '../DynoDesignProvider';
-import { useAuth } from '../AuthProvider';
+import { DynoDesignProvider, useDynoDesign } from '../DynoDesignProvider';
 import { NotificationProvider } from '../components/NotificationProvider';
 import { NotificationBell } from '../components/NotificationBell';
-import { OverridesProvider } from '../components/OverridesProvider';
-import { LoginDialog } from '../components/LoginDialog';
 import { useThemeMode } from '../theme/useThemeMode';
 
 const SUPABASE_STORAGE_BASE = 'https://aqpmdqlhffjakkznxudv.supabase.co/storage/v1/object/public/design-system';
@@ -204,17 +201,34 @@ const NAV_ITEMS = [
 ];
 
 function ShowcaseInner() {
-  const { user, signOut } = useAuth();
   const { mode, switchMode } = useThemeMode('light');
   const [activeSection, setActiveSection] = useState('buttons');
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Theme URL from ?user= param
+  // Filter nav items by search query — keep categories whose label OR whose
+  // child labels match. When a query is active, every matching category is
+  // also forced expanded so matches stay visible.
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const filteredNavItems = !normalizedQuery
+    ? NAV_ITEMS
+    : NAV_ITEMS
+        .map((cat) => {
+          const catMatches = cat.label.toLowerCase().includes(normalizedQuery);
+          const matchingChildren = cat.children?.filter((c) => c.label.toLowerCase().includes(normalizedQuery)) || [];
+          if (catMatches) return cat; // whole category visible
+          if (matchingChildren.length) return { ...cat, children: matchingChildren };
+          return null;
+        })
+        .filter(Boolean);
+  const expandedItems = normalizedQuery
+    ? filteredNavItems.map((cat) => cat.id)
+    : undefined;
+
+  // Theme URL from ?user= param (auth removed — themes load by URL param only)
   const params = new URLSearchParams(window.location.search);
   const userParam = params.get('user');
-  const userId = user?.uid || userParam;
-  const themeURL = userId ? SUPABASE_STORAGE_BASE + '/' + userId : undefined;
+  const themeURL = userParam ? SUPABASE_STORAGE_BASE + '/' + userParam : undefined;
 
   const handleTreeSelect = useCallback((event, itemId) => {
     if (itemId && !NAV_ITEMS.some((cat) => cat.id === itemId)) {
@@ -225,17 +239,25 @@ function ShowcaseInner() {
 
   const sidebarContent = (
     <Box sx={{ flex: 1, overflow: 'auto', p: 1 }}>
-      <DynoTreeView
-        items={NAV_ITEMS}
-        variant="default"
-        color="default"
-        selectedItems={activeSection}
-        onSelectedItemsChange={handleTreeSelect}
-        defaultExpandedItems={['inputs']}
-        animation="slide"
-        aria-label="Component navigation"
-        sx={{ border: 'none', borderRadius: 0 }}
-      />
+      {filteredNavItems.length === 0 ? (
+        <Box sx={{ p: 2, color: 'var(--Quiet)', fontSize: '14px' }}>
+          No components match "{searchQuery}"
+        </Box>
+      ) : (
+        <DynoTreeView
+          // Re-mount when query changes so the new expandedItems take effect
+          key={normalizedQuery || 'all'}
+          items={filteredNavItems}
+          variant="default"
+          color="default"
+          selectedItems={activeSection}
+          onSelectedItemsChange={handleTreeSelect}
+          defaultExpandedItems={expandedItems || ['inputs']}
+          animation="slide"
+          aria-label="Component navigation"
+          sx={{ border: 'none', borderRadius: 0 }}
+        />
+      )}
     </Box>
   );
 
@@ -256,24 +278,15 @@ function ShowcaseInner() {
       defaultStyle="Modern"
     >
     <NotificationProvider>
-    <OverridesProvider dsId={userId}>
     <Box sx={{ display: 'flex', minHeight: '100vh', flexDirection: 'column' }}>
-      {/* App Bar */}
-      <AppBar
-        mode="desktop"
-        barColor="default"
+      {/* App Bar — brand is pulled from the loaded theme.json manifest via
+          the DynoDesignProvider context, so it shows the design system's name
+          (e.g. "Acme") instead of the static "Company" default. */}
+      <BrandedAppBar
         onMenuClick={() => setMobileOpen(!mobileOpen)}
-        user={user}
-        onLogin={() => setLoginOpen(true)}
-        onSignOut={signOut}
-        showRightButtons={!!user}
-        rightButtons={user ? [
-          { icon: <NotificationBell />, label: 'Notifications', raw: true },
-        ] : []}
-        sx={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999999 }}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
       />
-
-      <LoginDialog open={loginOpen} onClose={() => setLoginOpen(false)} />
 
       {/* Main Content Container */}
       <Box sx={{ display: 'flex', flex: 1, mt: 7.5 }}>
@@ -385,9 +398,34 @@ function ShowcaseInner() {
       {/* Settings Panel */}
       <SettingsPanel />
     </Box>
-    </OverridesProvider>
     </NotificationProvider>
     </DynoDesignProvider>
+  );
+}
+
+/**
+ * AppBar wrapper that reads the loaded design system's name from the
+ * DynoDesignProvider context (populated from theme.json's `name` field) and
+ * passes it as `brand`. Falls back to the default "Company" rendering when
+ * no name is available (no themeURL or older manifests without `name`).
+ */
+function BrandedAppBar({ onMenuClick, searchQuery, onSearchChange }) {
+  const { name } = useDynoDesign();
+  return (
+    <AppBar
+      mode="desktop"
+      barColor="default"
+      brand={name || undefined}
+      onMenuClick={onMenuClick}
+      searchValue={searchQuery}
+      onSearchChange={onSearchChange}
+      searchPlaceholder="Search components..."
+      showRightButtons
+      rightButtons={[
+        { icon: <NotificationBell />, label: 'Notifications', raw: true },
+      ]}
+      sx={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999999 }}
+    />
   );
 }
 

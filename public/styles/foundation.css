@@ -1,3 +1,8 @@
+/* ============================================================================
+ * foundation.css — STATIC: lib-owned, do not regenerate per design system.
+ * Primitive sizing tokens (button/card radius defaults, etc.).
+ * Edit by hand; do NOT overwrite from studio exports.
+ * ============================================================================ */
 :root {
 
   /* Button */
@@ -8,6 +13,9 @@
   --Large-Button-Height: 56px;
   --Button-Min-Width: 60px;
   --Button-Border-Width: 2px;
+  --Sm-Button-Padding: 4px;
+  --Button-Padding: 8px;
+  --Large-Button-Padding: 12px;
   --Button-Bevel: 0;
   --Button-Bevel-Px: 0px;
   --Button-Bevel-Opacity: 0.5;

@@ -112,7 +112,10 @@ export function Badge({
       padding: dot ? 0 : sc.padding,
       fontSize: sc.fontSize,
       fontWeight: 600,
-      fontFamily: 'inherit',
+      // Pull from the Typography system's Body family token (same value as
+      // Caption / BodySmall / Body), so the badge text matches the design
+      // system's body font instead of inheriting whatever the parent uses.
+      fontFamily: 'var(--Body-Font-Family)',
       lineHeight: 1,
       borderRadius: dot ? '50%' : sc.height / 2 + 'px',
 
@@ -122,8 +125,12 @@ export function Badge({
       border: styles.border,
       boxSizing: 'border-box',
 
-      // No MUI defaults
-      boxShadow: 'none',
+      // 1px ring in the background color so the badge stays visually separated
+      // from whatever it's anchored to (icon, avatar, button corner) — same
+      // technique MUI uses for its own punch-out badges, but via box-shadow so
+      // it doesn't conflict with the variant border (outline/light variants
+      // already use border for their colored ring).
+      boxShadow: '0 0 0 1px var(--Background)',
 
       // Transition
       transition: 'transform 0.2s ease, opacity 0.2s ease',

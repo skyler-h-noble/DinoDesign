@@ -4,6 +4,7 @@ import {
   TextField as MuiTextField,
   Box,
   FormHelperText,
+  InputAdornment,
 } from '@mui/material';
 
 /**
@@ -43,6 +44,8 @@ export function TextField({
   type = 'text',
   required = false,
   fullWidth = true,
+  startAdornment,   // ReactNode rendered inside the input on the left
+  endAdornment,     // ReactNode rendered inside the input on the right
   sx = {},
   ...props
 }) {
@@ -84,6 +87,12 @@ export function TextField({
             style: {
               color: textColor,
             },
+            startAdornment: startAdornment
+              ? <InputAdornment position="start">{startAdornment}</InputAdornment>
+              : undefined,
+            endAdornment: endAdornment
+              ? <InputAdornment position="end">{endAdornment}</InputAdornment>
+              : undefined,
           },
         }}
         sx={{

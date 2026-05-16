@@ -2,6 +2,33 @@
 import React from 'react';
 import { Button as MuiButton, Avatar as MuiAvatar, Box, GlobalStyles } from '@mui/material';
 import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography, ButtonExtraSmall as ButtonExtraSmallTypography } from '../Typography';
+import { Avatar as DDAvatar } from '../Avatar/Avatar';
+import { Icon as DDIcon } from '../Icon/Icon';
+import { Badge as DDBadge } from '../Badge/Badge';
+
+// Auto-size mapping for start/end decorators based on Button size
+const DECORATOR_SIZE_MAP = {
+  small:  { avatar: 'xxx-small', icon: 'small'  },
+  medium: { avatar: 'xx-small',  icon: 'medium' },
+  large:  { avatar: 'small',     icon: 'large'  },
+};
+
+// Auto-detect decorator type by React element type and resize it.
+// - Avatar → cloned with avatar size for the button size
+// - Icon   → cloned with icon size for the button size
+// - Other (raw MUI SvgIcon, etc.) → returned as-is so MUI's startIcon/endIcon
+//   slot can size it via inherited font-size.
+function resolveDecorator(node, buttonSize) {
+  if (!React.isValidElement(node)) return node;
+  const mapping = DECORATOR_SIZE_MAP[buttonSize] || DECORATOR_SIZE_MAP.medium;
+  if (node.type === DDAvatar) {
+    return React.cloneElement(node, { size: mapping.avatar });
+  }
+  if (node.type === DDIcon) {
+    return React.cloneElement(node, { size: mapping.icon });
+  }
+  return node;
+}
 
 /**
  * Button Component
@@ -63,9 +90,9 @@ function bevelShadow(color) {
 function solidStyles(color, elevated = false) {
   const C = cap(color);
   const bevel = bevelShadow(color);
-  const restLevel = elevated ? 'var(--Effect-Level-2)' : 'var(--Effect-Level-1)';
-  const hoverLevel = elevated ? 'var(--Effect-Level-3)' : 'var(--Effect-Level-2)';
-  const restShadow = `${bevel}, ${restLevel}`;
+  const restLevel = elevated ? 'var(--Effect-Level-1)' : 'none';
+  const hoverLevel = elevated ? 'var(--Effect-Level-2)' : 'var(--Effect-Level-1)';
+  const restShadow = restLevel === 'none' ? bevel : `${bevel}, ${restLevel}`;
   const hoverShadow = `${bevel}, ${hoverLevel}`;
   return {
     backgroundColor: `var(--Buttons-${C}-Button)`,
@@ -105,14 +132,14 @@ function outlineStyles(color) {
     border: `var(--Button-Border-Width) solid var(--Buttons-${C}-Border)`,
     boxShadow: 'none',
     '& .MuiTouchRipple-rippleVisible': {
-      color: `var(--Buttons-${C}-Hover)`,
+      color: 'var(--Hover)',
     },
     '&:hover': {
-      backgroundColor: `var(--Buttons-${C}-Hover)`,
+      backgroundColor: 'var(--Hover)',
       boxShadow: 'none',
     },
     '&:active': {
-      backgroundColor: `var(--Buttons-${C}-Active)`,
+      backgroundColor: 'var(--Active)',
     },
     '&.Mui-focusVisible': {
       backgroundColor: 'transparent',
@@ -124,8 +151,8 @@ function outlineStyles(color) {
 
 function lightStyles(color, elevated = false) {
   const C = cap(color);
-  const restLevel = elevated ? 'var(--Effect-Level-2)' : 'var(--Effect-Level-1)';
-  const hoverLevel = elevated ? 'var(--Effect-Level-3)' : 'var(--Effect-Level-2)';
+  const restLevel = elevated ? 'var(--Effect-Level-1)' : 'none';
+  const hoverLevel = elevated ? 'var(--Effect-Level-2)' : 'var(--Effect-Level-1)';
   return {
     backgroundColor: `var(--${C}-Color-11)`,
     color: `var(--Text-${C}-Color-11)`,
@@ -154,31 +181,29 @@ function ghostStyles(isTextContent) {
   return {
     backgroundColor: 'transparent',
     color: 'var(--Hotlink)',
-    border: '1px solid transparent',
+    border: 'var(--Button-Border-Width) solid transparent',
     boxShadow: 'none',
+    textDecoration: 'none',
     ...(isTextContent && {
-      '& .MuiButton-root, & span, &': { textDecoration: 'underline' },
-      textDecoration: 'underline',
+      // Underline lives on the text wrapper only — not on the button root or
+      // arbitrary spans — so it never propagates into the start/end decorator
+      // slots (icons, avatars and their inner spans).
+      '& .btn-text-content': { textDecoration: 'underline' },
     }),
     '& .MuiTouchRipple-rippleVisible': {
       color: 'var(--Hover)',
-    },
-    '& .MuiButton-startIcon, & .MuiButton-endIcon': {
-      textDecoration: 'none',
     },
     '&:hover': {
       backgroundColor: 'var(--Hover)',
       boxShadow: 'none',
       ...(isTextContent && {
-        textDecoration: 'none',
-        '& span': { textDecoration: 'none' },
+        '& .btn-text-content': { textDecoration: 'none' },
       }),
     },
     '&:active': {
       backgroundColor: 'var(--Active)',
       ...(isTextContent && {
-        textDecoration: 'none',
-        '& span': { textDecoration: 'none' },
+        '& .btn-text-content': { textDecoration: 'none' },
       }),
     },
     '&.Mui-focusVisible': {
@@ -186,8 +211,7 @@ function ghostStyles(isTextContent) {
       outline: '2px solid var(--Focus-Visible)',
       outlineOffset: '2px',
       ...(isTextContent && {
-        textDecoration: 'none',
-        '& span': { textDecoration: 'none' },
+        '& .btn-text-content': { textDecoration: 'none' },
       }),
     },
   };
@@ -257,11 +281,14 @@ function getSizingStyles({ size, iconOnly, letterNumber, avatar }) {
   }
 
   // Text — minHeight from token, minWidth from SIZE_BASE
+  const PADDING_X_BY_SIZE = {
+    small:  'var(--Sm-Button-Padding)',
+    medium: 'var(--Button-Padding)',
+    large:  'var(--Large-Button-Padding)',
+  };
   return {
     ...base,
-    padding: size === 'large'
-      ? 'var(--Sizing-Half) var(--Sizing-2)'
-      : 'var(--Sizing-Half) var(--Sizing-1)',
+    padding: `0 ${PADDING_X_BY_SIZE[size] || PADDING_X_BY_SIZE.medium}`,
   };
 }
 
@@ -280,6 +307,18 @@ export function Button({
   swatchColor,
   startIcon,
   endIcon,
+  startDecorator,
+  endDecorator,
+  // Badge — optional count/status indicator anchored to the button corner.
+  // When `badge` is true, the rendered button is wrapped in the design-system
+  // Badge so positioning, colors, and theming match the standalone component.
+  badge = false,
+  badgeContent,
+  badgeVariant = 'error',
+  badgeSize,
+  badgeDot = false,
+  badgeMax = 99,
+  badgeAnchorOrigin = { vertical: 'top', horizontal: 'right' },
   children,
   className = '',
   sx = {},
@@ -324,17 +363,26 @@ export function Button({
 
     if (typeof children === 'string' || typeof children === 'number') {
       return (
-        <TypographyComp
+        <Box
           component="span"
+          className="btn-text-content"
           sx={{
-            color: 'inherit',
-            lineHeight: 'inherit',
-            letterSpacing: 'inherit',
-            ...(size === 'medium' && { margin: '1px 0 0 0' }),
+            display: 'inline-flex',
+            alignItems: 'center',
+            padding: '4px',
           }}
         >
-          {children}
-        </TypographyComp>
+          <TypographyComp
+            component="span"
+            sx={{
+              color: 'inherit',
+              lineHeight: 'inherit',
+              letterSpacing: 'inherit',
+            }}
+          >
+            {children}
+          </TypographyComp>
+        </Box>
       );
     }
     return children;
@@ -361,15 +409,29 @@ export function Button({
     return startIcon;
   };
 
-  return (
+  // Decorators take precedence over legacy startIcon/endIcon
+  const resolvedStartDecorator = startDecorator !== undefined
+    ? resolveDecorator(startDecorator, size)
+    : undefined;
+  const resolvedEndDecorator = endDecorator !== undefined
+    ? resolveDecorator(endDecorator, size)
+    : undefined;
+
+  // Default the badge size to match the button size when not explicitly set.
+  // Badge only ships small/medium/large; "medium" is a safe fallback for any
+  // future button sizes that don't have a 1:1 badge mapping.
+  const resolvedBadgeSize = badgeSize
+    || (size === 'small' ? 'small' : size === 'large' ? 'large' : 'medium');
+
+  const out = (
     <>
       <GlobalStyles styles={{
         '[class*="btn-"] .MuiButton-startIcon, [class*="btn-"] .MuiButton-icon': {
           marginLeft: '0px !important',
-          marginRight: '4px !important',
+          marginRight: '2px !important',
         },
         '[class*="btn-"] .MuiButton-endIcon': {
-          marginLeft: '4px !important',
+          marginLeft: '2px !important',
           marginRight: '0px !important',
         },
         '[class*="btn-"] .MuiButton-iconSizeSmall .MuiSvgIcon-root, [class*="btn-"] .MuiButton-iconSizeSmall > *': {
@@ -380,8 +442,10 @@ export function Button({
       size={size}
       {...(effectiveFullWidth && { fullWidth: true })}
       disabled={disabled}
-      startIcon={avatar ? renderStartIcon() : startIcon}
-      endIcon={endIcon}
+      startIcon={resolvedStartDecorator !== undefined
+        ? resolvedStartDecorator
+        : (avatar ? renderStartIcon() : startIcon)}
+      endIcon={resolvedEndDecorator !== undefined ? resolvedEndDecorator : endIcon}
       className={`btn-${variant} ${className}`}
       role="button"
       sx={{
@@ -410,8 +474,9 @@ export function Button({
         '& .MuiButton-startIcon': {
           display: 'inherit',
           color: 'inherit',
+          padding: '0 2px',
           marginLeft: '0px !important',
-          marginRight: avatar ? '0px !important' : '4px !important',
+          marginRight: avatar ? '0px !important' : '2px !important',
         },
         ...(avatar && {
           '& .MuiAvatar-root': {
@@ -421,7 +486,8 @@ export function Button({
         '& .MuiButton-endIcon': {
           display: 'inherit',
           color: 'inherit',
-          marginLeft: '4px !important',
+          padding: '0 2px',
+          marginLeft: '2px !important',
           marginRight: '0px !important',
         },
         '& .MuiSvgIcon-root': { color: 'inherit' },
@@ -442,7 +508,7 @@ export function Button({
         },
 
         ...(swatch && {
-          border: '1px solid var(--Buttons-Default-Border)',
+          border: 'var(--Button-Border-Width) solid var(--Border)',
           padding: '1px',
           width: SIZE_HEIGHT[size] || SIZE_HEIGHT.medium,
           height: SIZE_HEIGHT[size] || SIZE_HEIGHT.medium,
@@ -475,6 +541,26 @@ export function Button({
     </MuiButton>
     </>
   );
+
+  // Wrap in Badge if requested. Done after assembly so all the button-internal
+  // styling (variant, size, sizing overrides, focus, etc.) is unaffected — the
+  // badge just decorates the corner.
+  if (badge) {
+    return (
+      <DDBadge
+        variant={badgeVariant}
+        size={resolvedBadgeSize}
+        badgeContent={badgeContent}
+        dot={badgeDot}
+        max={badgeMax}
+        anchorOrigin={badgeAnchorOrigin}
+        showZero={badgeContent === 0}
+      >
+        {out}
+      </DDBadge>
+    );
+  }
+  return out;
 }
 
 // ─── Convenience Exports ──────────────────────────────────────────────────────

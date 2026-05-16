@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './AuthProvider';
 import ComponentShowcase from './pages/ComponentShowcase';
 
 // Detect platform from user agent
@@ -17,24 +16,22 @@ function App() {
   const platform = params.get('platform') || detectPlatform();
 
   return (
-    <AuthProvider>
-      <div
-        data-platform={platform}
-        data-theme="Default"
-        data-surface="Surface"
-        style={{
-          background: 'var(--Background)',
-          color: 'var(--Text)',
-          minHeight: '100vh',
-        }}
-      >
-        <Router>
-          <Routes>
-            <Route path="/" element={<ComponentShowcase />} />
-          </Routes>
-        </Router>
-      </div>
-    </AuthProvider>
+    <div
+      data-platform={platform}
+      data-theme="Default"
+      data-surface="Surface"
+      style={{
+        background: 'var(--Background)',
+        color: 'var(--Text)',
+        minHeight: '100vh',
+      }}
+    >
+      <Router>
+        <Routes>
+          <Route path="/" element={<ComponentShowcase />} />
+        </Routes>
+      </Router>
+    </div>
   );
 }
 

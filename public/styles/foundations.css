@@ -1,3 +1,9 @@
+/* ============================================================================
+ * foundations.css — STATIC: lib-owned, do not regenerate per design system.
+ * Alternate / legacy primitives. Edit by hand; do NOT overwrite from studio exports.
+ * (Note: file naming is unfortunate — `foundation.css` and `foundations.css`
+ * both exist with slightly different content. Reconcile when convenient.)
+ * ============================================================================ */
 :root {
 
   /* Button */

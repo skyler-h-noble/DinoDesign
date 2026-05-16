@@ -3,13 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
-import { Typography, TYPOGRAPHY_STYLES, HEADER_COLORS, TEXT_COLORS } from './Typography';
+import { Typography, HEADER_COLORS, TEXT_COLORS } from './Typography';
 import {
   H2, H5, BodySmall, Caption, Label, OverlineSmall
 } from './Typography';
 import { Button } from '../Button/Button';
 import { Checkbox } from '../Checkbox/Checkbox';
 import { Input } from '../Input/Input';
+import { Select } from '../Select/Select';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
@@ -52,21 +53,41 @@ const STYLE_LABELS = {
 };
 
 const STYLE_GROUPS = {
-  Display:       ['display-large', 'display-small'],
-  Headings:      ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
-  Subtitle:      ['subtitle', 'subtitle-large'],
-  'Body Small':  ['body-small', 'body-small-semibold', 'body-small-bold'],
-  'Body Medium': ['body', 'body-semibold', 'body-bold'],
-  'Body Large':  ['body-large', 'body-large-semibold', 'body-large-bold'],
-  Label:         ['label', 'label-small', 'label-large'],
-  Caption:       ['caption', 'caption-bold'],
-  Legal:         ['legal', 'legal-semibold'],
-  Overline:      ['overline-small', 'overline', 'overline-large'],
-  Button:        ['button-extra-small', 'button-small', 'button'],
-  Number:        ['number-large', 'number-medium', 'number-small'],
+  Display:  ['display-large', 'display-small'],
+  Headings: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
+  Subtitle: ['subtitle', 'subtitle-large'],
+  Body: [
+    'body-small', 'body-small-semibold', 'body-small-bold',
+    'body',       'body-semibold',       'body-bold',
+    'body-large', 'body-large-semibold', 'body-large-bold',
+  ],
+  Label:    ['label', 'label-small', 'label-large'],
+  Caption:  ['caption', 'caption-bold'],
+  Legal:    ['legal', 'legal-semibold'],
+  Overline: ['overline-small', 'overline', 'overline-large'],
+  Button:   ['button-extra-small', 'button-small', 'button'],
+  Number:   ['number-large', 'number-medium', 'number-small'],
 };
 
 const HEADING_STYLES = new Set(['display-large', 'display-small', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'subtitle', 'subtitle-large']);
+
+// Color groups for the Color section (mirrors Button)
+const HEADER_COLOR_GROUPS = [
+  { label: 'Default',  colors: ['default'] },
+  { label: 'Theme',    colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
+  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+];
+const TEXT_COLOR_GROUPS = [
+  { label: 'Default',  colors: ['default', 'quiet'] },
+  { label: 'Theme',    colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
+  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+];
+
+// Build grouped Select options from STYLE_GROUPS + STYLE_LABELS
+const STYLE_DROPDOWN_OPTIONS = Object.entries(STYLE_GROUPS).map(([group, styles]) => ({
+  label: group,
+  options: styles.map((s) => ({ value: s, label: STYLE_LABELS[s] })),
+}));
 
 // Header color → data-theme for swatch buttons
 const HEADER_SWATCH_THEME = {
@@ -253,7 +274,7 @@ export function TypographyShowcase() {
   const currentConfig = STYLE_CONFIG[textStyle] || STYLE_CONFIG.body;
   const resolvedColor = color || (isHeading ? 'default' : currentConfig.defaultColor === 'standard' ? 'default' : currentConfig.defaultColor);
   const resolvedWidth = width || currentConfig.defaultWidth;
-  const availableColors = isHeading ? HEADER_COLORS : TEXT_COLORS;
+  const colorGroups = isHeading ? HEADER_COLOR_GROUPS : TEXT_COLOR_GROUPS;
   const tokenMap = isHeading ? HEADER_TOKEN_MAP : TEXT_TOKEN_MAP;
 
   const generateCode = () => {
@@ -291,6 +312,9 @@ export function TypographyShowcase() {
   return (
     <Box sx={{ pb: 8 }}>
       <H2>Typography</H2>
+      <Box sx={{ mt: 1 }}>
+        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
 
       <Grid container sx={{ mt: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
@@ -342,63 +366,57 @@ export function TypographyShowcase() {
               <TabPanel value={0}>
                 <Box sx={{ p: 3 }}>
 
-                  {/* Background */}
-                  <Box sx={{ mb: 3 }}>
-                    <BackgroundPicker
-                      theme={bgTheme}
-                      onThemeChange={setBgTheme}
-                      surface={bgSurface}
-                      onSurfaceChange={setBgSurface}
+                  {/* Style — single grouped dropdown */}
+                  <Box>
+                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</OverlineSmall>
+                    <Select
+                      options={STYLE_DROPDOWN_OPTIONS}
+                      value={textStyle}
+                      onChange={(s) => { setTextStyle(s); setColor(''); setWidth(''); }}
+                      labelPosition="none"
+                      size="small"
+                      fullWidth
                     />
                   </Box>
 
                   {/* Color */}
-                  <Box sx={{ mt: 0, mb: 3 }}>
+                  <Box sx={{ mt: 3 }}>
                     <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                       {isHeading ? 'HEADER COLOR' : 'TEXT COLOR'}
                     </OverlineSmall>
-                    <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-                      {availableColors.map((c) => {
-                        const isSel = color === c || (color === '' && c === 'default');
-                        // Resolve the actual color token for this swatch background
-                        const swatchBg = isHeading
-                          ? (c === 'default' ? 'var(--Header)' : 'var(--Header-' + cap(c) + ')')
-                          : (c === 'default' ? 'var(--Text)' : c === 'quiet' ? 'var(--Quiet)' : 'var(--Text-' + cap(c) + ')');
-                        return (
-                          <Box key={c} component="button"
-                            onClick={() => setColor(c === 'default' ? '' : c)}
-                            aria-label={'Select ' + cap(c)} aria-pressed={isSel} title={cap(c)}
-                            sx={{
-                              width: 'var(--Button-Height)', height: 'var(--Button-Height)',
-                              borderRadius: '4px',
-                              backgroundColor: swatchBg,
-                              border: isSel ? '2px solid var(--Text)' : '2px solid var(--Border)',
-                              outline: isSel ? '2px solid var(--Focus-Visible)' : '2px solid transparent',
-                              outlineOffset: '1px', cursor: 'pointer', flexShrink: 0,
-                              display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              transition: 'transform 0.1s ease', '&:hover': { transform: 'scale(1.1)' },
-                            }}>
-                            {isSel && <CheckIcon sx={{ fontSize: 16, color: 'var(--Background)', pointerEvents: 'none' }} />}
-                          </Box>
-                        );
-                      })}
+                    <Stack spacing={1.5}>
+                      {colorGroups.map((group) => (
+                        <Box key={group.label}>
+                          <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 4, fontWeight: 600 }}>{group.label}</Caption>
+                          <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
+                            {group.colors.map((c) => {
+                              const isSel = color === c || (color === '' && c === 'default');
+                              const swatchBg = isHeading
+                                ? (c === 'default' ? 'var(--Header)' : 'var(--Header-' + cap(c) + ')')
+                                : (c === 'default' ? 'var(--Text)' : c === 'quiet' ? 'var(--Quiet)' : 'var(--Text-' + cap(c) + ')');
+                              return (
+                                <Box key={c} component="button"
+                                  onClick={() => setColor(c === 'default' ? '' : c)}
+                                  aria-label={'Select ' + cap(c)} aria-pressed={isSel} title={cap(c)}
+                                  sx={{
+                                    width: 'var(--Button-Height)', height: 'var(--Button-Height)',
+                                    borderRadius: '4px',
+                                    backgroundColor: swatchBg,
+                                    border: isSel ? '2px solid var(--Text)' : '2px solid var(--Border)',
+                                    outline: isSel ? '2px solid var(--Focus-Visible)' : '2px solid transparent',
+                                    outlineOffset: '1px', cursor: 'pointer', flexShrink: 0,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    transition: 'transform 0.1s ease', '&:hover': { transform: 'scale(1.1)' },
+                                  }}>
+                                  {isSel && <CheckIcon sx={{ fontSize: 16, color: 'var(--Background)', pointerEvents: 'none' }} />}
+                                </Box>
+                              );
+                            })}
+                          </Stack>
+                        </Box>
+                      ))}
                     </Stack>
                   </Box>
-
-                  {/* Style groups */}
-                  {Object.entries(STYLE_GROUPS).map(([group, styles]) => (
-                    <Box key={group} sx={{ mt: group === 'Headings' ? 2 : 3 }}>
-                      <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
-                        {'STYLE — ' + group.toUpperCase()}
-                      </OverlineSmall>
-                      <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-                        {styles.map((s) => (
-                          <ControlButton key={s} label={STYLE_LABELS[s]} selected={textStyle === s}
-                            onClick={() => { setTextStyle(s); setColor(''); setWidth(''); }} />
-                        ))}
-                      </Stack>
-                    </Box>
-                  ))}
 
                   {/* Width */}
                   <Box sx={{ mt: 3 }}>

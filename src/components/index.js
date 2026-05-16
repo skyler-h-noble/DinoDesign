@@ -65,19 +65,25 @@ export { NumberField, NumberFieldShowcase } from './NumberField';
 export { ToggleButton } from './ToggleButton';
 
 // ========== INPUTS & FORMS ==========
-export { 
-  TextField, 
-  EmailTextField, 
-  PasswordTextField, 
-  SearchTextField, 
-  NumberTextField, 
-  PhoneTextField, 
-  URLTextField, 
-  TextArea, 
-  TextFieldGroup 
-} from './TextField';
+// Canonical input: full-featured component with variants, validation,
+// adornments, surface awareness. Exported as `TextInput` (the preferred name).
+// The underlying file is still `./Input/Input.js` for now.
+export { Input as TextInput } from './Input';
 
-export { TextInput, EmailInput, PasswordInput, TextArea as TextAreaInput } from './TextInput';
+// DEPRECATED — kept for backward compat. New code should use `TextInput`
+// (the canonical export above). These are thinner wrappers around MUI
+// TextField; `TextInput` has every feature they do plus more.
+export {
+  TextField,
+  EmailTextField,
+  PasswordTextField,
+  SearchTextField,
+  NumberTextField,
+  PhoneTextField,
+  URLTextField,
+  TextArea,
+  TextFieldGroup
+} from './TextField';
 
 export { Select, SelectShowcase } from './Select';
 export { Autocomplete, AutocompleteShowcase } from './Autocomplete';

@@ -105,7 +105,8 @@ export function SearchField({
         (disabled ? ' search-field-disabled' : '') +
         (className ? ' ' + className : '')}
       sx={{
-        display: 'inline-flex',
+        display: 'flex',
+        boxSizing: 'border-box',
         ...sx,
       }}
       {...props}
@@ -134,6 +135,7 @@ export function SearchField({
           alignItems: 'center',
           gap: 1,
           width: '100%',
+          boxSizing: 'border-box',
           minHeight: s.height,
           px: s.px + 'px',
           backgroundColor: 'var(--Background)',
