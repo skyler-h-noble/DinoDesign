@@ -1,0 +1,41 @@
+/* ============================================================================
+ * foundations.css — STATIC: lib-owned, do not regenerate per design system.
+ * Alternate / legacy primitives. Edit by hand; do NOT overwrite from studio exports.
+ * (Note: file naming is unfortunate — `foundation.css` and `foundations.css`
+ * both exist with slightly different content. Reconcile when convenient.)
+ * ============================================================================ */
+:root {
+
+  /* Button */
+  --Button-Radius: 34px;
+  --Button-Icon-Radius: 61px;
+  --Button-Height: 36px;
+  --Small-Button-Height: 24px;
+  --Large-Button-Height: 56px;
+  --Button-Min-Width: 60px;
+  --Button-Bevel: 11%;
+  --Button-Bevel-Px: 4px;
+  --Button-Bevel-Opacity: 100%;
+  --Button-Bevel-Shadow: inset -4px -4px 4px color-mix(in srgb, var(--Buttons-Default-Highlight, #ffffff) 100%, transparent), inset 4px 4px 4px color-mix(in srgb, var(--Buttons-Default-Lowlight, #000000) 100%, transparent);
+  --Style-Border-Radius: var(--Button-Radius);
+
+  /* Card */
+  --Card-Radius: 8px;
+  --Card-Focus-Radius: 11px;
+  --Card-Padding: 16px;
+  --Style-Gradient-Color-1: var(--Buttons-Primary-Button);
+  --Style-Gradient-Color-2: var(--Buttons-Primary-Button);
+  --Style-Gradient-Angle: 0;
+
+  --Sizing-1: 8px;
+  --Sizing-2: 16px;
+  --Sizing-3: 24px;
+  --Sizing-4: 32px;
+  --Sizing-Half: 4px;
+  --Sizing-Quarter: 2px;
+  --Sizing-Negative-1: -8px;
+  --Sizing-Negative-Half: -4px;
+  --Sizing-Negative-Quarter: -2px;
+  --Sizing-Negative-1-and-Half: -12px;
+  --Min-Stack-Gap: 0px;
+}

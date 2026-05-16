@@ -1,0 +1,45 @@
+/* ============================================================================
+ * foundation.css — STATIC: lib-owned, do not regenerate per design system.
+ * Primitive sizing tokens (button/card radius defaults, etc.).
+ * Edit by hand; do NOT overwrite from studio exports.
+ * ============================================================================ */
+:root {
+
+  /* Button */
+  --Button-Radius: 4px;
+  --Button-Icon-Radius: 4px;
+  --Button-Height: 36px;
+  --Small-Button-Height: 24px;
+  --Large-Button-Height: 56px;
+  --Button-Min-Width: 60px;
+  --Button-Border-Width: 2px;
+  --Sm-Button-Padding: 4px;
+  --Button-Padding: 8px;
+  --Large-Button-Padding: 12px;
+  --Button-Bevel: 0;
+  --Button-Bevel-Px: 0px;
+  --Button-Bevel-Opacity: 0.5;
+  --Button-Bevel-Shadow: none;
+  --Style-Border-Radius: var(--Button-Radius);
+
+  /* Card */
+  --Card-Radius: 8px;
+  --Card-Focus-Radius: 11px;
+  --Card-Padding: 16px;
+  --Style-Gradient-Color-1: var(--Buttons-Primary-Button);
+  --Style-Gradient-Color-2: var(--Buttons-Primary-Button);
+  --Style-Gradient-Angle: 0;
+
+  --Sizing-Quarter: 2px;
+  --Sizing-Half: 4px;
+  --Sizing-1: 8px;
+  --Sizing-1-and-Half: 12px;
+  --Sizing-2: 16px;
+  --Sizing-3: 24px;
+  --Sizing-4: 32px;
+  --Sizing-Negative-1: -8px;
+  --Sizing-Negative-Half: -4px;
+  --Sizing-Negative-Quarter: -2px;
+  --Sizing-Negative-1-and-Half: -12px;
+  --Min-Stack-Gap: 0px;
+}
