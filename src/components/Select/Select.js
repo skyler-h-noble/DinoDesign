@@ -303,7 +303,11 @@ export function Select({
               >
                 {isColor && optColor && (
                   <Box sx={{
-                    width: 20, height: 20, borderRadius: '4px',
+                    width: 20, height: 20,
+                    // Follow the brand's border-radius token so the swatch
+                    // matches the dropdown's overall shape (pill / rounded
+                    // square / sharp) instead of always being 4px.
+                    borderRadius: 'var(--Style-Border-Radius)',
                     backgroundColor: optColor,
                     border: isSelected ? '2px solid var(--Buttons-' + C + '-Border)' : '1px solid var(--Border)',
                     flexShrink: 0,
@@ -467,7 +471,7 @@ export function Select({
         }}>
           {isColor && hasValue ? (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Box sx={{ width: 20, height: 20, borderRadius: '4px', backgroundColor: currentValue, border: '1px solid var(--Border)', flexShrink: 0 }} />
+              <Box sx={{ width: 20, height: 20, borderRadius: 'var(--Style-Border-Radius)', backgroundColor: currentValue, border: '1px solid var(--Border)', flexShrink: 0 }} />
               {showColorLabels && <BodySmall style={{ color: 'inherit' }}>{selectedLabel}</BodySmall>}
             </Box>
           ) : (
