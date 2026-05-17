@@ -229,10 +229,14 @@ export function NumberField({
       >
         {renderLabel()}
 
-        {/* Outer border shell */}
+        {/* Outer border shell — size-aware Input-Radius. */}
         <Box sx={{
           border: '1px solid ' + borderToken,
-          borderRadius: 'var(--Style-Border-Radius)',
+          borderRadius: size === 'small'
+            ? 'var(--Sm-Input-Radius, var(--Input-Radius, var(--Style-Border-Radius)))'
+            : size === 'large'
+              ? 'var(--Lg-Input-Radius, var(--Input-Radius, var(--Style-Border-Radius)))'
+              : 'var(--Input-Radius, var(--Style-Border-Radius))',
           overflow: 'hidden',
           transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
           boxShadow: 'var(--Effect-Level-1)',
@@ -343,22 +347,30 @@ export function NumberField({
         display: 'inline-flex', alignItems: 'center', gap: size === 'small' ? 0.5 : 1,
         opacity: disabled ? 0.5 : 1,
       }}>
-        {/* Decrement */}
+        {/* Decrement — icon button, uses size-aware icon-button radius. */}
         <Box component="button" type="button" aria-label="Decrease" {...holdHandlers(-1)}
           disabled={disabled || atMin}
           sx={{
             ...stepperSx,
             width: sc.btnSize, height: sc.btnSize,
-            borderRadius: 'var(--Style-Border-Radius)',
+            borderRadius: size === 'small'
+              ? 'var(--Sm-Button-Icon-Radius, var(--Button-Icon-Radius, var(--Style-Border-Radius)))'
+              : size === 'large'
+                ? 'var(--Lg-Button-Icon-Radius, var(--Button-Icon-Radius, var(--Style-Border-Radius)))'
+                : 'var(--Button-Icon-Radius, var(--Style-Border-Radius))',
             border: '1px solid ' + borderToken,
           }}>
           <Icon size="small"><RemoveIcon /></Icon>
         </Box>
 
-        {/* Value */}
+        {/* Value — size-aware Input-Radius. */}
         <Box sx={{
           border: '1px solid ' + borderToken,
-          borderRadius: 'var(--Style-Border-Radius)',
+          borderRadius: size === 'small'
+            ? 'var(--Sm-Input-Radius, var(--Input-Radius, var(--Style-Border-Radius)))'
+            : size === 'large'
+              ? 'var(--Lg-Input-Radius, var(--Input-Radius, var(--Style-Border-Radius)))'
+              : 'var(--Input-Radius, var(--Style-Border-Radius))',
           overflow: 'hidden',
           '&:focus-within': {
             outline: '2px solid var(--Focus-Visible)',
@@ -398,13 +410,17 @@ export function NumberField({
         </Box>
         </Box>
 
-        {/* Increment */}
+        {/* Increment — icon button, size-aware icon-button radius. */}
         <Box component="button" type="button" aria-label="Increase" {...holdHandlers(1)}
           disabled={disabled || atMax}
           sx={{
             ...stepperSx,
             width: sc.btnSize, height: sc.btnSize,
-            borderRadius: 'var(--Style-Border-Radius)',
+            borderRadius: size === 'small'
+              ? 'var(--Sm-Button-Icon-Radius, var(--Button-Icon-Radius, var(--Style-Border-Radius)))'
+              : size === 'large'
+                ? 'var(--Lg-Button-Icon-Radius, var(--Button-Icon-Radius, var(--Style-Border-Radius)))'
+                : 'var(--Button-Icon-Radius, var(--Style-Border-Radius))',
             border: '1px solid ' + borderToken,
           }}>
           <Icon size="small"><AddIcon /></Icon>

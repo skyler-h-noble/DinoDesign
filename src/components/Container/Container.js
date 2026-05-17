@@ -24,6 +24,7 @@ export function Container({
     <MuiContainer
       maxWidth={maxWidth}
       disableGutters={disableGutters}
+      data-surface="Surface"
       sx={{
         backgroundColor: 'var(--Background)',
         color: 'var(--Text)',
@@ -91,6 +92,7 @@ export function FluidContainer({
 
   return (
     <Box
+      data-surface="Surface"
       sx={{
         width: '100%',
         padding: paddingMap[padding],
@@ -129,6 +131,7 @@ export function ConstrainedContainer({
 
   return (
     <Box
+      data-surface="Surface"
       sx={{
         margin: '0 auto',
         padding: 'var(--Spacing-3)',
@@ -161,6 +164,7 @@ export function LayoutContainer({
 }) {
   return (
     <Box
+      data-surface="Surface"
       sx={{
         display: 'flex',
         flexDirection: 'column',
@@ -202,6 +206,7 @@ export function GridContainer({
 
   return (
     <Box
+      data-surface="Surface"
       sx={{
         display: 'grid',
         gridTemplateColumns: `repeat(${columns}, 1fr)`,
@@ -246,6 +251,7 @@ export function StackContainer({
 
   return (
     <Box
+      data-surface="Surface"
       sx={{
         display: 'flex',
         flexDirection: direction,

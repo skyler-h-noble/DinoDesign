@@ -186,7 +186,7 @@ export function Modal({
             maxWidth: s.maxWidth + 'px',
             width: 'calc(100% - 32px)',
             maxHeight: 'calc(100vh - 64px)',
-            borderRadius: 'var(--Style-Border-Radius)',
+            borderRadius: 'var(--Modal-Radius, var(--Style-Border-Radius))',
           }),
           // Visual
           backgroundColor: 'var(--Background)',

@@ -303,13 +303,21 @@ export function Select({
               >
                 {isColor && optColor && (
                   <Box sx={{
-                    width: 20, height: 20,
-                    // Follow the brand's border-radius token so the swatch
-                    // matches the dropdown's overall shape (pill / rounded
-                    // square / sharp) instead of always being 4px.
-                    borderRadius: 'var(--Style-Border-Radius)',
+                    // Swatch scales with the Select's own height (-8px
+                    // gives a generous gap on top/bottom for the option
+                    // row's vertical padding to breathe).
+                    height: 'calc(' + sizeConfig.height + ' - 8px)',
+                    width: 'calc(' + sizeConfig.height + ' - 8px)',
+                    // Radius follows the input swatch token so the swatch
+                    // scales independently of the button radius (the input
+                    // can have a different roundness from buttons).
+                    borderRadius: 'var(--Input-Swatch-Radius, var(--Button-Radius))',
                     backgroundColor: optColor,
-                    border: isSelected ? '2px solid var(--Buttons-' + C + '-Border)' : '1px solid var(--Border)',
+                    // Always 1px so the selected ring doesn't read as a
+                    // double border next to the swatch's own outline.
+                    // Selected uses the accent border color, unselected
+                    // uses --Border — same stroke width either way.
+                    border: '1px solid ' + (isSelected ? 'var(--Buttons-' + C + '-Border)' : 'var(--Border)'),
                     flexShrink: 0,
                   }} />
                 )}
@@ -471,7 +479,18 @@ export function Select({
         }}>
           {isColor && hasValue ? (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Box sx={{ width: 20, height: 20, borderRadius: 'var(--Style-Border-Radius)', backgroundColor: currentValue, border: '1px solid var(--Border)', flexShrink: 0 }} />
+              <Box sx={{
+                height: 'calc(' + sizeConfig.height + ' - 8px)',
+                width: 'calc(' + sizeConfig.height + ' - 8px)',
+                borderRadius: 'var(--Input-Swatch-Radius, var(--Button-Radius))',
+                // selectedOption holds the option object (label, value,
+                // color). The trigger swatch needs the option's `color`
+                // — not currentValue, which is just the value string
+                // (e.g. "primary") and isn't a valid CSS color.
+                backgroundColor: (selectedOption && typeof selectedOption !== 'string' && selectedOption.color) || 'transparent',
+                border: '1px solid var(--Border)',
+                flexShrink: 0,
+              }} />
               {showColorLabels && <BodySmall style={{ color: 'inherit' }}>{selectedLabel}</BodySmall>}
             </Box>
           ) : (

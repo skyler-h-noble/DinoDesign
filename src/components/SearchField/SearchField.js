@@ -111,10 +111,15 @@ export function SearchField({
       }}
       {...props}
     >
-      {/* Outer border shell */}
+      {/* Outer border shell — size-aware Input-Radius so each size rounds
+          by its own height, not the medium button's. */}
       <Box sx={{
         border: '1px solid ' + borderToken,
-        borderRadius: 'var(--Style-Border-Radius)',
+        borderRadius: size === 'small'
+          ? 'var(--Sm-Input-Radius, var(--Input-Radius, var(--Style-Border-Radius)))'
+          : size === 'large'
+            ? 'var(--Lg-Input-Radius, var(--Input-Radius, var(--Style-Border-Radius)))'
+            : 'var(--Input-Radius, var(--Style-Border-Radius))',
         overflow: 'hidden',
         opacity: disabled ? 0.5 : 1,
         transition: 'border-color 0.15s ease, box-shadow 0.15s ease',

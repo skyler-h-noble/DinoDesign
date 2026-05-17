@@ -4,9 +4,11 @@ import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import SearchIcon from '@mui/icons-material/Search';
+import * as MuiIcons from '@mui/icons-material';
 import { Select } from './Select';
 import { Button } from '../Button/Button';
 import { Icon } from '../Icon/Icon';
+import { Input } from '../Input/Input';
 import { Switch } from '../Switch/Switch';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
@@ -29,6 +31,21 @@ const SAMPLE_OPTIONS = [
   { value: 'cherry', label: 'Cherry' },
   { value: 'date', label: 'Date' },
   { value: 'elderberry', label: 'Elderberry' },
+];
+
+// Color-mode sample options — each option carries a `color` so the
+// Select renders a swatch alongside the label (or just the swatch when
+// `showColorLabels` is false). Useful for color-pickers anchored to
+// design tokens, like the Status/App/Nav bar pickers in dinodesign-studio.
+const SWATCH_OPTIONS = [
+  { value: 'primary',       label: 'Primary',       color: 'var(--Buttons-Primary-Button)' },
+  { value: 'secondary',     label: 'Secondary',     color: 'var(--Buttons-Secondary-Button)' },
+  { value: 'tertiary',      label: 'Tertiary',      color: 'var(--Buttons-Tertiary-Button)' },
+  { value: 'neutral',       label: 'Neutral',       color: 'var(--Buttons-Neutral-Button)' },
+  { value: 'info',          label: 'Info',          color: 'var(--Buttons-Info-Button)' },
+  { value: 'success',       label: 'Success',       color: 'var(--Buttons-Success-Button)' },
+  { value: 'warning',       label: 'Warning',       color: 'var(--Buttons-Warning-Button)' },
+  { value: 'error',         label: 'Error',         color: 'var(--Buttons-Error-Button)' },
 ];
 
 /* ── Helpers ── */
@@ -91,9 +108,15 @@ export function SelectShowcase() {
   const [disabled, setDisabled]         = useState(false);
   const [fullWidth, setFullWidth]       = useState(true);
   const [startDeco, setStartDeco]       = useState(false);
+  const [iconName, setIconName]         = useState('Search');
   const [selectedValue, setSelectedValue] = useState('');
   const [bgTheme, setBgTheme]           = useState(null);
   const [bgSurface, setBgSurface]       = useState('Surface');
+  // Swatch (color) mode — each option renders a colored swatch sized to
+  // the Select height. When labels are off, the trigger shows just the
+  // swatch — handy for compact color-only pickers.
+  const [colorMode, setColorMode]       = useState(false);
+  const [showColorLabels, setShowColorLabels] = useState(true);
 
   const generateCode = () => {
     const parts = [];
@@ -102,10 +125,12 @@ export function SelectShowcase() {
     if (size !== 'medium') parts.push('size="' + size + '"');
     if (selectLabel) parts.push('label="' + selectLabel + '"');
     if (labelPosition !== 'top') parts.push('labelPosition="' + labelPosition + '"');
+    if (colorMode) parts.push('mode="color"');
+    if (colorMode && !showColorLabels) parts.push('showColorLabels={false}');
     if (showDividers) parts.push('showDividers');
     if (disabled) parts.push('disabled');
     if (fullWidth) parts.push('fullWidth');
-    if (startDeco) parts.push('startDecoration={<SearchIcon />}');
+    if (startDeco) parts.push('startDecoration={<Icon><' + iconName + 'Icon /></Icon>}');
     parts.push('options={options}');
     parts.push('value={value}');
     parts.push('onChange={setValue}');
@@ -129,13 +154,18 @@ export function SelectShowcase() {
                 size={size}
                 label={selectLabel}
                 labelPosition={labelPosition}
-                options={SAMPLE_OPTIONS}
+                mode={colorMode ? 'color' : undefined}
+                showColorLabels={colorMode ? showColorLabels : undefined}
+                options={colorMode ? SWATCH_OPTIONS : SAMPLE_OPTIONS}
                 value={selectedValue}
                 onChange={setSelectedValue}
                 showDividers={showDividers}
                 disabled={disabled}
                 fullWidth={fullWidth}
-                startDecoration={startDeco ? <Icon size="small"><SearchIcon /></Icon> : undefined}
+                startDecoration={startDeco ? (() => {
+                  const IconComp = MuiIcons[iconName] || MuiIcons.Search;
+                  return <Icon size="small"><IconComp /></Icon>;
+                })() : undefined}
               />
             </Box>
           </PreviewSurface>
@@ -228,11 +258,28 @@ export function SelectShowcase() {
                   <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box>
                       <Label>Start Icon</Label>
-                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Search icon before value</Caption>
+                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Icon rendered before the value</Caption>
                     </Box>
                     <Switch checked={startDeco} onChange={(e) => setStartDeco(e.target.checked)}
                       size="small" aria-label="Start icon" />
                   </Box>
+
+                  {startDeco && (
+                    <Box sx={{ mt: 2 }}>
+                      <Input
+                        label="Icon Name"
+                        value={iconName}
+                        onChange={(e) => setIconName(e.target.value)}
+                        placeholder="Search"
+                        variant="primary-outline"
+                        size="small"
+                        fullWidth
+                      />
+                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 4 }}>
+                        <a href="https://mui.com/material-ui/material-icons/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--Hotlink)' }}>Material icon</a> name (e.g. Search, Add, Edit, Filter, Sort, Star)
+                      </Caption>
+                    </Box>
+                  )}
 
                   <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box>
@@ -251,6 +298,30 @@ export function SelectShowcase() {
                     <Switch checked={disabled} onChange={(e) => setDisabled(e.target.checked)}
                       size="small" aria-label="Disabled" />
                   </Box>
+
+                  <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box>
+                      <Label>Color Mode</Label>
+                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>
+                        Render swatches alongside each option. Swatch size scales to Select height, radius follows the brand's button radius.
+                      </Caption>
+                    </Box>
+                    <Switch checked={colorMode} onChange={(e) => setColorMode(e.target.checked)}
+                      size="small" aria-label="Color mode" />
+                  </Box>
+
+                  {colorMode && (
+                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box>
+                        <Label>Show Color Labels</Label>
+                        <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>
+                          Hide to render a swatch-only trigger (no text). Useful for compact color pickers.
+                        </Caption>
+                      </Box>
+                      <Switch checked={showColorLabels} onChange={(e) => setShowColorLabels(e.target.checked)}
+                        size="small" aria-label="Show color labels" />
+                    </Box>
+                  )}
 
                   <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box>

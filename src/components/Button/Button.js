@@ -449,11 +449,22 @@ export function Button({
       className={`btn-${variant} ${className}`}
       role="button"
       sx={{
+        // Size-aware radius — pulls the Sm/Lg variant so each button size
+        // gets the percent-of-its-own-height pixel value. Falls back to the
+        // medium token if the size variants aren't defined.
         borderRadius: avatar
           ? 'var(--Large-Button-Height)'
           : (iconOnly || swatch)
-            ? 'var(--Button-Icon-Radius)'
-            : 'var(--Button-Radius)',
+            ? (size === 'small'
+                ? 'var(--Sm-Button-Icon-Radius, var(--Button-Icon-Radius))'
+                : size === 'large'
+                  ? 'var(--Lg-Button-Icon-Radius, var(--Button-Icon-Radius))'
+                  : 'var(--Button-Icon-Radius)')
+            : (size === 'small'
+                ? 'var(--Sm-Button-Radius, var(--Button-Radius))'
+                : size === 'large'
+                  ? 'var(--Lg-Button-Radius, var(--Button-Radius))'
+                  : 'var(--Button-Radius)'),
         textTransform: 'none',
         fontWeight: 'inherit',
         lineHeight: 1,
@@ -533,7 +544,14 @@ export function Button({
           style={{
             width: '100%',
             height: '100%',
-            borderRadius: 'calc(var(--Button-Icon-Radius) - 2px)',
+            // Inner swatch fill — use the size-aware Inner-Radius token
+            // so it stays concentric with the outer button corner. Falls
+            // back to the old calc() if the new tokens aren't in CSS.
+            borderRadius: size === 'small'
+              ? 'var(--Sm-Button-Icon-Inner-Radius, calc(var(--Button-Icon-Radius) - 2px))'
+              : size === 'large'
+                ? 'var(--Lg-Button-Icon-Inner-Radius, calc(var(--Button-Icon-Radius) - 2px))'
+                : 'var(--Button-Icon-Inner-Radius, calc(var(--Button-Icon-Radius) - 2px))',
             ...(swatchColor ? { backgroundColor: swatchColor } : {}),
           }}
         />

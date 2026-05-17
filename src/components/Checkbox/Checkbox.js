@@ -37,7 +37,7 @@ function outlineStyles(color) {
     type: 'outline',
     color: C,
     borderToken: 'var(--Buttons-' + C + '-Border)',
-    icon: 'var(--Text-' + C + ')',
+    icon: 'var(--Buttons-' + C + '-Border)',
   };
 }
 
@@ -47,7 +47,7 @@ function lightStyles(color) {
     type: 'light',
     color: C,
     borderToken: 'var(--Buttons-' + C + '-Border)',
-    icon: 'var(--Text-' + C + ')',
+    icon: 'var(--Buttons-' + C + '-Border)',
     dataTheme: C + '-Light',
   };
 }

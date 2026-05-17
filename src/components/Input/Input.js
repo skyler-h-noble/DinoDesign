@@ -217,10 +217,16 @@ export function Input({
     >
       {renderStandardLabel()}
 
-      {/* Outer border shell — provides contrast against page background */}
+      {/* Outer border shell — provides contrast against page background.
+          Radius uses the size-aware Input-Radius token so a small input is
+          rounded by its own height, not the medium button's. */}
       <Box sx={{
         border: '1px solid ' + effectiveBorder,
-        borderRadius: 'var(--Style-Border-Radius)',
+        borderRadius: size === 'small'
+          ? 'var(--Sm-Input-Radius, var(--Input-Radius, var(--Style-Border-Radius)))'
+          : size === 'large'
+            ? 'var(--Lg-Input-Radius, var(--Input-Radius, var(--Style-Border-Radius)))'
+            : 'var(--Input-Radius, var(--Style-Border-Radius))',
         overflow: 'hidden',
         transition: 'border-color 0.15s ease-in-out',
         boxShadow: 'var(--Effect-Level-1)',
