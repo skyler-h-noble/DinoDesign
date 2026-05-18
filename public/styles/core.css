@@ -16,19 +16,9 @@
   --Body-Bold-Font-Weight: var(--Set-Font-Family-Body-Bold-Weight);
   --Cognitive-Multiplier: 1;
   --Dropshadow-Color: 20, 20, 20;  /* fallback */
-
-  /* ========================================
-   * Effect Levels (Box Shadows)
-   * --Dropshadow-Color is overridden per-theme in Light/Dark-Mode.css;
-   * the nested var() resolves at the consuming element, so themed values
-   * still apply even though these are defined in core.
-   * ======================================== */
-  --Effect-Level-0: none;
-  --Effect-Level-1: 0 1px 2px rgba(var(--Dropshadow-Color), 0.28);
-  --Effect-Level-2: 0 2px 4px rgba(var(--Dropshadow-Color), 0.22), 0 1px 2px rgba(var(--Dropshadow-Color), 0.28);
-  --Effect-Level-3: 0 4px 8px rgba(var(--Dropshadow-Color), 0.17), 0 2px 4px rgba(var(--Dropshadow-Color), 0.22);
-  --Effect-Level-4: 0 8px 16px rgba(var(--Dropshadow-Color), 0.13), 0 4px 8px rgba(var(--Dropshadow-Color), 0.17);
-  --Effect-Level-5: 0 16px 32px rgba(var(--Dropshadow-Color), 0.1), 0 8px 16px rgba(var(--Dropshadow-Color), 0.13);
+  /* Effect-Level-0 through Effect-Level-5 now live in base.css alongside
+     the other component tokens. --Dropshadow-Color is still overridden
+     per-theme in Light/Dark-Mode.css. */
 }
 
 /* Platform Font Overrides */
