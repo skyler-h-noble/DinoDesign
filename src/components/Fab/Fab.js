@@ -2,6 +2,7 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, bevelShadow } from '../_shadows';
 
 /**
  * Fab (Floating Action Button) Component
@@ -120,7 +121,12 @@ export function Fab({
           backgroundColor: tokens.bg,
           color: tokens.text,
           border: 'var(--Button-Border-Width) solid ' + tokens.border,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+          // Bevel sizing — height feeds --_bevel via --Button-Bevel %
+          // (matches Button + Slider). At default --Button-Bevel: 0 the
+          // bevel is invisible; bumping the token lights it up everywhere.
+          '--_height': s.size + 'px',
+          '--_bevel': 'calc(var(--Button-Bevel) * var(--_height) / 100)',
+          boxShadow: `${bevelShadow(color)}, ${SHADOW_LEVEL_1}`,
           // Typography
           fontSize: s.fontSize,
           fontFamily: 'inherit',
@@ -131,8 +137,8 @@ export function Fab({
           outline: 'none',
           flexShrink: 0,
           transition: 'background-color 0.15s ease, box-shadow 0.2s ease, transform 0.1s ease',
-          '&:hover': !disabled ? { backgroundColor: tokens.hover, boxShadow: '0 4px 12px rgba(0,0,0,0.2)' } : {},
-          '&:active': !disabled ? { backgroundColor: tokens.active, transform: 'scale(0.96)' } : {},
+          '&:hover': !disabled ? { backgroundColor: tokens.hover, boxShadow: `${bevelShadow(color)}, ${SHADOW_LEVEL_2}` } : {},
+          '&:active': !disabled ? { backgroundColor: tokens.active, transform: 'scale(0.96)', boxShadow: bevelShadow(color) } : {},
           '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px' },
           // Animation
           ...(animate && !disabled && {

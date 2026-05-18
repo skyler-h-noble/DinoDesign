@@ -48,3 +48,30 @@ export const SHADOWS = {
   4: SHADOW_LEVEL_4,
   5: SHADOW_LEVEL_5,
 };
+
+// ─── Bevel Shadow (chained inset shadows for Button-style highlight/lowlight)
+//
+// Two inset shadows: a lowlight in the bottom-right and a highlight in the
+// top-left, producing a soft 3D bevel on a filled surface. Uses the button
+// color tokens (--Buttons-{C}-Highlight, --Buttons-{C}-Lowlight) so the
+// bevel tints with the surface color, and scales by `--_bevel` — a value
+// the consumer sets per-element as a function of element height.
+//
+// Consumers must set TWO CSS vars on the element where the bevel renders:
+//   --_height   the element's height (e.g. 'var(--Button-Height)' or '20px')
+//   --_bevel    calc(var(--Button-Bevel) * var(--_height) / 100)
+//
+// All vars carry fallbacks so the box-shadow stays valid even if the
+// consumer is rendered outside a themed scope or forgets to set --_bevel.
+//
+// Used by Button (variant + size, applied to root) and Slider (variant +
+// handle size, applied to .MuiSlider-thumb::before).
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+export function bevelShadow(color) {
+  const C = cap(color);
+  return [
+    `inset calc(-1 * var(--_bevel, 0px)) calc(-1 * var(--_bevel, 0px)) var(--_bevel, 0px) rgba(var(--Buttons-${C}-Lowlight, 0, 0, 0), var(--Button-Bevel-Opacity, 0.5))`,
+    `inset var(--_bevel, 0px) var(--_bevel, 0px) var(--_bevel, 0px) rgba(var(--Buttons-${C}-Highlight, 0, 0, 0), var(--Button-Bevel-Opacity, 0.5))`,
+  ].join(', ');
+}

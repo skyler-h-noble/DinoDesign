@@ -4,7 +4,7 @@ import { Box, Tooltip as MuiTooltip } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import { Icon } from '../Icon/Icon';
-import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
+import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, bevelShadow } from '../_shadows';
 
 /**
  * SpeedDial Component
@@ -114,6 +114,10 @@ export function SpeedDial({
 
   const tooltipPlacement = direction === 'up' || direction === 'down' ? 'left' : 'top';
 
+  // Bevel — every button derives --_bevel from its own --_height (set
+  // at the call site), so the main FAB (56px) and action buttons (40px)
+  // each scale their bevel proportionally. At default --Button-Bevel: 0
+  // the bevel is invisible. Matches Button + Slider's bevel pattern.
   const btnSx = {
     borderRadius: '50%',
     border: '1px solid ' + fabBorder,
@@ -121,9 +125,11 @@ export function SpeedDial({
     color: fabText,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     cursor: 'pointer', outline: 'none',
-    boxShadow: SHADOW_LEVEL_1,
+    '--_bevel': 'calc(var(--Button-Bevel) * var(--_height) / 100)',
+    boxShadow: `${bevelShadow(color)}, ${SHADOW_LEVEL_1}`,
     transition: 'box-shadow 0.15s ease, transform 0.15s ease',
-    '&:hover': { boxShadow: SHADOW_LEVEL_2 },
+    '&:hover': { boxShadow: `${bevelShadow(color)}, ${SHADOW_LEVEL_2}` },
+    '&:active': { boxShadow: bevelShadow(color) },
     '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px' },
   };
 
@@ -147,7 +153,7 @@ export function SpeedDial({
         component="button" type="button"
         aria-label={ariaLabel} aria-expanded={isOpen} aria-haspopup="menu"
         onClick={handleToggle}
-        sx={{ ...btnSx, width: FAB_SIZE, height: FAB_SIZE, position: 'relative', zIndex: 2, fontSize: '24px' }}
+        sx={{ ...btnSx, width: FAB_SIZE, height: FAB_SIZE, '--_height': FAB_SIZE + 'px', position: 'relative', zIndex: 2, fontSize: '24px' }}
       >
         <Box sx={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -171,7 +177,7 @@ export function SpeedDial({
               key={action.key || index}
               sx={{
                 ...btnSx,
-                width: ACTION_SIZE, height: ACTION_SIZE, fontSize: '20px',
+                width: ACTION_SIZE, height: ACTION_SIZE, '--_height': ACTION_SIZE + 'px', fontSize: '20px',
                 position: 'absolute', ...offset,
                 opacity: isOpen ? 1 : 0,
                 transform: isOpen ? 'scale(1)' : 'scale(0.3)',

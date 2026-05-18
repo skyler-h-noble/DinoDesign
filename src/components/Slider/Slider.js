@@ -2,7 +2,7 @@
 import React from 'react';
 import { Slider as MuiSlider, Box } from '@mui/material';
 import { Body, BodySmall } from '../Typography';
-import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
+import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, bevelShadow } from '../_shadows';
 
 /**
  * Slider Component
@@ -139,6 +139,11 @@ export function Slider({
       border: 'none',
       boxShadow: 'none',
       transition: 'none',
+      // Bevel sizing — visual diameter feeds --_bevel via --Button-Bevel %.
+      // Inherited into ::before so the bevelShadow() insets render on the
+      // visual circle, mirroring how Button computes its bevel from height.
+      '--_height': sizeConfig.visual + 'px',
+      '--_bevel': 'calc(var(--Button-Bevel) * var(--_height) / 100)',
       // Remove MUI default ::after
       '&::after': { display: 'none' },
 
@@ -151,7 +156,7 @@ export function Slider({
         borderRadius: '50%',
         backgroundColor: styles.thumb,
         border: styles.thumbBorder || 'none',
-        boxShadow: SHADOW_LEVEL_1,
+        boxShadow: `${bevelShadow(variant)}, ${SHADOW_LEVEL_1}`,
         transition: 'box-shadow 0.15s ease-in-out',
         // Centered by default (single slider)
         top: '50%',
@@ -160,11 +165,12 @@ export function Slider({
       },
 
       '&:hover::before': {
-        boxShadow: SHADOW_LEVEL_2,
+        boxShadow: `${bevelShadow(variant)}, ${SHADOW_LEVEL_2}`,
       },
 
       '&.Mui-active::before': {
-        boxShadow: SHADOW_LEVEL_1,
+        // Pressed: keep bevel, drop elevation (matches Button's pressed state)
+        boxShadow: bevelShadow(variant),
       },
 
       '&.Mui-focusVisible': {
@@ -173,7 +179,7 @@ export function Slider({
         borderRadius: '50%',
       },
       '&.Mui-focusVisible::before': {
-        boxShadow: SHADOW_LEVEL_2,
+        boxShadow: `${bevelShadow(variant)}, ${SHADOW_LEVEL_2}`,
       },
     },
 
