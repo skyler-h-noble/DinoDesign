@@ -84,11 +84,20 @@ export function Rating({
     setHoverValue(val);
   };
 
+  // Filter-based drop-shadow recipes — `filter: drop-shadow()` follows the
+  // star's outline (better for SVG than box-shadow's rectangle). var() is
+  // inlined so substitution happens at the star element and picks up the
+  // themed --Dropshadow-Color. Chained drop-shadows on hover give a
+  // Level-2-style multi-layer lift.
+  const FILTER_LEVEL_1 = 'drop-shadow(0 1px 2px rgba(var(--Dropshadow-Color), 0.28))';
+  const FILTER_LEVEL_2 = 'drop-shadow(0 2px 4px rgba(var(--Dropshadow-Color), 0.22)) drop-shadow(0 1px 2px rgba(var(--Dropshadow-Color), 0.28))';
+
   const getStarStyles = (isFilled, isHalfFilled) => {
     if (isFilled || isHalfFilled) {
       return {
         color: filledColor,
-        filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.15))',
+        filter: FILTER_LEVEL_1,
+        transition: 'filter 0.15s ease',
         '& .MuiSvgIcon-root': {
           stroke: filledBorder,
           strokeWidth: 0.5,
@@ -106,6 +115,7 @@ export function Rating({
 
   const hoverStarSx = isInteractive ? {
     '&:hover': {
+      filter: FILTER_LEVEL_2,
       '& .MuiSvgIcon-root': {
         stroke: hoverBorder,
         strokeWidth: 1,

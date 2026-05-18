@@ -76,13 +76,19 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 // Elevated buttons: Level 2 resting, Level 3 hover
 
 // ─── Bevel Shadow (per-color, per-size) ─────────────────────────────────────
-// Uses --_bevel (computed from % × height) and per-color Highlight/Lowlight
-
+// Uses --_bevel (computed from % × height) and per-color Highlight/Lowlight.
+//
+// Every var() carries a fallback so the whole box-shadow declaration stays
+// valid even if a variable goes missing in some scope (e.g. button used
+// outside a themed ancestor, or --_bevel not declared because the element
+// isn't the Button itself). Without fallbacks, a single unresolved var
+// invalidates the entire box-shadow per CSS spec — so no shadow at all
+// would render, including the outer elevation layers.
 function bevelShadow(color) {
   const C = cap(color);
   return [
-    `inset calc(-1 * var(--_bevel)) calc(-1 * var(--_bevel)) var(--_bevel) rgba(var(--Buttons-${C}-Lowlight), var(--Button-Bevel-Opacity, 0.5))`,
-    `inset var(--_bevel) var(--_bevel) var(--_bevel) rgba(var(--Buttons-${C}-Highlight), var(--Button-Bevel-Opacity, 0.5))`,
+    `inset calc(-1 * var(--_bevel, 0px)) calc(-1 * var(--_bevel, 0px)) var(--_bevel, 0px) rgba(var(--Buttons-${C}-Lowlight, 0, 0, 0), var(--Button-Bevel-Opacity, 0.5))`,
+    `inset var(--_bevel, 0px) var(--_bevel, 0px) var(--_bevel, 0px) rgba(var(--Buttons-${C}-Highlight, 0, 0, 0), var(--Button-Bevel-Opacity, 0.5))`,
   ].join(', ');
 }
 
