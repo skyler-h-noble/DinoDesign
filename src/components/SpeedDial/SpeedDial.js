@@ -4,6 +4,7 @@ import { Box, Tooltip as MuiTooltip } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import { Icon } from '../Icon/Icon';
+import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
 
 /**
  * SpeedDial Component
@@ -120,9 +121,9 @@ export function SpeedDial({
     color: fabText,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     cursor: 'pointer', outline: 'none',
-    boxShadow: 'var(--Effect-Level-1)',
+    boxShadow: SHADOW_LEVEL_1,
     transition: 'box-shadow 0.15s ease, transform 0.15s ease',
-    '&:hover': { boxShadow: 'var(--Effect-Level-2)' },
+    '&:hover': { boxShadow: SHADOW_LEVEL_2 },
     '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px' },
   };
 

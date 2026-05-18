@@ -2,6 +2,7 @@
 import React from 'react';
 import { Slider as MuiSlider, Box } from '@mui/material';
 import { Body, BodySmall } from '../Typography';
+import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
 
 /**
  * Slider Component
@@ -150,7 +151,7 @@ export function Slider({
         borderRadius: '50%',
         backgroundColor: styles.thumb,
         border: styles.thumbBorder || 'none',
-        boxShadow: 'var(--Effect-Level-1)',
+        boxShadow: SHADOW_LEVEL_1,
         transition: 'box-shadow 0.15s ease-in-out',
         // Centered by default (single slider)
         top: '50%',
@@ -159,11 +160,11 @@ export function Slider({
       },
 
       '&:hover::before': {
-        boxShadow: 'var(--Effect-Level-2)',
+        boxShadow: SHADOW_LEVEL_2,
       },
 
       '&.Mui-active::before': {
-        boxShadow: 'var(--Effect-Level-1)',
+        boxShadow: SHADOW_LEVEL_1,
       },
 
       '&.Mui-focusVisible': {
@@ -172,7 +173,7 @@ export function Slider({
         borderRadius: '50%',
       },
       '&.Mui-focusVisible::before': {
-        boxShadow: 'var(--Effect-Level-2)',
+        boxShadow: SHADOW_LEVEL_2,
       },
     },
 

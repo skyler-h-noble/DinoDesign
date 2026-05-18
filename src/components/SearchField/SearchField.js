@@ -4,6 +4,7 @@ import { Box } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import { Icon } from '../Icon/Icon';
+import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
 
 /**
  * SearchField Component
@@ -123,8 +124,8 @@ export function SearchField({
         overflow: 'hidden',
         opacity: disabled ? 0.5 : 1,
         transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
-        boxShadow: 'var(--Effect-Level-1)',
-        '&:hover': { boxShadow: 'var(--Effect-Level-2)' },
+        boxShadow: SHADOW_LEVEL_1,
+        '&:hover': { boxShadow: SHADOW_LEVEL_2 },
         width: '100%',
         '&:focus-within': {
           outline: '2px solid var(--Focus-Visible)',

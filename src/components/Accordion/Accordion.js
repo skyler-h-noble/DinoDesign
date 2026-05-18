@@ -4,6 +4,7 @@ import { Box } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Icon } from '../Icon/Icon';
 import { BodySmall, Body } from '../Typography';
+import { SHADOW_LEVEL_2 } from '../_shadows';
 
 /**
  * Accordion Component
@@ -67,7 +68,7 @@ export function AccordionGroup({
             border: '1px solid var(--Border-Variant)',
             borderRadius: 'var(--Style-Border-Radius)',
             overflow: 'hidden',
-            boxShadow: 'var(--Effect-Level-2)',
+            boxShadow: SHADOW_LEVEL_2,
             ...sx,
           }}
           {...props}
@@ -163,7 +164,7 @@ export function Accordion({
         border: '1px solid var(--Border-Variant)',
         borderRadius: 'var(--Style-Border-Radius)',
         overflow: 'hidden',
-        boxShadow: 'var(--Effect-Level-2)',
+        boxShadow: SHADOW_LEVEL_2,
       }}>
         <Box
           data-theme={dataTheme}

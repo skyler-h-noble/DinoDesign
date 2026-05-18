@@ -4,6 +4,7 @@ import { Box } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Icon } from '../Icon/Icon';
 import { BodySmall, Body } from '../Typography';
+import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3 } from '../_shadows';
 
 /**
  * Menu Component Suite
@@ -85,9 +86,9 @@ export function MenuButton({ children, className = '', sx = {}, ...props }) {
         border: '1px solid var(--Buttons-' + C + '-Border)',
         borderRadius: 'var(--Style-Border-Radius)',
         cursor: 'pointer',
-        boxShadow: 'var(--Effect-Level-1)',
+        boxShadow: SHADOW_LEVEL_1,
         transition: 'box-shadow 0.15s ease',
-        '&:hover': { boxShadow: 'var(--Effect-Level-2)' },
+        '&:hover': { boxShadow: SHADOW_LEVEL_2 },
         '&:focus-visible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '2px' },
         ...sx,
       }}
@@ -162,7 +163,7 @@ export function Menu({ children, className = '', placement = 'bottom-start', sx 
         zIndex: 99999, marginTop: '4px',
         border: '1px solid ' + borderToken,
         borderRadius: 'var(--Style-Border-Radius)',
-        boxShadow: 'var(--Effect-Level-3)',
+        boxShadow: SHADOW_LEVEL_3,
         overflow: 'hidden',
         ...sx,
       }}

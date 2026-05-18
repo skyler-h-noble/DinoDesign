@@ -2,6 +2,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { Box } from '@mui/material';
+import { SHADOW_LEVEL_4 } from '../_shadows';
 
 /**
  * Popover Component
@@ -87,7 +88,7 @@ export function Popover({
         backgroundColor: 'var(--Background)',
         border: '1px solid var(--Border)',
         borderRadius: 'var(--Style-Border-Radius)',
-        boxShadow: 'var(--Effect-Level-4)',
+        boxShadow: SHADOW_LEVEL_4,
         ...sx,
       }}
     >

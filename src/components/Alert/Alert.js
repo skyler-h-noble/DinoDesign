@@ -2,6 +2,7 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import { Body, BodySmall } from '../Typography';
+import { SHADOW_LEVEL_3 } from '../_shadows';
 
 /**
  * Alert Component
@@ -90,7 +91,7 @@ export function Alert({
         border: '1px solid ' + borderToken,
         borderRadius: 'var(--Style-Border-Radius)',
         overflow: 'hidden',
-        boxShadow: 'var(--Effect-Level-3)',
+        boxShadow: SHADOW_LEVEL_3,
         ...sx,
       }}
       {...props}

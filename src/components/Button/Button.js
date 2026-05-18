@@ -5,6 +5,7 @@ import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography, Butto
 import { Avatar as DDAvatar } from '../Avatar/Avatar';
 import { Icon as DDIcon } from '../Icon/Icon';
 import { Badge as DDBadge } from '../Badge/Badge';
+import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
 
 // Auto-size mapping for start/end decorators based on Button size
 const DECORATOR_SIZE_MAP = {
@@ -90,8 +91,8 @@ function bevelShadow(color) {
 function solidStyles(color, elevated = false) {
   const C = cap(color);
   const bevel = bevelShadow(color);
-  const restLevel = elevated ? 'var(--Effect-Level-1)' : 'none';
-  const hoverLevel = elevated ? 'var(--Effect-Level-2)' : 'var(--Effect-Level-1)';
+  const restLevel = elevated ? SHADOW_LEVEL_1 : 'none';
+  const hoverLevel = elevated ? SHADOW_LEVEL_2 : SHADOW_LEVEL_1;
   const restShadow = restLevel === 'none' ? bevel : `${bevel}, ${restLevel}`;
   const hoverShadow = `${bevel}, ${hoverLevel}`;
   return {
@@ -151,8 +152,8 @@ function outlineStyles(color) {
 
 function lightStyles(color, elevated = false) {
   const C = cap(color);
-  const restLevel = elevated ? 'var(--Effect-Level-1)' : 'none';
-  const hoverLevel = elevated ? 'var(--Effect-Level-2)' : 'var(--Effect-Level-1)';
+  const restLevel = elevated ? SHADOW_LEVEL_1 : 'none';
+  const hoverLevel = elevated ? SHADOW_LEVEL_2 : SHADOW_LEVEL_1;
   return {
     backgroundColor: `var(--${C}-Color-11)`,
     color: `var(--Text-${C}-Color-11)`,

@@ -1,6 +1,7 @@
 // src/components/Box/Box.js
 import React from 'react';
 import { Box as MuiBox } from '@mui/material';
+import { SHADOW_LEVEL_2, SHADOW_LEVEL_3, SHADOW_LEVEL_4 } from '../_shadows';
 
 /**
  * Box Component
@@ -62,8 +63,8 @@ export function Box({
   const p = PADDING_MAP[padding] !== undefined ? PADDING_MAP[padding] : PADDING_MAP.md;
   const isClickable = clickable || !!onClick;
 
-  const restShadow = elevated ? 'var(--Effect-Level-3)' : 'var(--Effect-Level-2)';
-  const hoverShadow = elevated ? 'var(--Effect-Level-4)' : 'var(--Effect-Level-3)';
+  const restShadow = elevated ? SHADOW_LEVEL_3 : SHADOW_LEVEL_2;
+  const hoverShadow = elevated ? SHADOW_LEVEL_4 : SHADOW_LEVEL_3;
 
   return (
     <MuiBox

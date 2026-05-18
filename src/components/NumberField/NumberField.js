@@ -7,6 +7,7 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import AddIcon from '@mui/icons-material/Add';
 import { Icon } from '../Icon/Icon';
 import { Body, BodySmall } from '../Typography';
+import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
 
 /**
  * NumberField Component
@@ -239,8 +240,8 @@ export function NumberField({
               : 'var(--Input-Radius, var(--Style-Border-Radius))',
           overflow: 'hidden',
           transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
-          boxShadow: 'var(--Effect-Level-1)',
-          '&:hover': { boxShadow: 'var(--Effect-Level-2)' },
+          boxShadow: SHADOW_LEVEL_1,
+          '&:hover': { boxShadow: SHADOW_LEVEL_2 },
           opacity: disabled ? 0.5 : 1,
           '&:focus-within': {
             outline: '2px solid var(--Focus-Visible)',

@@ -3,6 +3,7 @@ import React, { useState, useCallback } from 'react';
 import { Box } from '@mui/material';
 import { Button } from '../Button/Button';
 import { Icon } from '../Icon/Icon';
+import { SHADOW_LEVEL_2 } from '../_shadows';
 
 /**
  * Toolbar Component
@@ -77,7 +78,7 @@ export function Toolbar({
         padding: isFloating ? '8px 16px' : '8px',
         fontFamily: 'inherit',
         flexShrink: 0,
-        ...(isFloating && { boxShadow: 'var(--Effect-Level-2)' }),
+        ...(isFloating && { boxShadow: SHADOW_LEVEL_2 }),
         ...sx,
       }}
       {...props}

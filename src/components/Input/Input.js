@@ -11,6 +11,7 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { Body, BodySmall } from '../Typography';
+import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
 
 /**
  * Input Component
@@ -229,8 +230,8 @@ export function Input({
             : 'var(--Input-Radius, var(--Style-Border-Radius))',
         overflow: 'hidden',
         transition: 'border-color 0.15s ease-in-out',
-        boxShadow: 'var(--Effect-Level-1)',
-        '&:hover': { boxShadow: 'var(--Effect-Level-2)' },
+        boxShadow: SHADOW_LEVEL_1,
+        '&:hover': { boxShadow: SHADOW_LEVEL_2 },
         '&:focus-within': {
           outline: '2px solid var(--Focus-Visible)',
           outlineOffset: '2px',

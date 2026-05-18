@@ -5,6 +5,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { Button } from '../Button/Button';
 import { Icon } from '../Icon/Icon';
 import { useDynoDesign } from '../../DynoDesignProvider';
+import { SHADOW_LEVEL_3 } from '../_shadows';
 
 /**
  * Drawer Component
@@ -160,7 +161,7 @@ export function Drawer({
           backgroundColor: 'var(--Background)',
           color: 'var(--Text)',
           ...BORDER_EDGE[anchor],
-          boxShadow: 'var(--Effect-Level-3)',
+          boxShadow: SHADOW_LEVEL_3,
           display: 'flex',
           flexDirection: 'column',
           outline: 'none',

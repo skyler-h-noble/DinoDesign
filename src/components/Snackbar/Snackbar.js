@@ -5,6 +5,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { Button } from '../Button/Button';
 import { Icon } from '../Icon/Icon';
 import { Body, BodySmall } from '../Typography';
+import { SHADOW_LEVEL_3 } from '../_shadows';
 
 /**
  * Snackbar (Toast) Component
@@ -115,7 +116,7 @@ export function Snackbar({
         maxWidth: 'min(560px, calc(100vw - 32px))',
         border: '1px solid ' + borderToken,
         borderRadius: 'var(--Style-Border-Radius)',
-        boxShadow: 'var(--Effect-Level-3)',
+        boxShadow: SHADOW_LEVEL_3,
         overflow: 'hidden',
         animation: 'snackbar-slide-in 0.3s ease forwards',
         '@keyframes snackbar-slide-in': slideKeyframes,

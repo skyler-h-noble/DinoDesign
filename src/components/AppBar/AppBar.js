@@ -8,6 +8,7 @@ import { SearchField } from '../SearchField/SearchField';
 import { Tabs, TabList, Tab } from '../Tabs/Tabs';
 import { Drawer } from '../Drawer/Drawer';
 import { Button } from '../Button/Button';
+import { SHADOW_LEVEL_1 } from '../_shadows';
 
 /**
  * AppBar Component
@@ -101,7 +102,7 @@ function DesktopAppBar({
         display: 'flex', alignItems: 'center', height: 64,
         px: 2, gap: 2,
         backgroundColor: 'var(--Background)', color: 'var(--Text)',
-        boxShadow: 'var(--Effect-Level-1)',
+        boxShadow: SHADOW_LEVEL_1,
         fontFamily: 'inherit',
         ...sx,
       }}
@@ -256,7 +257,7 @@ function MobileAppBar({
 
   const containerSx = {
     backgroundColor: 'var(--Background)', color: 'var(--Text)',
-    boxShadow: 'var(--Effect-Level-1)',
+    boxShadow: SHADOW_LEVEL_1,
     fontFamily: 'inherit', width: '100%', maxWidth: 420,
     ...sx,
   };

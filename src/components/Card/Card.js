@@ -1,6 +1,7 @@
 // src/components/Card/Card.js
 import React, { createContext, useContext } from 'react';
 import { Box } from '@mui/material';
+import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3, SHADOW_LEVEL_4 } from '../_shadows';
 
 /**
  * Card Component
@@ -115,9 +116,9 @@ export function Card({
       : '1px solid var(--Buttons-Default-Border)';
 
   // Elevation shadows (on outer shell, inherits parent dropshadow-color)
-  const restShadow  = elevated ? 'var(--Effect-Level-3)' : 'var(--Effect-Level-2)';
-  const hoverShadow = elevated ? 'var(--Effect-Level-4)' : 'var(--Effect-Level-3)';
-  const activeShadow = elevated ? 'var(--Effect-Level-2)' : 'var(--Effect-Level-1)';
+  const restShadow  = elevated ? SHADOW_LEVEL_3 : SHADOW_LEVEL_2;
+  const hoverShadow = elevated ? SHADOW_LEVEL_4 : SHADOW_LEVEL_3;
+  const activeShadow = elevated ? SHADOW_LEVEL_2 : SHADOW_LEVEL_1;
 
   return (
     <CardContext.Provider value={{ variant, color, size, orientation }}>
@@ -171,7 +172,7 @@ export function Card({
             '&:active': {
               cursor: 'grabbing',
               zIndex: 10,
-              boxShadow: 'var(--Effect-Level-4)',
+              boxShadow: SHADOW_LEVEL_4,
               transform: 'scale(1.02)',
               // Thicker border on active so the outer shell visually grows
               // along with the scale (a 1px border at 1.02x is imperceptible).

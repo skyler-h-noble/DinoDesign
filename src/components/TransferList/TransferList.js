@@ -9,6 +9,7 @@ import { Button } from '../Button/Button';
 import { Icon } from '../Icon/Icon';
 import { Checkbox } from '../Checkbox/Checkbox';
 import { BodySmall, Caption } from '../Typography';
+import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
 
 /**
  * TransferList Component
@@ -97,9 +98,9 @@ export function TransferList({
         overflow: 'hidden',
         display: 'flex', flexDirection: 'column',
         opacity: disabled ? 0.5 : 1,
-        boxShadow: 'var(--Effect-Level-1)',
+        boxShadow: SHADOW_LEVEL_1,
         transition: 'box-shadow 0.15s ease',
-        '&:hover': { boxShadow: 'var(--Effect-Level-2)' },
+        '&:hover': { boxShadow: SHADOW_LEVEL_2 },
       }}>
         {/* Header */}
         <Box
