@@ -71,7 +71,7 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 export function bevelShadow(color) {
   const C = cap(color);
   return [
-    `inset calc(-1 * var(--_bevel, 0px)) calc(-1 * var(--_bevel, 0px)) var(--_bevel, 0px) rgba(var(--Buttons-${C}-Lowlight, 0, 0, 0), var(--Button-Bevel-Opacity, 0.5))`,
-    `inset var(--_bevel, 0px) var(--_bevel, 0px) var(--_bevel, 0px) rgba(var(--Buttons-${C}-Highlight, 0, 0, 0), var(--Button-Bevel-Opacity, 0.5))`,
+    `inset calc(-1 * var(--_bevel)) calc(-1 * var(--_bevel)) var(--_bevel) rgba(var(--Buttons-${C}-Lowlight, 0, 0, 0), var(--Button-Bevel-Opacity, 0.5))`,
+    `inset var(--_bevel) var(--_bevel) var(--_bevel) rgba(var(--Buttons-${C}-Highlight, 0, 0, 0), var(--Button-Bevel-Opacity, 0.5))`,
   ].join(', ');
 }
