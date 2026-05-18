@@ -463,7 +463,11 @@ export function Button({
         whiteSpace: 'nowrap',
         flexShrink: 0,
         transition: 'background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out',
-        '--_bevel': 'calc(var(--Button-Bevel) * var(--_height) / 100)',
+        // _bevel = (Button-Bevel% × height) / 100, capped at 20% of height
+        // so the inset highlight/lowlight can never bleed into the text band.
+        // Text occupies the middle ~60% of a button; a 20% inset on each side
+        // (40% total) leaves the text safely clear regardless of bevel%.
+        '--_bevel': 'min(calc(var(--Button-Bevel) * var(--_height) / 100), calc(var(--_height) / 5))',
 
         ...sizingStyles,
         ...variantStyles,

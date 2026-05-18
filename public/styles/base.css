@@ -1,6 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Urbanist&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Manrope&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Kanit&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Schibsted+Grotesk&display=swap');
 
 /* ========================================
  * Base CSS Variables
@@ -14,30 +13,30 @@
  * ======================================== */
 
 :root {
-  --Surface: var(--Primary-Background-11-Surface);
-  --Surface-Dim: var(--Primary-Background-11-Surface-Dim);
-  --Surface-Bright: var(--Primary-Background-11-Surface-Bright);
-  --Container: var(--Primary-Background-11-Container);
-  --Container-Lowest: var(--Primary-Background-11-Container-Lowest);
-  --Container-Low: var(--Primary-Background-11-Container-Low);
-  --Container-High: var(--Primary-Background-11-Container-High);
-  --Container-Highest: var(--Primary-Background-11-Container-Highest);
+  --Surface: var(--Primary-Background-9-Surface);
+  --Surface-Dim: var(--Primary-Background-9-Surface-Dim);
+  --Surface-Bright: var(--Primary-Background-9-Surface-Bright);
+  --Container: var(--Primary-Background-9-Container);
+  --Container-Lowest: var(--Primary-Background-9-Container-Lowest);
+  --Container-Low: var(--Primary-Background-9-Container-Low);
+  --Container-High: var(--Primary-Background-9-Container-High);
+  --Container-Highest: var(--Primary-Background-9-Container-Highest);
   /* Default Theme */
-  --Background: var(--Primary-Background-11-Surface);
-  --Surface-Dim: var(--Primary-Background-11-Surface-Dim);
-  --Surface-Bright: var(--Primary-Background-11-Surface-Bright);
-  --Header: var(--Header-Surfaces-Primary-Color-11);
-  --Text: var(--Text-Surfaces-Primary-Color-11);
-  --Quiet: var(--Quiet-Surfaces-Primary-Color-11);
-  --Border: var(--Border-Surfaces-Primary-Color-11);
-  --Border-Variant: var(--Border-Variant-Surfaces-Primary-Color-11);
-  --Hotlink: var(--Text-Surfaces-Info-Color-11);
-  --Hotlink-Visited: var(--Text-Surfaces-Hotlink-Visited-Color-11);
-  --Hover: var(--Hover-Primary-Color-11);
-  --Active: var(--Active-Primary-Color-11);
-  --Focus-Visible: var(--Focus-Visible-Surfaces-Color-11);
-  --Buttons-Primary-Hover: #f9fdfd;
-  --Buttons-Primary-Active: #f9fdfd;
+  --Background: var(--Primary-Background-9-Surface);
+  --Surface-Dim: var(--Primary-Background-9-Surface-Dim);
+  --Surface-Bright: var(--Primary-Background-9-Surface-Bright);
+  --Header: var(--Header-Surfaces-Primary-Color-9);
+  --Text: var(--Text-Surfaces-Primary-Color-9);
+  --Quiet: var(--Quiet-Surfaces-Primary-Color-9);
+  --Border: var(--Border-Surfaces-Primary-Color-9);
+  --Border-Variant: var(--Border-Variant-Surfaces-Primary-Color-9);
+  --Hotlink: var(--Text-Surfaces-Info-Color-9);
+  --Hotlink-Visited: var(--Text-Surfaces-Hotlink-Visited-Color-9);
+  --Hover: var(--Hover-Primary-Color-9);
+  --Active: var(--Active-Primary-Color-9);
+  --Focus-Visible: var(--Focus-Visible-Surfaces-Color-9);
+  --Buttons-Primary-Hover: #f7f0e2;
+  --Buttons-Primary-Active: #f7f0e2;
   --Buttons-Primary-Light-Button: var(--Primary-Color-12);
   --Buttons-Primary-Light-Text: var(--Text-Surfaces-Primary-Color-12);
   --Buttons-Primary-Light-Border: var(--Border-Surfaces-Primary-Color-12);
@@ -45,82 +44,82 @@
   --Buttons-Primary-Light-Active: #FFFFFF;
   --Buttons-Secondary-Button: var(--Secondary-Color-9);
   --Buttons-Secondary-Text: var(--Text-Surfaces-Secondary-Color-9);
-  --Buttons-Secondary-Border: var(--Border-Surfaces-Secondary-Color-11);
-  --Buttons-Secondary-Hover: #d7f7f2;
-  --Buttons-Secondary-Active: #d7f7f2;
+  --Buttons-Secondary-Border: var(--Border-Surfaces-Secondary-Color-9);
+  --Buttons-Secondary-Hover: #e5f2ff;
+  --Buttons-Secondary-Active: #e5f2ff;
   --Buttons-Secondary-Light-Button: var(--Secondary-Color-12);
   --Buttons-Secondary-Light-Text: var(--Text-Surfaces-Secondary-Color-12);
-  --Buttons-Secondary-Light-Border: var(--Border-Surfaces-Secondary-Color-11);
+  --Buttons-Secondary-Light-Border: var(--Border-Surfaces-Secondary-Color-9);
   --Buttons-Secondary-Light-Hover: #FFFFFF;
   --Buttons-Secondary-Light-Active: #FFFFFF;
   --Buttons-Tertiary-Button: var(--Tertiary-Color-9);
   --Buttons-Tertiary-Text: var(--Text-Surfaces-Tertiary-Color-9);
-  --Buttons-Tertiary-Border: var(--Border-Surfaces-Tertiary-Color-11);
-  --Buttons-Tertiary-Hover: #e7f3f6;
-  --Buttons-Tertiary-Active: #e7f3f6;
+  --Buttons-Tertiary-Border: var(--Border-Surfaces-Tertiary-Color-9);
+  --Buttons-Tertiary-Hover: #fdeded;
+  --Buttons-Tertiary-Active: #fdeded;
   --Buttons-Tertiary-Light-Button: var(--Tertiary-Color-12);
   --Buttons-Tertiary-Light-Text: var(--Text-Surfaces-Tertiary-Color-12);
-  --Buttons-Tertiary-Light-Border: var(--Border-Surfaces-Tertiary-Color-11);
+  --Buttons-Tertiary-Light-Border: var(--Border-Surfaces-Tertiary-Color-9);
   --Buttons-Tertiary-Light-Hover: #FFFFFF;
   --Buttons-Tertiary-Light-Active: #FFFFFF;
-  --Buttons-Primary-Button: var(--Primary-Button-Containers-Background-11-Button);
-  --Buttons-Primary-Text: var(--Primary-Button-Containers-Background-11-Text);
-  --Buttons-Primary-Border: var(--Border-Containers-Primary-Color-11);
-  --Buttons-Primary-Hover: #f9fdfd;
-  --Buttons-Primary-Active: #f9fdfd;
+  --Buttons-Primary-Button: var(--Primary-Button-Containers-Background-9-Button);
+  --Buttons-Primary-Text: var(--Primary-Button-Containers-Background-9-Text);
+  --Buttons-Primary-Border: var(--Border-Containers-Primary-Color-9);
+  --Buttons-Primary-Hover: #f7f0e2;
+  --Buttons-Primary-Active: #f7f0e2;
   --Buttons-Primary-Light-Border: var(--Border-Containers-Primary-Color-12);
-  --Buttons-Secondary-Border: var(--Border-Containers-Secondary-Color-11);
-  --Buttons-Secondary-Light-Border: var(--Border-Containers-Secondary-Color-11);
-  --Buttons-Tertiary-Border: var(--Border-Containers-Tertiary-Color-11);
-  --Buttons-Tertiary-Light-Border: var(--Border-Containers-Tertiary-Color-11);
+  --Buttons-Secondary-Border: var(--Border-Containers-Secondary-Color-9);
+  --Buttons-Secondary-Light-Border: var(--Border-Containers-Secondary-Color-9);
+  --Buttons-Tertiary-Border: var(--Border-Containers-Tertiary-Color-9);
+  --Buttons-Tertiary-Light-Border: var(--Border-Containers-Tertiary-Color-9);
   --Buttons-Neutral-Button: var(--Neutral-Color-6);
   --Buttons-Neutral-Text: var(--Text-Surfaces-Neutral-Color-6);
-  --Buttons-Neutral-Border: var(--Border-Containers-Neutral-Color-11);
+  --Buttons-Neutral-Border: var(--Border-Containers-Neutral-Color-9);
   --Buttons-Neutral-Hover: #aeaeae;
   --Buttons-Neutral-Active: #aeaeae;
   --Buttons-Neutral-Light-Button: var(--Neutral-Color-12);
   --Buttons-Neutral-Light-Text: var(--Text-Surfaces-Neutral-Color-12);
-  --Buttons-Neutral-Light-Border: var(--Border-Containers-Neutral-Color-11);
+  --Buttons-Neutral-Light-Border: var(--Border-Containers-Neutral-Color-9);
   --Buttons-Neutral-Light-Hover: #FFFFFF;
   --Buttons-Neutral-Light-Active: #FFFFFF;
   --Buttons-Info-Button: var(--Info-Color-6);
   --Buttons-Info-Text: var(--Text-Surfaces-Info-Color-6);
-  --Buttons-Info-Border: var(--Border-Containers-Info-Color-11);
+  --Buttons-Info-Border: var(--Border-Containers-Info-Color-9);
   --Buttons-Info-Hover: #90a7ff;
   --Buttons-Info-Active: #90a7ff;
   --Buttons-Info-Light-Button: var(--Info-Color-12);
   --Buttons-Info-Light-Text: var(--Text-Surfaces-Info-Color-12);
-  --Buttons-Info-Light-Border: var(--Border-Containers-Info-Color-11);
+  --Buttons-Info-Light-Border: var(--Border-Containers-Info-Color-9);
   --Buttons-Info-Light-Hover: #FFFFFF;
   --Buttons-Info-Light-Active: #FFFFFF;
   --Buttons-Success-Button: var(--Success-Color-6);
   --Buttons-Success-Text: var(--Text-Surfaces-Success-Color-6);
-  --Buttons-Success-Border: var(--Border-Containers-Success-Color-11);
+  --Buttons-Success-Border: var(--Border-Containers-Success-Color-9);
   --Buttons-Success-Hover: #6abf84;
   --Buttons-Success-Active: #6abf84;
   --Buttons-Success-Light-Button: var(--Success-Color-12);
   --Buttons-Success-Light-Text: var(--Text-Surfaces-Success-Color-12);
-  --Buttons-Success-Light-Border: var(--Border-Containers-Success-Color-11);
+  --Buttons-Success-Light-Border: var(--Border-Containers-Success-Color-9);
   --Buttons-Success-Light-Hover: #FFFFFF;
   --Buttons-Success-Light-Active: #FFFFFF;
   --Buttons-Warning-Button: var(--Warning-Color-6);
   --Buttons-Warning-Text: var(--Text-Surfaces-Warning-Color-6);
-  --Buttons-Warning-Border: var(--Border-Containers-Warning-Color-11);
+  --Buttons-Warning-Border: var(--Border-Containers-Warning-Color-9);
   --Buttons-Warning-Hover: #e3a12b;
   --Buttons-Warning-Active: #e3a12b;
   --Buttons-Warning-Light-Button: var(--Warning-Color-12);
   --Buttons-Warning-Light-Text: var(--Text-Surfaces-Warning-Color-12);
-  --Buttons-Warning-Light-Border: var(--Border-Containers-Warning-Color-11);
+  --Buttons-Warning-Light-Border: var(--Border-Containers-Warning-Color-9);
   --Buttons-Warning-Light-Hover: #FFFFFF;
   --Buttons-Warning-Light-Active: #FFFFFF;
   --Buttons-Error-Button: var(--Error-Color-6);
   --Buttons-Error-Text: var(--Text-Surfaces-Error-Color-6);
-  --Buttons-Error-Border: var(--Border-Containers-Error-Color-11);
+  --Buttons-Error-Border: var(--Border-Containers-Error-Color-9);
   --Buttons-Error-Hover: #ff877d;
   --Buttons-Error-Active: #ff877d;
   --Buttons-Error-Light-Button: var(--Error-Color-12);
   --Buttons-Error-Light-Text: var(--Text-Surfaces-Error-Color-12);
-  --Buttons-Error-Light-Border: var(--Border-Containers-Error-Color-11);
+  --Buttons-Error-Light-Border: var(--Border-Containers-Error-Color-9);
   --Buttons-Error-Light-Hover: #FFFFFF;
   --Buttons-Error-Light-Active: #FFFFFF;
   --Buttons-BlackWhite-Light-Button: var(--White);
@@ -134,26 +133,28 @@
   --Buttons-Default-Button: var(--Default-Button-Default-Medium-Button);
   --Buttons-Default-Text: var(--Default-Button-Default-Medium-Text);
   --Buttons-Default-Border: var(--Buttons-Secondary-Border);
-  --Buttons-Default-Hover: #b9ede4;
-  --Buttons-Default-Active: #b9ede4;
-  --Icons-Default: var(--Icon-Surfaces-Neutral-Color-11);
-  --Icons-Default-Variant: var(--Icon-Variant-Surfaces-Neutral-Color-11);
-  --Icons-Primary: var(--Icon-Surfaces-Primary-Color-11);
-  --Icons-Primary-Variant: var(--Icon-Variant-Surfaces-Primary-Color-11);
-  --Icons-Secondary: var(--Icon-Surfaces-Secondary-Color-11);
-  --Icons-Secondary-Variant: var(--Icon-Variant-Surfaces-Secondary-Color-11);
-  --Icons-Tertiary: var(--Icon-Surfaces-Tertiary-Color-11);
-  --Icons-Tertiary-Variant: var(--Icon-Variant-Surfaces-Tertiary-Color-11);
-  --Icons-Neutral: var(--Icon-Surfaces-Neutral-Color-11);
-  --Icons-Neutral-Variant: var(--Icon-Variant-Surfaces-Neutral-Color-11);
-  --Icons-Info: var(--Icon-Surfaces-Info-Color-11);
-  --Icons-Info-Variant: var(--Icon-Variant-Surfaces-Info-Color-11);
-  --Icons-Success: var(--Icon-Surfaces-Success-Color-11);
-  --Icons-Success-Variant: var(--Icon-Variant-Surfaces-Success-Color-11);
-  --Icons-Warning: var(--Icon-Surfaces-Warning-Color-11);
-  --Icons-Warning-Variant: var(--Icon-Variant-Surfaces-Warning-Color-11);
-  --Icons-Error: var(--Icon-Surfaces-Error-Color-11);
-  --Icons-Error-Variant: var(--Icon-Variant-Surfaces-Error-Color-11);
+  --Buttons-Default-Highlight: var(--Buttons-Secondary-Highlight);
+  --Buttons-Default-Lowlight: var(--Buttons-Secondary-Lowlight);
+  --Buttons-Default-Hover: #cfe5fc;
+  --Buttons-Default-Active: #cfe5fc;
+  --Icons-Default: var(--Icon-Surfaces-Neutral-Color-9);
+  --Icons-Default-Variant: var(--Icon-Variant-Surfaces-Neutral-Color-9);
+  --Icons-Primary: var(--Icon-Surfaces-Primary-Color-9);
+  --Icons-Primary-Variant: var(--Icon-Variant-Surfaces-Primary-Color-9);
+  --Icons-Secondary: var(--Icon-Surfaces-Secondary-Color-9);
+  --Icons-Secondary-Variant: var(--Icon-Variant-Surfaces-Secondary-Color-9);
+  --Icons-Tertiary: var(--Icon-Surfaces-Tertiary-Color-9);
+  --Icons-Tertiary-Variant: var(--Icon-Variant-Surfaces-Tertiary-Color-9);
+  --Icons-Neutral: var(--Icon-Surfaces-Neutral-Color-9);
+  --Icons-Neutral-Variant: var(--Icon-Variant-Surfaces-Neutral-Color-9);
+  --Icons-Info: var(--Icon-Surfaces-Info-Color-9);
+  --Icons-Info-Variant: var(--Icon-Variant-Surfaces-Info-Color-9);
+  --Icons-Success: var(--Icon-Surfaces-Success-Color-9);
+  --Icons-Success-Variant: var(--Icon-Variant-Surfaces-Success-Color-9);
+  --Icons-Warning: var(--Icon-Surfaces-Warning-Color-9);
+  --Icons-Warning-Variant: var(--Icon-Variant-Surfaces-Warning-Color-9);
+  --Icons-Error: var(--Icon-Surfaces-Error-Color-9);
+  --Icons-Error-Variant: var(--Icon-Variant-Surfaces-Error-Color-9);
 }
 
 :root {
@@ -166,35 +167,33 @@
   --Chart-Lines: #e2e2e2;
 
   /* Solid Chart Colors */
-  --Chart-1: #e9f3f3;
-  --Chart-2: #d7f7f2;
-  --Chart-3: #e7f3f6;
+  --Chart-1: #f7f0e2;
+  --Chart-2: #e5f2ff;
+  --Chart-3: #fdeded;
   --Chart-4: #edeeff;
   --Chart-5: #dff7e4;
   --Chart-6: #ffedd1;
   --Chart-7: #ffe7e1;
   --Chart-8: #f1f1f1;
-  --Chart-9: #d6e5e5;
-  --Chart-10: #b9ede4;
+  --Chart-9: #eee1c9;
+  --Chart-10: #cfe5fc;
 
   /* Opaque Chart Colors (50% opacity) */
-  --Chart-1-Opaque: rgba(233, 243, 243, 0.5);
-  --Chart-2-Opaque: rgba(215, 247, 242, 0.5);
-  --Chart-3-Opaque: rgba(231, 243, 246, 0.5);
+  --Chart-1-Opaque: rgba(247, 240, 226, 0.5);
+  --Chart-2-Opaque: rgba(229, 242, 255, 0.5);
+  --Chart-3-Opaque: rgba(253, 237, 237, 0.5);
   --Chart-4-Opaque: rgba(237, 238, 255, 0.5);
   --Chart-5-Opaque: rgba(223, 247, 228, 0.5);
   --Chart-6-Opaque: rgba(255, 237, 209, 0.5);
   --Chart-7-Opaque: rgba(255, 231, 225, 0.5);
   --Chart-8-Opaque: rgba(241, 241, 241, 0.5);
-  --Chart-9-Opaque: rgba(214, 229, 229, 0.5);
-  --Chart-10-Opaque: rgba(185, 237, 228, 0.5);
+  --Chart-9-Opaque: rgba(238, 225, 201, 0.5);
+  --Chart-10-Opaque: rgba(207, 229, 252, 0.5);
 
   /* ========================================
    * Effect Levels (Box Shadows)
-   * --Dropshadow-Color fallback lives in core.css (:root) and is
-   * overridden per-theme in Light/Dark-Mode.css. The nested var()
-   * resolves at the consuming element, so themed values still apply.
    * ======================================== */
+
   --Effect-Level-0: none;
   --Effect-Level-1: 0 1px 2px rgba(var(--Dropshadow-Color), 0.28);
   --Effect-Level-2: 0 2px 4px rgba(var(--Dropshadow-Color), 0.22), 0 1px 2px rgba(var(--Dropshadow-Color), 0.28);
@@ -202,27 +201,66 @@
   --Effect-Level-4: 0 8px 16px rgba(var(--Dropshadow-Color), 0.13), 0 4px 8px rgba(var(--Dropshadow-Color), 0.17);
   --Effect-Level-5: 0 16px 32px rgba(var(--Dropshadow-Color), 0.1), 0 8px 16px rgba(var(--Dropshadow-Color), 0.13);
 
- --Set-Font-Family-Header: "Urbanist", sans-serif;
+ --Set-Font-Family-Header: "Ubuntu", sans-serif;
  --Set-Font-Family-Header-Weight: 700;
- --Set-Font-Family-Body: "DM Sans", sans-serif;
+ --Set-Font-Family-Body: "Kanit", sans-serif;
  --Set-Font-Family-Body-Weight: 400;
  --Set-Font-Family-Body-Semibold-Weight: 600;
  --Set-Font-Family-Body-Bold-Weight: 700;
- --Set-Font-Family-Decorative: "Manrope", sans-serif;
+ --Set-Font-Family-Decorative: "Schibsted Grotesk", sans-serif;
  --Set-Font-Family-Decorative-Weight: 600;
 }
 
 
 :root {
-  --Button-Radius: 8px;
-  --Card-Radius: 11px;
+  --Button-Radius: 32px;
+  --Sm-Button-Radius: 24px;
+  --Lg-Button-Radius: 56px;
+  --Button-Inner-Radius: 31px;
+  --Sm-Button-Inner-Radius: 23px;
+  --Lg-Button-Inner-Radius: 55px;
+  --Button-Focus-Radius: 35px;
+  --Sm-Button-Focus-Radius: 27px;
+  --Lg-Button-Focus-Radius: 59px;
+  --Button-Icon-Radius: 1px;
+  --Sm-Button-Icon-Radius: 1px;
+  --Lg-Button-Icon-Radius: 2px;
+  --Button-Icon-Inner-Radius: 0px;
+  --Sm-Button-Icon-Inner-Radius: 0px;
+  --Lg-Button-Icon-Inner-Radius: 1px;
+  --Button-Icon-Focus-Radius: 4px;
+  --Sm-Button-Icon-Focus-Radius: 4px;
+  --Lg-Button-Icon-Focus-Radius: 5px;
+  --Card-Radius: 48px;
+  --Card-Inner-Radius: 47px;
+  --Card-Focus-Radius: 51px;
   --Card-Padding: 16px;
+  --Modal-Padding: 24px;
+  --Modal-Radius: 56px;
+  --Modal-Inner-Radius: 55px;
+  --Modal-Focus-Radius: 59px;
+  --Input-Radius: 4px;
+  --Sm-Input-Radius: 3px;
+  --Lg-Input-Radius: 7px;
+  --Input-Inner-Radius: 3px;
+  --Input-Focus-Radius: 7px;
+  --Input-Swatch-Radius: 3px;
+  --Sm-Input-Swatch-Radius: 2px;
+  --Lg-Input-Swatch-Radius: 6px;
+  --Input-Padding: 2px;
   --Button-Border-Width: 2px;
-  --Button-Padding: 4px;
+  --Button-Padding: 16px;
   --Sm-Button-Padding: 8px;
   --Large-Button-Padding: 16px;
-  --Input-Radius: 8px;
-  --Input-Padding: 4px;
+  --Button-Bevel: 13;
+  --Button-Bevel-Px: 4px;
+  --Button-Bevel-Opacity: 0.94;
+  --Effect-Level-0: none;
+  --Effect-Level-1: 0 1px 2px rgba(var(--Dropshadow-Color), 0.28);
+  --Effect-Level-2: 0 2px 4px rgba(var(--Dropshadow-Color), 0.22), 0 1px 2px rgba(var(--Dropshadow-Color), 0.28);
+  --Effect-Level-3: 0 4px 8px rgba(var(--Dropshadow-Color), 0.17), 0 2px 4px rgba(var(--Dropshadow-Color), 0.22);
+  --Effect-Level-4: 0 8px 16px rgba(var(--Dropshadow-Color), 0.13), 0 4px 8px rgba(var(--Dropshadow-Color), 0.17);
+  --Effect-Level-5: 0 16px 32px rgba(var(--Dropshadow-Color), 0.1), 0 8px 16px rgba(var(--Dropshadow-Color), 0.13);
 }
 
 
