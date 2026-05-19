@@ -57,20 +57,20 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 function outlineStyles(color) {
   const C = cap(color);
   return {
-    bg: 'var(--Background)',
+    bg: 'var(--Hover)',
     border: 'var(--Buttons-' + C + '-Border)',
     text: 'var(--Text)',
-    focusBg: 'var(--Background)',
+    focusBg: 'var(--Hover)',
   };
 }
 
 function lightStyles(color) {
   const C = cap(color);
   return {
-    bg: 'var(--Buttons-' + C + '-Light-Button, var(--Background))',
+    bg: 'var(--Buttons-' + C + '-Light-Button, var(--Hover))',
     border: 'var(--Buttons-' + C + '-Border)',
     text: 'var(--Text)',
-    focusBg: 'var(--Buttons-' + C + '-Light-Button, var(--Background))',
+    focusBg: 'var(--Buttons-' + C + '-Light-Button, var(--Hover))',
   };
 }
 
@@ -238,10 +238,12 @@ export function Input({
         },
       }}>
 
-        {/* Inner themed surface — for light variant gets data-theme/data-surface */}
-        <Box
-          {...(isLight ? { 'data-theme': lightTheme, 'data-surface': 'Surface-Dim' } : { 'data-surface': 'Surface-Bright' })}
-        >
+        {/* Inner wrapper. No data-surface — the input inherits the parent
+            surface so it doesn't bleed the brand --Background through. The
+            field itself uses --Hover (a subtle tint of the parent surface)
+            for its background, which gives a visible affordance without
+            fighting saturated dark surfaces. */}
+        <Box>
           <MuiTextField
             value={value}
             defaultValue={defaultValue}
@@ -266,7 +268,7 @@ export function Input({
             }}
             sx={{
               '& .MuiOutlinedInput-root': {
-                backgroundColor: 'var(--Background)',
+                backgroundColor: 'var(--Hover)',
                 color: 'var(--Quiet)',
                 fontSize: sizeConfig.fontSize,
                 minHeight: multiline ? 'auto' : sizeConfig.height,

@@ -133,9 +133,11 @@ export function SearchField({
         },
       }}>
 
-      {/* Inner surface */}
+      {/* Inner field. No data-surface — inherits parent's surface so the
+          field's background blends with the surrounding container. Uses
+          --Hover (a subtle tint of the parent surface) for affordance
+          without dragging the brand --Background through. */}
       <Box
-        data-surface="Container"
         sx={{
           display: 'flex',
           alignItems: 'center',
@@ -144,7 +146,7 @@ export function SearchField({
           boxSizing: 'border-box',
           minHeight: s.height,
           px: s.px + 'px',
-          backgroundColor: 'var(--Background)',
+          backgroundColor: 'var(--Hover)',
         }}
       >
         <Icon size="small" sx={{ color: isActive ? activeTextColor : 'var(--Quiet)', flexShrink: 0, transition: 'color 0.15s ease' }}>

@@ -197,9 +197,8 @@ export function NumberField({
     '&:disabled': { opacity: 0.4, cursor: 'not-allowed' },
   };
 
-  const innerAttrs = isLight
-    ? { 'data-theme': C + '-Light', 'data-surface': 'Surface-Dim' }
-    : { 'data-surface': 'Container' };
+  // No data-surface — inherit parent scope; field uses --Hover for affordance.
+  const innerAttrs = {};
 
   const renderLabel = () => {
     if (!isTop || !label) return null;
@@ -249,12 +248,12 @@ export function NumberField({
           },
         }}>
 
-        {/* Inner themed surface */}
+        {/* Inner wrapper (no data-surface; --Hover for field bg) */}
         <Box {...innerAttrs}>
           <Box sx={{
             position: 'relative', display: 'flex', alignItems: 'stretch',
             minHeight: sc.height,
-            backgroundColor: 'var(--Background)',
+            backgroundColor: 'var(--Hover)',
           }}>
             {/* Floating label */}
             {isFloating && label && (
@@ -400,7 +399,7 @@ export function NumberField({
               minHeight: sc.height,
               textAlign: 'center',
               border: 'none', outline: 'none',
-              backgroundColor: 'var(--Background)',
+              backgroundColor: 'var(--Hover)',
               color: 'var(--Text)',
               fontSize: sc.fontSize,
               fontFamily: 'var(--Body-Font-Family)',

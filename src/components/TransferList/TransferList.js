@@ -102,13 +102,12 @@ export function TransferList({
         transition: 'box-shadow 0.15s ease',
         '&:hover': { boxShadow: SHADOW_LEVEL_2 },
       }}>
-        {/* Header */}
+        {/* Header — no data-surface; --Hover for affordance */}
         <Box
-          data-surface="Container"
           sx={{
             display: 'flex', alignItems: 'center', gap: 1,
             px: 1.5, py: 1,
-            backgroundColor: 'var(--Background)',
+            backgroundColor: 'var(--Hover)',
             borderBottom: '1px solid var(--Border)',
           }}
         >
@@ -133,10 +132,9 @@ export function TransferList({
           </Caption>
         </Box>
 
-        {/* Item list */}
+        {/* Item list — no data-surface; --Hover for affordance */}
         <Box
-          data-surface="Container"
-          sx={{ flex: 1, overflowY: 'auto', maxHeight: 240, backgroundColor: 'var(--Background)' }}
+          sx={{ flex: 1, overflowY: 'auto', maxHeight: 240, backgroundColor: 'var(--Hover)' }}
         >
           <Box
             component="ul"

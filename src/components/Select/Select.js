@@ -240,13 +240,17 @@ export function Select({
     });
   }, [open]);
 
-  // The dropdown rendered into document.body via portal
+  // The dropdown rendered into document.body via portal. No data-surface —
+  // the dropdown uses --Hover (a subtle tint of whatever scope the body
+  // resolves to) for its background so it stays consistent with the
+  // trigger field and doesn't fight saturated brand surfaces. We still
+  // carry data-theme so per-palette tokens (Buttons, Border, etc.)
+  // resolve correctly against the brand the user picked.
   const dropdown = open ? ReactDOM.createPortal(
     <Box
       ref={dropdownRef}
       data-select-dropdown
       data-theme={parentTheme || undefined}
-      data-surface={parentSurface || undefined}
       role="listbox"
       aria-label={label || 'Options'}
       sx={{
@@ -255,7 +259,7 @@ export function Select({
         bottom: dropdownPos.bottom ?? 'unset',
         left: dropdownPos.left,
         width: dropdownPos.width + 'px',
-        backgroundColor: 'var(--Background)',
+        backgroundColor: 'var(--Hover)',
         border: '1px solid var(--Buttons-Default-Border)',
         borderRadius: '4px',
         boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
@@ -414,10 +418,8 @@ export function Select({
         },
       }}>
 
-      {/* Inner themed surface */}
-      <Box
-        {...(isLight ? { 'data-theme': C + '-Light', 'data-surface': 'Surface-Dim' } : { 'data-surface': 'Container' })}
-      >
+      {/* Inner wrapper — no data-surface so trigger inherits parent scope */}
+      <Box>
 
       {/* Trigger */}
       <Box
@@ -438,7 +440,7 @@ export function Select({
           width: '100%', minWidth: 140,
           height: sizeConfig.height,
           padding: sizeConfig.padding,
-          backgroundColor: 'var(--Background)',
+          backgroundColor: 'var(--Hover)',
           border: 'none',
           borderRadius: 0,
           color: (hasValue || open) ? activeTextColor : 'var(--Quiet)',

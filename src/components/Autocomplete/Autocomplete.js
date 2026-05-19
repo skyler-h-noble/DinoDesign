@@ -219,16 +219,15 @@ export function Autocomplete({
         },
       }}>
 
-      {/* Inner themed surface */}
-      <Box
-        {...(isLight ? { 'data-theme': C + '-Light', 'data-surface': 'Surface-Dim' } : { 'data-surface': 'Container' })}
-      >
+      {/* Inner wrapper — no data-surface so the field inherits parent
+          scope and doesn't drag the brand --Background through. */}
+      <Box>
 
-      {/* Input container */}
+      {/* Input container — uses --Hover for affordance against parent surface */}
       <Box sx={{
         position: 'relative', display: 'flex', alignItems: 'center',
         minHeight: sizeConfig.height,
-        backgroundColor: 'var(--Background)',
+        backgroundColor: 'var(--Hover)',
       }}>
         {/* Floating label */}
         {isFloating && label && (
@@ -332,7 +331,7 @@ export function Autocomplete({
       {open && (
         <Box role="listbox" aria-label={label || 'Options'} sx={{
           position: 'absolute', top: '100%', left: 0, right: 0, mt: 0.5,
-          backgroundColor: 'var(--Background)',
+          backgroundColor: 'var(--Hover)',
           border: '1px solid var(--Buttons-Default-Border)',
           borderRadius: 'var(--Style-Border-Radius)',
           boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
