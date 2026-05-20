@@ -69,7 +69,38 @@ Set once on the root. Cascades to every component automatically.
 <div data-surface="Container-Lowest">  // inputs, deepest
 <div data-surface="Container-High">    // modal, highest card
 ```
-Sets `--Background` which components use via `background: var(--Background)`.
+
+`data-surface` is the **only** way to change a region's background. Setting
+it exposes the full set of paired tokens — `--Background`, `--Text`,
+`--Quiet`, `--Header`, `--Border`, `--Border-Variant`, `--Hover`, `--Active`,
+`--Hotlink`, and the per-palette `--Buttons-*-Border/Highlight/Lowlight`
+overrides — all tuned for that surface's tone. Every nested component reads
+those automatically.
+
+```jsx
+// ✅ Right — declare the surface, every nested token auto-resolves
+<section data-theme="Primary-Light" data-surface="Surface">
+  <H2>Title</H2>           {/* gets --Header */}
+  <Body>Body copy</Body>   {/* gets --Text */}
+  <Button variant="primary">Save</Button>  {/* gets --Buttons-Primary-* */}
+</section>
+```
+
+```jsx
+// ❌ Wrong — paints the box but leaves text/border/quiet on the parent's
+// tone, so contrast breaks the moment the surface flips dark or moves to a
+// different Color-N. Never write these:
+<div style={{ background: 'var(--Surface)' }}>
+<div style={{ background: 'var(--Container)' }}>
+<div style={{ background: 'var(--Surface-Dim)' }}>
+<div style={{ background: 'var(--Primary-Color-11)' }}>
+<div style={{ background: '#f0ebe0' }}>
+```
+
+Components that need to paint a background read `var(--Background)` (which
+`data-surface` resolves for them). User code does **not** write
+`var(--Background)` either — it sets `data-surface` on the element and lets
+the cascade do the rest.
 
 ---
 
@@ -156,7 +187,13 @@ import { ThemedZone, Surfaced } from './DynoDesignProvider';
 
 ### Background & Surface
 ```css
-var(--Background)          /* resolves via data-surface — use this in components */
+var(--Background)          /* what data-surface resolves to. Components read this.
+                              User code: prefer setting data-surface on the
+                              element instead of writing background here. */
+
+/* Source vars — DO NOT write these in styles. They exist so the cascade can
+   resolve --Background. Setting data-surface="Surface" exposes --Surface as
+   --Background; data-surface="Container" exposes --Container; etc. */
 var(--Surface)
 var(--Surface-Dim)
 var(--Surface-Bright)
@@ -228,6 +265,24 @@ var(--Set-Font-Family-Body-Semibold-Weight)
 var(--Set-Font-Family-Body-Bold-Weight)
 var(--Set-Font-Family-Decorative)
 ```
+
+### Typography `color` prop — not `style={{ color }}`
+
+All typography components (`H1`–`H6`, `Body`, `BodySmall`, `BodyLarge`,
+`Caption`, `Overline`, `Label`, `Subtitle`) accept a `color` prop that maps
+to the right brand token. **Do not write `style={{ color: 'var(--Text-…)' }}`
+on typography** — set the prop instead:
+
+```jsx
+<Body color="quiet">…</Body>        // var(--Text-Quiet)
+<Body color="primary">…</Body>      // var(--Text-Primary)
+<Body color="secondary">…</Body>    // var(--Text-Secondary)
+<Body color="success">…</Body>      // semantic tokens
+```
+
+Available values: `standard` (default), `quiet`, `primary`, `secondary`,
+`tertiary`, `neutral`, `info`, `success`, `warning`, `error`. Same list for
+headings.
 
 ---
 
@@ -376,6 +431,59 @@ import {
 </ThemedZone>
 ```
 
+### Section — paint a region with the design system
+```jsx
+// Section bundles data-theme + data-surface + background paint into one
+// component. Use it for page sections, footers, hero, sticky-nav wrappers.
+<Section theme="Primary" surface="Surface" padding="80px 24px">
+  <H2>…</H2>
+</Section>
+
+// Inherit surface from parent (no theme switch):
+<Section padding="48px 24px">…</Section>
+
+// Render as a different element:
+<Section as="footer" theme="Neutral-Dark" surface="Surface">…</Section>
+```
+
+Use `<ThemedZone>` for the case where you want the attributes but NOT the
+background paint (e.g., wrapping an `AppBar` whose own root paints itself).
+
+### Footer & Copyright
+```jsx
+// Footer = configurable 1–4 column footer with optional social row +
+// subscribe area + auto Copyright strip. First column is always the
+// company address / contact.
+<Footer
+  brand={<Logo />}
+  address={{
+    company: 'My Company',
+    lines: ['123 Main St', 'San Francisco, CA'],
+    email: 'hi@example.com',
+    phone: '+1 555 555 5555',
+  }}
+  columns={[                             // up to 3 more columns
+    { title: 'Product', links: [{ label: 'Features', href: '/features' }] },
+    { title: 'Company', links: [{ label: 'About', href: '/about' }] },
+  ]}
+  socialLinks={[                         // optional
+    { icon: <TwitterIcon />, url: 'https://twitter.com/x', label: 'Twitter' },
+  ]}
+  subscribe={{                           // optional
+    title: 'Stay in the loop',
+    onSubscribe: (email) => api.subscribe(email),
+  }}
+  copyrightName="My Company"
+/>
+
+// Copyright = standalone copyright strip (used internally by Footer too).
+<Copyright companyName="My Company" year={2026} />
+```
+
+Footer/Copyright are hardcoded to `--Primary-Color-2` body / `--Primary-
+Color-1` copyright strip for now. Long term they'll auto-derive from the
+user's chosen background tone.
+
 ---
 
 ## Flagging Missing Components
@@ -482,6 +590,17 @@ import { Button, Card, Alert, H2, Body, HStack } from './components';
 <span style={{ fontSize: 14 }}>        // ← use <BodySmall>, <Label>, <Caption>
 <p>                                     // ← use <Body>
 <h2>                                    // ← use <H2>
+
+// Never override a component's colors with style — change the variant instead
+<Button style={{ background: '...', color: '...' }}>   // ← use variant="primary"
+<H2 style={{ color: '...' }}>                          // ← H2 sets --Header itself
+<Body style={{ color: 'var(--Quiet)' }}>               // ← use quiet variant or <Caption>
+<Card style={{ background: 'var(--Container-High)' }}> // ← Card sets data-surface itself
+
+// Never paint a background with a surface var directly — use data-surface
+style={{ background: 'var(--Surface)' }}      // ← <div data-surface="Surface">
+style={{ background: 'var(--Container)' }}    // ← <div data-surface="Container">
+style={{ background: 'var(--Surface-Dim)' }}  // ← <div data-surface="Surface-Dim">
 
 // Never hardcode hex colors
 style={{ background: '#006b5a', color: '#ffffff' }}

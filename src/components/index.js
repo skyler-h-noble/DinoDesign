@@ -116,6 +116,7 @@ export {
 export { Box, BoxShowcase } from './Box';
 export { Container } from './Container';
 export { Grid } from './Grid';
+export { Section } from './Section';
 
 // ========== NAVIGATION ==========
 export { Tabs, TabList, Tab, TabPanel, TabsShowcase, useTabsContext } from './Tabs';
@@ -156,6 +157,7 @@ export { Tooltip } from './Tooltip';
 export { AppBar, DesktopAppBar, MobileAppBar, AppBarShowcase } from './AppBar';
 export { Header } from './Header';
 export { Footer } from './Footer';
+export { Copyright } from './Copyright';
 export { Sidebar } from './Sidebar';
 export { MainLayout } from './MainLayout';
 export { Accordion, AccordionSummary, AccordionDetails, AccordionGroup } from './Accordion';
