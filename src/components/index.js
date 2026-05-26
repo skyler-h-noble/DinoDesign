@@ -116,7 +116,7 @@ export {
 export { Box, BoxShowcase } from './Box';
 export { Container } from './Container';
 export { Grid } from './Grid';
-export { Section } from './Section';
+export { Section, SectionShowcase } from './Section';
 
 // ========== NAVIGATION ==========
 export { Tabs, TabList, Tab, TabPanel, TabsShowcase, useTabsContext } from './Tabs';
@@ -156,8 +156,10 @@ export { Tooltip } from './Tooltip';
 // ========== APP STRUCTURE ==========
 export { AppBar, DesktopAppBar, MobileAppBar, AppBarShowcase } from './AppBar';
 export { Header } from './Header';
-export { Footer } from './Footer';
-export { Copyright } from './Copyright';
+export { Footer, FooterShowcase } from './Footer';
+export { Copyright, CopyrightShowcase } from './Copyright';
+export { CurvedText, CurvedTextShowcase } from './CurvedText';
+export { BevelText, BevelTextShowcase } from './BevelText';
 export { Sidebar } from './Sidebar';
 export { MainLayout } from './MainLayout';
 export { Accordion, AccordionSummary, AccordionDetails, AccordionGroup } from './Accordion';

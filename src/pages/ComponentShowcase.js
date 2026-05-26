@@ -57,6 +57,11 @@ import { AutocompleteShowcase } from '../components/Autocomplete/AutocompleteSho
 import { TreeViewShowcase } from '../components/TreeView/TreeViewShowcase';
 import { StackShowcase } from '../components/Stack/StackShowcase';
 import { TagShowcase } from '../components/Tag/TagShowcase';
+import { SectionShowcase } from '../components/Section/SectionShowcase';
+import { FooterShowcase } from '../components/Footer/FooterShowcase';
+import { CopyrightShowcase } from '../components/Copyright/CopyrightShowcase';
+import { CurvedTextShowcase } from '../components/CurvedText/CurvedTextShowcase';
+import { BevelTextShowcase } from '../components/BevelText/BevelTextShowcase';
 
 import {
   Button,
@@ -150,6 +155,7 @@ const NAV_ITEMS = [
     label: 'Layout',
     children: [
       { id: 'stack', label: 'Stack' },
+      { id: 'section', label: 'Section' },
     ],
   },
   {
@@ -196,6 +202,8 @@ const NAV_ITEMS = [
     children: [
       { id: 'link', label: 'Link' },
       { id: 'appbar', label: 'App Bar' },
+      { id: 'footer', label: 'Footer' },
+      { id: 'copyright', label: 'Copyright' },
       { id: 'bottomnav', label: 'Bottom Navigation' },
       { id: 'toolbar', label: 'Toolbar' },
       { id: 'rail', label: 'Rail' },
@@ -206,6 +214,14 @@ const NAV_ITEMS = [
       { id: 'menu', label: 'Menu' },
       { id: 'drawer', label: 'Drawer' },
       { id: 'speeddial', label: 'Speed Dial' },
+    ],
+  },
+  {
+    id: 'decorative',
+    label: 'Decorative',
+    children: [
+      { id: 'curvedtext', label: 'Curved Display Text' },
+      { id: 'beveltext', label: 'Bevel Display Text' },
     ],
   },
 ];
@@ -360,6 +376,7 @@ function ShowcaseInner() {
 
             {/* ============ LAYOUT ============ */}
             {activeSection === 'stack' && <StackShowcase />}
+            {activeSection === 'section' && <SectionShowcase />}
 
             {/* ============ SURFACES ============ */}
             {activeSection === 'card' && <CardShowcase />}
@@ -390,6 +407,10 @@ function ShowcaseInner() {
             {/* ============ NAVIGATION ============ */}
             {activeSection === 'link' && <LinkShowcase />}
             {activeSection === 'appbar' && <AppBarShowcase />}
+            {activeSection === 'footer' && <FooterShowcase />}
+            {activeSection === 'copyright' && <CopyrightShowcase />}
+            {activeSection === 'curvedtext' && <CurvedTextShowcase />}
+            {activeSection === 'beveltext' && <BevelTextShowcase />}
             {activeSection === 'bottomnav' && <BottomNavigationShowcase />}
             {activeSection === 'toolbar' && <ToolbarShowcase />}
             {activeSection === 'rail' && <RailShowcase />}

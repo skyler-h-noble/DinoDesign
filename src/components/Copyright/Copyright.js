@@ -18,7 +18,18 @@ import { BodySmall } from '../Typography';
  *   children    — override the entire text content
  *   className, style, ...rest — forwarded to the wrapper
  */
+// Color presets mirror Footer's. Each maps to a (bg, fg) pair OR a
+// data-theme/data-surface combo that lets the cascade resolve the tone.
+const COLOR_PRESETS = {
+  default:        { bg: 'var(--Primary-Color-1)',  fg: 'var(--Primary-Color-12)' },
+  primary:        { theme: 'Primary',      surface: 'Surface-Dim' },
+  'primary-dark': { bg: 'var(--Primary-Color-1)',  fg: 'var(--Primary-Color-12)' },
+  white:          { bg: 'var(--Neutral-Color-11)', fg: 'var(--Neutral-Color-3)' },
+  black:          { bg: 'var(--Neutral-Color-1)',  fg: 'var(--Neutral-Color-12)' },
+};
+
 export function Copyright({
+  color = 'default',
   companyName = '',
   year = new Date().getFullYear(),
   rights = 'All rights reserved',
@@ -31,14 +42,22 @@ export function Copyright({
     children ??
     `© ${year}${companyName ? ' ' + companyName : ''}.${rights ? ' ' + rights + '.' : ''}`;
 
+  const preset = COLOR_PRESETS[color] || COLOR_PRESETS.default;
+  const themeAttrs = preset.theme
+    ? { 'data-theme': preset.theme, 'data-surface': preset.surface || 'Surface-Dim' }
+    : {};
+  const paintStyle = preset.theme
+    ? { background: 'var(--Background)', color: 'var(--Text)' }
+    : { background: preset.bg, color: preset.fg };
+
   return (
     <div
+      {...themeAttrs}
       className={['dino-copyright', className].filter(Boolean).join(' ')}
       style={{
         padding: '14px 24px',
         textAlign: 'center',
-        background: 'var(--Primary-Color-1)',
-        color: 'var(--Primary-Color-12)',
+        ...paintStyle,
         ...style,
       }}
       {...rest}

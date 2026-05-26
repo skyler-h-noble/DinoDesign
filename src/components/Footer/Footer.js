@@ -13,12 +13,20 @@ import { Copyright } from '../Copyright/Copyright';
  * address / contact. Additional `columns` add link lists (max 3 more).
  * Optional `socialLinks` row and `subscribe` area sit above the copyright.
  *
- * Color: hardcoded to `--Primary-Color-2` body and `--Primary-Color-1`
- * copyright strip for now (per the studio's first-pass spec). Long term these
- * should derive from the user's brand background. Text is `--Primary-Color-12`
- * so it stays readable on the dark brand bg.
+ * Color presets (the `color` prop):
+ *   default       — `--Primary-Color-2` body, `--Primary-Color-1` copyright.
+ *                   The long-term plan is to auto-derive this from the brand;
+ *                   hardcoded for now.
+ *   primary       — `data-theme="Primary" data-surface="Surface"` — adopts the
+ *                   user's Primary surface tone.
+ *   primary-dark  — `data-theme="Primary" data-surface="Surface-Dimmest"` —
+ *                   the deepest Primary surface.
+ *   white         — Neutral Color-12 (pure white).
+ *   black         — Neutral Color-1 (near-black).
  *
  * Props:
+ *   color         — "default" (default) | "primary" | "primary-dark" |
+ *                   "white" | "black".
  *   brand         — ReactNode, logo / brand icon slot rendered at the top.
  *   address       — { company, lines[], email, phone } — first column.
  *   columns       — [{ title, links: [{ label, href, onClick }] }] — up to 3.
@@ -30,7 +38,16 @@ import { Copyright } from '../Copyright/Copyright';
  *
  *   className, style, ...rest — forwarded to the <footer> element.
  */
+const COLOR_PRESETS = {
+  default:        { bg: 'var(--Primary-Color-2)', fg: 'var(--Primary-Color-12)' },
+  primary:        { theme: 'Primary',      surface: 'Surface' },
+  'primary-dark': { theme: 'Primary',      surface: 'Surface-Dimmest' },
+  white:          { bg: 'var(--Neutral-Color-12)', fg: 'var(--Neutral-Color-2)' },
+  black:          { bg: 'var(--Neutral-Color-1)',  fg: 'var(--Neutral-Color-12)' },
+};
+
 export function Footer({
+  color = 'default',
   brand,
   address,
   columns = [],
@@ -43,14 +60,22 @@ export function Footer({
   ...rest
 }) {
   const visibleColumns = columns.slice(0, 3);
-  const columnCount = 1 + visibleColumns.length;
+  const preset = COLOR_PRESETS[color] || COLOR_PRESETS.default;
+  // When the preset declares a theme/surface, we rely on the cascade to
+  // resolve --Background. Otherwise we paint the explicit hex from the preset.
+  const themeAttrs = preset.theme
+    ? { 'data-theme': preset.theme, 'data-surface': preset.surface || 'Surface' }
+    : {};
+  const paintStyle = preset.theme
+    ? { background: 'var(--Background)', color: 'var(--Text)' }
+    : { background: preset.bg, color: preset.fg };
 
   return (
     <footer
+      {...themeAttrs}
       className={['dino-footer', className].filter(Boolean).join(' ')}
       style={{
-        background: 'var(--Primary-Color-2)',
-        color: 'var(--Primary-Color-12)',
+        ...paintStyle,
         ...style,
       }}
       {...rest}
@@ -61,7 +86,10 @@ export function Footer({
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(' + columnCount + ', minmax(0, 1fr))',
+            // Auto-fit + minmax(280px, 1fr) gives each column a 280px floor
+            // (so the address column has room for two address lines + contact
+            // info) and lets columns wrap onto new rows on narrower screens.
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
             gap: 40,
           }}
         >
@@ -90,7 +118,7 @@ export function Footer({
         )}
       </div>
 
-      <Copyright companyName={copyrightName} year={copyrightYear} />
+      <Copyright color={color} companyName={copyrightName} year={copyrightYear} />
     </footer>
   );
 }
