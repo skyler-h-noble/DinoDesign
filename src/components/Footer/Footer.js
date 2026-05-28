@@ -126,12 +126,17 @@ export function Footer({
 function AddressColumn({ address }) {
   if (!address) return <div />;
   const { company, lines = [], email, phone } = address;
+  // Company / address lines / phone are all rendered as plain body copy at the
+  // same weight. The brand identity already lives in the `brand` slot above
+  // the columns — repeating it as a header here would be redundant.
+  const addressLines = [
+    ...(company ? [company] : []),
+    ...lines,
+    ...(phone ? [phone] : []),
+  ];
   return (
     <div>
-      {company && (
-        <H4 style={{ color: 'inherit', marginBottom: 12 }}>{company}</H4>
-      )}
-      {lines.map((line, i) => (
+      {addressLines.map((line, i) => (
         <BodySmall
           key={i}
           style={{ color: 'inherit', opacity: 0.85, display: 'block' }}
@@ -139,28 +144,19 @@ function AddressColumn({ address }) {
           {line}
         </BodySmall>
       ))}
-      {(email || phone) && (
+      {email && (
         <div style={{ marginTop: 12 }}>
-          {email && (
-            <BodySmall
-              style={{ color: 'inherit', opacity: 0.85, display: 'block' }}
+          <BodySmall
+            style={{ color: 'inherit', opacity: 0.85, display: 'block' }}
+          >
+            <Link
+              href={'mailto:' + email}
+              color="standard"
+              style={{ color: 'inherit' }}
             >
-              <Link
-                href={'mailto:' + email}
-                color="standard"
-                style={{ color: 'inherit' }}
-              >
-                {email}
-              </Link>
-            </BodySmall>
-          )}
-          {phone && (
-            <BodySmall
-              style={{ color: 'inherit', opacity: 0.85, display: 'block' }}
-            >
-              {phone}
-            </BodySmall>
-          )}
+              {email}
+            </Link>
+          </BodySmall>
         </div>
       )}
     </div>
