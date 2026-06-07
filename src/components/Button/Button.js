@@ -124,14 +124,14 @@ function outlineStyles(color) {
     border: `var(--Button-Border-Width) solid var(--Buttons-${C}-Border)`,
     boxShadow: 'none',
     '& .MuiTouchRipple-rippleVisible': {
-      color: 'var(--Hover)',
+      color: `var(--Buttons-${C}-Hover)`,
     },
     '&:hover': {
-      backgroundColor: 'var(--Hover)',
+      backgroundColor: `var(--Buttons-${C}-Hover)`,
       boxShadow: 'none',
     },
     '&:active': {
-      backgroundColor: 'var(--Active)',
+      backgroundColor: `var(--Buttons-${C}-Active)`,
     },
     '&.Mui-focusVisible': {
       backgroundColor: 'transparent',
@@ -172,7 +172,11 @@ function lightStyles(color, elevated = false) {
 function ghostStyles(isTextContent) {
   return {
     backgroundColor: 'transparent',
-    color: 'var(--Hotlink)',
+    // Text ghost buttons read like links (--Hotlink). Icon-only ghosts
+    // are pure affordances — link styling is too colored for a calendar
+    // icon, so they fall back to the secondary text token and only
+    // darken to --Text on hover.
+    color: isTextContent ? 'var(--Hotlink)' : 'var(--Quiet)',
     border: 'var(--Button-Border-Width) solid transparent',
     boxShadow: 'none',
     textDecoration: 'none',
@@ -188,15 +192,15 @@ function ghostStyles(isTextContent) {
     '&:hover': {
       backgroundColor: 'var(--Hover)',
       boxShadow: 'none',
-      ...(isTextContent && {
-        '& .btn-text-content': { textDecoration: 'none' },
-      }),
+      ...(isTextContent
+        ? { '& .btn-text-content': { textDecoration: 'none' } }
+        : { color: 'var(--Text)' }),
     },
     '&:active': {
       backgroundColor: 'var(--Active)',
-      ...(isTextContent && {
-        '& .btn-text-content': { textDecoration: 'none' },
-      }),
+      ...(isTextContent
+        ? { '& .btn-text-content': { textDecoration: 'none' } }
+        : { color: 'var(--Text)' }),
     },
     '&.Mui-focusVisible': {
       backgroundColor: 'transparent',
@@ -370,6 +374,7 @@ export function Button({
               color: 'inherit',
               lineHeight: 'inherit',
               letterSpacing: 'inherit',
+              padding: '4px',
             }}
           >
             {children}
