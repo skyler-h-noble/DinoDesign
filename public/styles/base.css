@@ -1,5 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Kanit&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Schibsted+Grotesk&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab&display=swap');
 
 /* ========================================
  * Base CSS Variables
@@ -35,8 +35,8 @@
   --Hover: var(--Hover-Primary-Color-9);
   --Active: var(--Active-Primary-Color-9);
   --Focus-Visible: var(--Focus-Visible-Surfaces-Color-9);
-  --Buttons-Primary-Hover: #f7f0e2;
-  --Buttons-Primary-Active: #f7f0e2;
+  --Buttons-Primary-Hover: #ffeaef;
+  --Buttons-Primary-Active: #ffeaef;
   --Buttons-Primary-Light-Button: var(--Primary-Color-12);
   --Buttons-Primary-Light-Text: var(--Text-Surfaces-Primary-Color-12);
   --Buttons-Primary-Light-Border: var(--Border-Surfaces-Primary-Color-12);
@@ -45,8 +45,8 @@
   --Buttons-Secondary-Button: var(--Secondary-Color-9);
   --Buttons-Secondary-Text: var(--Text-Surfaces-Secondary-Color-9);
   --Buttons-Secondary-Border: var(--Border-Surfaces-Secondary-Color-9);
-  --Buttons-Secondary-Hover: #e5f2ff;
-  --Buttons-Secondary-Active: #e5f2ff;
+  --Buttons-Secondary-Hover: #d6f6ff;
+  --Buttons-Secondary-Active: #d6f6ff;
   --Buttons-Secondary-Light-Button: var(--Secondary-Color-12);
   --Buttons-Secondary-Light-Text: var(--Text-Surfaces-Secondary-Color-12);
   --Buttons-Secondary-Light-Border: var(--Border-Surfaces-Secondary-Color-9);
@@ -55,8 +55,8 @@
   --Buttons-Tertiary-Button: var(--Tertiary-Color-9);
   --Buttons-Tertiary-Text: var(--Text-Surfaces-Tertiary-Color-9);
   --Buttons-Tertiary-Border: var(--Border-Surfaces-Tertiary-Color-9);
-  --Buttons-Tertiary-Hover: #fdeded;
-  --Buttons-Tertiary-Active: #fdeded;
+  --Buttons-Tertiary-Hover: #feecf1;
+  --Buttons-Tertiary-Active: #feecf1;
   --Buttons-Tertiary-Light-Button: var(--Tertiary-Color-12);
   --Buttons-Tertiary-Light-Text: var(--Text-Surfaces-Tertiary-Color-12);
   --Buttons-Tertiary-Light-Border: var(--Border-Surfaces-Tertiary-Color-9);
@@ -65,8 +65,8 @@
   --Buttons-Primary-Button: var(--Primary-Button-Containers-Background-9-Button);
   --Buttons-Primary-Text: var(--Primary-Button-Containers-Background-9-Text);
   --Buttons-Primary-Border: var(--Border-Containers-Primary-Color-9);
-  --Buttons-Primary-Hover: #f7f0e2;
-  --Buttons-Primary-Active: #f7f0e2;
+  --Buttons-Primary-Hover: #ffeaef;
+  --Buttons-Primary-Active: #ffeaef;
   --Buttons-Primary-Light-Border: var(--Border-Containers-Primary-Color-12);
   --Buttons-Secondary-Border: var(--Border-Containers-Secondary-Color-9);
   --Buttons-Secondary-Light-Border: var(--Border-Containers-Secondary-Color-9);
@@ -132,11 +132,11 @@
   --Buttons-BlackWhite-Medium-Active: #000000;
   --Buttons-Default-Button: var(--Default-Button-Default-Medium-Button);
   --Buttons-Default-Text: var(--Default-Button-Default-Medium-Text);
-  --Buttons-Default-Border: var(--Buttons-Secondary-Border);
-  --Buttons-Default-Highlight: var(--Buttons-Secondary-Highlight);
-  --Buttons-Default-Lowlight: var(--Buttons-Secondary-Lowlight);
-  --Buttons-Default-Hover: #cfe5fc;
-  --Buttons-Default-Active: #cfe5fc;
+  --Buttons-Default-Border: var(--Buttons-Primary-Border);
+  --Buttons-Default-Highlight: var(--Buttons-Primary-Highlight);
+  --Buttons-Default-Lowlight: var(--Buttons-Primary-Lowlight);
+  --Buttons-Default-Hover: #feb6c6;
+  --Buttons-Default-Active: #feb6c6;
   --Icons-Default: var(--Icon-Surfaces-Neutral-Color-9);
   --Icons-Default-Variant: var(--Icon-Variant-Surfaces-Neutral-Color-9);
   --Icons-Primary: var(--Icon-Surfaces-Primary-Color-9);
@@ -167,28 +167,28 @@
   --Chart-Lines: #e2e2e2;
 
   /* Solid Chart Colors */
-  --Chart-1: #f7f0e2;
-  --Chart-2: #e5f2ff;
-  --Chart-3: #fdeded;
+  --Chart-1: #ffeaef;
+  --Chart-2: #d6f6ff;
+  --Chart-3: #feecf1;
   --Chart-4: #edeeff;
   --Chart-5: #dff7e4;
   --Chart-6: #ffedd1;
   --Chart-7: #ffe7e1;
   --Chart-8: #f1f1f1;
-  --Chart-9: #eee1c9;
-  --Chart-10: #cfe5fc;
+  --Chart-9: #ffd6e0;
+  --Chart-10: #b0ebff;
 
   /* Opaque Chart Colors (50% opacity) */
-  --Chart-1-Opaque: rgba(247, 240, 226, 0.5);
-  --Chart-2-Opaque: rgba(229, 242, 255, 0.5);
-  --Chart-3-Opaque: rgba(253, 237, 237, 0.5);
+  --Chart-1-Opaque: rgba(255, 234, 239, 0.5);
+  --Chart-2-Opaque: rgba(214, 246, 255, 0.5);
+  --Chart-3-Opaque: rgba(254, 236, 241, 0.5);
   --Chart-4-Opaque: rgba(237, 238, 255, 0.5);
   --Chart-5-Opaque: rgba(223, 247, 228, 0.5);
   --Chart-6-Opaque: rgba(255, 237, 209, 0.5);
   --Chart-7-Opaque: rgba(255, 231, 225, 0.5);
   --Chart-8-Opaque: rgba(241, 241, 241, 0.5);
-  --Chart-9-Opaque: rgba(238, 225, 201, 0.5);
-  --Chart-10-Opaque: rgba(207, 229, 252, 0.5);
+  --Chart-9-Opaque: rgba(255, 214, 224, 0.5);
+  --Chart-10-Opaque: rgba(176, 235, 255, 0.5);
 
   /* ========================================
    * Effect Levels (Box Shadows)
@@ -201,27 +201,27 @@
   --Effect-Level-4: 0 8px 16px rgba(var(--Dropshadow-Color), 0.13), 0 4px 8px rgba(var(--Dropshadow-Color), 0.17);
   --Effect-Level-5: 0 16px 32px rgba(var(--Dropshadow-Color), 0.1), 0 8px 16px rgba(var(--Dropshadow-Color), 0.13);
 
- --Set-Font-Family-Header: "Ubuntu", sans-serif;
+ --Set-Font-Family-Header: "Pacifico", cursive;
  --Set-Font-Family-Header-Weight: 700;
- --Set-Font-Family-Body: "Kanit", sans-serif;
+ --Set-Font-Family-Body: "Roboto Slab", serif;
  --Set-Font-Family-Body-Weight: 400;
  --Set-Font-Family-Body-Semibold-Weight: 600;
  --Set-Font-Family-Body-Bold-Weight: 700;
- --Set-Font-Family-Decorative: "Schibsted Grotesk", sans-serif;
+ --Set-Font-Family-Decorative: "Fira Sans", sans-serif;
  --Set-Font-Family-Decorative-Weight: 600;
 }
 
 
 :root {
-  --Button-Radius: 32px;
-  --Sm-Button-Radius: 24px;
-  --Lg-Button-Radius: 56px;
-  --Button-Inner-Radius: 31px;
-  --Sm-Button-Inner-Radius: 23px;
-  --Lg-Button-Inner-Radius: 55px;
-  --Button-Focus-Radius: 35px;
-  --Sm-Button-Focus-Radius: 27px;
-  --Lg-Button-Focus-Radius: 59px;
+  --Button-Radius: 16px;
+  --Sm-Button-Radius: 12px;
+  --Lg-Button-Radius: 29px;
+  --Button-Inner-Radius: 15px;
+  --Sm-Button-Inner-Radius: 11px;
+  --Lg-Button-Inner-Radius: 28px;
+  --Button-Focus-Radius: 19px;
+  --Sm-Button-Focus-Radius: 15px;
+  --Lg-Button-Focus-Radius: 32px;
   --Button-Icon-Radius: 1px;
   --Sm-Button-Icon-Radius: 1px;
   --Lg-Button-Icon-Radius: 2px;
@@ -231,14 +231,14 @@
   --Button-Icon-Focus-Radius: 4px;
   --Sm-Button-Icon-Focus-Radius: 4px;
   --Lg-Button-Icon-Focus-Radius: 5px;
-  --Card-Radius: 48px;
-  --Card-Inner-Radius: 47px;
-  --Card-Focus-Radius: 51px;
+  --Card-Radius: 32px;
+  --Card-Inner-Radius: 31px;
+  --Card-Focus-Radius: 35px;
   --Card-Padding: 16px;
   --Modal-Padding: 24px;
-  --Modal-Radius: 56px;
-  --Modal-Inner-Radius: 55px;
-  --Modal-Focus-Radius: 59px;
+  --Modal-Radius: 40px;
+  --Modal-Inner-Radius: 39px;
+  --Modal-Focus-Radius: 43px;
   --Input-Radius: 4px;
   --Sm-Input-Radius: 3px;
   --Lg-Input-Radius: 7px;
@@ -249,12 +249,12 @@
   --Lg-Input-Swatch-Radius: 6px;
   --Input-Padding: 2px;
   --Button-Border-Width: 2px;
-  --Button-Padding: 16px;
+  --Button-Padding: 8px;
   --Sm-Button-Padding: 8px;
   --Large-Button-Padding: 16px;
-  --Button-Bevel: 13;
-  --Button-Bevel-Px: 4px;
-  --Button-Bevel-Opacity: 0.94;
+  --Button-Bevel: 0;
+  --Button-Bevel-Px: 0px;
+  --Button-Bevel-Opacity: 0.5;
   --Effect-Level-0: none;
   --Effect-Level-1: 0 1px 2px rgba(var(--Dropshadow-Color), 0.28);
   --Effect-Level-2: 0 2px 4px rgba(var(--Dropshadow-Color), 0.22), 0 1px 2px rgba(var(--Dropshadow-Color), 0.28);
