@@ -54,8 +54,11 @@ required.
 
 ### Option A — Theme URL (recommended for production)
 
-Point to a hosted Dino-generated theme. The Provider fetches the CSS files
-automatically and injects them into the page.
+Point to a hosted Dino-generated theme. The Provider reads the manifest, then
+loads each CSS file as a `<link rel="stylesheet">` tag so the browser fetches
+them in parallel, caches them, and blocks paint until they apply — no flash
+of unbranded styling. The Provider wrapper is `visibility: hidden` while the
+sheets load and becomes visible the moment they're ready.
 
 ```jsx
 // src/index.js
@@ -103,6 +106,42 @@ import '@dynodesign/tokens/themes.css';
   <Button color="primary">Click me</Button>
 </Card>
 ```
+
+### Option D — Render-blocking `<link>` in HTML (fastest first paint)
+
+The Provider's `<link>` injection (Options A/B) loads CSS as fast as
+JavaScript can mount the React tree — but the JS bundle still has to
+download first. For the fastest possible time-to-styled-paint, put the
+brand `<link>` tags directly in your HTML's `<head>`, *before* the bundle.
+The browser fetches CSS in parallel with JS, then applies it before the
+React tree first renders.
+
+```html
+<!-- public/index.html (or your SSR template) -->
+<head>
+  <link rel="preconnect" href="https://your-theme-cdn.com" crossorigin>
+  <link rel="stylesheet" id="dyno-foundation" data-dyno="true" href="https://your-theme-cdn.com/<uuid>/foundation.css">
+  <link rel="stylesheet" id="dyno-core"       data-dyno="true" href="https://your-theme-cdn.com/<uuid>/core.css">
+  <link rel="stylesheet" id="dyno-mode"       data-dyno="true" href="https://your-theme-cdn.com/<uuid>/Light-Mode.css">
+  <link rel="stylesheet" id="dyno-base"       data-dyno="true" href="https://your-theme-cdn.com/<uuid>/base.css">
+  <link rel="stylesheet" id="dyno-styles"     data-dyno="true" href="https://your-theme-cdn.com/<uuid>/styles.css">
+  <script type="module" src="/main.js" defer></script>
+</head>
+```
+
+The `id="dyno-*"` attributes match the Provider's internal tag ids — so
+when `<DynoDesignProvider>` later calls `loadCSSSource`, it finds the
+existing `<link>` by id and uses it instead of re-fetching.
+
+Mount the Provider with `themeURL` (or individual props) anyway so dark-mode
+swap still works — the Provider's `<link>` adoption skips the initial fetch
+but it still needs to know about the dark-mode source to swap on toggle.
+
+If you're hosting on a platform with edge functions (Netlify, Vercel,
+Cloudflare), this can be automated per-request by reading a query
+parameter or subdomain and templating the `<link>` tags in. See
+`netlify/edge-functions/playground-css.ts` in the DinoDesign Studio repo
+for a reference implementation.
 
 ---
 

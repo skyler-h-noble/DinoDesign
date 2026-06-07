@@ -53,6 +53,18 @@
  *   3. Light-Mode.css  OR Dark-Mode.css  (one at a time, swaps on toggle)
  *   4. base.css        — data-style / data-surface rules
  *   5. styles.css      — final overrides
+ *
+ * ── How CSS is loaded ─────────────────────────────────────────────────────────
+ *   URL sources (the common production case) load as <link rel="stylesheet">
+ *   tags. The browser fetches them in parallel, caches them, and blocks paint
+ *   until they apply — no flash of unbranded styling.
+ *
+ *   Raw CSS strings (local dev, custom setups) load as <style> tags.
+ *
+ *   While loading, the Provider wrapper carries data-dyno-css="loading" and is
+ *   visibility:hidden — once every sheet resolves it flips to "ready" and
+ *   becomes visible. Error state stays visible so the consumer can render
+ *   a fallback.
  */
 
 import React, {
@@ -115,36 +127,97 @@ const TAG = {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function injectStyleTag(id, css) {
-  if (!css) return;
+/**
+ * Detect whether a CSS source is a URL or a raw CSS string. URLs load via
+ * <link rel="stylesheet"> (render-blocking, browser-cached, no FOUC); raw
+ * strings load via <style> (the only option for inline CSS).
+ */
+function isURL(source) {
+  if (!source || typeof source !== 'string') return false;
+  return source.startsWith('http')
+      || source.startsWith('/')
+      || source.endsWith('.css');
+}
+
+/**
+ * Insert a <link rel="stylesheet"> for a URL source. Returns a Promise that
+ * resolves when the stylesheet has loaded (so we can flip cssStatus to
+ * 'ready' only after every brand sheet is actually applied — avoiding the
+ * Provider-default-then-brand flicker that the fetch+<style> path causes).
+ *
+ * `beforeId` controls cascade order: pass the id of the tag that should come
+ * AFTER this one. The lib's order is foundation → core → mode → base → styles,
+ * and CSS variable resolution depends on it.
+ */
+function injectLinkTag(id, href, beforeId) {
+  const existing = document.getElementById(id);
+  if (existing) {
+    if (existing.tagName === 'LINK' && existing.getAttribute('href') !== href) {
+      // Swap href in place — browser refetches. Use the existing onload so
+      // callers can still await readiness on a mode swap.
+      return new Promise((resolve, reject) => {
+        existing.onload = () => resolve(existing);
+        existing.onerror = () => reject(new Error(`DynoDesignProvider: failed to load ${href}`));
+        existing.setAttribute('href', href);
+      });
+    }
+    return Promise.resolve(existing);
+  }
+  return new Promise((resolve, reject) => {
+    const tag = document.createElement('link');
+    tag.id = id;
+    tag.rel = 'stylesheet';
+    tag.setAttribute('data-dyno', 'true');
+    tag.onload = () => resolve(tag);
+    tag.onerror = () => reject(new Error(`DynoDesignProvider: failed to load ${href}`));
+    tag.href = href;
+    const before = beforeId ? document.getElementById(beforeId) : null;
+    if (before) {
+      document.head.insertBefore(tag, before);
+    } else {
+      document.head.appendChild(tag);
+    }
+  });
+}
+
+/**
+ * Insert an inline <style> for a raw CSS string. Used only when the consumer
+ * passes raw CSS (not a URL) — most production use cases are URLs and go
+ * through injectLinkTag.
+ */
+function injectStyleTag(id, css, beforeId) {
+  if (!css) return Promise.resolve(null);
   const existing = document.getElementById(id);
   if (existing) {
     existing.textContent = css;
-    return;
+    return Promise.resolve(existing);
   }
   const tag = document.createElement('style');
   tag.id = id;
   tag.setAttribute('data-dyno', 'true');
   tag.textContent = css;
-  document.head.appendChild(tag);
+  const before = beforeId ? document.getElementById(beforeId) : null;
+  if (before) {
+    document.head.insertBefore(tag, before);
+  } else {
+    document.head.appendChild(tag);
+  }
+  return Promise.resolve(tag);
 }
 
 function removeStyleTag(id) {
   document.getElementById(id)?.remove();
 }
 
-async function fetchCSS(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`DynoDesignProvider: failed to fetch ${url} (${res.status})`);
-  return res.text();
-}
-
-async function resolveCSS(source) {
-  if (!source) return null;
-  if (source.startsWith('http') || source.startsWith('/') || source.endsWith('.css')) {
-    return fetchCSS(source);
-  }
-  return source; // raw CSS string
+/**
+ * Load a CSS source into the document at the position specified by beforeId.
+ * Routes to <link> for URLs (no fetch round-trip; browser handles caching)
+ * and <style> for raw CSS strings.
+ */
+function loadCSSSource(id, source, beforeId) {
+  if (!source) return Promise.resolve(null);
+  if (isURL(source)) return injectLinkTag(id, source, beforeId);
+  return injectStyleTag(id, source, beforeId);
 }
 
 /**
@@ -352,10 +425,24 @@ export function DynoDesignProvider({
   const [rootSurface,  setRootSurface]  = useState(resolvedDefaultSurface);
 
   // ── CSS status ─────────────────────────────────────────────────────────────
-  const [cssStatus, setCssStatus] = useState('loading');
+  // 'loading' while sheets are in flight, 'ready' after they apply, 'error' on
+  // a load failure. Initial value is 'ready' when the consumer passes neither
+  // a themeURL nor any individual CSS prop — that case means they're using
+  // the Provider only for theme-context (no brand sheets to load), so the
+  // hide-during-load rule shouldn't keep the page invisible forever.
+  const hasAnyCSSSource = !!(
+    themeURL || foundationCSS || coreCSS || lightModeCSS || darkModeCSS || baseCSS || stylesCSS
+  );
+  const [cssStatus, setCssStatus] = useState(hasAnyCSSSource ? 'loading' : 'ready');
   const [cssError,  setCssError]  = useState(null);
 
   // ── EFFECT: Inject static CSS (foundation, core, base, styles) ────────────
+  // Injects each sheet in its correct cascade slot. URLs become <link> tags
+  // (browser-cached, render-blocking — no flash); raw CSS strings become
+  // <style> tags. The mode sheet's slot (#dyno-mode) sits between core and
+  // base; we anchor base/styles after it by passing the right beforeId so
+  // the order stays foundation → core → mode → base → styles regardless of
+  // which sheet resolves first.
   useEffect(() => {
     const { foundation, core, base, styles } = resolvedSources;
     if (!foundation && !core && !base && !styles) return;
@@ -363,18 +450,18 @@ export function DynoDesignProvider({
     setCssStatus('loading');
     setCssError(null);
 
+    // Order matters: inject earlier slots first so later slots can use them
+    // as `beforeId` anchors. Each call is non-blocking; we await the union
+    // before flipping to 'ready' so we don't unhide before the brand actually
+    // applies.
     Promise.all([
-      resolveCSS(foundation),
-      resolveCSS(core),
-      resolveCSS(base),
-      resolveCSS(styles),
+      loadCSSSource(TAG.foundation, foundation),
+      loadCSSSource(TAG.core,       core),
+      loadCSSSource(TAG.base,       base),
+      loadCSSSource(TAG.styles,     styles),
     ])
-      .then(([foundationCSS, coreCSS, baseCSS, stylesCSS]) => {
+      .then(() => {
         if (!mountedRef.current) return;
-        injectStyleTag(TAG.foundation, foundationCSS);
-        injectStyleTag(TAG.core,       coreCSS);
-        injectStyleTag(TAG.base,       baseCSS);
-        injectStyleTag(TAG.styles,     stylesCSS);
         setCssStatus('ready');
       })
       .catch(err => {
@@ -393,30 +480,16 @@ export function DynoDesignProvider({
   }, [resolvedSources.foundation, resolvedSources.core, resolvedSources.base, resolvedSources.styles]);
 
   // ── EFFECT: Swap active mode CSS ──────────────────────────────────────────
+  // Mode sheet inserts before #dyno-base so the cascade slot is always
+  // foundation → core → MODE → base → styles, regardless of dark/light
+  // toggling order. <link> swap just changes href in place — the browser
+  // refetches (cache-control on the storage layer decides whether the
+  // network hit happens).
   useEffect(() => {
     const activeSource = isDark ? resolvedSources.darkMode : resolvedSources.lightMode;
     if (!activeSource) return;
 
-    resolveCSS(activeSource)
-      .then(css => {
-        if (!mountedRef.current || !css) return;
-
-        const existingMode = document.getElementById(TAG.mode);
-        if (existingMode) {
-          existingMode.textContent = css;
-        } else {
-          const tag = document.createElement('style');
-          tag.id = TAG.mode;
-          tag.setAttribute('data-dyno', 'true');
-          tag.textContent = css;
-          const baseTag = document.getElementById(TAG.base);
-          if (baseTag) {
-            document.head.insertBefore(tag, baseTag);
-          } else {
-            document.head.appendChild(tag);
-          }
-        }
-      })
+    loadCSSSource(TAG.mode, activeSource, TAG.base)
       .catch(err => console.error('DynoDesignProvider mode CSS error:', err));
 
   }, [isDark, resolvedSources.lightMode, resolvedSources.darkMode]);
@@ -462,12 +535,21 @@ export function DynoDesignProvider({
   ]);
 
   // ── Render ─────────────────────────────────────────────────────────────────
+  // The inline <style> below is rendered as part of the React tree so the
+  // hide rule is in the DOM before paint — without it, the consumer would
+  // see the lib's <DynoDesignProvider>-default tokens for a frame before
+  // the brand sheets resolve and apply. `data-dyno-css="loading"` flips to
+  // `ready` (or `error`) once every brand sheet has finished loading, at
+  // which point the wrapper becomes visible. Error state stays visible so
+  // the consumer can render a fallback message.
   return (
     <DynoDesignContext.Provider value={contextValue}>
+      <style data-dyno="hide-during-load">{`[data-dyno-css="loading"]{visibility:hidden}`}</style>
       <div
         data-theme={activeTheme}
         data-style={styleVariant}
         data-surface={rootSurface}
+        data-dyno-css={cssStatus}
         className={className}
         style={{ ...(fullHeight ? { minHeight: '100vh' } : {}), ...styleProp }}
       >

@@ -274,6 +274,20 @@ function App() {
 }
 ```
 
+### How the CSS loads
+
+The Provider reads `theme.json` and inserts each brand sheet as a
+`<link rel="stylesheet">` tag (URL sources) or `<style>` tag (raw CSS
+strings). Sheets load in cascade order — `foundation → core → mode →
+base → styles` — and the browser blocks paint until each `<link>` is
+applied.
+
+While loading, the Provider's root element carries
+`data-dyno-css="loading"` and is `visibility: hidden`. It flips to
+`"ready"` once every sheet resolves. Consumers can read the same value
+via `useDynoDesign().cssStatus` to render a fallback during a slow
+network load.
+
 ### Using components
 
 Components automatically inherit the theme from their nearest `data-theme`
