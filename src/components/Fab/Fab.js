@@ -125,7 +125,10 @@ export function Fab({
           // (matches Button + Slider). At default --Button-Bevel: 0 the
           // bevel is invisible; bumping the token lights it up everywhere.
           '--_height': s.size + 'px',
-          '--_bevel': 'calc(var(--Button-Bevel) * var(--_height) / 100)',
+          // Same min() cap as Button — bevel can never exceed 20% of height,
+          // so the inset can't bleed into icon/label area regardless of
+          // how high --Button-Bevel is set.
+          '--_bevel': 'min(calc(var(--Button-Bevel) * var(--_height) / 100), calc(var(--_height) / 5))',
           boxShadow: `${bevelShadow(color)}, ${SHADOW_LEVEL_1}`,
           // Typography
           fontSize: s.fontSize,

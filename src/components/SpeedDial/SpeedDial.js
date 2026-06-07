@@ -125,7 +125,7 @@ export function SpeedDial({
     color: fabText,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     cursor: 'pointer', outline: 'none',
-    '--_bevel': 'calc(var(--Button-Bevel) * var(--_height) / 100)',
+    '--_bevel': 'min(calc(var(--Button-Bevel) * var(--_height) / 100), calc(var(--_height) / 5))',
     boxShadow: `${bevelShadow(color)}, ${SHADOW_LEVEL_1}`,
     transition: 'box-shadow 0.15s ease, transform 0.15s ease',
     '&:hover': { boxShadow: `${bevelShadow(color)}, ${SHADOW_LEVEL_2}` },

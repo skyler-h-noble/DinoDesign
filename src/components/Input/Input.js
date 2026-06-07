@@ -275,6 +275,11 @@ export function Input({
                 padding: 0,
                 borderRadius: 0,
                 transition: 'color 0.15s ease-in-out',
+                // When the label floats, the input element has heavy top
+                // padding to clear it. Align adornments to the input's text
+                // baseline (bottom) so they line up with the typed text
+                // instead of floating up next to the shrunken label.
+                ...(isFloating && { alignItems: 'flex-end' }),
 
                 '& fieldset': {
                   border: 'none',
@@ -307,15 +312,40 @@ export function Input({
                 },
 
                 '& .MuiInputAdornment-root': { color: 'var(--Quiet)' },
+
+                // Start adornment positioning when floating — gives it some
+                // breathing room from the left edge and pushes it up by the
+                // input's bottom padding so it centers with the input text.
+                ...(isFloating && {
+                  '& .MuiInputAdornment-positionStart': {
+                    marginLeft: (sizeConfig.leftPad || 14) + 'px',
+                    marginRight: '4px',
+                    marginBottom: '8px',
+                  },
+                  '& .MuiInputAdornment-positionEnd': {
+                    marginRight: '8px',
+                    marginBottom: '8px',
+                  },
+                  // Input already has the left padding it needs when no
+                  // adornment is present; when one IS present, drop the
+                  // input's left padding so text doesn't get pushed further
+                  // right than the adornment.
+                  ...(startAdornment && {
+                    '& input': { paddingLeft: '4px' },
+                    '& textarea': { paddingLeft: '4px' },
+                  }),
+                }),
               },
 
               '& .MuiInputLabel-root': {
                 color: 'var(--Quiet)',
                 fontSize: sizeConfig.fontSize,
                 transformOrigin: 'top left',
-                transform: 'translate(' + (sizeConfig.leftPad || 14) + 'px, 16px) scale(1)',
+                // Shift the label right when a start adornment is present so
+                // the shrunken label doesn't sit on top of the icon.
+                transform: 'translate(' + ((sizeConfig.leftPad || 14) + (startAdornment ? 32 : 0)) + 'px, 16px) scale(1)',
                 '&.MuiInputLabel-shrink': {
-                  transform: 'translate(' + (sizeConfig.leftPad || 14) + 'px, 6px) scale(0.75)',
+                  transform: 'translate(' + ((sizeConfig.leftPad || 14) + (startAdornment ? 32 : 0)) + 'px, 6px) scale(0.75)',
                   color: 'var(--Quiet)',
                 },
                 '&.Mui-focused': { color: activeTextColor },

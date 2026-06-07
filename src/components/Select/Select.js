@@ -494,10 +494,10 @@ export function Select({
                 border: '1px solid var(--Border)',
                 flexShrink: 0,
               }} />
-              {showColorLabels && <BodySmall style={{ color: 'inherit' }}>{selectedLabel}</BodySmall>}
+              {showColorLabels && <BodySmall style={{ color: 'inherit', padding: '2px 0 0 0' }}>{selectedLabel}</BodySmall>}
             </Box>
           ) : (
-            <BodySmall style={{ color: 'inherit' }}>
+            <BodySmall style={{ color: 'inherit', padding: '2px 0 0 0' }}>
               {hasValue ? selectedLabel : (isFloating && label ? '' : placeholder)}
             </BodySmall>
           )}

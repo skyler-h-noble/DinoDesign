@@ -1,9 +1,10 @@
 // src/components/SettingsPanel.js
 import React, { useState, useEffect } from 'react';
-import { Box, Drawer, Stack, Divider } from '@mui/material';
+import { Box, Stack, Divider } from '@mui/material';
 import { Settings as SettingsIcon, Close as CloseIcon } from '@mui/icons-material';
 import { useThemeMode } from '../theme/useThemeMode';
 import { Button } from './Button/Button';
+import { Drawer } from './Drawer/Drawer';
 import { H5, BodySmall, Caption, OverlineSmall } from './Typography';
 
 const PLATFORMS = [
@@ -61,25 +62,21 @@ export function SettingsPanel() {
         <SettingsIcon sx={{ fontSize: 24 }} />
       </Box>
 
-      {/* Drawer */}
-      <Drawer anchor="right" open={panelOpen} onClose={() => setPanelOpen(false)}
+      {/* Drawer — our own component carries data-theme + data-surface on
+          its panel automatically, so child token references resolve correctly
+          in both light and dark modes. */}
+      <Drawer
+        anchor="right"
+        open={panelOpen}
+        onClose={() => setPanelOpen(false)}
         hideBackdrop
-        ModalProps={{ keepMounted: true }}
-        sx={{ zIndex: 99999999 }}
-        PaperProps={{
-          sx: {
-            width: 320,
-            backgroundColor: 'var(--Background)',
-            color: 'var(--Text)',
-            boxShadow: '-4px 0 16px rgba(0,0,0,0.12)',
-          },
-        }}>
-
-        {/* Inner wrapper with surface context */}
+        size="small"
+        sx={{ width: 320, zIndex: 99999999 }}
+      >
+        {/* Inner padding wrapper — the Drawer's own panel already supplies
+            data-surface; this Box just provides padding + layout. */}
         <Box
-          data-theme="Default"
-          data-surface="Surface-Dim"
-          sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--Background)' }}>
+          sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
 
           {/* Header */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -97,7 +94,7 @@ export function SettingsPanel() {
 
               {/* Mode */}
               <Box>
-                <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 12 }}>
+                <OverlineSmall style={{ color: 'var(--Text)', opacity: 0.85, display: 'block', marginBottom: 12, fontWeight: 600 }}>
                   MODE
                 </OverlineSmall>
                 <Stack direction="row" spacing={1}>
@@ -120,7 +117,7 @@ export function SettingsPanel() {
 
               {/* Platform */}
               <Box>
-                <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 12 }}>
+                <OverlineSmall style={{ color: 'var(--Text)', opacity: 0.85, display: 'block', marginBottom: 12, fontWeight: 600 }}>
                   PLATFORM
                 </OverlineSmall>
                 <Stack spacing={1}>
@@ -142,7 +139,7 @@ export function SettingsPanel() {
                           }}>
                             {label}
                           </BodySmall>
-                          <Caption style={{ color: 'var(--Text-Quiet)' }}>{note}</Caption>
+                          <Caption style={{ color: 'var(--Text)', opacity: 0.7 }}>{note}</Caption>
                         </Box>
                         {isSel && (
                           <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'var(--Buttons-Primary-Button)', flexShrink: 0 }} />

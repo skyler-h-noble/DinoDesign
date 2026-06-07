@@ -119,6 +119,7 @@ export function Tabs({
 /* ─── TabList ─── */
 export function TabList({
   children,
+  rounded = false,
   className = '',
   sx = {},
   ...props
@@ -249,7 +250,11 @@ export function TabList({
         position: 'relative',
         backgroundColor: 'var(--Background)',
         padding: '4px',
-        borderRadius: 'var(--Style-Border-Radius)',
+        // overflow: hidden so the active Tab's square-cornered background gets
+        // clipped by the parent's border radius when `rounded` is on. Harmless
+        // when rounded is off (nothing pokes out of a square container).
+        overflow: 'hidden',
+        borderRadius: rounded ? 'var(--Style-Border-Radius)' : 0,
         ...sx,
       }}
       {...props}

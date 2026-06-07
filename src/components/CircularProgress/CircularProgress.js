@@ -1,5 +1,5 @@
 // src/components/CircularProgress/CircularProgress.js
-import React from 'react';
+import React, { useId } from 'react';
 import { Box } from '@mui/material';
 
 /**
@@ -49,12 +49,20 @@ export function CircularProgress({
   const clampedValue = hasValue ? Math.min(100, Math.max(0, value)) : 0;
   const radius = (s.diameter - t) / 2;
   const circumference = 2 * Math.PI * radius;
+  // Indeterminate: indicator is the SMALLER arc (~25% visible); the bigger
+  // 75% reveals --Border-Variant track behind it. The spinner rotation
+  // (applied to the outer Box) sweeps that small arc around the circle.
   const strokeDashoffset = hasValue
     ? circumference - (clampedValue / 100) * circumference
-    : circumference * 0.25; // 25% visible for indeterminate
+    : circumference * 0.75;
 
   const trackColor = 'var(--Border-Variant)';
   const fillColor = 'var(--Buttons-' + C + '-Border)';
+
+  // Unique gradient id per instance — useId guarantees no collisions across
+  // multiple CircularProgress components on the same page.
+  const uid = useId();
+  const gradId = 'cp-grad-' + uid.replace(/:/g, '');
 
   return (
     <Box
@@ -97,6 +105,18 @@ export function CircularProgress({
         height={s.diameter}
         style={{ position: 'absolute', top: 0, left: 0, transform: 'rotate(-90deg)' }}
       >
+        {/* Linear gradient for indicator — fades the leading edge to 0
+            alpha and the trailing edge to full color, giving the spinning
+            arc a comet-trail effect. Since SVG only has linear/radial
+            gradients (no conic), we approximate by placing the gradient
+            across the bounding box; combined with the arc's rotation this
+            reads as a directional fade as it sweeps. */}
+        <defs>
+          <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   stopColor={fillColor} stopOpacity="0" />
+            <stop offset="100%" stopColor={fillColor} stopOpacity="1" />
+          </linearGradient>
+        </defs>
         {/* Track circle */}
         <circle
           cx={s.diameter / 2}
@@ -113,7 +133,7 @@ export function CircularProgress({
           cy={s.diameter / 2}
           r={radius}
           fill="none"
-          stroke={fillColor}
+          stroke={'url(#' + gradId + ')'}
           strokeWidth={t}
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}

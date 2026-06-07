@@ -82,6 +82,7 @@ export function TabsShowcase() {
   const [orientation, setOrientation] = useState('horizontal');
   const [bgTheme, setBgTheme]         = useState(null);
   const [bgSurface, setBgSurface]     = useState('Surface');
+  const [rounded, setRounded]         = useState(false);
 
   const isDefault = variant === 'standard';
   const colorGroups = isDefault ? DEFAULT_COLOR_GROUPS : THEMED_COLOR_GROUPS;
@@ -100,7 +101,7 @@ export function TabsShowcase() {
     if (orientation !== 'horizontal') parts.push('orientation="vertical"');
     return (
       '<Tabs defaultValue={0}' + (parts.length ? ' ' + parts.join(' ') : '') + '>\n' +
-      '  <TabList>\n' +
+      '  <TabList' + (rounded ? ' rounded' : '') + '>\n' +
       '    <Tab>Overview</Tab>\n' +
       '    <Tab>Features</Tab>\n' +
       '    <Tab>Pricing</Tab>\n' +
@@ -130,7 +131,7 @@ export function TabsShowcase() {
                 size={size}
                 orientation={orientation}
               >
-                <TabList>
+                <TabList rounded={rounded}>
                   <Tab>Overview</Tab>
                   <Tab>Features</Tab>
                   <Tab>Pricing</Tab>
@@ -230,6 +231,22 @@ export function TabsShowcase() {
                         <ControlButton key={o} label={cap(o)} selected={orientation === o} onClick={() => setOrientation(o)} />
                       ))}
                     </Stack>
+                  </Box>
+
+                  {/* Rounded */}
+                  <Box sx={{ mt: 3 }}>
+                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SHAPE</OverlineSmall>
+                    <Switch
+                      label="Rounded corners"
+                      checked={rounded}
+                      onChange={(e) => setRounded(e.target.checked)}
+                    />
+                    <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
+                      Off by default. When on, the TabList applies{' '}
+                      <code>var(--Style-Border-Radius)</code> and clips the
+                      active tab's background to fit the rounded shell
+                      (<code>overflow: hidden</code> is always on).
+                    </Caption>
                   </Box>
                 </Box>
               </TabPanel>

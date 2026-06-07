@@ -143,7 +143,7 @@ export function Slider({
       // Inherited into ::before so the bevelShadow() insets render on the
       // visual circle, mirroring how Button computes its bevel from height.
       '--_height': sizeConfig.visual + 'px',
-      '--_bevel': 'calc(var(--Button-Bevel) * var(--_height) / 100)',
+      '--_bevel': 'min(calc(var(--Button-Bevel) * var(--_height) / 100), calc(var(--_height) / 5))',
       // Remove MUI default ::after
       '&::after': { display: 'none' },
 

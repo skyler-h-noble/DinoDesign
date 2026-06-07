@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Box } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import { Icon } from '../Icon/Icon';
-import { ButtonSmall, Button as ButtonTypography, BodyLarge } from '../Typography';
+import { ButtonExtraSmall, ButtonSmall, Button as ButtonTypography, BodyLarge, H4 } from '../Typography';
 
 /**
  * Avatar Component
@@ -31,14 +31,30 @@ const COLOR_MAP = {
   info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
 };
 
+// Each size pairs a pixel diameter with the typography component used for
+// initials. Larger sizes use larger type tokens so initials scale with the
+// avatar. 'custom' falls back to whatever `customSize` is passed (a number
+// of pixels). Icon size scales as a rough 50% of the avatar diameter.
 const SIZE_MAP = {
-  'xxx-small': { size: 16, fontSize: '9px',  iconSize: 10 },
-  'xx-small':  { size: 20, fontSize: '10px', iconSize: 12 },
-  'x-small':   { size: 24, fontSize: '11px', iconSize: 14 },
-  small:       { size: 32, fontSize: '13px', iconSize: 18 },
-  medium:      { size: 40, fontSize: '15px', iconSize: 22 },
-  large:       { size: 56, fontSize: '20px', iconSize: 28 },
+  'xxx-small': { size: 16,  iconSize: 10 },
+  'xx-small':  { size: 24,  iconSize: 14 },
+  'x-small':   { size: 32,  iconSize: 18 },
+  small:       { size: 40,  iconSize: 22 },
+  medium:      { size: 56,  iconSize: 28 },
+  large:       { size: 64,  iconSize: 32 },
+  'x-large':   { size: 80,  iconSize: 40 },
+  'xx-large':  { size: 160, iconSize: 80 },
 };
+
+// Typography choice per size — bigger avatars get bigger initials.
+function getInitialsComponent(size) {
+  if (size === 'xxx-small' || size === 'xx-small')       return ButtonExtraSmall;
+  if (size === 'x-small'   || size === 'small')          return ButtonSmall;
+  if (size === 'medium'    || size === 'large')          return ButtonTypography;
+  if (size === 'x-large')                                return BodyLarge;
+  if (size === 'xx-large')                               return H4;
+  return ButtonTypography; // sensible default for 'custom' or unknown
+}
 
 export function Avatar({
   src,
@@ -47,6 +63,7 @@ export function Avatar({
   icon,
   color = 'default',
   size = 'medium',
+  customSize,
   clickable = false,
   onClick,
   className = '',
@@ -54,7 +71,10 @@ export function Avatar({
   ...props
 }) {
   const [imgError, setImgError] = useState(false);
-  const s = SIZE_MAP[size] || SIZE_MAP.medium;
+  // Custom size — pixel diameter from `customSize` prop, icon ~50% of that.
+  const s = size === 'custom' && customSize
+    ? { size: customSize, iconSize: Math.round(customSize * 0.5) }
+    : (SIZE_MAP[size] || SIZE_MAP.medium);
   const C = COLOR_MAP[color] || COLOR_MAP.default;
 
   const hasSrc = src && !imgError;
@@ -86,7 +106,6 @@ export function Avatar({
         borderRadius: '50%',
         backgroundColor: bg,
         color: textColor,
-        fontSize: s.fontSize,
         fontFamily: 'inherit', fontWeight: 600,
         overflow: 'hidden',
         flexShrink: 0,
@@ -119,9 +138,20 @@ export function Avatar({
         />
       )}
       {hasInitials && (() => {
-        const TextComp = size === 'small' ? ButtonSmall : size === 'large' ? BodyLarge : ButtonTypography;
+        const TextComp = getInitialsComponent(size);
         return (
-          <TextComp style={{ color: 'inherit', fontWeight: 600, lineHeight: 1 }} aria-hidden="true">
+          <TextComp
+            style={{
+              color: 'inherit',
+              fontWeight: 600,
+              lineHeight: 1,
+              textAlign: 'center',
+              // Tiny top-pad optically centers caps inside the circle since
+              // cap-height sits slightly above the geometric center.
+              paddingTop: '2px',
+            }}
+            aria-hidden="true"
+          >
             {initials.slice(0, 2).toUpperCase()}
           </TextComp>
         );
