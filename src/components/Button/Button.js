@@ -123,15 +123,20 @@ function outlineStyles(color) {
     color: 'var(--Text)',
     border: `var(--Button-Border-Width) solid var(--Buttons-${C}-Border)`,
     boxShadow: 'none',
+    // Outline (like Ghost) has no fill of its own, so its hover/active
+    // feedback comes from the surface --Hover / --Active scrim — a
+    // subtle tone-aware overlay that reads correctly on any surface
+    // tone. Using --Buttons-{C}-Hover would paint a solid colored
+    // background and lose the "outline" character of the variant.
     '& .MuiTouchRipple-rippleVisible': {
-      color: `var(--Buttons-${C}-Hover)`,
+      color: 'var(--Hover)',
     },
     '&:hover': {
-      backgroundColor: `var(--Buttons-${C}-Hover)`,
+      backgroundColor: 'var(--Hover)',
       boxShadow: 'none',
     },
     '&:active': {
-      backgroundColor: `var(--Buttons-${C}-Active)`,
+      backgroundColor: 'var(--Active)',
     },
     '&.Mui-focusVisible': {
       backgroundColor: 'transparent',
@@ -190,6 +195,10 @@ function ghostStyles(isTextContent) {
       color: 'var(--Hover)',
     },
     '&:hover': {
+      // Ghost and Outline use the surface --Hover / --Active scrim by
+      // design — they're the only variants without a fill of their own,
+      // so they need a tone-aware overlay tint to indicate hover. Solid
+      // variants use --Buttons-{C}-Hover instead.
       backgroundColor: 'var(--Hover)',
       boxShadow: 'none',
       ...(isTextContent
