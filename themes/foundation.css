@@ -21,16 +21,44 @@
   --Style-Gradient-Color-2: var(--Buttons-Primary-Button);
   --Style-Gradient-Angle: 0;
 
-  --Sizing-Quarter: 2px;
-  --Sizing-Half: 4px;
-  --Sizing-1: 8px;
-  --Sizing-1-and-Half: 12px;
-  --Sizing-2: 16px;
-  --Sizing-3: 24px;
-  --Sizing-4: 32px;
-  --Sizing-Negative-1: -8px;
-  --Sizing-Negative-Half: -4px;
-  --Sizing-Negative-Quarter: -2px;
-  --Sizing-Negative-1-and-Half: -12px;
+  /* Positive sizing scale. The whole-number sequence steps by 8px
+     through 16 (covering common spacing + element-sizing needs), then
+     jumps to 20 (=160px) and 30 (=240px) for layout-level sizes. The
+     fractional tokens (Quarter, Half, 1-and-Half, 2-and-Half) plug the
+     2/4/12/20px gaps used by lab-spacing and inset-positioning rules. */
+  --Sizing-Quarter:      2px;
+  --Sizing-Half:         4px;
+  --Sizing-1:            8px;
+  --Sizing-1-and-Half:  12px;
+  --Sizing-2:           16px;
+  --Sizing-2-and-Half:  20px;
+  --Sizing-3:           24px;
+  --Sizing-4:           32px;
+  --Sizing-5:           40px;
+  --Sizing-6:           48px;
+  --Sizing-7:           56px;
+  --Sizing-8:           64px;
+  --Sizing-9:           72px;
+  --Sizing-10:          80px;
+  --Sizing-11:          88px;
+  --Sizing-12:          96px;
+  --Sizing-13:         104px;
+  --Sizing-14:         112px;
+  --Sizing-15:         120px;
+  --Sizing-16:         128px;
+  --Sizing-20:         160px;
+  --Sizing-30:         240px;
+
+  /* Negative sizing scale. Used by overlap/inset/negative-margin rules
+     (e.g. pulling a card edge into a stage's padding, hanging a label
+     into a gutter). Sizing-Negative-Quarter (-2px) is kept for the
+     hairline-overlap case even though it's not in the Figma variable
+     set — removing it would break consumers; adding it to Figma later
+     is a no-op. */
+  --Sizing-Negative-Quarter:    -2px;
+  --Sizing-Negative-Half:       -4px;
+  --Sizing-Negative-1:          -8px;
+  --Sizing-Negative-1-and-Half:-12px;
+  --Sizing-Negative-2:         -16px;
   --Min-Stack-Gap: 0px;
 }
