@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Box, Stack, Grid, Tabs, Tab, Tooltip, IconButton as MuiIconButton,
   Divider as MuiDivider, Switch, Avatar, TextField,
+  Checkbox as MuiCheckbox, Radio as MuiRadio,
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
@@ -20,13 +21,25 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import InfoIcon from '@mui/icons-material/Info';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import SearchIcon from '@mui/icons-material/Search';
+import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
 import { List, ListItem } from './List';
+import { Button } from '../Button';
+import { ButtonGroup } from '../ButtonGroup';
+import { Link } from '../Link';
+import { Tag } from '../Tag';
 import {
   H2, H4, H5, Body, BodySmall, Caption, Label, OverlineSmall
 } from '../Typography';
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
-const COLORS = ['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+// Grouped per the Button showcase pattern. Default is its own group at the
+// top; Theme covers brand palettes; Semantic covers status colors.
+const COLOR_GROUPS = [
+  { label: 'Default',  colors: ['default'] },
+  { label: 'Theme',    colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
+  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+];
 
 const SOLID_THEME_MAP = {
   primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
@@ -65,23 +78,30 @@ function getCssVar(varName) {
   return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
 }
 
+// Three-layer sample data so the 1st / 2nd / 3rd-row toggles always have
+// content to show. Previously only the AVATAR_ITEMS / IMAGE_ITEMS had
+// overline + secondary, so toggling the rows on for the default sample
+// items had no visible effect.
 const SAMPLE_ITEMS = [
-  { label: 'Home', icon: HomeIcon },
-  { label: 'Inbox', icon: InboxIcon },
-  { label: 'Projects', icon: FolderIcon },
-  { label: 'Settings', icon: SettingsIcon },
+  { overline: 'NAV',      label: 'Home',     secondary: 'Dashboard overview',         icon: HomeIcon     },
+  { overline: 'INBOX',    label: 'Inbox',    secondary: '3 unread messages',          icon: InboxIcon    },
+  { overline: 'WORK',     label: 'Projects', secondary: 'Active and archived work',   icon: FolderIcon   },
+  { overline: 'SETTINGS', label: 'Settings', secondary: 'Preferences and account',    icon: SettingsIcon },
 ];
+// Three-layer text sample data so the full OverlineSmall / SubtitleLarge /
+// Body stack is visible. `overline` is the kicker on top, `label` is the
+// main title (SubtitleLarge), `secondary` is the Body description.
 const AVATAR_ITEMS = [
-  { label: 'Alice Johnson', secondary: 'Product Designer', initials: 'AJ' },
-  { label: 'Bob Smith', secondary: 'Engineer', initials: 'BS' },
-  { label: 'Carol Davis', secondary: 'Marketing Lead', initials: 'CD' },
-  { label: 'Dan Wilson', secondary: 'Data Analyst', initials: 'DW' },
+  { overline: 'TEAM',      label: 'Alice Johnson', secondary: 'Product Designer', initials: 'AJ' },
+  { overline: 'TEAM',      label: 'Bob Smith',     secondary: 'Engineer',         initials: 'BS' },
+  { overline: 'MARKETING', label: 'Carol Davis',   secondary: 'Marketing Lead',   initials: 'CD' },
+  { overline: 'DATA',      label: 'Dan Wilson',    secondary: 'Data Analyst',     initials: 'DW' },
 ];
 const IMAGE_ITEMS = [
-  { label: 'Mountain Vista', secondary: 'Landscape photography' },
-  { label: 'City Lights', secondary: 'Urban collection' },
-  { label: 'Ocean Breeze', secondary: 'Coastal series' },
-  { label: 'Forest Trail', secondary: 'Nature walks' },
+  { overline: 'LANDSCAPE', label: 'Mountain Vista', secondary: 'Landscape photography series' },
+  { overline: 'URBAN',     label: 'City Lights',    secondary: 'Night-time street shots' },
+  { overline: 'COASTAL',   label: 'Ocean Breeze',   secondary: 'Long-exposure shoreline' },
+  { overline: 'NATURE',    label: 'Forest Trail',   secondary: 'Hiking and trail walks' },
 ];
 
 function ContrastBadge({ ratio, threshold }) {
@@ -127,17 +147,23 @@ function CopyButton({ code }) {
 }
 function ColorSwatchButton({ color, selected, onClick }) {
   const C = cap(color);
+  // 'default' uses the Buttons-Default-* tokens which inherit from the
+  // active surface scope — so the swatch paints whatever the current
+  // page-level default button color is. Other colors use their explicit
+  // palette token (Buttons-Primary, Buttons-Success, etc.).
+  const bgVar      = color === 'default' ? 'var(--Buttons-Default-Button)' : ('var(--Buttons-' + C + '-Button)');
+  const fgVar      = color === 'default' ? 'var(--Buttons-Default-Text)'   : ('var(--Buttons-' + C + '-Text)');
   return (
     <Tooltip title={C} arrow>
       <Box onClick={() => onClick(color)} role="button" aria-label={'Select ' + C} aria-pressed={selected}
         sx={{ width: 'var(--Button-Height)', height: 'var(--Button-Height)', borderRadius: '4px',
-          backgroundColor: 'var(--Buttons-' + C + '-Button)',
+          backgroundColor: bgVar,
           border: selected ? '2px solid var(--Text)' : '1px solid var(--Border)',
           outline: selected ? '2px solid var(--Focus-Visible)' : '2px solid transparent',
           outlineOffset: '1px', cursor: 'pointer', flexShrink: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           transition: 'transform 0.1s ease', '&:hover': { transform: 'scale(1.1)' } }}>
-        {selected && <CheckIcon sx={{ fontSize: 24, color: 'var(--Buttons-' + C + '-Text)', pointerEvents: 'none' }} />}
+        {selected && <CheckIcon sx={{ fontSize: 24, color: fgVar, pointerEvents: 'none' }} />}
       </Box>
     </Tooltip>
   );
@@ -159,24 +185,50 @@ function ControlButton({ label, selected, onClick, disabled: isDisabled }) {
     </Box>
   );
 }
-function PlaceholderImg({ index, size }) {
+function PlaceholderImg({ size }) {
+  // Image-slot placeholder. Painted with var(--Border) so the swatch sits
+  // visibly between Surface and Container without competing with the
+  // text content, with a centered photo icon to signal that something
+  // belongs here. The icon uses var(--Background) so it reads against
+  // the border-tinted square at any tone.
   const s = size === 'small' ? 28 : size === 'large' ? 40 : 36;
-  const hues = [200, 140, 280, 30];
   return (
-    <Box sx={{ width: s + 'px', height: s + 'px', borderRadius: '4px',
-      background: 'linear-gradient(135deg, hsl(' + hues[index % 4] + ', 60%, 70%), hsl(' + (hues[index % 4] + 40) + ', 50%, 50%))',
-      flexShrink: 0 }} />
+    <Box sx={{
+      width: s + 'px',
+      height: s + 'px',
+      borderRadius: 'var(--Input-Radius)',
+      backgroundColor: 'var(--Border)',
+      flexShrink: 0,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: 'var(--Background)',
+    }}>
+      <ImageOutlinedIcon sx={{ fontSize: Math.round(s * 0.6) }} />
+    </Box>
   );
 }
 
 export function ListShowcase() {
   const [mainTab, setMainTab] = useState(0);
-  const [variant, setVariant] = useState('default');
-  const [color, setColor] = useState('primary');
-  const [size, setSize] = useState('medium');
+  // Variant / color / size pickers were removed — the lib now offers
+  // only the default style at a single auto-sizing footprint that grows
+  // and shrinks with content. These are pinned at the API level so
+  // generateCode and <List> calls below don't need conditional branches.
+  const variant     = 'default';
+  const color       = 'default';
+  const size        = 'medium';
   const [orientation, setOrientation] = useState('vertical');
-  const [showDividers, setShowDividers] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  // Per-row visibility booleans. Defaults: 1st and 2nd rows ON, 3rd row OFF
+  // — the most common compact list configuration.
+  const [showOverline,  setShowOverline]  = useState(true);
+  const [showTitle,     setShowTitle]     = useState(true);
+  const [showSecondary, setShowSecondary] = useState(false);
+  // Non-clickable mode dividers. Mutually exclusive with the clickable
+  // card chrome; the playground only surfaces these when interaction='none'.
+  const [bottomBorder,  setBottomBorder]  = useState(false);
+  const [rightBorder,   setRightBorder]   = useState(false);
   const [startDecoratorType, setStartDecoratorType] = useState('none');
   const [endDecoratorType, setEndDecoratorType] = useState('none');
   const [startIconName, setStartIconName] = useState('Home');
@@ -184,27 +236,23 @@ export function ListShowcase() {
   const [startIconIsButton, setStartIconIsButton] = useState(false);
   const [endIconIsButton, setEndIconIsButton] = useState(false);
   const [interaction, setInteraction] = useState('none');
-  const [selectionType, setSelectionType] = useState('checkbox');
-  const [selectedIndices, setSelectedIndices] = useState([]);
   const [contrastData, setContrastData] = useState({});
 
-  const isDefault = variant === 'default';
   const isHorizontal = orientation === 'horizontal';
   const hasStartIcon = startDecoratorType === 'icon';
   const hasEndIcon = endDecoratorType === 'icon';
   const isClickable = interaction === 'clickable';
-  const isSelectable = interaction === 'selectable';
-  const selectionMode = isSelectable ? selectionType : 'none';
-
-  const getThemeName = () => {
-    if (variant === 'solid') return SOLID_THEME_MAP[color] || '';
-    if (variant === 'light') return LIGHT_THEME_MAP[color] || '';
-    return '';
-  };
+  // Selectable mode was removed from the playground — checkbox / radio
+  // affordances are now passed via the start/end decorator slots, so the
+  // showcase no longer needs a separate interaction mode for selection.
+  // Pinned to false so accessibility-tab branches that gated on selectable
+  // simply don't render.
+  const isSelectable = false;
+  const selectionType = 'checkbox';
+  const selectionMode = 'none';
 
   const handleInteractionChange = (mode) => {
     setInteraction(mode);
-    setSelectedIndices([]);
   };
   const handleStartDecoratorChange = (type) => {
     setStartDecoratorType(type);
@@ -222,17 +270,23 @@ export function ListShowcase() {
       return React.createElement(SAMPLE_ITEMS[index % SAMPLE_ITEMS.length].icon);
     }
     if (startDecoratorType === 'avatar') return <Avatar sx={{ bgcolor: 'var(--Buttons-Primary-Button)' }}>{AVATAR_ITEMS[index % AVATAR_ITEMS.length].initials}</Avatar>;
-    if (startDecoratorType === 'image') return <PlaceholderImg index={index} size={size} />;
+    if (startDecoratorType === 'image')    return <PlaceholderImg index={index} size={size} />;
+    if (startDecoratorType === 'checkbox') return <MuiCheckbox sx={{ p: 0, color: 'var(--Border)', '&.Mui-checked': { color: 'var(--Buttons-Primary-Button)' } }} onClick={(e) => e.stopPropagation()} />;
+    if (startDecoratorType === 'radio')    return <MuiRadio    sx={{ p: 0, color: 'var(--Border)', '&.Mui-checked': { color: 'var(--Buttons-Primary-Button)' } }} onClick={(e) => e.stopPropagation()} />;
     return undefined;
   };
   const getEndDecorator = (index) => {
-    if (endDecoratorType === 'icon') {
-      const Resolved = resolveIcon(endIconName);
-      if (Resolved) return <Resolved />;
-      return <ChevronRightIcon />;
-    }
-    if (endDecoratorType === 'avatar') return <Avatar sx={{ bgcolor: 'var(--Buttons-Info-Button)', fontSize: '12px' }}><StarIcon sx={{ fontSize: 16 }} /></Avatar>;
-    if (endDecoratorType === 'image') return <PlaceholderImg index={index + 2} size={size} />;
+    if (endDecoratorType === 'checkbox')   return <MuiCheckbox sx={{ p: 0, color: 'var(--Border)', '&.Mui-checked': { color: 'var(--Buttons-Primary-Button)' } }} onClick={(e) => e.stopPropagation()} />;
+    if (endDecoratorType === 'radio')      return <MuiRadio    sx={{ p: 0, color: 'var(--Border)', '&.Mui-checked': { color: 'var(--Buttons-Primary-Button)' } }} onClick={(e) => e.stopPropagation()} />;
+    if (endDecoratorType === 'link')       return <Link href="#" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>Open</Link>;
+    if (endDecoratorType === 'button')     return <Button size="small" variant="primary-outline" onClick={(e) => e.stopPropagation()}>Action</Button>;
+    if (endDecoratorType === 'buttonGroup') return (
+      <ButtonGroup size="small">
+        <Button size="small" variant="primary-outline" onClick={(e) => e.stopPropagation()}>Edit</Button>
+        <Button size="small" variant="primary-outline" onClick={(e) => e.stopPropagation()}>Delete</Button>
+      </ButtonGroup>
+    );
+    if (endDecoratorType === 'tag')        return <Tag color="primary" size="small">Status</Tag>;
     return undefined;
   };
 
@@ -241,26 +295,30 @@ export function ListShowcase() {
     const useImageLabels = startDecoratorType === 'image';
     const sourceItems = useAvatarLabels ? AVATAR_ITEMS : useImageLabels ? IMAGE_ITEMS : SAMPLE_ITEMS;
     return sourceItems.map((item, i) => ({
-      label: item.label,
-      secondary: item.secondary,
+      // Row visibility — when toggled off, pass null so ListItem skips
+      // rendering that text layer. The typography style for each row is
+      // chosen by the consumer; we never bake style assumptions into the
+      // row identity.
+      label:     showTitle     ? item.label     : null,
+      secondary: showSecondary ? item.secondary : null,
+      overline:  showOverline  ? item.overline  : null,
       startDecorator: getStartDecorator(i),
       endDecorator: getEndDecorator(i),
       startDecoratorIsButton: hasStartIcon && startIconIsButton,
       endDecoratorIsButton: hasEndIcon && endIconIsButton,
       startDecoratorAriaLabel: hasStartIcon && startIconIsButton ? (startIconName || 'Action') : undefined,
       endDecoratorAriaLabel: hasEndIcon && endIconIsButton ? (endIconName || 'Action') : undefined,
+      // Non-clickable mode dividers — surfaced as ListItem props; the
+      // ListItem implementation ignores them when clickable is true.
+      bottomBorder: !isClickable && bottomBorder,
+      rightBorder:  !isClickable && rightBorder,
     }));
   };
 
   const generateCode = () => {
     const lines = [];
     const lp = [];
-    if (variant !== 'default') lp.push('variant="' + variant + '"');
-    if (!isDefault) lp.push('color="' + color + '"');
-    if (size !== 'medium') lp.push('size="' + size + '"');
     if (isHorizontal) lp.push('orientation="horizontal"');
-    if (showDividers) lp.push('dividers');
-    if (isSelectable) lp.push('selectionMode="' + selectionType + '"');
     if (isClickable) lp.push('clickable');
     lines.push('<List' + (lp.length ? ' ' + lp.join(' ') : '') + '>');
     const ip = [];
@@ -294,7 +352,7 @@ export function ListShowcase() {
     data.background = getCssVar('--Background');
     data.focusVisible = getCssVar('--Focus-Visible');
     setContrastData(data);
-  }, [variant, color]);
+  }, []);
 
   return (
     <Box sx={{ pb: 8 }}>
@@ -312,10 +370,8 @@ export function ListShowcase() {
           <Grid item sx={{ width: { xs: '100%', md: 'calc((100vw - 432px) / 2)' }, flexShrink: 0 }}>
             <Box sx={{ p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
               minHeight: 200, backgroundColor: 'var(--Background)', borderBottom: '1px solid var(--Border)' }}>
-              <Box sx={{ width: '100%', maxWidth: isHorizontal ? '100%' : 320 }}>
-                <List variant={variant} color={color} size={size} orientation={orientation}
-                  dividers={showDividers} selectionMode={selectionMode} clickable={isClickable}
-                  selectedIndices={selectedIndices} onSelectionChange={setSelectedIndices}
+              <Box sx={{ width: '100%' }}>
+                <List orientation={orientation} clickable={isClickable}
                   items={getPreviewItems()} />
               </Box>
             </Box>
@@ -334,40 +390,6 @@ export function ListShowcase() {
             <H4>Playground</H4>
 
             <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</OverlineSmall>
-              <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1 }}>
-                {['default', 'solid', 'light'].map((s) => (
-                  <ControlButton key={s} label={cap(s)} selected={variant === s} onClick={() => setVariant(s)} />
-                ))}
-              </Stack>
-              <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
-                {isDefault
-                  ? 'No theme \u2014 uses page-level var(--Text), var(--Border), var(--Background)'
-                  : 'data-theme="' + getThemeName() + '" \u2014 all tokens resolve from theme'}
-              </Caption>
-            </Box>
-
-            {!isDefault && (
-              <Box sx={{ mt: 3 }}>
-                <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
-                <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-                  {COLORS.map((c) => (
-                    <ColorSwatchButton key={c} color={c} selected={color === c} onClick={setColor} />
-                  ))}
-                </Stack>
-              </Box>
-            )}
-
-            <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</OverlineSmall>
-              <Stack direction="row" spacing={1}>
-                {['small', 'medium', 'large'].map((s) => (
-                  <ControlButton key={s} label={cap(s)} selected={size === s} onClick={() => setSize(s)} />
-                ))}
-              </Stack>
-            </Box>
-
-            <Box sx={{ mt: 3 }}>
               <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ORIENTATION</OverlineSmall>
               <Stack direction="row" spacing={1}>
                 {['vertical', 'horizontal'].map((o) => (
@@ -379,36 +401,54 @@ export function ListShowcase() {
             <Box sx={{ mt: 3 }}>
               <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>INTERACTION</OverlineSmall>
               <Stack direction="row" spacing={1}>
-                {['none', 'clickable', 'selectable'].map((m) => (
+                {['none', 'clickable'].map((m) => (
                   <ControlButton key={m} label={cap(m)} selected={interaction === m} onClick={() => handleInteractionChange(m)} />
                 ))}
               </Stack>
               {isClickable && (
                 <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
-                  Items get hover, active, and 3px inset focus ring. role="button" with Enter/Space activation.
+                  Items get the card chrome (border + shadow + radius) plus hover, active, and 3px inset focus ring. role="button" with Enter/Space activation.
                 </Caption>
-              )}
-              {isSelectable && (
-                <Box sx={{ mt: 2 }}>
-                  <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SELECTION TYPE</OverlineSmall>
-                  <Stack direction="row" spacing={1}>
-                    {['checkbox', 'radio'].map((t) => (
-                      <ControlButton key={t} label={cap(t)} selected={selectionType === t} onClick={() => { setSelectionType(t); setSelectedIndices([]); }} />
-                    ))}
-                  </Stack>
-                  <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
-                    {selectionType === 'checkbox'
-                      ? 'Multi-select: click items to toggle. Container role="listbox" aria-multiselectable.'
-                      : 'Single-select: click to choose one. Container role="listbox".'}
-                  </Caption>
-                </Box>
               )}
             </Box>
 
-            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Label>Dividers</Label>
-              <Switch checked={showDividers} onChange={(e) => setShowDividers(e.target.checked)} size="small" />
+            {/* Row-visibility booleans. The typography style for each row
+                is configurable by the consumer (via the overline / children /
+                secondary props' inner components), so we don't name the rows
+                by typography type — just by position. */}
+            <Box sx={{ mt: 3 }}>
+              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>TEXT ROWS</OverlineSmall>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                <Label>1st row of text</Label>
+                <Switch checked={showOverline} onChange={(e) => setShowOverline(e.target.checked)} size="small" />
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                <Label>2nd row of text</Label>
+                <Switch checked={showTitle} onChange={(e) => setShowTitle(e.target.checked)} size="small" />
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Label>3rd row of text</Label>
+                <Switch checked={showSecondary} onChange={(e) => setShowSecondary(e.target.checked)} size="small" />
+              </Box>
             </Box>
+
+            {/* Non-clickable mode dividers — bottomBorder for vertical
+                lists, rightBorder for horizontal. Only visible when the
+                row is non-clickable (the clickable mode renders its own
+                card chrome — border + shadow — instead of edge dividers). */}
+            {!isClickable && (
+              <Box sx={{ mt: 3 }}>
+                <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>NON-CLICKABLE DIVIDERS</OverlineSmall>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                  <Label>Bottom border</Label>
+                  <Switch checked={bottomBorder} onChange={(e) => setBottomBorder(e.target.checked)} size="small" />
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Label>Right border</Label>
+                  <Switch checked={rightBorder} onChange={(e) => setRightBorder(e.target.checked)} size="small" />
+                </Box>
+              </Box>
+            )}
 
             <MuiDivider sx={{ my: 3, borderColor: 'var(--Border)' }} />
 
@@ -424,7 +464,7 @@ export function ListShowcase() {
                 <Box sx={{ mt: 1 }}>
                   <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>START DECORATOR</OverlineSmall>
                   <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1 }}>
-                    {['none', 'icon', 'avatar', 'image'].map((t) => (
+                    {['none', 'icon', 'avatar', 'image', 'checkbox', 'radio'].map((t) => (
                       <ControlButton key={t} label={cap(t)} selected={startDecoratorType === t} onClick={() => handleStartDecoratorChange(t)} />
                     ))}
                   </Stack>
@@ -452,7 +492,7 @@ export function ListShowcase() {
                 <Box sx={{ mt: 3 }}>
                   <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>END DECORATOR</OverlineSmall>
                   <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1 }}>
-                    {['none', 'icon', 'avatar', 'image'].map((t) => (
+                    {['none', 'checkbox', 'radio', 'link', 'button', 'buttonGroup', 'tag'].map((t) => (
                       <ControlButton key={t} label={cap(t)} selected={endDecoratorType === t} onClick={() => handleEndDecoratorChange(t)} />
                     ))}
                   </Stack>
@@ -487,7 +527,7 @@ export function ListShowcase() {
           <H4>Accessibility Requirements</H4>
           <BodySmall color="quiet" style={{ marginBottom: 32 }}>
             Based on current settings: {variant}{!isDefault ? ' / ' + color : ''} / {size} / {orientation}
-            {showDividers ? ' / dividers' : ''}{isSelectable ? ' / ' + selectionType : ''}
+            {isSelectable ? ' / ' + selectionType : ''}
             {isClickable ? ' / clickable' : ''}
             {!isDefault ? ' \u2014 data-theme="' + getThemeName() + '"' : ''}
           </BodySmall>

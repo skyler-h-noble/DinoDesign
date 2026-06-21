@@ -18,8 +18,9 @@ import { Box } from '@mui/material';
  *   warning    var(--Icons-Warning)         Two-tone: var(--Icons-Variant-Warning)
  *   error      var(--Icons-Error)           Two-tone: var(--Icons-Variant-Error)
  *
- * SIZES:
- *   small   20px
+ * SIZES (Figma-aligned):
+ *   xs      12px
+ *   small   16px
  *   medium  24px (default)
  *   large   36px
  *   custom  user-specified fontSize
@@ -49,7 +50,8 @@ const COLOR_LABEL_MAP = {
 };
 
 const SIZE_MAP = {
-  small: '20px',
+  xs: '12px',
+  small: '16px',
   medium: '24px',
   large: '36px',
 };

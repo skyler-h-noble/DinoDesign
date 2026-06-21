@@ -88,7 +88,7 @@ export {
 export { Select, SelectShowcase } from './Select';
 export { Autocomplete, AutocompleteShowcase } from './Autocomplete';
 export { Checkbox } from './Checkbox';
-export { RadioGroup, RadioInput } from './Radio';
+export { Radio, RadioGroup, RadioInput } from './Radio';
 export { SwitchInput } from './Switch';
 export { SliderInput, RangeSlider } from './Slider';
 export { RatingInput } from './Rating';
@@ -117,6 +117,7 @@ export { Box, BoxShowcase } from './Box';
 export { Container } from './Container';
 export { Grid } from './Grid';
 export { Section, SectionShowcase } from './Section';
+export { Ratio, RatioShowcase, RATIO_NAMES } from './Ratio';
 
 // ========== NAVIGATION ==========
 export { Tabs, TabList, Tab, TabPanel, TabsShowcase, useTabsContext } from './Tabs';
@@ -149,7 +150,7 @@ export { LinearProgress, LinearProgressShowcase } from './LinearProgress';
 export { Avatar, AvatarGroup, AvatarShowcase } from './Avatar';
 export { Badge, BadgeShowcase } from './Badge';
 export { Divider } from './Divider';
-export { List } from './List';
+export { List, ListItem, ListItemDecorator } from './List';
 export { Table } from './Table';
 export { Tooltip } from './Tooltip';
 
@@ -170,6 +171,7 @@ export {
   SolidTreeView,
   LightTreeView,
   DEFAULT_ITEMS,
+  TreeBranch,
   TreeViewShowcase,
 } from './TreeView';
 
@@ -178,7 +180,7 @@ export { Link } from './Link';
 export { SettingsPanel } from './SettingsPanel';
 
 // ========== CONVENIENCE ALIASES ==========
-export { RadioInput as Radio } from './Radio';
+// Radio is already exported above as a direct named export — no alias needed.
 export { SwitchInput as Switch } from './Switch';
 export { SliderInput as Slider } from './Slider';
 export { RatingInput as Rating } from './Rating';

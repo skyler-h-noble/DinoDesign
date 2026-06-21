@@ -2,9 +2,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Box, Tooltip as MuiTooltip } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import CloseIcon from '@mui/icons-material/Close';
-import { Icon } from '../Icon/Icon';
-import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, bevelShadow } from '../_shadows';
+import { Fab } from '../Fab/Fab';
 
 /**
  * SpeedDial Component
@@ -21,10 +19,11 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, bevelShadow } from '../_shadows';
  * Accessibility: role="menu", FAB has aria-expanded/aria-haspopup, actions are role="menuitem"
  */
 
-const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-
+// Main FAB is large (56), actions are small (32) — matches the Fab size scale.
+// On open the main FAB rotates 45° so the AddIcon (+) becomes an × without
+// swapping icon elements (clean visual, no remount).
 const FAB_SIZE = 56;
-const ACTION_SIZE = 40;
+const ACTION_SIZE = 32;
 const GAP = 12;
 
 export function SpeedDial({
@@ -38,7 +37,6 @@ export function SpeedDial({
   onOpen,
   onClose,
   icon,
-  openIcon,
   ariaLabel = 'Speed Dial',
   className = '',
   sx = {},
@@ -49,13 +47,8 @@ export function SpeedDial({
   const isOpen = isControlled ? controlledOpen : internalOpen;
   const containerRef = useRef(null);
 
-  const C = cap(color === 'default' ? 'Default' : color);
-  const isSolid = variant === 'solid';
-
-  // Token references
-  const fabBg = isSolid ? 'var(--Buttons-' + C + '-Button)' : 'transparent';
-  const fabText = isSolid ? 'var(--Buttons-' + C + '-Text)' : 'var(--Buttons-' + C + '-Border)';
-  const fabBorder = 'var(--Buttons-' + C + '-Border)';
+  // Fab handles its own tokens/states; we just thread the variant + color.
+  const fabVariant = variant;
 
   const handleToggle = useCallback(() => {
     if (isOpen) {
@@ -114,27 +107,20 @@ export function SpeedDial({
 
   const tooltipPlacement = direction === 'up' || direction === 'down' ? 'left' : 'top';
 
-  // Bevel — every button derives --_bevel from its own --_height (set
-  // at the call site), so the main FAB (56px) and action buttons (40px)
-  // each scale their bevel proportionally. At default --Button-Bevel: 0
-  // the bevel is invisible. Matches Button + Slider's bevel pattern.
-  const btnSx = {
-    borderRadius: '50%',
-    border: '1px solid ' + fabBorder,
-    backgroundColor: fabBg,
-    color: fabText,
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    cursor: 'pointer', outline: 'none',
-    '--_bevel': 'min(calc(var(--Button-Bevel) * var(--_height) / 100), calc(var(--_height) / 5))',
-    boxShadow: `${bevelShadow(color)}, ${SHADOW_LEVEL_1}`,
-    transition: 'box-shadow 0.15s ease, transform 0.15s ease',
-    '&:hover': { boxShadow: `${bevelShadow(color)}, ${SHADOW_LEVEL_2}` },
-    '&:active': { boxShadow: bevelShadow(color) },
-    '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px' },
-  };
-
-  const defaultIcon = icon || <Icon size="medium" sx={{ color: 'inherit' }}><AddIcon /></Icon>;
-  const defaultOpenIcon = openIcon || <Icon size="medium" sx={{ color: 'inherit' }}><CloseIcon /></Icon>;
+  // The main icon (defaults to AddIcon). We wrap it in a rotating Box so the
+  // 45° turn animates whether the user provides a custom icon or not — the
+  // rotation alone turns + into × without an icon swap / remount.
+  const mainIcon = (
+    <Box
+      sx={{
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        transition: 'transform 0.3s ease',
+        transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)',
+      }}
+    >
+      {icon || <AddIcon />}
+    </Box>
+  );
 
   return (
     <Box
@@ -148,21 +134,19 @@ export function SpeedDial({
       }}
       {...props}
     >
-      {/* FAB */}
-      <Box
-        component="button" type="button"
-        aria-label={ariaLabel} aria-expanded={isOpen} aria-haspopup="menu"
+      {/* Main FAB — large (56), rotates 45° on open */}
+      <Fab
+        size="large"
+        variant={fabVariant}
+        color={color}
         onClick={handleToggle}
-        sx={{ ...btnSx, width: FAB_SIZE, height: FAB_SIZE, '--_height': FAB_SIZE + 'px', position: 'relative', zIndex: 2, fontSize: '24px' }}
+        aria-label={ariaLabel}
+        aria-expanded={isOpen}
+        aria-haspopup="menu"
+        sx={{ position: 'relative', zIndex: 2 }}
       >
-        <Box sx={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transition: 'transform 0.3s ease',
-          transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)',
-        }}>
-          {isOpen ? defaultOpenIcon : defaultIcon}
-        </Box>
-      </Box>
+        {mainIcon}
+      </Fab>
 
       {/* Actions */}
       <Box role="menu" sx={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'visible' }}>
@@ -170,23 +154,25 @@ export function SpeedDial({
           const offset = getActionOffset(index);
           const delay = index * speed;
           const actionEl = (
-            <Box
-              component="button" type="button" role="menuitem"
+            <Fab
+              key={action.key || index}
+              size="small"
+              variant={fabVariant}
+              color={color}
+              role="menuitem"
               aria-label={action.name || 'Action ' + (index + 1)}
               onClick={() => handleActionClick(action, index)}
-              key={action.key || index}
               sx={{
-                ...btnSx,
-                width: ACTION_SIZE, height: ACTION_SIZE, '--_height': ACTION_SIZE + 'px', fontSize: '20px',
                 position: 'absolute', ...offset,
                 opacity: isOpen ? 1 : 0,
                 transform: isOpen ? 'scale(1)' : 'scale(0.3)',
+                transition: 'opacity 0.2s ease, transform 0.2s ease',
                 transitionDelay: isOpen ? delay + 'ms' : '0ms',
                 pointerEvents: isOpen ? 'auto' : 'none',
               }}
             >
-              {action.icon || <Icon size="small" sx={{ color: 'inherit' }}><AddIcon /></Icon>}
-            </Box>
+              {action.icon || <AddIcon />}
+            </Fab>
           );
 
           if (showTooltips && action.name) {

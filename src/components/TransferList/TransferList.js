@@ -8,21 +8,27 @@ import KeyboardDoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrow
 import { Button } from '../Button/Button';
 import { Icon } from '../Icon/Icon';
 import { Checkbox } from '../Checkbox/Checkbox';
+import { Divider } from '../Divider/Divider';
 import { BodySmall, Caption } from '../Typography';
-import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
+import { SHADOW_LEVEL_2 } from '../_shadows';
 
 /**
- * TransferList Component
+ * TransferList Component — Figma-aligned
+ *
+ * STRUCTURE (per panel):
+ *   <fill> ← outer flex slot
+ *     <hug + Card-Radius + Level-2 shadow> ← elevation wrapper
+ *       <Container surface + bg + 1px border + Card-Radius, vstack> ← frame
+ *         Header   (min-h 40, hstack, left-top, BodySmall bold title + quiet count)
+ *         Divider  (horizontal, default color → --Border-Variant, size small)
+ *         List     (vstack, gap 16, padding 12/16)
+ *
+ * Between the two panels: a vstack Button Container (gap 8, padding 8).
+ * Outer layout: hstack, centered, gap 4. Available + Chosen are fill.
  *
  * MODES:
- *   basic      Two lists with >/< move buttons. Checkboxes to select items.
- *   enhanced   Adds select-all header with count, move-all buttons.
- *
- * TOKENS:
- *   Panel:   data-surface="Container", bg var(--Background), border var(--Buttons-Default-Border)
- *   Header:  bg var(--Hover), border-bottom var(--Border)
- *   Buttons: DynoDesign Button component (default-outline)
- *   Shadow:  Level 1 rest, Level 2 hover
+ *   basic      2 move buttons (one each direction)
+ *   enhanced   4 move buttons + select-all header checkbox
  */
 
 function not(a, b) { return a.filter((v) => !b.includes(v)); }
@@ -89,93 +95,116 @@ export function TransferList({
   const renderPanel = (title, items, checkedItems) => {
     const allChecked = items.length > 0 && items.every((i) => checked.includes(i));
     const someChecked = items.some((i) => checked.includes(i)) && !allChecked;
+    const countText = isEnhanced
+      ? checkedItems.length + '/' + items.length
+      : items.length + ' items';
 
     return (
-      <Box sx={{
-        flex: 1, minWidth: 160,
-        border: '1px solid var(--Buttons-Default-Border)',
-        borderRadius: 'var(--Style-Border-Radius)',
-        overflow: 'hidden',
-        display: 'flex', flexDirection: 'column',
-        opacity: disabled ? 0.5 : 1,
-        boxShadow: SHADOW_LEVEL_1,
-        transition: 'box-shadow 0.15s ease',
-        '&:hover': { boxShadow: SHADOW_LEVEL_2 },
-      }}>
-        {/* Header — no data-surface; --Hover for affordance */}
-        <Box
-          sx={{
-            display: 'flex', alignItems: 'center', gap: 1,
-            px: 1.5, py: 1,
-            backgroundColor: 'var(--Hover)',
-            borderBottom: '1px solid var(--Border)',
-          }}
-        >
-          {isEnhanced && (
-            <Checkbox
-              size="small"
-              variant="default-outline"
-              checked={allChecked}
-              indeterminate={someChecked}
-              onChange={() => handleToggleAll(items)}
-              disabled={disabled || items.length === 0}
-              aria-label={allChecked ? 'Deselect all' : 'Select all'}
-            />
-          )}
-          <BodySmall style={{ flex: 1, fontWeight: 600, color: 'var(--Text)' }}>
-            {title}
-          </BodySmall>
-          <Caption style={{ color: 'var(--Quiet)' }}>
-            {isEnhanced
-              ? checkedItems.length + '/' + items.length
-              : items.length + ' items'}
-          </Caption>
-        </Box>
-
-        {/* Item list — no data-surface; --Hover for affordance */}
-        <Box
-          sx={{ flex: 1, overflowY: 'auto', maxHeight: 240, backgroundColor: 'var(--Hover)' }}
-        >
+      // OUTER: fill — the panel takes equal share of the parent row.
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        {/* MIDDLE: hug, Card-Radius, Level-2 shadow */}
+        <Box sx={{
+          borderRadius: 'var(--Card-Radius)',
+          boxShadow: SHADOW_LEVEL_2,
+        }}>
+          {/* INNER FRAME: Container surface, bg, 1px border, Card-Radius,
+              vstack with no gap. Header → Divider → List flow. */}
           <Box
-            component="ul"
-            role="list"
-            sx={{ m: 0, p: 0, listStyle: 'none' }}
+            data-surface="Container"
+            sx={{
+              backgroundColor: 'var(--Background)',
+              border: '1px solid var(--Border)',
+              borderRadius: 'var(--Card-Radius)',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 0,
+              opacity: disabled ? 0.5 : 1,
+            }}
           >
-            {items.map((item) => {
-              const isItemChecked = checked.includes(item);
-              return (
-                <Box
-                  component="li"
-                  key={item}
-                  role="listitem"
-                  onClick={() => handleToggle(item)}
-                  sx={{
-                    display: 'flex', alignItems: 'center', gap: 1,
-                    px: 1.5, py: 0.75,
-                    cursor: disabled ? 'not-allowed' : 'pointer',
-                    backgroundColor: isItemChecked ? 'var(--Hover)' : 'transparent',
-                    transition: 'background-color 0.1s ease',
-                    '&:hover': !disabled ? { backgroundColor: 'var(--Hover)' } : {},
-                  }}
-                >
-                  <Checkbox
-                    size="small"
-                    variant="default-outline"
-                    checked={isItemChecked}
-                    onChange={() => handleToggle(item)}
-                    disabled={disabled}
-                    aria-label={'Select ' + item}
-                    sx={{ pointerEvents: 'none' }}
-                  />
-                  <BodySmall style={{ color: 'var(--Text)', flex: 1 }}>{item}</BodySmall>
+            {/* HEADER — min-h 40, hstack, left/top aligned */}
+            <Box sx={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'flex-start',
+              justifyContent: 'flex-start',
+              gap: 1,
+              minHeight: '40px',
+              padding: '12px 16px',
+            }}>
+              {isEnhanced && (
+                <Checkbox
+                  size="small"
+                  variant="default-outline"
+                  checked={allChecked}
+                  indeterminate={someChecked}
+                  onChange={() => handleToggleAll(items)}
+                  disabled={disabled || items.length === 0}
+                  aria-label={allChecked ? 'Deselect all' : 'Select all'}
+                />
+              )}
+              {/* Left title — fill, BodySmall bold, --Text */}
+              <BodySmall style={{ flex: 1, fontWeight: 700, color: 'var(--Text)' }}>
+                {title}
+              </BodySmall>
+              {/* Right title — hug, Caption, --Quiet */}
+              <Caption style={{ color: 'var(--Quiet)' }}>
+                {countText}
+              </Caption>
+            </Box>
+
+            {/* DIVIDER — horizontal, default color (resolves to --Border-Variant), small */}
+            <Divider orientation="horizontal" color="default" size="small" />
+
+            {/* LIST — vstack, gap 16, padding 12px 16px */}
+            <Box
+              component="ul"
+              role="list"
+              sx={{
+                m: 0,
+                listStyle: 'none',
+                padding: '12px 16px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px',
+                overflowY: 'auto',
+                maxHeight: 240,
+              }}
+            >
+              {items.map((item) => {
+                const isItemChecked = checked.includes(item);
+                return (
+                  <Box
+                    component="li"
+                    key={item}
+                    role="listitem"
+                    onClick={() => handleToggle(item)}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                      cursor: disabled ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    <Checkbox
+                      size="small"
+                      variant="default-outline"
+                      checked={isItemChecked}
+                      onChange={() => handleToggle(item)}
+                      disabled={disabled}
+                      aria-label={'Select ' + item}
+                      sx={{ pointerEvents: 'none' }}
+                    />
+                    <BodySmall style={{ color: 'var(--Text)', flex: 1 }}>{item}</BodySmall>
+                  </Box>
+                );
+              })}
+              {items.length === 0 && (
+                <Box component="li" sx={{ p: 2, textAlign: 'center' }}>
+                  <Caption style={{ color: 'var(--Quiet)' }}>No items</Caption>
                 </Box>
-              );
-            })}
-            {items.length === 0 && (
-              <Box component="li" sx={{ p: 2, textAlign: 'center', listStyle: 'none' }}>
-                <Caption style={{ color: 'var(--Quiet)' }}>No items</Caption>
-              </Box>
-            )}
+              )}
+            </Box>
           </Box>
         </Box>
       </Box>
@@ -192,7 +221,13 @@ export function TransferList({
       role="group"
       aria-label="Transfer list"
       sx={{
-        display: 'flex', alignItems: 'stretch', gap: 1.5,
+        // hstack, centered both axes, gap 4. Available + Chosen are fill (set
+        // via flex: 1 on each renderPanel root).
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '4px',
         fontFamily: 'inherit',
         ...sx,
       }}
@@ -200,8 +235,15 @@ export function TransferList({
     >
       {renderPanel(leftTitle, left, leftChecked)}
 
-      {/* Move buttons */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 1, flexShrink: 0 }}>
+      {/* Button Container — vstack, gap 8, padding 8. 2 buttons in basic
+          mode; 4 buttons (with move-all) in enhanced mode. */}
+      <Box sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+        padding: '8px',
+        flexShrink: 0,
+      }}>
         {isEnhanced && (
           <Button iconOnly variant="default-outline" size="small" onClick={moveAllRight}
             disabled={disabled || left.length === 0} aria-label="Move all right">

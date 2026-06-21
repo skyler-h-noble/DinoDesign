@@ -1,29 +1,8 @@
 // src/components/Radio/Radio.test.js
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {
-  Radio,
-  RadioGroup,
-  RadioInput,
-  PrimaryOutlineRadio,
-  SecondaryOutlineRadio,
-  TertiaryOutlineRadio,
-  NeutralOutlineRadio,
-  InfoOutlineRadio,
-  SuccessOutlineRadio,
-  WarningOutlineRadio,
-  ErrorOutlineRadio,
-  PrimaryLightRadio,
-  SecondaryLightRadio,
-  TertiaryLightRadio,
-  NeutralLightRadio,
-  InfoLightRadio,
-  SuccessLightRadio,
-  WarningLightRadio,
-  ErrorLightRadio,
-  OutlineRadio,
-} from './Radio';
+import { Radio, RadioGroup, RadioInput } from './Radio';
 import { axe } from 'jest-axe';
 
 // ─── Radio (single) ─────────────────────────────────────────────────────────
@@ -89,21 +68,21 @@ describe('Radio Component', () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
-  // --- Variants ---
+  // --- Color ---
 
-  test('defaults to primary-outline variant', () => {
+  test('defaults to primary color', () => {
     const { container } = render(<Radio value="a" label="Default" />);
-    expect(container.querySelector('.radio-primary-outline')).toBeInTheDocument();
+    expect(container.querySelector('.radio-primary')).toBeInTheDocument();
   });
 
-  test('applies outline variant class', () => {
-    const { container } = render(<Radio variant="secondary-outline" value="a" label="Sec" />);
-    expect(container.querySelector('.radio-secondary-outline')).toBeInTheDocument();
+  test('applies named color class', () => {
+    const { container } = render(<Radio color="secondary" value="a" label="Sec" />);
+    expect(container.querySelector('.radio-secondary')).toBeInTheDocument();
   });
 
-  test('applies light variant class', () => {
-    const { container } = render(<Radio variant="success-light" value="a" label="Suc" />);
-    expect(container.querySelector('.radio-success-light')).toBeInTheDocument();
+  test('falls back to primary for unknown colors', () => {
+    const { container } = render(<Radio color="purple" value="a" label="Bad" />);
+    expect(container.querySelector('.radio-primary')).toBeInTheDocument();
   });
 
   // --- Sizes ---
@@ -220,21 +199,13 @@ describe('RadioGroup Component', () => {
     expect(onChange).toHaveBeenCalled();
   });
 
-  // --- Variants ---
+  // --- Color ---
 
-  test('passes variant to child radios', () => {
+  test('passes color to child radios', () => {
     const { container } = render(
-      <RadioGroup variant="error-outline" options={options} value="opt1" onChange={() => {}} />
+      <RadioGroup color="error" options={options} value="opt1" onChange={() => {}} />
     );
-    const radioButtons = container.querySelectorAll('.radio-error-outline');
-    expect(radioButtons.length).toBe(3);
-  });
-
-  test('passes light variant to child radios', () => {
-    const { container } = render(
-      <RadioGroup variant="success-light" options={options} value="opt1" onChange={() => {}} />
-    );
-    const radioButtons = container.querySelectorAll('.radio-success-light');
+    const radioButtons = container.querySelectorAll('.radio-error');
     expect(radioButtons.length).toBe(3);
   });
 
@@ -253,7 +224,6 @@ describe('RadioGroup Component', () => {
     const { container } = render(
       <RadioGroup options={options} value="opt1" onChange={() => {}} />
     );
-    // MUI RadioGroup without row prop renders as column
     const group = container.querySelector('[role="radiogroup"]');
     expect(group).toBeInTheDocument();
   });
@@ -264,7 +234,6 @@ describe('RadioGroup Component', () => {
     );
     const group = container.querySelector('[role="radiogroup"]');
     expect(group).toBeInTheDocument();
-    // row class is applied by MUI when row={true}
     expect(group.className).toContain('row');
   });
 
@@ -317,45 +286,9 @@ describe('RadioGroup Component', () => {
   });
 });
 
-// ─── Convenience Exports ─────────────────────────────────────────────────────
+// ─── Legacy Aliases ─────────────────────────────────────────────────────────
 
-describe('Convenience Exports', () => {
-  // Outline
-  test.each([
-    ['PrimaryOutlineRadio',   PrimaryOutlineRadio,   'primary-outline'],
-    ['SecondaryOutlineRadio', SecondaryOutlineRadio, 'secondary-outline'],
-    ['TertiaryOutlineRadio',  TertiaryOutlineRadio,  'tertiary-outline'],
-    ['NeutralOutlineRadio',   NeutralOutlineRadio,   'neutral-outline'],
-    ['InfoOutlineRadio',      InfoOutlineRadio,      'info-outline'],
-    ['SuccessOutlineRadio',   SuccessOutlineRadio,   'success-outline'],
-    ['WarningOutlineRadio',   WarningOutlineRadio,   'warning-outline'],
-    ['ErrorOutlineRadio',     ErrorOutlineRadio,     'error-outline'],
-  ])('%s renders with correct variant', (name, Component, variant) => {
-    const { container } = render(<Component value="x" label="Test" />);
-    expect(container.querySelector(`.radio-${variant}`)).toBeInTheDocument();
-  });
-
-  // Light
-  test.each([
-    ['PrimaryLightRadio',   PrimaryLightRadio,   'primary-light'],
-    ['SecondaryLightRadio', SecondaryLightRadio, 'secondary-light'],
-    ['TertiaryLightRadio',  TertiaryLightRadio,  'tertiary-light'],
-    ['NeutralLightRadio',   NeutralLightRadio,   'neutral-light'],
-    ['InfoLightRadio',      InfoLightRadio,      'info-light'],
-    ['SuccessLightRadio',   SuccessLightRadio,   'success-light'],
-    ['WarningLightRadio',   WarningLightRadio,   'warning-light'],
-    ['ErrorLightRadio',     ErrorLightRadio,     'error-light'],
-  ])('%s renders with correct variant', (name, Component, variant) => {
-    const { container } = render(<Component value="x" label="Test" />);
-    expect(container.querySelector(`.radio-${variant}`)).toBeInTheDocument();
-  });
-
-  // Aliases
-  test('OutlineRadio defaults to primary-outline', () => {
-    const { container } = render(<OutlineRadio value="x" label="Test" />);
-    expect(container.querySelector('.radio-primary-outline')).toBeInTheDocument();
-  });
-
+describe('Legacy Aliases', () => {
   test('RadioInput is an alias for Radio', () => {
     expect(RadioInput).toBe(Radio);
   });

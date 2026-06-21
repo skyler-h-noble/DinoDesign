@@ -15,13 +15,32 @@ import {
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
 
+// Avatars only carry the brand palette — semantic colors aren't shown
+// because they don't map cleanly to an identity affordance.
 const COLOR_GROUPS = [
   { label: 'Default', colors: ['default'] },
-  { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
-  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+  { label: 'Theme',   colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
 ];
 
-const CONTENT_TYPES = ['initials', 'fallback', 'image'];
+// Showcase-friendly labels for the three content modes.
+// 'photo'    → src=image URL
+// 'icon'     → no src/initials; Avatar renders its default Person icon
+// 'initials' → text label inside the avatar (e.g. "LN")
+const CONTENT_TYPES = ['photo', 'icon', 'initials'];
+const CONTENT_LABELS = { photo: 'Photo', icon: 'Icon', initials: 'Initials' };
+
+// All 8 Figma sizes + custom.
+const SIZES = ['xxx-small', 'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'];
+const SIZE_LABELS = {
+  'xxx-small': 'XXXS',
+  'xx-small':  'XXS',
+  'x-small':   'XS',
+  small:       'Small',
+  medium:      'Medium',
+  large:       'Large',
+  'x-large':   'XL',
+  'xx-large':  'XXL',
+};
 
 /* ── Helpers ── */
 function CopyButton({ code }) {
@@ -78,25 +97,35 @@ export function AvatarShowcase() {
   const [size, setSize]               = useState('medium');
   const [contentType, setContentType] = useState('initials');
   const [clickable, setClickable]     = useState(false);
+  const [insideButton, setInsideButton] = useState(false);
   const [showGroup, setShowGroup]     = useState(false);
   const [bgTheme, setBgTheme]         = useState(null);
   const [bgSurface, setBgSurface]     = useState('Surface');
 
+  // Photo content overrides color — the image IS the visual, so we don't pass
+  // a color prop in photo mode.
+  const isPhoto = contentType === 'photo';
+
   const getAvatarProps = () => {
-    const p = { color, size, clickable };
+    const p = { size, clickable, insideButton };
+    if (!isPhoto) p.color = color;
     if (contentType === 'initials') p.initials = 'LN';
-    if (contentType === 'image') p.src = 'https://i.pravatar.cc/150?img=3';
-    if (contentType === 'image') p.alt = 'User avatar';
+    if (contentType === 'photo') {
+      p.src = 'https://i.pravatar.cc/150?img=3';
+      p.alt = 'User avatar';
+    }
+    // 'icon' — leave src/initials unset so Avatar falls back to <PersonIcon>.
     return p;
   };
 
   const generateCode = () => {
     const parts = [];
-    if (color !== 'default') parts.push('color="' + color + '"');
+    if (!isPhoto && color !== 'default') parts.push('color="' + color + '"');
     if (size !== 'medium') parts.push('size="' + size + '"');
     if (contentType === 'initials') parts.push('initials="LN"');
-    if (contentType === 'image') parts.push('src="..." alt="User avatar"');
+    if (contentType === 'photo') parts.push('src="..." alt="User avatar"');
     if (clickable) parts.push('clickable onClick={handleClick}');
+    if (insideButton) parts.push('insideButton');
 
     if (showGroup) {
       return '<AvatarGroup max={3}>\n  <Avatar ' + parts.join(' ') + ' />\n  <Avatar initials="AB" />\n  <Avatar initials="CD" />\n  <Avatar initials="EF" />\n</AvatarGroup>';
@@ -155,8 +184,8 @@ export function AvatarShowcase() {
                     <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
                   </Box>
 
-                  {/* Color */}
-                  <Box>
+                  {/* Color — not applicable when content is a photo */}
+                  <Box sx={{ opacity: isPhoto ? 0.4 : 1, pointerEvents: isPhoto ? 'none' : 'auto' }}>
                     <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
                     <Stack spacing={1.5}>
                       {COLOR_GROUPS.map((group) => (
@@ -170,14 +199,20 @@ export function AvatarShowcase() {
                         </Box>
                       ))}
                     </Stack>
+                    {isPhoto && (
+                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 8 }}>
+                        Color is ignored when the avatar shows a photo — the
+                        image carries the visual.
+                      </Caption>
+                    )}
                   </Box>
 
                   {/* Size */}
                   <Box sx={{ mt: 3 }}>
                     <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</OverlineSmall>
-                    <Stack direction="row" spacing={1}>
-                      {['small', 'medium', 'large'].map((s) => (
-                        <ControlButton key={s} label={cap(s)} selected={size === s} onClick={() => setSize(s)} />
+                    <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
+                      {SIZES.map((s) => (
+                        <ControlButton key={s} label={SIZE_LABELS[s]} selected={size === s} onClick={() => setSize(s)} />
                       ))}
                     </Stack>
                   </Box>
@@ -187,7 +222,7 @@ export function AvatarShowcase() {
                     <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>CONTENT</OverlineSmall>
                     <Stack direction="row" spacing={1}>
                       {CONTENT_TYPES.map((ct) => (
-                        <ControlButton key={ct} label={cap(ct)} selected={contentType === ct} onClick={() => setContentType(ct)} />
+                        <ControlButton key={ct} label={CONTENT_LABELS[ct]} selected={contentType === ct} onClick={() => setContentType(ct)} />
                       ))}
                     </Stack>
                   </Box>
@@ -200,6 +235,15 @@ export function AvatarShowcase() {
                     </Box>
                     <Switch variant="default-outline" checked={clickable} onChange={(e) => setClickable(e.target.checked)}
                       size="small" aria-label="Clickable" />
+                  </Box>
+
+                  <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box>
+                      <Label>Inside Button</Label>
+                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Adds 2px horizontal margin so the avatar sits cleanly in a Button</Caption>
+                    </Box>
+                    <Switch variant="default-outline" checked={insideButton} onChange={(e) => setInsideButton(e.target.checked)}
+                      size="small" aria-label="Inside Button" />
                   </Box>
 
                   <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

@@ -1,29 +1,31 @@
 // src/components/Box/BoxShowcase.js
 import React, { useState } from 'react';
-import { Box as MuiBox, Stack, Grid } from '@mui/material';
+import { Grid, Stack } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import { Box } from './Box';
 import { Button } from '../Button/Button';
-import { Switch } from '../Switch/Switch';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H5, Body, BodySmall, Caption, Label, OverlineSmall,
+  H2, H5, Body, BodySmall, Caption, OverlineSmall,
 } from '../Typography';
 
-const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
-
-const COLOR_GROUPS = [
-  { label: 'Default', colors: ['default'] },
-  { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
-  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+const SURFACES = [
+  'Surface', 'Surface-Dim', 'Surface-Bright',
+  'Container', 'Container-Low', 'Container-Lowest', 'Container-High',
 ];
 
-const PADDINGS = ['none', 'xs', 'sm', 'md', 'lg', 'xl'];
+const THEMES = [
+  'Default',
+  'Primary', 'Primary-Light',
+  'Secondary', 'Secondary-Light',
+  'Tertiary', 'Tertiary-Light',
+  'Neutral', 'Neutral-Light',
+  'Info-Light', 'Success-Light', 'Warning-Light', 'Error-Light',
+];
 
-/* ── Helpers ── */
 function CopyButton({ code }) {
   const [copied, setCopied] = useState(false);
   const handleCopy = async () => {
@@ -47,61 +49,33 @@ function ControlButton({ label, selected, onClick }) {
   );
 }
 
-function ColorSwatchButton({ color, selected, onClick, variant }) {
-  const C = cap(color);
-  const themeMap = { solid: C, light: C + '-Light', dark: C };
-  const surfaceMap = { solid: 'Surface', light: 'Surface', dark: 'Surface-Dimmest' };
-  return (
-    <MuiBox
-      component="button"
-      data-theme={themeMap[variant]}
-      data-surface={surfaceMap[variant]}
-      onClick={() => onClick(color)}
-      aria-label={'Select ' + C}
-      aria-pressed={selected}
-      title={C}
-      sx={{
-        width: 'var(--Button-Height)', height: 'var(--Button-Height)', borderRadius: '4px',
-        backgroundColor: 'var(--Background)',
-        border: selected ? '2px solid var(--Text)' : '2px solid var(--Border)',
-        outline: selected ? '2px solid var(--Focus-Visible)' : '2px solid transparent',
-        outlineOffset: '1px', cursor: 'pointer', flexShrink: 0,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        transition: 'transform 0.1s ease', '&:hover': { transform: 'scale(1.1)' },
-      }}>
-      {selected && <CheckIcon sx={{ fontSize: 16, color: 'var(--Text)', pointerEvents: 'none' }} />}
-    </MuiBox>
-  );
-}
-
-/* ── Main Showcase ── */
 export function BoxShowcase() {
-  const [variant, setVariant]     = useState('solid');
-  const [color, setColor]         = useState('primary');
-  const [padding, setPadding]     = useState('md');
-  const [elevated, setElevated]   = useState(false);
-  const [clickable, setClickable] = useState(false);
+  const [theme, setTheme]         = useState('');
+  const [surface, setSurface]     = useState('');
   const [bgTheme, setBgTheme]     = useState(null);
   const [bgSurface, setBgSurface] = useState('Surface');
 
-
   const generateCode = () => {
-    const parts = ['variant="' + variant + '"'];
-    if (color !== 'default') parts.push('color="' + color + '"');
-    if (padding !== 'md') parts.push('padding="' + padding + '"');
-    if (elevated) parts.push('elevated');
-    if (clickable) parts.push('clickable onClick={handleClick}');
+    const parts = [];
+    if (theme) parts.push('theme="' + theme + '"');
+    if (surface) parts.push('surface="' + surface + '"');
+    const head = parts.length ? ' ' + parts.join(' ') : '';
     return (
-      '<Box ' + parts.join(' ') + '>\n' +
-      '  <H5>Box Title</H5>\n' +
-      '  <Body>Content goes here.</Body>\n' +
+      '<Box' + head + '>\n' +
+      '  {/* anything */}\n' +
       '</Box>'
     );
   };
 
   return (
-    <MuiBox sx={{ pb: 8 }}>
+    <Box sx={{ pb: 8 }}>
       <H2>Box</H2>
+      <Body color="quiet" style={{ marginTop: 8, marginBottom: 24, maxWidth: 720 }}>
+        Bare layout primitive — a slot that participates in the design-system
+        cascade (<code>data-theme</code> / <code>data-surface</code>) without
+        carrying any chrome. Reach for <code>&lt;Ratio&gt;</code> or
+        <code> &lt;Card&gt;</code> when you need padding, borders, or shadow.
+      </Body>
 
       <Grid container sx={{ mt: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
@@ -109,149 +83,130 @@ export function BoxShowcase() {
         <Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, pr: { md: 3 } }}>
 
           <PreviewSurface theme={bgTheme} surface={bgSurface}>
-            <MuiBox sx={{ width: '100%', maxWidth: 400 }}>
-              <Box
-                variant={variant}
-                color={color}
-                padding={padding}
-                elevated={elevated}
-                clickable={clickable}
-                onClick={clickable ? () => {} : undefined}
-              >
-                <H5>Box Title</H5>
-                <Body style={{ color: 'var(--Quiet)' }}>
-                  A themed container with configurable variant, color, padding, and elevation.
-                </Body>
+            <Box sx={{ width: '100%', maxWidth: 400 }}>
+              <Box theme={theme || undefined} surface={surface || undefined}>
+                <Box sx={{
+                  padding: 3,
+                  backgroundColor: 'var(--Background)',
+                  color: 'var(--Text)',
+                  borderRadius: 'var(--Style-Border-Radius)',
+                  border: '1px dashed var(--Border-Variant)',
+                }}>
+                  <H5>Box content</H5>
+                  <Body style={{ color: 'var(--Text-Quiet)', marginTop: 6 }}>
+                    Anything dropped inside resolves tokens against the
+                    Box's theme / surface, if you set them.
+                  </Body>
+                </Box>
               </Box>
-            </MuiBox>
+            </Box>
           </PreviewSurface>
 
-          <MuiBox sx={{ backgroundColor: '#1e1e1e', borderRadius: '8px', overflow: 'hidden', mt: 2 }}>
-            <MuiBox sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          <Box sx={{ backgroundColor: '#1e1e1e', borderRadius: '8px', overflow: 'hidden', mt: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
               px: 2, py: 1, borderBottom: '1px solid #333' }}>
               <Caption style={{ color: '#9ca3af' }}>JSX</Caption>
               <CopyButton code={generateCode()} />
-            </MuiBox>
-            <MuiBox sx={{ p: 2, overflow: 'hidden' }}>
-              <MuiBox component="code" sx={{
+            </Box>
+            <Box sx={{ p: 2, overflow: 'hidden' }}>
+              <Box component="code" sx={{
                 fontFamily: 'monospace', fontSize: '11px', color: '#e5e7eb',
                 whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowWrap: 'break-word',
                 maxWidth: '100%', display: 'block',
               }}>
                 {generateCode()}
-              </MuiBox>
-            </MuiBox>
-          </MuiBox>
+              </Box>
+            </Box>
+          </Box>
         </Grid>
 
         {/* ── RIGHT: Tabs ── */}
         <Grid item sx={{ width: { xs: '100%', md: '45%' }, flexShrink: 0, alignSelf: 'flex-start', minWidth: 0, overflow: 'hidden' }}>
-          <MuiBox sx={{ backgroundColor: 'var(--Background)', overflow: 'hidden' }}>
-
+          <Box sx={{ backgroundColor: 'var(--Background)', overflow: 'hidden' }}>
             <Tabs defaultValue={0} variant="standard" color="primary">
               <TabList>
                 <Tab>Playground</Tab>
-                <Tab>Accessibility</Tab>
+                <Tab>When to use</Tab>
               </TabList>
 
               {/* ── Playground ── */}
               <TabPanel value={0}>
-                <MuiBox sx={{ p: 3 }}>
+                <Box sx={{ p: 3 }}>
 
-                  {/* Background */}
-                  <MuiBox sx={{ mb: 3 }}>
+                  <Box sx={{ mb: 3 }}>
                     <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
-                  </MuiBox>
+                  </Box>
 
-                  {/* Style */}
-                  <MuiBox>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</OverlineSmall>
-                    <Stack direction="row" spacing={1}>
-                      {['solid', 'light', 'dark'].map((v) => (
-                        <ControlButton key={v} label={cap(v)} selected={variant === v} onClick={() => setVariant(v)} />
-                      ))}
-                    </Stack>
-                  </MuiBox>
-
-                  {/* Color */}
-                  <MuiBox sx={{ mt: 3 }}>
-                      <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
-                      <Stack spacing={1.5}>
-                        {COLOR_GROUPS.map((group) => (
-                          <MuiBox key={group.label}>
-                            <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 4, fontWeight: 600 }}>{group.label}</Caption>
-                            <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-                              {group.colors.map((c) => (
-                                <ColorSwatchButton key={c} color={c} variant={variant} selected={color === c} onClick={setColor} />
-                              ))}
-                            </Stack>
-                          </MuiBox>
-                        ))}
-                      </Stack>
-                    </MuiBox>
-
-                  {/* Padding */}
-                  <MuiBox sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>PADDING</OverlineSmall>
+                  {/* Theme override */}
+                  <Box>
+                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+                      THEME (optional)
+                    </OverlineSmall>
                     <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-                      {PADDINGS.map((p) => (
-                        <ControlButton key={p} label={cap(p)} selected={padding === p} onClick={() => setPadding(p)} />
+                      <ControlButton label="None" selected={!theme} onClick={() => setTheme('')} />
+                      {THEMES.map((t) => (
+                        <ControlButton key={t} label={t} selected={theme === t} onClick={() => setTheme(t)} />
                       ))}
                     </Stack>
-                  </MuiBox>
+                  </Box>
 
-                  {/* Toggles */}
-                  <MuiBox sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <MuiBox>
-                      <Label>Elevated</Label>
-                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Higher shadow level</Caption>
-                    </MuiBox>
-                    <Switch variant="default-outline" checked={elevated} onChange={(e) => setElevated(e.target.checked)}
-                      size="small" aria-label="Elevated" />
-                  </MuiBox>
+                  {/* Surface override */}
+                  <Box sx={{ mt: 3 }}>
+                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+                      SURFACE (optional)
+                    </OverlineSmall>
+                    <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
+                      <ControlButton label="None" selected={!surface} onClick={() => setSurface('')} />
+                      {SURFACES.map((s) => (
+                        <ControlButton key={s} label={s} selected={surface === s} onClick={() => setSurface(s)} />
+                      ))}
+                    </Stack>
+                    <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
+                      Both props are pass-throughs to <code>data-theme</code>{' '}
+                      and <code>data-surface</code>. Leave empty to inherit
+                      from the parent zone.
+                    </Caption>
+                  </Box>
 
-                  <MuiBox sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <MuiBox>
-                      <Label>Clickable</Label>
-                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Hover/active/focus states</Caption>
-                    </MuiBox>
-                    <Switch variant="default-outline" checked={clickable} onChange={(e) => setClickable(e.target.checked)}
-                      size="small" aria-label="Clickable" />
-                  </MuiBox>
-
-                </MuiBox>
+                </Box>
               </TabPanel>
 
-              {/* ── Accessibility ── */}
+              {/* ── When to use ── */}
               <TabPanel value={1}>
-                <MuiBox sx={{ p: 3 }}>
-                  <Stack spacing={3}>
-
-                    <MuiBox sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
-                      <H5>Structure and ARIA</H5>
-                      <Stack spacing={0}>
-                        {[
-                          { label: 'Two-layer',   value: 'Outer shell (border + shadow) + inner content (data-theme + data-surface)' },
-                          { label: 'Clickable',   value: 'role="button", tabIndex=0. Enter/Space activate.' },
-                          { label: 'Focus',        value: 'outline: 3px solid var(--Focus-Visible); outline-offset: 3px' },
-                          { label: 'Elevation',    value: 'Effect-Level-2 rest, Level-3 hover. Elevated: Level-3 rest, Level-4 hover.' },
-                        ].map(({ label, value }) => (
-                          <MuiBox key={label} sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                            <BodySmall>{label}:</BodySmall>
-                            <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>{value}</Caption>
-                          </MuiBox>
-                        ))}
-                      </Stack>
-                    </MuiBox>
-
+                <Box sx={{ p: 3 }}>
+                  <Stack spacing={2}>
+                    <Box>
+                      <BodySmall style={{ fontWeight: 700 }}>Reach for Box when…</BodySmall>
+                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 4 }}>
+                        you need a wrapper to scope a theme / surface zone, or
+                        you want a typed JSX root without painting any visual
+                        styling.
+                      </Caption>
+                    </Box>
+                    <Box>
+                      <BodySmall style={{ fontWeight: 700 }}>Use Ratio when…</BodySmall>
+                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 4 }}>
+                        the container needs a fixed proportion (image, video,
+                        embed, hero tile) — it carries the same theme / color
+                        shell Box used to.
+                      </Caption>
+                    </Box>
+                    <Box>
+                      <BodySmall style={{ fontWeight: 700 }}>Use Card when…</BodySmall>
+                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 4 }}>
+                        the container has a title, body, and actions — Card
+                        handles the standard 2-layer chrome plus header /
+                        footer slots.
+                      </Caption>
+                    </Box>
                   </Stack>
-                </MuiBox>
+                </Box>
               </TabPanel>
             </Tabs>
-          </MuiBox>
+          </Box>
         </Grid>
       </Grid>
-    </MuiBox>
+    </Box>
   );
 }
 

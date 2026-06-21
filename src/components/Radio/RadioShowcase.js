@@ -78,29 +78,32 @@ function ColorSwatchButton({ color, selected, onClick }) {
 
 /* ── Main Showcase ── */
 export function RadioShowcase() {
-  const [style, setStyle]               = useState('outline');
   const [color, setColor]               = useState('default');
   const [size, setSize]                 = useState('medium');
   const [orientation, setOrientation]   = useState('vertical');
+  const [labelPlacement, setLabelPlacement] = useState('end');
   const [selectedValue, setSelectedValue] = useState('option1');
   const [disabled, setDisabled]         = useState(false);
   const [bgTheme, setBgTheme]           = useState(null);
   const [bgSurface, setBgSurface]       = useState('Surface');
 
-  const effectiveColor = color === 'default' ? 'default' : color;
-  const variant = effectiveColor + '-' + style;
-
   const generateCode = () => {
-    const parts = ['variant="' + variant + '"'];
+    const parts = [];
+    if (color !== 'primary') parts.push('color="' + color + '"');
     if (size !== 'medium') parts.push('size="' + size + '"');
     parts.push('label="Choose an option"');
     if (orientation !== 'vertical') parts.push('orientation="horizontal"');
+    if (labelPlacement !== 'end') parts.push('labelPlacement="' + labelPlacement + '"');
     if (disabled) parts.push('disabled');
     parts.push('options={options}');
     parts.push('value={value}');
     parts.push('onChange={handleChange}');
     return '<RadioGroup\n  ' + parts.join('\n  ') + '\n/>';
   };
+
+  // `default` color maps to the literal `default` token family (greys);
+  // any selected color flows through directly.
+  const effectiveColor = color;
 
   return (
     <Box sx={{ pb: 8 }}>
@@ -113,13 +116,14 @@ export function RadioShowcase() {
 
           <PreviewSurface theme={bgTheme} surface={bgSurface}>
             <RadioGroup
-              variant={variant}
+              color={effectiveColor}
               size={size}
               label="Choose an option"
               options={SAMPLE_OPTIONS}
               value={selectedValue}
               onChange={(e) => setSelectedValue(e.target.value)}
               orientation={orientation}
+              labelPlacement={labelPlacement}
               disabled={disabled}
             />
           </PreviewSurface>
@@ -161,18 +165,8 @@ export function RadioShowcase() {
                     <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
                   </Box>
 
-                  {/* Style */}
-                  <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</OverlineSmall>
-                    <Stack direction="row" spacing={1}>
-                      {['outline', 'light'].map((s) => (
-                        <ControlButton key={s} label={cap(s)} selected={style === s} onClick={() => setStyle(s)} />
-                      ))}
-                    </Stack>
-                  </Box>
-
                   {/* Color */}
-                  <Box sx={{ mt: 3 }}>
+                  <Box>
                     <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
                     <Stack spacing={1.5}>
                       {COLOR_GROUPS.map((group) => (
@@ -206,6 +200,24 @@ export function RadioShowcase() {
                         <ControlButton key={o} label={cap(o)} selected={orientation === o} onClick={() => setOrientation(o)} />
                       ))}
                     </Stack>
+                  </Box>
+
+                  {/* Label Position */}
+                  <Box sx={{ mt: 3 }}>
+                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>LABEL POSITION</OverlineSmall>
+                    <Stack direction="row" spacing={1}>
+                      {[
+                        { value: 'end',    label: 'End' },
+                        { value: 'bottom', label: 'Bottom' },
+                      ].map((p) => (
+                        <ControlButton key={p.value} label={p.label} selected={labelPlacement === p.value} onClick={() => setLabelPlacement(p.value)} />
+                      ))}
+                    </Stack>
+                    <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
+                      <strong>End</strong> = label right of the radio.{' '}
+                      <strong>Bottom</strong> = label below — matches the
+                      Figma "vertical" item layout.
+                    </Caption>
                   </Box>
 
                   {/* Toggles */}

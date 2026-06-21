@@ -192,12 +192,27 @@
    * Effect Levels (Box Shadows)
    * ======================================== */
 
+  /* Per-elevation dropshadow tokens — defaults pre-computed for a white
+     surface using the studio's shared Comeau-style math (drop L,
+     ascending alpha). Brand CSS overrides --Dropshadow-Color-1..5 per
+     surface scope at runtime; the Effect-Level recipes below pick up the
+     overridden values automatically via var(). */
+  --Dropshadow-Color-1: #8c8c8c1a;   /* L=55, S=0, alpha 0.10 */
+  --Dropshadow-Color-2: #73737329;   /* L=45, S=0, alpha 0.16 */
+  --Dropshadow-Color-3: #59595938;   /* L=35, S=0, alpha 0.22 */
+  --Dropshadow-Color-4: #4040404d;   /* L=25, S=0, alpha 0.30 */
+  --Dropshadow-Color-5: #2e2e2e66;   /* L=18, S=0, alpha 0.40 */
+
+  /* Layered shadow recipes — each level stacks its own atmospheric shadow
+     on top of the previous level's contact shadow. Higher elevations read
+     as more dramatic, not weaker. Shared with the studio's per-design-
+     system CSS export so generated systems and the lib's defaults agree. */
   --Effect-Level-0: none;
-  --Effect-Level-1: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --Effect-Level-2: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  --Effect-Level-3: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --Effect-Level-4: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --Effect-Level-5: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --Effect-Level-1: 0 1px 2px var(--Dropshadow-Color-1);
+  --Effect-Level-2: 0 2px 4px var(--Dropshadow-Color-2), 0 1px 2px var(--Dropshadow-Color-1);
+  --Effect-Level-3: 0 4px 8px var(--Dropshadow-Color-3), 0 2px 4px var(--Dropshadow-Color-2);
+  --Effect-Level-4: 0 8px 16px var(--Dropshadow-Color-4), 0 4px 8px var(--Dropshadow-Color-3);
+  --Effect-Level-5: 0 16px 32px var(--Dropshadow-Color-5), 0 8px 16px var(--Dropshadow-Color-4);
 
  --Set-Font-Family-Header: "Prata", serif;
  --Set-Font-Family-Header-Weight: 200;

@@ -4,6 +4,14 @@ import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import { Tag, TAG_COLORS, TAG_COLOR_TOKEN_MAP } from './Tag';
+
+// Grouped color picker — mirrors the Button showcase pattern:
+// Default at the top, then brand Theme colors, then Semantic status colors.
+const COLOR_GROUPS = [
+  { label: 'Default',  colors: ['default'] },
+  { label: 'Theme',    colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
+  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+];
 import { Button } from '../Button/Button';
 import { Switch } from '../Switch/Switch';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
@@ -211,12 +219,19 @@ export function TagShowcase() {
                     <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
                   </Box>
 
-                  {/* Color swatches */}
+                  {/* Color swatches — Default / Theme / Semantic */}
                   <Box>
                     <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
-                    <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-                      {TAG_COLORS.map((c) => (
-                        <ColorSwatchButton key={c} color={c} selected={color === c} onClick={setColor} />
+                    <Stack spacing={1.5}>
+                      {COLOR_GROUPS.map((group) => (
+                        <Box key={group.label}>
+                          <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 4, fontWeight: 600 }}>{group.label}</Caption>
+                          <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
+                            {group.colors.map((c) => (
+                              <ColorSwatchButton key={c} color={c} selected={color === c} onClick={setColor} />
+                            ))}
+                          </Stack>
+                        </Box>
                       ))}
                     </Stack>
                     <Caption style={{ color: 'var(--Text-Quiet)', marginTop: 6, display: 'block' }}>

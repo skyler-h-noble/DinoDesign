@@ -8,23 +8,23 @@ import {
   FormLabel,
   Box,
 } from '@mui/material';
-import { Body, BodySmall } from '../Typography';
+import { BodyLarge, Body, BodySmall } from '../Typography';
 
 /**
  * Radio Component
- * Full-featured radio button with complete design system integration
  *
- * VARIANTS:
- *   OUTLINE variant="{color}-outline"   transparent BG, border + dot when selected
- *   LIGHT   variant="{color}-light"     tinted BG when selected
+ * Single style (no outline/light split). Color drives the ring + dot.
  *
- * SIZES: small (16px) | medium (20px) | large (24px)
- * STATES: checked | unchecked | disabled
- * LABEL: optional text to the right of the radio
+ * GEOMETRY (Figma-aligned):
+ *   small  — parent 24×24, outer ring 16×16, inner dot 8×8,    BodySmall label, 4px gap
+ *   medium — parent 24×24, outer ring 20×20, inner dot 9.5×9.5, Body label,      8px gap
+ *   large  — parent 24×24, outer ring 24×24, inner dot 9.5×9.5, BodyLarge label, 12px gap
+ *
+ * COLORS: default | primary | secondary | tertiary | neutral |
+ *         info | success | warning | error
  *
  * ACCESSIBILITY:
- *   - aria-label and aria-labelledby passed via inputProps to the <input>
- *     element directly per WCAG 1.3.1
+ *   - aria-label / aria-labelledby forwarded to <input> per WCAG 1.3.1
  *   - Without a visible label prop, always provide aria-label
  *   - Use RadioGroup with a label for grouped radio buttons
  */
@@ -32,62 +32,23 @@ import { Body, BodySmall } from '../Typography';
 const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
-// --- Variant Style Builders --------------------------------------------------
-
-function outlineStyles(color) {
-  const C = cap(color);
-  return {
-    type: 'outline',
-    color: C,
-    borderToken: 'var(--Buttons-' + C + '-Border)',
-    dot: 'var(--Buttons-' + C + '-Border)',
-  };
-}
-
-function lightStyles(color) {
-  const C = cap(color);
-  return {
-    type: 'light',
-    color: C,
-    borderToken: 'var(--Buttons-' + C + '-Border)',
-    dot: 'var(--Buttons-' + C + '-Border)',
-    dataTheme: C + '-Light',
-  };
-}
-
-function buildVariantMap() {
-  const map = {};
-  COLORS.forEach((color) => {
-    map[color + '-outline'] = outlineStyles(color);
-    map[color + '-light']   = lightStyles(color);
-  });
-  map['primary']  = outlineStyles('primary');
-  map['default']  = outlineStyles('default');
-  map['outline']  = outlineStyles('primary');
-  map['light']    = lightStyles('primary');
-  return map;
-}
-
 // --- Sizing ------------------------------------------------------------------
+// touchTarget is the 24×24 parent container; box is the outer ring; dot is the
+// inner filled circle when checked. Padding between target and ring is derived.
 
 const SIZE_MAP = {
-  small:  { box: 16, dot: 8,    labelSize: '13px', gap: 6,  touchTarget: 28 },
-  medium: { box: 20, dot: 9.5,  labelSize: '15px', gap: 8,  touchTarget: 32 },
-  large:  { box: 24, dot: 12,   labelSize: '17px', gap: 10, touchTarget: 40 },
+  small:  { touchTarget: 24, box: 16, dot: 8,   gap: 4,  LabelComp: BodySmall },
+  medium: { touchTarget: 24, box: 20, dot: 9.5, gap: 8,  LabelComp: Body },
+  large:  { touchTarget: 24, box: 24, dot: 9.5, gap: 12, LabelComp: BodyLarge },
 };
 
 // --- Custom Radio Icons ------------------------------------------------------
 
-function RadioCircleIcon({ size, variant, checked }) {
-  const variantMap = buildVariantMap();
-  const styles = variantMap[variant] || variantMap['primary-outline'];
+function RadioCircleIcon({ size, color, checked }) {
+  const C = cap(color);
+  const ringColor = 'var(--Buttons-' + C + '-Border)';
+  const dotColor = 'var(--Buttons-' + C + '-Border)';
   const sizeConfig = SIZE_MAP[size] || SIZE_MAP.medium;
-  const isLight = styles.type === 'light';
-
-  // Inner data attributes for light variant
-  const innerAttrs = isLight
-    ? { 'data-theme': styles.dataTheme, 'data-surface': 'Surface-Dim' }
-    : {};
 
   return (
     <Box
@@ -95,57 +56,43 @@ function RadioCircleIcon({ size, variant, checked }) {
       sx={{
         width: sizeConfig.box,
         height: sizeConfig.box,
+        boxSizing: 'border-box',
         borderRadius: '50%',
-        border: '2px solid ' + styles.borderToken,
+        border: '2px solid ' + ringColor,
         overflow: 'hidden',
         flexShrink: 0,
+        backgroundColor: 'var(--Background)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         transition: 'border-color 0.15s ease-in-out',
       }}
     >
-      {/* Inner themed surface */}
-      <Box
-        {...innerAttrs}
-        sx={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: 'var(--Background)',
-          borderRadius: '50%',
-          transition: 'background-color 0.15s ease-in-out',
-        }}
-      >
-        {checked && (
-          <Box
-            sx={{
-              width: sizeConfig.dot,
-              height: sizeConfig.dot,
-              borderRadius: '50%',
-              backgroundColor: styles.dot,
-              transition: 'transform 0.15s ease-in-out',
-            }}
-          />
-        )}
-      </Box>
+      {checked && (
+        <Box
+          sx={{
+            width: sizeConfig.dot,
+            height: sizeConfig.dot,
+            borderRadius: '50%',
+            backgroundColor: dotColor,
+            transition: 'transform 0.15s ease-in-out',
+          }}
+        />
+      )}
     </Box>
   );
-}
-
-function UncheckedRadioIcon({ size, variant }) {
-  return <RadioCircleIcon size={size} variant={variant} checked={false} />;
-}
-
-function CheckedRadioIcon({ size, variant }) {
-  return <RadioCircleIcon size={size} variant={variant} checked={true} />;
 }
 
 // --- Radio Component ---------------------------------------------------------
 
 export function Radio({
-  variant = 'primary-outline',
+  color = 'primary',
   size = 'medium',
   label,
+  // 'end'    — label to the right of the radio (default)
+  // 'bottom' — label below the radio (matches the "vertical" Figma layout)
+  // 'top' / 'start' also accepted (forwarded to MUI FormControlLabel)
+  labelPlacement = 'end',
   checked,
   disabled = false,
   onChange,
@@ -160,12 +107,15 @@ export function Radio({
   inputProps: inputPropsProp = {},
   ...props
 }) {
-  const variantMap = buildVariantMap();
-  const styles = variantMap[variant] || variantMap['primary-outline'];
+  const effectiveColor = COLORS.includes(color) ? color : 'primary';
   const sizeConfig = SIZE_MAP[size] || SIZE_MAP.medium;
-  const LabelComp = size === 'small' ? BodySmall : Body;
+  const LabelComp = sizeConfig.LabelComp;
+  // Inset between the 24×24 parent and the outer ring. Comes out to:
+  //   small  → 4px (24-16)/2
+  //   medium → 2px (24-20)/2
+  //   large  → 0px (24-24)/2
+  const inset = (sizeConfig.touchTarget - sizeConfig.box) / 2;
 
-  // Pass aria attributes directly to the <input> element
   const mergedInputProps = {
     ...inputPropsProp,
     ...(ariaLabel       && { 'aria-label': ariaLabel }),
@@ -180,15 +130,18 @@ export function Radio({
       onChange={onChange}
       name={name}
       value={value}
-      icon={<UncheckedRadioIcon size={size} variant={variant} />}
-      checkedIcon={<CheckedRadioIcon size={size} variant={variant} />}
-      className={'radio-' + variant + ' ' + className}
+      icon={<RadioCircleIcon size={size} color={effectiveColor} checked={false} />}
+      checkedIcon={<RadioCircleIcon size={size} color={effectiveColor} checked={true} />}
+      className={'radio-' + effectiveColor + ' ' + className}
       inputProps={mergedInputProps}
       disableRipple
       sx={{
-        padding: (sizeConfig.touchTarget - sizeConfig.box) / 2 + 'px',
-        minWidth: 24,
-        minHeight: 24,
+        padding: inset + 'px',
+        width: sizeConfig.touchTarget,
+        height: sizeConfig.touchTarget,
+        minWidth: sizeConfig.touchTarget,
+        minHeight: sizeConfig.touchTarget,
+        boxSizing: 'border-box',
         borderRadius: '50%',
         color: 'inherit',
         transition: 'background-color 0.15s ease-in-out',
@@ -218,7 +171,6 @@ export function Radio({
             component="span"
             sx={{
               color: disabled ? 'var(--Text-Quiet)' : 'var(--Text)',
-              fontSize: sizeConfig.labelSize,
               lineHeight: 1.4,
               userSelect: 'none',
             }}
@@ -226,11 +178,15 @@ export function Radio({
             {label}
           </LabelComp>
         }
+        labelPlacement={labelPlacement}
         disabled={disabled}
         sx={{
           marginLeft: 0,
           marginRight: 0,
           gap: sizeConfig.gap + 'px',
+          // alignItems: 'center' works for both end/start (cross-axis is
+          // vertical) and top/bottom (cross-axis is horizontal) — the radio
+          // sits centered relative to the label either way.
           alignItems: 'center',
           '&.Mui-disabled .MuiTypography-root': {
             color: 'var(--Text-Quiet)',
@@ -247,13 +203,15 @@ export function Radio({
 // --- RadioGroup Component ----------------------------------------------------
 
 export function RadioGroup({
-  variant = 'primary-outline',
+  color = 'primary',
   size = 'medium',
   label,
   options = [],
   value,
   onChange,
   orientation = 'vertical',
+  // Threaded to each child Radio. See Radio() for accepted values.
+  labelPlacement = 'end',
   disabled = false,
   spacing = 1,
   name,
@@ -267,7 +225,7 @@ export function RadioGroup({
     <FormControl
       component="fieldset"
       disabled={disabled}
-      className={'radio-group-' + variant + ' ' + className}
+      className={'radio-group-' + color + ' ' + className}
       sx={sx}
     >
       {label && (
@@ -292,15 +250,25 @@ export function RadioGroup({
         aria-label={ariaLabel}
         aria-labelledby={ariaLabelledBy}
         row={orientation === 'horizontal'}
-        sx={{ gap: spacing }}
+        sx={{
+          // Explicit flex-direction so the layout flips even when sx ends up
+          // winning over MUI's `row` prop in the cascade. Wrap keeps long
+          // horizontal groups from overflowing.
+          display: 'flex',
+          flexDirection: orientation === 'horizontal' ? 'row' : 'column',
+          flexWrap: orientation === 'horizontal' ? 'wrap' : 'nowrap',
+          alignItems: orientation === 'horizontal' ? 'center' : 'flex-start',
+          gap: spacing,
+        }}
         {...props}
       >
         {options.map((option) => (
           <Radio
             key={option.value}
-            variant={variant}
+            color={color}
             size={size}
             label={option.label}
+            labelPlacement={labelPlacement}
             value={option.value}
             disabled={option.disabled || disabled}
           />
@@ -310,32 +278,10 @@ export function RadioGroup({
   );
 }
 
-// --- Convenience Exports -----------------------------------------------------
+// --- Legacy / Convenience Aliases --------------------------------------------
 
-// Outline
-export const PrimaryOutlineRadio   = (p) => <Radio variant="primary-outline"   {...p} />;
-export const SecondaryOutlineRadio = (p) => <Radio variant="secondary-outline" {...p} />;
-export const TertiaryOutlineRadio  = (p) => <Radio variant="tertiary-outline"  {...p} />;
-export const NeutralOutlineRadio   = (p) => <Radio variant="neutral-outline"   {...p} />;
-export const InfoOutlineRadio      = (p) => <Radio variant="info-outline"      {...p} />;
-export const SuccessOutlineRadio   = (p) => <Radio variant="success-outline"   {...p} />;
-export const WarningOutlineRadio   = (p) => <Radio variant="warning-outline"   {...p} />;
-export const ErrorOutlineRadio     = (p) => <Radio variant="error-outline"     {...p} />;
-
-// Light
-export const PrimaryLightRadio     = (p) => <Radio variant="primary-light"     {...p} />;
-export const SecondaryLightRadio   = (p) => <Radio variant="secondary-light"   {...p} />;
-export const TertiaryLightRadio    = (p) => <Radio variant="tertiary-light"    {...p} />;
-export const NeutralLightRadio     = (p) => <Radio variant="neutral-light"     {...p} />;
-export const InfoLightRadio        = (p) => <Radio variant="info-light"        {...p} />;
-export const SuccessLightRadio     = (p) => <Radio variant="success-light"     {...p} />;
-export const WarningLightRadio     = (p) => <Radio variant="warning-light"     {...p} />;
-export const ErrorLightRadio       = (p) => <Radio variant="error-light"       {...p} />;
-
-// Aliases
-export const OutlineRadio = (p) => <Radio variant="primary-outline" {...p} />;
-
-// Legacy exports for backwards compatibility
+// `RadioInput` is the historic export name — kept so older consumers don't
+// break when the variant prop was removed.
 export const RadioInput = Radio;
 
 export default Radio;

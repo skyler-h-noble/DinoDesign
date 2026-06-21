@@ -1,6 +1,19 @@
 // src/components/List/List.js
 import React from 'react';
 import { Box, Checkbox, Radio } from '@mui/material';
+import { OverlineSmall, SubtitleLarge, Body } from '../Typography';
+
+// Default three-layer typography for the text frame. Order is top→bottom:
+//   overline  — OverlineSmall  (optional metadata kicker on top)
+//   title     — SubtitleLarge  (children, the main label)
+//   secondary — Body           (supporting description)
+// Single-line consumers (just `children`) render only the SubtitleLarge title
+// so plain "Home" / "Inbox" rows still look like titles, not metadata.
+const DEFAULT_LAYERS = {
+  overline:  OverlineSmall,
+  title:     SubtitleLarge,
+  secondary: Body,
+};
 
 const SOLID_THEME_MAP = {
   primary: 'Primary',
@@ -31,7 +44,9 @@ const SIZE_MAP = {
 };
 
 export function ListItemDecorator({ children, size = 'medium', isButton = false, onAction, ariaLabel }) {
-  const s = SIZE_MAP[size] || SIZE_MAP.medium;
+  // Both decorator paths now hug their content — no forced width/height. The
+  // consumer passes a sized child (Icon size="small", Avatar size="medium",
+  // Ratio ratio="1:1" with maxWidth, etc.) and the slot wraps it tightly.
   if (isButton) {
     return (
       <Box component="button" role="button" tabIndex={0}
@@ -40,24 +55,19 @@ export function ListItemDecorator({ children, size = 'medium', isButton = false,
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onAction?.(e); } }}
         className="list-item-decorator-button"
         sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-          width: (s.decoratorSize + 4) + 'px', height: (s.decoratorSize + 4) + 'px', padding: '2px',
+          padding: 0,
           border: 'none', backgroundColor: 'transparent', borderRadius: '50%', cursor: 'pointer', color: 'inherit',
           transition: 'background-color 0.15s ease',
           '&:hover': { backgroundColor: 'rgba(128,128,128,0.15)' },
           '&:active': { backgroundColor: 'rgba(128,128,128,0.25)' },
-          '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '-3px' },
-          '& .MuiSvgIcon-root': { fontSize: s.iconSize + 'px' } }}>
+          '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '-3px' } }}>
         {children}
       </Box>
     );
   }
   return (
     <Box className="list-item-decorator"
-      sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-        width: s.decoratorSize + 'px', height: s.decoratorSize + 'px',
-        '& .MuiSvgIcon-root': { fontSize: s.iconSize + 'px' },
-        '& .MuiAvatar-root': { width: s.decoratorSize + 'px', height: s.decoratorSize + 'px', fontSize: (s.iconSize - 2) + 'px' },
-        '& img': { width: s.decoratorSize + 'px', height: s.decoratorSize + 'px', borderRadius: '4px', objectFit: 'cover' } }}>
+      sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
       {children}
     </Box>
   );
@@ -68,9 +78,19 @@ export function ListItem({
   startDecoratorIsButton = false, endDecoratorIsButton = false,
   onStartDecoratorAction, onEndDecoratorAction,
   startDecoratorAriaLabel, endDecoratorAriaLabel,
-  size = 'medium', variant = 'default', color, secondary,
+  size = 'medium', variant = 'default', color,
+  // Three stacked text layers — children is the title (SubtitleLarge),
+  // secondary is supporting body (Body), overline is the optional kicker
+  // on top (OverlineSmall). Vstacked with var(--Sizing-Half) (4px) gap.
+  overline, secondary,
   clickable = false, disabled = false, selected = false,
-  selectionMode = 'none', onSelect, onClick, sx = {}, ...props
+  selectionMode = 'none', onSelect, onClick,
+  // Non-clickable mode dividers. Apply only when !clickable — the clickable
+  // mode has its own card chrome (border + shadow) instead. bottomBorder
+  // separates rows in a vertical non-clickable list; rightBorder separates
+  // items in a horizontal non-clickable list.
+  bottomBorder = false, rightBorder = false,
+  sx = {}, ...props
 }) {
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
   const isClickable = clickable || !!onClick;
@@ -102,15 +122,54 @@ export function ListItem({
       onClick={handleClick} onKeyDown={isFocusable ? handleKeyDown : undefined}
       className={'list-item' + (selected ? ' list-item-selected' : '') + (disabled ? ' list-item-disabled' : '')
         + (isClickable ? ' list-item-clickable' : '') + (isSelectable ? ' list-item-selectable' : '')}
-      sx={{ display: 'flex', alignItems: 'center', gap: s.gap, py: s.py, px: s.px,
+      sx={{
+        // hstack, top-left aligned, fill width, with Sizing-1-and-Half (12px)
+        // gap between Start slot → Text frame → End slot.
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-start',
+        width: '100%',
+        gap: 'var(--Sizing-1-and-Half)',
+        py: s.py, px: s.px,
+        minHeight: '32px',
         fontSize: s.fontSize, fontFamily: 'inherit', color: 'var(--Text)', listStyle: 'none',
         cursor: isFocusable ? 'pointer' : 'default', opacity: disabled ? 0.5 : 1,
-        borderRadius: 'var(--Style-Border-Radius)',
+        borderRadius: 'var(--Input-Radius)',
+        position: 'relative',
         transition: 'background-color 0.15s ease, box-shadow 0.15s ease',
+        // Card chrome — only when the row is clickable. Non-clickable rows
+        // stay bare so they sit flat in a stack; non-clickable dividers
+        // (bottomBorder / rightBorder) handle row separation instead.
+        ...(isClickable ? {
+          border: '1px solid var(--Border)',
+          boxShadow: 'var(--Effect-Level-1)',
+          padding: 'var(--Sizing-1)',
+        } : {}),
+        // Non-clickable separators — single hairline at the edge the user
+        // requested. Mutually exclusive with card chrome above.
+        ...(!isClickable && bottomBorder ? {
+          borderBottom: '1px solid var(--Border)',
+        } : {}),
+        ...(!isClickable && rightBorder ? {
+          borderRight: '1px solid var(--Border)',
+        } : {}),
         backgroundColor: selected ? 'var(--Hover)' : 'transparent',
-        '&:hover': isFocusable ? { backgroundColor: 'var(--Hover)' } : {},
-        '&:active': isFocusable ? { backgroundColor: 'var(--Background)' } : {},
-        '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '-3px' },
+        '&:hover':         isFocusable ? { backgroundColor: 'var(--Hover)',  boxShadow: 'var(--Effect-Level-2)' } : {},
+        '&:active':        isFocusable ? { backgroundColor: 'var(--Active)', boxShadow: 'var(--Effect-Level-1)' } : {},
+        // Inset focus ring rendered as a pseudo-element so the corner
+        // radius (--Input-Inner-Focus-Visible = Input-Radius minus 1px)
+        // can differ from the row's outer radius. A CSS `outline` follows
+        // the element's own border-radius and can't be tuned per-state.
+        '&:focus-visible': { outline: 'none' },
+        '&:focus-visible::after': {
+          content: '""',
+          position: 'absolute',
+          inset: '1px',
+          border: '3px solid var(--Focus-Visible)',
+          borderRadius: 'var(--Input-Inner-Focus-Visible)',
+          pointerEvents: 'none',
+        },
         ...sx }}
       {...props}>
       {selectionMode === 'checkbox' && (
@@ -131,15 +190,52 @@ export function ListItem({
           {startDecorator}
         </ListItemDecorator>
       )}
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Box sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{children}</Box>
-        {secondary && (
-          <Box sx={{ fontSize: size === 'small' ? '11px' : size === 'large' ? '13px' : '12px',
-            opacity: 0.7, mt: 0.25, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {secondary}
+      {(() => {
+        // Text frame — flex-fills the remaining horizontal space between
+        // start decorator and end decorator. The text frame ITSELF fills,
+        // and each line wraps naturally rather than ellipsis-truncating.
+        // Order is top→bottom: overline (kicker) → children (title) →
+        // secondary (body).
+        const Layers = DEFAULT_LAYERS;
+        const lineSx = {
+          display: 'block',
+          width: '100%',
+          // Allow natural wrapping. Long strings flow to multiple lines
+          // instead of getting cut with ellipsis — the row's minHeight
+          // gives the visual baseline; the text decides the real height.
+          wordBreak: 'break-word',
+          overflowWrap: 'anywhere',
+        };
+        return (
+          <Box sx={{
+            // Fill the remaining horizontal space. minWidth:0 lets flex
+            // shrink past the children's intrinsic size so wrapping works
+            // (without it, long unbroken text would overflow the row).
+            flex: '1 1 auto',
+            width: '100%',
+            minWidth: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 'var(--Sizing-Half)',
+          }}>
+            {overline && (
+              <Layers.overline style={{ ...lineSx, color: 'var(--Text-Quiet)' }}>
+                {overline}
+              </Layers.overline>
+            )}
+            {children !== undefined && children !== null && (
+              <Layers.title style={{ ...lineSx, color: 'var(--Text)' }}>
+                {children}
+              </Layers.title>
+            )}
+            {secondary && (
+              <Layers.secondary style={{ ...lineSx, color: 'var(--Text-Quiet)' }}>
+                {secondary}
+              </Layers.secondary>
+            )}
           </Box>
-        )}
-      </Box>
+        );
+      })()}
       {endDecorator && (
         <ListItemDecorator size={size} isButton={endDecoratorIsButton}
           onAction={onEndDecoratorAction} ariaLabel={endDecoratorAriaLabel}>
@@ -194,8 +290,11 @@ export function List({
             onEndDecoratorAction={item.onEndDecoratorAction}
             startDecoratorAriaLabel={item.startDecoratorAriaLabel}
             endDecoratorAriaLabel={item.endDecoratorAriaLabel}
-            secondary={item.secondary} clickable={clickable || item.clickable}
+            overline={item.overline} secondary={item.secondary}
+            clickable={clickable || item.clickable}
             disabled={item.disabled}
+            bottomBorder={item.bottomBorder}
+            rightBorder={item.rightBorder}
             selected={isSelectable ? selectedIndices.includes(index) : item.selected}
             selectionMode={selectionMode} onSelect={() => handleItemSelect(index)}
             onClick={item.onClick}>
@@ -239,13 +338,38 @@ export function List({
       {...wrapperDataAttrs}
       className={'list-container list-' + variant + ' list-' + color + ' ' + className}
       sx={{ display: 'flex', flexDirection: isHorizontal ? 'row' : 'column',
-        alignItems: isHorizontal ? 'center' : 'stretch', gap: 0, m: 0,
+        // Stretch in both orientations:
+        //   • vertical → items span full width
+        //   • horizontal → items match the tallest sibling's height, so
+        //     a row of items all have a uniform bottom edge and the
+        //     content within each item is top-aligned.
+        alignItems: 'stretch',
+        // Clickable Lists separate their card-chromed items with 8px to
+        // keep individual borders + shadows visually distinct. Non-clickable
+        // Lists keep gap:0 — rows are visually joined by hairlines or just
+        // sit flush against each other.
+        gap: clickable ? 'var(--Sizing-1)' : 0,
+        m: 0,
         p: isDefault ? 0 : 1,
         backgroundColor: isDefault ? 'transparent' : 'var(--Background)',
         color: 'var(--Text)',
-        border: '1px solid var(--Border)',
+        // The List container has NO border by itself. Visual separation
+        // between rows is the responsibility of ListItem (via clickable
+        // chrome OR bottomBorder/rightBorder dividers).
         borderRadius: isDefault ? 0 : 'var(--Style-Border-Radius)',
-        listStyle: 'none', overflow: 'hidden', ...sx }}
+        // List fills its parent's width. No overflow:hidden — items'
+        // shadows and focus rings (which can extend slightly beyond the
+        // row edge) shouldn't be clipped at the container boundary.
+        width: '100%',
+        listStyle: 'none',
+        // In horizontal mode, every direct child item flexes equally so a
+        // row of items has uniform column widths. width:100% on the item
+        // works for vertical stacks but in a row it'd force each item to
+        // 100% of the container; flex:1 1 0 distributes evenly instead.
+        ...(isHorizontal ? {
+          '& > .list-item': { flex: '1 1 0', width: 'auto' },
+        } : {}),
+        ...sx }}
       {...props}>
       {renderItems()}
     </Box>

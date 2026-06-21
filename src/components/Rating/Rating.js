@@ -14,7 +14,10 @@ import { BodySmall, Caption } from '../Typography';
  *   Empty star:   var(--Text-Quiet)
  *   Hover star:   var(--Buttons-{C}-Hover)
  *
- * SIZES: small (20px), medium (28px), large (36px)
+ * SIZES (Figma-aligned, matched to the Icon scale):
+ *   small   icon 16 (Small),  24×24 hit area, internal 3px focus ring, group gap 0
+ *   medium  icon 24 (Medium), 24×24 hit area, internal 3px focus ring, group gap 0
+ *   large   icon 36 (Large),  natural size,   external 2px focus ring, group gap 2
  *
  * MODES:
  *   controlled    value + onChange
@@ -33,10 +36,14 @@ const COLOR_MAP = {
   info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
 };
 
+// minHit defines a button-style hit target — the star icon itself stays at
+// iconSize, but the clickable button expands to fill minHit so small icons
+// don't punch a hole in the touch surface. focusInset is negative for
+// internal rings (small/medium) and positive for external (large).
 const SIZE_MAP = {
-  small:  { iconSize: 20, gap: 2 },
-  medium: { iconSize: 28, gap: 4 },
-  large:  { iconSize: 36, gap: 4 },
+  small:  { iconSize: 16, minHit: 24, gap: 0, focusInset: -3, focusWidth: 3 },
+  medium: { iconSize: 24, minHit: 24, gap: 0, focusInset: -3, focusWidth: 3 },
+  large:  { iconSize: 36, minHit: undefined, gap: 2, focusInset: 2, focusWidth: 2 },
 };
 
 export function Rating({
@@ -182,11 +189,25 @@ export function Rating({
         sx={{
           display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
           border: 'none', backgroundColor: 'transparent', padding: 0,
-          cursor: isInteractive ? 'pointer' : 'default',
+          ...(s.minHit && {
+            minWidth: s.minHit + 'px',
+            minHeight: s.minHit + 'px',
+          }),
+          cursor: disabled ? 'not-allowed' : (isInteractive ? 'pointer' : 'default'),
           outline: 'none',
+          transition: 'transform 0.1s ease',
           ...starStyles,
           ...hoverStarSx,
-          '&:focus-visible': isInteractive ? { outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px', borderRadius: '2px' } : {},
+          '&:active': isInteractive ? { transform: 'scale(0.95)' } : {},
+          '&:focus-visible': isInteractive ? {
+            outline: s.focusWidth + 'px solid var(--Focus-Visible)',
+            outlineOffset: s.focusInset + 'px',
+            borderRadius: '2px',
+          } : {},
+          '&:disabled': {
+            cursor: 'not-allowed',
+            opacity: 0.5,
+          },
         }}
       >
         <IconComponent sx={{ fontSize: s.iconSize, transition: 'color 0.1s ease, filter 0.1s ease' }} />

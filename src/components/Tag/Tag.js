@@ -30,11 +30,17 @@ import { BodySmall } from '../Typography';
  */
 
 const COLORS = [
+  // 'default' resolves to --Tag-Default-BG / --Tag-Default-Text which the
+  // consuming brand CSS (or the lib's fallback below) defines. Mirrors the
+  // Button-Default cascade pattern so brand-driven dashboards pick up the
+  // active surface's neutral palette without specifying a color.
+  'default',
   'primary', 'secondary', 'tertiary', 'neutral',
   'info', 'success', 'warning', 'error',
 ];
 
 const COLOR_TOKEN_MAP = {
+  default:   'Default',
   primary:   'Primary',
   secondary: 'Secondary',
   tertiary:  'Tertiary',

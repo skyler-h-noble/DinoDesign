@@ -1,19 +1,14 @@
 // src/components/Radio/Radio.stories.js
 import { Radio, RadioGroup } from './Radio';
-import { Stack, Box } from '@mui/material';
+import { Stack } from '@mui/material';
 
 export default {
   title: 'Forms/Radio',
   component: Radio,
   argTypes: {
-    variant: {
+    color: {
       control: 'select',
-      options: [
-        'primary-outline', 'secondary-outline', 'tertiary-outline', 'neutral-outline',
-        'info-outline', 'success-outline', 'warning-outline', 'error-outline',
-        'primary-light', 'secondary-light', 'tertiary-light', 'neutral-light',
-        'info-light', 'success-light', 'warning-light', 'error-light',
-      ],
+      options: ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'],
     },
     size: { control: 'select', options: ['small', 'medium', 'large'] },
     disabled: { control: 'boolean' },
@@ -26,32 +21,34 @@ const SAMPLE_OPTIONS = [
   { label: 'Option Three', value: 'opt3' },
 ];
 
+const ALL_COLORS = ['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+
 // ─── Single Radio ────────────────────────────────────────────────────────────
 
 export const Default = {
   render: () => (
-    <Radio variant="primary-outline" label="Accept terms" value="accept" />
+    <Radio color="primary" label="Accept terms" value="accept" />
   ),
 };
 
 export const Checked = {
   render: () => (
-    <Radio variant="primary-outline" label="Selected option" checked value="selected" />
+    <Radio color="primary" label="Selected option" checked value="selected" />
   ),
 };
 
 export const Disabled = {
   render: () => (
     <Stack spacing={2}>
-      <Radio variant="primary-outline" label="Disabled unchecked" disabled value="a" />
-      <Radio variant="primary-outline" label="Disabled checked" disabled checked value="b" />
+      <Radio color="primary" label="Disabled unchecked" disabled value="a" />
+      <Radio color="primary" label="Disabled checked" disabled checked value="b" />
     </Stack>
   ),
 };
 
 export const NoLabel = {
   render: () => (
-    <Radio variant="primary-outline" aria-label="Standalone radio" value="standalone" />
+    <Radio color="primary" aria-label="Standalone radio" value="standalone" />
   ),
 };
 
@@ -60,34 +57,21 @@ export const NoLabel = {
 export const Sizes = {
   render: () => (
     <Stack spacing={3}>
-      <Radio variant="primary-outline" size="small" label="Small (16px circle, 28px touch)" checked value="sm" />
-      <Radio variant="primary-outline" size="medium" label="Medium (20px circle, 32px touch)" checked value="md" />
-      <Radio variant="primary-outline" size="large" label="Large (24px circle, 40px touch)" checked value="lg" />
+      <Radio color="primary" size="small"  label="Small (16×16 ring, 8×8 dot, BodySmall, 4px gap)"  checked value="sm" />
+      <Radio color="primary" size="medium" label="Medium (20×20 ring, 9.5×9.5 dot, Body, 8px gap)"  checked value="md" />
+      <Radio color="primary" size="large"  label="Large (24×24 ring, 9.5×9.5 dot, BodyLarge, 12px gap)" checked value="lg" />
     </Stack>
   ),
 };
 
-// ─── Outline Variants ────────────────────────────────────────────────────────
+// ─── All Colors ──────────────────────────────────────────────────────────────
 
-export const OutlineColors = {
-  name: 'Outline — All Colors',
+export const AllColors = {
+  name: 'All Colors',
   render: () => (
     <Stack spacing={2}>
-      {['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'].map((c) => (
-        <Radio key={c} variant={`${c}-outline`} label={`${c.charAt(0).toUpperCase() + c.slice(1)} Outline`} checked value={c} />
-      ))}
-    </Stack>
-  ),
-};
-
-// ─── Light Variants ──────────────────────────────────────────────────────────
-
-export const LightColors = {
-  name: 'Light — All Colors',
-  render: () => (
-    <Stack spacing={2}>
-      {['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'].map((c) => (
-        <Radio key={c} variant={`${c}-light`} label={`${c.charAt(0).toUpperCase() + c.slice(1)} Light`} checked value={c} />
+      {ALL_COLORS.map((c) => (
+        <Radio key={c} color={c} label={`${c.charAt(0).toUpperCase() + c.slice(1)}`} checked value={c} />
       ))}
     </Stack>
   ),
@@ -99,7 +83,7 @@ export const GroupVertical = {
   name: 'RadioGroup — Vertical',
   render: () => (
     <RadioGroup
-      variant="primary-outline"
+      color="primary"
       label="Select an option"
       options={SAMPLE_OPTIONS}
       value="opt1"
@@ -112,7 +96,7 @@ export const GroupHorizontal = {
   name: 'RadioGroup — Horizontal',
   render: () => (
     <RadioGroup
-      variant="primary-outline"
+      color="primary"
       label="Select an option"
       options={SAMPLE_OPTIONS}
       value="opt2"
@@ -129,7 +113,7 @@ export const GroupSizes = {
       {['small', 'medium', 'large'].map((s) => (
         <RadioGroup
           key={s}
-          variant="primary-outline"
+          color="primary"
           size={s}
           label={`Size: ${s}`}
           options={SAMPLE_OPTIONS}
@@ -141,36 +125,17 @@ export const GroupSizes = {
   ),
 };
 
-export const GroupOutlineColors = {
-  name: 'RadioGroup — Outline Colors',
+export const GroupAllColors = {
+  name: 'RadioGroup — All Colors',
   render: () => (
     <Stack spacing={4}>
-      {['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'].map((c) => (
+      {ALL_COLORS.map((c) => (
         <RadioGroup
           key={c}
-          variant={`${c}-outline`}
-          label={`${c.charAt(0).toUpperCase() + c.slice(1)} Outline`}
+          color={c}
+          label={`${c.charAt(0).toUpperCase() + c.slice(1)}`}
           options={SAMPLE_OPTIONS}
           value="opt1"
-          onChange={() => {}}
-          orientation="horizontal"
-        />
-      ))}
-    </Stack>
-  ),
-};
-
-export const GroupLightColors = {
-  name: 'RadioGroup — Light Colors',
-  render: () => (
-    <Stack spacing={4}>
-      {['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'].map((c) => (
-        <RadioGroup
-          key={c}
-          variant={`${c}-light`}
-          label={`${c.charAt(0).toUpperCase() + c.slice(1)} Light`}
-          options={SAMPLE_OPTIONS}
-          value="opt2"
           onChange={() => {}}
           orientation="horizontal"
         />
@@ -183,7 +148,7 @@ export const GroupDisabled = {
   name: 'RadioGroup — Disabled',
   render: () => (
     <RadioGroup
-      variant="primary-outline"
+      color="primary"
       label="Disabled group"
       options={SAMPLE_OPTIONS}
       value="opt1"
@@ -197,7 +162,7 @@ export const GroupPartialDisabled = {
   name: 'RadioGroup — Partial Disabled',
   render: () => (
     <RadioGroup
-      variant="primary-outline"
+      color="primary"
       label="Some options disabled"
       options={[
         { label: 'Available', value: 'a' },
@@ -214,35 +179,11 @@ export const GroupNoLabel = {
   name: 'RadioGroup — No visible label',
   render: () => (
     <RadioGroup
-      variant="primary-outline"
+      color="primary"
       aria-label="Invisible group label"
       options={SAMPLE_OPTIONS}
       value="opt3"
       onChange={() => {}}
     />
-  ),
-};
-
-// ─── Style Comparison ────────────────────────────────────────────────────────
-
-export const StyleComparison = {
-  name: 'Side-by-Side: Outline vs Light',
-  render: () => (
-    <Stack direction="row" spacing={6}>
-      <RadioGroup
-        variant="primary-outline"
-        label="Outline"
-        options={SAMPLE_OPTIONS}
-        value="opt1"
-        onChange={() => {}}
-      />
-      <RadioGroup
-        variant="primary-light"
-        label="Light"
-        options={SAMPLE_OPTIONS}
-        value="opt1"
-        onChange={() => {}}
-      />
-    </Stack>
   ),
 };

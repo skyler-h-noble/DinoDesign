@@ -16,6 +16,14 @@
   /* Card */
   --Card-Radius: 8px;
   --Card-Focus-Radius: 11px;
+
+  /* Input — used by TextField, Select, ListItem (when clickable),
+     and any element whose chrome reads as a tappable input row.
+     --Input-Inner-Focus-Visible is the corner radius for the inset
+     focus ring; it's the input radius minus 1 so the inset 3px-thick
+     focus indicator visually matches the chrome's outer corners. */
+  --Input-Radius: 4px;
+  --Input-Inner-Focus-Visible: calc(var(--Input-Radius) - 1px);
   --Card-Padding: 16px;
   --Style-Gradient-Color-1: var(--Buttons-Primary-Button);
   --Style-Gradient-Color-2: var(--Buttons-Primary-Button);

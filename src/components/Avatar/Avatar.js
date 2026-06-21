@@ -8,13 +8,23 @@ import { ButtonExtraSmall, ButtonSmall, Button as ButtonTypography, BodyLarge, H
 /**
  * Avatar Component
  *
- * CONTENT PRIORITY: image → initials → fallback (Person icon)
+ * CONTENT (priority): photo (src) → initials → icon (defaults to Person)
  *
- * SIZES: small (32px), medium (40px), large (56px)
+ * SIZES (Figma-aligned):
+ *   xxx-small  16   |  xx-small  24   |  x-small   32   |  small  40
+ *   medium     56   |  large     64   |  x-large   80   |  xx-large 160
+ *   custom     — pass `customSize` (pixel diameter); icon ~50%.
  *
- * COLORS: default, primary, secondary, tertiary, neutral, info, success, warning, error
+ * COLORS: default, primary, secondary, tertiary, neutral
+ *   (Semantic colors aren't meaningful on an avatar — kept off the public API.)
  *   Background: var(--Buttons-{C}-Border)
  *   Text/Icon:  var(--Buttons-{C}-Text)
+ *   Photo content ignores color (the image is the visual).
+ *
+ * INSIDE BUTTON:
+ *   Pass `insideButton` when the avatar lives inside a Button — adds 2px
+ *   horizontal margin so the button's interior has breathing room around the
+ *   circular silhouette without you having to wrap the avatar in a spacer.
  *
  * CLICKABLE:
  *   Border:  var(--Buttons-Default-Border)
@@ -28,7 +38,6 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const COLOR_MAP = {
   default: 'Default',
   primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
-  info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
 };
 
 // Each size pairs a pixel diameter with the typography component used for
@@ -66,6 +75,9 @@ export function Avatar({
   customSize,
   clickable = false,
   onClick,
+  // When true, adds 2px horizontal margin so an Avatar inside a Button has
+  // breathing room without needing a wrapping spacer.
+  insideButton = false,
   className = '',
   sx = {},
   ...props
@@ -110,6 +122,9 @@ export function Avatar({
         overflow: 'hidden',
         flexShrink: 0,
         border: '2px solid ' + borderColor,
+        // Inside-button breathing room. Pure margin so the avatar's circular
+        // silhouette doesn't get pushed into an ellipse by padding.
+        ...(insideButton && { marginLeft: '2px', marginRight: '2px' }),
         // Button reset
         ...(isClickable && {
           cursor: 'pointer',

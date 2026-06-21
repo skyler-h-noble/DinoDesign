@@ -3,7 +3,7 @@ import React, { useState, createContext, useContext } from 'react';
 import { Box } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Icon } from '../Icon/Icon';
-import { BodySmall, Body } from '../Typography';
+import { OverlineSmall, BodyLarge, Body, BodySmall } from '../Typography';
 import { SHADOW_LEVEL_2 } from '../_shadows';
 
 /**
@@ -24,9 +24,12 @@ import { SHADOW_LEVEL_2 } from '../_shadows';
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 const SIZE_MAP = {
-  small:  { summaryPy: '8px', summaryPx: '12px', detailsPy: '8px', detailsPx: '12px', fontSize: '13px', iconSize: 18 },
-  medium: { summaryPy: '12px', summaryPx: '16px', detailsPy: '12px', detailsPx: '16px', fontSize: '14px', iconSize: 20 },
-  large:  { summaryPy: '16px', summaryPx: '20px', detailsPy: '16px', detailsPx: '20px', fontSize: '16px', iconSize: 22 },
+  // Padding is a CSS-shorthand string per size so each side can differ —
+  // useful when the chevron at the end needs less right padding than the
+  // start/text columns. `iconSize` drives the chevron <Icon size="…"> token.
+  small:  { summaryPadding: '8px 12px',         detailsPy: '8px',  detailsPx: '12px', fontSize: '13px', iconSize: 'small'  },
+  medium: { summaryPadding: '12px 8px 12px 16px', detailsPy: '12px', detailsPx: '16px', fontSize: '14px', iconSize: 'medium' },
+  large:  { summaryPadding: '16px 20px',        detailsPy: '16px', detailsPx: '20px', fontSize: '16px', iconSize: 'large'  },
 };
 
 /* ─── Contexts ─── */
@@ -184,8 +187,22 @@ export function Accordion({
 }
 
 /* ─── AccordionSummary ─── */
+// Title typography scales per size — Body is the default ("Body Medium"),
+// BodySmall for compact rows, BodyLarge for spacious ones. Overline and
+// secondary stay constant (OverlineSmall + BodySmall) and only render when
+// the consumer passes them.
+const TITLE_COMPS = { small: BodySmall, medium: Body, large: BodyLarge };
+
 export function AccordionSummary({
   children,
+  // List-style slots — empty by default. Both hug their content, so an
+  // <Icon size="small" /> or <Avatar size="x-small" /> drops in cleanly.
+  startDecorator,
+  endDecorator,
+  // Optional text layers above and below the title. With both empty, only
+  // the Body (medium) title renders — matches the Figma default.
+  overline,
+  secondary,
   expandIcon,
   className = '',
   sx = {},
@@ -194,13 +211,20 @@ export function AccordionSummary({
   const { expanded, toggle, disabled, accordionId } = useContext(AccordionContext);
   const { size } = useContext(GroupContext);
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
-  const TextComp = size === 'small' ? BodySmall : Body;
+  const TitleComp = TITLE_COMPS[size] || TITLE_COMPS.medium;
 
   const icon = expandIcon || (
-    <Icon size="small" sx={{ color: expanded ? 'var(--Text)' : 'var(--Quiet)', transition: 'color 0.15s ease' }}>
+    <Icon size={s.iconSize} sx={{ color: expanded ? 'var(--Text)' : 'var(--Quiet)', transition: 'color 0.15s ease' }}>
       <ExpandMoreIcon />
     </Icon>
   );
+
+  const lineSx = {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    display: 'block',
+  };
 
   return (
     <Box
@@ -214,11 +238,16 @@ export function AccordionSummary({
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
       className={'accordion-summary' + (expanded ? ' accordion-summary-expanded' : '') + ' ' + className}
       sx={{
+        // hstack, top-left aligned, Sizing-1-and-Half (12px) gap — matches
+        // the List item frame so a row of List slots inside the summary
+        // visually aligns with the rest of the design system.
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-start',
         width: '100%',
-        padding: s.summaryPy + ' ' + s.summaryPx,
+        gap: 'var(--Sizing-1-and-Half)',
+        padding: s.summaryPadding,
         border: 'none',
         backgroundColor: 'transparent',
         color: expanded ? 'var(--Text)' : 'var(--Quiet)',
@@ -240,16 +269,61 @@ export function AccordionSummary({
       }}
       {...props}
     >
-      <Box sx={{ flex: 1 }}>
-        <TextComp style={{ color: 'inherit', fontWeight: 600 }}>{children}</TextComp>
+      {/* Start slot — hugs content, only renders when supplied. */}
+      {startDecorator && (
+        <Box
+          className="accordion-summary-start"
+          sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+        >
+          {startDecorator}
+        </Box>
+      )}
+
+      {/* Text frame — flex-fill vstack, Sizing-Half (4px) gap between
+          the optional overline, the title, and the optional secondary. */}
+      <Box sx={{
+        flex: 1,
+        minWidth: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'var(--Sizing-Half)',
+      }}>
+        {overline && (
+          <OverlineSmall style={{ ...lineSx, color: 'var(--Text-Quiet)' }}>
+            {overline}
+          </OverlineSmall>
+        )}
+        {children !== undefined && children !== null && (
+          <TitleComp style={{ ...lineSx, color: 'inherit', fontWeight: 600 }}>
+            {children}
+          </TitleComp>
+        )}
+        {secondary && (
+          <BodySmall style={{ ...lineSx, color: 'var(--Text-Quiet)' }}>
+            {secondary}
+          </BodySmall>
+        )}
       </Box>
+
+      {/* End slot — hugs content, only renders when supplied. The chevron
+          is separate from this slot so the consumer's end decorator never
+          conflicts with the expand/collapse affordance. */}
+      {endDecorator && (
+        <Box
+          className="accordion-summary-end"
+          sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+        >
+          {endDecorator}
+        </Box>
+      )}
+
+      {/* Chevron — always rendered at the far right. */}
       <Box
         sx={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
           transition: 'transform 0.25s ease',
           flexShrink: 0,
-          ml: 1,
         }}
       >
         {icon}

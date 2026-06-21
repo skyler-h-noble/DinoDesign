@@ -6,5 +6,6 @@ export {
   DEFAULT_ITEMS,
 } from './TreeView';
 
+export { TreeBranch } from './TreeBranch';
 export { TreeViewShowcase } from './TreeViewShowcase';
 export { default } from './TreeView';

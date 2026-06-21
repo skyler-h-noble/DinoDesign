@@ -58,6 +58,7 @@ import { TreeViewShowcase } from '../components/TreeView/TreeViewShowcase';
 import { StackShowcase } from '../components/Stack/StackShowcase';
 import { TagShowcase } from '../components/Tag/TagShowcase';
 import { SectionShowcase } from '../components/Section/SectionShowcase';
+import { RatioShowcase } from '../components/Ratio/RatioShowcase';
 import { FooterShowcase } from '../components/Footer/FooterShowcase';
 import { CopyrightShowcase } from '../components/Copyright/CopyrightShowcase';
 import { CurvedTextShowcase } from '../components/CurvedText/CurvedTextShowcase';
@@ -165,6 +166,7 @@ const NAV_ITEMS = [
       { id: 'card', label: 'Card' },
       { id: 'gradient', label: 'Gradient' },
       { id: 'box', label: 'Box' },
+      { id: 'ratio', label: 'Ratio' },
       { id: 'sheet', label: 'Sheet' },
       { id: 'accordion', label: 'Accordion' },
       { id: 'treeview', label: 'Tree View' },
@@ -377,6 +379,7 @@ function ShowcaseInner() {
             {/* ============ LAYOUT ============ */}
             {activeSection === 'stack' && <StackShowcase />}
             {activeSection === 'section' && <SectionShowcase />}
+            {activeSection === 'ratio' && <RatioShowcase />}
 
             {/* ============ SURFACES ============ */}
             {activeSection === 'card' && <CardShowcase />}

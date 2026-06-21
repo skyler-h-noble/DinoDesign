@@ -2,7 +2,7 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, bevelShadow } from '../_shadows';
+import { SHADOW_LEVEL_3, SHADOW_LEVEL_4, bevelShadow } from '../_shadows';
 
 /**
  * Fab (Floating Action Button) Component
@@ -13,10 +13,10 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, bevelShadow } from '../_shadows';
  *
  * COLORS: primary, secondary, tertiary, neutral, info, success, warning, error
  *
- * SIZES:
- *   small   40px (icon 20px)
- *   medium  48px (icon 24px) — default
- *   large   56px (icon 28px)
+ * SIZES (Figma-aligned, matched to the Icon scale):
+ *   small   32px  (Icon size="small"  → 16px)
+ *   medium  48px  (Icon size="medium" → 24px) — default
+ *   large   56px  (Icon size="large"  → 36px)
  *
  * EXTENDED: pill shape with icon + label text
  * ANIMATION: pulse ring effect when enabled
@@ -30,9 +30,9 @@ const COLOR_MAP = {
 };
 
 const SIZE_MAP = {
-  small:  { size: 40, iconSize: 20, fontSize: '13px', px: 12, gap: 6 },
+  small:  { size: 32, iconSize: 16, fontSize: '13px', px: 12, gap: 6 },
   medium: { size: 48, iconSize: 24, fontSize: '14px', px: 16, gap: 8 },
-  large:  { size: 56, iconSize: 28, fontSize: '15px', px: 20, gap: 10 },
+  large:  { size: 56, iconSize: 36, fontSize: '15px', px: 20, gap: 10 },
 };
 
 function getTokens(variant, color) {
@@ -129,7 +129,7 @@ export function Fab({
           // so the inset can't bleed into icon/label area regardless of
           // how high --Button-Bevel is set.
           '--_bevel': 'min(calc(var(--Button-Bevel) * var(--_height) / 100), calc(var(--_height) / 5))',
-          boxShadow: `${bevelShadow(color)}, ${SHADOW_LEVEL_1}`,
+          boxShadow: `${bevelShadow(color)}, ${SHADOW_LEVEL_3}`,
           // Typography
           fontSize: s.fontSize,
           fontFamily: 'inherit',
@@ -140,7 +140,7 @@ export function Fab({
           outline: 'none',
           flexShrink: 0,
           transition: 'background-color 0.15s ease, box-shadow 0.2s ease, transform 0.1s ease',
-          '&:hover': !disabled ? { backgroundColor: tokens.hover, boxShadow: `${bevelShadow(color)}, ${SHADOW_LEVEL_2}` } : {},
+          '&:hover': !disabled ? { backgroundColor: tokens.hover, boxShadow: `${bevelShadow(color)}, ${SHADOW_LEVEL_4}` } : {},
           '&:active': !disabled ? { backgroundColor: tokens.active, transform: 'scale(0.96)', boxShadow: bevelShadow(color) } : {},
           '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px' },
           // Animation

@@ -7,8 +7,9 @@ import { Box } from '@mui/material';
  * Visual separator with optional text indicator
  *
  * COLORS:
- *   default           var(--Border-Variant)
- *   {color}           var(--Buttons-{Color}-Border) for all 8 brand colors
+ *   border            var(--Border)
+ *   border-variant    var(--Border-Variant)   (also the default if no color is set)
+ *   {color}           var(--Icons-{Color}) for all 8 brand colors
  *
  * ORIENTATION: horizontal | vertical
  *
@@ -20,41 +21,49 @@ import { Box } from '@mui/material';
  * INDICATOR (optional text label centered on the divider):
  *   Works on both horizontal and vertical orientations.
  *
+ *   The pill's border always matches the divider line color (see COLORS above).
+ *   For border / border-variant / unset divider colors, the pill falls back
+ *   to the Default Tag tokens so it reads as a neutral chip.
+ *
  *   indicatorStyle="outline"
  *     BG:     var(--Background)
  *     Text:   var(--Text)
- *     Border: 1px solid var(--Buttons-{Color}-Border)
  *
  *   indicatorStyle="light"
- *     BG:     var(--Buttons-{Color}-Button)
- *     Text:   var(--Buttons-{Color}-Text)
- *     Border: 1px solid var(--Buttons-{Color}-Border)
+ *     BG:     var(--Tag-{Color}-BG)
+ *     Text:   var(--Tag-{Color}-Text)
  *
  *   textAlign (horizontal): left | center | right
  *   textAlign (vertical):   top  | center | bottom
  */
 
-const COLORS = ['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+const COLORS = ['border', 'border-variant', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 function getLineColor(color) {
-  if (!color || color === 'default') return 'var(--Border-Variant)';
-  return 'var(--Buttons-' + cap(color) + '-Border)';
+  if (!color || color === 'default' || color === 'border-variant') return 'var(--Border-Variant)';
+  if (color === 'border') return 'var(--Border)';
+  return 'var(--Icons-' + cap(color) + ')';
 }
 
 function getIndicatorStyles(color, indicatorStyle) {
-  const C = cap(color && color !== 'default' ? color : 'primary');
+  // Brand colors get their Tag/Icons tokens; surface colors (border /
+  // border-variant / unset) fall back to the Default Tag color so the
+  // pill still reads as a neutral chip.
+  const isBrand = color && !['default', 'border', 'border-variant'].includes(color);
+  const C = isBrand ? cap(color) : 'Default';
+  const borderColor = getLineColor(color);
   if (indicatorStyle === 'light') {
     return {
-      bg:     'var(--Buttons-' + C + '-Button)',
-      text:   'var(--Buttons-' + C + '-Text)',
-      border: '1px solid var(--Buttons-' + C + '-Border)',
+      bg:     'var(--Tag-' + C + '-BG)',
+      text:   'var(--Tag-' + C + '-Text)',
+      border: '1px solid ' + borderColor,
     };
   }
   return {
     bg:     'var(--Background)',
     text:   'var(--Text)',
-    border: '1px solid var(--Buttons-' + C + '-Border)',
+    border: '1px solid ' + borderColor,
   };
 }
 

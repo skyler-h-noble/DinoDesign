@@ -76,11 +76,16 @@ import { H2, H5, BodySmall, Caption, Label, OverlineSmall } from '../Typography'
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 
-const COLORS = ['default', 'quiet', 'primary', 'secondary', 'neutral', 'info', 'success', 'warning', 'error'];
 const COLOR_LABEL_MAP = {
   default: 'Default', quiet: 'Quiet', primary: 'Primary', secondary: 'Secondary',
-  neutral: 'Neutral', info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
+  tertiary: 'Tertiary', neutral: 'Neutral', info: 'Info', success: 'Success',
+  warning: 'Warning', error: 'Error',
 };
+const COLOR_GROUPS = [
+  { label: 'Default',  colors: ['default'] },
+  { label: 'Theme',    colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
+  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+];
 const STYLES = ['filled', 'outlined', 'rounded', 'twotone', 'sharp'];
 const STYLE_LABELS = { filled: 'Filled', outlined: 'Outlined', rounded: 'Rounded', twotone: 'Two Tone', sharp: 'Sharp' };
 const ICON_NAMES = ['Home', 'Favorite', 'Delete', 'Settings', 'Search', 'Star', 'Person', 'Notifications', 'Visibility', 'ShoppingCart', 'Lock', 'Info'];
@@ -169,7 +174,7 @@ export function IconShowcase() {
   const isTwoTone = style === 'twotone';
   const resolvedFontSize = size === 'custom'
     ? (parseInt(customSize, 10) || 40) + 'px'
-    : ({ small: '20px', medium: '24px', large: '36px' }[size] || '24px');
+    : ({ xs: '12px', small: '16px', medium: '24px', large: '36px' }[size] || '24px');
   const IconComp = getIconComponent(selectedIcon, style);
   const suffix = getIconSuffix(style);
   const importName = selectedIcon + suffix + 'Icon';
@@ -285,23 +290,40 @@ export function IconShowcase() {
                   {/* Color */}
                   <Box sx={{ mt: 3 }}>
                     <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
-                    <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-                      {COLORS.map((c) => {
-                        const CC = COLOR_LABEL_MAP[c];
-                        const isSel = color === c;
-                        return (
-                          <Box key={c} component="button" onClick={() => setColor(c)}
-                            aria-label={'Select ' + cap(c)} aria-pressed={isSel} title={cap(c)}
-                            sx={{ width: 'var(--Button-Height)', height: 'var(--Button-Height)', borderRadius: '4px',
-                              cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              color: 'var(--Icons-' + CC + ')', backgroundColor: 'var(--Background)',
-                              border: isSel ? '2px solid var(--Text)' : '2px solid var(--Border)',
-                              outline: isSel ? '2px solid var(--Focus-Visible)' : '2px solid transparent',
-                              outlineOffset: '1px', transition: 'transform 0.1s', '&:hover': { transform: 'scale(1.1)' } }}>
-                            <IconComp sx={{ fontSize: 18 }} />
-                          </Box>
-                        );
-                      })}
+                    <Stack spacing={1.5}>
+                      {COLOR_GROUPS.map((group) => (
+                        <Box key={group.label}>
+                          <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 4, fontWeight: 600 }}>
+                            {group.label}
+                          </Caption>
+                          <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
+                            {group.colors.map((c) => {
+                              const CC = COLOR_LABEL_MAP[c];
+                              const isSel = color === c;
+                              return (
+                                <Box key={c} component="button" onClick={() => setColor(c)}
+                                  aria-label={'Select ' + cap(c)} aria-pressed={isSel} title={cap(c)}
+                                  sx={{
+                                    width: 'var(--Button-Height)', height: 'var(--Button-Height)',
+                                    borderRadius: '4px',
+                                    backgroundColor: 'var(--Icons-' + CC + ')',
+                                    border: isSel ? '2px solid var(--Text)' : '1px solid var(--Border)',
+                                    outline: isSel ? '2px solid var(--Focus-Visible)' : '2px solid transparent',
+                                    outlineOffset: '1px',
+                                    cursor: 'pointer', flexShrink: 0,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    transition: 'transform 0.1s ease',
+                                    '&:hover': { transform: 'scale(1.1)' },
+                                  }}>
+                                  {isSel && (
+                                    <CheckIcon sx={{ fontSize: 16, color: 'var(--Background)', pointerEvents: 'none' }} />
+                                  )}
+                                </Box>
+                              );
+                            })}
+                          </Stack>
+                        </Box>
+                      ))}
                     </Stack>
                   </Box>
 
@@ -309,7 +331,7 @@ export function IconShowcase() {
                   <Box sx={{ mt: 3 }}>
                     <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</OverlineSmall>
                     <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-                      {['small','medium','large','custom'].map((s) => <ControlButton key={s} label={cap(s)} selected={size===s} onClick={() => setSize(s)} />)}
+                      {['xs','small','medium','large','custom'].map((s) => <ControlButton key={s} label={s === 'xs' ? 'XS' : cap(s)} selected={size===s} onClick={() => setSize(s)} />)}
                     </Stack>
                     {size === 'custom' && (
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1.5 }}>

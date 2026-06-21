@@ -1,120 +1,45 @@
 // src/components/Box/Box.js
 import React from 'react';
 import { Box as MuiBox } from '@mui/material';
-import { SHADOW_LEVEL_2, SHADOW_LEVEL_3, SHADOW_LEVEL_4 } from '../_shadows';
 
 /**
- * Box Component
+ * Box Component — bare layout primitive.
  *
- * Theme-aware container matching Card's two-layer structure.
+ * A theme-aware container with no visual styling of its own. Use it when you
+ * need a slot that participates in the design-system cascade (data-theme /
+ * data-surface) without inheriting any of the chrome that Ratio or Card
+ * would bring.
  *
- * VARIANTS:
- *   default   No theme. data-surface="Container". bg var(--Background).
- *   solid     data-theme="{Theme}" data-surface="Surface". bg var(--Background).
- *   light     data-theme="{Theme}-Light" data-surface="Surface". bg var(--Background).
- *   dark      data-theme="{Theme}" data-surface="Surface-Dimmest". bg var(--Background).
+ * Props:
+ *   theme      — optional data-theme override for everything inside
+ *   surface    — optional data-surface override (Surface | Container | Container-Low | etc.)
+ *   component  — root element tag (default: 'div')
+ *   children, className, sx, ...props — forwarded
  *
- * COLORS: primary | secondary | tertiary | neutral | info | success | warning | error
- *
- * STRUCTURE:
- *   Outer shell — border, border-radius, box-shadow
- *   Inner content — data-theme + data-surface, background, text
- *
- * PADDING: none | xs | sm | md | lg | xl
- * ELEVATION: Level 1 rest, Level 2 hover (when clickable or elevated)
+ * For a themed shell with border + shadow + padding, use <Ratio> (sized) or
+ * <Card> (with header/actions). Box is intentionally bare so that nested
+ * tokens resolve correctly without competing styling.
  */
-
-const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-
-const PADDING_MAP = {
-  none: 0,
-  xs: 1,
-  sm: 2,
-  md: 3,
-  lg: 4,
-  xl: 6,
-};
 
 export function Box({
   children,
-  variant = 'solid',
-  color = 'default',
-  padding = 'md',
-  elevated = false,
-  clickable = false,
-  onClick,
+  theme,
+  surface,
   component = 'div',
   className = '',
   sx = {},
   ...props
 }) {
-  const C = cap(color === 'default' ? 'Default' : color);
-
-  // Theme for inner content
-  const dataTheme = variant === 'light'
-    ? (color === 'default' ? 'Default' : C + '-Light')
-    : C;
-
-  // Surface for inner content
-  const dataSurface = variant === 'dark'
-    ? 'Surface-Dimmest'
-    : 'Surface';
-
-  const p = PADDING_MAP[padding] !== undefined ? PADDING_MAP[padding] : PADDING_MAP.md;
-  const isClickable = clickable || !!onClick;
-
-  const restShadow = elevated ? SHADOW_LEVEL_3 : SHADOW_LEVEL_2;
-  const hoverShadow = elevated ? SHADOW_LEVEL_4 : SHADOW_LEVEL_3;
-
   return (
     <MuiBox
       component={component}
-      onClick={isClickable ? onClick : undefined}
-      role={isClickable ? 'button' : undefined}
-      tabIndex={isClickable ? 0 : undefined}
-      className={'dyno-box dyno-box-' + variant +
-        (isClickable ? ' dyno-box-clickable' : '') +
-        (elevated ? ' dyno-box-elevated' : '') +
-        (className ? ' ' + className : '')}
-      sx={{
-        border: '1px solid var(--Border-Variant)',
-        borderRadius: 'var(--Style-Border-Radius)',
-        boxShadow: restShadow,
-        overflow: 'hidden',
-        transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
-        ...(isClickable && {
-          cursor: 'pointer',
-          '&:hover': {
-            borderColor: 'var(--Buttons-Default-Border)',
-            boxShadow: hoverShadow,
-          },
-          '&:active': { transform: 'scale(0.995)' },
-          '&:focus-visible': {
-            outline: '3px solid var(--Focus-Visible)',
-            outlineOffset: '3px',
-          },
-        }),
-        ...(!isClickable && {
-          '&:hover': { boxShadow: hoverShadow },
-        }),
-        ...sx,
-      }}
+      data-theme={theme || undefined}
+      data-surface={surface || undefined}
+      className={'dyno-box' + (className ? ' ' + className : '')}
+      sx={sx}
       {...props}
     >
-      {/* Inner content — scoped theme and surface */}
-      <MuiBox
-        data-theme={dataTheme || undefined}
-        data-surface={dataSurface}
-        sx={{
-          padding: p,
-          backgroundColor: 'var(--Background)',
-          color: 'var(--Text)',
-          fontFamily: 'inherit',
-          borderRadius: 'calc(var(--Style-Border-Radius) - 1px)',
-        }}
-      >
-        {children}
-      </MuiBox>
+      {children}
     </MuiBox>
   );
 }

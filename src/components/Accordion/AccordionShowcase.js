@@ -48,6 +48,12 @@ function ControlButton({ label, selected, onClick }) {
 
 function ColorSwatchButton({ color, selected, onClick }) {
   const C = cap(color);
+  // Default isn't a button-palette family — it means "Default theme on the
+  // Surface", which renders the page-surface background. Show the surface
+  // colour in the swatch so the picker matches what users actually see.
+  const isDefault = color === 'default';
+  const bg = isDefault ? 'var(--Surface)' : 'var(--Buttons-' + C + '-Button)';
+  const checkColor = isDefault ? 'var(--Text)' : 'var(--Buttons-' + C + '-Text)';
   return (
     <Box
       component="button"
@@ -57,7 +63,7 @@ function ColorSwatchButton({ color, selected, onClick }) {
       title={C}
       sx={{
         width: 'var(--Button-Height)', height: 'var(--Button-Height)', borderRadius: '4px',
-        backgroundColor: 'var(--Buttons-' + C + '-Button)',
+        backgroundColor: bg,
         border: selected ? '2px solid var(--Text)' : '1px solid var(--Border)',
         outline: selected ? '2px solid var(--Focus-Visible)' : '2px solid transparent',
         outlineOffset: '1px', cursor: 'pointer', flexShrink: 0,
@@ -65,7 +71,7 @@ function ColorSwatchButton({ color, selected, onClick }) {
         transition: 'transform 0.1s ease', '&:hover': { transform: 'scale(1.1)' },
       }}>
       {selected && (
-        <CheckIcon sx={{ fontSize: 16, color: 'var(--Buttons-' + C + '-Text)', pointerEvents: 'none' }} />
+        <CheckIcon sx={{ fontSize: 16, color: checkColor, pointerEvents: 'none' }} />
       )}
     </Box>
   );
