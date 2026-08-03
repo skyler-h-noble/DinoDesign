@@ -130,6 +130,13 @@ export function DynoStack({
         (className ? ' ' + className : '')
       }
       sx={{
+        // Paint the current surface so a Stack that carries data-theme/
+        // data-surface actually shows its background (matches Box). When no
+        // surface is set it resolves to the inherited parent color — a no-op.
+        background: 'var(--Background)',
+        // A fixed width is the OUTER width (matches a Figma frame: padding sits
+        // inside it). Without border-box, width + padding overflow the frame.
+        boxSizing: 'border-box',
         ...(needsMinGap ? { '&::before': { display: 'none' } } : {}),
         ...sx,
       }}

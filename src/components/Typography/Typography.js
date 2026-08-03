@@ -410,7 +410,7 @@ export const STYLE_MAP = {
   // ── Overline ──────────────────────────────────────────────────────────────
   'overline-small': {
     component: 'span',
-    fontFamily: ff('Body'),
+    fontFamily: ff('Decorative'),
     fontSize: fs('Overline-Small'),
     fontWeight: fw('Overline-Small'),
     lineHeight: lhr('Overline-Small'),
@@ -421,7 +421,7 @@ export const STYLE_MAP = {
   },
   overline: {
     component: 'span',
-    fontFamily: ff('Body'),
+    fontFamily: ff('Decorative'),
     fontSize: fs('Overline-Medium'),
     fontWeight: fw('Overline-Medium'),
     lineHeight: lhr('Overline-Medium'),
@@ -432,7 +432,7 @@ export const STYLE_MAP = {
   },
   'overline-medium': {
     component: 'span',
-    fontFamily: ff('Body'),
+    fontFamily: ff('Decorative'),
     fontSize: fs('Overline-Medium'),
     fontWeight: fw('Overline-Medium'),
     lineHeight: lhr('Overline-Medium'),
@@ -443,7 +443,7 @@ export const STYLE_MAP = {
   },
   'overline-large': {
     component: 'span',
-    fontFamily: ff('Body'),
+    fontFamily: ff('Decorative'),
     fontSize: fs('Overline-Large'),
     fontWeight: fw('Overline-Large'),
     lineHeight: lhr('Overline-Large'),
@@ -549,7 +549,7 @@ const HEADER_COLOR_MAP = {
 const TEXT_COLOR_MAP = {
   standard:  'var(--Text)',
   default:   'var(--Text)',
-  quiet:     'var(--Text-Quiet)',
+  quiet:     'var(--Quiet)',
   primary:   'var(--Text-Primary)',
   secondary: 'var(--Text-Secondary)',
   tertiary:  'var(--Text-Tertiary)',

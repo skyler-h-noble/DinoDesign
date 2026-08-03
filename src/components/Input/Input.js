@@ -87,16 +87,20 @@ function buildVariantMap() {
 
 // --- Sizing ------------------------------------------------------------------
 
+// The horizontal text inset is driven by --Input-Padding (the design system's
+// input padding token) so the studio's Input Padding control takes effect.
+// Vertical stays per-size; each size keeps its original horizontal value as the
+// fallback when --Input-Padding isn't defined.
 const SIZE_MAP = {
-  small:  { height: 'var(--Small-Button-Height)', fontSize: '13px', labelSize: '13px', padding: '4px 8px',  iconSize: 16 },
-  medium: { height: 'var(--Button-Height)',        fontSize: '15px', labelSize: '15px', padding: '6px 12px', iconSize: 18 },
-  large:  { height: 'var(--Large-Button-Height)',  fontSize: '17px', labelSize: '17px', padding: '8px 16px', iconSize: 20 },
+  small:  { height: 'var(--Small-Button-Height)', fontSize: '13px', labelSize: '13px', padding: '4px var(--Input-Padding, 8px)',  iconSize: 16 },
+  medium: { height: 'var(--Button-Height)',        fontSize: '15px', labelSize: '15px', padding: '4px var(--Input-Padding, 12px)', iconSize: 18 },
+  large:  { height: 'var(--Large-Button-Height)',  fontSize: '17px', labelSize: '17px', padding: '4px var(--Input-Padding, 16px)', iconSize: 20 },
 };
 
 const FLOATING_SIZE_MAP = {
-  small:  { height: '48px', fontSize: '13px', labelSize: '11px', padding: '20px 12px 4px', leftPad: 12, iconSize: 16 },
-  medium: { height: '56px', fontSize: '15px', labelSize: '12px', padding: '22px 14px 6px', leftPad: 14, iconSize: 18 },
-  large:  { height: '64px', fontSize: '17px', labelSize: '14px', padding: '24px 16px 6px', leftPad: 16, iconSize: 20 },
+  small:  { height: '48px', fontSize: '13px', labelSize: '11px', padding: '20px var(--Input-Padding, 12px) 4px', leftPad: 12, iconSize: 16 },
+  medium: { height: '56px', fontSize: '15px', labelSize: '12px', padding: '22px var(--Input-Padding, 14px) 6px', leftPad: 14, iconSize: 18 },
+  large:  { height: '64px', fontSize: '17px', labelSize: '14px', padding: '24px var(--Input-Padding, 16px) 6px', leftPad: 16, iconSize: 20 },
 };
 
 // --- Validation icons --------------------------------------------------------

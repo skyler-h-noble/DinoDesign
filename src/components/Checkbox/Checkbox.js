@@ -69,9 +69,12 @@ function buildVariantMap() {
 // --- Sizing ------------------------------------------------------------------
 
 const SIZE_MAP = {
-  small:  { box: 16, icon: 12, labelSize: '13px', gap: 6,  touchTarget: 28 },
-  medium: { box: 20, icon: 14, labelSize: '15px', gap: 8,  touchTarget: 32 },
-  large:  { box: 24, icon: 18, labelSize: '17px', gap: 10, touchTarget: 40 },
+  // touchTarget = the checkbox's frame footprint = a constant 24×24 for ALL
+  // sizes (the box is centered inside): small 16 (4px pad), medium 20 (2px pad),
+  // large 24 (0 pad). Matches the Figma component frame.
+  small:  { box: 16, icon: 12, labelSize: '13px', gap: 6,  touchTarget: 24 },
+  medium: { box: 20, icon: 14, labelSize: '15px', gap: 8,  touchTarget: 24 },
+  large:  { box: 24, icon: 18, labelSize: '17px', gap: 10, touchTarget: 24 },
 };
 
 // --- Custom Icons ------------------------------------------------------------
@@ -86,6 +89,14 @@ function CheckboxBoxIcon({ size, variant, checked, indeterminate }) {
   // Outer border always uses the themed border token
   const outerBorder = styles.borderToken;
 
+  // Corner radius scales per size via its own token (the box is 16/20/24px,
+  // radius = 20% of box). Falls back to that default set (Sm 3.2 / Md 4 /
+  // Lg 4.8px) when the brand CSS doesn't define the tokens.
+  const radiusVar =
+    size === 'small' ? 'var(--Sm-Checkbox-Radius, 3.2px)' :
+    size === 'large' ? 'var(--Lg-Checkbox-Radius, 4.8px)' :
+    'var(--Checkbox-Radius, 4px)';
+
   // Inner data attributes for light variant
   const innerAttrs = isLight
     ? { 'data-theme': styles.dataTheme, 'data-surface': 'Surface-Dim' }
@@ -97,7 +108,10 @@ function CheckboxBoxIcon({ size, variant, checked, indeterminate }) {
       sx={{
         width: sizeConfig.box,
         height: sizeConfig.box,
-        borderRadius: 'var(--Checkbox-Radius, 4px)',
+        // border sits INSIDE the box, so the rendered size equals sizeConfig.box
+        // (e.g. medium = 20×20, not 20 + 2px borders = 24).
+        boxSizing: 'border-box',
+        borderRadius: radiusVar,
         border: '2px solid ' + outerBorder,
         overflow: 'hidden',
         flexShrink: 0,

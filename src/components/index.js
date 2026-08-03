@@ -147,7 +147,7 @@ export { CircularProgress, CircularProgressShowcase } from './CircularProgress';
 export { LinearProgress, LinearProgressShowcase } from './LinearProgress';
 
 // ========== DATA DISPLAY ==========
-export { Avatar, AvatarGroup, AvatarShowcase } from './Avatar';
+export { Avatar, AvatarGroup, AvatarShowcase, DEFAULT_AVATAR_SRC } from './Avatar';
 export { Badge, BadgeShowcase } from './Badge';
 export { Divider } from './Divider';
 export { List, ListItem, ListItemDecorator } from './List';

@@ -23,7 +23,10 @@ function resolveDecorator(node, buttonSize) {
   if (!React.isValidElement(node)) return node;
   const mapping = DECORATOR_SIZE_MAP[buttonSize] || DECORATOR_SIZE_MAP.medium;
   if (node.type === DDAvatar) {
-    return React.cloneElement(node, { size: mapping.avatar });
+    // Button avatars: size to the button (small→16, medium→24, large→40) AND
+    // get 2px horizontal padding so they sit correctly beside the label /
+    // within a group segment. insideButton applies the 2px L/R margin.
+    return React.cloneElement(node, { size: mapping.avatar, insideButton: true });
   }
   if (node.type === DDIcon) {
     return React.cloneElement(node, { size: mapping.icon });
@@ -79,7 +82,7 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 // bevelShadow lives in src/components/_shadows.js so both Button and Slider
 // can share it. Consumers must set --_bevel and --_height on the element.
 
-function solidStyles(color, elevated = false) {
+function solidStyles(color, elevated = false, selected = false) {
   const C = cap(color);
   const bevel = bevelShadow(color);
   const restLevel = elevated ? SHADOW_LEVEL_1 : 'none';
@@ -100,10 +103,12 @@ function solidStyles(color, elevated = false) {
     '&:hover': {
       backgroundColor: `var(--Buttons-${C}-Hover)`,
       boxShadow: hoverShadow,
+      ...(!selected && { transform: 'translateY(-1px)' }),
     },
     '&:active': {
       backgroundColor: `var(--Buttons-${C}-Active)`,
       boxShadow: bevel, // No elevation on press
+      ...(!selected && { transform: 'translateY(0)' }),
     },
     '&.Mui-focusVisible': {
       backgroundColor: `var(--Buttons-${C}-Button)`,
@@ -116,7 +121,7 @@ function solidStyles(color, elevated = false) {
   };
 }
 
-function outlineStyles(color) {
+function outlineStyles(color, selected = false) {
   const C = cap(color);
   return {
     backgroundColor: 'transparent',
@@ -134,9 +139,11 @@ function outlineStyles(color) {
     '&:hover': {
       backgroundColor: 'var(--Hover)',
       boxShadow: 'none',
+      ...(!selected && { transform: 'translateY(-1px)' }),
     },
     '&:active': {
       backgroundColor: 'var(--Active)',
+      ...(!selected && { transform: 'translateY(0)' }),
     },
     '&.Mui-focusVisible': {
       backgroundColor: 'transparent',
@@ -146,7 +153,7 @@ function outlineStyles(color) {
   };
 }
 
-function lightStyles(color, elevated = false) {
+function lightStyles(color, elevated = false, selected = false) {
   const C = cap(color);
   const restLevel = elevated ? SHADOW_LEVEL_1 : 'none';
   const hoverLevel = elevated ? SHADOW_LEVEL_2 : SHADOW_LEVEL_1;
@@ -161,10 +168,12 @@ function lightStyles(color, elevated = false) {
     '&:hover': {
       backgroundColor: `var(--Hover-${C}-Color-11)`,
       boxShadow: hoverLevel,
+      ...(!selected && { transform: 'translateY(-1px)' }),
     },
     '&:active': {
       backgroundColor: `var(--Active-${C}-Color-11)`,
       boxShadow: 'none',
+      ...(!selected && { transform: 'translateY(0)' }),
     },
     '&.Mui-focusVisible': {
       backgroundColor: `var(--${C}-Color-11)`,
@@ -174,7 +183,7 @@ function lightStyles(color, elevated = false) {
   };
 }
 
-function ghostStyles(isTextContent) {
+function ghostStyles(isTextContent, selected = false) {
   return {
     backgroundColor: 'transparent',
     // Text ghost buttons read like links (--Hotlink). Icon-only ghosts
@@ -201,12 +210,14 @@ function ghostStyles(isTextContent) {
       // variants use --Buttons-{C}-Hover instead.
       backgroundColor: 'var(--Hover)',
       boxShadow: 'none',
+      ...(!selected && { transform: 'translateY(-1px)' }),
       ...(isTextContent
         ? { '& .btn-text-content': { textDecoration: 'none' } }
         : { color: 'var(--Text)' }),
     },
     '&:active': {
       backgroundColor: 'var(--Active)',
+      ...(!selected && { transform: 'translateY(0)' }),
       ...(isTextContent
         ? { '& .btn-text-content': { textDecoration: 'none' } }
         : { color: 'var(--Text)' }),
@@ -222,17 +233,17 @@ function ghostStyles(isTextContent) {
   };
 }
 
-function buildVariantMap(isTextContent, elevated = false) {
+function buildVariantMap(isTextContent, elevated = false, selected = false) {
   const map = {};
   COLORS.forEach((color) => {
-    map[color]                = solidStyles(color, elevated);
-    map[`${color}-outline`]   = outlineStyles(color);
-    map[`${color}-light`]     = lightStyles(color, elevated);
+    map[color]                = solidStyles(color, elevated, selected);
+    map[`${color}-outline`]   = outlineStyles(color, selected);
+    map[`${color}-light`]     = lightStyles(color, elevated, selected);
   });
-  map['danger']         = solidStyles('error', elevated);
-  map['outline']        = outlineStyles('default');
-  map['ghost']          = ghostStyles(isTextContent);
-  map['text']           = ghostStyles(isTextContent);
+  map['danger']         = solidStyles('error', elevated, selected);
+  map['outline']        = outlineStyles('default', selected);
+  map['ghost']          = ghostStyles(isTextContent, selected);
+  map['text']           = ghostStyles(isTextContent, selected);
   return map;
 }
 
@@ -303,6 +314,10 @@ export function Button({
   variant = 'default',
   size = 'medium',
   elevated = false,
+  // Pass `selected` when the button represents a toggled-on state (e.g. the
+  // active option in a ButtonGroup). Suppresses the hover translateY lift
+  // so a selected button doesn't animate when the user hovers it again.
+  selected = false,
   fullWidth = false,
   disabled = false,
   iconOnly = false,
@@ -338,7 +353,7 @@ export function Button({
     ? 'primary'
     : variant;
 
-  const variantMap     = buildVariantMap(isTextContent, elevated);
+  const variantMap     = buildVariantMap(isTextContent, elevated, selected);
   const variantStyles  = variantMap[effectiveVariant] || variantMap.default;
   const sizingStyles   = getSizingStyles({ size, iconOnly: isIconOnly, letterNumber, avatar });
 
@@ -374,7 +389,11 @@ export function Button({
           sx={{
             display: 'inline-flex',
             alignItems: 'center',
-            padding: '4px',
+            // Asymmetric bottom padding nudges the glyph baseline down 2px so
+            // ascender-heavy strings feel optically centered inside the button
+            // shell. Only applied here (outer span) — the inner Typography now
+            // renders with no padding to avoid doubling.
+            padding: '2px 4px 2px 4px',
           }}
         >
           <TypographyComp
@@ -383,7 +402,6 @@ export function Button({
               color: 'inherit',
               lineHeight: 'inherit',
               letterSpacing: 'inherit',
-              padding: '4px',
             }}
           >
             {children}
@@ -476,7 +494,7 @@ export function Button({
         lineHeight: 1,
         whiteSpace: 'nowrap',
         flexShrink: 0,
-        transition: 'background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out',
+        transition: 'background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, transform 0.15s ease-in-out',
         // _bevel = (Button-Bevel% × height) / 100, capped at 20% of height
         // so the inset highlight/lowlight can never bleed into the text band.
         // Text occupies the middle ~60% of a button; a 20% inset on each side

@@ -61,6 +61,11 @@ export function Card({
   children,
   variant = 'solid',
   color = 'default',
+  // Optional explicit surface override for the inner content. By default a
+  // default-color card uses "Container"; pass surface="Surface" when the card
+  // is actually a Surface-level region (so tokens like --Header resolve to the
+  // Surface tone, not the Container tone).
+  surface,
   size = 'medium',
   orientation = 'vertical',
   clickable = false,
@@ -91,11 +96,13 @@ export function Card({
   // Surface for inner content — Container for default-color cards so they
   // respect the consumer's card-coloring tokens; Surface (or Surface-Dimmest
   // for dark variant) for themed cards.
-  const dataSurface = isDefaultColor
-    ? 'Container'
-    : isDark
-      ? 'Surface-Dimmest'
-      : 'Surface';
+  const dataSurface = surface
+    ? surface
+    : isDefaultColor
+      ? 'Container'
+      : isDark
+        ? 'Surface-Dimmest'
+        : 'Surface';
 
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
   const isHorizontal = orientation === 'horizontal';
@@ -152,9 +159,13 @@ export function Card({
             '&:hover': {
               borderColor: 'var(--Buttons-Default-Border)',
               boxShadow: hoverShadow,
+              transform: 'translateY(-1px)',
             },
             '&:active': {
-              transform: 'scale(0.995)',
+              // Settle back from the lifted hover state AND scale slightly
+              // for the press feedback. CSS overrides `transform` whole,
+              // so both must be in one string.
+              transform: 'translateY(0) scale(0.995)',
               boxShadow: activeShadow,
             },
             '&:focus-visible': {
@@ -191,7 +202,12 @@ export function Card({
         } : undefined}
         {...props}
       >
-        {/* Inner content — scoped theme and surface */}
+        {/* Inner content — scoped theme and surface. `borderRadius: inherit`
+            picks up the outer Card's rounding (whatever --Card-Radius
+            resolves to under the active theme) so the two always agree,
+            even if the token changes. The outer also has overflow:hidden,
+            so nested images/media get clipped to the outer's rounded
+            corners without needing extra math here. */}
         <Box
           data-theme={dataTheme || undefined}
           data-surface={dataSurface}
@@ -204,7 +220,7 @@ export function Card({
             color: 'var(--Text)',
             fontSize: s.fontSize,
             fontFamily: 'inherit',
-            borderRadius: 'calc(var(--Card-Radius) - 1px)',
+            borderRadius: 'inherit',
             position: 'relative',
             flex: 1,
             minWidth: 0,

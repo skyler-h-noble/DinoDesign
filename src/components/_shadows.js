@@ -20,24 +20,40 @@
 // invalidates the entire box-shadow per CSS spec.
 const DS = 'var(--Dropshadow-Color, 20, 20, 20)';
 
+// ─── Layered shadow geometry (Shadow Palette model, as built in Figma) ───────
+// MUST stay identical to the studio generator at
+// dinodesign-studio/src/utils/dropshadow.ts (LEVEL_LAYERS) and the Figma effect
+// styles. Level N stacks N layers with growing offset (angled: offsetX =
+// offsetY/2, blur = offsetY, NO spread). Layer i uses --Dropshadow-Color-(i+1)
+// — tight contact = Color-1 (strongest), larger layers = higher/fainter tokens.
+// Each color falls back to the aggregate --Dropshadow-Color at that token's
+// alpha so the box-shadow stays valid outside a themed scope. Tuples are
+// [offsetX, offsetY, blur].
+const _LEVEL_LAYERS = {
+  1: [[0.5, 1, 1]],
+  2: [[1, 2, 2], [2, 4, 4]],
+  3: [[1, 2, 2], [2, 4, 4], [3, 6, 6]],
+  4: [[1, 2, 2], [2, 4, 4], [4, 8, 8], [8, 16, 16]],
+  5: [[1, 2, 2], [2, 4, 4], [4, 8, 8], [8, 16, 16], [16, 32, 32]],
+};
+const _ALPHAS = [0.20, 0.17, 0.15, 0.13, 0.11];
+
+function _buildShadow(level) {
+  return _LEVEL_LAYERS[level]
+    .map(([x, y, blur], i) => {
+      const n = i + 1;
+      const color = `var(--Dropshadow-Color-${n}, rgba(${DS}, ${_ALPHAS[i]}))`;
+      return `${x}px ${y}px ${blur}px ${color}`;
+    })
+    .join(', ');
+}
+
 export const SHADOW_LEVEL_0 = 'none';
-
-export const SHADOW_LEVEL_1 =
-  `0 1px 2px rgba(${DS}, 0.58)`;
-
-// Inner sublayer matches Level-1 (0.58) so Level-2 visually composes
-// from a Level-1 base with an additional larger, more diffused layer.
-export const SHADOW_LEVEL_2 =
-  `0 2px 4px rgba(${DS}, 0.22), 0 1px 2px rgba(${DS}, 0.58)`;
-
-export const SHADOW_LEVEL_3 =
-  `0 4px 8px rgba(${DS}, 0.17), 0 2px 4px rgba(${DS}, 0.22)`;
-
-export const SHADOW_LEVEL_4 =
-  `0 8px 16px rgba(${DS}, 0.13), 0 4px 8px rgba(${DS}, 0.17)`;
-
-export const SHADOW_LEVEL_5 =
-  `0 16px 32px rgba(${DS}, 0.1), 0 8px 16px rgba(${DS}, 0.13)`;
+export const SHADOW_LEVEL_1 = _buildShadow(1);
+export const SHADOW_LEVEL_2 = _buildShadow(2);
+export const SHADOW_LEVEL_3 = _buildShadow(3);
+export const SHADOW_LEVEL_4 = _buildShadow(4);
+export const SHADOW_LEVEL_5 = _buildShadow(5);
 
 // Keyed map for dynamic level lookup (e.g. SHADOWS[level])
 export const SHADOWS = {
@@ -70,8 +86,18 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export function bevelShadow(color) {
   const C = cap(color);
+  // The 4th value (spread) is a NEGATIVE --_bevel. Without it the inset shadow
+  // blooms out to offset+blur (~2×--_bevel) and reads far too large; the
+  // negative spread pulls it back so the highlight/lowlight stay a tight edge.
+  //
+  // Highlight/Lowlight are full COLORS (hex). Opacity is applied via color-mix
+  // with --Button-Bevel-Opacity — NOT rgba(), which would reject a hex token
+  // and silently fall back to black (the cause of the over-dark hosted bevel).
+  // Lowlight falls back to black, highlight to white.
+  const mix = (token, fallback) =>
+    `color-mix(in srgb, var(${token}, ${fallback}) calc(var(--Button-Bevel-Opacity, 0.5) * 100%), transparent)`;
   return [
-    `inset calc(-1 * var(--_bevel)) calc(-1 * var(--_bevel)) var(--_bevel) rgba(var(--Buttons-${C}-Lowlight, 0, 0, 0), var(--Button-Bevel-Opacity, 0.5))`,
-    `inset var(--_bevel) var(--_bevel) var(--_bevel) rgba(var(--Buttons-${C}-Highlight, 0, 0, 0), var(--Button-Bevel-Opacity, 0.5))`,
+    `inset calc(-1 * var(--_bevel)) calc(-1 * var(--_bevel)) var(--_bevel) calc(-1 * var(--_bevel)) ${mix(`--Buttons-${C}-Lowlight`, 'black')}`,
+    `inset var(--_bevel) var(--_bevel) var(--_bevel) calc(-1 * var(--_bevel)) ${mix(`--Buttons-${C}-Highlight`, 'white')}`,
   ].join(', ');
 }

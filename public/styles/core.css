@@ -3,6 +3,25 @@
  * Platform-aware font overrides referencing brand tokens via var().
  * Edit by hand; do NOT overwrite from studio exports.
  * ============================================================================ */
+
+/* Any region that carries data-surface paints from the surface tokens it
+   exposes. This is the "data-surface is the only way to change a region's
+   background" contract — a consumer just sets data-surface="…" and the
+   region paints itself. No more inline `background: var(--Background)` on
+   every section wrapper. */
+[data-surface] {
+  background: var(--Background);
+  color: var(--Text);
+}
+
+/* Body inherits the default surface pair so the app root paints without any
+   explicit wrapper. Consumers that want a different root paint just set
+   data-surface on <body> or a wrapping <div>. */
+body {
+  background: var(--Background);
+  color: var(--Text);
+}
+
 :root {
   --Body-Font-Family: var(--Set-Font-Family-Body);
   --Font-Family-Body: var(--Set-Font-Family-Body);

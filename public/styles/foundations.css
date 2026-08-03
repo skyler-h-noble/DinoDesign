@@ -27,15 +27,31 @@
   --Style-Gradient-Color-2: var(--Buttons-Primary-Button);
   --Style-Gradient-Angle: 0;
 
+  --Sizing-Quarter: 2px;
+  --Sizing-Half: 4px;
   --Sizing-1: 8px;
+  --Sizing-1-and-Half: 12px;
   --Sizing-2: 16px;
+  --Sizing-2-and-Half: 20px;
   --Sizing-3: 24px;
   --Sizing-4: 32px;
-  --Sizing-Half: 4px;
-  --Sizing-Quarter: 2px;
-  --Sizing-Negative-1: -8px;
-  --Sizing-Negative-Half: -4px;
+  --Sizing-5: 40px;
+  --Sizing-6: 48px;
+  --Sizing-7: 56px;
+  --Sizing-8: 64px;
+  --Sizing-9: 72px;
+  --Sizing-10: 80px;
+  --Sizing-11: 88px;
+  --Sizing-12: 96px;
+  --Sizing-13: 104px;
+  --Sizing-14: 112px;
+  --Sizing-15: 120px;
+  --Sizing-16: 128px;
+  --Sizing-20: 160px;
+  --Sizing-30: 240px;
   --Sizing-Negative-Quarter: -2px;
+  --Sizing-Negative-Half: -4px;
+  --Sizing-Negative-1: -8px;
   --Sizing-Negative-1-and-Half: -12px;
   --Min-Stack-Gap: 0px;
 }

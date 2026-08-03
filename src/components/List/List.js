@@ -1,7 +1,7 @@
 // src/components/List/List.js
 import React from 'react';
 import { Box, Checkbox, Radio } from '@mui/material';
-import { OverlineSmall, SubtitleLarge, Body } from '../Typography';
+import { OverlineSmall, SubtitleLarge, Body, BodySmallSemibold } from '../Typography';
 
 // Default three-layer typography for the text frame. Order is top→bottom:
 //   overline  — OverlineSmall  (optional metadata kicker on top)
@@ -11,8 +11,8 @@ import { OverlineSmall, SubtitleLarge, Body } from '../Typography';
 // so plain "Home" / "Inbox" rows still look like titles, not metadata.
 const DEFAULT_LAYERS = {
   overline:  OverlineSmall,
-  title:     SubtitleLarge,
-  secondary: Body,
+  title:     Body,                // children / name → Body-Medium
+  secondary: BodySmallSemibold,   // supporting / role → Body-Small-Semibold
 };
 
 const SOLID_THEME_MAP = {
@@ -39,7 +39,7 @@ const LIGHT_THEME_MAP = {
 
 const SIZE_MAP = {
   small:  { py: 0.5, px: 1.5, fontSize: '13px', iconSize: 16, decoratorSize: 28, gap: 1, checkSize: 'small' },
-  medium: { py: 1,   px: 2,   fontSize: '14px', iconSize: 20, decoratorSize: 36, gap: 1.5, checkSize: 'small' },
+  medium: { py: 1,   px: 1,   fontSize: '14px', iconSize: 20, decoratorSize: 36, gap: 1.5, checkSize: 'small' },
   large:  { py: 1.5, px: 2.5, fontSize: '16px', iconSize: 24, decoratorSize: 40, gap: 2, checkSize: 'medium' },
 };
 
@@ -81,7 +81,7 @@ export function ListItem({
   size = 'medium', variant = 'default', color,
   // Three stacked text layers — children is the title (SubtitleLarge),
   // secondary is supporting body (Body), overline is the optional kicker
-  // on top (OverlineSmall). Vstacked with var(--Sizing-Half) (4px) gap.
+  // on top (OverlineSmall). Vstacked with no gap (line-height carries rhythm).
   overline, secondary,
   clickable = false, disabled = false, selected = false,
   selectionMode = 'none', onSelect, onClick,
@@ -130,12 +130,14 @@ export function ListItem({
         alignItems: 'flex-start',
         justifyContent: 'flex-start',
         width: '100%',
+        // Include padding in the 100% width so the row fills — not overflows —
+        // its parent (without this, width:100% + 16px L/R padding spills 32px).
+        boxSizing: 'border-box',
         gap: 'var(--Sizing-1-and-Half)',
         py: s.py, px: s.px,
         minHeight: '32px',
         fontSize: s.fontSize, fontFamily: 'inherit', color: 'var(--Text)', listStyle: 'none',
         cursor: isFocusable ? 'pointer' : 'default', opacity: disabled ? 0.5 : 1,
-        borderRadius: 'var(--Input-Radius)',
         position: 'relative',
         transition: 'background-color 0.15s ease, box-shadow 0.15s ease',
         // Card chrome — only when the row is clickable. Non-clickable rows
@@ -145,14 +147,15 @@ export function ListItem({
           border: '1px solid var(--Border)',
           boxShadow: 'var(--Effect-Level-1)',
           padding: 'var(--Sizing-1)',
+          borderRadius: 'var(--Input-Radius)',
         } : {}),
         // Non-clickable separators — single hairline at the edge the user
         // requested. Mutually exclusive with card chrome above.
         ...(!isClickable && bottomBorder ? {
-          borderBottom: '1px solid var(--Border)',
+          borderBottom: '1px solid var(--Border-Variant)',
         } : {}),
         ...(!isClickable && rightBorder ? {
-          borderRight: '1px solid var(--Border)',
+          borderRight: '1px solid var(--Border-Variant)',
         } : {}),
         backgroundColor: selected ? 'var(--Hover)' : 'transparent',
         '&:hover':         isFocusable ? { backgroundColor: 'var(--Hover)',  boxShadow: 'var(--Effect-Level-2)' } : {},
@@ -216,10 +219,12 @@ export function ListItem({
             minWidth: 0,
             display: 'flex',
             flexDirection: 'column',
-            gap: 'var(--Sizing-Half)',
+            // Text layers (overline → title → secondary) stack with NO gap —
+            // line-height carries the rhythm; matches the Figma text frame.
+            gap: 0,
           }}>
             {overline && (
-              <Layers.overline style={{ ...lineSx, color: 'var(--Text-Quiet)' }}>
+              <Layers.overline style={{ ...lineSx, color: 'var(--Quiet)' }}>
                 {overline}
               </Layers.overline>
             )}
@@ -229,7 +234,7 @@ export function ListItem({
               </Layers.title>
             )}
             {secondary && (
-              <Layers.secondary style={{ ...lineSx, color: 'var(--Text-Quiet)' }}>
+              <Layers.secondary style={{ ...lineSx, color: 'var(--Quiet)' }}>
                 {secondary}
               </Layers.secondary>
             )}
@@ -338,6 +343,7 @@ export function List({
       {...wrapperDataAttrs}
       className={'list-container list-' + variant + ' list-' + color + ' ' + className}
       sx={{ display: 'flex', flexDirection: isHorizontal ? 'row' : 'column',
+        boxSizing: 'border-box',
         // Stretch in both orientations:
         //   • vertical → items span full width
         //   • horizontal → items match the tallest sibling's height, so

@@ -59,7 +59,16 @@ export function ButtonGroup({
   disabled = false,
   orientation = 'horizontal',
   spacing = 0,
-  fullWidth = false,
+  // fit — the group's WIDTH variant (in Figma, a "Width"/"Fit" variant property):
+  //   'hug'   (default) each button sizes to its own content
+  //   'fill'  group fills its container; buttons share the width equally
+  //   'equal' group HUGS its content but every button matches the WIDEST one
+  //           (horizontal group laid out as inline-grid with equal 1fr columns,
+  //           whose fr tracks resolve to the widest column's max-content; a
+  //           vertical group already equalizes width via alignItems:stretch).
+  fit,
+  fullWidth = false,    // back-compat alias → fit="fill"
+  equalWidth = false,   // back-compat alias → fit="equal"
 
   // Selection
   value: controlledValue,
@@ -80,6 +89,12 @@ export function ButtonGroup({
   const isConnected  = spacing === 0;
   const isLight      = variant === 'light';
   const isGhost      = variant === 'ghost';
+
+  // Resolve the width variant (fit) from the prop or the back-compat booleans.
+  const fitMode = fit ?? (fullWidth ? 'fill' : equalWidth ? 'equal' : 'hug');
+  const isFill  = fitMode === 'fill';
+  const isEqual = fitMode === 'equal';
+  const useGrid = isEqual && isHorizontal;   // equal-width-hug uses an inline-grid
 
   const C            = cap(color);                               // 'Default', 'Primary', …
   const btnBorder    = 'var(--Buttons-' + C + '-Border)';
@@ -130,10 +145,21 @@ export function ButtonGroup({
     } : {};
 
     // ── Selected styles ───────────────────────────────────────────────────
+    // The selected segment is already "on" — it must NOT change on hover.
+    // Without this, it inherits the solid Button's &:hover (which paints
+    // var(--Buttons-{C}-Hover), a near-white scrim) and flips light on hover.
     const selectedSx = isSelected ? {
       backgroundColor:  btnBg    + ' !important',
       color:            btnText  + ' !important',
       borderColor:      btnBorder + ' !important',
+      // The selected segment is "on" — freeze it across hover, active (press)
+      // AND focus so it never picks up the solid Button's hover/active scrim.
+      // Only unselected segments should react to :hover / :active.
+      '&:hover, &:active, &.Mui-focusVisible, &:focus-visible': {
+        backgroundColor: btnBg    + ' !important',
+        color:           btnText  + ' !important',
+        borderColor:     btnBorder + ' !important',
+      },
     } : {};
 
     // ── Unselected styles ─────────────────────────────────────────────────
@@ -158,6 +184,13 @@ export function ButtonGroup({
     } : {};
 
     const buttonSx = {
+      // Grid items stretch to fill their 1fr cell via the default
+      // justify-self:stretch — do NOT set width:100% here. An explicit
+      // width:100% fixes each segment to exactly the cell width, so the
+      // -Button-Border-Width marginLeft only makes neighbors TOUCH (two 2px
+      // borders side by side = a 4px double border). Letting them stretch lets
+      // that negative margin OVERLAP the shared edge into a single border —
+      // the same collapse the flex (hug/fill) modes already get.
       ...positionalSx,
       ...selectedSx,
       ...unselectedSx,
@@ -214,11 +247,25 @@ export function ButtonGroup({
       aria-label={ariaLabel}
       className={'btn-group btn-group-' + variant + ' btn-group-' + color + ' ' + className}
       sx={{
-        display:        fullWidth ? 'flex' : 'inline-flex',
-        flexDirection:  isHorizontal ? 'row' : 'column',
-        alignItems:     'stretch',
+        ...(useGrid
+          ? {
+              // equal-width-hug: inline-grid, equal 1fr columns → every button
+              // matches the widest; inline-grid shrink-wraps so the group hugs.
+              display:        isFill ? 'grid' : 'inline-grid',
+              gridAutoFlow:   'column',
+              gridAutoColumns:'1fr',
+              justifyItems:   'stretch',   // buttons fill their column width (equal)
+              alignItems:     'stretch',   // buttons fill the row height → if one
+                                           // wraps to 2 lines, all match the tallest
+              width:          isFill ? '100%' : 'fit-content',
+            }
+          : {
+              display:        isFill ? 'flex' : 'inline-flex',
+              flexDirection:  isHorizontal ? 'row' : 'column',
+              alignItems:     'stretch',
+              width:          isFill ? '100%' : 'auto',
+            }),
         gap:            isConnected ? 0 : spacing,
-        width:          fullWidth ? '100%' : 'auto',
         border:         containerBorder,
         borderRadius:   'var(--Style-Border-Radius)',
         // No overflow:hidden — would clip button borders, focus rings, and

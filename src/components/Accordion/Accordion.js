@@ -69,7 +69,7 @@ export function AccordionGroup({
           className={'accordion-group accordion-group-' + variant + ' ' + className}
           sx={{
             border: '1px solid var(--Border-Variant)',
-            borderRadius: 'var(--Style-Border-Radius)',
+            borderRadius: 'var(--Button-Radius)',
             overflow: 'hidden',
             boxShadow: SHADOW_LEVEL_2,
             ...sx,
@@ -81,7 +81,7 @@ export function AccordionGroup({
             data-surface={dataSurface}
             sx={{
               backgroundColor: 'var(--Background)',
-              borderRadius: 'calc(var(--Style-Border-Radius) - 1px)',
+              borderRadius: 'calc(var(--Button-Radius) - 1px)',
             }}
           >
             {children}
@@ -165,7 +165,7 @@ export function Accordion({
     return (
       <Box sx={{
         border: '1px solid var(--Border-Variant)',
-        borderRadius: 'var(--Style-Border-Radius)',
+        borderRadius: 'var(--Button-Radius)',
         overflow: 'hidden',
         boxShadow: SHADOW_LEVEL_2,
       }}>
@@ -174,7 +174,7 @@ export function Accordion({
           data-surface={dataSurface}
           sx={{
             backgroundColor: 'var(--Background)',
-            borderRadius: 'calc(var(--Style-Border-Radius) - 1px)',
+            borderRadius: 'calc(var(--Button-Radius) - 1px)',
           }}
         >
           {content}

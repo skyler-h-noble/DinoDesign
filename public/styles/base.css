@@ -227,6 +227,9 @@
 
 :root {
   --Button-Radius: 8px;
+  /* Structural default so outline borders render even when no brand CSS is
+     loaded (the studio chrome). A brand's generated base.css overrides this. */
+  --Button-Border-Width: 2px;
   --Card-Radius: 11px;
   --Card-Padding: 16px;
 }

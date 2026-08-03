@@ -157,7 +157,7 @@ function CopyButton({ code }) {
   );
 }
 function ControlButton({ label, selected, onClick }) {
-  return <Button variant={selected ? 'primary' : 'primary-outline'} size="small" onClick={onClick}>{label}</Button>;
+  return <Button selected={selected} variant={selected ? 'primary' : 'primary-outline'} size="small" onClick={onClick}>{label}</Button>;
 }
 
 export function IconShowcase() {

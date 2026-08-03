@@ -1,6 +1,8 @@
 // src/components/Ratio/Ratio.js
 import React from 'react';
 import { Box as MuiBox } from '@mui/material';
+import ImageIcon from '@mui/icons-material/Image';
+import { Icon } from '../Icon/Icon';
 import { SHADOW_LEVEL_2, SHADOW_LEVEL_3, SHADOW_LEVEL_4 } from '../_shadows';
 
 /**
@@ -72,6 +74,16 @@ export function Ratio({
   variant = 'default',
   color = 'default',
   padding = 'none',
+  // fit="width" (default): fills the parent's width, height derives from the
+  // ratio. fit="height": fills the parent's height, width derives from the
+  // ratio — for fixed-height rows / horizontal layouts.
+  fit = 'width',
+  // placeholder: this slot is INTENDED to hold an image. Defaults to TRUE, so an
+  // empty Ratio (no child) renders the Image Placeholder by default — a fill
+  // frame with a large centered photo icon (background var(--Border), icon
+  // var(--Background)). A supplied child (real image) always wins. Pass
+  // placeholder={false} for an empty slot with no placeholder.
+  placeholder = true,
   elevated = false,
   clickable = false,
   onClick,
@@ -84,6 +96,10 @@ export function Ratio({
 }) {
   const aspect = RATIO_MAP[ratio] || RATIO_MAP['1:1'];
   const C = cap(color === 'default' ? 'Default' : color);
+
+  // Show the Image Placeholder when this slot is meant for an image
+  // (placeholder) but no child (no assigned/valid image) was provided.
+  const showPlaceholder = placeholder && React.Children.count(children) === 0;
 
   // data-theme/data-surface for the inner content — mirrors Box.
   const dataTheme = variant === 'light'
@@ -114,11 +130,24 @@ export function Ratio({
         // width. The shell carries border, radius, and elevation so the
         // shape is preserved while the inner layer handles theme tokens.
         aspectRatio: aspect,
-        width: '100%',
+        // fit drives which dimension fills the parent; the other derives from
+        // the aspect ratio. flex:0 0 auto keeps a flex parent (a list row, an
+        // HStack) from growing or shrinking the slot, so the aspect-ratio holds
+        // and the derived axis isn't distorted. For fit="height" the PARENT must
+        // have a definite height for height:100% to resolve. The min on the
+        // filled axis is a floor so the box never collapses to nothing inside a
+        // hugging parent. All overridable via sx.
+        flex: '0 0 auto',
+        ...(fit === 'height'
+          ? { height: '100%', width: 'auto', minHeight: 24 }
+          : { width: '100%', height: 'auto', minWidth: 24 }),
         ...(maxWidth !== undefined && { maxWidth }),
         ...(maxHeight !== undefined && { maxHeight }),
         border: isDefault ? 'none' : '1px solid var(--Border-Variant)',
-        borderRadius: 'var(--Style-Border-Radius)',
+        // Default variant is a bare, SQUARE media slot (no radius) — matches a
+        // plain Ratio in the design. Styled variants (solid/light/dark) keep
+        // the brand radius for their card-like chrome.
+        borderRadius: isDefault ? 0 : 'var(--Style-Border-Radius)',
         boxShadow: isDefault ? 'none' : restShadow,
         overflow: 'hidden',
         transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
@@ -150,14 +179,24 @@ export function Ratio({
           width: '100%',
           height: '100%',
           padding: p,
-          backgroundColor: 'var(--Background)',
+          // Image Placeholder fills with var(--Border); else the normal surface.
+          backgroundColor: showPlaceholder ? 'var(--Border)' : 'var(--Background)',
           color: 'var(--Text)',
           fontFamily: 'inherit',
           borderRadius: isDefault ? 0 : 'calc(var(--Style-Border-Radius) - 1px)',
-          '& > *': { width: '100%', height: '100%' },
+          // Center the placeholder icon; otherwise let a single child fill.
+          ...(showPlaceholder
+            ? { display: 'flex', alignItems: 'center', justifyContent: 'center' }
+            : { '& > *': { width: '100%', height: '100%' } }),
         }}
       >
-        {children}
+        {showPlaceholder ? (
+          // Centered photo icon — lib <Icon> at the large (36px) size, colored
+          // var(--Background) so it reads against the var(--Border) fill.
+          <Icon size="large" sx={{ color: 'var(--Background)' }}>
+            <ImageIcon />
+          </Icon>
+        ) : children}
       </MuiBox>
     </MuiBox>
   );

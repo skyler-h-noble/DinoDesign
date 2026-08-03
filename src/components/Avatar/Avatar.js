@@ -3,12 +3,17 @@ import React, { useState } from 'react';
 import { Box } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import { Icon } from '../Icon/Icon';
-import { ButtonExtraSmall, ButtonSmall, Button as ButtonTypography, BodyLarge, H4 } from '../Typography';
+import { Legal, LegalSemibold, NumberSmall, NumberMedium, NumberLarge } from '../Typography';
+import { DEFAULT_AVATAR_SRC } from './defaultAvatar';
 
 /**
  * Avatar Component
  *
- * CONTENT (priority): photo (src) → initials → icon (defaults to Person)
+ * CONTENT (priority): real src → initials → explicit icon → DEFAULT PHOTO.
+ *   The default avatar IS the photo: a bare <Avatar /> shows the built-in photo.
+ *   The three Figma variants map to: bare <Avatar /> (photo), initials="…"
+ *   (initials), icon={…} (icon). defaultPhoto={false} restores the Person-icon
+ *   fallback for a bare avatar.
  *
  * SIZES (Figma-aligned):
  *   xxx-small  16   |  xx-small  24   |  x-small   32   |  small  40
@@ -55,23 +60,40 @@ const SIZE_MAP = {
   'xx-large':  { size: 160, iconSize: 80 },
 };
 
-// Typography choice per size — bigger avatars get bigger initials.
+// Typography choice per size — bigger avatars get bigger initials. Mapping per
+// the design spec:
+//   xxx-small → Legal (Standard), forced to 7px (see the render)
+//   xx-small  → Legal Semibold
+//   x-small / small        → Number Small
+//   medium / large         → Number Medium
+//   x-large / xx-large     → Number Large
 function getInitialsComponent(size) {
-  if (size === 'xxx-small' || size === 'xx-small')       return ButtonExtraSmall;
-  if (size === 'x-small'   || size === 'small')          return ButtonSmall;
-  if (size === 'medium'    || size === 'large')          return ButtonTypography;
-  if (size === 'x-large')                                return BodyLarge;
-  if (size === 'xx-large')                               return H4;
-  return ButtonTypography; // sensible default for 'custom' or unknown
+  switch (size) {
+    case 'xxx-small': return Legal;          // fontSize overridden to 7px below
+    case 'xx-small':  return LegalSemibold;
+    case 'x-small':
+    case 'small':     return NumberSmall;
+    case 'medium':
+    case 'large':     return NumberMedium;
+    case 'x-large':
+    case 'xx-large':  return NumberLarge;
+    default:          return NumberMedium;   // 'custom' / unknown
+  }
 }
 
 export function Avatar({
   src,
+  // The DEFAULT avatar IS the photo: a bare <Avatar /> shows the lib's built-in
+  // photo. `src` (a real URL) always wins; `initials` or an explicit `icon`
+  // override the photo (those are the other two variants). Pass
+  // defaultPhoto={false} to suppress the photo and fall back to the Person icon.
+  defaultPhoto = true,
   alt,
   initials,
   icon,
   color = 'default',
-  size = 'medium',
+  // Default size is x-small (XS, 32px) per the design spec's default avatar.
+  size = 'x-small',
   customSize,
   clickable = false,
   onClick,
@@ -89,7 +111,11 @@ export function Avatar({
     : (SIZE_MAP[size] || SIZE_MAP.medium);
   const C = COLOR_MAP[color] || COLOR_MAP.default;
 
-  const hasSrc = src && !imgError;
+  // Photo source: an explicit src wins; otherwise the built-in default photo —
+  // but only when there's no initials and no explicit icon, so those two
+  // variants still take precedence over the default photo.
+  const effectiveSrc = src || (defaultPhoto && !initials && !icon ? DEFAULT_AVATAR_SRC : undefined);
+  const hasSrc = effectiveSrc && !imgError;
   const hasInitials = !hasSrc && initials;
   const isFallback = !hasSrc && !hasInitials;
   const isClickable = clickable || !!onClick;
@@ -121,7 +147,9 @@ export function Avatar({
         fontFamily: 'inherit', fontWeight: 600,
         overflow: 'hidden',
         flexShrink: 0,
-        border: '2px solid ' + borderColor,
+        // Photo variant has NO border — the image is the visual. Initials/icon
+        // variants keep the 2px themed border for a visible boundary.
+        border: hasSrc ? 'none' : '2px solid ' + borderColor,
         // Inside-button breathing room. Pure margin so the avatar's circular
         // silhouette doesn't get pushed into an ellipse by padding.
         ...(insideButton && { marginLeft: '2px', marginRight: '2px' }),
@@ -142,7 +170,7 @@ export function Avatar({
       {hasSrc && (
         <Box
           component="img"
-          src={src}
+          src={effectiveSrc}
           alt={alt || 'Avatar'}
           onError={() => setImgError(true)}
           sx={{
@@ -158,12 +186,15 @@ export function Avatar({
           <TextComp
             style={{
               color: 'inherit',
-              fontWeight: 600,
+              // No fontWeight override — each chosen typography (Legal vs
+              // Legal-Semibold vs Number-*) carries its own weight per the spec.
               lineHeight: 1,
               textAlign: 'center',
               // Tiny top-pad optically centers caps inside the circle since
               // cap-height sits slightly above the geometric center.
               paddingTop: '2px',
+              // xxx-small (16px) avatar: Legal Standard at a forced 7px.
+              ...(size === 'xxx-small' && { fontSize: '7px' }),
             }}
             aria-hidden="true"
           >

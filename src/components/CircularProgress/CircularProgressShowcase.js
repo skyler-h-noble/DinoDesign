@@ -46,7 +46,7 @@ function CopyButton({ code }) {
 function ControlButton({ label, selected, onClick }) {
   return (
     <Button
-      variant={selected ? 'default' : 'default-outline'}
+      selected={selected} variant={selected ? 'default' : 'default-outline'}
       size="small"
       onClick={onClick}
     >

@@ -80,7 +80,11 @@ export function Footer({
       }}
       {...rest}
     >
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '56px 24px 32px' }}>
+      {/* Bottom padding runs slightly heavier than top so the copyright /
+          fine-print row below the columns has clear breathing room from the
+          edge — mirrors the classic footer rhythm where the visual base is
+          weightier than the top hairline. */}
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 24px 56px' }}>
         {brand && <div style={{ marginBottom: 36 }}>{brand}</div>}
 
         <div

@@ -261,7 +261,7 @@ export function Select({
         width: dropdownPos.width + 'px',
         backgroundColor: 'var(--Hover)',
         border: '1px solid var(--Buttons-Default-Border)',
-        borderRadius: '4px',
+        borderRadius: 'var(--Input-Radius, var(--Style-Border-Radius, 4px))',
         boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
         zIndex: 99999,
         maxHeight: DROPDOWN_MAX_HEIGHT + 'px',
@@ -407,7 +407,9 @@ export function Select({
       {/* Outer border shell */}
       <Box sx={{
         border: '1px solid ' + borderToken,
-        borderRadius: 'var(--Style-Border-Radius)',
+        // Select is an input → follow the Input Radius, falling back to the
+        // button/style radius when a design system doesn't define it.
+        borderRadius: 'var(--Input-Radius, var(--Style-Border-Radius))',
         overflow: 'hidden',
         transition: 'border-color 0.15s ease',
         boxShadow: SHADOW_LEVEL_1,
