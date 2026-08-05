@@ -39,7 +39,7 @@ function solidStyles(color) {
     text:     'var(--Buttons-' + C + '-Text)',
     border:   'none',
     hoverBg:  'var(--Buttons-' + C + '-Hover)',
-    activeBg: 'var(--Buttons-' + C + '-Active)',
+    activeBg: 'var(--Buttons-' + C + '-Pressed)',
   };
 }
 
@@ -61,7 +61,7 @@ function lightStyles(color) {
     text:     'var(--Buttons-' + C + '-Text)',
     border:   '1px solid var(--Buttons-' + C + '-Border)',
     hoverBg:  'var(--Buttons-' + C + '-Hover)',
-    activeBg: 'var(--Buttons-' + C + '-Active)',
+    activeBg: 'var(--Buttons-' + C + '-Pressed)',
   };
 }
 

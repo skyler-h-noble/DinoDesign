@@ -154,7 +154,7 @@ export function AppBarShowcase() {
     data.border       = getCssVar('--Border');
     data.focusVisible = getCssVar('--Focus-Visible');
     data.hover        = getCssVar('--Hover');
-    data.active       = getCssVar('--Active');
+    data.active       = getCssVar('--Pressed');
     setContrastData(data);
   }, [barColor, surface, mode]);
 
@@ -356,10 +356,10 @@ export function AppBarShowcase() {
                         note="Icon buttons use var(--Hover) on hover"
                       />
                       <A11yRow
-                        label="On active: var(--Text) vs. var(--Active)"
+                        label="On active: var(--Text) vs. var(--Pressed)"
                         ratio={getContrast(contrastData.text, contrastData.active)}
                         threshold={4.5}
-                        note="Icon buttons use var(--Active) on press"
+                        note="Icon buttons use var(--Pressed) on press"
                       />
                     </Box>
 

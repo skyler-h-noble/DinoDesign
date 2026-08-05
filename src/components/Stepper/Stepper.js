@@ -14,9 +14,9 @@ import { BodySmall, Caption } from '../Typography';
  *
  * COLORS: 8 brand colors → maps to var(--Buttons-{Color}-*) tokens
  *   Selected:   bg var(--Buttons-{C}-Button), text var(--Buttons-{C}-Text),
- *               hover var(--Buttons-{C}-Hover), active var(--Buttons-{C}-Active)
+ *               hover var(--Buttons-{C}-Hover), active var(--Buttons-{C}-Pressed)
  *   Unselected: bg transparent, text var(--Text),
- *               hover var(--Hover), active var(--Active)
+ *               hover var(--Hover), active var(--Pressed)
  *   Border:     var(--Buttons-{C}-Border) always
  *   Focus:      var(--Focus-Visible)
  *
@@ -125,7 +125,7 @@ export function Step({
   const bgToken = (isActive || isCompleted) ? 'var(--Buttons-' + C + '-Button)' : 'transparent';
   const textToken = (isActive || isCompleted) ? 'var(--Buttons-' + C + '-Text)' : 'var(--Text)';
   const hoverToken = (isActive || isCompleted) ? 'var(--Buttons-' + C + '-Hover)' : 'var(--Hover)';
-  const activeToken = (isActive || isCompleted) ? 'var(--Buttons-' + C + '-Active)' : 'var(--Active)';
+  const activeToken = (isActive || isCompleted) ? 'var(--Buttons-' + C + '-Pressed)' : 'var(--Pressed)';
 
   const indicatorEl = (
     <Box

@@ -34,7 +34,7 @@ import { DEFAULT_AVATAR_SRC } from './defaultAvatar';
  * CLICKABLE:
  *   Border:  var(--Buttons-Default-Border)
  *   Hover:   var(--Buttons-Default-Hover)
- *   Active:  var(--Buttons-Default-Active)
+ *   Active:  var(--Buttons-Default-Pressed)
  *   Focus:   var(--Focus-Visible)
  */
 
@@ -160,7 +160,7 @@ export function Avatar({
           padding: 0,
           transition: 'background-color 0.15s ease, border-color 0.15s ease',
           '&:hover': { backgroundColor: hasSrc ? 'rgba(0,0,0,0.08)' : 'var(--Buttons-Default-Hover)' },
-          '&:active': { backgroundColor: hasSrc ? 'rgba(0,0,0,0.15)' : 'var(--Buttons-Default-Active)' },
+          '&:active': { backgroundColor: hasSrc ? 'rgba(0,0,0,0.15)' : 'var(--Buttons-Default-Pressed)' },
           '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px' },
         }),
         ...sx,

@@ -106,7 +106,7 @@ function solidStyles(color, elevated = false, selected = false) {
       ...(!selected && { transform: 'translateY(-1px)' }),
     },
     '&:active': {
-      backgroundColor: `var(--Buttons-${C}-Active)`,
+      backgroundColor: `var(--Buttons-${C}-Pressed)`,
       boxShadow: bevel, // No elevation on press
       ...(!selected && { transform: 'translateY(0)' }),
     },
@@ -129,7 +129,7 @@ function outlineStyles(color, selected = false) {
     border: `var(--Button-Border-Width) solid var(--Buttons-${C}-Border)`,
     boxShadow: 'none',
     // Outline (like Ghost) has no fill of its own, so its hover/active
-    // feedback comes from the surface --Hover / --Active scrim — a
+    // feedback comes from the surface --Hover / --Pressed scrim — a
     // subtle tone-aware overlay that reads correctly on any surface
     // tone. Using --Buttons-{C}-Hover would paint a solid colored
     // background and lose the "outline" character of the variant.
@@ -142,7 +142,7 @@ function outlineStyles(color, selected = false) {
       ...(!selected && { transform: 'translateY(-1px)' }),
     },
     '&:active': {
-      backgroundColor: 'var(--Active)',
+      backgroundColor: 'var(--Pressed)',
       ...(!selected && { transform: 'translateY(0)' }),
     },
     '&.Mui-focusVisible': {
@@ -171,7 +171,7 @@ function lightStyles(color, elevated = false, selected = false) {
       ...(!selected && { transform: 'translateY(-1px)' }),
     },
     '&:active': {
-      backgroundColor: `var(--Active-${C}-Color-11)`,
+      backgroundColor: `var(--Pressed-${C}-Color-11)`,
       boxShadow: 'none',
       ...(!selected && { transform: 'translateY(0)' }),
     },
@@ -204,7 +204,7 @@ function ghostStyles(isTextContent, selected = false) {
       color: 'var(--Hover)',
     },
     '&:hover': {
-      // Ghost and Outline use the surface --Hover / --Active scrim by
+      // Ghost and Outline use the surface --Hover / --Pressed scrim by
       // design — they're the only variants without a fill of their own,
       // so they need a tone-aware overlay tint to indicate hover. Solid
       // variants use --Buttons-{C}-Hover instead.
@@ -216,7 +216,7 @@ function ghostStyles(isTextContent, selected = false) {
         : { color: 'var(--Text)' }),
     },
     '&:active': {
-      backgroundColor: 'var(--Active)',
+      backgroundColor: 'var(--Pressed)',
       ...(!selected && { transform: 'translateY(0)' }),
       ...(isTextContent
         ? { '& .btn-text-content': { textDecoration: 'none' } }
@@ -393,7 +393,7 @@ export function Button({
             // ascender-heavy strings feel optically centered inside the button
             // shell. Only applied here (outer span) — the inner Typography now
             // renders with no padding to avoid doubling.
-            padding: '2px 4px 2px 4px',
+            padding: '4px 4px 2px 4px',
           }}
         >
           <TypographyComp

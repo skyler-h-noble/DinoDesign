@@ -90,13 +90,13 @@ function getItemSx(d) {
 
       '&:active': {
         color:           'var(--Text)',
-        backgroundColor: 'var(--Active)',
+        backgroundColor: 'var(--Pressed)',
       },
 
       '&.Mui-selected': {
         color:           'var(--Text)',
         fontWeight:      600,
-        backgroundColor: 'var(--Active)',
+        backgroundColor: 'var(--Pressed)',
         padding:         '0 8px',
         '&:hover': {
           backgroundColor: 'var(--Hover)',

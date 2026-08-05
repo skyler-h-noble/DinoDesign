@@ -18,7 +18,7 @@ import { BodySmall, Caption } from '../Typography';
  *   Default:  2px dashed var(--Buttons-Default-Border), border-radius 32px
  *   Hover:    border-color var(--Buttons-Primary-Border), bg var(--Hover)
  *   Dragging: border-color var(--Buttons-Primary-Border), bg var(--Hover)
- *   Active:   bg var(--Active)
+ *   Active:   bg var(--Pressed)
  *   Focus:    3px solid var(--Focus-Visible), offset 3px
  *   Disabled: opacity 0.5, not interactive
  *
@@ -140,7 +140,7 @@ export function DropZone({
             borderColor: 'var(--Buttons-Primary-Border)',
           },
           '&:active': {
-            backgroundColor: 'var(--Active)',
+            backgroundColor: 'var(--Pressed)',
             borderColor: 'var(--Buttons-Primary-Border)',
           },
           '&:focus-visible': {

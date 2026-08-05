@@ -46,7 +46,7 @@ Colors: `primary` `secondary` `tertiary` `neutral` `info` `success` `warning` `e
 | `color` (text)     | `var(--Buttons-{Color}-Text)`      |
 | `box-shadow`       | `var(--Shadow-1), var(--Shadow-2), var(--Effect-Level-3)` |
 | `:hover` bg        | `var(--Buttons-{Color}-Hover)`     |
-| `:active` bg       | `var(--Buttons-{Color}-Active)`    |
+| `:active` bg       | `var(--Buttons-{Color}-Pressed)`    |
 | `:focus-visible`   | `var(--Focus-Visible)` (as bg)     |
 | Ripple color       | `var(--Buttons-{Color}-Hover)`     |
 
@@ -59,7 +59,7 @@ Colors: `primary` `secondary` `tertiary` `neutral` `info` `success` `warning` `e
 | `color` (text)     | `var(--Text)`                             |
 | `box-shadow`       | `none`                                    |
 | `:hover` bg        | `var(--Buttons-Primary-Hover)`            |
-| `:active` bg       | `var(--Buttons-Primary-Active)`           |
+| `:active` bg       | `var(--Buttons-Primary-Pressed)`           |
 | `:focus-visible`   | `var(--Focus-Visible)` (as bg)            |
 | Ripple color       | `var(--Surface-Dim)`                      |
 
@@ -75,8 +75,8 @@ Colors: `primary` `secondary` `tertiary` `neutral` `info` `success` `warning` `e
 | `color` (text)     | `var(--Text-{Color}-Color-11)`            |
 | `box-shadow`       | `var(--Shadow-1), var(--Shadow-2), var(--Effect-Level-3)` |
 | `:hover` bg        | `var(--Hover-{Color}-Color-11)`           |
-| `:active` bg       | `var(--Active-{Color}-Color-11)`          |
-| `:focus-visible`   | `var(--Active-{Color}-Color-11)` (as bg)  |
+| `:active` bg       | `var(--Pressed-{Color}-Color-11)`          |
+| `:focus-visible`   | `var(--Pressed-{Color}-Color-11)` (as bg)  |
 | Ripple color       | `var(--Hover-{Color}-Color-11)`           |
 
 ### Ghost — `variant="ghost"` (also `variant="text"`)
@@ -90,8 +90,8 @@ Colors: `primary` `secondary` `tertiary` `neutral` `info` `success` `warning` `e
 | `box-shadow`           | `none`                                     |
 | `:hover` bg            | `var(--Background-Hover)`                  |
 | `:hover` text-decor    | `none`                                     |
-| `:active` bg           | `var(--Background-Active)`                 |
-| `:focus-visible` bg    | `var(--Background-Active)`                 |
+| `:active` bg           | `var(--Background-Pressed)`                 |
+| `:focus-visible` bg    | `var(--Background-Pressed)`                 |
 | Ripple color           | `var(--Background-Hover)`                  |
 
 > Ghost buttons are **not compatible** with `avatar` or `swatch` content types. The component
@@ -347,7 +347,7 @@ import { Tooltip } from '@mui/material';
 --{Color}-Color-11             Light variant background
 --Text-{Color}-Color-11        Light variant text color
 --Hover-{Color}-Color-11       Light variant hover background
---Active-{Color}-Color-11      Light variant active background
+--Pressed-{Color}-Color-11      Light variant active background
 
 --Hotlink                      Ghost text color
 --Background-Hover             Ghost hover background

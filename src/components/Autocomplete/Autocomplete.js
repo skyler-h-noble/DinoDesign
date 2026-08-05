@@ -365,7 +365,7 @@ export function Autocomplete({
                     cursor: 'pointer', fontSize: sizeConfig.fontSize, fontFamily: 'inherit',
                     ...styles,
                     transition: 'background-color 0.1s ease',
-                    '&:active': { backgroundColor: 'var(--Active)' },
+                    '&:active': { backgroundColor: 'var(--Pressed)' },
                   }}>
                   <BodySmall style={{ flex: 1, color: 'inherit', fontWeight: 'inherit' }}>{optLabel}</BodySmall>
                   {isSelected && <Icon size="small" sx={{ opacity: 0.6, flexShrink: 0 }}><CheckIcon /></Icon>}

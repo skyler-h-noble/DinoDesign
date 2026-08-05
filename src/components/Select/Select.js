@@ -299,7 +299,7 @@ export function Select({
                   ...styles,
                   transition: 'background-color 0.1s ease',
                   '&:hover': !isSelected ? { backgroundColor: 'var(--Buttons-' + C + '-Hover)', color: 'var(--Buttons-' + C + '-Text)' } : {},
-                  '&:active': !isSelected ? { backgroundColor: 'var(--Buttons-' + C + '-Active)', color: 'var(--Buttons-' + C + '-Text)' } : {},
+                  '&:active': !isSelected ? { backgroundColor: 'var(--Buttons-' + C + '-Pressed)', color: 'var(--Buttons-' + C + '-Text)' } : {},
                   '&:focus-visible': {
                     outline: '2px solid var(--Focus-Visible)',
                     outlineOffset: '2px',

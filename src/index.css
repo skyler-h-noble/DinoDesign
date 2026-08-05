@@ -8,7 +8,7 @@ html, body {
   box-sizing: border-box;
 }
 
-body {
+body, section {
   background: var(--Background);
   color: var(--Text);
 }

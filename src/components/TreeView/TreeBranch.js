@@ -136,7 +136,7 @@ export function TreeBranch({
           outline: 'none',
           transition: 'background-color 0.15s ease, color 0.15s ease',
           '&:hover': !disabled ? { backgroundColor: 'var(--Hover)' } : {},
-          '&:active': !disabled ? { backgroundColor: 'var(--Active)' } : {},
+          '&:active': !disabled ? { backgroundColor: 'var(--Pressed)' } : {},
           '&:focus-visible': {
             // 3px outline, sitting 2px inside the branch edge.
             outline: '3px solid var(--Focus-Visible)',

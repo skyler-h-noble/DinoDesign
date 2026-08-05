@@ -43,7 +43,7 @@ function getTokens(variant, color) {
       text: 'var(--Buttons-' + C + '-Light-Text)',
       border: 'var(--Buttons-' + C + '-Light-Border)',
       hover: 'var(--Buttons-' + C + '-Light-Hover)',
-      active: 'var(--Buttons-' + C + '-Light-Active)',
+      active: 'var(--Buttons-' + C + '-Light-Pressed)',
     };
   }
   return {
@@ -51,7 +51,7 @@ function getTokens(variant, color) {
     text: 'var(--Buttons-' + C + '-Text)',
     border: 'var(--Buttons-' + C + '-Border)',
     hover: 'var(--Buttons-' + C + '-Hover)',
-    active: 'var(--Buttons-' + C + '-Active)',
+    active: 'var(--Buttons-' + C + '-Pressed)',
   };
 }
 

@@ -319,7 +319,7 @@ export function ChipShowcase() {
       data.chipText = getCssVar('--Buttons-' + C + '-Text');
       data.chipBorder = style === 'light' ? getCssVar('--Buttons-' + C + '-Border') : null;
       data.hover = getCssVar('--Buttons-' + C + '-Hover');
-      data.active = getCssVar('--Buttons-' + C + '-Active');
+      data.active = getCssVar('--Buttons-' + C + '-Pressed');
     } else if (style === 'outline') {
       data.chipBg = getCssVar('--Background');
       data.chipText = getCssVar('--Text');

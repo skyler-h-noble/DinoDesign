@@ -22,7 +22,7 @@ import { BodySmall, Caption } from '../Typography';
  *   Selected:   text var(--Text), fontWeight 600
  *   Indicator (3px): var(--Buttons-{Color}-Border) for standard, var(--Text) for solid/light/dark
  *   Hover: var(--Hover)
- *   Active: var(--Active)
+ *   Active: var(--Pressed)
  *   Focus: 3px inset var(--Focus-Visible)
  *   TabList border: var(--Border-Variant)
  *
@@ -223,7 +223,7 @@ export function TabList({
     flexShrink: 0,
     transition: 'color 0.15s ease, background-color 0.15s ease',
     '&:hover': { color: 'var(--Text)', backgroundColor: 'var(--Hover)' },
-    '&:active': { backgroundColor: 'var(--Active)' },
+    '&:active': { backgroundColor: 'var(--Pressed)' },
     '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '-3px' },
     '&:disabled': { opacity: 0.3, cursor: 'default', '&:hover': { backgroundColor: 'transparent', color: 'var(--Text-Quiet)' } },
   };
@@ -426,7 +426,7 @@ export function Tab({
             backgroundColor: 'var(--Hover)',
           },
           '&:active': {
-            backgroundColor: 'var(--Active)',
+            backgroundColor: 'var(--Pressed)',
           },
           '&:focus-visible': {
             outline: '3px solid var(--Focus-Visible)',

@@ -395,7 +395,7 @@ export function ButtonShowcase() {
         data.buttonText   = v('--Buttons-' + C + '-Text');
         data.buttonBorder = v('--Buttons-' + C + '-Border');
         data.hover        = v('--Buttons-' + C + '-Hover');
-        data.active       = v('--Buttons-' + C + '-Active');
+        data.active       = v('--Buttons-' + C + '-Pressed');
         // Hover/active are overlays on the button fill
         data.hoverBase    = data.buttonBg;
         data.activeBase   = data.buttonBg;
@@ -404,7 +404,7 @@ export function ButtonShowcase() {
         data.buttonText   = v('--Text');
         data.buttonBorder = v('--Buttons-' + C + '-Border');
         data.hover        = v('--Buttons-' + C + '-Hover');
-        data.active       = v('--Buttons-' + C + '-Active');
+        data.active       = v('--Buttons-' + C + '-Pressed');
         // Hover/active overlays sit on the page background
         data.hoverBase    = data.background;
         data.activeBase   = data.background;
@@ -413,7 +413,7 @@ export function ButtonShowcase() {
         data.buttonText   = v('--Hotlink');
         data.buttonBorder = null; // transparent
         data.hover        = v('--Hover');
-        data.active       = v('--Active');
+        data.active       = v('--Pressed');
         data.hoverBase    = data.background;
         data.activeBase   = data.background;
       }

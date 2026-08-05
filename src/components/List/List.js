@@ -159,7 +159,7 @@ export function ListItem({
         } : {}),
         backgroundColor: selected ? 'var(--Hover)' : 'transparent',
         '&:hover':         isFocusable ? { backgroundColor: 'var(--Hover)',  boxShadow: 'var(--Effect-Level-2)' } : {},
-        '&:active':        isFocusable ? { backgroundColor: 'var(--Active)', boxShadow: 'var(--Effect-Level-1)' } : {},
+        '&:active':        isFocusable ? { backgroundColor: 'var(--Pressed)', boxShadow: 'var(--Effect-Level-1)' } : {},
         // Inset focus ring rendered as a pseudo-element so the corner
         // radius (--Input-Inner-Focus-Visible = Input-Radius minus 1px)
         // can differ from the row's outer radius. A CSS `outline` follows

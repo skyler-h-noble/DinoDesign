@@ -192,7 +192,7 @@ export function NumberField({
     cursor: 'pointer', outline: 'none', flexShrink: 0, border: 'none',
     transition: 'background-color 0.15s ease',
     '&:hover': { backgroundColor: 'var(--Buttons-' + C + '-Hover)' },
-    '&:active': { backgroundColor: 'var(--Buttons-' + C + '-Active)' },
+    '&:active': { backgroundColor: 'var(--Buttons-' + C + '-Pressed)' },
     '&:focus-visible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px' },
     '&:disabled': { opacity: 0.4, cursor: 'not-allowed' },
   };

@@ -22,7 +22,7 @@ import { Box } from '@mui/material';
  *   Unselected text:           var(--Text-Quiet)
  *   Hover (unselected) bg:     var(--Hover)
  *   Hover (unselected) text:   var(--Text)
- *   Active (unselected) bg:    var(--Active)
+ *   Active (unselected) bg:    var(--Pressed)
  *   Focus ring:                var(--Focus-Visible)
  *
  * ─── SELECTION ───────────────────────────────────────────────────────────────
@@ -172,7 +172,7 @@ export function ButtonGroup({
         zIndex:          1,
       },
       '&:active': {
-        backgroundColor: 'var(--Active)',
+        backgroundColor: 'var(--Pressed)',
         color:           'var(--Buttons-Default-Text)',
       },
     } : {};

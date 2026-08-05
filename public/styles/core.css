@@ -17,7 +17,7 @@
 /* Body inherits the default surface pair so the app root paints without any
    explicit wrapper. Consumers that want a different root paint just set
    data-surface on <body> or a wrapping <div>. */
-body {
+body, section {
   background: var(--Background);
   color: var(--Text);
 }
