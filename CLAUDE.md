@@ -344,13 +344,23 @@ import {
 ```jsx
 // variant: 'primary' | 'secondary' | 'tertiary' | 'neutral' |
 //          'info' | 'success' | 'warning' | 'error' |
+//          'black-white' |
 //          + '-outline' + '-light' variants | 'ghost' | 'text'
+//          ('black-white' has solid + outline only — see below)
 // size: 'small' | 'medium' | 'large'
 <Button variant="primary" size="medium" startIcon={<AddIcon />}>
   Save Changes
 </Button>
 <Button variant="primary-outline">Cancel</Button>
 <Button variant="primary-light">Secondary Action</Button>
+
+// black-white resolves itself against whatever it is placed on: black on a
+// light surface, white on a dark one, with a label that always clears 4.5:1.
+// Works on every theme and surface with no prop change.
+<Button variant="black-white">Works anywhere</Button>
+<Button variant="black-white-outline">Also anywhere</Button>
+// No 'black-white-light': that variant reads --<Color>-Color-11, and
+// black-white is a resolved pair rather than a palette, so it has no tones.
 ```
 
 ### ButtonGroup

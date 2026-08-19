@@ -84,8 +84,14 @@ export const SHADOWS = {
 // handle size, applied to .MuiSlider-thumb::before).
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
+// Colour names whose TOKEN segment is not just the capitalised prop.
+// `black-white` would capitalise to `Black-white` and point at a token that
+// does not exist; the design system emits --Buttons-BlackWhite-*.
+export const TOKEN_SEGMENT = { 'black-white': 'BlackWhite' };
+export const tokenSegment = (color) => TOKEN_SEGMENT[color] || cap(color);
+
 export function bevelShadow(color) {
-  const C = cap(color);
+  const C = tokenSegment(color);
   // The 4th value (spread) is a NEGATIVE --_bevel. Without it the inset shadow
   // blooms out to offset+blur (~2×--_bevel) and reads far too large; the
   // negative spread pulls it back so the highlight/lowlight stay a tight edge.

@@ -5,7 +5,7 @@ import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography, Butto
 import { Avatar as DDAvatar } from '../Avatar/Avatar';
 import { Icon as DDIcon } from '../Icon/Icon';
 import { Badge as DDBadge } from '../Badge/Badge';
-import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, bevelShadow } from '../_shadows';
+import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, bevelShadow, tokenSegment } from '../_shadows';
 
 // Auto-size mapping for start/end decorators based on Button size
 const DECORATOR_SIZE_MAP = {
@@ -74,6 +74,11 @@ function resolveDecorator(node, buttonSize) {
 const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
+// `black-white` capitalises to `Black-white`, which is not a token. The design
+// system emits --Buttons-BlackWhite-*, so token names go through the shared
+// mapping in _shadows.js rather than through cap() directly.
+const seg = tokenSegment;
+
 // ─── Effect Levels (from base.css) ──────────────────────────────────────────
 // Normal buttons:   Level 1 resting, Level 2 hover
 // Elevated buttons: Level 2 resting, Level 3 hover
@@ -83,7 +88,7 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 // can share it. Consumers must set --_bevel and --_height on the element.
 
 function solidStyles(color, elevated = false, selected = false) {
-  const C = cap(color);
+  const C = seg(color);
   const bevel = bevelShadow(color);
   const restLevel = elevated ? SHADOW_LEVEL_1 : 'none';
   const hoverLevel = elevated ? SHADOW_LEVEL_2 : SHADOW_LEVEL_1;
@@ -122,7 +127,7 @@ function solidStyles(color, elevated = false, selected = false) {
 }
 
 function outlineStyles(color, selected = false) {
-  const C = cap(color);
+  const C = seg(color);
   return {
     backgroundColor: 'transparent',
     color: 'var(--Text)',
@@ -240,6 +245,17 @@ function buildVariantMap(isTextContent, elevated = false, selected = false) {
     map[`${color}-outline`]   = outlineStyles(color, selected);
     map[`${color}-light`]     = lightStyles(color, elevated, selected);
   });
+  // Black/white — solid and outline only.
+  //
+  // Not a member of COLORS on purpose: that loop also builds `-light`, which
+  // reads --<C>-Color-11, and BlackWhite has no tonal ramp to take a Color-11
+  // from. Solid and outline need only --Buttons-BlackWhite-{Button,Text,Border,
+  // Hover,Pressed,Highlight,Lowlight}, which the system emits in every theme
+  // and surface block — so the button resolves to black on a light surface and
+  // white on a dark one wherever it is placed, with no prop change.
+  map['black-white']         = solidStyles('black-white', elevated, selected);
+  map['black-white-outline'] = outlineStyles('black-white', selected);
+
   map['danger']         = solidStyles('error', elevated, selected);
   map['outline']        = outlineStyles('default', selected);
   map['ghost']          = ghostStyles(isTextContent, selected);
@@ -389,11 +405,7 @@ export function Button({
           sx={{
             display: 'inline-flex',
             alignItems: 'center',
-            // Asymmetric bottom padding nudges the glyph baseline down 2px so
-            // ascender-heavy strings feel optically centered inside the button
-            // shell. Only applied here (outer span) — the inner Typography now
-            // renders with no padding to avoid doubling.
-            padding: '4px 4px 2px 4px',
+            padding: '4px',
           }}
         >
           <TypographyComp
