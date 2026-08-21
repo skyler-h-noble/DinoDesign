@@ -48,7 +48,7 @@ import { Box } from '@mui/material';
  *   info | success | warning | error
  *
  * TEXT COLORS (all other styles):
- *   default | quiet | primary | secondary | tertiary | neutral |
+ *   default | quiet | eyebrow | primary | secondary | tertiary | neutral |
  *   info | success | warning | error
  *
  * WIDTH:
@@ -416,7 +416,7 @@ export const STYLE_MAP = {
     lineHeight: lhr('Overline-Small'),
     letterSpacing: ls('Overline-Small'),
     textTransform: 'uppercase',
-    defaultColor: 'quiet',
+    defaultColor: 'eyebrow',
     defaultWidth: 'hug',
   },
   overline: {
@@ -427,7 +427,7 @@ export const STYLE_MAP = {
     lineHeight: lhr('Overline-Medium'),
     letterSpacing: ls('Overline-Medium'),
     textTransform: 'uppercase',
-    defaultColor: 'quiet',
+    defaultColor: 'eyebrow',
     defaultWidth: 'hug',
   },
   'overline-medium': {
@@ -438,7 +438,7 @@ export const STYLE_MAP = {
     lineHeight: lhr('Overline-Medium'),
     letterSpacing: ls('Overline-Medium'),
     textTransform: 'uppercase',
-    defaultColor: 'quiet',
+    defaultColor: 'eyebrow',
     defaultWidth: 'hug',
   },
   'overline-large': {
@@ -449,7 +449,7 @@ export const STYLE_MAP = {
     lineHeight: lhr('Overline-Large'),
     letterSpacing: ls('Overline-Large'),
     textTransform: 'uppercase',
-    defaultColor: 'quiet',
+    defaultColor: 'eyebrow',
     defaultWidth: 'hug',
   },
 
@@ -550,6 +550,18 @@ const TEXT_COLOR_MAP = {
   standard:  'var(--Text)',
   default:   'var(--Text)',
   quiet:     'var(--Quiet)',
+  // The eyebrow's own role. The design system publishes --Eyebrow per theme
+  // AND per surface — it is a deliberate rotation off the surface's palette
+  // (Primary borrows Secondary, Secondary borrows Tertiary, state themes
+  // borrow black/white), not a muted Text. Rendering an overline as --Quiet
+  // threw that away and painted every eyebrow the same grey.
+  //
+  // The --Quiet fallback is for design systems generated before --Eyebrow
+  // existed: their CSS has no such token, and without it every overline in
+  // those systems would fall back to inherited colour. It resolves to another
+  // BRAND token rather than a hardcoded value, so the lib still defines
+  // nothing the brand CSS owns.
+  eyebrow:   'var(--Eyebrow, var(--Quiet))',
   primary:   'var(--Text-Primary)',
   secondary: 'var(--Text-Secondary)',
   tertiary:  'var(--Text-Tertiary)',
@@ -578,7 +590,7 @@ function resolveColor(textStyle, color, defaultColor) {
 export const TYPOGRAPHY_STYLES = Object.keys(STYLE_MAP);
 
 export const HEADER_COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
-export const TEXT_COLORS   = ['default', 'quiet', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+export const TEXT_COLORS   = ['default', 'quiet', 'eyebrow', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
 
 // ─── Core Component ───────────────────────────────────────────────────────────
 
