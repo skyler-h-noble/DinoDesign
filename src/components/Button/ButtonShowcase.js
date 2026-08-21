@@ -22,7 +22,7 @@ const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info'
 const COLOR_GROUPS = [
   { label: 'Default', colors: ['default'] },
   { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
-  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+  { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
 ];
 const STYLES = ['solid', 'outline', 'ghost'];
 const CONTENT_TYPES = ['text', 'number', 'letter', 'icon', 'swatch'];

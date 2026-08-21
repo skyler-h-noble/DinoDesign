@@ -124,8 +124,7 @@ export function SearchField({
         overflow: 'hidden',
         opacity: disabled ? 0.5 : 1,
         transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
-        boxShadow: SHADOW_LEVEL_1,
-        '&:hover': { boxShadow: SHADOW_LEVEL_2 },
+        boxShadow: 'none',
         width: '100%',
         '&:focus-within': {
           outline: '2px solid var(--Focus-Visible)',

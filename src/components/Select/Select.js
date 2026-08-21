@@ -262,7 +262,7 @@ export function Select({
         backgroundColor: 'var(--Hover)',
         border: '1px solid var(--Buttons-Default-Border)',
         borderRadius: 'var(--Input-Radius, var(--Style-Border-Radius, 4px))',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+        boxShadow: 'none',
         zIndex: 99999,
         maxHeight: DROPDOWN_MAX_HEIGHT + 'px',
         overflowY: 'auto',
@@ -412,8 +412,7 @@ export function Select({
         borderRadius: 'var(--Input-Radius, var(--Style-Border-Radius))',
         overflow: 'hidden',
         transition: 'border-color 0.15s ease',
-        boxShadow: SHADOW_LEVEL_1,
-        '&:hover': { boxShadow: SHADOW_LEVEL_2 },
+        boxShadow: 'none',
         '&:focus-within': {
           outline: '2px solid var(--Focus-Visible)',
           outlineOffset: '2px',

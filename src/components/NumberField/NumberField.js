@@ -238,9 +238,8 @@ export function NumberField({
               ? 'var(--Lg-Input-Radius, var(--Input-Radius, var(--Style-Border-Radius)))'
               : 'var(--Input-Radius, var(--Style-Border-Radius))',
           overflow: 'hidden',
-          transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
-          boxShadow: SHADOW_LEVEL_1,
-          '&:hover': { boxShadow: SHADOW_LEVEL_2 },
+          transition: 'border-color 0.15s ease',
+          boxShadow: 'none',
           opacity: disabled ? 0.5 : 1,
           '&:focus-within': {
             outline: '2px solid var(--Focus-Visible)',

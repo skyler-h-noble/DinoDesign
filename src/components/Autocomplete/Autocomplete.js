@@ -210,8 +210,7 @@ export function Autocomplete({
             : 'var(--Input-Radius, var(--Style-Border-Radius))',
         overflow: 'hidden',
         transition: 'border-color 0.15s ease',
-        boxShadow: SHADOW_LEVEL_1,
-        '&:hover': { boxShadow: SHADOW_LEVEL_2 },
+        boxShadow: 'none',
         opacity: disabled ? 0.5 : 1,
         '&:focus-within': {
           outline: '2px solid var(--Focus-Visible)',
@@ -334,7 +333,7 @@ export function Autocomplete({
           backgroundColor: 'var(--Hover)',
           border: '1px solid var(--Buttons-Default-Border)',
           borderRadius: 'var(--Style-Border-Radius)',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+          boxShadow: 'none',
           zIndex: 9999, maxHeight: 240, overflowY: 'auto', py: 0.5,
         }}>
           {loading ? (

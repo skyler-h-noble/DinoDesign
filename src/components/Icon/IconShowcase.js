@@ -84,7 +84,7 @@ const COLOR_LABEL_MAP = {
 const COLOR_GROUPS = [
   { label: 'Default',  colors: ['default'] },
   { label: 'Theme',    colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
-  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+  { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
 ];
 const STYLES = ['filled', 'outlined', 'rounded', 'twotone', 'sharp'];
 const STYLE_LABELS = { filled: 'Filled', outlined: 'Outlined', rounded: 'Rounded', twotone: 'Two Tone', sharp: 'Sharp' };

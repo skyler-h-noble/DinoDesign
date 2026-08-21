@@ -102,10 +102,10 @@ export function TransferList({
     return (
       // OUTER: fill — the panel takes equal share of the parent row.
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        {/* MIDDLE: hug, Card-Radius, Level-2 shadow */}
+        {/* MIDDLE: hug, Card-Radius, no shadow (inputs & dropdowns are flat) */}
         <Box sx={{
           borderRadius: 'var(--Card-Radius)',
-          boxShadow: SHADOW_LEVEL_2,
+          boxShadow: 'none',
         }}>
           {/* INNER FRAME: Container surface, bg, 1px border, Card-Radius,
               vstack with no gap. Header → Divider → List flow. */}

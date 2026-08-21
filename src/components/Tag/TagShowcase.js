@@ -10,7 +10,7 @@ import { Tag, TAG_COLORS, TAG_COLOR_TOKEN_MAP } from './Tag';
 const COLOR_GROUPS = [
   { label: 'Default',  colors: ['default'] },
   { label: 'Theme',    colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
-  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+  { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
 ];
 import { Button } from '../Button/Button';
 import { Switch } from '../Switch/Switch';

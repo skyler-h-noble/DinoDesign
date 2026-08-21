@@ -23,7 +23,7 @@ const DARK_COLORS  = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 
 const COLOR_GROUPS = [
   { label: 'Default', colors: ['default'] },
   { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
-  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+  { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
 ];
 
 const SOLID_THEME_MAP = {

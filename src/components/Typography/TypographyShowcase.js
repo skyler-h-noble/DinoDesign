@@ -75,12 +75,12 @@ const HEADING_STYLES = new Set(['display-large', 'display-small', 'h1', 'h2', 'h
 const HEADER_COLOR_GROUPS = [
   { label: 'Default',  colors: ['default'] },
   { label: 'Theme',    colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
-  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+  { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
 ];
 const TEXT_COLOR_GROUPS = [
   { label: 'Default',  colors: ['default', 'quiet'] },
   { label: 'Theme',    colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
-  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+  { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
 ];
 
 // Build grouped Select options from STYLE_GROUPS + STYLE_LABELS

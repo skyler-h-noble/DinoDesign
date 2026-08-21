@@ -19,7 +19,7 @@ const COLOR_GROUPS = [
   { label: 'Default', colors: ['default'] },
   { label: 'Theme', colors: ['primary', 'secondary', 'tertiary'] },
   { label: 'Core', colors: ['white', 'black'] },
-  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+  { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
 ];
 
 const ICONS = [HomeIcon, CodeIcon, CheckCircleOutlineIcon, StarIcon, GridViewIcon, ComputerIcon];
