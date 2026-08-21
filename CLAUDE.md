@@ -266,6 +266,67 @@ var(--Set-Font-Family-Body-Bold-Weight)
 var(--Set-Font-Family-Decorative)
 ```
 
+### Page setup — the system styles NO bare elements
+
+Loading the CSS changes nothing on its own. There is no `body`, `html`, `p`,
+`h1` or `*` rule in any of the six files — only custom properties and opt-in
+`.typography-*` classes. That is deliberate: a design system that restyled
+`body` just by being imported would change a page nobody asked it to change.
+
+So set the page defaults yourself, once:
+
+```css
+body {
+  font-family: var(--Font-Family-Body);
+  font-size:   var(--Body-Medium-Font-Size);
+  font-weight: var(--Font-Weight-Body);
+  line-height: var(--Body-Medium-Line-Height);
+}
+```
+
+Colour is separate. `--Text` and `--Background` are only defined under
+`[data-theme]`, so a bare `body` cannot resolve them — either theme the body
+(`<body data-theme="Default" data-surface="Surface">`) or leave colour to the
+themed regions inside it. Type tokens have no such requirement; they resolve at
+`:root`.
+
+The alternative to a `body` rule is `class="typography-body"` on the elements
+that want it — same tokens, explicit rather than global.
+
+**`data-platform` is OPTIONAL.** `core.css` defines every `--Font-Family-*` at
+`:root`, so text resolves without it. `typography-tokens.css` additionally
+publishes per-platform ramps under `[data-platform="Desktop"|"IOS-Mobile"|
+"IOS-Tablet"|"Android"]`; set the attribute only when you want a platform's
+ramp instead of the default. Text rendering with the wrong family is almost
+never a missing `data-platform` — check that `core.css` is loaded first.
+
+### Eyebrow vs Overline — one concept, two names
+
+This trips people up, so read it before writing an eyebrow style. **Eyebrow is
+the FACE and the COLOUR role; Overline is the TYPE STYLE.** The sizes are
+published under Overline, everything else under Eyebrow:
+
+```css
+color:          var(--Eyebrow);                     /* per theme AND per surface */
+font-family:    var(--Font-Family-Eyebrow);
+font-weight:    var(--Font-Weight-Eyebrow);
+font-size:      var(--Overline-Medium-Font-Size);   /* NOT --Eyebrow-Font-Size */
+letter-spacing: var(--Overline-Medium-Letter-Spacing);
+```
+
+`--Eyebrow-Font-Size` and `--Eyebrow-Letter-Spacing` do not exist and never
+have. Reaching for them fails silently — the declaration falls back to whatever
+literal you wrote, so the text renders at the wrong size with no error.
+
+Steps are `--Overline-{Small,Medium,Large}-*` at 12 / 13 / 15px, with tracking
+loosening as the size drops.
+
+`--Eyebrow` is not a muted `--Text`. It is a rotation off the surface's own
+palette — Primary borrows Secondary, Secondary borrows Tertiary, Tertiary and
+Neutral borrow Primary, and the state themes borrow black or white — so
+substituting `--Quiet` throws the rotation away and paints every eyebrow the
+same grey.
+
 ### Typography `color` prop — not `style={{ color }}`
 
 All typography components (`H1`–`H6`, `Body`, `BodySmall`, `BodyLarge`,
