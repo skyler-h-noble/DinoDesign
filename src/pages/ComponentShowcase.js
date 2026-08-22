@@ -269,6 +269,16 @@ function ShowcaseInner() {
   const themeURL = userParam ? themeManifestUrl(userParam) : undefined;
   const typographyCSS = userParam ? themeTypographyUrl(userParam) : undefined;
 
+  // No ?user= — render whatever is sitting in public/styles, so you can drop a
+  // studio export in that folder and see it without uploading anything.
+  //
+  // index.html already <link>s foundation / base / core / typography-tokens /
+  // styles, but NOT the mode sheets: those swap on the dark-mode toggle, so
+  // they have to go through the Provider's mode slot. Without this the local
+  // folder rendered with no palette at all — every colour token unresolved.
+  const localLightModeCSS = userParam ? undefined : '/styles/Light-Mode.css';
+  const localDarkModeCSS  = userParam ? undefined : '/styles/Dark-Mode.css';
+
   const handleTreeSelect = useCallback((event, itemId) => {
     if (itemId && !NAV_ITEMS.some((cat) => cat.id === itemId)) {
       setActiveSection(itemId);
@@ -313,6 +323,8 @@ function ShowcaseInner() {
     <DynoDesignProvider
       themeURL={themeURL}
       typographyCSS={typographyCSS}
+      lightModeCSS={localLightModeCSS}
+      darkModeCSS={localDarkModeCSS}
       defaultTheme="Default"
       defaultSurface="Surface"
       defaultStyle="Modern"

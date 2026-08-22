@@ -460,7 +460,17 @@ export function DynoDesignProvider({
   // which sheet resolves first.
   useEffect(() => {
     const { foundation, core, typography, base, styles } = resolvedSources;
-    if (!foundation && !core && !typography && !base && !styles) return;
+    if (!foundation && !core && !typography && !base && !styles) {
+      // Nothing in the static slots. The mode sheet, if there is one, loads on
+      // its own effect below and needs nothing from here.
+      //
+      // This MUST still flip the status: 'loading' hides the whole tree behind
+      // the anti-FOUC rule, so returning early without it left an app that
+      // supplies only lightModeCSS/darkModeCSS — index.html carrying the rest —
+      // permanently invisible.
+      setCssStatus('ready');
+      return;
+    }
 
     setCssStatus('loading');
     setCssError(null);
