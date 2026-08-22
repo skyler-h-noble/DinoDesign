@@ -16,7 +16,7 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H5, BodySmall, Caption, Label, OverlineSmall,
+  H2, H5, BodySmall, Caption, Label, EyebrowSmall,
 } from '../Typography';
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
@@ -125,7 +125,7 @@ export function RailShowcase() {
 
                   {/* Expanded Width */}
                   <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>EXPANDED WIDTH</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>EXPANDED WIDTH</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       {['partial', 'full'].map((w) => (
                         <ControlButton key={w} label={cap(w)} selected={expandedWidth === w} onClick={() => setExpandedWidth(w)} />

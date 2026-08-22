@@ -56,7 +56,7 @@ export const AllColorVariants = {
         <br />
         • Filled (Primary): var(--Buttons-Primary-Button)
         <br />
-        • Filled (Others): Semantic colors (success, warning, error, info)
+        • Filled (Others): State colors (success, warning, error, info)
       </Typography>
     </Paper>
   ),
@@ -361,7 +361,7 @@ export const ColorVariantsDemo = {
             Filled - Success/Warning/Error/Info:
           </Typography>
           <Typography variant="caption" sx={{ display: 'block', color: 'var(--Text-Secondary)' }}>
-            Semantic colors (solid colors, not CSS variables)
+            State colors (solid colors, not CSS variables)
           </Typography>
         </Box>
       </Stack>

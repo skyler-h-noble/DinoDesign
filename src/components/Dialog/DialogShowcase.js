@@ -10,7 +10,7 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H5, Body, BodySmall, Caption, Label, OverlineSmall,
+  H2, H5, Body, BodySmall, Caption, Label, EyebrowSmall,
 } from '../Typography';
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
@@ -134,7 +134,7 @@ export function DialogShowcase() {
 
                   {/* Size */}
                   <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</EyebrowSmall>
                     <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
                       {['xs', 'sm', 'md', 'lg', 'xl'].map((s) => (
                         <ControlButton key={s} label={s.toUpperCase()} selected={maxWidth === s} onClick={() => { setMaxWidth(s); setFullScreen(false); }} />
@@ -145,7 +145,7 @@ export function DialogShowcase() {
 
                   {/* Transition */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>TRANSITION</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>TRANSITION</EyebrowSmall>
                     <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
                       {['none', 'slide-up', 'slide-down', 'grow', 'fade', 'zoom'].map((t) => (
                         <ControlButton key={t} label={cap(t)} selected={transition === t} onClick={() => setTransition(t)} />

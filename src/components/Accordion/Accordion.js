@@ -3,7 +3,7 @@ import React, { useState, createContext, useContext } from 'react';
 import { Box } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Icon } from '../Icon/Icon';
-import { OverlineSmall, BodyLarge, Body, BodySmall } from '../Typography';
+import { EyebrowSmall, BodyLarge, Body, BodySmall } from '../Typography';
 import { SHADOW_LEVEL_2 } from '../_shadows';
 
 /**
@@ -188,8 +188,8 @@ export function Accordion({
 
 /* ─── AccordionSummary ─── */
 // Title typography scales per size — Body is the default ("Body Medium"),
-// BodySmall for compact rows, BodyLarge for spacious ones. Overline and
-// secondary stay constant (OverlineSmall + BodySmall) and only render when
+// BodySmall for compact rows, BodyLarge for spacious ones. Eyebrow and
+// secondary stay constant (EyebrowSmall + BodySmall) and only render when
 // the consumer passes them.
 const TITLE_COMPS = { small: BodySmall, medium: Body, large: BodyLarge };
 
@@ -201,6 +201,8 @@ export function AccordionSummary({
   endDecorator,
   // Optional text layers above and below the title. With both empty, only
   // the Body (medium) title renders — matches the Figma default.
+  // `overline` is the former name for `eyebrow`, still accepted.
+  eyebrow,
   overline,
   secondary,
   expandIcon,
@@ -280,7 +282,7 @@ export function AccordionSummary({
       )}
 
       {/* Text frame — flex-fill vstack, Sizing-Half (4px) gap between
-          the optional overline, the title, and the optional secondary. */}
+          the optional eyebrow, the title, and the optional secondary. */}
       <Box sx={{
         flex: 1,
         minWidth: 0,
@@ -288,10 +290,10 @@ export function AccordionSummary({
         flexDirection: 'column',
         gap: 'var(--Sizing-Half)',
       }}>
-        {overline && (
-          <OverlineSmall style={{ ...lineSx, color: 'var(--Text-Quiet)' }}>
-            {overline}
-          </OverlineSmall>
+        {(eyebrow ?? overline) && (
+          <EyebrowSmall style={{ ...lineSx, color: 'var(--Text-Quiet)' }}>
+            {eyebrow ?? overline}
+          </EyebrowSmall>
         )}
         {children !== undefined && children !== null && (
           <TitleComp style={{ ...lineSx, color: 'inherit', fontWeight: 600 }}>

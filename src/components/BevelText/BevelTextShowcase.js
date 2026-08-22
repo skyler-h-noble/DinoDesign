@@ -7,7 +7,7 @@ import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
 import { Slider } from '../Slider/Slider';
 import { SwitchInput } from '../Switch';
-import { H2, Body, BodySmall, Caption, OverlineSmall } from '../Typography';
+import { H2, Body, BodySmall, Caption, EyebrowSmall } from '../Typography';
 import {
   BEVEL_PRESETS,
   BEVEL_PRESET_NAMES,
@@ -202,9 +202,9 @@ export function BevelTextShowcase() {
 
                   {/* Theme */}
                   <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                       THEME
-                    </OverlineSmall>
+                    </EyebrowSmall>
                     <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', rowGap: 1 }}>
                       {BEVEL_THEMES.map((t) => (
                         <ControlButton
@@ -224,9 +224,9 @@ export function BevelTextShowcase() {
 
                   {/* Presets */}
                   <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                       PRESETS
-                    </OverlineSmall>
+                    </EyebrowSmall>
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                       {PRESET_OPTIONS.map((opt) => (
                         <PresetCard
@@ -248,9 +248,9 @@ export function BevelTextShowcase() {
                         p: 2,
                       }}
                     >
-                      <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 12 }}>
+                      <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 12 }}>
                         CUSTOM
-                      </OverlineSmall>
+                      </EyebrowSmall>
 
                       <Stack spacing={2}>
                         <div>
@@ -327,9 +327,9 @@ export function BevelTextShowcase() {
 
                   {/* Typography */}
                   <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                       TYPOGRAPHY
-                    </OverlineSmall>
+                    </EyebrowSmall>
                     <Stack spacing={2}>
                       <div>
                         <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>
@@ -357,9 +357,9 @@ export function BevelTextShowcase() {
 
                   {/* Preview background */}
                   <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                       PREVIEW BACKGROUND
-                    </OverlineSmall>
+                    </EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       {BG_OPTIONS.map((b) => (
                         <ControlButton

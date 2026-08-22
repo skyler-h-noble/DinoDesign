@@ -10,7 +10,7 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H5, BodySmall, Caption, Label, OverlineSmall,
+  H2, H5, BodySmall, Caption, Label, EyebrowSmall,
 } from '../Typography';
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
@@ -121,7 +121,7 @@ export function TransferListShowcase() {
 
                   {/* Mode */}
                   <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>MODE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>MODE</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       <ControlButton label="Basic" selected={mode === 'basic'} onClick={() => setMode('basic')} />
                       <ControlButton label="Enhanced" selected={mode === 'enhanced'} onClick={() => setMode('enhanced')} />

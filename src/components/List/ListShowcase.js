@@ -28,13 +28,13 @@ import { ButtonGroup } from '../ButtonGroup';
 import { Link } from '../Link';
 import { Tag } from '../Tag';
 import {
-  H2, H4, H5, Body, BodySmall, Caption, Label, OverlineSmall
+  H2, H4, H5, Body, BodySmall, Caption, Label, EyebrowSmall
 } from '../Typography';
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
 // Grouped per the Button showcase pattern. Default is its own group at the
-// top; Theme covers brand palettes; Semantic covers status colors.
+// top; Theme covers brand palettes; State covers status colors.
 const COLOR_GROUPS = [
   { label: 'Default',  colors: ['default'] },
   { label: 'Theme',    colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
@@ -80,28 +80,28 @@ function getCssVar(varName) {
 
 // Three-layer sample data so the 1st / 2nd / 3rd-row toggles always have
 // content to show. Previously only the AVATAR_ITEMS / IMAGE_ITEMS had
-// overline + secondary, so toggling the rows on for the default sample
+// eyebrow + secondary, so toggling the rows on for the default sample
 // items had no visible effect.
 const SAMPLE_ITEMS = [
-  { overline: 'NAV',      label: 'Home',     secondary: 'Dashboard overview',         icon: HomeIcon     },
-  { overline: 'INBOX',    label: 'Inbox',    secondary: '3 unread messages',          icon: InboxIcon    },
-  { overline: 'WORK',     label: 'Projects', secondary: 'Active and archived work',   icon: FolderIcon   },
-  { overline: 'SETTINGS', label: 'Settings', secondary: 'Preferences and account',    icon: SettingsIcon },
+  { eyebrow: 'NAV',      label: 'Home',     secondary: 'Dashboard overview',         icon: HomeIcon     },
+  { eyebrow: 'INBOX',    label: 'Inbox',    secondary: '3 unread messages',          icon: InboxIcon    },
+  { eyebrow: 'WORK',     label: 'Projects', secondary: 'Active and archived work',   icon: FolderIcon   },
+  { eyebrow: 'SETTINGS', label: 'Settings', secondary: 'Preferences and account',    icon: SettingsIcon },
 ];
-// Three-layer text sample data so the full OverlineSmall / SubtitleLarge /
-// Body stack is visible. `overline` is the kicker on top, `label` is the
+// Three-layer text sample data so the full EyebrowSmall / SubtitleLarge /
+// Body stack is visible. `eyebrow` is the kicker on top, `label` is the
 // main title (SubtitleLarge), `secondary` is the Body description.
 const AVATAR_ITEMS = [
-  { overline: 'TEAM',      label: 'Alice Johnson', secondary: 'Product Designer', initials: 'AJ' },
-  { overline: 'TEAM',      label: 'Bob Smith',     secondary: 'Engineer',         initials: 'BS' },
-  { overline: 'MARKETING', label: 'Carol Davis',   secondary: 'Marketing Lead',   initials: 'CD' },
-  { overline: 'DATA',      label: 'Dan Wilson',    secondary: 'Data Analyst',     initials: 'DW' },
+  { eyebrow: 'TEAM',      label: 'Alice Johnson', secondary: 'Product Designer', initials: 'AJ' },
+  { eyebrow: 'TEAM',      label: 'Bob Smith',     secondary: 'Engineer',         initials: 'BS' },
+  { eyebrow: 'MARKETING', label: 'Carol Davis',   secondary: 'Marketing Lead',   initials: 'CD' },
+  { eyebrow: 'DATA',      label: 'Dan Wilson',    secondary: 'Data Analyst',     initials: 'DW' },
 ];
 const IMAGE_ITEMS = [
-  { overline: 'LANDSCAPE', label: 'Mountain Vista', secondary: 'Landscape photography series' },
-  { overline: 'URBAN',     label: 'City Lights',    secondary: 'Night-time street shots' },
-  { overline: 'COASTAL',   label: 'Ocean Breeze',   secondary: 'Long-exposure shoreline' },
-  { overline: 'NATURE',    label: 'Forest Trail',   secondary: 'Hiking and trail walks' },
+  { eyebrow: 'LANDSCAPE', label: 'Mountain Vista', secondary: 'Landscape photography series' },
+  { eyebrow: 'URBAN',     label: 'City Lights',    secondary: 'Night-time street shots' },
+  { eyebrow: 'COASTAL',   label: 'Ocean Breeze',   secondary: 'Long-exposure shoreline' },
+  { eyebrow: 'NATURE',    label: 'Forest Trail',   secondary: 'Hiking and trail walks' },
 ];
 
 function ContrastBadge({ ratio, threshold }) {
@@ -222,7 +222,7 @@ export function ListShowcase() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   // Per-row visibility booleans. Defaults: 1st and 2nd rows ON, 3rd row OFF
   // — the most common compact list configuration.
-  const [showOverline,  setShowOverline]  = useState(true);
+  const [showEyebrow,  setShowEyebrow]  = useState(true);
   const [showTitle,     setShowTitle]     = useState(true);
   const [showSecondary, setShowSecondary] = useState(false);
   // Non-clickable mode dividers. Mutually exclusive with the clickable
@@ -301,7 +301,7 @@ export function ListShowcase() {
       // row identity.
       label:     showTitle     ? item.label     : null,
       secondary: showSecondary ? item.secondary : null,
-      overline:  showOverline  ? item.overline  : null,
+      eyebrow:  showEyebrow  ? item.eyebrow  : null,
       startDecorator: getStartDecorator(i),
       endDecorator: getEndDecorator(i),
       startDecoratorIsButton: hasStartIcon && startIconIsButton,
@@ -390,7 +390,7 @@ export function ListShowcase() {
             <H4>Playground</H4>
 
             <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ORIENTATION</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ORIENTATION</EyebrowSmall>
               <Stack direction="row" spacing={1}>
                 {['vertical', 'horizontal'].map((o) => (
                   <ControlButton key={o} label={cap(o)} selected={orientation === o} onClick={() => setOrientation(o)} />
@@ -399,7 +399,7 @@ export function ListShowcase() {
             </Box>
 
             <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>INTERACTION</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>INTERACTION</EyebrowSmall>
               <Stack direction="row" spacing={1}>
                 {['none', 'clickable'].map((m) => (
                   <ControlButton key={m} label={cap(m)} selected={interaction === m} onClick={() => handleInteractionChange(m)} />
@@ -413,14 +413,14 @@ export function ListShowcase() {
             </Box>
 
             {/* Row-visibility booleans. The typography style for each row
-                is configurable by the consumer (via the overline / children /
+                is configurable by the consumer (via the eyebrow / children /
                 secondary props' inner components), so we don't name the rows
                 by typography type — just by position. */}
             <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>TEXT ROWS</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>TEXT ROWS</EyebrowSmall>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                 <Label>1st row of text</Label>
-                <Switch checked={showOverline} onChange={(e) => setShowOverline(e.target.checked)} size="small" />
+                <Switch checked={showEyebrow} onChange={(e) => setShowEyebrow(e.target.checked)} size="small" />
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                 <Label>2nd row of text</Label>
@@ -438,7 +438,7 @@ export function ListShowcase() {
                 card chrome — border + shadow — instead of edge dividers). */}
             {!isClickable && (
               <Box sx={{ mt: 3 }}>
-                <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>NON-CLICKABLE DIVIDERS</OverlineSmall>
+                <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>NON-CLICKABLE DIVIDERS</EyebrowSmall>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                   <Label>Bottom border</Label>
                   <Switch checked={bottomBorder} onChange={(e) => setBottomBorder(e.target.checked)} size="small" />
@@ -462,7 +462,7 @@ export function ListShowcase() {
             {showAdvanced && (
               <Box sx={{ mt: 2 }}>
                 <Box sx={{ mt: 1 }}>
-                  <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>START DECORATOR</OverlineSmall>
+                  <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>START DECORATOR</EyebrowSmall>
                   <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1 }}>
                     {['none', 'icon', 'avatar', 'image', 'checkbox', 'radio'].map((t) => (
                       <ControlButton key={t} label={cap(t)} selected={startDecoratorType === t} onClick={() => handleStartDecoratorChange(t)} />
@@ -490,7 +490,7 @@ export function ListShowcase() {
                 </Box>
 
                 <Box sx={{ mt: 3 }}>
-                  <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>END DECORATOR</OverlineSmall>
+                  <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>END DECORATOR</EyebrowSmall>
                   <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1 }}>
                     {['none', 'checkbox', 'radio', 'link', 'button', 'buttonGroup', 'tag'].map((t) => (
                       <ControlButton key={t} label={cap(t)} selected={endDecoratorType === t} onClick={() => handleEndDecoratorChange(t)} />

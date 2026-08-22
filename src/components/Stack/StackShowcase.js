@@ -14,7 +14,7 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H3, H5, BodySmall, Caption, OverlineSmall, Body,
+  H2, H3, H5, BodySmall, Caption, EyebrowSmall, Body,
 } from '../Typography';
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
@@ -215,7 +215,7 @@ function Playground() {
           <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
 
           <Box>
-            <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>CHILDREN</OverlineSmall>
+            <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>CHILDREN</EyebrowSmall>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
               {Object.entries(childSets).map(([key, { label }]) => (
                 <ControlButton key={key} label={label} selected={childSet === key} onClick={() => setChildSet(key)} />
@@ -224,7 +224,7 @@ function Playground() {
           </Box>
 
           <Box>
-            <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>DIRECTION</OverlineSmall>
+            <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>DIRECTION</EyebrowSmall>
             <Box sx={{ display: 'flex', gap: 1 }}>
               {['row', 'column'].map((d) => (
                 <ControlButton key={d} label={cap(d)} selected={direction === d} onClick={() => setDirection(d)} />
@@ -233,9 +233,9 @@ function Playground() {
           </Box>
 
           <Box>
-            <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+            <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
               GAP — {gap} unit{willEnforce ? ' → raised to var(--min-stack-gap)' : ''}
-            </OverlineSmall>
+            </EyebrowSmall>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Box component="input" type="range" min={0} max={6} step={0.5} value={gap}
                 onChange={(e) => setGap(Number(e.target.value))}
@@ -245,7 +245,7 @@ function Playground() {
           </Box>
 
           <Box>
-            <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>OPTIONS</OverlineSmall>
+            <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>OPTIONS</EyebrowSmall>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
               <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                 <Box>

@@ -20,7 +20,7 @@ import StarIcon from '@mui/icons-material/Star';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import { BottomNavigation } from './BottomNavigation';
 import {
-  H2, H4, H5, BodySmall, Caption, Label, OverlineSmall
+  H2, H4, H5, BodySmall, Caption, Label, EyebrowSmall
 } from '../Typography';
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
@@ -291,7 +291,7 @@ export function BottomNavigationShowcase() {
 
             {/* Bar Color */}
             <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>BAR COLOR</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>BAR COLOR</EyebrowSmall>
               <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
                 {BAR_COLORS.map((c) => (
                   <ControlButton key={c.value} label={c.label} selected={barColor === c.value} onClick={() => setBarColor(c.value)} />
@@ -304,7 +304,7 @@ export function BottomNavigationShowcase() {
 
             {/* Options */}
             <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>OPTIONS</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>OPTIONS</EyebrowSmall>
               <Stack spacing={0}>
                 <CheckboxControl label="Fixed" checked={fixed} onChange={setFixed}
                   caption="Position fixed to bottom of viewport." />
@@ -318,7 +318,7 @@ export function BottomNavigationShowcase() {
             {/* Label orientation */}
             {showLabels && (
               <Box sx={{ mt: 3 }}>
-                <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>LABEL ORIENTATION</OverlineSmall>
+                <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>LABEL ORIENTATION</EyebrowSmall>
                 <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
                   <ControlButton label="Vertical" selected={labelOrientation === 'vertical'} onClick={() => setLabelOrientation('vertical')} />
                   <ControlButton label="Horizontal" selected={labelOrientation === 'horizontal' && canHorizontal}
@@ -337,7 +337,7 @@ export function BottomNavigationShowcase() {
 
             {/* Navigation Items */}
             <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>NAVIGATION ITEMS</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>NAVIGATION ITEMS</EyebrowSmall>
               <NumberStepper label="Count" value={itemCount} onChange={setItemCount} min={3} max={6} />
 
               <Stack spacing={1.5} sx={{ mt: 2 }}>

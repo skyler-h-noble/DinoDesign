@@ -11,7 +11,7 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H5, BodySmall, Caption, Label, OverlineSmall,
+  H2, H5, BodySmall, Caption, Label, EyebrowSmall,
 } from '../Typography';
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
@@ -189,7 +189,7 @@ export function DividerShowcase() {
 
                   {/* Color */}
                   <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</EyebrowSmall>
                     <Stack spacing={1.5}>
                       {COLOR_GROUPS.map((group) => (
                         <Box key={group.label}>
@@ -206,7 +206,7 @@ export function DividerShowcase() {
 
                   {/* Orientation */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ORIENTATION</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ORIENTATION</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       {['horizontal', 'vertical'].map((o) => (
                         <ControlButton key={o} label={cap(o)} selected={orientation === o} onClick={() => handleOrientationChange(o)} />
@@ -216,7 +216,7 @@ export function DividerShowcase() {
 
                   {/* Size */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       {['small', 'medium', 'large'].map((s) => (
                         <ControlButton key={s} label={cap(s) + ' (' + SIZE_LABELS[s] + ')'} selected={size === s} onClick={() => setSize(s)} />
@@ -243,7 +243,7 @@ export function DividerShowcase() {
                       </Box>
 
                       <Box sx={{ mt: 3 }}>
-                        <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>INDICATOR STYLE</OverlineSmall>
+                        <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>INDICATOR STYLE</EyebrowSmall>
                         <Stack direction="row" spacing={1}>
                           {['outline', 'light'].map((s) => (
                             <ControlButton key={s} label={cap(s)} selected={indicatorStyle === s} onClick={() => setIndicatorStyle(s)} />
@@ -252,9 +252,9 @@ export function DividerShowcase() {
                       </Box>
 
                       <Box sx={{ mt: 3 }}>
-                        <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+                        <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                           {isVertical ? 'ALIGNMENT' : 'TEXT ALIGN'}
-                        </OverlineSmall>
+                        </EyebrowSmall>
                         <Stack direction="row" spacing={1}>
                           {alignOptions.map((a) => (
                             <ControlButton key={a} label={cap(a)} selected={textAlign === a} onClick={() => setTextAlign(a)} />

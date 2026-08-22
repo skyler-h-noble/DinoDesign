@@ -12,7 +12,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { Badge } from './Badge';
 import {
-  H2, H4, H5, Body, BodySmall, Caption, Label, OverlineSmall
+  H2, H4, H5, Body, BodySmall, Caption, Label, EyebrowSmall
 } from '../Typography';
 
 // --- Contrast Calculator -----------------------------------------------------
@@ -316,7 +316,7 @@ export function BadgeShowcase() {
 
             {/* Style */}
             <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</EyebrowSmall>
               <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1 }}>
                 {styles.map((s) => (
                   <ControlButton key={s} label={cap(s)} selected={style === s}
@@ -327,7 +327,7 @@ export function BadgeShowcase() {
 
             {/* Color */}
             <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</EyebrowSmall>
               <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
                 {COLORS.map((c) => (
                   <ColorSwatchButton key={c} color={c} selected={color === c} onClick={setColor} />
@@ -337,7 +337,7 @@ export function BadgeShowcase() {
 
             {/* Size */}
             <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</EyebrowSmall>
               <Stack direction="row" spacing={1}>
                 {['small', 'medium', 'large'].map((s) => (
                   <ControlButton key={s} label={cap(s)} selected={size === s} onClick={() => setSize(s)} />
@@ -350,7 +350,7 @@ export function BadgeShowcase() {
 
             {/* Badge Content */}
             <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>BADGE CONTENT</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>BADGE CONTENT</EyebrowSmall>
               <TextField
                 size="small"
                 value={badgeContent}

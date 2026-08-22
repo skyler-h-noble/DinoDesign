@@ -1,7 +1,7 @@
 // src/components/Button/Button.js
 import React from 'react';
 import { Button as MuiButton, Avatar as MuiAvatar, Box, GlobalStyles } from '@mui/material';
-import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography, ButtonExtraSmall as ButtonExtraSmallTypography } from '../Typography';
+import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography, ButtonExtraSmall as ButtonExtraSmallTypography, CAP_HEIGHT_TRIM } from '../Typography';
 import { Avatar as DDAvatar } from '../Avatar/Avatar';
 import { Icon as DDIcon } from '../Icon/Icon';
 import { Badge as DDBadge } from '../Badge/Badge';
@@ -87,9 +87,9 @@ const seg = tokenSegment;
 // bevelShadow lives in src/components/_shadows.js so both Button and Slider
 // can share it. Consumers must set --_bevel and --_height on the element.
 
-function solidStyles(color, elevated = false, selected = false) {
+function solidStyles(color, elevated = false, selected = false, size = 'medium') {
   const C = seg(color);
-  const bevel = bevelShadow(color);
+  const bevel = bevelShadow(color, size);
   const restLevel = elevated ? SHADOW_LEVEL_1 : 'none';
   const hoverLevel = elevated ? SHADOW_LEVEL_2 : SHADOW_LEVEL_1;
   const restShadow = restLevel === 'none' ? bevel : `${bevel}, ${restLevel}`;
@@ -238,10 +238,10 @@ function ghostStyles(isTextContent, selected = false) {
   };
 }
 
-function buildVariantMap(isTextContent, elevated = false, selected = false) {
+function buildVariantMap(isTextContent, elevated = false, selected = false, size = 'medium') {
   const map = {};
   COLORS.forEach((color) => {
-    map[color]                = solidStyles(color, elevated, selected);
+    map[color]                = solidStyles(color, elevated, selected, size);
     map[`${color}-outline`]   = outlineStyles(color, selected);
     map[`${color}-light`]     = lightStyles(color, elevated, selected);
   });
@@ -253,10 +253,10 @@ function buildVariantMap(isTextContent, elevated = false, selected = false) {
   // Hover,Pressed,Highlight,Lowlight}, which the system emits in every theme
   // and surface block — so the button resolves to black on a light surface and
   // white on a dark one wherever it is placed, with no prop change.
-  map['black-white']         = solidStyles('black-white', elevated, selected);
+  map['black-white']         = solidStyles('black-white', elevated, selected, size);
   map['black-white-outline'] = outlineStyles('black-white', selected);
 
-  map['danger']         = solidStyles('error', elevated, selected);
+  map['danger']         = solidStyles('error', elevated, selected, size);
   map['outline']        = outlineStyles('default', selected);
   map['ghost']          = ghostStyles(isTextContent, selected);
   map['text']           = ghostStyles(isTextContent, selected);
@@ -271,9 +271,17 @@ const SIZE_HEIGHT = {
   large:  'var(--Large-Button-Height)',
 };
 
+// minWidth here is the TEXT button's floor. Small and medium share
+// --Button-Min-Width; large has its own --Lg-Button-Min-Width (the standard
+// floor plus 40px) because a 56px-tall button reads as a stub at the standard
+// width. The fallback covers design systems generated before that token.
+//
+// The square types don't use it: icon-only, letter/number and avatar-only
+// buttons take their min-width from the button HEIGHT instead, so they stay
+// square. getSizingStyles overrides minWidth for those.
 const SIZE_BASE = {
-  small:  { minHeight: 'var(--Small-Button-Height)', minWidth: 'var(--Small-Button-Height)', fontSize: '13px', '--_height': 'var(--Small-Button-Height)' },
-  large:  { minHeight: 'var(--Large-Button-Height)', minWidth: 'var(--Large-Button-Height)', fontSize: '17px', '--_height': 'var(--Large-Button-Height)' },
+  small:  { minHeight: 'var(--Small-Button-Height)', minWidth: 'var(--Button-Min-Width)', fontSize: '13px', '--_height': 'var(--Small-Button-Height)' },
+  large:  { minHeight: 'var(--Large-Button-Height)', minWidth: 'var(--Lg-Button-Min-Width, var(--Button-Min-Width))', fontSize: '17px', '--_height': 'var(--Large-Button-Height)' },
   medium: {
     minHeight: 'var(--Button-Height)',
     minWidth:  'var(--Button-Min-Width)',
@@ -312,7 +320,8 @@ function getSizingStyles({ size, iconOnly, letterNumber, avatar }) {
     };
   }
 
-  // Text — minHeight from token, minWidth from SIZE_BASE
+  // Text — minHeight from the size's height token, minWidth from
+  // --Button-Min-Width (see SIZE_BASE)
   const PADDING_X_BY_SIZE = {
     small:  'var(--Sm-Button-Padding)',
     medium: 'var(--Button-Padding)',
@@ -361,6 +370,45 @@ export function Button({
   ...props
 }) {
   const isIconOnly     = iconOnly || avatar || swatch;
+
+  /*
+   * Accessible naming for icon buttons.
+   *
+   * Rule: the BUTTON carries the name; the icons inside carry none. Give both
+   * a name and a screen reader announces the control twice — "Delete, Delete
+   * button". Give neither and an icon-only button is announced as just
+   * "button", which tells the user nothing.
+   *
+   * The lib's <Icon> already sets aria-hidden unless you pass it an aria-label,
+   * so the common case is correct by default. The failure modes left are a raw
+   * MUI SvgIcon with titleAccess, and an icon-only button with no name at all —
+   * both silent, and both invisible unless you use a screen reader.
+   */
+  if (process.env.NODE_ENV !== 'production') {
+    const named =
+      props['aria-label'] || props['aria-labelledby'] || props.title;
+    if (isIconOnly && !named) {
+      // eslint-disable-next-line no-console
+      console.error(
+        '[DynoDesign] An icon-only <Button> has no accessible name. A screen ' +
+        'reader announces it as just "button". Add aria-label="…" describing ' +
+        'the ACTION ("Delete item"), not the icon ("trash").',
+      );
+    }
+    if (named) {
+      React.Children.forEach(children, (child) => {
+        const childLabel = child?.props?.['aria-label'] || child?.props?.titleAccess;
+        if (childLabel) {
+          // eslint-disable-next-line no-console
+          console.error(
+            '[DynoDesign] <Button> is labelled "' + named + '" but also ' +
+            'contains an icon labelled "' + childLabel + '". A screen reader ' +
+            'reads both. Remove the icon\'s label — the button owns the name.',
+          );
+        }
+      });
+    }
+  }
   const isTextContent  = !isIconOnly;
   const effectiveFullWidth = fullWidth && !isIconOnly && !letterNumber;
 
@@ -369,7 +417,7 @@ export function Button({
     ? 'primary'
     : variant;
 
-  const variantMap     = buildVariantMap(isTextContent, elevated, selected);
+  const variantMap     = buildVariantMap(isTextContent, elevated, selected, size);
   const variantStyles  = variantMap[effectiveVariant] || variantMap.default;
   const sizingStyles   = getSizingStyles({ size, iconOnly: isIconOnly, letterNumber, avatar });
 
@@ -390,6 +438,9 @@ export function Button({
             padding: '4px',
             color: 'inherit',
             lineHeight: 1,
+            // Trim to cap height / baseline so the letter or number centres on
+            // its own form rather than on the font's ascender-to-descender box.
+            ...CAP_HEIGHT_TRIM,
           }}
         >
           {children}
@@ -405,7 +456,7 @@ export function Button({
           sx={{
             display: 'inline-flex',
             alignItems: 'center',
-            padding: '4px',
+            padding: '4px 2px',
           }}
         >
           <TypographyComp
@@ -414,6 +465,10 @@ export function Button({
               color: 'inherit',
               lineHeight: 'inherit',
               letterSpacing: 'inherit',
+              // Figma's "cap height to baseline" vertical trim. The label then
+              // centres on its cap height, which is what makes a button's text
+              // look centred rather than measured-and-centred.
+              ...CAP_HEIGHT_TRIM,
             }}
           >
             {children}
@@ -478,6 +533,12 @@ export function Button({
       size={size}
       {...(effectiveFullWidth && { fullWidth: true })}
       disabled={disabled}
+      // Icons inside a button are DECORATION. The button owns the accessible
+      // name; anything in these slots must not contribute a second one, or a
+      // screen-reader user hears the control announced twice ("Delete, Delete
+      // button"). Wrapping enforces it structurally — the lib's own <Icon> is
+      // already aria-hidden by default, but a raw SvgIcon with titleAccess, an
+      // emoji, or a bare string in the slot would otherwise be read out.
       startIcon={resolvedStartDecorator !== undefined
         ? resolvedStartDecorator
         : (avatar ? renderStartIcon() : startIcon)}
@@ -513,12 +574,44 @@ export function Button({
         // (40% total) leaves the text safely clear regardless of bevel%.
         '--_bevel': 'min(calc(var(--Button-Bevel) * var(--_height) / 100), calc(var(--_height) / 5))',
 
+        // Small button — hit target without a size change.
+        //
+        // The small button stays 24px on every platform; what grows is the
+        // area that responds to a tap. --Target is the platform minimum
+        // (24 desktop, 44 iOS, 48 Android) and --Platform-Spacer is the room
+        // reserved around the button so the enlarged target doesn't sit on
+        // top of whatever is next to it.
+        //
+        // Done with a centred ::before rather than a wrapper element: a
+        // wrapper would change Button's DOM, and every consumer positioning,
+        // measuring or flex-ing a Button would have to learn about it.
+        ...(size === 'small' && {
+          position: 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '100%',
+            height: '100%',
+            minWidth: 'var(--Target, 0px)',
+            minHeight: 'var(--Target, 0px)',
+          },
+        }),
+
         ...sizingStyles,
         ...variantStyles,
 
         // Force padding override
         '&.MuiButton-root': {
           padding: sizingStyles.padding ?? '0 var(--Sizing-1)',
+          // The small button's target spacer lives here, not in the sx above,
+          // for the same reason the padding does: Stack/HStack reset their
+          // children with `> :not(style):not(style)` (specificity 0,1,2),
+          // which outranks a plain single-class sx rule and silently zeroed
+          // the margin. `&.MuiButton-root` is 0,2,0 and survives.
+          ...(size === 'small' && { margin: 'var(--Platform-Spacer, 0px)' }),
         },
 
         // Icon margins + color inheritance

@@ -7,7 +7,7 @@ import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
 import { Slider } from '../Slider/Slider';
 import { SwitchInput } from '../Switch';
-import { H2, H3, Body, BodySmall, Caption, OverlineSmall } from '../Typography';
+import { H2, H3, Body, BodySmall, Caption, EyebrowSmall } from '../Typography';
 import { ContrastCheck } from '../_a11y/ContrastCheck';
 import { BEVEL_PRESET_NAMES, BEVEL_THEMES } from '../_bevelPresets';
 
@@ -190,9 +190,9 @@ export function CurvedTextShowcase() {
 
             {/* Curve count */}
             <Box>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                 CURVES
-              </OverlineSmall>
+              </EyebrowSmall>
               <Stack direction="row" spacing={1}>
                 {[1, 2].map((n) => (
                   <ControlButton
@@ -210,9 +210,9 @@ export function CurvedTextShowcase() {
 
             {/* Per-curve controls */}
             <Box>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 12 }}>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 12 }}>
                 PER-CURVE SETTINGS
-              </OverlineSmall>
+              </EyebrowSmall>
               <Stack spacing={2}>
                 {curves.map((curve, i) => (
                   <Box
@@ -276,9 +276,9 @@ export function CurvedTextShowcase() {
 
             {/* Typography */}
             <Box>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                 TYPOGRAPHY
-              </OverlineSmall>
+              </EyebrowSmall>
               <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', rowGap: 1 }}>
                 {TEXT_STYLES.map((s) => (
                   <ControlButton
@@ -297,10 +297,10 @@ export function CurvedTextShowcase() {
 
             {/* Letter spacing */}
             <Box>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                 LETTER SPACING
                 <span style={{ float: 'right' }}>{letterSpacing}px</span>
-              </OverlineSmall>
+              </EyebrowSmall>
               <Slider
                 min={-4}
                 max={40}
@@ -315,10 +315,10 @@ export function CurvedTextShowcase() {
 
             {/* Font weight */}
             <Box>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                 FONT WEIGHT
                 <span style={{ float: 'right' }}>{fontWeight}</span>
-              </OverlineSmall>
+              </EyebrowSmall>
               <Slider
                 min={100}
                 max={900}
@@ -334,9 +334,9 @@ export function CurvedTextShowcase() {
 
             {/* Bevel */}
             <Box>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                 BEVEL
-              </OverlineSmall>
+              </EyebrowSmall>
               <SwitchInput
                 label="3D bevel effect"
                 checked={bevel}
@@ -387,10 +387,10 @@ export function CurvedTextShowcase() {
             {/* Rotation */}
             <Box>
               <Stack direction="row" alignItems="center" sx={{ mb: 1 }}>
-                <OverlineSmall style={{ color: 'var(--Text-Quiet)', flex: 1 }}>
+                <EyebrowSmall style={{ color: 'var(--Text-Quiet)', flex: 1 }}>
                   ROTATION
                   <span style={{ float: 'right', marginRight: 12 }}>{rotation}°</span>
-                </OverlineSmall>
+                </EyebrowSmall>
                 <Button variant="default-outline" size="small" onClick={autoLevel}>
                   Auto-level
                 </Button>
@@ -412,9 +412,9 @@ export function CurvedTextShowcase() {
 
             {/* Color */}
             <Box>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                 COLOR
-              </OverlineSmall>
+              </EyebrowSmall>
               <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', rowGap: 1 }}>
                 {COLORS.map((c) => (
                   <ControlButton

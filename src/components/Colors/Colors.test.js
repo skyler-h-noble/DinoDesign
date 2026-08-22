@@ -73,9 +73,9 @@ describe('Colors Component', () => {
     expect(screen.getByText('Buttons - Secondary')).toBeInTheDocument();
   });
 
-  test('displays Button Semantic colors', () => {
+  test('displays Button State colors', () => {
     render(<Colors />);
-    expect(screen.getByText('Buttons - Semantic')).toBeInTheDocument();
+    expect(screen.getByText('Buttons - State')).toBeInTheDocument();
     expect(screen.getByText('Info Button')).toBeInTheDocument();
     expect(screen.getByText('Success Button')).toBeInTheDocument();
     expect(screen.getByText('Warning Button')).toBeInTheDocument();

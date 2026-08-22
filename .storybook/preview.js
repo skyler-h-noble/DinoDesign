@@ -1,5 +1,5 @@
 import '../public/styles/foundation.css';
-import '../public/styles/foundations.css';
+import '../public/styles/foundation.css';
 import '../public/styles/core.css';
 import '../public/styles/Light-Mode.css';
 import '../public/styles/base.css';

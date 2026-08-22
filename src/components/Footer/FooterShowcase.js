@@ -8,7 +8,7 @@ import { Footer } from './Footer';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { Button } from '../Button/Button';
 import { SwitchInput } from '../Switch';
-import { H2, H3, Body, BodySmall, Caption, OverlineSmall } from '../Typography';
+import { H2, H3, Body, BodySmall, Caption, EyebrowSmall } from '../Typography';
 import { ContrastCheck } from '../_a11y/ContrastCheck';
 
 const SAMPLE_ADDRESS = {
@@ -130,9 +130,9 @@ export function FooterShowcase() {
           <Stack spacing={3} sx={{ p: 3, maxWidth: 560 }}>
             {/* Column count */}
             <Box>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                 COLUMNS
-              </OverlineSmall>
+              </EyebrowSmall>
               <Stack direction="row" spacing={1}>
                 {[1, 2, 3, 4].map((n) => (
                   <ControlButton
@@ -150,9 +150,9 @@ export function FooterShowcase() {
 
             {/* Color */}
             <Box>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                 COLOR
-              </OverlineSmall>
+              </EyebrowSmall>
               <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', rowGap: 1 }}>
                 {COLORS.map((c) => (
                   <ControlButton
@@ -170,9 +170,9 @@ export function FooterShowcase() {
 
             {/* Social toggle */}
             <Box>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                 SOCIAL LINKS
-              </OverlineSmall>
+              </EyebrowSmall>
               <SwitchInput
                 label="Show social media row"
                 checked={showSocial}
@@ -186,9 +186,9 @@ export function FooterShowcase() {
 
             {/* Subscribe toggle */}
             <Box>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                 SUBSCRIBE
-              </OverlineSmall>
+              </EyebrowSmall>
               <SwitchInput
                 label="Show email subscribe form"
                 checked={showSubscribe}

@@ -115,10 +115,20 @@ import { useThemeMode } from '../theme/useThemeMode';
 // to construct the manifest URL here; the Provider follows the rest.
 const FIREBASE_STORAGE_BUCKET = 'dino-design.firebasestorage.app';
 const FIREBASE_STORAGE_ROOT   = 'design-systems';
-function themeManifestUrl(userId) {
-  const path = `${FIREBASE_STORAGE_ROOT}/${userId}/theme.json`;
+function themeFileUrl(userId, filename) {
+  const path = `${FIREBASE_STORAGE_ROOT}/${userId}/${filename}`;
   return `https://firebasestorage.googleapis.com/v0/b/${FIREBASE_STORAGE_BUCKET}/o/${encodeURIComponent(path)}?alt=media`;
 }
+
+const themeManifestUrl = (userId) => themeFileUrl(userId, 'theme.json');
+
+// theme.json does not list typography-tokens.css yet, but the studio uploads
+// it alongside the rest. Point at it directly so the showcase renders the
+// design system's OWN type ramp — without it the lib's bundled copy wins on
+// [data-platform] and silently replaces the brand's sizes and weights.
+// Once the manifest gains a "typography" key the Provider picks it up on its
+// own and this prop can go.
+const themeTypographyUrl = (userId) => themeFileUrl(userId, 'typography-tokens.css');
 
 const DRAWER_WIDTH = 320;
 
@@ -257,6 +267,7 @@ function ShowcaseInner() {
   const params = new URLSearchParams(window.location.search);
   const userParam = params.get('user');
   const themeURL = userParam ? themeManifestUrl(userParam) : undefined;
+  const typographyCSS = userParam ? themeTypographyUrl(userParam) : undefined;
 
   const handleTreeSelect = useCallback((event, itemId) => {
     if (itemId && !NAV_ITEMS.some((cat) => cat.id === itemId)) {
@@ -301,6 +312,7 @@ function ShowcaseInner() {
   return (
     <DynoDesignProvider
       themeURL={themeURL}
+      typographyCSS={typographyCSS}
       defaultTheme="Default"
       defaultSurface="Surface"
       defaultStyle="Modern"

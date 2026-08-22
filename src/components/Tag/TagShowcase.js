@@ -6,7 +6,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import { Tag, TAG_COLORS, TAG_COLOR_TOKEN_MAP } from './Tag';
 
 // Grouped color picker — mirrors the Button showcase pattern:
-// Default at the top, then brand Theme colors, then Semantic status colors.
+// Default at the top, then brand Theme colors, then State status colors.
 const COLOR_GROUPS = [
   { label: 'Default',  colors: ['default'] },
   { label: 'Theme',    colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
@@ -18,7 +18,7 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H5, BodySmall, Caption, OverlineSmall,
+  H2, H5, BodySmall, Caption, EyebrowSmall,
 } from '../Typography';
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
@@ -219,9 +219,9 @@ export function TagShowcase() {
                     <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
                   </Box>
 
-                  {/* Color swatches — Default / Theme / Semantic */}
+                  {/* Color swatches — Default / Theme / State */}
                   <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</EyebrowSmall>
                     <Stack spacing={1.5}>
                       {COLOR_GROUPS.map((group) => (
                         <Box key={group.label}>
@@ -241,7 +241,7 @@ export function TagShowcase() {
 
                   {/* Text input */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>LABEL TEXT</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>LABEL TEXT</EyebrowSmall>
                     <Box
                       component="input"
                       type="text"

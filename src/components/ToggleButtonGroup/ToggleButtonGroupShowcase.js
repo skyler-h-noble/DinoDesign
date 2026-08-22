@@ -15,7 +15,7 @@ import FormatAlignCenterIcon from '@mui/icons-material/FormatAlignCenter';
 import FormatAlignRightIcon from '@mui/icons-material/FormatAlignRight';
 import { ToggleButtonGroup, ToggleButton } from './ToggleButtonGroup';
 import {
-  H2, H4, H5, Body, BodySmall, Caption, Label, OverlineSmall
+  H2, H4, H5, Body, BodySmall, Caption, Label, EyebrowSmall
 } from '../Typography';
 
 // --- Contrast Calculator -----------------------------------------------------
@@ -322,7 +322,7 @@ export function ToggleButtonGroupShowcase() {
 
             {/* Style */}
             <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</EyebrowSmall>
               <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1 }}>
                 {styles.map((s) => (
                   <ControlButton key={s} label={cap(s)} selected={style === s}
@@ -334,7 +334,7 @@ export function ToggleButtonGroupShowcase() {
             {/* Color (hidden for primary) */}
             {style !== 'primary' && (
               <Box sx={{ mt: 3 }}>
-                <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
+                <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</EyebrowSmall>
                 <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
                   {COLORS.map((c) => (
                     <ColorSwatchButton key={c} color={c} selected={color === c} onClick={setColor} />
@@ -345,7 +345,7 @@ export function ToggleButtonGroupShowcase() {
 
             {/* Size */}
             <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</EyebrowSmall>
               <Stack direction="row" spacing={1}>
                 {['small', 'medium', 'large'].map((s) => (
                   <ControlButton key={s} label={cap(s)} selected={size === s} onClick={() => setSize(s)} />
@@ -355,7 +355,7 @@ export function ToggleButtonGroupShowcase() {
 
             {/* Selection mode */}
             <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SELECTION</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SELECTION</EyebrowSmall>
               <Stack direction="row" spacing={1}>
                 <ControlButton label="Exclusive" selected={exclusive} onClick={() => setExclusive(true)} />
                 <ControlButton label="Multiple" selected={!exclusive} onClick={() => setExclusive(false)} />
@@ -364,7 +364,7 @@ export function ToggleButtonGroupShowcase() {
 
             {/* Orientation */}
             <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ORIENTATION</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ORIENTATION</EyebrowSmall>
               <Stack direction="row" spacing={1}>
                 <ControlButton label="Horizontal" selected={orientation === 'horizontal'} onClick={() => setOrientation('horizontal')} />
                 <ControlButton label="Vertical" selected={orientation === 'vertical'} onClick={() => setOrientation('vertical')} />

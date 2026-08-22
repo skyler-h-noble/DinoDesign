@@ -23,7 +23,7 @@ import { SHADOW_LEVEL_1 } from '../_shadows';
  *   black          data-theme="Black"
  *
  * SURFACE (sets data-surface, default "Surface"):
- *   Surface | Surface-Bright | Surface-Dim | Surface-Dimmest
+ *   Surface-Dimmest | Surface-Dim | Surface | Surface-Bright | Surface-Brightest
  *
  * DESKTOP: Login, Menu (expanded only <=3 links), Branding, Search, Right buttons
  * MOBILE: search, small, medium, large

@@ -13,7 +13,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import * as MuiIcons from '@mui/icons-material';
 import { Chip } from './Chip';
 import {
-  H2, H4, H5, Body, BodySmall, BodyBold, Caption, Label, OverlineSmall
+  H2, H4, H5, Body, BodySmall, BodyBold, Caption, Label, EyebrowSmall
 } from '../Typography';
 
 // --- Contrast Calculator -----------------------------------------------------
@@ -417,7 +417,7 @@ export function ChipShowcase() {
 
             {/* Style */}
             <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</EyebrowSmall>
               <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1 }}>
                 {['solid', 'outline', 'light'].map((s) => (
                   <ControlButton
@@ -432,7 +432,7 @@ export function ChipShowcase() {
 
             {/* Color */}
             <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</EyebrowSmall>
               <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
                 {COLORS.map((c) => (
                   <ColorSwatchButton
@@ -447,7 +447,7 @@ export function ChipShowcase() {
 
             {/* Size */}
             <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</EyebrowSmall>
               <Stack direction="row" spacing={1}>
                 {['small', 'medium', 'large'].map((s) => (
                   <ControlButton
@@ -546,7 +546,7 @@ export function ChipShowcase() {
               <Box sx={{ mt: 2 }}>
                 {/* Start Decorator */}
                 <Box sx={{ mt: 2 }}>
-                  <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>START DECORATOR</OverlineSmall>
+                  <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>START DECORATOR</EyebrowSmall>
                   <Stack direction="row" spacing={1} sx={{ gap: 1 }}>
                     {['none', 'icon', 'avatar'].map((t) => (
                       <ControlButton
@@ -583,7 +583,7 @@ export function ChipShowcase() {
 
                 {/* End Decorator */}
                 <Box sx={{ mt: 3 }}>
-                  <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>END DECORATOR</OverlineSmall>
+                  <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>END DECORATOR</EyebrowSmall>
                   <Stack direction="row" spacing={1} sx={{ gap: 1 }}>
                     {['none', 'icon', 'avatar'].map((t) => (
                       <ControlButton
@@ -622,7 +622,7 @@ export function ChipShowcase() {
 
                 {/* Selection Mode */}
                 <Box sx={{ mt: 2 }}>
-                  <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SELECTION MODE</OverlineSmall>
+                  <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SELECTION MODE</EyebrowSmall>
                   <Stack direction="row" spacing={1} sx={{ gap: 1 }}>
                     {['none', 'radio', 'checkbox'].map((m) => (
                       <ControlButton
@@ -671,7 +671,7 @@ export function ChipShowcase() {
             <Box sx={{ p: 3, backgroundColor: 'var(--Container)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
               <H5>Text Readability</H5>
               <BodySmall color="quiet" style={{ marginBottom: 16 }}>
-                Chip label must maintain >= 4.5:1 contrast against its background
+                Chip label must maintain &gt;= 4.5:1 contrast against its background
               </BodySmall>
               <A11yRow
                 label="Label on Chip Background"

@@ -7,8 +7,10 @@
 // ========== DESIGN FOUNDATION ==========
 export { 
   Typography, 
+  CAP_HEIGHT_TRIM,
   Heading, 
   DisplayLarge,
+  DisplayMedium,
   DisplaySmall,
   H1, 
   H2, 
@@ -32,6 +34,8 @@ export {
   Subtitle,
   Subtitle1, 
   Subtitle2,
+  SubtitleSmall,
+  SubtitleMedium,
   SubtitleLarge,
   Legal,
   LegalSemibold,
@@ -39,6 +43,11 @@ export {
   LabelExtraSmall,
   LabelSmall,
   LabelLarge,
+  Eyebrow,
+  EyebrowSmall,
+  EyebrowMedium,
+  EyebrowLarge,
+  // Overline — former name for Eyebrow, kept as an alias.
   Overline,
   OverlineSmall,
   OverlineMedium,

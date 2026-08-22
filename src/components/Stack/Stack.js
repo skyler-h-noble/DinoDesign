@@ -30,7 +30,7 @@ import { Stack as MuiStack, Box } from '@mui/material';
 const SMALL_DISPLAY_NAMES = [
   'Link', 'Chip', 'Badge', 'Caption', 'Label', 'Tag',
   'BodySmall', 'LegalSemibold', 'Legal', 'LabelSmall', 'LabelExtraSmall',
-  'OverlineSmall', 'ButtonSmall',
+  'EyebrowSmall', 'ButtonSmall',
 ];
 
 function isSmallChild(child) {

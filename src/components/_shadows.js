@@ -90,20 +90,64 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 export const TOKEN_SEGMENT = { 'black-white': 'BlackWhite' };
 export const tokenSegment = (color) => TOKEN_SEGMENT[color] || cap(color);
 
-export function bevelShadow(color) {
+// Token prefix per button size, matching the design system's
+// --Sm-Button-* / --Button-* / --Lg-Button-* naming.
+const BEVEL_PREFIX = { small: 'Sm-', medium: '', large: 'Lg-' };
+
+/**
+ * The bevel's two inset shadows.
+ *
+ * `size` ('small' | 'medium' | 'large') opts into the design system's
+ * per-size geometry tokens — eight literal lengths per size, generated from
+ * the same module that writes the Figma variables, so the two artifacts carry
+ * identical numbers. Each one falls back to the value the lib derives from
+ * --_bevel, which is what older design systems (and any caller with no size
+ * token to point at) keep using.
+ *
+ * Callers with a height that no size token describes — the Fab's diameter, the
+ * Slider's thumb — pass no size and stay entirely on the derived path.
+ */
+export function bevelShadow(color, size) {
   const C = tokenSegment(color);
+
+  // Highlight/Lowlight are RGB TRIPLETS, not colors — `239, 228, 241`, the
+  // same convention --Dropshadow-Color uses. They have to be wrapped in rgb()
+  // before anything can consume them.
+  //
+  // Dropping a bare triplet straight into color-mix() does NOT fall back and
+  // does NOT throw: `color-mix(in srgb, 239, 228, 241 100%, transparent)`
+  // parses as garbage, which invalidates the whole box-shadow declaration and
+  // takes the bevel to `none`. That is why hosted buttons rendered flat while
+  // the studio's rendered beveled.
+  //
+  // Opacity rides on color-mix with --Button-Bevel-Opacity. Fallbacks are
+  // triplets too (black for the lowlight, white for the highlight) so an
+  // unthemed consumer still gets a valid shadow.
+  const mix = (token, fallback) =>
+    `color-mix(in srgb, rgb(var(${token}, ${fallback})) calc(var(--Button-Bevel-Opacity, 0.5) * 100%), transparent)`;
+
+  // Derived geometry — the fallback for every slot below.
+  //
   // The 4th value (spread) is a NEGATIVE --_bevel. Without it the inset shadow
   // blooms out to offset+blur (~2×--_bevel) and reads far too large; the
   // negative spread pulls it back so the highlight/lowlight stay a tight edge.
-  //
-  // Highlight/Lowlight are full COLORS (hex). Opacity is applied via color-mix
-  // with --Button-Bevel-Opacity — NOT rgba(), which would reject a hex token
-  // and silently fall back to black (the cause of the over-dark hosted bevel).
-  // Lowlight falls back to black, highlight to white.
-  const mix = (token, fallback) =>
-    `color-mix(in srgb, var(${token}, ${fallback}) calc(var(--Button-Bevel-Opacity, 0.5) * 100%), transparent)`;
+  const B = 'var(--_bevel)';
+  const NEG = 'calc(-1 * var(--_bevel))';
+
+  // With a size, each slot reads its token and keeps the derived value as its
+  // own fallback, so a partially-populated design system degrades per value.
+  const prefix = BEVEL_PREFIX[size];
+  const geo = prefix === undefined
+    ? (_slot, derived) => derived
+    : (slot, derived) => `var(--${prefix}Button-${slot}, ${derived})`;
+
+  // Highlight sits top-left (positive offsets), lowlight bottom-right.
   return [
-    `inset calc(-1 * var(--_bevel)) calc(-1 * var(--_bevel)) var(--_bevel) calc(-1 * var(--_bevel)) ${mix(`--Buttons-${C}-Lowlight`, 'black')}`,
-    `inset var(--_bevel) var(--_bevel) var(--_bevel) calc(-1 * var(--_bevel)) ${mix(`--Buttons-${C}-Highlight`, 'white')}`,
+    `inset ${geo('Lowlight-Offset-x', NEG)} ${geo('Lowlight-Offset-y', NEG)} ` +
+      `${geo('Lowlight-Blur-Radius', B)} ${geo('Lowlight-Spread', NEG)} ` +
+      mix(`--Buttons-${C}-Lowlight`, '0 0 0'),
+    `inset ${geo('Highlight-Offset-x', B)} ${geo('Highlight-Offset-y', B)} ` +
+      `${geo('Highlight-Blur-Radius', B)} ${geo('Highlight-Spread', NEG)} ` +
+      mix(`--Buttons-${C}-Highlight`, '255 255 255'),
   ].join(', ');
 }

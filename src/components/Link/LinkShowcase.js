@@ -7,7 +7,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import { Link, LINK_STYLES, LINK_COLORS } from './Link';
 import {
-  H2, H4, H5, Body, BodySmall, Caption, Label, OverlineSmall
+  H2, H4, H5, Body, BodySmall, Caption, Label, EyebrowSmall
 } from '../Typography';
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
@@ -185,7 +185,7 @@ export function LinkShowcase() {
 
             {/* Style — Body group */}
             <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE — BODY</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE — BODY</EyebrowSmall>
               <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1 }}>
                 {['body', 'body-small', 'body-large', 'body-semibold', 'body-bold'].map((s) => (
                   <ControlButton key={s} label={STYLE_LABELS[s]} selected={textStyle === s} onClick={() => setTextStyle(s)} />
@@ -195,20 +195,20 @@ export function LinkShowcase() {
 
             {/* Style — Utility group */}
             <Box sx={{ mt: 2 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE — UTILITY</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE — UTILITY</EyebrowSmall>
               <Stack direction="row" spacing={1}>
                 {['button', 'label', 'caption'].map((s) => (
                   <ControlButton key={s} label={STYLE_LABELS[s]} selected={textStyle === s} onClick={() => setTextStyle(s)} />
                 ))}
               </Stack>
               <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
-                Headers (H1–H6), Display, and Overline styles are not available for links.
+                Headers (H1–H6), Display, and Eyebrow styles are not available for links.
               </Caption>
             </Box>
 
             {/* Color */}
             <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</EyebrowSmall>
               <Stack direction="row" spacing={1}>
                 {LINK_COLORS.map((c) => (
                   <ControlButton key={c} label={COLOR_LABELS[c]} selected={color === c} onClick={() => setColor(c)} />
@@ -230,7 +230,7 @@ export function LinkShowcase() {
 
             {/* Inline usage example */}
             <Box sx={{ mt: 3, p: 2, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>INLINE USAGE</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>INLINE USAGE</EyebrowSmall>
               <Body>
                 Links are inline elements designed to sit within{' '}
                 <Link href="#" textStyle="body" color="primary">running text</Link>
@@ -332,7 +332,7 @@ export function LinkShowcase() {
                 <Box sx={{ py: 1.5 }}>
                   <BodySmall>Restricted styles:</BodySmall>
                   <Caption style={{ color: 'var(--Text-Quiet)' }}>
-                    Headers (H1–H6), Display (DisplayLarge, DisplaySmall), and Overline styles are excluded. Links are inline text elements and should not adopt heading or decorative typography.
+                    Headers (H1–H6), Display (DisplayLarge, DisplaySmall), and Eyebrow styles are excluded. Links are inline text elements and should not adopt heading or decorative typography.
                   </Caption>
                 </Box>
               </Stack>

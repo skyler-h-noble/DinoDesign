@@ -391,7 +391,7 @@ Read these docs before writing any code:
 
 ALWAYS import components from '@dynodesign/components'
 ALWAYS import CSS at the top of App.js:
-  import '@dynodesign/components/public/styles/foundations.css'
+  import '@dynodesign/components/public/styles/foundation.css'
   import '@dynodesign/components/public/styles/core.css'
   import '@dynodesign/components/public/styles/Light-Mode.css'
   import '@dynodesign/components/public/styles/base.css'

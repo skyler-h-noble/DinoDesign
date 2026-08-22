@@ -9,7 +9,7 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H5, BodySmall, Caption, Label, OverlineSmall
+  H2, H5, BodySmall, Caption, Label, EyebrowSmall
 } from '../Typography';
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
@@ -231,7 +231,7 @@ export function AppBarShowcase() {
 
                   {/* Mode */}
                   <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>MODE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>MODE</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       {['desktop', 'mobile'].map((m) => (
                         <ControlButton key={m} label={cap(m)} selected={mode === m} onClick={() => setMode(m)} />
@@ -241,7 +241,7 @@ export function AppBarShowcase() {
 
                   {/* Bar Color */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>BAR COLOR</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>BAR COLOR</EyebrowSmall>
                     <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
                       {BAR_COLORS.map((c) => (
                         <BarColorSwatch key={c} color={c} selected={barColor === c} onClick={setBarColor} />
@@ -254,7 +254,7 @@ export function AppBarShowcase() {
 
                   {/* Surface */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SURFACE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SURFACE</EyebrowSmall>
                     <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
                       {SURFACES.map((s) => (
                         <ControlButton key={s} label={s.replace('Surface-', '').replace('Surface', 'Default')} selected={surface === s} onClick={() => setSurface(s)} />
@@ -270,7 +270,7 @@ export function AppBarShowcase() {
                     <>
                       {/* Menu Type */}
                       <Box sx={{ mt: 3 }}>
-                        <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>MENU TYPE</OverlineSmall>
+                        <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>MENU TYPE</EyebrowSmall>
                         <Stack direction="row" spacing={1}>
                           {['hamburger', 'expanded'].map((m) => (
                             <ControlButton key={m} label={cap(m)} selected={menuType === m} onClick={() => setMenuType(m)} />
@@ -283,7 +283,7 @@ export function AppBarShowcase() {
 
                       {/* Brand Type */}
                       <Box sx={{ mt: 3 }}>
-                        <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>BRAND</OverlineSmall>
+                        <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>BRAND</EyebrowSmall>
                         <Stack direction="row" spacing={1}>
                           {['name', 'logo'].map((b) => (
                             <ControlButton key={b} label={cap(b)} selected={brandType === b} onClick={() => setBrandType(b)} />
@@ -293,7 +293,7 @@ export function AppBarShowcase() {
 
                       {/* Search Position */}
                       <Box sx={{ mt: 3 }}>
-                        <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SEARCH POSITION</OverlineSmall>
+                        <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SEARCH POSITION</EyebrowSmall>
                         <Stack direction="row" spacing={1}>
                           {['left', 'right'].map((p) => (
                             <ControlButton key={p} label={cap(p)} selected={searchPosition === p} onClick={() => setSearchPosition(p)} />
@@ -303,7 +303,7 @@ export function AppBarShowcase() {
 
                       {/* Login Type */}
                       <Box sx={{ mt: 3 }}>
-                        <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>LOGIN TYPE</OverlineSmall>
+                        <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>LOGIN TYPE</EyebrowSmall>
                         <Stack direction="row" spacing={1}>
                           {['login', 'avatar'].map((l) => (
                             <ControlButton key={l} label={cap(l)} selected={loginType === l} onClick={() => setLoginType(l)} />
@@ -316,7 +316,7 @@ export function AppBarShowcase() {
                   {/* Mobile-only controls */}
                   {!isDesktop && (
                     <Box sx={{ mt: 3 }}>
-                      <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>MOBILE VARIANT</OverlineSmall>
+                      <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>MOBILE VARIANT</EyebrowSmall>
                       <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
                         {['search', 'small', 'medium', 'large'].map((v) => (
                           <ControlButton key={v} label={cap(v)} selected={mobileVariant === v} onClick={() => setMobileVariant(v)} />

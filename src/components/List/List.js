@@ -1,16 +1,16 @@
 // src/components/List/List.js
 import React from 'react';
 import { Box, Checkbox, Radio } from '@mui/material';
-import { OverlineSmall, SubtitleLarge, Body, BodySmallSemibold } from '../Typography';
+import { EyebrowSmall, SubtitleLarge, Body, BodySmallSemibold } from '../Typography';
 
 // Default three-layer typography for the text frame. Order is top→bottom:
-//   overline  — OverlineSmall  (optional metadata kicker on top)
+//   eyebrow   — EyebrowSmall  (optional metadata kicker on top)
 //   title     — SubtitleLarge  (children, the main label)
 //   secondary — Body           (supporting description)
 // Single-line consumers (just `children`) render only the SubtitleLarge title
 // so plain "Home" / "Inbox" rows still look like titles, not metadata.
 const DEFAULT_LAYERS = {
-  overline:  OverlineSmall,
+  eyebrow:   EyebrowSmall,
   title:     Body,                // children / name → Body-Medium
   secondary: BodySmallSemibold,   // supporting / role → Body-Small-Semibold
 };
@@ -80,9 +80,10 @@ export function ListItem({
   startDecoratorAriaLabel, endDecoratorAriaLabel,
   size = 'medium', variant = 'default', color,
   // Three stacked text layers — children is the title (SubtitleLarge),
-  // secondary is supporting body (Body), overline is the optional kicker
-  // on top (OverlineSmall). Vstacked with no gap (line-height carries rhythm).
-  overline, secondary,
+  // secondary is supporting body (Body), eyebrow is the optional kicker
+  // on top (EyebrowSmall). Vstacked with no gap (line-height carries rhythm).
+  // `overline` is the former name for `eyebrow`, still accepted.
+  eyebrow, overline, secondary,
   clickable = false, disabled = false, selected = false,
   selectionMode = 'none', onSelect, onClick,
   // Non-clickable mode dividers. Apply only when !clickable — the clickable
@@ -197,9 +198,10 @@ export function ListItem({
         // Text frame — flex-fills the remaining horizontal space between
         // start decorator and end decorator. The text frame ITSELF fills,
         // and each line wraps naturally rather than ellipsis-truncating.
-        // Order is top→bottom: overline (kicker) → children (title) →
+        // Order is top→bottom: eyebrow (kicker) → children (title) →
         // secondary (body).
         const Layers = DEFAULT_LAYERS;
+        const kicker = eyebrow ?? overline;
         const lineSx = {
           display: 'block',
           width: '100%',
@@ -219,14 +221,14 @@ export function ListItem({
             minWidth: 0,
             display: 'flex',
             flexDirection: 'column',
-            // Text layers (overline → title → secondary) stack with NO gap —
+            // Text layers (eyebrow → title → secondary) stack with NO gap —
             // line-height carries the rhythm; matches the Figma text frame.
             gap: 0,
           }}>
-            {overline && (
-              <Layers.overline style={{ ...lineSx, color: 'var(--Quiet)' }}>
-                {overline}
-              </Layers.overline>
+            {kicker && (
+              <Layers.eyebrow style={{ ...lineSx, color: 'var(--Quiet)' }}>
+                {kicker}
+              </Layers.eyebrow>
             )}
             {children !== undefined && children !== null && (
               <Layers.title style={{ ...lineSx, color: 'var(--Text)' }}>
@@ -295,7 +297,7 @@ export function List({
             onEndDecoratorAction={item.onEndDecoratorAction}
             startDecoratorAriaLabel={item.startDecoratorAriaLabel}
             endDecoratorAriaLabel={item.endDecoratorAriaLabel}
-            overline={item.overline} secondary={item.secondary}
+            eyebrow={item.eyebrow ?? item.overline} secondary={item.secondary}
             clickable={clickable || item.clickable}
             disabled={item.disabled}
             bottomBorder={item.bottomBorder}

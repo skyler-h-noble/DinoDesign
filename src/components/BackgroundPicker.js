@@ -44,7 +44,7 @@ const THEME_OPTIONS = [
   { label: 'Error-Light',     value: 'Error-Light' },
 ];
 
-const CARD_SURFACES      = ['Surface', 'Surface-Bright', 'Surface-Dim', 'Surface-Dimmest'];
+const CARD_SURFACES      = ['Surface-Dimmest', 'Surface-Dim', 'Surface', 'Surface-Bright', 'Surface-Brightest'];
 const CONTAINER_SURFACES = ['Container', 'Container-Highest', 'Container-High', 'Container-Low', 'Container-Lowest'];
 const ALL_SURFACES       = [...CARD_SURFACES, ...CONTAINER_SURFACES];
 

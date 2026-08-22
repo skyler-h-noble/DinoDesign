@@ -9,7 +9,7 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H5, Body, BodySmall, Caption, OverlineSmall,
+  H2, H5, Body, BodySmall, Caption, EyebrowSmall,
 } from '../Typography';
 
 const SURFACES = [
@@ -139,9 +139,9 @@ export function BoxShowcase() {
 
                   {/* Theme override */}
                   <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                       THEME (optional)
-                    </OverlineSmall>
+                    </EyebrowSmall>
                     <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
                       <ControlButton label="None" selected={!theme} onClick={() => setTheme('')} />
                       {THEMES.map((t) => (
@@ -152,9 +152,9 @@ export function BoxShowcase() {
 
                   {/* Surface override */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                       SURFACE (optional)
-                    </OverlineSmall>
+                    </EyebrowSmall>
                     <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
                       <ControlButton label="None" selected={!surface} onClick={() => setSurface('')} />
                       {SURFACES.map((s) => (

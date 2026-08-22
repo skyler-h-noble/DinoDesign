@@ -72,7 +72,7 @@ import { Icon } from './Icon';
 import { Button } from '../Button/Button';
 import { Switch } from '../Switch/Switch';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
-import { H2, H5, BodySmall, Caption, Label, OverlineSmall } from '../Typography';
+import { H2, H5, BodySmall, Caption, Label, EyebrowSmall } from '../Typography';
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 
@@ -258,7 +258,7 @@ export function IconShowcase() {
 
                   {/* Icon name */}
                   <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ICON</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ICON</EyebrowSmall>
                     <Box component="input" type="text" value={selectedIcon}
                       onChange={(e) => setSelectedIcon(e.target.value)}
                       placeholder="e.g. Home, Favorite, Delete"
@@ -281,7 +281,7 @@ export function IconShowcase() {
 
                   {/* Style */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</EyebrowSmall>
                     <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
                       {STYLES.map((s) => <ControlButton key={s} label={STYLE_LABELS[s]} selected={style===s} onClick={() => setStyle(s)} />)}
                     </Stack>
@@ -289,7 +289,7 @@ export function IconShowcase() {
 
                   {/* Color */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</EyebrowSmall>
                     <Stack spacing={1.5}>
                       {COLOR_GROUPS.map((group) => (
                         <Box key={group.label}>
@@ -329,7 +329,7 @@ export function IconShowcase() {
 
                   {/* Size */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</EyebrowSmall>
                     <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
                       {['xs','small','medium','large','custom'].map((s) => <ControlButton key={s} label={s === 'xs' ? 'XS' : cap(s)} selected={size===s} onClick={() => setSize(s)} />)}
                     </Stack>
@@ -348,7 +348,7 @@ export function IconShowcase() {
 
                   {/* aria-label */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ARIA LABEL</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ARIA LABEL</EyebrowSmall>
                     <Box component="input" type="text" value={ariaLabel}
                       onChange={(e) => setAriaLabel(e.target.value)}
                       placeholder={'Leave empty for decorative (aria-hidden)'}

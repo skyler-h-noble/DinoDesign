@@ -207,9 +207,16 @@ var(--Container-High)      /* modals live here */
 ```css
 var(--Text)                /* primary body text */
 var(--Text-Quiet)          /* secondary / muted text */
-var(--Header)              /* headings */
+var(--Header)              /* Display and H1-H3 only - see below */
 var(--Hotlink)             /* links */
 ```
+
+`--Header` is a DISPLAY role, not a heading role. `<DisplayLarge>`,
+`<DisplaySmall>` and `<H1>`-`<H3>` default to it; `<H4>`-`<H6>` default to
+`--Text`. At H4 and below the type is body-sized and usually sits inline with
+body copy, so a second tone reads as an inconsistency rather than as another
+level of hierarchy. Both defaults are applied by the component - don't pass a
+`color` prop to restate either one.
 
 ### Borders & States
 ```css
@@ -255,16 +262,103 @@ var(--Style-Gradient-Color-2)
 var(--Style-Gradient-Angle)
 ```
 
-### Typography
+### Typography — the four faces
+
+A design system publishes four faces, not two. Each has a `--Set-Font-Family-*`
+input and a `--Font-Family-*` token that components actually read:
+
 ```css
+/* What components read */
+var(--Font-Family-Display)   /* the expressive face — display-large/medium/small */
+var(--Font-Family-Header)    /* h1–h6, and the only face carrying variable axes */
+var(--Font-Family-Eyebrow)   /* eyebrow labels; defaults to the OS UI stack */
+var(--Font-Family-Body)      /* everything else */
+
+/* Per-face weights */
+var(--Font-Weight-Display)
+var(--Font-Weight-Header)
+var(--Font-Weight-Eyebrow)
+var(--Font-Weight-Body)
+
+/* The generator's inputs — you set these, you don't read them */
 var(--Set-Font-Family-Header)
 var(--Set-Font-Family-Header-Weight)
+var(--Set-Font-Family-Display)
+var(--Set-Font-Family-Eyebrow)
 var(--Set-Font-Family-Body)
 var(--Set-Font-Family-Body-Weight)
 var(--Set-Font-Family-Body-Semibold-Weight)
 var(--Set-Font-Family-Body-Bold-Weight)
-var(--Set-Font-Family-Decorative)
+var(--Set-Font-Family-Decorative)   /* legacy alias of the Display face */
 ```
+
+Every step of every ramp also publishes its own `--{Style}-Font-Family` and
+`--{Style}-Text-Transform`, so a single style can be re-pointed without moving
+the whole face.
+
+### Body has two weights — Subtitle is the bold one
+
+The Body ramp publishes exactly two weights at each size, and no bold:
+
+```css
+--Body-{Small,Medium,Large}-Font-Weight            /* standard — var(--Font-Weight-Body) */
+--Body-{Small,Medium,Large}-Semibold-Font-Weight   /* 600 */
+```
+
+**For bold at body sizes, use Subtitle.** It is Body at 700 — same face, same
+sizes, same line height, same letter-spacing — so a third weight on Body would
+publish the same three styles under two names:
+
+| You want | Use | Reads |
+| --- | --- | --- |
+| body, normal | `<Body>` | `--Body-Medium-Font-Weight` |
+| body, semibold | `<Typography variant="body-semibold">` | `--Body-Medium-Semibold-Font-Weight` |
+| body, **bold** | `<Subtitle>` | `--Subtitle-Medium-Font-Weight` (700) |
+| bold, one step down | `<Typography variant="subtitle-small">` | `--Subtitle-Small-Font-Weight` |
+| bold, one step up | `<SubtitleLarge>` | `--Subtitle-Large-Font-Weight` |
+
+Three things that bite when you make that swap:
+
+**Subtitle defaults to `--Header`, Body defaults to `--Text`.** Swapping `<Body>`
+for `<Subtitle>` to gain weight also changes the colour. Pass
+`color="standard"` to keep `--Text`.
+
+**`variant="body-bold"` is an alias, not a bold.** The `-bold` body keys still
+resolve so old markup doesn't break, but they land on the *semibold* style. If
+you asked for `body-large-bold` and got 600, that is why — reach for Subtitle.
+
+**`--Body-Bold-Font-Weight` (700) exists, but it is not a type style.** It is a
+face-level weight for bolding body-face text outside the ramp (`Link` uses it).
+Don't build a Body-Bold ramp out of it — the sizes and leading that make
+Subtitle a real style aren't there.
+
+`SubtitleLarge` and `Subtitle` (the medium step) are named exports;
+`subtitle-small` is reachable only through `<Typography variant>`.
+
+### Variable-font axes — Header only
+
+When the Header face is a variable font (e.g. Google Sans Flex), the system
+publishes its axes as tokens and composes them into one value:
+
+```css
+var(--Font-Width-Header)          /* wdth */
+var(--Font-Optical-Size-Header)   /* opsz */
+var(--Font-Slant-Header)          /* slnt — negative leans right */
+var(--Font-Grade-Header)          /* GRAD */
+var(--Font-Roundness-Header)      /* ROND — 100 is fully rounded */
+
+var(--Font-Variation-Header)      /* the composed font-variation-settings value */
+```
+
+`H1`–`H6` apply `--Font-Variation-Header` themselves. If you hand-roll a
+heading, set `font-variation-settings: var(--Font-Variation-Header)` — reaching
+for the individual axis tokens one at a time just re-derives it.
+
+**`wght` is deliberately absent from the composed value.** `font-weight`
+already carries it, and declaring the weight in both places lets the two
+disagree. Set weight with `font-weight` / `--Font-Weight-Header`.
+
+Display, Eyebrow, and Body have no axis tokens — only the Header face does.
 
 ### Page setup — the system styles NO bare elements
 
@@ -300,26 +394,38 @@ publishes per-platform ramps under `[data-platform="Desktop"|"IOS-Mobile"|
 ramp instead of the default. Text rendering with the wrong family is almost
 never a missing `data-platform` — check that `core.css` is loaded first.
 
-### Eyebrow vs Overline — one concept, two names
+### Eyebrow — the style formerly called Overline
 
-This trips people up, so read it before writing an eyebrow style. **Eyebrow is
-the FACE and the COLOUR role; Overline is the TYPE STYLE.** The sizes are
-published under Overline, everything else under Eyebrow:
+The component is `<Eyebrow>` (`textStyle="eyebrow"`), in three steps:
+`eyebrow-small` / `eyebrow` / `eyebrow-large`. `<Overline>` and
+`textStyle="overline"` still resolve to it, so existing code keeps working, but
+Eyebrow is the name to write.
+
+The rename now reaches the size tokens too, so an eyebrow is spelled one way
+in every property:
 
 ```css
 color:          var(--Eyebrow);                     /* per theme AND per surface */
 font-family:    var(--Font-Family-Eyebrow);
 font-weight:    var(--Font-Weight-Eyebrow);
-font-size:      var(--Overline-Medium-Font-Size);   /* NOT --Eyebrow-Font-Size */
-letter-spacing: var(--Overline-Medium-Letter-Spacing);
+font-size:      var(--Eyebrow-Medium-Font-Size);   /* NOT --Eyebrow-Font-Size */
+letter-spacing: var(--Eyebrow-Medium-Letter-Spacing);
 ```
 
-`--Eyebrow-Font-Size` and `--Eyebrow-Letter-Spacing` do not exist and never
-have. Reaching for them fails silently — the declaration falls back to whatever
-literal you wrote, so the text renders at the wrong size with no error.
+`--Eyebrow-Font-Size` and `--Eyebrow-Letter-Spacing` — with no step — do not
+exist and never have. Sizes are per STEP. Reaching for the bare name fails
+silently: the declaration falls back to whatever literal you wrote, so the text
+renders at the wrong size with no error.
 
-Steps are `--Overline-{Small,Medium,Large}-*` at 12 / 13 / 15px, with tracking
-loosening as the size drops.
+Steps are `--Eyebrow-{Small,Medium,Large}-*` at 12 / 13 / 15px, with tracking
+loosening as the size drops. Use `<Eyebrow>` and the tokens resolve themselves;
+the token names only matter when you hand-roll one.
+
+`--Overline-{Small,Medium,Large}-*` is still emitted as an alias pointing at
+the Eyebrow token, because a design system's CSS is frozen once published and
+consumers upgrade the lib on their own schedule. Read the Eyebrow name; the
+components already fall back to the Overline one for systems generated before
+the rename.
 
 `--Eyebrow` is not a muted `--Text`. It is a rotation off the surface's own
 palette — Primary borrows Secondary, Secondary borrows Tertiary, Tertiary and
@@ -327,10 +433,45 @@ Neutral borrow Primary, and the state themes borrow black or white — so
 substituting `--Quiet` throws the rotation away and paints every eyebrow the
 same grey.
 
+### Cap-height trim — Figma's "cap height to baseline"
+
+Figma's vertical-trim setting has a CSS equivalent, and the lib ships it as
+`CAP_HEIGHT_TRIM`:
+
+```jsx
+import { CAP_HEIGHT_TRIM } from './components';
+
+<Box sx={{ paddingTop: '2px', ...CAP_HEIGHT_TRIM }}>LABEL</Box>
+```
+
+It cuts the text box to the cap height on top and the alphabetic baseline
+underneath, so a label centres on its letterforms instead of on the font's
+line box — which carries ascender and descender space that a button label or
+an avatar's initials never use. `Button` and `Avatar` apply it already.
+
+It is progressive enhancement: the rules sit inside
+`@supports (text-box-edge: cap alphabetic)`, so a browser without `text-box`
+renders exactly as it did before. That is why any optical padding you use to
+fake the same effect goes OUTSIDE the spread — the block zeroes the padding
+itself wherever the real trim applies.
+
+Don't hand-write `text-box-trim` / `text-box-edge` in a component; spread the
+constant so every trimmed surface trims to the same two edges.
+
+### Avatar initials wear the Eyebrow style
+
+`Avatar` renders its initials in the Eyebrow face, weight and tracking — not
+Legal or Number. The eyebrow ramp is three steps and the avatar ramp is eight,
+so the step picked per size sets weight and tracking only; the size comes from
+the avatar's own map. The eyebrow's trailing letter-spacing is cancelled with a
+negative `margin-inline-end`, without which the initials sit visibly left of
+centre in the circle.
+
 ### Typography `color` prop — not `style={{ color }}`
 
-All typography components (`H1`–`H6`, `Body`, `BodySmall`, `BodyLarge`,
-`Caption`, `Overline`, `Label`, `Subtitle`) accept a `color` prop that maps
+All typography components (`H1`–`H6`, `DisplayLarge`/`DisplayMedium`/
+`DisplaySmall`, `Body`, `BodySmall`, `BodyLarge`, `Caption`, `Eyebrow`,
+`Label`, `Subtitle`) accept a `color` prop that maps
 to the right brand token. **Do not write `style={{ color: 'var(--Text-…)' }}`
 on typography** — set the prop instead:
 
@@ -355,7 +496,11 @@ All 49 components import from `./components` (or `@dynodesign/components` if ins
 import {
   // Typography
   Typography, H1, H2, H3, H4, H5, H6,
-  Body, BodySmall, BodyLarge, Label, Caption, Overline,
+  DisplayLarge, DisplayMedium, DisplaySmall,
+  Body, BodySmall, BodyLarge, BodySemibold, Label, Caption,
+  Subtitle, SubtitleSmall, SubtitleLarge,
+  Eyebrow, EyebrowSmall, EyebrowLarge,   // Overline* still exports as an alias
+  CAP_HEIGHT_TRIM,                       // sx spread — cap-height/baseline trim
 
   // Buttons
   Button, ButtonGroup, ButtonIcon, Fab, Rail, Toolbar,

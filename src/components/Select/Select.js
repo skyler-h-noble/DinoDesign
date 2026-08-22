@@ -261,7 +261,16 @@ export function Select({
         width: dropdownPos.width + 'px',
         backgroundColor: 'var(--Hover)',
         border: '1px solid var(--Buttons-Default-Border)',
-        borderRadius: 'var(--Input-Radius, var(--Style-Border-Radius, 4px))',
+        // The floating PANEL, not the trigger. It followed --Input-Radius
+        // uncapped, so a pill-shaped field gave the dropdown 22px+ corners —
+        // and the panel scrolls with full-bleed rows, so a large corner clips
+        // the first and last item's hover highlight into a crescent.
+        //
+        // --Dropdown-Frame-Radius is min(Input-Radius, Card-Radius, 16px).
+        // The nested fallback is required, not defensive: the CSS is frozen
+        // per design system in Storage, so a system published before this
+        // token existed must still resolve.
+        borderRadius: 'var(--Dropdown-Frame-Radius, var(--Input-Radius, var(--Style-Border-Radius, 4px)))',
         boxShadow: 'none',
         zIndex: 99999,
         maxHeight: DROPDOWN_MAX_HEIGHT + 'px',

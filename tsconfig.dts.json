@@ -1,0 +1,41 @@
+{
+  // Declaration-only build. The lib is plain JS + JSX; this exists purely to
+  // emit .d.ts so consumers stop hand-maintaining their own copy of the API.
+  //
+  // Before this, package.json pointed `types` at dist/index.d.ts — a file
+  // nothing ever produced. Every TypeScript consumer therefore wrote its own
+  // `declare module '@dynodesign/components'` shim and it drifted behind the
+  // lib silently: the studio's was missing eleven components that had been
+  // shipping for months, and nothing failed until someone imported one.
+  //
+  // Types are INFERRED from the source (prop destructuring + defaults), so a
+  // component gains real prop types without annotating anything, and a
+  // component added to src/components/index.js appears here automatically.
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    // The dependency tree ships .d.ts using syntax older compilers cannot
+    // PARSE (skipLibCheck skips checking, not parsing), so this needs TS >= 5.
+    //
+    // build:types runs it via `npx -p typescript@5.9` rather than depending on
+    // a local install. react-scripts pins typescript to ^3.2.1 || ^4 as a peer,
+    // so adding 5.9 as a devDependency makes npm re-resolve the whole tree and
+    // emit a wall of peerOptional WARNINGS — which read as failure, and take
+    // long enough with no output that the install gets interrupted.
+    //
+    // Pinned, not floating: the declarations are a published artefact, and a
+    // compiler drifting under them would change output with no commit.
+    // Cached, this runs in ~2s.
+    "skipLibCheck": true,
+    "jsx": "react",
+    "target": "ES2020",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "rootDir": "src",
+    "outDir": "dist/types",
+    "noEmitOnError": false
+  },
+  "include": ["src/components/index.js", "src/DynoDesignProvider.js"]
+}
