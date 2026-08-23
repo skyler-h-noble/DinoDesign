@@ -522,17 +522,21 @@ export const STYLE_MAP = {
     component: 'span',
     fontFamily: ff('Body'),
     fontSize: fs('Button-Small'),
-    fontWeight: 500,
+    fontWeight: fw('Button-Small'),
     lineHeight: lhr('Button-Small'),
     letterSpacing: ls('Button-Small'),
     defaultColor: 'standard',
     defaultWidth: 'hug',
   },
+  // Button-Standard is the current token family (family/size/weight/leading/
+  // tracking). --Button-Font-Size and --Body-Font-Weight are the pre-ramp
+  // names, kept as fallbacks: reading --Body-Font-Weight alone rendered the
+  // label at 400 where the scale says 600.
   button: {
     component: 'span',
     fontFamily: ff('Body'),
-    fontSize: fs('Button'),
-    fontWeight: fw('Body'),
+    fontSize: 'var(--Button-Standard-Font-Size, var(--Button-Font-Size))',
+    fontWeight: 'var(--Button-Standard-Font-Weight, var(--Body-Font-Weight))',
     lineHeight: lhr('Button-Standard'),
     letterSpacing: ls('Button-Standard'),
     defaultColor: 'standard',
@@ -541,8 +545,8 @@ export const STYLE_MAP = {
   'button-standard': {
     component: 'span',
     fontFamily: ff('Body'),
-    fontSize: fs('Button'),
-    fontWeight: fw('Body'),
+    fontSize: 'var(--Button-Standard-Font-Size, var(--Button-Font-Size))',
+    fontWeight: 'var(--Button-Standard-Font-Weight, var(--Body-Font-Weight))',
     lineHeight: lhr('Button-Standard'),
     letterSpacing: ls('Button-Standard'),
     defaultColor: 'standard',

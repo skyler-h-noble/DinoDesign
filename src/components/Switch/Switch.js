@@ -292,9 +292,15 @@ export function Switch({
       disabled={disabled}
       name={name}
       value={value}
-      inputProps={{
-        'aria-label': ariaLabel,
-        'aria-labelledby': ariaLabelledby,
+      // slotProps.input, NOT inputProps: MUI 7 deprecated inputProps on Switch
+      // and drops it on the floor — it builds the SwitchBase's slotProps from
+      // slotProps.input alone. The old form silently produced an input with no
+      // accessible name, so every unlabelled Switch failed axe.
+      slotProps={{
+        input: {
+          ...(ariaLabel ? { 'aria-label': ariaLabel } : {}),
+          ...(ariaLabelledby ? { 'aria-labelledby': ariaLabelledby } : {}),
+        },
       }}
       className={'switch-' + variant + ' ' + className}
       sx={switchSx}

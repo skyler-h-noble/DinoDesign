@@ -3,11 +3,19 @@ import React from 'react';
 import { Button as MuiButton, Avatar as MuiAvatar, Box, GlobalStyles } from '@mui/material';
 import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography, ButtonExtraSmall as ButtonExtraSmallTypography, CAP_HEIGHT_TRIM } from '../Typography';
 import { Avatar as DDAvatar } from '../Avatar/Avatar';
-import { Icon as DDIcon } from '../Icon/Icon';
+import { Icon as DDIcon, ICON_SIZE_MAP } from '../Icon/Icon';
 import { Badge as DDBadge } from '../Badge/Badge';
 import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, bevelShadow, tokenSegment } from '../_shadows';
 
 // Auto-size mapping for start/end decorators based on Button size
+// Padding on the label wrapper — Figma's "Typography Holder". Small and medium
+// share 4px vertical / 2px horizontal; large is square at 4px.
+const LABEL_PADDING_BY_SIZE = {
+  small:  '4px 2px',
+  medium: '4px 2px',
+  large:  '4px',
+};
+
 const DECORATOR_SIZE_MAP = {
   small:  { avatar: 'xxx-small', icon: 'small'  },
   medium: { avatar: 'xx-small',  icon: 'medium' },
@@ -321,15 +329,15 @@ function getSizingStyles({ size, iconOnly, letterNumber, avatar }) {
   }
 
   // Text — minHeight from the size's height token, minWidth from
-  // --Button-Min-Width (see SIZE_BASE)
-  const PADDING_X_BY_SIZE = {
-    small:  'var(--Sm-Button-Padding)',
-    medium: 'var(--Button-Padding)',
-    large:  'var(--Large-Button-Padding)',
-  };
+  // --Button-Min-Width (see SIZE_BASE).
+  //
+  // ONE padding token for all three sizes. --Sm-Button-Padding and
+  // --Large-Button-Padding still exist in the export, but the design binds
+  // every size to --Button-Padding, and reading the per-size names made small
+  // buttons 8px where the design says 16px.
   return {
     ...base,
-    padding: `0 ${PADDING_X_BY_SIZE[size] || PADDING_X_BY_SIZE.medium}`,
+    padding: '0 var(--Button-Padding)',
   };
 }
 
@@ -456,15 +464,17 @@ export function Button({
           sx={{
             display: 'inline-flex',
             alignItems: 'center',
-            padding: '4px 2px',
+            padding: LABEL_PADDING_BY_SIZE[size] || LABEL_PADDING_BY_SIZE.medium,
           }}
         >
           <TypographyComp
             component="span"
             sx={{
               color: 'inherit',
-              lineHeight: 'inherit',
-              letterSpacing: 'inherit',
+              // line-height and letter-spacing come from the Button-* type
+              // tokens, not from MUI's root. Inheriting them pulled in MUI's
+              // 0.02857em tracking, which rendered as 0.371px where the token
+              // says 0.
               // Figma's "cap height to baseline" vertical trim. The label then
               // centres on its cap height, which is what makes a button's text
               // look centred rather than measured-and-centred.
@@ -525,8 +535,18 @@ export function Button({
           marginLeft: '2px !important',
           marginRight: '0px !important',
         },
+        // MUI sizes icons per BUTTON size (18/20/22), which silently overrode
+        // the Icon component's own scale — a medium button's icon rendered at
+        // 20px where the scale says 24. Restate the scale here so the icon is
+        // the size the design system says it is, whatever button it sits in.
         '[class*="btn-"] .MuiButton-iconSizeSmall .MuiSvgIcon-root, [class*="btn-"] .MuiButton-iconSizeSmall > *': {
-          fontSize: '1rem !important',
+          fontSize: ICON_SIZE_MAP.small + ' !important',
+        },
+        '[class*="btn-"] .MuiButton-iconSizeMedium .MuiSvgIcon-root, [class*="btn-"] .MuiButton-iconSizeMedium > *': {
+          fontSize: ICON_SIZE_MAP.medium + ' !important',
+        },
+        '[class*="btn-"] .MuiButton-iconSizeLarge .MuiSvgIcon-root, [class*="btn-"] .MuiButton-iconSizeLarge > *': {
+          fontSize: ICON_SIZE_MAP.large + ' !important',
         },
       }} />
       <MuiButton
@@ -606,19 +626,15 @@ export function Button({
         // Force padding override
         '&.MuiButton-root': {
           padding: sizingStyles.padding ?? '0 var(--Sizing-1)',
-          // The small button's target spacer lives here, not in the sx above,
-          // for the same reason the padding does: Stack/HStack reset their
-          // children with `> :not(style):not(style)` (specificity 0,1,2),
-          // which outranks a plain single-class sx rule and silently zeroed
-          // the margin. `&.MuiButton-root` is 0,2,0 and survives.
-          ...(size === 'small' && { margin: 'var(--Platform-Spacer, 0px)' }),
         },
 
         // Icon margins + color inheritance
+        // No padding on the slots: the design spaces them with the 2px gap
+        // alone, and the extra 2px each side made the icon sit 4px wider than
+        // its glyph.
         '& .MuiButton-startIcon': {
           display: 'inherit',
           color: 'inherit',
-          padding: '0 2px',
           marginLeft: '0px !important',
           marginRight: avatar ? '0px !important' : '2px !important',
         },
@@ -630,7 +646,6 @@ export function Button({
         '& .MuiButton-endIcon': {
           display: 'inherit',
           color: 'inherit',
-          padding: '0 2px',
           marginLeft: '2px !important',
           marginRight: '0px !important',
         },
