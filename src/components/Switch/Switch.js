@@ -79,12 +79,15 @@ function outlineStyles(color) {
     color: C,
     trackOff:       'var(--Background)',
     trackOffBorder: 'var(--Border-Variant)',
-    trackOn:        'transparent',
+    // ON is a FILLED track, same as the design's default. It used to be
+    // transparent, which read as "nothing happened" next to the default
+    // variant — only the border changed colour.
+    trackOn:        'var(--Buttons-' + C + '-Button)',
     trackOnBorder:  'var(--Buttons-' + C + '-Border)',
     dotOff:         'var(--Quiet)',
-    dotOn:          'var(--Buttons-' + C + '-Border)',
+    dotOn:          'var(--Buttons-' + C + '-Text)',
     iconOff:        'var(--Background)',
-    iconOn:         'var(--Background)',
+    iconOn:         'var(--Buttons-' + C + '-Button)',
   };
 }
 
@@ -95,12 +98,15 @@ function lightStyles(color) {
     color: C,
     trackOff:       'var(--Border-Variant)',
     trackOffBorder: 'transparent',
-    trackOn:        'var(--Background)',
+    // The light tone fills the track. There are no --Buttons-*-Light-* tokens
+    // in the export, so this uses Color-11 — the same tone Button's light
+    // variant fills with.
+    trackOn:        'var(--' + C + '-Color-11)',
     trackOnBorder:  'var(--Buttons-' + C + '-Border)',
     dotOff:         'var(--Quiet)',
     dotOn:          'var(--Buttons-' + C + '-Border)',
     iconOff:        'var(--Border-Variant)',
-    iconOn:         'var(--Background)',
+    iconOn:         'var(--' + C + '-Color-11)',
     dataTheme:      C + '-Light',
   };
 }
@@ -178,6 +184,7 @@ export function Switch({
   const LabelComp = size === 'small' ? BodySmall : Body;
 
   const dot      = sc.trackH - THUMB_INSET * 2;
+  const rootW    = Math.max(TOUCH_MIN, sc.trackW);
   const rootH    = Math.max(TOUCH_MIN, sc.trackH);
   const trackTop = (rootH - sc.trackH) / 2;
 
@@ -204,20 +211,35 @@ export function Switch({
     // The design dims the WHOLE control rather than its parts.
     opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
 
+    // switchBase FILLS the root, and the thumb is placed with padding rather
+    // than by sizing the base to the track.
+    //
+    // Two things depend on this. The hit area is the <input>, which fills
+    // switchBase — sizing it to the track gave a 20x12 target on small, under
+    // the WCAG 2.2 24x24 minimum. And `calc(100% - 4px)` measured the ROOT,
+    // which is 24px wide on small while the track is 20px, so the checked
+    // thumb landed 2px past the track's right edge. Medium and large hid the
+    // bug because their tracks are already wider than the touch minimum.
     '& .MuiSwitch-switchBase': {
-      width: 'calc(100% - ' + THUMB_INSET * 2 + 'px)',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
       display: 'flex',
       justifyContent: 'flex-start',
       alignItems: 'center',
-      padding: 0,
-      left: THUMB_INSET + 'px',
-      top: trackTop,
-      height: sc.trackH,
+      paddingTop: 0,
+      paddingBottom: 0,
+      paddingLeft: THUMB_INSET + 'px',
+      // The track sits at the root's left edge, so any slack between the track
+      // and the root goes on the right.
+      paddingRight: (rootW - sc.trackW + THUMB_INSET) + 'px',
       color: 'transparent',
       transition: 'justify-content 0.15s ease',
       transform: 'none',
 
-      '& .MuiSwitch-input': { left: 0, width: '100%' },
+      '& .MuiSwitch-input': { left: 0, top: 0, width: '100%', height: '100%', margin: 0 },
 
       '& .MuiSwitch-thumb': {
         ...thumbBase,
