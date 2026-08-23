@@ -53,7 +53,6 @@ const COLOR_LABEL_MAP = {
 // slot rules, which otherwise inherit MUI's own per-button-size icon sizing —
 // reads these numbers instead of keeping a second copy.
 export const ICON_SIZE_MAP = {
-  xxs: '8px',
   xs: '12px',
   small: '16px',
   medium: '24px',

@@ -331,13 +331,23 @@ function getSizingStyles({ size, iconOnly, letterNumber, avatar }) {
   // Text — minHeight from the size's height token, minWidth from
   // --Button-Min-Width (see SIZE_BASE).
   //
-  // ONE padding token for all three sizes. --Sm-Button-Padding and
-  // --Large-Button-Padding still exist in the export, but the design binds
-  // every size to --Button-Padding, and reading the per-size names made small
-  // buttons 8px where the design says 16px.
+  // TWO padding tokens across three sizes: small and medium share
+  // --Button-Padding (8px); large has its own --Lg-Button-Padding (16px),
+  // because 8px reads cramped against a large button's taller box.
+  //
+  // There is deliberately no --Sm-Button-Padding here. It is still emitted by
+  // the export, as an alias of --Button-Padding, so older markup keeps
+  // resolving — but binding small to it is what previously made small buttons
+  // 8px where the design says 16px.
+  //
+  // --Lg-Button-Padding is the canonical spelling, matching --Lg-Button-Min-Width
+  // and --Lg-Input-Radius. The export also emits --Large-Button-Padding as an
+  // alias of it, for brand CSS generated before the rename.
   return {
     ...base,
-    padding: '0 var(--Button-Padding)',
+    padding: size === 'large'
+      ? '0 var(--Lg-Button-Padding)'
+      : '0 var(--Button-Padding)',
   };
 }
 

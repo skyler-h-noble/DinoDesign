@@ -144,9 +144,9 @@ const TOUCH_MIN = 24;
 const THUMB_INSET = 2;
 
 const SIZE_MAP = {
-  small:  { trackW: 20, trackH: 12, dotRadius: 'var(--Sizing-1, 8px)',           icon: 8  },
-  medium: { trackW: 30, trackH: 16, dotRadius: 'var(--Sizing-2, 16px)',          icon: 8  },
-  large:  { trackW: 48, trackH: 24, dotRadius: 'var(--Sizing-2-and-Half, 20px)', icon: 16 },
+  small:  { trackW: 28, trackH: 16, dotRadius: 'var(--Sizing-2, 16px)',          icon: 8  },
+  medium: { trackW: 40, trackH: 24, dotRadius: 'var(--Sizing-2-and-Half, 20px)', icon: 16 },
+  large:  { trackW: 56, trackH: 32, dotRadius: 'var(--Sizing-2-and-Half, 20px)', icon: 16 },
 };
 
 // --- Component ---------------------------------------------------------------
