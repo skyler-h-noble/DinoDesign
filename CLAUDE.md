@@ -665,6 +665,102 @@ import {
 Use `<ThemedZone>` for the case where you want the attributes but NOT the
 background paint (e.g., wrapping an `AppBar` whose own root paints itself).
 
+## The 60/30/10 pass — do this on any page you render
+
+A page built entirely from `data-theme="Primary"` is *correct* and looks
+monotonous. The system gives you three brand palettes and most generated pages
+use one. So after the markup is right, do a second pass for colour BALANCE:
+
+| share | role | where it lives |
+| --- | --- | --- |
+| ~60% | Primary | the dominant sections, the default surface |
+| ~30% | Secondary | one or two whole sections, switched by `data-theme` |
+| ~10% | Tertiary | accents only — avatars, a left border, a single stat block |
+
+The ratio is of VISUAL AREA, not of element count. One full-bleed Secondary
+section outweighs twenty Tertiary avatars, which is the point: Tertiary is a
+seasoning and should never be a section background.
+
+### How to scan a rendered page
+
+Read it as blocks of area, top to bottom, and count what each one paints:
+
+1. List every region that sets `data-theme` (or `<Section theme=…>`) and note
+   its rough height. That is the 60/30 split, and it is the only part that
+   moves the ratio much.
+2. If everything is one theme, convert ONE mid-page section to Secondary.
+   Prefer a section that is already conceptually a break — testimonials, stats,
+   a pricing band — over splitting a continuous narrative.
+3. Then place Tertiary in the small stuff, using the two moves below.
+
+Do not chase exact percentages. 60/30/10 is a target, and anything in the
+region of "mostly one, a clear second, a glint of a third" reads correctly.
+
+### Tertiary move 1 — avatars
+
+Avatars are the highest-value Tertiary slot on most pages: they repeat, they
+are small, and they are already visually separate from the text around them.
+
+```jsx
+<Avatar initials={initials(name)} alt={name} color="tertiary" />
+```
+
+Pass `color`, don't restyle. The component owns its size, shape and contrast,
+and the initials wear the Eyebrow style (see *Avatar initials wear the Eyebrow
+style* above).
+
+### Tertiary move 2 — a left border on NON-CLICKABLE cards
+
+A card that the user can click already earns its emphasis from hover: it lifts,
+it shadows, its border brightens. Adding a colour bar to it competes with that
+and reads as a second affordance.
+
+A card that is purely informational has no such signal, so it is the right
+place for a Tertiary edge:
+
+```css
+.stat {
+  background: var(--Container);
+  border: 1px solid var(--Border-Variant);
+  /* Declared AFTER the shorthand so it only replaces the left edge. */
+  border-left: 4px solid var(--Tertiary-Color-8);
+  border-radius: var(--Card-Radius);
+}
+```
+
+Two things that are easy to get wrong:
+
+**Order matters.** `border-left` must come after the `border` shorthand or the
+shorthand overwrites it and the accent silently disappears.
+
+**Clickable cards get nothing.** If the card has an `onClick`, an `<a>` wrapper,
+or a hover transform, leave its border alone.
+
+### Which cards get the accent — the standalone ones
+
+Do not put a left border on every card in a grid. Repeating it across a
+uniform set turns a 10% accent into a 30% one and flattens the hierarchy the
+border was meant to create.
+
+Apply it to cards that are already different from their neighbours:
+
+- a lone card that isn't part of a set
+- a summary or total that sits apart from the rows above it
+- the one card in a group that differs in kind (a callout among plain items)
+
+If every card in a region would qualify, that region does not need the accent —
+switch the whole region's `data-theme` instead and let the surface carry it.
+
+### What NOT to reach for
+
+- **Do not** paint a section `data-theme="Tertiary"` to hit the 10%. That makes
+  it 30%+ and there is no palette left for accents.
+- **Do not** use `color="tertiary"` on body text to add colour. Text carries a
+  4.5:1 requirement and a recoloured paragraph reads as a link.
+- **Do not** hand-write a hex to "balance" a page. Every share of the ratio is
+  an existing token; if the colour you want isn't one, the ratio is not the
+  problem.
+
 ### Footer & Copyright
 ```jsx
 // Footer = configurable 1–4 column footer with optional social row +
@@ -784,6 +880,12 @@ style={{ background: 'var(--Buttons-Primary-Button)', color: 'var(--Buttons-Prim
 
 // Use data-theme for color context zones
 <div data-theme="Success-Light" data-surface="Surface">
+
+// After the markup is right, run the 60/30/10 pass — a page built entirely
+// from one palette is correct and monotonous. See "The 60/30/10 pass" above.
+<Section theme="Secondary" surface="Surface">    // one section carries the 30
+<Avatar initials="LN" color="tertiary" />        // accents carry the 10
+style={{ borderLeft: '4px solid var(--Tertiary-Color-8)' }}  // non-clickable cards only
 
 // Use data-surface for background depth
 <div data-surface="Container">
