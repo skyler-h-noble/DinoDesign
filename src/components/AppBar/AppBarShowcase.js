@@ -16,12 +16,14 @@ const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 
 const BAR_COLORS = ['default', 'primary', 'primary-light', 'white', 'black'];
 const SURFACES = ['Surface', 'Surface-Bright', 'Surface-Dim', 'Surface-Dimmest'];
+// Mirrors AppBar's own map — theme plus a surface where the colour implies a
+// lightness. White / Black / *-Light are no longer themes.
 const THEME_MAP = {
-  'default':        'App-Bar',
-  'primary':        'Primary',
-  'primary-light':  'Primary-Light',
-  'white':          'White',
-  'black':          'Black',
+  'default':        { theme: 'App-Bar' },
+  'primary':        { theme: 'Primary' },
+  'primary-light':  { theme: 'Primary', surface: 'Surface-Brightest' },
+  'white':          { theme: 'Neutral', surface: 'Surface-Brightest' },
+  'black':          { theme: 'Neutral', surface: 'Surface-Dimmest' },
 };
 
 function getLuminance(hex) {
@@ -93,9 +95,9 @@ function ControlButton({ label, selected, onClick }) {
 }
 
 function BarColorSwatch({ color, selected, onClick }) {
-  const dataTheme = THEME_MAP[color] || 'App-Bar';
+  const bar = THEME_MAP[color] || THEME_MAP.default;
   return (
-    <Box component="button" data-theme={dataTheme} data-surface="Surface"
+    <Box component="button" data-theme={bar.theme} data-surface={bar.surface || 'Surface'}
       onClick={() => onClick(color)} aria-label={'Select ' + color} aria-pressed={selected} title={color}
       sx={{
         width: 'var(--Button-Height, 36px)', height: 'var(--Button-Height, 36px)', borderRadius: '4px',
@@ -125,7 +127,11 @@ export function AppBarShowcase() {
   const [contrastData, setContrastData]     = useState({});
 
   const isDesktop = mode === 'desktop';
-  const dataTheme = THEME_MAP[barColor] || 'App-Bar';
+  const bar = THEME_MAP[barColor] || THEME_MAP.default;
+  const dataTheme = bar.theme;
+  // A bar colour that implies a lightness overrides the surface picker, so the
+  // markup shown to the user has to report the surface that actually applies.
+  const effectiveSurface = bar.surface || surface;
 
   const generateCode = () => {
     if (isDesktop) {
@@ -332,7 +338,7 @@ export function AppBarShowcase() {
               <TabPanel value={1}>
                 <Box sx={{ p: 3 }}>
                   <BodySmall color="quiet" style={{ marginBottom: 24 }}>
-                    {mode} / {barColor} / {surface}{!isDesktop ? ' / ' + mobileVariant : ''} — data-theme="{dataTheme}" data-surface="{surface}"
+                    {mode} / {barColor} / {surface}{!isDesktop ? ' / ' + mobileVariant : ''} — data-theme="{dataTheme}" data-surface="{effectiveSurface}"
                   </BodySmall>
 
                   <Stack spacing={3}>
@@ -347,7 +353,7 @@ export function AppBarShowcase() {
                         label="Resting: var(--Text) vs. var(--Background)"
                         ratio={getContrast(contrastData.text, contrastData.background)}
                         threshold={4.5}
-                        note={'data-theme="' + dataTheme + '" data-surface="' + surface + '"'}
+                        note={'data-theme="' + dataTheme + '" data-surface="' + effectiveSurface + '"'}
                       />
                       <A11yRow
                         label="On hover: var(--Text) vs. var(--Hover)"
@@ -432,7 +438,7 @@ export function AppBarShowcase() {
                         <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
                           <BodySmall>Theme + Surface:</BodySmall>
                           <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>
-                            {'data-theme="' + dataTheme + '" data-surface="' + surface + '"'}
+                            {'data-theme="' + dataTheme + '" data-surface="' + effectiveSurface + '"'}
                           </Caption>
                         </Box>
                         <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>

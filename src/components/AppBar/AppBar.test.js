@@ -47,9 +47,10 @@ describe('data-theme per barColor', () => {
     const { container } = render(<DesktopAppBar barColor="primary" />);
     expect(container.querySelector('[data-theme="Primary"]')).toBeInTheDocument();
   });
-  test('primary-light sets data-theme="Primary-Light"', () => {
+  // Lightness is the SURFACE axis now — the *-Light themes are gone.
+  test('primary-light sets data-theme="Primary" on Surface-Brightest', () => {
     const { container } = render(<DesktopAppBar barColor="primary-light" />);
-    expect(container.querySelector('[data-theme="Primary-Light"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-theme="Primary"][data-surface="Surface-Brightest"]')).toBeInTheDocument();
   });
   test('primary-dark sets data-theme="Primary-Dark"', () => {
     const { container } = render(<DesktopAppBar barColor="primary-dark" />);
@@ -59,9 +60,9 @@ describe('data-theme per barColor', () => {
     const { container } = render(<DesktopAppBar barColor="white" />);
     expect(container.querySelector('[data-theme="Neutral"]')).toBeInTheDocument();
   });
-  test('black sets data-theme="Neutral-Dark"', () => {
+  test('black sets data-theme="Neutral" on Surface-Dimmest', () => {
     const { container } = render(<DesktopAppBar barColor="black" />);
-    expect(container.querySelector('[data-theme="Neutral-Dark"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-theme="Neutral"][data-surface="Surface-Dimmest"]')).toBeInTheDocument();
   });
   test('mobile default sets data-theme="App-Bar"', () => {
     const { container } = render(<MobileAppBar mobileVariant="small" title="P" />);

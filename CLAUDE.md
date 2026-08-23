@@ -38,17 +38,34 @@ Every component's visual output is driven by three HTML attributes on ancestor e
 
 ### `data-theme` — sets the color context
 ```jsx
-<div data-theme="Primary-Light">   // light teal context
-<div data-theme="Neutral-Dark">    // dark grey context
-<div data-theme="App-Bar">         // navigation bar context
-<div data-theme="Success-Light">   // semantic success context
+<div data-theme="Primary">                                  // primary context
+<div data-theme="Neutral" data-surface="Surface-Dimmest">   // black context
+<div data-theme="App-Bar">                                  // navigation bar
+<div data-theme="Success">                                  // semantic success
 ```
 
-**Valid themes:**
-- Light: `Default`, `Primary-Light`, `Primary`, `Secondary-Light`, `Secondary`, `Tertiary-Light`, `Tertiary`, `Neutral-Light`, `Neutral`
-- Semantic light: `Error-Light`, `Success-Light`, `Warning-Light`, `Info-Light`
-- Dark: `Primary-Dark`, `Secondary-Dark`, `Tertiary-Dark`, `Neutral-Dark`, `Error-Dark`, `Success-Dark`, `Warning-Dark`, `Info-Dark`
-- Navigation: `App-Bar`, `Nav-Bar`, `Status`
+**Valid themes — there are nine:**
+
+`Default` · `Primary` · `Secondary` · `Tertiary` · `Neutral` · `Info` ·
+`Success` · `Warning` · `Error`
+
+Plus three a component sets for itself rather than something you choose:
+`App-Bar`, `Nav-Bar`, `Status`.
+
+**That is the whole list.** Lightness and darkness are NOT themes — they are
+the surface axis. These do not exist and resolve to nothing:
+
+| you might reach for | write this instead |
+| --- | --- |
+| `data-theme="White"` | `data-theme="Neutral" data-surface="Surface-Brightest"` |
+| `data-theme="Black"` | `data-theme="Neutral" data-surface="Surface-Dimmest"` |
+| `data-theme="Primary-Light"` | `data-theme="Primary" data-surface="Surface-Brightest"` |
+| `data-theme="Primary-Dark"` | `data-theme="Primary" data-surface="Surface-Dimmest"` |
+| any `*-Light` / `*-Dark` | the theme, plus a bright or dim surface |
+
+A `data-theme` with no matching block paints nothing and reports nothing —
+the element simply inherits whatever surrounded it. Nothing errors, so this
+is worth getting right the first time.
 
 ### `data-style` — sets the shape language
 ```jsx
@@ -59,16 +76,31 @@ Every component's visual output is driven by three HTML attributes on ancestor e
 ```
 Set once on the root. Cascades to every component automatically.
 
-### `data-surface` — sets background depth
+### `data-surface` — sets background depth AND lightness
+
+Five page surfaces, darkest to brightest:
+
 ```jsx
-<div data-surface="Surface">           // base page background
+<div data-surface="Surface-Dimmest">   // darkest — black under Neutral
 <div data-surface="Surface-Dim">       // slightly recessed
+<div data-surface="Surface">           // base page background
 <div data-surface="Surface-Bright">    // elevated (AppBar)
-<div data-surface="Container">         // card background
-<div data-surface="Container-Low">     // inset card
-<div data-surface="Container-Lowest">  // inputs, deepest
-<div data-surface="Container-High">    // modal, highest card
+<div data-surface="Surface-Brightest"> // brightest — white under Neutral
 ```
+
+Five container levels for things that sit ON a surface:
+
+```jsx
+<div data-surface="Container-Lowest">  // inputs, deepest
+<div data-surface="Container-Low">     // inset card
+<div data-surface="Container">         // card background
+<div data-surface="Container-High">    // modal, highest card
+<div data-surface="Container-Highest">
+```
+
+This axis is where light and dark live. `Neutral` + `Surface-Dimmest` is a
+pure-black region with white text; `Neutral` + `Surface-Brightest` is the
+white one.
 
 `data-surface` is the **only** way to change a region's background. Setting
 it exposes the full set of paired tokens — `--Background`, `--Text`,
@@ -79,7 +111,7 @@ those automatically.
 
 ```jsx
 // ✅ Right — declare the surface, every nested token auto-resolves
-<section data-theme="Primary-Light" data-surface="Surface">
+<section data-theme="Primary" data-surface="Surface-Bright">
   <H2>Title</H2>           {/* gets --Header */}
   <Body>Body copy</Body>   {/* gets --Text */}
   <Button variant="primary">Save</Button>  {/* gets --Buttons-Primary-* */}
@@ -171,7 +203,7 @@ import { ThemedZone, Surfaced } from './DynoDesignProvider';
 </ThemedZone>
 
 // Semantic alert zones
-<ThemedZone theme="Success-Light" surface="Surface">
+<ThemedZone theme="Success" surface="Surface-Bright">
   <Alert />
 </ThemedZone>
 
@@ -608,7 +640,7 @@ import {
 // variant: 'standard' | 'outline' | 'light' | 'solid'
 // color: 8 brand colors
 // Wrap in ThemedZone for semantic coloring:
-<ThemedZone theme="Success-Light" surface="Surface">
+<ThemedZone theme="Success" surface="Surface-Bright">
   <Alert variant="light" color="success">
     Operation completed successfully.
   </Alert>
@@ -659,7 +691,7 @@ import {
 <Section padding="48px 24px">…</Section>
 
 // Render as a different element:
-<Section as="footer" theme="Neutral-Dark" surface="Surface">…</Section>
+<Section as="footer" theme="Neutral" surface="Surface-Dimmest">…</Section>
 ```
 
 Use `<ThemedZone>` for the case where you want the attributes but NOT the
@@ -879,7 +911,7 @@ are the components the library still needs to grow.
 style={{ background: 'var(--Buttons-Primary-Button)', color: 'var(--Buttons-Primary-Text)' }}
 
 // Use data-theme for color context zones
-<div data-theme="Success-Light" data-surface="Surface">
+<div data-theme="Success" data-surface="Surface-Bright">
 
 // After the markup is right, run the 60/30/10 pass — a page built entirely
 // from one palette is correct and monotonous. See "The 60/30/10 pass" above.
@@ -968,7 +1000,7 @@ function MyPage() {
         </Surfaced>
 
         {/* Semantic alert zones */}
-        <ThemedZone theme="Warning-Light" surface="Surface">
+        <ThemedZone theme="Warning" surface="Surface-Bright">
           <Alert variant="light" color="warning">
             Please review before continuing.
           </Alert>

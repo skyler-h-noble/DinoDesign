@@ -24,25 +24,30 @@ import { Select } from './Select/Select';
 
 const NULL_TOKEN = '__null__';
 
+// The themes a design system actually publishes. Every entry here has a
+// matching [data-theme="…"] block in Light-Mode.css / Dark-Mode.css; anything
+// else silently resolves to nothing, which paints an unthemed box rather than
+// failing.
+//
+// Two axes were retired and are NOT themes any more:
+//   Black  → data-theme="Neutral" data-surface="Surface-Dimmest"   (#000 bg)
+//   White  → data-theme="Neutral" data-surface="Surface-Brightest"
+//   *-Light → gone entirely; lightness is the SURFACE axis now
+// Pick Neutral in this dropdown and the surface next to it.
 const THEME_OPTIONS = [
-  { label: 'Default',         value: NULL_TOKEN },
-  { label: 'White',           value: 'White' },
-  { label: 'Black',           value: 'Black' },
-  { label: 'Primary',         value: 'Primary' },
-  { label: 'Secondary',       value: 'Secondary' },
-  { label: 'Tertiary',        value: 'Tertiary' },
-  { label: 'Primary-Light',   value: 'Primary-Light' },
-  { label: 'Secondary-Light', value: 'Secondary-Light' },
-  { label: 'Tertiary-Light',  value: 'Tertiary-Light' },
-  { label: 'Info',            value: 'Info' },
-  { label: 'Success',         value: 'Success' },
-  { label: 'Warning',         value: 'Warning' },
-  { label: 'Error',           value: 'Error' },
-  { label: 'Info-Light',      value: 'Info-Light' },
-  { label: 'Success-Light',   value: 'Success-Light' },
-  { label: 'Warning-Light',   value: 'Warning-Light' },
-  { label: 'Error-Light',     value: 'Error-Light' },
+  { label: 'Default',   value: NULL_TOKEN },
+  { label: 'Primary',   value: 'Primary' },
+  { label: 'Secondary', value: 'Secondary' },
+  { label: 'Tertiary',  value: 'Tertiary' },
+  { label: 'Neutral',   value: 'Neutral' },
+  { label: 'Info',      value: 'Info' },
+  { label: 'Success',   value: 'Success' },
+  { label: 'Warning',   value: 'Warning' },
+  { label: 'Error',     value: 'Error' },
 ];
+// App-Bar, Nav-Bar and Status are published too, but they are contexts a
+// component sets for itself rather than backgrounds you choose to preview on,
+// so they are deliberately not offered here.
 
 const CARD_SURFACES      = ['Surface-Dimmest', 'Surface-Dim', 'Surface', 'Surface-Bright', 'Surface-Brightest'];
 const CONTAINER_SURFACES = ['Container', 'Container-Highest', 'Container-High', 'Container-Low', 'Container-Lowest'];
