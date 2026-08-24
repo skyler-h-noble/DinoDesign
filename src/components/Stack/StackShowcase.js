@@ -5,7 +5,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import { DynoStack } from './Stack';
+import { OmniStack } from './Stack';
 import { Button } from '../Button/Button';
 import { Switch } from '../Switch/Switch';
 import { Chip } from '../Chip/Chip';
@@ -168,14 +168,14 @@ function Playground() {
   const willEnforce = enforceMinGap && hasSmall;
 
   const generateCode = () => {
-    const lines = ['<DynoStack'];
+    const lines = ['<OmniStack'];
     if (direction !== 'column') lines.push('  direction="' + direction + '"');
     lines.push('  gap={' + gap + '}');
     if (!enforceMinGap) lines.push('  enforceMinGap={false}');
     if (flexWrap) lines.push('  flexWrap="wrap"');
     lines.push('>');
     lines.push('  {children}');
-    lines.push('</DynoStack>');
+    lines.push('</OmniStack>');
     return lines.join('\n');
   };
 
@@ -196,14 +196,14 @@ function Playground() {
                 Small child detected — gap raised to var(--min-stack-gap)
               </Box>
             )}
-            <DynoStack
+            <OmniStack
               direction={direction}
               gap={gap}
               enforceMinGap={enforceMinGap}
               flexWrap={flexWrap ? 'wrap' : undefined}
             >
               {childSets[childSet].content}
-            </DynoStack>
+            </OmniStack>
           </Box>
         </PreviewSurface>
         <CodeBlock code={generateCode()} />
@@ -276,7 +276,7 @@ export function StackShowcase() {
     <Box sx={{ pb: 8 }}>
       <H3>Stack</H3>
       <Body style={{ color: 'var(--Text-Quiet)', marginTop: 8, marginBottom: 32, maxWidth: 640 }}>
-        DynoStack is a layout primitive built on MUI Stack with one intelligent addition:
+        OmniStack is a layout primitive built on MUI Stack with one intelligent addition:
         it automatically enforces a minimum gap between children when it detects small (24px)
         interactive components — protecting WCAG 2.5.8 compliance without any extra developer effort.
       </Body>
@@ -302,7 +302,7 @@ export function StackShowcase() {
               </Body>
               <SideBySideDemo
                 leftLabel="Plain MUI Stack — gap too small"
-                rightLabel="DynoStack — gap auto-enforced"
+                rightLabel="OmniStack — gap auto-enforced"
                 leftPasses={false}
                 rightPasses={true}
                 leftContent={
@@ -313,11 +313,11 @@ export function StackShowcase() {
                   </Box>
                 }
                 rightContent={
-                  <DynoStack gap={0.5}>
+                  <OmniStack gap={0.5}>
                     <Link href="#" size="small">Terms of Service</Link>
                     <Link href="#" size="small">Privacy Policy</Link>
                     <Link href="#" size="small">Cookie Settings</Link>
-                  </DynoStack>
+                  </OmniStack>
                 }
                 leftCode={`<Stack gap={0.5}>
   <Link size="small">Terms of Service</Link>
@@ -325,11 +325,11 @@ export function StackShowcase() {
   <Link size="small">Cookie Settings</Link>
 </Stack>
 // ⚠ gap=4px — targets overlap`}
-                rightCode={`<DynoStack gap={0.5}>
+                rightCode={`<OmniStack gap={0.5}>
   <Link size="small">Terms of Service</Link>
   <Link size="small">Privacy Policy</Link>
   <Link size="small">Cookie Settings</Link>
-</DynoStack>
+</OmniStack>
 // ✓ small child detected → gap enforced`}
               />
             </Box>
@@ -353,20 +353,20 @@ export function StackShowcase() {
                   </Box>
                 }
                 rightContent={
-                  <DynoStack gap={0.25}>
+                  <OmniStack gap={0.25}>
                     <Button variant="primary" size="medium">Save changes</Button>
                     <Link href="#" size="small">Or discard</Link>
-                  </DynoStack>
+                  </OmniStack>
                 }
                 leftCode={`<Stack gap={0.25}>
   <Button size="medium">Save changes</Button>
   <Link size="small">Or discard</Link>
 </Stack>
 // ⚠ Link is 24px — gap too tight`}
-                rightCode={`<DynoStack gap={0.25}>
+                rightCode={`<OmniStack gap={0.25}>
   <Button size="medium">Save changes</Button>
   <Link size="small">Or discard</Link>
-</DynoStack>
+</OmniStack>
 // ✓ Link detected → gap enforced`}
               />
             </Box>
@@ -375,7 +375,7 @@ export function StackShowcase() {
             <Box sx={{ p: 3, backgroundColor: 'var(--Background)', border: '1px solid var(--Border)', borderRadius: 'var(--Style-Border-Radius)' }}>
               <H3>How detection works</H3>
               <Body style={{ color: 'var(--Text-Quiet)', marginTop: 8, marginBottom: 16 }}>
-                DynoStack inspects children at render time using a priority-ordered signal chain.
+                OmniStack inspects children at render time using a priority-ordered signal chain.
                 Any one signal is enough to trigger enforcement.
               </Body>
               <Box sx={{ display: 'flex', flexDirection: 'column' }}>
@@ -410,7 +410,7 @@ export function StackShowcase() {
   --min-stack-gap: 8px; /* Set in your theme.css */
 }
 
-/* DynoStack substitutes the variable, not the value: */
+/* OmniStack substitutes the variable, not the value: */
 gap: var(--min-stack-gap, 8px);
 
 /* Dark mode, brand overrides, and media queries
@@ -424,13 +424,13 @@ gap: var(--min-stack-gap, 8px);
                 Use <code>enforceMinGap=&#123;false&#125;</code> to opt out. This creates a searchable
                 pattern accessibility audits can grep for — a conscious waiver, not a silent violation.
               </Body>
-              <CodeBlock code={`<DynoStack gap={0.5} enforceMinGap={false}>
+              <CodeBlock code={`<OmniStack gap={0.5} enforceMinGap={false}>
   {/* Explicitly waived — auditors can grep:
       enforceMinGap={false}
       to find all waivers in the codebase. */}
   <Link size="small">Terms</Link>
   <Link size="small">Privacy</Link>
-</DynoStack>`} />
+</OmniStack>`} />
             </Box>
 
           </Box>
@@ -445,9 +445,9 @@ gap: var(--min-stack-gap, 8px);
         <TabPanel value={2}>
           <Box sx={{ pt: 3 }}>
 
-            <H3>DynoStack props</H3>
+            <H3>OmniStack props</H3>
             <Body style={{ color: 'var(--Text-Quiet)', marginTop: 4, marginBottom: 16 }}>
-              All standard MUI Stack props are supported. These are DynoStack additions:
+              All standard MUI Stack props are supported. These are OmniStack additions:
             </Body>
 
             <Box sx={{ border: '1px solid var(--Border)', borderRadius: 'var(--Style-Border-Radius)', overflow: 'hidden', mb: 4 }}>
@@ -478,7 +478,7 @@ gap: var(--min-stack-gap, 8px);
             <H3>Convenience exports</H3>
             <Box sx={{ border: '1px solid var(--Border)', borderRadius: 'var(--Style-Border-Radius)', overflow: 'hidden', mb: 4 }}>
               {[
-                { name: 'Stack',             desc: 'Alias for DynoStack — drop-in MUI Stack replacement' },
+                { name: 'Stack',             desc: 'Alias for OmniStack — drop-in MUI Stack replacement' },
                 { name: 'HStack',            desc: 'direction="row" alignItems="center"' },
                 { name: 'VStack',            desc: 'direction="column"' },
                 { name: 'CenteredStack',     desc: 'direction="column" alignItems="center" justifyContent="center"' },
@@ -486,8 +486,8 @@ gap: var(--min-stack-gap, 8px);
                 { name: 'WrapStack',         desc: 'direction="row" flexWrap="wrap"' },
                 { name: 'ResponsiveStack',   desc: 'column on xs, row on sm+ (breakpoint configurable)' },
                 { name: 'GridStack',         desc: 'Alias for WrapStack' },
-                { name: 'InsetStack',        desc: 'DynoStack with px: 2 horizontal padding' },
-                { name: 'ScrollStack',       desc: 'DynoStack with overflowY: auto' },
+                { name: 'InsetStack',        desc: 'OmniStack with px: 2 horizontal padding' },
+                { name: 'ScrollStack',       desc: 'OmniStack with overflowY: auto' },
               ].map(({ name, desc }, i, arr) => (
                 <Box key={name} sx={{
                   display: 'grid', gridTemplateColumns: '200px 1fr',
@@ -502,12 +502,12 @@ gap: var(--min-stack-gap, 8px);
             </Box>
 
             <H3>Debug attributes</H3>
-            <CodeBlock code={`/* When enforcement is active, DynoStack adds: */
-className="dyno-stack dyno-stack-min-gap-enforced"
+            <CodeBlock code={`/* When enforcement is active, OmniStack adds: */
+className="omni-stack omni-stack-min-gap-enforced"
 data-min-gap-enforced="true"
 
 /* Target in CSS: */
-.dyno-stack-min-gap-enforced { outline: 2px dashed orange; }
+.omni-stack-min-gap-enforced { outline: 2px dashed orange; }
 
 /* Query in tests: */
 container.querySelector('[data-min-gap-enforced="true"]')`} />

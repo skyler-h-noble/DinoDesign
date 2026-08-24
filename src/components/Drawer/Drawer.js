@@ -4,7 +4,7 @@ import { Box } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { Button } from '../Button/Button';
 import { Icon } from '../Icon/Icon';
-import { useDynoDesign } from '../../DynoDesignProvider';
+import { useOmniDesign } from '../../OmniDesignProvider';
 import { SHADOW_LEVEL_3 } from '../_shadows';
 
 /**
@@ -66,10 +66,10 @@ export function Drawer({
   const isHorizontal = anchor === 'left' || anchor === 'right';
 
   // Get provider theme for the portal
-  let dynoCtx;
-  try { dynoCtx = useDynoDesign(); } catch { dynoCtx = null; }
-  const providerTheme = dynoCtx?.theme || 'Default';
-  const providerStyle = dynoCtx?.style || 'Modern';
+  let omniCtx;
+  try { omniCtx = useOmniDesign(); } catch { omniCtx = null; }
+  const providerTheme = omniCtx?.theme || 'Default';
+  const providerStyle = omniCtx?.style || 'Modern';
 
   const dim = SIZE_DIMENSION[size] || SIZE_DIMENSION.medium;
 

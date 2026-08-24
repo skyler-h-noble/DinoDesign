@@ -8,7 +8,7 @@ import { Icon } from '../Icon/Icon';
 import { BodySmall, Caption } from '../Typography';
 
 /**
- * DynoTreeView — wraps MUI X SimpleTreeView
+ * OmniTreeView — wraps MUI X SimpleTreeView
  *
  * VARIANT (applies to the whole tree container):
  *   default   data-theme="Default"          data-surface="Surface-Dim"
@@ -193,7 +193,7 @@ function renderItems(items = [], density = 'default', color = 'primary', variant
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export function DynoTreeView({
+export function OmniTreeView({
   // Style
   color          = 'default',
   variant        = 'solid',     // 'solid' | 'light'
@@ -271,10 +271,10 @@ export function DynoTreeView({
       data-theme={dataTheme}
       data-surface="Surface-Dim"
       className={
-        'dyno-treeview' +
-        ' dyno-treeview-' + effectiveVariant +
-        ' dyno-treeview-' + color +
-        ' dyno-treeview-' + density +
+        'omni-treeview' +
+        ' omni-treeview-' + effectiveVariant +
+        ' omni-treeview-' + color +
+        ' omni-treeview-' + density +
         (className ? ' ' + className : '')
       }
       sx={{
@@ -360,7 +360,7 @@ export const DEFAULT_ITEMS = [
 
 // ─── Convenience exports ──────────────────────────────────────────────────────
 
-export const SolidTreeView = (p) => <DynoTreeView variant="solid" {...p} />;
-export const LightTreeView = (p) => <DynoTreeView variant="light" {...p} />;
+export const SolidTreeView = (p) => <OmniTreeView variant="solid" {...p} />;
+export const LightTreeView = (p) => <OmniTreeView variant="light" {...p} />;
 
-export default DynoTreeView;
+export default OmniTreeView;

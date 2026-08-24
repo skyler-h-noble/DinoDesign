@@ -58,7 +58,7 @@ directly by components — always aliased through the layers above.
 ## Layer 2 — Mode (light-mode.css / dark-mode.css)
 
 Maps primitive color scales to background-specific semantic tokens. One file is
-active at a time — swapped by `DynoDesignProvider` when dark mode is toggled.
+active at a time — swapped by `OmniDesignProvider` when dark mode is toggled.
 
 Tokens are scoped per background level (Background-1 through Background-12),
 where lower numbers are darker and higher numbers are lighter in light mode.
@@ -383,13 +383,13 @@ Components apply effects via `box-shadow: var(--Effects)`.
 ### Setup (once at app root)
 
 ```jsx
-import { DynoDesignProvider } from '@dyno/components';
+import { OmniDesignProvider } from '@omni/components';
 
 function App() {
   return (
-    <DynoDesignProvider themeURL="https://your-theme-cdn.com/brand">
+    <OmniDesignProvider themeURL="https://your-theme-cdn.com/brand">
       <YourApp />
-    </DynoDesignProvider>
+    </OmniDesignProvider>
   );
 }
 ```
@@ -403,9 +403,9 @@ base → styles` — and the browser blocks paint until each `<link>` is
 applied.
 
 While loading, the Provider's root element carries
-`data-dyno-css="loading"` and is `visibility: hidden`. It flips to
+`data-omni-css="loading"` and is `visibility: hidden`. It flips to
 `"ready"` once every sheet resolves. Consumers can read the same value
-via `useDynoDesign().cssStatus` to render a fallback during a slow
+via `useOmniDesign().cssStatus` to render a fallback during a slow
 network load.
 
 ### Using components
@@ -414,9 +414,9 @@ Components automatically inherit the theme from their nearest `data-theme`
 ancestor. No manual theme wiring required.
 
 ```jsx
-import { Card, Button } from '@dyno/components';
+import { Card, Button } from '@omni/components';
 
-// Inherits theme from DynoDesignProvider
+// Inherits theme from OmniDesignProvider
 <Card>
   <Button color="primary">Click me</Button>
 </Card>
@@ -449,7 +449,7 @@ Dino generates a complete token CSS package from a brand image:
 2. Builds 13-step color scales per hue (Primary, Secondary, Tertiary, Neutral)
 3. Generates `base.css`, `light-mode.css`, `dark-mode.css`, `themes.css`
 4. Publishes to a `themeURL` with a `theme.json` manifest
-5. Consumer points `DynoDesignProvider` at the new `themeURL`
+5. Consumer points `OmniDesignProvider` at the new `themeURL`
 6. All components re-skin automatically — zero code changes
 
 The `theme.json` manifest:

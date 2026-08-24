@@ -12,7 +12,7 @@ a brand requires only replacing the token CSS files; no component code changes.
 ## Prerequisites
 
 - React 18+
-- A Dyno theme URL (provided by DynoDesign after brand generation) **or** local CSS files
+- A Dyno theme URL (provided by OmniDesign after brand generation) **or** local CSS files
 
 ---
 
@@ -20,19 +20,19 @@ a brand requires only replacing the token CSS files; no component code changes.
 
 ### 1. Install peer dependencies
 
-`@dynodesign/components` is built on MUI and uses Emotion for styling. These must be installed in your app — they are not bundled inside the package:
+`@omnidesign/components` is built on MUI and uses Emotion for styling. These must be installed in your app — they are not bundled inside the package:
 
 ```bash
 npm install @mui/material @mui/icons-material @emotion/react @emotion/styled
 ```
 
-### 2. Install DynoDesign
+### 2. Install OmniDesign
 
 ```bash
-npm install @dynodesign/components
+npm install @omnidesign/components
 ```
 
-> **Why peer dependencies?** MUI is not bundled inside `@dynodesign/components` to avoid shipping duplicate copies of React and MUI in apps that already use them. Your app provides MUI; DynoDesign provides the token-driven theme layer on top of it. You never need to configure MUI directly — `DynoDesignProvider` handles all of that automatically.
+> **Why peer dependencies?** MUI is not bundled inside `@omnidesign/components` to avoid shipping duplicate copies of React and MUI in apps that already use them. Your app provides MUI; OmniDesign provides the token-driven theme layer on top of it. You never need to configure MUI directly — `OmniDesignProvider` handles all of that automatically.
 
 ### Required peer dependency versions
 
@@ -49,7 +49,7 @@ npm install @dynodesign/components
 
 ## Setup
 
-Wrap your app root once with `DynoDesignProvider`. That's the only configuration
+Wrap your app root once with `OmniDesignProvider`. That's the only configuration
 required.
 
 ### Option A — Theme URL (recommended for production)
@@ -65,13 +65,13 @@ sheets load and becomes visible the moment they're ready.
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import { DynoDesignProvider } from '@dynodesign/components';
+import { OmniDesignProvider } from '@omnidesign/components';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <DynoDesignProvider themeURL="https://your-theme-cdn.com/brand">
+    <OmniDesignProvider themeURL="https://your-theme-cdn.com/brand">
       <App />
-    </DynoDesignProvider>
+    </OmniDesignProvider>
   </React.StrictMode>
 );
 ```
@@ -79,7 +79,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 ### Option B — Local CSS files (local dev / self-hosted)
 
 ```jsx
-<DynoDesignProvider
+<OmniDesignProvider
   foundationCSS="/styles/base.css"
   lightModeCSS="/styles/light-mode.css"
   darkModeCSS="/styles/dark-mode.css"
@@ -88,7 +88,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   defaultStyle="Modern"
 >
   <App />
-</DynoDesignProvider>
+</OmniDesignProvider>
 ```
 
 ### Option C — No Provider (CSS imported directly)
@@ -97,9 +97,9 @@ If you manage CSS loading yourself, just import the files and use components
 directly. No Provider needed.
 
 ```jsx
-import '@dynodesign/tokens/base.css';
-import '@dynodesign/tokens/light-mode.css';
-import '@dynodesign/tokens/themes.css';
+import '@omnidesign/tokens/base.css';
+import '@omnidesign/tokens/light-mode.css';
+import '@omnidesign/tokens/themes.css';
 
 // Components work without a Provider
 <Card variant="solid" color="primary">
@@ -120,17 +120,17 @@ React tree first renders.
 <!-- public/index.html (or your SSR template) -->
 <head>
   <link rel="preconnect" href="https://your-theme-cdn.com" crossorigin>
-  <link rel="stylesheet" id="dyno-foundation" data-dyno="true" href="https://your-theme-cdn.com/<uuid>/foundation.css">
-  <link rel="stylesheet" id="dyno-core"       data-dyno="true" href="https://your-theme-cdn.com/<uuid>/core.css">
-  <link rel="stylesheet" id="dyno-mode"       data-dyno="true" href="https://your-theme-cdn.com/<uuid>/Light-Mode.css">
-  <link rel="stylesheet" id="dyno-base"       data-dyno="true" href="https://your-theme-cdn.com/<uuid>/base.css">
-  <link rel="stylesheet" id="dyno-styles"     data-dyno="true" href="https://your-theme-cdn.com/<uuid>/styles.css">
+  <link rel="stylesheet" id="omni-foundation" data-omni="true" href="https://your-theme-cdn.com/<uuid>/foundation.css">
+  <link rel="stylesheet" id="omni-core"       data-omni="true" href="https://your-theme-cdn.com/<uuid>/core.css">
+  <link rel="stylesheet" id="omni-mode"       data-omni="true" href="https://your-theme-cdn.com/<uuid>/Light-Mode.css">
+  <link rel="stylesheet" id="omni-base"       data-omni="true" href="https://your-theme-cdn.com/<uuid>/base.css">
+  <link rel="stylesheet" id="omni-styles"     data-omni="true" href="https://your-theme-cdn.com/<uuid>/styles.css">
   <script type="module" src="/main.js" defer></script>
 </head>
 ```
 
-The `id="dyno-*"` attributes match the Provider's internal tag ids — so
-when `<DynoDesignProvider>` later calls `loadCSSSource`, it finds the
+The `id="omni-*"` attributes match the Provider's internal tag ids — so
+when `<OmniDesignProvider>` later calls `loadCSSSource`, it finds the
 existing `<link>` by id and uses it instead of re-fetching.
 
 Mount the Provider with `themeURL` (or individual props) anyway so dark-mode
@@ -140,7 +140,7 @@ but it still needs to know about the dark-mode source to swap on toggle.
 If you're hosting on a platform with edge functions (Netlify, Vercel,
 Cloudflare), this can be automated per-request by reading a query
 parameter or subdomain and templating the `<link>` tags in. See
-`netlify/edge-functions/playground-css.ts` in the DinoDesign Studio repo
+`netlify/edge-functions/playground-css.ts` in the OmniDesign Studio repo
 for a reference implementation.
 
 ---
@@ -151,7 +151,7 @@ Once the Provider is set up, import and use components anywhere in your app.
 No additional wiring required — components inherit the active theme automatically.
 
 ```jsx
-import { Button } from '@dynodesign/components';
+import { Button } from '@omnidesign/components';
 
 function MyPage() {
   return (
@@ -170,7 +170,7 @@ Components automatically adapt to the theme of their nearest surface ancestor.
 You never need to pass a theme down manually.
 
 ```jsx
-import { Card, CardContent, Button } from '@dynodesign/components';
+import { Card, CardContent, Button } from '@omnidesign/components';
 
 // Card sets the surface context — Button inherits it automatically
 <Card variant="solid" color="primary">
@@ -199,14 +199,14 @@ To nest a different theme inside another:
 
 ## Dark Mode
 
-`DynoDesignProvider` manages dark mode for you. Toggle it with the
-`useDynoDesign` hook:
+`OmniDesignProvider` manages dark mode for you. Toggle it with the
+`useOmniDesign` hook:
 
 ```jsx
-import { useDynoDesign } from '@dynodesign/components';
+import { useOmniDesign } from '@omnidesign/components';
 
 function DarkModeToggle() {
-  const { isDark, toggleDarkMode } = useDynoDesign();
+  const { isDark, toggleDarkMode } = useOmniDesign();
 
   return (
     <Button color="neutral" onClick={toggleDarkMode}>
@@ -219,12 +219,12 @@ function DarkModeToggle() {
 Or start in dark mode by default:
 
 ```jsx
-<DynoDesignProvider
+<OmniDesignProvider
   themeURL="..."
   defaultDarkMode={true}
 >
   <App />
-</DynoDesignProvider>
+</OmniDesignProvider>
 ```
 
 Or control it externally:
@@ -232,26 +232,26 @@ Or control it externally:
 ```jsx
 const [dark, setDark] = useState(false);
 
-<DynoDesignProvider
+<OmniDesignProvider
   themeURL="..."
   darkMode={dark}
   onDarkModeChange={setDark}
 >
   <App />
-</DynoDesignProvider>
+</OmniDesignProvider>
 ```
 
 ---
 
 ## Changing the Active Theme
 
-Use `setTheme` from `useDynoDesign` to change the root theme at runtime:
+Use `setTheme` from `useOmniDesign` to change the root theme at runtime:
 
 ```jsx
-import { useDynoDesign } from '@dynodesign/components';
+import { useOmniDesign } from '@omnidesign/components';
 
 function ThemeSwitcher() {
-  const { theme, setTheme } = useDynoDesign();
+  const { theme, setTheme } = useOmniDesign();
 
   return (
     <select value={theme} onChange={e => setTheme(e.target.value)}>
@@ -266,7 +266,7 @@ function ThemeSwitcher() {
 
 ---
 
-## DynoDesignProvider Props
+## OmniDesignProvider Props
 
 | Prop | Type | Default | Description |
 |---|---|---|---|
@@ -287,12 +287,12 @@ function ThemeSwitcher() {
 
 ---
 
-## useDynoDesign Hook
+## useOmniDesign Hook
 
 Access the active theme state anywhere inside the Provider:
 
 ```jsx
-import { useDynoDesign } from '@dynodesign/components';
+import { useOmniDesign } from '@omnidesign/components';
 
 const {
   theme,           // active theme name e.g. 'Primary'
@@ -308,7 +308,7 @@ const {
   themes,          // string[] — all valid theme names
   styles,          // string[] — all valid style names
   surfaces,        // string[] — all valid surface names
-} = useDynoDesign();
+} = useOmniDesign();
 ```
 
 ---
@@ -320,7 +320,7 @@ before rendering:
 
 ```jsx
 function App() {
-  const { cssStatus, cssError } = useDynoDesign();
+  const { cssStatus, cssError } = useOmniDesign();
 
   if (cssStatus === 'loading') return <div>Loading theme...</div>;
   if (cssStatus === 'error')   return <div>Theme error: {cssError}</div>;
@@ -364,7 +364,7 @@ Professional   Modern   Bold   Playful
 Types are included. Import them as needed:
 
 ```ts
-import type { DynoTheme, DynoSurface, DynoStyle } from '@dynodesign/components';
+import type { DynoTheme, DynoSurface, DynoStyle } from '@omnidesign/components';
 ```
 
 ---
@@ -376,25 +376,25 @@ Dyno ships a `.cursorrules` file that tells Cursor exactly how to use your desig
 ### Option A — Copy from node_modules (quickest)
 After installing, copy the file into your project root:
 ```bash
-cp node_modules/@dynodesign/components/.cursorrules .cursorrules
+cp node_modules/@omnidesign/components/.cursorrules .cursorrules
 ```
 
 ### Option B — Copy and paste
 Create a `.cursorrules` file at your project root and paste this in:
 ```
-This project uses the @dynodesign/components design system.
+This project uses the @omnidesign/components design system.
 
 Read these docs before writing any code:
-- node_modules/@dynodesign/components/docs/getting-started.md
-- node_modules/@dynodesign/components/docs/token-system.md
-- node_modules/@dynodesign/components/docs/components.md
+- node_modules/@omnidesign/components/docs/getting-started.md
+- node_modules/@omnidesign/components/docs/token-system.md
+- node_modules/@omnidesign/components/docs/components.md
 
-ALWAYS import components from '@dynodesign/components'
+ALWAYS import components from '@omnidesign/components'
 ALWAYS import CSS at the top of App.js:
-  import '@dynodesign/components/public/styles/foundation.css'
-  import '@dynodesign/components/public/styles/core.css'
-  import '@dynodesign/components/public/styles/Light-Mode.css'
-  import '@dynodesign/components/public/styles/base.css'
+  import '@omnidesign/components/public/styles/foundation.css'
+  import '@omnidesign/components/public/styles/core.css'
+  import '@omnidesign/components/public/styles/Light-Mode.css'
+  import '@omnidesign/components/public/styles/base.css'
 
 ALWAYS wrap content in a div with data-theme, data-surface, and data-style attributes.
 ```

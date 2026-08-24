@@ -11,7 +11,7 @@ import ImageIcon from '@mui/icons-material/Image';
 import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { DynoTreeView, DEFAULT_ITEMS } from './TreeView';
+import { OmniTreeView, DEFAULT_ITEMS } from './TreeView';
 import { Button } from '../Button/Button';
 import { Switch } from '../Switch/Switch';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
@@ -267,7 +267,7 @@ export function TreeViewShowcase() {
   }, [color, bgTheme, getElVar, colorToken]);
 
   const generateCode = () => {
-    const lines = ['<DynoTreeView'];
+    const lines = ['<OmniTreeView'];
     if (color !== 'default') lines.push('  color="' + color + '"');
     if (variant !== 'default') lines.push('  variant="' + variant + '"');
     if (density !== 'default')       lines.push('  density="' + density + '"');
@@ -291,7 +291,7 @@ export function TreeViewShowcase() {
 
           <PreviewSurface ref={previewRef} theme={bgTheme}>
             <Box sx={{ width: '100%', maxWidth: 360 }}>
-              <DynoTreeView
+              <OmniTreeView
                 color={color}
                 variant={variant}
                 density={density}

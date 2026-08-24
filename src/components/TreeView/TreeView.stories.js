@@ -1,9 +1,9 @@
 // src/components/TreeView/TreeView.stories.js
 import React, { useState } from 'react';
-import { DynoTreeView, DefaultTreeView, SolidTreeView, LightTreeView, DEFAULT_ITEMS } from './TreeView';
+import { OmniTreeView, DefaultTreeView, SolidTreeView, LightTreeView, DEFAULT_ITEMS } from './TreeView';
 import { Box, Stack } from '@mui/material';
 
-export default { title: 'Surfaces/TreeView', component: DynoTreeView };
+export default { title: 'Surfaces/TreeView', component: OmniTreeView };
 
 const COLORS = ['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
 
@@ -55,7 +55,7 @@ export const Variants = {
       {['default', 'solid', 'light'].map((v) => (
         <Box key={v}>
           <Box sx={{ mb: 1, fontSize: '12px', color: 'var(--Text-Quiet)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{v}</Box>
-          <DynoTreeView variant={v} color="primary" items={DEFAULT_ITEMS} defaultExpandedItems={EXPANDED} />
+          <OmniTreeView variant={v} color="primary" items={DEFAULT_ITEMS} defaultExpandedItems={EXPANDED} />
         </Box>
       ))}
     </Stack>
@@ -104,7 +104,7 @@ export const Density = {
           <Box sx={{ mb: 1, fontSize: '12px', color: 'var(--Text-Quiet)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
             {d} ({d === 'compact' ? '24px' : '32px'})
           </Box>
-          <DynoTreeView density={d} variant="solid" color="primary" items={DEFAULT_ITEMS} defaultExpandedItems={EXPANDED} />
+          <OmniTreeView density={d} variant="solid" color="primary" items={DEFAULT_ITEMS} defaultExpandedItems={EXPANDED} />
         </Box>
       ))}
     </Stack>
@@ -117,7 +117,7 @@ export const MultiSelect = {
   name: 'Multi-Select',
   render: () => (
     <Box sx={{ p: 4, maxWidth: 360 }}>
-      <DynoTreeView
+      <OmniTreeView
         selectionMode="multi"
         variant="light"
         color="primary"
@@ -134,7 +134,7 @@ export const CheckboxSelection = {
   name: 'Checkbox Selection',
   render: () => (
     <Box sx={{ p: 4, maxWidth: 360 }}>
-      <DynoTreeView
+      <OmniTreeView
         checkboxSelection
         selectionMode="multi"
         variant="solid"
@@ -152,7 +152,7 @@ export const DisableSelection = {
   name: 'Selection Disabled',
   render: () => (
     <Box sx={{ p: 4, maxWidth: 360 }}>
-      <DynoTreeView
+      <OmniTreeView
         disableSelection
         variant="light"
         color="neutral"
@@ -174,7 +174,7 @@ export const ControlledExpansion = {
         <Box sx={{ mb: 2, fontSize: '12px', color: 'var(--Text-Quiet)' }}>
           Expanded: [{expanded.join(', ')}]
         </Box>
-        <DynoTreeView
+        <OmniTreeView
           variant="light"
           color="info"
           items={DEFAULT_ITEMS}
@@ -197,7 +197,7 @@ export const ControlledSelection = {
         <Box sx={{ mb: 2, fontSize: '12px', color: 'var(--Text-Quiet)' }}>
           Selected: {selected || 'none'}
         </Box>
-        <DynoTreeView
+        <OmniTreeView
           variant="solid"
           color="success"
           items={DEFAULT_ITEMS}
@@ -216,7 +216,7 @@ export const FileTree = {
   name: 'File Tree Example',
   render: () => (
     <Box sx={{ p: 4, maxWidth: 360 }}>
-      <DynoTreeView
+      <OmniTreeView
         variant="default"
         density="compact"
         items={FILE_TREE}
@@ -232,7 +232,7 @@ export const DisabledItems = {
   name: 'With Disabled Items',
   render: () => (
     <Box sx={{ p: 4, maxWidth: 360 }}>
-      <DynoTreeView
+      <OmniTreeView
         variant="solid"
         color="warning"
         items={DEFAULT_ITEMS}

@@ -6,7 +6,7 @@ import { Select } from './Select/Select';
 /**
  * BackgroundPicker
  *
- * Two compact dropdowns (using DynoDesign <Select>) for setting the
+ * Two compact dropdowns (using OmniDesign <Select>) for setting the
  * PreviewSurface environment:
  *   1. Background — data-theme applied to the preview wrapper
  *   2. Surface    — data-surface applied to the preview wrapper

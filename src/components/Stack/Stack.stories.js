@@ -1,9 +1,9 @@
 // src/components/Stack/Stack.stories.js
 import React from 'react';
 import { Box } from '@mui/material';
-import { DynoStack, HStack, VStack, WrapStack, CenteredStack, SpaceBetweenStack, ResponsiveStack } from './Stack';
+import { OmniStack, HStack, VStack, WrapStack, CenteredStack, SpaceBetweenStack, ResponsiveStack } from './Stack';
 
-export default { title: 'Layout/Stack', component: DynoStack };
+export default { title: 'Layout/Stack', component: OmniStack };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -40,11 +40,11 @@ const SmallBlock = ({ children }) => (
 export const Default = {
   render: () => (
     <Box sx={{ p: 4, maxWidth: 400 }}>
-      <DynoStack gap={2}>
+      <OmniStack gap={2}>
         <Block>Item A</Block>
         <Block>Item B</Block>
         <Block>Item C</Block>
-      </DynoStack>
+      </OmniStack>
     </Box>
   ),
 };
@@ -68,11 +68,11 @@ export const SmartGapEnforced = {
       <Box sx={{ mb: 1, fontSize: '12px', color: 'var(--Text-Quiet)' }}>
         gap=&#123;0.5&#125; but small children → raised to var(--min-stack-gap)
       </Box>
-      <DynoStack gap={0.5} direction="row" alignItems="center">
+      <OmniStack gap={0.5} direction="row" alignItems="center">
         <SmallBlock>Terms</SmallBlock>
         <SmallBlock>Privacy</SmallBlock>
         <SmallBlock>Cookies</SmallBlock>
-      </DynoStack>
+      </OmniStack>
     </Box>
   ),
 };
@@ -84,11 +84,11 @@ export const SmartGapDisabled = {
       <Box sx={{ mb: 1, fontSize: '12px', color: 'var(--Text-Quiet)' }}>
         enforceMinGap=false — gap used exactly as specified
       </Box>
-      <DynoStack gap={0.5} direction="row" alignItems="center" enforceMinGap={false}>
+      <OmniStack gap={0.5} direction="row" alignItems="center" enforceMinGap={false}>
         <SmallBlock>Terms</SmallBlock>
         <SmallBlock>Privacy</SmallBlock>
         <SmallBlock>Cookies</SmallBlock>
-      </DynoStack>
+      </OmniStack>
     </Box>
   ),
 };
@@ -100,11 +100,11 @@ export const MixedSizes = {
       <Box sx={{ mb: 1, fontSize: '12px', color: 'var(--Text-Quiet)' }}>
         One small child triggers enforcement for the whole stack
       </Box>
-      <DynoStack gap={1}>
+      <OmniStack gap={1}>
         <Block height={40}>Normal button</Block>
         <SmallBlock>Small link — triggers min gap</SmallBlock>
         <Block height={40}>Another normal item</Block>
-      </DynoStack>
+      </OmniStack>
     </Box>
   ),
 };
@@ -116,11 +116,11 @@ export const RowDirections = {
       {['row', 'column', 'row-reverse', 'column-reverse'].map((dir) => (
         <Box key={dir}>
           <Box sx={{ mb: 1, fontSize: '12px', color: 'var(--Text-Quiet)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{dir}</Box>
-          <DynoStack direction={dir} gap={2} alignItems="center">
+          <OmniStack direction={dir} gap={2} alignItems="center">
             <Block>A</Block>
             <Block>B</Block>
             <Block>C</Block>
-          </DynoStack>
+          </OmniStack>
         </Box>
       ))}
     </Box>
@@ -182,7 +182,7 @@ export const CustomMinGapToken = {
       <Box sx={{ mb: 1, fontSize: '12px', color: 'var(--Text-Quiet)' }}>
         Uses --my-custom-min-gap token instead of default
       </Box>
-      <DynoStack
+      <OmniStack
         direction="row"
         gap={0.5}
         minGapToken="--my-custom-min-gap"
@@ -191,7 +191,7 @@ export const CustomMinGapToken = {
         <SmallBlock>A</SmallBlock>
         <SmallBlock>B</SmallBlock>
         <SmallBlock>C</SmallBlock>
-      </DynoStack>
+      </OmniStack>
     </Box>
   ),
 };

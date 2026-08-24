@@ -1,14 +1,14 @@
 /**
- * DynoDesignProvider
+ * OmniDesignProvider
  *
- * Wires the full DynoDesign token cascade into any React app.
+ * Wires the full OmniDesign token cascade into any React app.
  *
  * ── Two ways to provide CSS ───────────────────────────────────────────────────
  *
  * 1. SIMPLE — single themeURL (recommended):
  *
- *   <DynoDesignProvider
- *     themeURL="https://themes.dynodesign.com/acme-corp"
+ *   <OmniDesignProvider
+ *     themeURL="https://themes.omnidesign.com/acme-corp"
  *     defaultTheme="Default"
  *     defaultStyle="Modern"
  *   >
@@ -18,7 +18,7 @@
  *
  * 2. MANUAL — individual CSS props (local dev / custom setups):
  *
- *   <DynoDesignProvider
+ *   <OmniDesignProvider
  *     foundationCSS="/styles/foundation.css"
  *     coreCSS="/styles/core.css"
  *     typographyCSS="/styles/typography-tokens.css"
@@ -64,7 +64,7 @@
  *
  *   Raw CSS strings (local dev, custom setups) load as <style> tags.
  *
- *   While loading, the Provider wrapper carries data-dyno-css="loading" and is
+ *   While loading, the Provider wrapper carries data-omni-css="loading" and is
  *   visibility:hidden — once every sheet resolves it flips to "ready" and
  *   becomes visible. Error state stays visible so the consumer can render
  *   a fallback.
@@ -82,11 +82,11 @@ import React, {
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 
-const DynoDesignContext = createContext(null);
+const OmniDesignContext = createContext(null);
 
 // ─── Valid values ─────────────────────────────────────────────────────────────
 
-export const DYNO_THEMES = [
+export const OMNI_THEMES = [
   'Default',
   'Primary-Light', 'Primary',
   'Secondary-Light', 'Secondary',
@@ -98,9 +98,9 @@ export const DYNO_THEMES = [
   'App-Bar', 'Nav-Bar', 'Status',
 ];
 
-export const DYNO_STYLES = ['Professional', 'Modern', 'Bold', 'Playful'];
+export const OMNI_STYLES = ['Professional', 'Modern', 'Bold', 'Playful'];
 
-export const DYNO_SURFACES = [
+export const OMNI_SURFACES = [
   // Five surface levels, darkest to lightest. Surface-Dimmest and
   // Surface-Brightest are the ends of the ramp: Brightest is the level that
   // replaced the <Palette>-Light themes, so `theme="Primary"
@@ -118,20 +118,20 @@ export const SURFACE_STYLE_THEME_MAP = {
 
 // ─── Style tag IDs ────────────────────────────────────────────────────────────
 //
-//   #dyno-foundation  (1st)
-//   #dyno-core        (2nd)
-//   #dyno-typography  (3rd) ← platform type ramps; must follow core
-//   #dyno-mode        (4th) ← swaps between light/dark
-//   #dyno-base        (5th)
-//   #dyno-styles      (6th) ← always last
+//   #omni-foundation  (1st)
+//   #omni-core        (2nd)
+//   #omni-typography  (3rd) ← platform type ramps; must follow core
+//   #omni-mode        (4th) ← swaps between light/dark
+//   #omni-base        (5th)
+//   #omni-styles      (6th) ← always last
 
 const TAG = {
-  foundation: 'dyno-foundation',
-  core:       'dyno-core',
-  typography: 'dyno-typography',
-  mode:       'dyno-mode',
-  base:       'dyno-base',
-  styles:     'dyno-styles',
+  foundation: 'omni-foundation',
+  core:       'omni-core',
+  typography: 'omni-typography',
+  mode:       'omni-mode',
+  base:       'omni-base',
+  styles:     'omni-styles',
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -166,7 +166,7 @@ function injectLinkTag(id, href, beforeId) {
       // callers can still await readiness on a mode swap.
       return new Promise((resolve, reject) => {
         existing.onload = () => resolve(existing);
-        existing.onerror = () => reject(new Error(`DynoDesignProvider: failed to load ${href}`));
+        existing.onerror = () => reject(new Error(`OmniDesignProvider: failed to load ${href}`));
         existing.setAttribute('href', href);
       });
     }
@@ -176,9 +176,9 @@ function injectLinkTag(id, href, beforeId) {
     const tag = document.createElement('link');
     tag.id = id;
     tag.rel = 'stylesheet';
-    tag.setAttribute('data-dyno', 'true');
+    tag.setAttribute('data-omni', 'true');
     tag.onload = () => resolve(tag);
-    tag.onerror = () => reject(new Error(`DynoDesignProvider: failed to load ${href}`));
+    tag.onerror = () => reject(new Error(`OmniDesignProvider: failed to load ${href}`));
     tag.href = href;
     const before = beforeId ? document.getElementById(beforeId) : null;
     if (before) {
@@ -203,7 +203,7 @@ function injectStyleTag(id, css, beforeId) {
   }
   const tag = document.createElement('style');
   tag.id = id;
-  tag.setAttribute('data-dyno', 'true');
+  tag.setAttribute('data-omni', 'true');
   tag.textContent = css;
   const before = beforeId ? document.getElementById(beforeId) : null;
   if (before) {
@@ -233,7 +233,7 @@ function loadCSSSource(id, source, beforeId) {
  * Fetch and parse theme.json from a themeURL.
  * Returns an object with resolved absolute URLs for each CSS file.
  *
- * @param {string} themeURL  — base URL, e.g. "https://themes.dynodesign.com/acme-corp"
+ * @param {string} themeURL  — base URL, e.g. "https://themes.omnidesign.com/acme-corp"
  * @returns {Promise<object>} — { foundationURL, coreURL, lightModeURL, darkModeURL,
  *                                baseURL, stylesURL, defaultTheme, defaultStyle,
  *                                defaultSurface, darkTheme }
@@ -248,7 +248,7 @@ async function fetchThemeManifest(themeURL) {
 
   const res = await fetch(manifestURL);
   if (!res.ok) {
-    throw new Error(`DynoDesignProvider: could not load theme manifest from ${manifestURL} (${res.status})`);
+    throw new Error(`OmniDesignProvider: could not load theme manifest from ${manifestURL} (${res.status})`);
   }
 
   const manifest = await res.json();
@@ -288,7 +288,7 @@ async function fetchThemeManifest(themeURL) {
  * Theme URL (simplest — recommended for production):
  * @param {string}   props.themeURL          Base URL of the theme folder.
  *                                           Must contain a theme.json manifest.
- *                                           e.g. "https://themes.dynodesign.com/acme-corp"
+ *                                           e.g. "https://themes.omnidesign.com/acme-corp"
  *
  * Individual CSS props (manual / local dev):
  * @param {string}   props.foundationCSS     foundation.css (URL or raw string)
@@ -319,7 +319,7 @@ async function fetchThemeManifest(themeURL) {
  * @param {boolean}  props.fullHeight        Adds minHeight: 100vh (default: true)
  * @param {React.ReactNode} props.children
  */
-export function DynoDesignProvider({
+export function OmniDesignProvider({
   // Theme URL
   themeURL,
 
@@ -412,7 +412,7 @@ export function DynoDesignProvider({
       })
       .catch(err => {
         if (!mountedRef.current) return;
-        console.error('DynoDesignProvider: manifest error:', err);
+        console.error('OmniDesignProvider: manifest error:', err);
         setCssError(err.message);
         setCssStatus('error');
       });
@@ -454,7 +454,7 @@ export function DynoDesignProvider({
   // ── EFFECT: Inject static CSS (foundation, core, base, styles) ────────────
   // Injects each sheet in its correct cascade slot. URLs become <link> tags
   // (browser-cached, render-blocking — no flash); raw CSS strings become
-  // <style> tags. The mode sheet's slot (#dyno-mode) sits between core and
+  // <style> tags. The mode sheet's slot (#omni-mode) sits between core and
   // base; we anchor base/styles after it by passing the right beforeId so
   // the order stays foundation → core → mode → base → styles regardless of
   // which sheet resolves first.
@@ -492,7 +492,7 @@ export function DynoDesignProvider({
       // the whole app down, so a failed load here is swallowed rather than
       // failing the Promise.all.
       loadCSSSource(TAG.typography, typography).catch(err => {
-        console.warn('DynoDesignProvider: typography CSS did not load —', err.message);
+        console.warn('OmniDesignProvider: typography CSS did not load —', err.message);
       }),
       loadCSSSource(TAG.base,       base),
       loadCSSSource(TAG.styles,     styles),
@@ -503,7 +503,7 @@ export function DynoDesignProvider({
       })
       .catch(err => {
         if (!mountedRef.current) return;
-        console.error('DynoDesignProvider CSS error:', err);
+        console.error('OmniDesignProvider CSS error:', err);
         setCssError(err.message);
         setCssStatus('error');
       });
@@ -519,7 +519,7 @@ export function DynoDesignProvider({
       resolvedSources.base, resolvedSources.styles]);
 
   // ── EFFECT: Swap active mode CSS ──────────────────────────────────────────
-  // Mode sheet inserts before #dyno-base so the cascade slot is always
+  // Mode sheet inserts before #omni-base so the cascade slot is always
   // foundation → core → MODE → base → styles, regardless of dark/light
   // toggling order. <link> swap just changes href in place — the browser
   // refetches (cache-control on the storage layer decides whether the
@@ -529,7 +529,7 @@ export function DynoDesignProvider({
     if (!activeSource) return;
 
     loadCSSSource(TAG.mode, activeSource, TAG.base)
-      .catch(err => console.error('DynoDesignProvider mode CSS error:', err));
+      .catch(err => console.error('OmniDesignProvider mode CSS error:', err));
 
   }, [isDark, resolvedSources.lightMode, resolvedSources.darkMode]);
 
@@ -545,17 +545,17 @@ export function DynoDesignProvider({
   }, [isControlled, isDark, onDarkModeChange]);
 
   const setTheme = useCallback((next) => {
-    if (!DYNO_THEMES.includes(next)) console.warn(`DynoDesignProvider: unknown theme "${next}"`);
+    if (!OMNI_THEMES.includes(next)) console.warn(`OmniDesignProvider: unknown theme "${next}"`);
     setThemeState(next);
   }, []);
 
   const setStyle = useCallback((next) => {
-    if (!DYNO_STYLES.includes(next)) console.warn(`DynoDesignProvider: unknown style "${next}"`);
+    if (!OMNI_STYLES.includes(next)) console.warn(`OmniDesignProvider: unknown style "${next}"`);
     setStyleVariant(next);
   }, []);
 
   const setSurface = useCallback((next) => {
-    if (!DYNO_SURFACES.includes(next)) console.warn(`DynoDesignProvider: unknown surface "${next}"`);
+    if (!OMNI_SURFACES.includes(next)) console.warn(`OmniDesignProvider: unknown surface "${next}"`);
     setRootSurface(next);
   }, []);
 
@@ -564,7 +564,7 @@ export function DynoDesignProvider({
     theme: activeTheme, style: styleVariant, surface: rootSurface,
     isDark, cssStatus, cssError,
     setTheme, setStyle, setSurface, toggleDarkMode,
-    themes: DYNO_THEMES, styles: DYNO_STYLES, surfaces: DYNO_SURFACES,
+    themes: OMNI_THEMES, styles: OMNI_STYLES, surfaces: OMNI_SURFACES,
     name: manifestThemeConfig.name ?? null,
   }), [
     activeTheme, styleVariant, rootSurface, isDark,
@@ -576,33 +576,33 @@ export function DynoDesignProvider({
   // ── Render ─────────────────────────────────────────────────────────────────
   // The inline <style> below is rendered as part of the React tree so the
   // hide rule is in the DOM before paint — without it, the consumer would
-  // see the lib's <DynoDesignProvider>-default tokens for a frame before
-  // the brand sheets resolve and apply. `data-dyno-css="loading"` flips to
+  // see the lib's <OmniDesignProvider>-default tokens for a frame before
+  // the brand sheets resolve and apply. `data-omni-css="loading"` flips to
   // `ready` (or `error`) once every brand sheet has finished loading, at
   // which point the wrapper becomes visible. Error state stays visible so
   // the consumer can render a fallback message.
   return (
-    <DynoDesignContext.Provider value={contextValue}>
-      <style data-dyno="hide-during-load">{`[data-dyno-css="loading"]{visibility:hidden}`}</style>
+    <OmniDesignContext.Provider value={contextValue}>
+      <style data-omni="hide-during-load">{`[data-omni-css="loading"]{visibility:hidden}`}</style>
       <div
         data-theme={activeTheme}
         data-style={styleVariant}
         data-surface={rootSurface}
-        data-dyno-css={cssStatus}
+        data-omni-css={cssStatus}
         className={className}
         style={{ ...(fullHeight ? { minHeight: '100vh' } : {}), ...styleProp }}
       >
         {children}
       </div>
-    </DynoDesignContext.Provider>
+    </OmniDesignContext.Provider>
   );
 }
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
-export function useDynoDesign() {
-  const ctx = useContext(DynoDesignContext);
-  if (!ctx) throw new Error('useDynoDesign must be used inside a <DynoDesignProvider>');
+export function useOmniDesign() {
+  const ctx = useContext(OmniDesignContext);
+  if (!ctx) throw new Error('useOmniDesign must be used inside a <OmniDesignProvider>');
   return ctx;
 }
 
@@ -626,4 +626,14 @@ export function Surfaced({ surface, as: Tag = 'div', children, className, style,
   );
 }
 
-export default DynoDesignProvider;
+// ── Back-compat aliases ──────────────────────────────────────────────────────
+// The system was called DynoDesign before this release. A design system's API
+// is frozen for consumers the moment they install it, and they upgrade on their
+// own schedule, so the old names keep resolving. Write the Omni names.
+export const DynoDesignProvider = OmniDesignProvider;
+export const useDynoDesign     = useOmniDesign;
+export const DYNO_THEMES       = OMNI_THEMES;
+export const DYNO_STYLES       = OMNI_STYLES;
+export const DYNO_SURFACES     = OMNI_SURFACES;
+
+export default OmniDesignProvider;

@@ -124,7 +124,7 @@ export { Chip } from './Chip';
 
 // ========== LAYOUT ==========
 export {
-  DynoStack,
+  OmniStack,
   Stack,
   HStack,
   VStack,
@@ -192,7 +192,7 @@ export { Accordion, AccordionSummary, AccordionDetails, AccordionGroup } from '.
 
 // ========== TREE VIEW ==========
 export {
-  DynoTreeView,
+  OmniTreeView,
   SolidTreeView,
   LightTreeView,
   DEFAULT_ITEMS,
@@ -211,6 +211,11 @@ export { SliderInput as Slider } from './Slider';
 export { RatingInput as Rating } from './Rating';
 
 // ========== PROVIDER ==========
-export { DynoDesignProvider, useDynoDesign, ThemedZone, Surfaced } from '../DynoDesignProvider';
+export { OmniDesignProvider, useOmniDesign, ThemedZone, Surfaced } from '../OmniDesignProvider';
 
 export default {};
+
+// Back-compat: these components were DynoStack / DynoTreeView before the
+// OmniDesign rename. Old imports keep working; write the Omni names.
+export { OmniStack as DynoStack } from './Stack/Stack';
+export { OmniTreeView as DynoTreeView } from './TreeView/TreeView';

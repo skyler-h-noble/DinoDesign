@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import { Stack as MuiStack, Box } from '@mui/material';
 
 /**
- * DynoStack — wraps MUI Stack with smart minimum gap enforcement.
+ * OmniStack — wraps MUI Stack with smart minimum gap enforcement.
  *
  * SMART GAP RULE:
  *   If any child component is detected as "small" (24px height),
@@ -87,7 +87,7 @@ function gapToPx(gap, muiSpacingUnit = 8) {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function DynoStack({
+export function OmniStack({
   children,
   gap,
   spacing,
@@ -125,8 +125,8 @@ export function DynoStack({
       alignItems={alignItems}
       justifyContent={justifyContent}
       className={
-        'dyno-stack' +
-        (needsMinGap ? ' dyno-stack-min-gap-enforced' : '') +
+        'omni-stack' +
+        (needsMinGap ? ' omni-stack-min-gap-enforced' : '') +
         (className ? ' ' + className : '')
       }
       sx={{
@@ -150,39 +150,39 @@ export function DynoStack({
 
 // ─── Convenience exports ──────────────────────────────────────────────────────
 
-export const HStack = (p) => <DynoStack direction="row" alignItems="center" {...p} />;
-export const VStack = (p) => <DynoStack direction="column" {...p} />;
+export const HStack = (p) => <OmniStack direction="row" alignItems="center" {...p} />;
+export const VStack = (p) => <OmniStack direction="column" {...p} />;
 
 export const CenteredStack = (p) => (
-  <DynoStack direction="column" alignItems="center" justifyContent="center" {...p} />
+  <OmniStack direction="column" alignItems="center" justifyContent="center" {...p} />
 );
 
 export const SpaceBetweenStack = (p) => (
-  <DynoStack direction="row" alignItems="center" justifyContent="space-between" {...p} />
+  <OmniStack direction="row" alignItems="center" justifyContent="space-between" {...p} />
 );
 
 export const WrapStack = (p) => (
-  <DynoStack direction="row" flexWrap="wrap" {...p} />
+  <OmniStack direction="row" flexWrap="wrap" {...p} />
 );
 
 export const ResponsiveStack = ({ breakpoint = 'sm', ...p }) => (
-  <DynoStack direction={{ xs: 'column', [breakpoint]: 'row' }} {...p} />
+  <OmniStack direction={{ xs: 'column', [breakpoint]: 'row' }} {...p} />
 );
 
 // ─── Backward-compat aliases ──────────────────────────────────────────────────
 // These match the names that were exported from the previous Stack implementation
 // so existing imports in the codebase continue to work without changes.
 
-export const Stack        = DynoStack;
+export const Stack        = OmniStack;
 export const GridStack    = WrapStack;
 export const StackDivider = (p) => (
   <Box sx={{ borderBottom: '1px solid var(--Border)', width: '100%' }} {...p} />
 );
 export const InsetStack  = ({ sx: sxProp, ...p }) => (
-  <DynoStack sx={{ px: 2, ...sxProp }} {...p} />
+  <OmniStack sx={{ px: 2, ...sxProp }} {...p} />
 );
 export const ScrollStack = ({ sx: sxProp, ...p }) => (
-  <DynoStack sx={{ overflowY: 'auto', ...sxProp }} {...p} />
+  <OmniStack sx={{ overflowY: 'auto', ...sxProp }} {...p} />
 );
 
-export default DynoStack;
+export default OmniStack;

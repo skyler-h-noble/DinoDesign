@@ -408,7 +408,7 @@ export function Button({
     if (isIconOnly && !named) {
       // eslint-disable-next-line no-console
       console.error(
-        '[DynoDesign] An icon-only <Button> has no accessible name. A screen ' +
+        '[OmniDesign] An icon-only <Button> has no accessible name. A screen ' +
         'reader announces it as just "button". Add aria-label="…" describing ' +
         'the ACTION ("Delete item"), not the icon ("trash").',
       );
@@ -419,7 +419,7 @@ export function Button({
         if (childLabel) {
           // eslint-disable-next-line no-console
           console.error(
-            '[DynoDesign] <Button> is labelled "' + named + '" but also ' +
+            '[OmniDesign] <Button> is labelled "' + named + '" but also ' +
             'contains an icon labelled "' + childLabel + '". A screen reader ' +
             'reads both. Remove the icon\'s label — the button owns the name.',
           );

@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Box } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { useDynoDesign } from '../../DynoDesignProvider';
+import { useOmniDesign } from '../../OmniDesignProvider';
 
 /**
  * Modal Component
@@ -91,10 +91,10 @@ export function Modal({
   const [visible, setVisible] = useState(false);
 
   // Get current theme context so the portal inherits the right tokens
-  let dynoCtx;
-  try { dynoCtx = useDynoDesign(); } catch { dynoCtx = null; }
-  const providerTheme = dynoCtx?.theme || 'Default';
-  const providerStyle = dynoCtx?.style || 'Modern';
+  let omniCtx;
+  try { omniCtx = useOmniDesign(); } catch { omniCtx = null; }
+  const providerTheme = omniCtx?.theme || 'Default';
+  const providerStyle = omniCtx?.style || 'Modern';
 
   const isDefault = variant === 'default';
   const isSoft = variant === 'soft';

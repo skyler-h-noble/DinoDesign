@@ -102,9 +102,9 @@ import {
   Typography,
   Spacing,
   Fab,
-  DynoTreeView,
+  OmniTreeView,
 } from '../components';
-import { DynoDesignProvider, useDynoDesign } from '../DynoDesignProvider';
+import { OmniDesignProvider, useOmniDesign } from '../OmniDesignProvider';
 import { NotificationProvider } from '../components/NotificationProvider';
 import { NotificationBell } from '../components/NotificationBell';
 import { useThemeMode } from '../theme/useThemeMode';
@@ -295,7 +295,7 @@ function ShowcaseInner() {
           No components match "{searchQuery}"
         </Box>
       ) : (
-        <DynoTreeView
+        <OmniTreeView
           // Re-mount when query changes so the new expandedItems take effect
           key={normalizedQuery || 'all'}
           items={filteredNavItems}
@@ -322,7 +322,7 @@ function ShowcaseInner() {
   };
 
   return (
-    <DynoDesignProvider
+    <OmniDesignProvider
       themeURL={themeURL}
       typographyCSS={typographyCSS}
       lightModeCSS={localLightModeCSS}
@@ -334,7 +334,7 @@ function ShowcaseInner() {
     <NotificationProvider>
     <Box sx={{ display: 'flex', minHeight: '100vh', flexDirection: 'column' }}>
       {/* App Bar — brand is pulled from the loaded theme.json manifest via
-          the DynoDesignProvider context, so it shows the design system's name
+          the OmniDesignProvider context, so it shows the design system's name
           (e.g. "Acme") instead of the static "Company" default. */}
       <BrandedAppBar
         onMenuClick={() => setMobileOpen(!mobileOpen)}
@@ -460,18 +460,18 @@ function ShowcaseInner() {
       <SettingsPanel />
     </Box>
     </NotificationProvider>
-    </DynoDesignProvider>
+    </OmniDesignProvider>
   );
 }
 
 /**
  * AppBar wrapper that reads the loaded design system's name from the
- * DynoDesignProvider context (populated from theme.json's `name` field) and
+ * OmniDesignProvider context (populated from theme.json's `name` field) and
  * passes it as `brand`. Falls back to the default "Company" rendering when
  * no name is available (no themeURL or older manifests without `name`).
  */
 function BrandedAppBar({ onMenuClick, searchQuery, onSearchChange }) {
-  const { name } = useDynoDesign();
+  const { name } = useOmniDesign();
   return (
     <AppBar
       mode="desktop"

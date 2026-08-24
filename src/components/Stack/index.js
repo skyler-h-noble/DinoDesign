@@ -1,6 +1,6 @@
 // src/components/Stack/index.js
 export {
-  DynoStack,
+  OmniStack,
   HStack,
   VStack,
   CenteredStack,

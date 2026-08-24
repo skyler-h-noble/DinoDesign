@@ -1,7 +1,7 @@
 {
-  "name": "@dynodesign/components",
+  "name": "@omnidesign/components",
   "version": "0.6.0",
-  "description": "DynoDesign adaptive component library — token-driven React components with customizable CSS theming",
+  "description": "DynoDesign adaptive component library \u2014 token-driven React components with customizable CSS theming",
   "author": "Lise Noble",
   "license": "Apache-2.0",
   "main": "dist/index.js",
@@ -23,9 +23,9 @@
       "require": "./dist/index.js"
     },
     "./provider": {
-      "types": "./dist/types/DynoDesignProvider.d.ts",
-      "import": "./dist/DynoDesignProvider.esm.js",
-      "require": "./dist/DynoDesignProvider.js"
+      "types": "./dist/types/OmniDesignProvider.d.ts",
+      "import": "./dist/OmniDesignProvider.esm.js",
+      "require": "./dist/OmniDesignProvider.js"
     },
     "./public/styles/foundation.css": "./public/styles/foundation.css",
     "./public/styles/core.css": "./public/styles/core.css",
@@ -101,7 +101,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/skyler-h-noble/DinoDesign"
+    "url": "https://github.com/lwnoble/omni-design"
   },
   "dependencies": {
     "@dynodesign/components": "^0.4.1",

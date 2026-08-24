@@ -4,7 +4,7 @@ import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import { Drawer, DrawerHeader, DrawerContent, DrawerClose } from './Drawer';
-import { DynoTreeView } from '../TreeView/TreeView';
+import { OmniTreeView } from '../TreeView/TreeView';
 import { Button } from '../Button/Button';
 import { Switch } from '../Switch/Switch';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
@@ -70,7 +70,7 @@ export function DrawerShowcase() {
       '    <DrawerClose onClick={handleClose} />\n' +
       '  </DrawerHeader>\n' +
       '  <DrawerContent>\n' +
-      '    <DynoTreeView items={navItems} />\n' +
+      '    <OmniTreeView items={navItems} />\n' +
       '  </DrawerContent>\n' +
       '</Drawer>'
     );
@@ -115,7 +115,7 @@ export function DrawerShowcase() {
               <DrawerClose onClick={() => setOpen(false)} />
             </DrawerHeader>
             <DrawerContent>
-              <DynoTreeView
+              <OmniTreeView
                 items={NAV_ITEMS}
                 variant="solid"
                 color="default"

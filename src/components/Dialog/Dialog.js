@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { Box } from '@mui/material';
-import { useDynoDesign } from '../../DynoDesignProvider';
+import { useOmniDesign } from '../../OmniDesignProvider';
 
 /**
  * Dialog Component
@@ -147,11 +147,11 @@ export function Dialog({
   const TransitionComponent = transition ? TRANSITION_MAP[transition] : undefined;
 
   // Get current theme context so the portal inherits the right tokens
-  let dynoCtx;
-  try { dynoCtx = useDynoDesign(); } catch { dynoCtx = null; }
-  const currentTheme = dynoCtx?.theme || 'Default';
-  const currentStyle = dynoCtx?.style || 'Modern';
-  const currentSurface = dynoCtx?.surface || 'Surface';
+  let omniCtx;
+  try { omniCtx = useOmniDesign(); } catch { omniCtx = null; }
+  const currentTheme = omniCtx?.theme || 'Default';
+  const currentStyle = omniCtx?.style || 'Modern';
+  const currentSurface = omniCtx?.surface || 'Surface';
 
   const handleClose = (event, reason) => {
     if (alert && reason === 'backdropClick') return;

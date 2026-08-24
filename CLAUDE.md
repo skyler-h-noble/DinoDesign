@@ -1,4 +1,4 @@
-# CLAUDE.md — DynoDesign Component Library
+# CLAUDE.md — OmniDesign Component Library
 
 This file tells AI coding tools (Claude Code, Cursor, Copilot, etc.) exactly how to use this design system correctly. Read this before generating any UI code.
 
@@ -24,7 +24,7 @@ my-project/
 │   ├── base.css         ← data-style, data-surface rules (loads 4th)
 │   └── styles.css       ← overrides (loads last)
 └── src/
-    ├── DynoDesignProvider.js   ← CSS injector + context + hook
+    ├── OmniDesignProvider.js   ← CSS injector + context + hook
     ├── App.js
     ├── index.js
     └── components/             ← 49 components, all token-driven
@@ -138,14 +138,14 @@ the cascade do the rest.
 
 ## MUI Integration
 
-`@dynodesign/components` is built on MUI. The `DynoDesignProvider` handles all MUI `ThemeProvider` wiring internally — **you never configure MUI directly**. DynoDesign's CSS custom properties drive all visual values; MUI is purely structural.
+`@omnidesign/components` is built on MUI. The `OmniDesignProvider` handles all MUI `ThemeProvider` wiring internally — **you never configure MUI directly**. OmniDesign's CSS custom properties drive all visual values; MUI is purely structural.
 
 **MUI peer dependencies must be installed in the consuming app:**
 ```bash
 npm install @mui/material @mui/icons-material @emotion/react @emotion/styled
 ```
 
-**Never use MUI's theming system to set colors — always use DynoDesign tokens:**
+**Never use MUI's theming system to set colors — always use OmniDesign tokens:**
 ```jsx
 // ✅ Correct — token-driven
 style={{ background: 'var(--Buttons-Primary-Button)', color: 'var(--Buttons-Primary-Text)' }}
@@ -158,15 +158,15 @@ sx={{ bgcolor: 'primary.main', color: 'white' }}
 
 ## Provider Setup
 
-The `DynoDesignProvider` must wrap your entire app. It injects CSS, configures MUI ThemeProvider, and sets the root attributes:
+The `OmniDesignProvider` must wrap your entire app. It injects CSS, configures MUI ThemeProvider, and sets the root attributes:
 
 ```jsx
 // src/App.js
-import { DynoDesignProvider } from './DynoDesignProvider';
+import { OmniDesignProvider } from './OmniDesignProvider';
 
 function App({ foundationCSS, coreCSS, lightModeCSS, darkModeCSS, baseCSS, stylesCSS }) {
   return (
-    <DynoDesignProvider
+    <OmniDesignProvider
       foundationCSS={foundationCSS}
       coreCSS={coreCSS}
       lightModeCSS={lightModeCSS}
@@ -178,24 +178,24 @@ function App({ foundationCSS, coreCSS, lightModeCSS, darkModeCSS, baseCSS, style
       defaultStyle="Modern"
     >
       {/* your app */}
-    </DynoDesignProvider>
+    </OmniDesignProvider>
   );
 }
 ```
 
 ### Accessing theme state in any child component:
 ```jsx
-import { useDynoDesign } from './DynoDesignProvider';
+import { useOmniDesign } from './OmniDesignProvider';
 
 function MyComponent() {
-  const { theme, style, isDark, toggleDarkMode, setTheme, setStyle } = useDynoDesign();
+  const { theme, style, isDark, toggleDarkMode, setTheme, setStyle } = useOmniDesign();
   // ...
 }
 ```
 
 ### Themed sub-zones (AppBar, alerts, nav):
 ```jsx
-import { ThemedZone, Surfaced } from './DynoDesignProvider';
+import { ThemedZone, Surfaced } from './OmniDesignProvider';
 
 // AppBar gets its own dark themed zone
 <ThemedZone theme="App-Bar" surface="Surface-Bright" as="header">
@@ -522,7 +522,7 @@ headings.
 
 ## Component Imports
 
-All 49 components import from `./components` (or `@dynodesign/components` if installed as a package):
+All 49 components import from `./components` (or `@omnidesign/components` if installed as a package):
 
 ```jsx
 import {
@@ -844,7 +844,7 @@ live (the literal `MISSING-LIB-COMPONENT` tag is greppable, so reviews and the
 // MISSING-LIB-COMPONENT: <ComponentName>
 // Needed for: <one line on the use case>
 // Proposed API: <props sketch>
-// Lib-track: open an issue / PR against @dynodesign/components
+// Lib-track: open an issue / PR against @omnidesign/components
 ```
 
 Then either:
@@ -856,10 +856,10 @@ Then either:
   lib first, or inline with a tracked follow-up.
 
 After tagging and implementing (either path), **ask the user** if they want
-to share the component back with DynoDesign for review:
+to share the component back with OmniDesign for review:
 
 > "I've tagged `<ComponentName>` as a missing lib component. Want me to
-> submit a proposal to the DynoDesign admin dashboard for review? If they
+> submit a proposal to the OmniDesign admin dashboard for review? If they
 > accept it, your inline copy can be replaced in a future package update."
 
 If the user says yes, run `/ShareComponent <ComponentName>` (see below). If
@@ -875,14 +875,14 @@ Two Claude Code slash commands ship with this package:
   at a glance.
 - `/ShareComponent [Name]` — generates a submission package (proposed API +
   inline implementation + source pointer) for a tagged component, asks the
-  user to confirm, then POSTs it to the DynoDesign admin dashboard for
+  user to confirm, then POSTs it to the OmniDesign admin dashboard for
   review.
 
-To install them in your project after `npm install @dynodesign/components`:
+To install them in your project after `npm install @omnidesign/components`:
 
 ```bash
 mkdir -p .claude/commands
-cp node_modules/@dynodesign/components/.claude/commands/*.md \
+cp node_modules/@omnidesign/components/.claude/commands/*.md \
   .claude/commands/
 ```
 
@@ -899,7 +899,7 @@ are the components the library still needs to grow.
 
 ### ✅ DO
 ```jsx
-// Always use DynoDesign components for layout and interaction — never raw HTML
+// Always use OmniDesign components for layout and interaction — never raw HTML
 <HStack spacing={2}>            // instead of <div style={{ display: 'flex', gap: 16 }}>
 <Button variant="outline" color="default">  // instead of <button style={{ border: '1px solid var(--Border)' }}>
 <Body>                          // instead of <p> or <span>
@@ -934,7 +934,7 @@ import { Button, Card, Alert, H2, Body, HStack } from './components';
 
 ### ❌ NEVER DO
 ```jsx
-// Never use raw HTML elements when a DynoDesign component exists
+// Never use raw HTML elements when a OmniDesign component exists
 <button style={...}>                    // ← use <Button>
 <div style={{ display: 'flex' }}>       // ← use <HStack> or <VStack>
 <span style={{ fontSize: 14 }}>        // ← use <BodySmall>, <Label>, <Caption>
@@ -964,7 +964,7 @@ sx={{ bgcolor: 'primary.main', color: 'white' }}
 // Never use Tailwind color classes
 className="bg-teal-600 text-white"
 
-// Never import MUI components directly without wrapping in DynoDesign tokens
+// Never import MUI components directly without wrapping in OmniDesign tokens
 import Button from '@mui/material/Button'; // ← bypasses the token system
 ```
 
@@ -975,7 +975,7 @@ import Button from '@mui/material/Button'; // ← bypasses the token system
 ```jsx
 function MyPage() {
   return (
-    // Root: set by DynoDesignProvider — don't add data-theme here again
+    // Root: set by OmniDesignProvider — don't add data-theme here again
     <main data-surface="Surface-Dim" style={{ minHeight: '100vh' }}>
 
       {/* AppBar always gets its own themed zone */}
@@ -1018,7 +1018,7 @@ function MyPage() {
 
 ```jsx
 // Toggle dark mode from any component inside the Provider
-const { isDark, toggleDarkMode } = useDynoDesign();
+const { isDark, toggleDarkMode } = useOmniDesign();
 
 <button onClick={toggleDarkMode}>
   {isDark ? 'Switch to Light' : 'Switch to Dark'}
@@ -1039,8 +1039,8 @@ Dark mode swaps `Light-Mode.css` for `Dark-Mode.css` — all token values update
 5. styles.css       — final overrides
 ```
 
-The `DynoDesignProvider` manages this automatically. Do not add `<link>` tags for these files in `index.html` — the Provider handles injection.
+The `OmniDesignProvider` manages this automatically. Do not add `<link>` tags for these files in `index.html` — the Provider handles injection.
 
 ---
 
-*Repo: https://github.com/skyler-h-noble/DinoDesign*
+*Repo: https://github.com/lwnoble/omni-design*

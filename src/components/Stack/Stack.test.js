@@ -1,7 +1,7 @@
 // src/components/Stack/Stack.test.js
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { DynoStack, HStack, VStack, WrapStack, CenteredStack, SpaceBetweenStack } from './Stack';
+import { OmniStack, HStack, VStack, WrapStack, CenteredStack, SpaceBetweenStack } from './Stack';
 import { axe } from 'jest-axe';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -13,28 +13,28 @@ const SmallByHeight   = () => <div data-testid="small-height" height={24}>Small<
 
 // ─── Basic rendering ──────────────────────────────────────────────────────────
 
-describe('DynoStack', () => {
+describe('OmniStack', () => {
   test('renders children', () => {
-    render(<DynoStack><NormalChild /></DynoStack>);
+    render(<OmniStack><NormalChild /></OmniStack>);
     expect(screen.getByTestId('child')).toBeInTheDocument();
   });
 
   test('renders multiple children', () => {
     render(
-      <DynoStack>
+      <OmniStack>
         <div data-testid="a">A</div>
         <div data-testid="b">B</div>
         <div data-testid="c">C</div>
-      </DynoStack>
+      </OmniStack>
     );
     expect(screen.getByTestId('a')).toBeInTheDocument();
     expect(screen.getByTestId('b')).toBeInTheDocument();
     expect(screen.getByTestId('c')).toBeInTheDocument();
   });
 
-  test('has dyno-stack class', () => {
-    const { container } = render(<DynoStack><NormalChild /></DynoStack>);
-    expect(container.querySelector('.dyno-stack')).toBeInTheDocument();
+  test('has omni-stack class', () => {
+    const { container } = render(<OmniStack><NormalChild /></OmniStack>);
+    expect(container.querySelector('.omni-stack')).toBeInTheDocument();
   });
 });
 
@@ -43,41 +43,41 @@ describe('DynoStack', () => {
 describe('Smart gap detection', () => {
   test('no small child — does NOT add enforcement class', () => {
     const { container } = render(
-      <DynoStack><NormalChild /></DynoStack>
+      <OmniStack><NormalChild /></OmniStack>
     );
-    expect(container.querySelector('.dyno-stack-min-gap-enforced')).not.toBeInTheDocument();
+    expect(container.querySelector('.omni-stack-min-gap-enforced')).not.toBeInTheDocument();
   });
 
   test('child with size="small" — adds enforcement class', () => {
     const { container } = render(
-      <DynoStack><SmallBySizeProp /></DynoStack>
+      <OmniStack><SmallBySizeProp /></OmniStack>
     );
-    expect(container.querySelector('.dyno-stack-min-gap-enforced')).toBeInTheDocument();
+    expect(container.querySelector('.omni-stack-min-gap-enforced')).toBeInTheDocument();
   });
 
   test('child with data-size="small" — adds enforcement class', () => {
     const { container } = render(
-      <DynoStack><SmallByDataAttr /></DynoStack>
+      <OmniStack><SmallByDataAttr /></OmniStack>
     );
-    expect(container.querySelector('.dyno-stack-min-gap-enforced')).toBeInTheDocument();
+    expect(container.querySelector('.omni-stack-min-gap-enforced')).toBeInTheDocument();
   });
 
   test('child with height={24} — adds enforcement class', () => {
     const { container } = render(
-      <DynoStack><SmallByHeight /></DynoStack>
+      <OmniStack><SmallByHeight /></OmniStack>
     );
-    expect(container.querySelector('.dyno-stack-min-gap-enforced')).toBeInTheDocument();
+    expect(container.querySelector('.omni-stack-min-gap-enforced')).toBeInTheDocument();
   });
 
   test('mixed children — one small is enough to enforce', () => {
     const { container } = render(
-      <DynoStack>
+      <OmniStack>
         <NormalChild />
         <SmallBySizeProp />
         <NormalChild />
-      </DynoStack>
+      </OmniStack>
     );
-    expect(container.querySelector('.dyno-stack-min-gap-enforced')).toBeInTheDocument();
+    expect(container.querySelector('.omni-stack-min-gap-enforced')).toBeInTheDocument();
   });
 });
 
@@ -86,11 +86,11 @@ describe('Smart gap detection', () => {
 describe('enforceMinGap=false', () => {
   test('does not add enforcement class even with small children', () => {
     const { container } = render(
-      <DynoStack enforceMinGap={false}>
+      <OmniStack enforceMinGap={false}>
         <SmallBySizeProp />
-      </DynoStack>
+      </OmniStack>
     );
-    expect(container.querySelector('.dyno-stack-min-gap-enforced')).not.toBeInTheDocument();
+    expect(container.querySelector('.omni-stack-min-gap-enforced')).not.toBeInTheDocument();
   });
 });
 
@@ -99,17 +99,17 @@ describe('enforceMinGap=false', () => {
 describe('data-min-gap-enforced attribute', () => {
   test('set to "true" when enforcement is active', () => {
     const { container } = render(
-      <DynoStack><SmallBySizeProp /></DynoStack>
+      <OmniStack><SmallBySizeProp /></OmniStack>
     );
-    const stack = container.querySelector('.dyno-stack');
+    const stack = container.querySelector('.omni-stack');
     expect(stack).toHaveAttribute('data-min-gap-enforced', 'true');
   });
 
   test('not present when no small children', () => {
     const { container } = render(
-      <DynoStack><NormalChild /></DynoStack>
+      <OmniStack><NormalChild /></OmniStack>
     );
-    const stack = container.querySelector('.dyno-stack');
+    const stack = container.querySelector('.omni-stack');
     expect(stack).not.toHaveAttribute('data-min-gap-enforced');
   });
 });
@@ -119,27 +119,27 @@ describe('data-min-gap-enforced attribute', () => {
 describe('Convenience exports', () => {
   test('HStack renders', () => {
     const { container } = render(<HStack><NormalChild /></HStack>);
-    expect(container.querySelector('.dyno-stack')).toBeInTheDocument();
+    expect(container.querySelector('.omni-stack')).toBeInTheDocument();
   });
 
   test('VStack renders', () => {
     const { container } = render(<VStack><NormalChild /></VStack>);
-    expect(container.querySelector('.dyno-stack')).toBeInTheDocument();
+    expect(container.querySelector('.omni-stack')).toBeInTheDocument();
   });
 
   test('WrapStack renders', () => {
     const { container } = render(<WrapStack><NormalChild /></WrapStack>);
-    expect(container.querySelector('.dyno-stack')).toBeInTheDocument();
+    expect(container.querySelector('.omni-stack')).toBeInTheDocument();
   });
 
   test('CenteredStack renders', () => {
     const { container } = render(<CenteredStack><NormalChild /></CenteredStack>);
-    expect(container.querySelector('.dyno-stack')).toBeInTheDocument();
+    expect(container.querySelector('.omni-stack')).toBeInTheDocument();
   });
 
   test('SpaceBetweenStack renders', () => {
     const { container } = render(<SpaceBetweenStack><NormalChild /></SpaceBetweenStack>);
-    expect(container.querySelector('.dyno-stack')).toBeInTheDocument();
+    expect(container.querySelector('.omni-stack')).toBeInTheDocument();
   });
 });
 
@@ -148,17 +148,17 @@ describe('Convenience exports', () => {
 describe('Edge cases', () => {
   test('null/undefined children do not crash', () => {
     expect(() =>
-      render(<DynoStack>{null}{undefined}<NormalChild /></DynoStack>)
+      render(<OmniStack>{null}{undefined}<NormalChild /></OmniStack>)
     ).not.toThrow();
   });
 
   test('empty children renders without error', () => {
-    expect(() => render(<DynoStack />)).not.toThrow();
+    expect(() => render(<OmniStack />)).not.toThrow();
   });
 
   test('className prop is forwarded', () => {
     const { container } = render(
-      <DynoStack className="my-custom"><NormalChild /></DynoStack>
+      <OmniStack className="my-custom"><NormalChild /></OmniStack>
     );
     expect(container.querySelector('.my-custom')).toBeInTheDocument();
   });
@@ -169,10 +169,10 @@ describe('Edge cases', () => {
 describe('Stack — Accessibility (jest-axe)', () => {
   test('has no violations with normal children', async () => {
     const { container } = render(
-      <DynoStack>
+      <OmniStack>
         <div>Item A</div>
         <div>Item B</div>
-      </DynoStack>
+      </OmniStack>
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();
@@ -180,10 +180,10 @@ describe('Stack — Accessibility (jest-axe)', () => {
 
   test('has no violations with small children and enforcement active', async () => {
     const { container } = render(
-      <DynoStack>
+      <OmniStack>
         <button size="small">Small button A</button>
         <button size="small">Small button B</button>
-      </DynoStack>
+      </OmniStack>
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();

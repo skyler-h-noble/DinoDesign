@@ -261,7 +261,7 @@ export function AccordionSummary({
         borderRadius: 0,
         '&:hover': !disabled ? {
           color: 'var(--Text)',
-          '& .dyno-icon': { color: 'var(--Text)' },
+          '& .omni-icon': { color: 'var(--Text)' },
         } : {},
         '&:focus-visible': {
           outline: '3px solid var(--Focus-Visible)',

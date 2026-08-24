@@ -2,7 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import {
-  DynoTreeView, DefaultTreeView, SolidTreeView, LightTreeView, DEFAULT_ITEMS,
+  OmniTreeView, DefaultTreeView, SolidTreeView, LightTreeView, DEFAULT_ITEMS,
 } from './TreeView';
 import { axe } from 'jest-axe';
 
@@ -20,10 +20,10 @@ const SIMPLE_ITEMS = [
 ];
 
 const renderTree = (props = {}) =>
-  render(<DynoTreeView items={SIMPLE_ITEMS} {...props} />);
+  render(<OmniTreeView items={SIMPLE_ITEMS} {...props} />);
 
 /* ─── Basic Rendering ─── */
-describe('DynoTreeView', () => {
+describe('OmniTreeView', () => {
   test('renders without crashing', () => {
     renderTree();
     expect(screen.getByRole('tree')).toBeInTheDocument();
@@ -49,14 +49,14 @@ describe('DynoTreeView', () => {
 
 /* ─── Wrapper element ─── */
 describe('Wrapper element', () => {
-  test('has dyno-treeview class', () => {
+  test('has omni-treeview class', () => {
     const { container } = renderTree();
-    expect(container.querySelector('.dyno-treeview')).toBeInTheDocument();
+    expect(container.querySelector('.omni-treeview')).toBeInTheDocument();
   });
 
   test('has variant class', () => {
     const { container } = renderTree({ variant: 'solid', color: 'primary' });
-    expect(container.querySelector('.dyno-treeview-solid')).toBeInTheDocument();
+    expect(container.querySelector('.omni-treeview-solid')).toBeInTheDocument();
   });
 
   test('always has data-surface="Surface-Dim"', () => {
@@ -66,7 +66,7 @@ describe('Wrapper element', () => {
 
   test('default variant has no data-theme', () => {
     const { container } = renderTree({ variant: 'default' });
-    const wrapper = container.querySelector('.dyno-treeview');
+    const wrapper = container.querySelector('.omni-treeview');
     expect(wrapper).not.toHaveAttribute('data-theme');
   });
 });
@@ -118,12 +118,12 @@ describe('Light variant data-theme', () => {
 describe('Density', () => {
   test('default density class', () => {
     const { container } = renderTree({ density: 'default' });
-    expect(container.querySelector('.dyno-treeview-default')).toBeInTheDocument();
+    expect(container.querySelector('.omni-treeview-default')).toBeInTheDocument();
   });
 
   test('compact density class', () => {
     const { container } = renderTree({ density: 'compact' });
-    expect(container.querySelector('.dyno-treeview-compact')).toBeInTheDocument();
+    expect(container.querySelector('.omni-treeview-compact')).toBeInTheDocument();
   });
 });
 
@@ -193,7 +193,7 @@ describe('Convenience exports', () => {
     const { container } = render(
       <DefaultTreeView items={SIMPLE_ITEMS} />
     );
-    expect(container.querySelector('.dyno-treeview-default')).toBeInTheDocument();
+    expect(container.querySelector('.omni-treeview-default')).toBeInTheDocument();
     expect(container.querySelector('[data-theme]')).not.toBeInTheDocument();
   });
 
@@ -201,7 +201,7 @@ describe('Convenience exports', () => {
     const { container } = render(
       <SolidTreeView color="primary" items={SIMPLE_ITEMS} />
     );
-    expect(container.querySelector('.dyno-treeview-solid')).toBeInTheDocument();
+    expect(container.querySelector('.omni-treeview-solid')).toBeInTheDocument();
     expect(container.querySelector('[data-theme="Primary"]')).toBeInTheDocument();
   });
 
@@ -209,7 +209,7 @@ describe('Convenience exports', () => {
     const { container } = render(
       <LightTreeView color="success" items={SIMPLE_ITEMS} />
     );
-    expect(container.querySelector('.dyno-treeview-light')).toBeInTheDocument();
+    expect(container.querySelector('.omni-treeview-light')).toBeInTheDocument();
     expect(container.querySelector('[data-theme="Success-Light"]')).toBeInTheDocument();
   });
 });
@@ -217,7 +217,7 @@ describe('Convenience exports', () => {
 /* ─── Default items ─── */
 describe('DEFAULT_ITEMS', () => {
   test('renders with default items export', () => {
-    render(<DynoTreeView items={DEFAULT_ITEMS} />);
+    render(<OmniTreeView items={DEFAULT_ITEMS} />);
     expect(screen.getByRole('tree')).toBeInTheDocument();
   });
 });
@@ -227,7 +227,7 @@ describe('DEFAULT_ITEMS', () => {
 describe('TreeView — Accessibility (jest-axe)', () => {
   test('has no violations with default props', async () => {
     const { container } = render(
-      <DynoTreeView items={SIMPLE_ITEMS} defaultExpandedItems={['parent']} />
+      <OmniTreeView items={SIMPLE_ITEMS} defaultExpandedItems={['parent']} />
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();
@@ -236,7 +236,7 @@ describe('TreeView — Accessibility (jest-axe)', () => {
   test('has no violations in Primary solid theme', async () => {
     const { container } = render(
       <div data-theme="Primary">
-        <DynoTreeView variant="solid" color="primary" items={SIMPLE_ITEMS} />
+        <OmniTreeView variant="solid" color="primary" items={SIMPLE_ITEMS} />
       </div>
     );
     const results = await axe(container);
@@ -246,7 +246,7 @@ describe('TreeView — Accessibility (jest-axe)', () => {
   test('has no violations in light theme', async () => {
     const { container } = render(
       <div data-theme="Primary-Light">
-        <DynoTreeView variant="light" color="primary" items={SIMPLE_ITEMS} />
+        <OmniTreeView variant="light" color="primary" items={SIMPLE_ITEMS} />
       </div>
     );
     const results = await axe(container);
@@ -255,7 +255,7 @@ describe('TreeView — Accessibility (jest-axe)', () => {
 
   test('has no violations with multi-select and checkboxes', async () => {
     const { container } = render(
-      <DynoTreeView
+      <OmniTreeView
         selectionMode="multi"
         checkboxSelection
         variant="solid"

@@ -55,18 +55,18 @@ export default [
     external,
   },
 
-  // ── DynoDesignProvider ──────────────────────────────────────────────────
+  // ── OmniDesignProvider ──────────────────────────────────────────────────
   {
-    input: 'src/DynoDesignProvider.js',
+    input: 'src/OmniDesignProvider.js',
     output: [
       {
-        file: 'dist/DynoDesignProvider.js',
+        file: 'dist/OmniDesignProvider.js',
         format: 'cjs',
         sourcemap: true,
         exports: 'named',
       },
       {
-        file: 'dist/DynoDesignProvider.esm.js',
+        file: 'dist/OmniDesignProvider.esm.js',
         format: 'esm',
         sourcemap: true,
       },

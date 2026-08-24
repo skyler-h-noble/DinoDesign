@@ -49,7 +49,7 @@ export function Box({
         component={component}
         data-theme={theme || undefined}
         data-surface={surface || undefined}
-        className={'dyno-box' + (className ? ' ' + className : '')}
+        className={'omni-box' + (className ? ' ' + className : '')}
         sx={{ background: 'var(--Background)', boxSizing: 'border-box', ...sx }}
         style={style}
         {...props}
@@ -83,7 +83,7 @@ export function Box({
   return (
     <MuiBox
       component={component}
-      className={'dyno-box-elevation' + (className ? ' ' + className : '')}
+      className={'omni-box-elevation' + (className ? ' ' + className : '')}
       sx={{ boxShadow: SHADOWS[level], boxSizing: 'border-box', width: sxW, height: sxH, borderRadius: sxR }}
       style={outerStyle}
       {...props}
@@ -91,7 +91,7 @@ export function Box({
       <MuiBox
         data-theme={theme || undefined}
         data-surface={surface || undefined}
-        className="dyno-box"
+        className="omni-box"
         // Fills the wrapper, paints the surface, inherits the wrapper's radius so
         // the surface matches the rounded shadowed box. Carries the caller's
         // layout (flex/gap/padding) so children are actually spaced.

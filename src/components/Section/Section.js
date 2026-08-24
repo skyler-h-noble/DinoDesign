@@ -14,7 +14,7 @@ import React from 'react';
  *            style={{ background: 'var(--Background)', color: 'var(--Text)' }}>
  *
  * Props:
- *   theme    — DynoDesign theme name (e.g. "Primary-Light", "Neutral-Dark").
+ *   theme    — OmniDesign theme name (e.g. "Primary-Light", "Neutral-Dark").
  *              Optional: omit to inherit from the parent theme zone.
  *   surface  — "Surface" (default) | "Surface-Dim" | "Surface-Dimmest" |
  *              "Surface-Bright" | "Surface-Brightest" |
