@@ -14,7 +14,7 @@ import { BodySmall, Caption } from '../Typography';
  * DATA ATTRIBUTES (on Tabs wrapper):
  *   standard  No data-theme, no data-surface. Indicator: var(--Buttons-{Color}-Border).
  *   solid     data-theme="{Color}", data-surface="Surface".
- *   light     data-theme="{Color}-Light", data-surface="Surface".
+ *   light     data-theme="{Color}", data-surface="Surface-Brightest".
  *   dark      data-theme="{Color}", data-surface="Surface-Dimmest".
  *
  * TABS (individual):
@@ -38,9 +38,13 @@ const SOLID_THEME_MAP = {
   default: 'Default', primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
   info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
 };
+// Light is the same THEME as solid — lightness lives on the surface axis now,
+// exactly as dark already does it (dark = the same theme on Surface-Dimmest).
+// The *-Light themes this used to name no longer exist in any design system,
+// so every light-variant TabList was resolving to nothing.
 const LIGHT_THEME_MAP = {
-  default: 'Default', primary: 'Primary-Light', secondary: 'Secondary-Light', tertiary: 'Tertiary-Light', neutral: 'Neutral-Light',
-  info: 'Info-Light', success: 'Success-Light', warning: 'Warning-Light', error: 'Error-Light',
+  default: 'Default', primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
+  info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
 };
 const DARK_THEME_MAP = {
   default: 'Default', primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
@@ -143,6 +147,7 @@ export function TabList({
     : undefined;
   const dataSurface = isStandard ? undefined
     : isDark ? 'Surface-Dimmest'
+    : isLight ? 'Surface-Brightest'
     : 'Surface';
 
   // Scroll state detection
@@ -344,8 +349,11 @@ export function Tab({
   const isSolid = variant === 'solid';
   const isLight = variant === 'light';
   const isDark = variant === 'dark';
+  // No white/black: they were never themes with --Buttons-*-Border tokens, and
+  // the White/Black themes they named are gone. Neutral on a Bright/Dim
+  // surface is the replacement.
   const C = { default: 'Default', primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary',
-    neutral: 'Neutral', white: 'White', black: 'Black',
+    neutral: 'Neutral',
     info: 'Info', success: 'Success', warning: 'Warning', error: 'Error' }[color] || 'Default';
 
   const resolvedValue = tabValue !== undefined ? tabValue : _index;
@@ -364,6 +372,7 @@ export function Tab({
     : undefined;
   const tabDataSurface = isStandard ? undefined
     : isDark ? 'Surface-Dimmest'
+    : isLight ? 'Surface-Brightest'
     : 'Surface';
 
   const tabId = 'tab-' + tabsId + '-' + resolvedValue;

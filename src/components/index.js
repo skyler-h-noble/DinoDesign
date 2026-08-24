@@ -7,8 +7,10 @@
 // ========== DESIGN FOUNDATION ==========
 export { 
   Typography, 
+  CAP_HEIGHT_TRIM,
   Heading, 
   DisplayLarge,
+  DisplayMedium,
   DisplaySmall,
   H1, 
   H2, 
@@ -32,6 +34,8 @@ export {
   Subtitle,
   Subtitle1, 
   Subtitle2,
+  SubtitleSmall,
+  SubtitleMedium,
   SubtitleLarge,
   Legal,
   LegalSemibold,
@@ -39,6 +43,11 @@ export {
   LabelExtraSmall,
   LabelSmall,
   LabelLarge,
+  Eyebrow,
+  EyebrowSmall,
+  EyebrowMedium,
+  EyebrowLarge,
+  // Overline — former name for Eyebrow, kept as an alias.
   Overline,
   OverlineSmall,
   OverlineMedium,
@@ -63,6 +72,22 @@ export { Rail, RailShowcase } from './Rail';
 export { Toolbar, ToolbarShowcase } from './Toolbar';
 export { NumberField, NumberFieldShowcase } from './NumberField';
 export { ToggleButton } from './ToggleButton';
+// The GROUP is a separate component from the standalone ToggleButton: it owns
+// the selection state, so a segmented control comes from here rather than from
+// wiring individual buttons together.
+export {
+  ToggleButtonGroup,
+  DefaultToggleButtonGroup,
+  PrimaryToggleButtonGroup,
+  SecondaryToggleButtonGroup,
+  TertiaryToggleButtonGroup,
+  NeutralToggleButtonGroup,
+  BlackWhiteToggleButtonGroup,
+  InfoToggleButtonGroup,
+  SuccessToggleButtonGroup,
+  WarningToggleButtonGroup,
+  ErrorToggleButtonGroup,
+} from './ToggleButtonGroup/ToggleButtonGroup';
 
 // ========== INPUTS & FORMS ==========
 // Canonical input: full-featured component with variants, validation,

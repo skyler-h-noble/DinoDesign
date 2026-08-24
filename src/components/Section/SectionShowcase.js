@@ -1,13 +1,13 @@
 // src/components/Section/SectionShowcase.js
 import React from 'react';
 import { Section } from './Section';
-import { H2, H3, Body, BodySmall } from '../Typography';
+import { H3, Body, BodySmall } from '../Typography';
 import { Button } from '../Button/Button';
 
 export function SectionShowcase() {
   return (
     <div>
-      <H2 style={{ marginBottom: 12 }}>Section</H2>
+      <H3 style={{ marginBottom: 12 }}>Section</H3>
       <Body color="quiet" style={{ marginBottom: 32, maxWidth: 720 }}>
         <code>{'<Section>'}</code> bundles <code>data-theme</code> +{' '}
         <code>data-surface</code> + background paint into one component. Use

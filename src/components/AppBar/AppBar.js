@@ -18,23 +18,30 @@ import { SHADOW_LEVEL_1 } from '../_shadows';
  * BAR COLORS (sets data-theme):
  *   default        data-theme="App-Bar"
  *   primary        data-theme="Primary"
- *   primary-light  data-theme="Primary-Light"
- *   white          data-theme="White"
- *   black          data-theme="Black"
+ *   primary-light  data-theme="Primary"  data-surface="Surface-Brightest"
+ *   white          data-theme="Neutral"  data-surface="Surface-Brightest"
+ *   black          data-theme="Neutral"  data-surface="Surface-Dimmest"
  *
  * SURFACE (sets data-surface, default "Surface"):
- *   Surface | Surface-Bright | Surface-Dim | Surface-Dimmest
+ *   Surface-Dimmest | Surface-Dim | Surface | Surface-Bright | Surface-Brightest
  *
  * DESKTOP: Login, Menu (expanded only <=3 links), Branding, Search, Right buttons
  * MOBILE: search, small, medium, large
  */
 
+// Each bar colour is a THEME plus, where the colour implies a lightness, a
+// SURFACE. Lightness stopped being a theme: White, Black and the *-Light
+// themes no longer exist in any design system, so `barColor="black"` used to
+// set a data-theme with no matching CSS and the bar rendered unthemed.
+//
+// A `surface` here overrides the component's own surface prop; without one the
+// prop stands.
 const THEME_MAP = {
-  'default':        'App-Bar',
-  'primary':        'Primary',
-  'primary-light':  'Primary-Light',
-  'white':          'White',
-  'black':          'Black',
+  'default':        { theme: 'App-Bar' },
+  'primary':        { theme: 'Primary' },
+  'primary-light':  { theme: 'Primary', surface: 'Surface-Brightest' },
+  'white':          { theme: 'Neutral', surface: 'Surface-Brightest' },
+  'black':          { theme: 'Neutral', surface: 'Surface-Dimmest' },
 };
 
 /* --- Icon Button (uses Button component) --- */
@@ -78,7 +85,9 @@ function DesktopAppBar({
   className = '', sx = {},
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const dataTheme = THEME_MAP[barColor] || THEME_MAP.default;
+  const barTheme = THEME_MAP[barColor] || THEME_MAP.default;
+  const dataTheme = barTheme.theme;
+  const dataSurface = barTheme.surface || surface;
   const effectiveMenu = (menuType === 'expanded' && navLinks.length > 3) ? 'hamburger' : menuType;
 
   const searchField = (
@@ -96,7 +105,7 @@ function DesktopAppBar({
     <Box
       component="header" role="banner"
       data-theme={dataTheme}
-      data-surface={surface}
+      data-surface={dataSurface}
       className={'appbar appbar-desktop appbar-' + barColor + (className ? ' ' + className : '')}
       sx={{
         display: 'flex', alignItems: 'center', height: 64,
@@ -253,7 +262,9 @@ function MobileAppBar({
   className = '', sx = {},
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const dataTheme = THEME_MAP[barColor] || THEME_MAP.default;
+  const barTheme = THEME_MAP[barColor] || THEME_MAP.default;
+  const dataTheme = barTheme.theme;
+  const dataSurface = barTheme.surface || surface;
 
   const containerSx = {
     backgroundColor: 'var(--Background)', color: 'var(--Text)',
@@ -264,7 +275,7 @@ function MobileAppBar({
 
   const commonProps = {
     'data-theme': dataTheme,
-    'data-surface': surface,
+    'data-surface': dataSurface,
   };
 
   const navDrawer = (

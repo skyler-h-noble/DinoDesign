@@ -82,7 +82,7 @@ export function Colors() {
       ],
     },
     {
-      name: 'Buttons - Semantic',
+      name: 'Buttons - State',
       colors: [
         { name: 'Info Button', var: '--Button-Info-Button' },
         { name: 'Success Button', var: '--Button-Success-Button' },

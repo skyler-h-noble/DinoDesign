@@ -22,6 +22,10 @@ export function Loader({
   size = 40,
   message = 'Loading...',
   sx = {},
+  // Names the progressbar, not the Stack wrapper. Left in ...props it landed
+  // on the wrapper and role="progressbar" had no accessible name.
+  'aria-label': ariaLabel = 'Loading',
+  'aria-labelledby': ariaLabelledby,
   ...props
 }) {
   return (
@@ -37,6 +41,8 @@ export function Loader({
     >
       <CircularProgress
         size={size}
+        aria-label={ariaLabelledby ? undefined : ariaLabel}
+        aria-labelledby={ariaLabelledby}
         sx={{
           color: 'var(--Primary-Color-11)',
         }}

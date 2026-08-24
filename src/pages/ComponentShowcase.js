@@ -15,6 +15,7 @@ import { CheckboxShowcase } from '../components/Checkbox/CheckboxShowcase';
 import { RadioShowcase } from '../components/Radio/RadioShowcase';
 import { SliderShowcase } from '../components/Slider/SliderShowcase';
 import { SwitchShowcase } from '../components/Switch/SwitchShowcase';
+import { ToggleButtonGroupShowcase } from '../components/ToggleButtonGroup/ToggleButtonGroupShowcase';
 import { BadgeShowcase } from '../components/Badge/BadgeShowcase';
 import { ChipShowcase } from '../components/Chip/ChipShowcase';
 import { DividerShowcase } from '../components/Divider/DividerShowcase';
@@ -115,10 +116,20 @@ import { useThemeMode } from '../theme/useThemeMode';
 // to construct the manifest URL here; the Provider follows the rest.
 const FIREBASE_STORAGE_BUCKET = 'dino-design.firebasestorage.app';
 const FIREBASE_STORAGE_ROOT   = 'design-systems';
-function themeManifestUrl(userId) {
-  const path = `${FIREBASE_STORAGE_ROOT}/${userId}/theme.json`;
+function themeFileUrl(userId, filename) {
+  const path = `${FIREBASE_STORAGE_ROOT}/${userId}/${filename}`;
   return `https://firebasestorage.googleapis.com/v0/b/${FIREBASE_STORAGE_BUCKET}/o/${encodeURIComponent(path)}?alt=media`;
 }
+
+const themeManifestUrl = (userId) => themeFileUrl(userId, 'theme.json');
+
+// theme.json does not list typography-tokens.css yet, but the studio uploads
+// it alongside the rest. Point at it directly so the showcase renders the
+// design system's OWN type ramp — without it the lib's bundled copy wins on
+// [data-platform] and silently replaces the brand's sizes and weights.
+// Once the manifest gains a "typography" key the Provider picks it up on its
+// own and this prop can go.
+const themeTypographyUrl = (userId) => themeFileUrl(userId, 'typography-tokens.css');
 
 const DRAWER_WIDTH = 320;
 
@@ -138,6 +149,7 @@ const NAV_ITEMS = [
       { id: 'buttons', label: 'Button' },
       { id: 'fab', label: 'FAB' },
       { id: 'buttongroup', label: 'Button Group' },
+      { id: 'togglebuttongroup', label: 'Toggle Button Group' },
       { id: 'input', label: 'Input' },
       { id: 'select', label: 'Select' },
       { id: 'autocomplete', label: 'Autocomplete' },
@@ -257,6 +269,17 @@ function ShowcaseInner() {
   const params = new URLSearchParams(window.location.search);
   const userParam = params.get('user');
   const themeURL = userParam ? themeManifestUrl(userParam) : undefined;
+  const typographyCSS = userParam ? themeTypographyUrl(userParam) : undefined;
+
+  // No ?user= — render whatever is sitting in public/styles, so you can drop a
+  // studio export in that folder and see it without uploading anything.
+  //
+  // index.html already <link>s foundation / base / core / typography-tokens /
+  // styles, but NOT the mode sheets: those swap on the dark-mode toggle, so
+  // they have to go through the Provider's mode slot. Without this the local
+  // folder rendered with no palette at all — every colour token unresolved.
+  const localLightModeCSS = userParam ? undefined : '/styles/Light-Mode.css';
+  const localDarkModeCSS  = userParam ? undefined : '/styles/Dark-Mode.css';
 
   const handleTreeSelect = useCallback((event, itemId) => {
     if (itemId && !NAV_ITEMS.some((cat) => cat.id === itemId)) {
@@ -301,6 +324,9 @@ function ShowcaseInner() {
   return (
     <DynoDesignProvider
       themeURL={themeURL}
+      typographyCSS={typographyCSS}
+      lightModeCSS={localLightModeCSS}
+      darkModeCSS={localDarkModeCSS}
       defaultTheme="Default"
       defaultSurface="Surface"
       defaultStyle="Modern"
@@ -371,6 +397,7 @@ function ShowcaseInner() {
             {activeSection === 'input' && <InputShowcase />}
             {activeSection === 'slider' && <SliderShowcase />}
             {activeSection === 'switch' && <SwitchShowcase />}
+            {activeSection === 'togglebuttongroup' && <ToggleButtonGroupShowcase />}
             {activeSection === 'rating' && <RatingShowcase />}
             {activeSection === 'numberfield' && <NumberFieldShowcase />}
             {activeSection === 'searchfield' && <SearchFieldShowcase />}

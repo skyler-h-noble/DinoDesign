@@ -9,7 +9,7 @@ import { Switch } from '../Switch/Switch';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H5, Body, BodySmall, Caption, Label, OverlineSmall,
+  H3, H5, Body, BodySmall, Caption, Label, EyebrowSmall,
 } from '../Typography';
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
@@ -17,12 +17,12 @@ const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
 const DEFAULT_COLOR_GROUPS = [
   { label: 'Default', colors: ['default'] },
   { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
-  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+  { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
 ];
 
 const THEMED_COLOR_GROUPS = [
   { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
-  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+  { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
 ];
 
 /* ── Helpers ── */
@@ -115,7 +115,7 @@ export function TabsShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H2>Tabs</H2>
+      <H3>Tabs</H3>
 
       <Grid container sx={{ mt: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
@@ -187,7 +187,7 @@ export function TabsShowcase() {
 
                   {/* Style */}
                   <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</EyebrowSmall>
                     <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
                       {['standard', 'solid', 'light', 'dark'].map((v) => (
                         <ControlButton key={v} label={cap(v === 'standard' ? 'default' : v)} selected={variant === v}
@@ -198,7 +198,7 @@ export function TabsShowcase() {
 
                   {/* Color */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</EyebrowSmall>
                     <Stack spacing={1.5}>
                       {colorGroups.map((group) => (
                         <Box key={group.label}>
@@ -215,7 +215,7 @@ export function TabsShowcase() {
 
                   {/* Size */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       {['small', 'medium', 'large'].map((s) => (
                         <ControlButton key={s} label={cap(s)} selected={size === s} onClick={() => setSize(s)} />
@@ -225,7 +225,7 @@ export function TabsShowcase() {
 
                   {/* Orientation */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ORIENTATION</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ORIENTATION</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       {['horizontal', 'vertical'].map((o) => (
                         <ControlButton key={o} label={cap(o)} selected={orientation === o} onClick={() => setOrientation(o)} />
@@ -235,7 +235,7 @@ export function TabsShowcase() {
 
                   {/* Rounded */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SHAPE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SHAPE</EyebrowSmall>
                     <Switch
                       label="Rounded corners"
                       checked={rounded}

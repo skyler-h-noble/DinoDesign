@@ -18,7 +18,7 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H5, BodySmall, Caption, Label, OverlineSmall,
+  H3, H5, BodySmall, Caption, Label, EyebrowSmall,
 } from '../Typography';
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
@@ -26,7 +26,7 @@ const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
 const COLOR_GROUPS = [
   { label: 'Default', colors: ['default'] },
   { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
-  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+  { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
 ];
 
 // ─── Sample data with icons ───────────────────────────────────────────────────
@@ -195,7 +195,7 @@ function JsonEditor({ value, onChange }) {
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-        <OverlineSmall style={{ color: 'var(--Text-Quiet)' }}>TREE DATA (JSON)</OverlineSmall>
+        <EyebrowSmall style={{ color: 'var(--Text-Quiet)' }}>TREE DATA (JSON)</EyebrowSmall>
         <Button variant="ghost" size="small" onClick={handleReset}>Reset</Button>
       </Box>
       <Box
@@ -282,7 +282,7 @@ export function TreeViewShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H2>Tree View</H2>
+      <H3>Tree View</H3>
 
       <Grid container sx={{ mt: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
@@ -343,7 +343,7 @@ export function TreeViewShowcase() {
 
                   {/* Style */}
                   <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       <ControlButton label="Solid" selected={variant === 'solid'} onClick={() => setVariant('solid')} />
                       <ControlButton label="Light" selected={variant === 'light'} onClick={() => setVariant('light')} />
@@ -352,7 +352,7 @@ export function TreeViewShowcase() {
 
                   {/* Color */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</EyebrowSmall>
                     <Stack spacing={1.5}>
                       {COLOR_GROUPS.map((group) => (
                         <Box key={group.label}>
@@ -369,7 +369,7 @@ export function TreeViewShowcase() {
 
                   {/* Density */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>DENSITY</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>DENSITY</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       <ControlButton label="Compact" selected={density === 'compact'} onClick={() => setDensity('compact')} />
                       <ControlButton label="Default" selected={density === 'default'} onClick={() => setDensity('default')} />
@@ -378,7 +378,7 @@ export function TreeViewShowcase() {
 
                   {/* Animation */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ANIMATION</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ANIMATION</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       {['none', 'slide', 'spring'].map((a) => (
                         <ControlButton key={a} label={cap(a)} selected={animation === a} onClick={() => setAnimation(a)} />
@@ -388,7 +388,7 @@ export function TreeViewShowcase() {
 
                   {/* Selection mode */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SELECTION MODE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SELECTION MODE</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       <ControlButton label="Single" selected={selectionMode === 'single'} onClick={() => setSelectionMode('single')} />
                       <ControlButton label="Multi"  selected={selectionMode === 'multi'}  onClick={() => setSelectionMode('multi')} />
@@ -397,7 +397,7 @@ export function TreeViewShowcase() {
 
                   {/* Toggles */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>OPTIONS</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>OPTIONS</EyebrowSmall>
 
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <Box>

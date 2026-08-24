@@ -16,7 +16,7 @@ import { SHADOW_LEVEL_3, SHADOW_LEVEL_4, bevelShadow } from '../_shadows';
  * SIZES (Figma-aligned, matched to the Icon scale):
  *   small   32px  (Icon size="small"  → 16px)
  *   medium  48px  (Icon size="medium" → 24px) — default
- *   large   56px  (Icon size="large"  → 36px)
+ *   large   56px  (Icon size="large"  → 32px)
  *
  * EXTENDED: pill shape with icon + label text
  * ANIMATION: pulse ring effect when enabled

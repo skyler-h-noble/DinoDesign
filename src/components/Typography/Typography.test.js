@@ -4,7 +4,8 @@ import { render, screen } from '@testing-library/react';
 import {
   Typography, H1, H2, H3, H4, H5, H6,
   Body, BodySmall, BodyLarge, BodySemibold, BodyBold,
-  Label, Caption, Overline, OverlineSmall,
+  Label, Caption, Eyebrow, EyebrowSmall, DisplayMedium,
+  Overline, OverlineSmall,
 } from './Typography';
 import { axe } from 'jest-axe';
 
@@ -78,8 +79,8 @@ describe('Semantic elements', () => {
     expect(screen.getByText('Click').tagName).toBe('SPAN');
   });
 
-  test('overline renders as span', () => {
-    render(<Typography textStyle="overline">SECTION</Typography>);
+  test('eyebrow renders as span', () => {
+    render(<Typography textStyle="eyebrow">SECTION</Typography>);
     expect(screen.getByText('SECTION').tagName).toBe('SPAN');
   });
 });
@@ -101,8 +102,8 @@ describe('Component override', () => {
 describe('Style classes', () => {
   const styles = [
     'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-    'body', 'body-small', 'body-large', 'body-semibold', 'body-bold',
-    'button', 'label', 'caption', 'overline',
+    'body', 'body-small', 'body-large', 'body-semibold',
+    'button', 'label', 'caption', 'eyebrow', 'display-medium',
   ];
 
   styles.forEach((s) => {
@@ -144,9 +145,11 @@ describe('Color', () => {
     expect(screen.getByText('Note')).toHaveClass('typography-color-quiet');
   });
 
-  test('overline defaults to quiet color', () => {
-    render(<Typography textStyle="overline">SECTION</Typography>);
-    expect(screen.getByText('SECTION')).toHaveClass('typography-color-quiet');
+  // Eyebrow has its own colour role — a rotation off the surface's palette,
+  // not a muted Text. Rendering it as --Quiet threw that rotation away.
+  test('eyebrow defaults to the eyebrow color', () => {
+    render(<Typography textStyle="eyebrow">SECTION</Typography>);
+    expect(screen.getByText('SECTION')).toHaveClass('typography-color-eyebrow');
   });
 });
 
@@ -208,11 +211,39 @@ describe('Convenience exports', () => {
   test('BodySmall', () => { render(<BodySmall>T</BodySmall>); expect(screen.getByText('T')).toHaveClass('typography-body-small'); });
   test('BodyLarge', () => { render(<BodyLarge>T</BodyLarge>); expect(screen.getByText('T')).toHaveClass('typography-body-large'); });
   test('BodySemibold', () => { render(<BodySemibold>T</BodySemibold>); expect(screen.getByText('T')).toHaveClass('typography-body-semibold'); });
-  test('BodyBold', () => { render(<BodyBold>T</BodyBold>); expect(screen.getByText('T')).toHaveClass('typography-body-bold'); });
+  // Body has Standard and Semibold only — the scale publishes no bold body
+  // weight — so BodyBold renders the semibold style rather than nothing.
+  test('BodyBold renders the semibold style', () => { render(<BodyBold>T</BodyBold>); expect(screen.getByText('T')).toHaveClass('typography-body-semibold'); });
   test('Label', () => { render(<Label>T</Label>); expect(screen.getByText('T')).toHaveClass('typography-label'); });
   test('Caption', () => { render(<Caption>T</Caption>); expect(screen.getByText('T')).toHaveClass('typography-caption'); });
-  test('Overline', () => { render(<Overline>T</Overline>); expect(screen.getByText('T')).toHaveClass('typography-overline'); });
-  test('OverlineSmall', () => { render(<OverlineSmall>T</OverlineSmall>); expect(screen.getByText('T')).toHaveClass('typography-overline'); });
+  test('Eyebrow', () => { render(<Eyebrow>T</Eyebrow>); expect(screen.getByText('T')).toHaveClass('typography-eyebrow'); });
+  test('EyebrowSmall', () => { render(<EyebrowSmall>T</EyebrowSmall>); expect(screen.getByText('T')).toHaveClass('typography-eyebrow-small'); });
+  test('DisplayMedium', () => { render(<DisplayMedium>T</DisplayMedium>); expect(screen.getByText('T')).toHaveClass('typography-display-medium'); });
+});
+
+// ─── Overline → Eyebrow rename ────────────────────────────────────────────────
+describe('Overline aliases', () => {
+  test('the Overline component renders the Eyebrow style', () => {
+    render(<Overline>T</Overline>);
+    expect(screen.getByText('T')).toHaveClass('typography-eyebrow');
+  });
+
+  test('OverlineSmall renders the small Eyebrow style', () => {
+    render(<OverlineSmall>T</OverlineSmall>);
+    expect(screen.getByText('T')).toHaveClass('typography-eyebrow-small');
+  });
+
+  test('textStyle="overline" still resolves', () => {
+    render(<Typography textStyle="overline">T</Typography>);
+    expect(screen.getByText('T')).toHaveClass('typography-eyebrow');
+  });
+
+  // A design system's typography-tokens.css targets .typography-overline*, so
+  // the legacy class rides along with the canonical one.
+  test('eyebrow styles also carry the legacy overline class', () => {
+    render(<Eyebrow>T</Eyebrow>);
+    expect(screen.getByText('T')).toHaveClass('typography-overline');
+  });
 });
 
 // ─── Accessibility — jest-axe ─────────────────────────────────────────────────

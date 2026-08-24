@@ -5,7 +5,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import { Typography, HEADER_COLORS, TEXT_COLORS } from './Typography';
 import {
-  H2, H5, BodySmall, Caption, Label, OverlineSmall
+  H3, H5, BodySmall, Caption, Label, EyebrowSmall
 } from './Typography';
 import { Button } from '../Button/Button';
 import { Checkbox } from '../Checkbox/Checkbox';
@@ -20,20 +20,19 @@ import { BackgroundPicker } from '../BackgroundPicker';
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 
 const STYLE_LABELS = {
-  'display-large': 'Display Large',
-  'display-small': 'Display Small',
+  'display-large':  'Display Large',
+  'display-medium': 'Display Medium',
+  'display-small':  'Display Small',
   h1: 'H1', h2: 'H2', h3: 'H3', h4: 'H4', h5: 'H5', h6: 'H6',
-  'subtitle':         'Subtitle',
+  'subtitle-small':   'Subtitle Small',
+  'subtitle':         'Subtitle Medium',
   'subtitle-large':   'Subtitle Large',
   'body-small':          'Body Small',
   'body-small-semibold': 'Body Small Semibold',
-  'body-small-bold':     'Body Small Bold',
   'body':                'Body Medium',
   'body-semibold':       'Body Medium Semibold',
-  'body-bold':           'Body Medium Bold',
   'body-large':          'Body Large',
   'body-large-semibold': 'Body Large Semibold',
-  'body-large-bold':     'Body Large Bold',
   'label':        'Label',
   'label-small':  'Label Small',
   'label-large':  'Label Large',
@@ -41,9 +40,9 @@ const STYLE_LABELS = {
   'caption-bold': 'Caption Bold',
   'legal':        'Legal',
   'legal-semibold': 'Legal Semibold',
-  'overline':       'Overline Medium',
-  'overline-small': 'Overline Small',
-  'overline-large': 'Overline Large',
+  'eyebrow':        'Eyebrow Medium',
+  'eyebrow-small':  'Eyebrow Small',
+  'eyebrow-large':  'Eyebrow Large',
   'button':              'Button Standard',
   'button-small':        'Button Small',
   'button-extra-small':  'Button Extra Small',
@@ -53,34 +52,34 @@ const STYLE_LABELS = {
 };
 
 const STYLE_GROUPS = {
-  Display:  ['display-large', 'display-small'],
+  Display:  ['display-large', 'display-medium', 'display-small'],
   Headings: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
-  Subtitle: ['subtitle', 'subtitle-large'],
+  Subtitle: ['subtitle-small', 'subtitle', 'subtitle-large'],
   Body: [
-    'body-small', 'body-small-semibold', 'body-small-bold',
-    'body',       'body-semibold',       'body-bold',
-    'body-large', 'body-large-semibold', 'body-large-bold',
+    'body-small', 'body-small-semibold',
+    'body',       'body-semibold',
+    'body-large', 'body-large-semibold',
   ],
   Label:    ['label', 'label-small', 'label-large'],
   Caption:  ['caption', 'caption-bold'],
   Legal:    ['legal', 'legal-semibold'],
-  Overline: ['overline-small', 'overline', 'overline-large'],
+  Eyebrow:  ['eyebrow-small', 'eyebrow', 'eyebrow-large'],
   Button:   ['button-extra-small', 'button-small', 'button'],
   Number:   ['number-large', 'number-medium', 'number-small'],
 };
 
-const HEADING_STYLES = new Set(['display-large', 'display-small', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'subtitle', 'subtitle-large']);
+const HEADING_STYLES = new Set(['display-large', 'display-medium', 'display-small', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'subtitle-small', 'subtitle', 'subtitle-large']);
 
 // Color groups for the Color section (mirrors Button)
 const HEADER_COLOR_GROUPS = [
   { label: 'Default',  colors: ['default'] },
   { label: 'Theme',    colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
-  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+  { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
 ];
 const TEXT_COLOR_GROUPS = [
   { label: 'Default',  colors: ['default', 'quiet'] },
   { label: 'Theme',    colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
-  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+  { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
 ];
 
 // Build grouped Select options from STYLE_GROUPS + STYLE_LABELS
@@ -151,18 +150,17 @@ const STYLE_CONFIG = {
   h5: { defaultColor: 'header', defaultWidth: 'fill' },
   h6: { defaultColor: 'header', defaultWidth: 'fill' },
   'display-large':       { defaultColor: 'header',   defaultWidth: 'fill' },
+  'display-medium':      { defaultColor: 'header',   defaultWidth: 'fill' },
   'display-small':       { defaultColor: 'header',   defaultWidth: 'fill' },
+  'subtitle-small':      { defaultColor: 'header',   defaultWidth: 'fill' },
   'subtitle':            { defaultColor: 'header',   defaultWidth: 'fill' },
   'subtitle-large':      { defaultColor: 'header',   defaultWidth: 'fill' },
   'body':                { defaultColor: 'standard', defaultWidth: 'fill' },
   'body-semibold':       { defaultColor: 'standard', defaultWidth: 'fill' },
-  'body-bold':           { defaultColor: 'standard', defaultWidth: 'fill' },
   'body-small':          { defaultColor: 'standard', defaultWidth: 'fill' },
   'body-small-semibold': { defaultColor: 'standard', defaultWidth: 'fill' },
-  'body-small-bold':     { defaultColor: 'standard', defaultWidth: 'fill' },
   'body-large':          { defaultColor: 'standard', defaultWidth: 'fill' },
   'body-large-semibold': { defaultColor: 'standard', defaultWidth: 'fill' },
-  'body-large-bold':     { defaultColor: 'standard', defaultWidth: 'fill' },
   'label':               { defaultColor: 'standard', defaultWidth: 'hug' },
   'label-small':         { defaultColor: 'standard', defaultWidth: 'hug' },
   'label-large':         { defaultColor: 'standard', defaultWidth: 'hug' },
@@ -170,9 +168,9 @@ const STYLE_CONFIG = {
   'caption-bold':        { defaultColor: 'quiet',    defaultWidth: 'hug' },
   'legal':               { defaultColor: 'quiet',    defaultWidth: 'hug' },
   'legal-semibold':      { defaultColor: 'quiet',    defaultWidth: 'hug' },
-  'overline-small':      { defaultColor: 'quiet',    defaultWidth: 'hug' },
-  'overline':            { defaultColor: 'quiet',    defaultWidth: 'hug' },
-  'overline-large':      { defaultColor: 'quiet',    defaultWidth: 'hug' },
+  'eyebrow-small':       { defaultColor: 'eyebrow',  defaultWidth: 'hug' },
+  'eyebrow':             { defaultColor: 'eyebrow',  defaultWidth: 'hug' },
+  'eyebrow-large':       { defaultColor: 'eyebrow',  defaultWidth: 'hug' },
   'button-extra-small':  { defaultColor: 'standard', defaultWidth: 'hug' },
   'button-small':        { defaultColor: 'standard', defaultWidth: 'hug' },
   'button':              { defaultColor: 'standard', defaultWidth: 'hug' },
@@ -311,7 +309,7 @@ export function TypographyShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H2>Typography</H2>
+      <H3>Typography</H3>
       <Box sx={{ mt: 1 }}>
         <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
       </Box>
@@ -368,7 +366,7 @@ export function TypographyShowcase() {
 
                   {/* Style — single grouped dropdown */}
                   <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</EyebrowSmall>
                     <Select
                       options={STYLE_DROPDOWN_OPTIONS}
                       value={textStyle}
@@ -381,9 +379,9 @@ export function TypographyShowcase() {
 
                   {/* Color */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                       {isHeading ? 'HEADER COLOR' : 'TEXT COLOR'}
-                    </OverlineSmall>
+                    </EyebrowSmall>
                     <Stack spacing={1.5}>
                       {colorGroups.map((group) => (
                         <Box key={group.label}>
@@ -420,7 +418,7 @@ export function TypographyShowcase() {
 
                   {/* Width */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>WIDTH</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>WIDTH</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       {['default', 'hug', 'fill'].map((w) => (
                         <ControlButton key={w} label={cap(w)} selected={width === (w === 'default' ? '' : w)}
@@ -431,7 +429,7 @@ export function TypographyShowcase() {
 
                   {/* Sample text */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SAMPLE TEXT</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SAMPLE TEXT</EyebrowSmall>
                     <Input
                       variant="primary-outline"
                       size="small"
@@ -489,7 +487,7 @@ export function TypographyShowcase() {
                         <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
                           <BodySmall>Semantic elements:</BodySmall>
                           <Caption style={{ color: 'var(--Text-Quiet)' }}>
-                            H1–H6 → &lt;h1&gt;–&lt;h6&gt; · Body → &lt;p&gt; · Label → &lt;label&gt; · Button, Caption, Overline → &lt;span&gt;
+                            H1–H6 → &lt;h1&gt;–&lt;h6&gt; · Body → &lt;p&gt; · Label → &lt;label&gt; · Button, Caption, Eyebrow → &lt;span&gt;
                           </Caption>
                         </Box>
                         <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
@@ -526,9 +524,9 @@ export function TypographyShowcase() {
                       <Stack spacing={2}>
                         {Object.entries(STYLE_GROUPS).map(([group, styles]) => (
                           <Box key={group}>
-                            <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+                            <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                               {group.toUpperCase()}
-                            </OverlineSmall>
+                            </EyebrowSmall>
                             {styles.map((s) => (
                               <Box key={s} sx={{ py: 1, borderBottom: '1px solid var(--Border)', display: 'flex', alignItems: 'baseline', gap: 2 }}>
                                 <Box sx={{ width: 100, flexShrink: 0 }}>

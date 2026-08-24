@@ -9,19 +9,21 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H5, BodySmall, Caption, Label, OverlineSmall
+  H3, H5, BodySmall, Caption, Label, EyebrowSmall
 } from '../Typography';
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 
 const BAR_COLORS = ['default', 'primary', 'primary-light', 'white', 'black'];
 const SURFACES = ['Surface', 'Surface-Bright', 'Surface-Dim', 'Surface-Dimmest'];
+// Mirrors AppBar's own map — theme plus a surface where the colour implies a
+// lightness. White / Black / *-Light are no longer themes.
 const THEME_MAP = {
-  'default':        'App-Bar',
-  'primary':        'Primary',
-  'primary-light':  'Primary-Light',
-  'white':          'White',
-  'black':          'Black',
+  'default':        { theme: 'App-Bar' },
+  'primary':        { theme: 'Primary' },
+  'primary-light':  { theme: 'Primary', surface: 'Surface-Brightest' },
+  'white':          { theme: 'Neutral', surface: 'Surface-Brightest' },
+  'black':          { theme: 'Neutral', surface: 'Surface-Dimmest' },
 };
 
 function getLuminance(hex) {
@@ -93,9 +95,9 @@ function ControlButton({ label, selected, onClick }) {
 }
 
 function BarColorSwatch({ color, selected, onClick }) {
-  const dataTheme = THEME_MAP[color] || 'App-Bar';
+  const bar = THEME_MAP[color] || THEME_MAP.default;
   return (
-    <Box component="button" data-theme={dataTheme} data-surface="Surface"
+    <Box component="button" data-theme={bar.theme} data-surface={bar.surface || 'Surface'}
       onClick={() => onClick(color)} aria-label={'Select ' + color} aria-pressed={selected} title={color}
       sx={{
         width: 'var(--Button-Height, 36px)', height: 'var(--Button-Height, 36px)', borderRadius: '4px',
@@ -125,7 +127,11 @@ export function AppBarShowcase() {
   const [contrastData, setContrastData]     = useState({});
 
   const isDesktop = mode === 'desktop';
-  const dataTheme = THEME_MAP[barColor] || 'App-Bar';
+  const bar = THEME_MAP[barColor] || THEME_MAP.default;
+  const dataTheme = bar.theme;
+  // A bar colour that implies a lightness overrides the surface picker, so the
+  // markup shown to the user has to report the surface that actually applies.
+  const effectiveSurface = bar.surface || surface;
 
   const generateCode = () => {
     if (isDesktop) {
@@ -160,7 +166,7 @@ export function AppBarShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H2>App Bar</H2>
+      <H3>App Bar</H3>
 
       <Grid container sx={{ mt: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
@@ -231,7 +237,7 @@ export function AppBarShowcase() {
 
                   {/* Mode */}
                   <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>MODE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>MODE</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       {['desktop', 'mobile'].map((m) => (
                         <ControlButton key={m} label={cap(m)} selected={mode === m} onClick={() => setMode(m)} />
@@ -241,7 +247,7 @@ export function AppBarShowcase() {
 
                   {/* Bar Color */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>BAR COLOR</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>BAR COLOR</EyebrowSmall>
                     <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
                       {BAR_COLORS.map((c) => (
                         <BarColorSwatch key={c} color={c} selected={barColor === c} onClick={setBarColor} />
@@ -254,7 +260,7 @@ export function AppBarShowcase() {
 
                   {/* Surface */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SURFACE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SURFACE</EyebrowSmall>
                     <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
                       {SURFACES.map((s) => (
                         <ControlButton key={s} label={s.replace('Surface-', '').replace('Surface', 'Default')} selected={surface === s} onClick={() => setSurface(s)} />
@@ -270,7 +276,7 @@ export function AppBarShowcase() {
                     <>
                       {/* Menu Type */}
                       <Box sx={{ mt: 3 }}>
-                        <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>MENU TYPE</OverlineSmall>
+                        <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>MENU TYPE</EyebrowSmall>
                         <Stack direction="row" spacing={1}>
                           {['hamburger', 'expanded'].map((m) => (
                             <ControlButton key={m} label={cap(m)} selected={menuType === m} onClick={() => setMenuType(m)} />
@@ -283,7 +289,7 @@ export function AppBarShowcase() {
 
                       {/* Brand Type */}
                       <Box sx={{ mt: 3 }}>
-                        <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>BRAND</OverlineSmall>
+                        <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>BRAND</EyebrowSmall>
                         <Stack direction="row" spacing={1}>
                           {['name', 'logo'].map((b) => (
                             <ControlButton key={b} label={cap(b)} selected={brandType === b} onClick={() => setBrandType(b)} />
@@ -293,7 +299,7 @@ export function AppBarShowcase() {
 
                       {/* Search Position */}
                       <Box sx={{ mt: 3 }}>
-                        <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SEARCH POSITION</OverlineSmall>
+                        <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SEARCH POSITION</EyebrowSmall>
                         <Stack direction="row" spacing={1}>
                           {['left', 'right'].map((p) => (
                             <ControlButton key={p} label={cap(p)} selected={searchPosition === p} onClick={() => setSearchPosition(p)} />
@@ -303,7 +309,7 @@ export function AppBarShowcase() {
 
                       {/* Login Type */}
                       <Box sx={{ mt: 3 }}>
-                        <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>LOGIN TYPE</OverlineSmall>
+                        <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>LOGIN TYPE</EyebrowSmall>
                         <Stack direction="row" spacing={1}>
                           {['login', 'avatar'].map((l) => (
                             <ControlButton key={l} label={cap(l)} selected={loginType === l} onClick={() => setLoginType(l)} />
@@ -316,7 +322,7 @@ export function AppBarShowcase() {
                   {/* Mobile-only controls */}
                   {!isDesktop && (
                     <Box sx={{ mt: 3 }}>
-                      <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>MOBILE VARIANT</OverlineSmall>
+                      <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>MOBILE VARIANT</EyebrowSmall>
                       <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
                         {['search', 'small', 'medium', 'large'].map((v) => (
                           <ControlButton key={v} label={cap(v)} selected={mobileVariant === v} onClick={() => setMobileVariant(v)} />
@@ -332,7 +338,7 @@ export function AppBarShowcase() {
               <TabPanel value={1}>
                 <Box sx={{ p: 3 }}>
                   <BodySmall color="quiet" style={{ marginBottom: 24 }}>
-                    {mode} / {barColor} / {surface}{!isDesktop ? ' / ' + mobileVariant : ''} — data-theme="{dataTheme}" data-surface="{surface}"
+                    {mode} / {barColor} / {surface}{!isDesktop ? ' / ' + mobileVariant : ''} — data-theme="{dataTheme}" data-surface="{effectiveSurface}"
                   </BodySmall>
 
                   <Stack spacing={3}>
@@ -347,7 +353,7 @@ export function AppBarShowcase() {
                         label="Resting: var(--Text) vs. var(--Background)"
                         ratio={getContrast(contrastData.text, contrastData.background)}
                         threshold={4.5}
-                        note={'data-theme="' + dataTheme + '" data-surface="' + surface + '"'}
+                        note={'data-theme="' + dataTheme + '" data-surface="' + effectiveSurface + '"'}
                       />
                       <A11yRow
                         label="On hover: var(--Text) vs. var(--Hover)"
@@ -432,7 +438,7 @@ export function AppBarShowcase() {
                         <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
                           <BodySmall>Theme + Surface:</BodySmall>
                           <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>
-                            {'data-theme="' + dataTheme + '" data-surface="' + surface + '"'}
+                            {'data-theme="' + dataTheme + '" data-surface="' + effectiveSurface + '"'}
                           </Caption>
                         </Box>
                         <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>

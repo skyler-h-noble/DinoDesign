@@ -5,7 +5,7 @@ import { Settings as SettingsIcon, Close as CloseIcon } from '@mui/icons-materia
 import { useThemeMode } from '../theme/useThemeMode';
 import { Button } from './Button/Button';
 import { Drawer } from './Drawer/Drawer';
-import { H5, BodySmall, Caption, OverlineSmall } from './Typography';
+import { H5, BodySmall, Caption, EyebrowSmall } from './Typography';
 
 const PLATFORMS = [
   { value: 'desktop',    label: 'Desktop',    note: '32px touch targets (WCAG)' },
@@ -94,9 +94,9 @@ export function SettingsPanel() {
 
               {/* Mode */}
               <Box>
-                <OverlineSmall style={{ color: 'var(--Text)', opacity: 0.85, display: 'block', marginBottom: 12, fontWeight: 600 }}>
+                <EyebrowSmall style={{ color: 'var(--Text)', opacity: 0.85, display: 'block', marginBottom: 12, fontWeight: 600 }}>
                   MODE
-                </OverlineSmall>
+                </EyebrowSmall>
                 <Stack direction="row" spacing={1}>
                   <Button
                     variant={mode === 'light' ? 'primary' : 'primary-outline'}
@@ -117,9 +117,9 @@ export function SettingsPanel() {
 
               {/* Platform */}
               <Box>
-                <OverlineSmall style={{ color: 'var(--Text)', opacity: 0.85, display: 'block', marginBottom: 12, fontWeight: 600 }}>
+                <EyebrowSmall style={{ color: 'var(--Text)', opacity: 0.85, display: 'block', marginBottom: 12, fontWeight: 600 }}>
                   PLATFORM
-                </OverlineSmall>
+                </EyebrowSmall>
                 <Stack spacing={1}>
                   {PLATFORMS.map(({ value, label, note }) => {
                     const isSel = platform === value;

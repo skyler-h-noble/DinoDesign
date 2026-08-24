@@ -66,7 +66,7 @@ export const ButtonColors = {
   parameters: {
     docs: {
       description: {
-        story: 'Button colors for different semantic states including Primary, Secondary, and Semantic variants (Info, Success, Warning, Error).',
+        story: 'Button colors for different semantic states including Primary, Secondary, and State variants (Info, Success, Warning, Error).',
       },
     },
   },

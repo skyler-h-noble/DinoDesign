@@ -9,7 +9,7 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H5, Body, BodySmall, Caption, OverlineSmall,
+  H3, H5, Body, BodySmall, Caption, EyebrowSmall,
 } from '../Typography';
 
 const SURFACES = [
@@ -69,7 +69,7 @@ export function BoxShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H2>Box</H2>
+      <H3>Box</H3>
       <Body color="quiet" style={{ marginTop: 8, marginBottom: 24, maxWidth: 720 }}>
         Bare layout primitive — a slot that participates in the design-system
         cascade (<code>data-theme</code> / <code>data-surface</code>) without
@@ -139,9 +139,9 @@ export function BoxShowcase() {
 
                   {/* Theme override */}
                   <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                       THEME (optional)
-                    </OverlineSmall>
+                    </EyebrowSmall>
                     <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
                       <ControlButton label="None" selected={!theme} onClick={() => setTheme('')} />
                       {THEMES.map((t) => (
@@ -152,9 +152,9 @@ export function BoxShowcase() {
 
                   {/* Surface override */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                       SURFACE (optional)
-                    </OverlineSmall>
+                    </EyebrowSmall>
                     <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
                       <ControlButton label="None" selected={!surface} onClick={() => setSurface('')} />
                       {SURFACES.map((s) => (

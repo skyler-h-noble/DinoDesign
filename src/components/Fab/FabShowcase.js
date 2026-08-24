@@ -12,7 +12,7 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H5, BodySmall, Caption, Label, OverlineSmall
+  H3, H5, BodySmall, Caption, Label, EyebrowSmall
 } from '../Typography';
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
@@ -20,7 +20,7 @@ const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 const COLOR_GROUPS = [
   { label: 'Default', colors: ['default'] },
   { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
-  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+  { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
 ];
 
 const COLOR_MAP = {
@@ -130,7 +130,7 @@ export function FabShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H2>Floating Action Button</H2>
+      <H3>Floating Action Button</H3>
 
       <Grid container sx={{ mt: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
@@ -187,7 +187,7 @@ export function FabShowcase() {
 
                   {/* Color */}
                   <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</EyebrowSmall>
                     <Stack spacing={1.5}>
                       {COLOR_GROUPS.map((group) => (
                         <Box key={group.label}>
@@ -204,7 +204,7 @@ export function FabShowcase() {
 
                   {/* Size */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       {['small', 'medium', 'large'].map((s) => (
                         <ControlButton key={s} label={cap(s)} selected={size === s} onClick={() => setSize(s)} />
@@ -222,7 +222,7 @@ export function FabShowcase() {
 
                   {/* Options */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>OPTIONS</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>OPTIONS</EyebrowSmall>
 
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <Box>

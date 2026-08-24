@@ -2,12 +2,13 @@
 export {
   Typography,
   TYPOGRAPHY_STYLES,
+  CAP_HEIGHT_TRIM,
   // Headings
   H1, H2, H3, H4, H5, H6, Heading,
   // Display
-  DisplayLarge, DisplaySmall,
+  DisplayLarge, DisplayMedium, DisplaySmall,
   // Subtitle
-  Subtitle, SubtitleLarge, Subtitle1, Subtitle2,
+  Subtitle, SubtitleSmall, SubtitleMedium, SubtitleLarge, Subtitle1, Subtitle2,
   // Body
   Body, BodySmall, BodyLarge, BodySemibold, BodyBold,
   BodySmallSemibold, BodySmallBold, BodyLargeSemibold, BodyLargeBold,
@@ -20,7 +21,8 @@ export {
   Legal, LegalSemibold,
   // Button typography
   Button, ButtonSmall, ButtonExtraSmall,
-  // Overline
+  // Eyebrow (Overline is the former name, kept as an alias)
+  Eyebrow, EyebrowSmall, EyebrowMedium, EyebrowLarge,
   Overline, OverlineSmall, OverlineMedium, OverlineLarge,
   // Number
   NumberLarge, NumberMedium, NumberSmall,

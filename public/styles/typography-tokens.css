@@ -20,6 +20,11 @@
   --Display-Small-Line-Height:   42px;
   --Display-Small-Letter-Spacing: 0px;
   --Font-Family-Display: var(--Platform-Font-Families-Header);
+  --Display-Medium-Font-Size:     45px;
+  --Display-Medium-Font-Weight:   600;
+  --Display-Medium-Line-Height:   45px;
+  --Display-Medium-Letter-Spacing: 0px;
+  --Font-Family-Display: var(--Platform-Font-Families-Header);
   --Display-Large-Font-Size:     48px;
   --Display-Large-Font-Weight:   600;
   --Display-Large-Line-Height:   48px;
@@ -191,6 +196,11 @@
   --Display-Small-Font-Weight:   600;
   --Display-Small-Line-Height:   28px;
   --Display-Small-Letter-Spacing: 0px;
+  --Font-Family-Display: var(--Platform-Font-Families-Header);
+  --Display-Medium-Font-Size:     28px;
+  --Display-Medium-Font-Weight:   600;
+  --Display-Medium-Line-Height:   28px;
+  --Display-Medium-Letter-Spacing: 0px;
   --Font-Family-Display: var(--Platform-Font-Families-Decorative);
   --Display-Large-Font-Size:     28px;
   --Display-Large-Font-Weight:   600;
@@ -363,6 +373,11 @@
   --Display-Small-Font-Weight:   600;
   --Display-Small-Line-Height:   28px;
   --Display-Small-Letter-Spacing: 0px;
+  --Font-Family-Display: var(--Platform-Font-Families-Header);
+  --Display-Medium-Font-Size:     28px;
+  --Display-Medium-Font-Weight:   600;
+  --Display-Medium-Line-Height:   28px;
+  --Display-Medium-Letter-Spacing: 0px;
   --Font-Family-Display: var(--Platform-Font-Families-Decorative);
   --Display-Large-Font-Size:     28px;
   --Display-Large-Font-Weight:   600;
@@ -535,6 +550,11 @@
   --Display-Small-Font-Weight:   600;
   --Display-Small-Line-Height:   28px;
   --Display-Small-Letter-Spacing: 0px;
+  --Font-Family-Display: var(--Platform-Font-Families-Header);
+  --Display-Medium-Font-Size:     28px;
+  --Display-Medium-Font-Weight:   600;
+  --Display-Medium-Line-Height:   28px;
+  --Display-Medium-Letter-Spacing: 0px;
   --Font-Family-Display: var(--Platform-Font-Families-Decorative);
   --Display-Large-Font-Size:     28px;
   --Display-Large-Font-Weight:   600;

@@ -12,7 +12,7 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H5, BodySmall, Caption, Label, OverlineSmall,
+  H3, H5, BodySmall, Caption, Label, EyebrowSmall,
 } from '../Typography';
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
@@ -20,7 +20,7 @@ const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
 const COLOR_GROUPS = [
   { label: 'Default', colors: ['default'] },
   { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
-  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+  { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
 ];
 
 /* ── Helpers ── */
@@ -156,7 +156,7 @@ export function ButtonGroupShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H2>Button Group</H2>
+      <H3>Button Group</H3>
 
       <Grid container sx={{ mt: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
@@ -223,7 +223,7 @@ export function ButtonGroupShowcase() {
 
                   {/* Style */}
                   <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       {['outlined', 'light', 'ghost'].map((v) => (
                         <ControlButton key={v} label={cap(v)} selected={variant === v} onClick={() => setVariant(v)} />
@@ -233,7 +233,7 @@ export function ButtonGroupShowcase() {
 
                   {/* Content Type */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>CONTENT TYPE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>CONTENT TYPE</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       {CONTENT_TYPES.map((ct) => (
                         <ControlButton key={ct} label={cap(ct)} selected={contentType === ct}
@@ -248,7 +248,7 @@ export function ButtonGroupShowcase() {
                   {/* Icon Position (text only) */}
                   {contentType === 'text' && (
                     <Box sx={{ mt: 3 }}>
-                      <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ICON POSITION</OverlineSmall>
+                      <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ICON POSITION</EyebrowSmall>
                       <Stack direction="row" spacing={1}>
                         {[['none', 'None'], ['left', 'Left'], ['right', 'Right']].map(([val, lbl]) => (
                           <ControlButton key={val} label={lbl} selected={iconPosition === val}
@@ -270,7 +270,7 @@ export function ButtonGroupShowcase() {
 
                   {/* Color */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</EyebrowSmall>
                     <Stack spacing={1.5}>
                       {COLOR_GROUPS.map((group) => (
                         <Box key={group.label}>
@@ -287,7 +287,7 @@ export function ButtonGroupShowcase() {
 
                   {/* Size */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       {['small', 'medium', 'large'].map((s) => (
                         <ControlButton key={s} label={cap(s)} selected={size === s} onClick={() => setSize(s)} />
@@ -297,7 +297,7 @@ export function ButtonGroupShowcase() {
 
                   {/* Orientation */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ORIENTATION</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ORIENTATION</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       {['horizontal', 'vertical'].map((o) => (
                         <ControlButton key={o} label={cap(o)} selected={orientation === o} onClick={() => setOrientation(o)} />
@@ -307,9 +307,9 @@ export function ButtonGroupShowcase() {
 
                   {/* Spacing */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                       SPACING — {spacing === 0 ? 'Connected' : spacing + ' units'}
-                    </OverlineSmall>
+                    </EyebrowSmall>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <Box
                         component="input"

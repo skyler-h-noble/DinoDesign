@@ -10,7 +10,7 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H5, BodySmall, Caption, Label, OverlineSmall,
+  H3, H5, BodySmall, Caption, Label, EyebrowSmall,
 } from '../Typography';
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
@@ -135,7 +135,7 @@ export function AvatarShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H2>Avatar</H2>
+      <H3>Avatar</H3>
 
       <Grid container sx={{ mt: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
@@ -186,7 +186,7 @@ export function AvatarShowcase() {
 
                   {/* Color — not applicable when content is a photo */}
                   <Box sx={{ opacity: isPhoto ? 0.4 : 1, pointerEvents: isPhoto ? 'none' : 'auto' }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</EyebrowSmall>
                     <Stack spacing={1.5}>
                       {COLOR_GROUPS.map((group) => (
                         <Box key={group.label}>
@@ -209,7 +209,7 @@ export function AvatarShowcase() {
 
                   {/* Size */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</EyebrowSmall>
                     <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
                       {SIZES.map((s) => (
                         <ControlButton key={s} label={SIZE_LABELS[s]} selected={size === s} onClick={() => setSize(s)} />
@@ -219,7 +219,7 @@ export function AvatarShowcase() {
 
                   {/* Content */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>CONTENT</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>CONTENT</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       {CONTENT_TYPES.map((ct) => (
                         <ControlButton key={ct} label={CONTENT_LABELS[ct]} selected={contentType === ct} onClick={() => setContentType(ct)} />

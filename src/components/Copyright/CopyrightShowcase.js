@@ -6,7 +6,7 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
 import { NumberField } from '../NumberField/NumberField';
-import { H2, H3, Body, BodySmall, Caption, OverlineSmall } from '../Typography';
+import { H3, Body, BodySmall, Caption, EyebrowSmall } from '../Typography';
 import { ContrastCheck } from '../_a11y/ContrastCheck';
 
 const COLORS = [
@@ -42,7 +42,7 @@ export function CopyrightShowcase() {
 
   return (
     <Box>
-      <H2 style={{ marginBottom: 12 }}>Copyright</H2>
+      <H3 style={{ marginBottom: 12 }}>Copyright</H3>
       <Body color="quiet" style={{ marginBottom: 24, maxWidth: 720 }}>
         Standalone copyright strip used at the bottom of pages. Defaults to{' '}
         <code>© {'{year}'} {'{companyName}'}. {'{rights}'}.</code> Pass{' '}
@@ -75,9 +75,9 @@ export function CopyrightShowcase() {
           <Stack spacing={3} sx={{ p: 3, maxWidth: 560 }}>
             {/* Mode */}
             <Box>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                 TEXT MODE
-              </OverlineSmall>
+              </EyebrowSmall>
               <Stack direction="row" spacing={1}>
                 <ControlButton label="Auto-generated" selected={!useCustom} onClick={() => setUseCustom(false)} />
                 <ControlButton label="Custom" selected={useCustom} onClick={() => setUseCustom(true)} />
@@ -133,9 +133,9 @@ export function CopyrightShowcase() {
 
             {/* Color */}
             <Box>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                 COLOR
-              </OverlineSmall>
+              </EyebrowSmall>
               <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', rowGap: 1 }}>
                 {COLORS.map((c) => (
                   <ControlButton

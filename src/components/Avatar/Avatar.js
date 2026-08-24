@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Box } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import { Icon } from '../Icon/Icon';
-import { Legal, LegalSemibold, NumberSmall, NumberMedium, NumberLarge } from '../Typography';
+import { Eyebrow, EyebrowSmall, EyebrowLarge, CAP_HEIGHT_TRIM } from '../Typography';
 import { DEFAULT_AVATAR_SRC } from './defaultAvatar';
 
 /**
@@ -21,7 +21,7 @@ import { DEFAULT_AVATAR_SRC } from './defaultAvatar';
  *   custom     — pass `customSize` (pixel diameter); icon ~50%.
  *
  * COLORS: default, primary, secondary, tertiary, neutral
- *   (Semantic colors aren't meaningful on an avatar — kept off the public API.)
+ *   (State colors aren't meaningful on an avatar — kept off the public API.)
  *   Background: var(--Buttons-{C}-Border)
  *   Text/Icon:  var(--Buttons-{C}-Text)
  *   Photo content ignores color (the image is the visual).
@@ -60,26 +60,42 @@ const SIZE_MAP = {
   'xx-large':  { size: 160, iconSize: 80 },
 };
 
-// Typography choice per size — bigger avatars get bigger initials. Mapping per
-// the design spec:
-//   xxx-small → Legal (Standard), forced to 7px (see the render)
-//   xx-small  → Legal Semibold
-//   x-small / small        → Number Small
-//   medium / large         → Number Medium
-//   x-large / xx-large     → Number Large
-function getInitialsComponent(size) {
+// Initials wear the EYEBROW style — same face, weight and tracking as an
+// eyebrow label. Which of the three eyebrow steps a size gets decides its
+// weight and tracking only; the size itself comes from INITIALS_FONT_SIZE
+// below, because an avatar ramp is eight steps wide and the eyebrow ramp is
+// three.
+//
+// `token` is the step's own token name, needed to cancel its tracking (see the
+// render): letter-spacing adds space AFTER the last letter too, which shifts
+// centred initials left by half the tracking.
+function getInitialsStyle(size) {
   switch (size) {
-    case 'xxx-small': return Legal;          // fontSize overridden to 7px below
-    case 'xx-small':  return LegalSemibold;
-    case 'x-small':
-    case 'small':     return NumberSmall;
+    case 'xxx-small':
+    case 'xx-small':
+    case 'x-small':   return { Comp: EyebrowSmall, token: 'Overline-Small' };
+    case 'small':
     case 'medium':
-    case 'large':     return NumberMedium;
+    case 'large':     return { Comp: Eyebrow,      token: 'Overline-Medium' };
     case 'x-large':
-    case 'xx-large':  return NumberLarge;
-    default:          return NumberMedium;   // 'custom' / unknown
+    case 'xx-large':  return { Comp: EyebrowLarge, token: 'Overline-Large' };
+    default:          return { Comp: Eyebrow,      token: 'Overline-Medium' };
   }
 }
+
+// Size per avatar step. These are the sizes the initials already rendered at —
+// the eyebrow switch changes the face, not the scale. Every value but the
+// smallest is a token; nothing in the type ramp goes down to 7px.
+const INITIALS_FONT_SIZE = {
+  'xxx-small': '7px',
+  'xx-small':  'var(--Legal-Font-Size)',
+  'x-small':   'var(--Number-Small-Font-Size)',
+  'small':     'var(--Number-Small-Font-Size)',
+  'medium':    'var(--Number-Medium-Font-Size)',
+  'large':     'var(--Number-Medium-Font-Size)',
+  'x-large':   'var(--Number-Large-Font-Size)',
+  'xx-large':  'var(--Number-Large-Font-Size)',
+};
 
 export function Avatar({
   src,
@@ -181,20 +197,21 @@ export function Avatar({
         />
       )}
       {hasInitials && (() => {
-        const TextComp = getInitialsComponent(size);
+        const { Comp: TextComp, token } = getInitialsStyle(size);
         return (
           <TextComp
-            style={{
+            sx={{
               color: 'inherit',
-              // No fontWeight override — each chosen typography (Legal vs
-              // Legal-Semibold vs Number-*) carries its own weight per the spec.
+              // No fontWeight override — the eyebrow step carries its own.
+              fontSize: INITIALS_FONT_SIZE[size] || INITIALS_FONT_SIZE.medium,
               lineHeight: 1,
               textAlign: 'center',
-              // Tiny top-pad optically centers caps inside the circle since
-              // cap-height sits slightly above the geometric center.
-              paddingTop: '2px',
-              // xxx-small (16px) avatar: Legal Standard at a forced 7px.
-              ...(size === 'xxx-small' && { fontSize: '7px' }),
+              // Cancel the trailing half of the eyebrow's tracking. Without
+              // this the initials sit visibly left of centre in the circle.
+              marginInlineEnd: `calc(-1 * var(--${token}-Letter-Spacing, 0px))`,
+              // Trim to cap height / baseline — Figma's "cap height to
+              // baseline" — so the initials centre on their own letterforms.
+              ...CAP_HEIGHT_TRIM,
             }}
             aria-hidden="true"
           >

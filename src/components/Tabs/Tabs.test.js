@@ -273,17 +273,20 @@ describe('Solid variant data-theme on Tabs wrapper', () => {
 });
 
 /* ─── Light data-theme ─── */
+// Light is the same THEME as solid on a bright SURFACE, mirroring dark (same
+// theme on Surface-Dimmest). The *-Light themes these used to assert no longer
+// exist in any design system.
 describe('Light variant data-theme on Tabs wrapper', () => {
   const cases = [
-    ['primary', 'Primary-Light'], ['secondary', 'Secondary-Light'], ['tertiary', 'Tertiary-Light'],
-    ['neutral', 'Neutral-Light'], ['info', 'Info-Light'], ['success', 'Success-Light'],
-    ['warning', 'Warning-Light'], ['error', 'Error-Light'],
+    ['primary', 'Primary'], ['secondary', 'Secondary'], ['tertiary', 'Tertiary'],
+    ['neutral', 'Neutral'], ['info', 'Info'], ['success', 'Success'],
+    ['warning', 'Warning'], ['error', 'Error'],
   ];
 
   cases.forEach(([color, theme]) => {
-    test('light ' + color + ' → data-theme="' + theme + '"', () => {
+    test('light ' + color + ' → data-theme="' + theme + '" on Surface-Brightest', () => {
       const { container } = renderTabs({ variant: 'light', color });
-      expect(container.querySelector('[data-theme="' + theme + '"]')).toBeInTheDocument();
+      expect(container.querySelector('[data-theme="' + theme + '"][data-surface="Surface-Brightest"]')).toBeInTheDocument();
     });
   });
 });

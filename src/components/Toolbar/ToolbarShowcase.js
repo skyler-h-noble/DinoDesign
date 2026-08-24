@@ -16,7 +16,7 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H5, BodySmall, Caption, Label, OverlineSmall,
+  H3, H5, BodySmall, Caption, Label, EyebrowSmall,
 } from '../Typography';
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
@@ -75,7 +75,7 @@ export function ToolbarShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H2>Toolbar</H2>
+      <H3>Toolbar</H3>
 
       <Grid container sx={{ mt: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
@@ -123,7 +123,7 @@ export function ToolbarShowcase() {
 
                   {/* Type */}
                   <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>TYPE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>TYPE</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       {['floating', 'contextual'].map((t) => (
                         <ControlButton key={t} label={cap(t)} selected={type === t} onClick={() => setType(t)} />
@@ -133,7 +133,7 @@ export function ToolbarShowcase() {
 
                   {/* Color */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</EyebrowSmall>
                     <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
                       {['default', 'primary', 'primary-light', 'white', 'black'].map((c) => (
                         <ControlButton key={c} label={cap(c)} selected={color === c} onClick={() => setColor(c)} />
@@ -143,7 +143,7 @@ export function ToolbarShowcase() {
 
                   {/* Orientation */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ORIENTATION</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ORIENTATION</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       {['horizontal', 'vertical'].map((o) => (
                         <ControlButton key={o} label={cap(o)} selected={orientation === o} onClick={() => setOrientation(o)} />

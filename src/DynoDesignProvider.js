@@ -21,6 +21,7 @@
  *   <DynoDesignProvider
  *     foundationCSS="/styles/foundation.css"
  *     coreCSS="/styles/core.css"
+ *     typographyCSS="/styles/typography-tokens.css"
  *     lightModeCSS="/styles/Light-Mode.css"
  *     darkModeCSS="/styles/Dark-Mode.css"
  *     baseCSS="/styles/base.css"
@@ -34,6 +35,7 @@
  *   {
  *     "foundation": "foundation.css",
  *     "core": "core.css",
+ *     "typography": "typography-tokens.css",   // optional
  *     "lightMode": "Light-Mode.css",
  *     "darkMode": "Dark-Mode.css",
  *     "base": "base.css",
@@ -50,9 +52,10 @@
  * ── CSS load order ────────────────────────────────────────────────────────────
  *   1. foundation.css  — primitives
  *   2. core.css        — component base styles
- *   3. Light-Mode.css  OR Dark-Mode.css  (one at a time, swaps on toggle)
- *   4. base.css        — data-style / data-surface rules
- *   5. styles.css      — final overrides
+ *   3. typography-tokens.css — platform type ramps (optional)
+ *   4. Light-Mode.css  OR Dark-Mode.css  (one at a time, swaps on toggle)
+ *   5. base.css        — data-style / data-surface rules
+ *   6. styles.css      — final overrides
  *
  * ── How CSS is loaded ─────────────────────────────────────────────────────────
  *   URL sources (the common production case) load as <link rel="stylesheet">
@@ -98,7 +101,11 @@ export const DYNO_THEMES = [
 export const DYNO_STYLES = ['Professional', 'Modern', 'Bold', 'Playful'];
 
 export const DYNO_SURFACES = [
-  'Surface', 'Surface-Dim', 'Surface-Bright',
+  // Five surface levels, darkest to lightest. Surface-Dimmest and
+  // Surface-Brightest are the ends of the ramp: Brightest is the level that
+  // replaced the <Palette>-Light themes, so `theme="Primary"
+  // surface="Surface-Brightest"` is what `theme="Primary-Light"` used to be.
+  'Surface-Dimmest', 'Surface-Dim', 'Surface', 'Surface-Bright', 'Surface-Brightest',
   'Container', 'Container-Low', 'Container-Lowest',
   'Container-High', 'Container-Highest',
 ];
@@ -113,13 +120,15 @@ export const SURFACE_STYLE_THEME_MAP = {
 //
 //   #dyno-foundation  (1st)
 //   #dyno-core        (2nd)
-//   #dyno-mode        (3rd) ← swaps between light/dark
-//   #dyno-base        (4th)
-//   #dyno-styles      (5th) ← always last
+//   #dyno-typography  (3rd) ← platform type ramps; must follow core
+//   #dyno-mode        (4th) ← swaps between light/dark
+//   #dyno-base        (5th)
+//   #dyno-styles      (6th) ← always last
 
 const TAG = {
   foundation: 'dyno-foundation',
   core:       'dyno-core',
+  typography: 'dyno-typography',
   mode:       'dyno-mode',
   base:       'dyno-base',
   styles:     'dyno-styles',
@@ -255,6 +264,7 @@ async function fetchThemeManifest(themeURL) {
   return {
     foundationURL:  resolve(manifest.foundation),
     coreURL:        resolve(manifest.core),
+    typographyURL:  resolve(manifest.typography),
     lightModeURL:   resolve(manifest.lightMode),
     darkModeURL:    resolve(manifest.darkMode),
     baseURL:        resolve(manifest.base),
@@ -283,6 +293,7 @@ async function fetchThemeManifest(themeURL) {
  * Individual CSS props (manual / local dev):
  * @param {string}   props.foundationCSS     foundation.css (URL or raw string)
  * @param {string}   props.coreCSS           core.css
+ * @param {string}   props.typographyCSS     typography-tokens.css
  * @param {string}   props.lightModeCSS      Light-Mode.css
  * @param {string}   props.darkModeCSS       Dark-Mode.css
  * @param {string}   props.baseCSS           base.css
@@ -315,6 +326,7 @@ export function DynoDesignProvider({
   // Individual CSS (manual / local dev)
   foundationCSS,
   coreCSS,
+  typographyCSS,
   lightModeCSS,
   darkModeCSS,
   baseCSS,
@@ -352,6 +364,7 @@ export function DynoDesignProvider({
   const [resolvedSources, setResolvedSources] = useState({
     foundation: foundationCSS ?? null,
     core:       coreCSS       ?? null,
+    typography: typographyCSS ?? null,
     lightMode:  lightModeCSS  ?? null,
     darkMode:   darkModeCSS   ?? null,
     base:       baseCSS       ?? null,
@@ -381,6 +394,7 @@ export function DynoDesignProvider({
         setResolvedSources({
           foundation: foundationCSS ?? manifest.foundationURL,
           core:       coreCSS       ?? manifest.coreURL,
+          typography: typographyCSS ?? manifest.typographyURL,
           lightMode:  lightModeCSS  ?? manifest.lightModeURL,
           darkMode:   darkModeCSS   ?? manifest.darkModeURL,
           base:       baseCSS       ?? manifest.baseURL,
@@ -431,7 +445,8 @@ export function DynoDesignProvider({
   // the Provider only for theme-context (no brand sheets to load), so the
   // hide-during-load rule shouldn't keep the page invisible forever.
   const hasAnyCSSSource = !!(
-    themeURL || foundationCSS || coreCSS || lightModeCSS || darkModeCSS || baseCSS || stylesCSS
+    themeURL || foundationCSS || coreCSS || typographyCSS
+      || lightModeCSS || darkModeCSS || baseCSS || stylesCSS
   );
   const [cssStatus, setCssStatus] = useState(hasAnyCSSSource ? 'loading' : 'ready');
   const [cssError,  setCssError]  = useState(null);
@@ -444,8 +459,18 @@ export function DynoDesignProvider({
   // the order stays foundation → core → mode → base → styles regardless of
   // which sheet resolves first.
   useEffect(() => {
-    const { foundation, core, base, styles } = resolvedSources;
-    if (!foundation && !core && !base && !styles) return;
+    const { foundation, core, typography, base, styles } = resolvedSources;
+    if (!foundation && !core && !typography && !base && !styles) {
+      // Nothing in the static slots. The mode sheet, if there is one, loads on
+      // its own effect below and needs nothing from here.
+      //
+      // This MUST still flip the status: 'loading' hides the whole tree behind
+      // the anti-FOUC rule, so returning early without it left an app that
+      // supplies only lightModeCSS/darkModeCSS — index.html carrying the rest —
+      // permanently invisible.
+      setCssStatus('ready');
+      return;
+    }
 
     setCssStatus('loading');
     setCssError(null);
@@ -454,9 +479,21 @@ export function DynoDesignProvider({
     // as `beforeId` anchors. Each call is non-blocking; we await the union
     // before flipping to 'ready' so we don't unhide before the brand actually
     // applies.
+    // typography goes in after core and before base. It carries the platform
+    // ramps under [data-platform="…"], whose specificity ties with the :root
+    // ramp in core.css — so whichever loads LAST wins, and the design
+    // system's own ramp has to be the one that does. A design system that
+    // ships no typography-tokens.css leaves this slot empty and the copy
+    // bundled with the lib (linked from index.html) stands.
     Promise.all([
       loadCSSSource(TAG.foundation, foundation),
       loadCSSSource(TAG.core,       core),
+      // Optional slot: a design system that doesn't publish one must not take
+      // the whole app down, so a failed load here is swallowed rather than
+      // failing the Promise.all.
+      loadCSSSource(TAG.typography, typography).catch(err => {
+        console.warn('DynoDesignProvider: typography CSS did not load —', err.message);
+      }),
       loadCSSSource(TAG.base,       base),
       loadCSSSource(TAG.styles,     styles),
     ])
@@ -474,10 +511,12 @@ export function DynoDesignProvider({
     return () => {
       removeStyleTag(TAG.foundation);
       removeStyleTag(TAG.core);
+      removeStyleTag(TAG.typography);
       removeStyleTag(TAG.base);
       removeStyleTag(TAG.styles);
     };
-  }, [resolvedSources.foundation, resolvedSources.core, resolvedSources.base, resolvedSources.styles]);
+  }, [resolvedSources.foundation, resolvedSources.core, resolvedSources.typography,
+      resolvedSources.base, resolvedSources.styles]);
 
   // ── EFFECT: Swap active mode CSS ──────────────────────────────────────────
   // Mode sheet inserts before #dyno-base so the cascade slot is always

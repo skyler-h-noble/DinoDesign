@@ -17,8 +17,6 @@ export default {
       control: 'select',
       options: [
         'primary',
-        'primary-light', 'secondary-light', 'tertiary-light', 'neutral-light',
-        'info-light', 'success-light', 'warning-light', 'error-light',
       ],
     },
     size: { control: 'select', options: ['small', 'medium', 'large'] },
@@ -96,25 +94,6 @@ export const Primary = {
   ),
 };
 
-// ─── Light — All Colors ──────────────────────────────────────────────────────
-
-export const LightColors = {
-  name: 'Light — All Colors',
-  render: () => (
-    <Stack spacing={3} sx={{ p: 2 }}>
-      {['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'].map((c) => (
-        <Stack key={c} spacing={1}>
-          <Box sx={{ fontSize: '13px', color: 'var(--Text-Quiet)', textTransform: 'capitalize' }}>{c}</Box>
-          <ToggleButtonGroup variant={c + '-light'} value="bold" exclusive aria-label={c + ' light'}>
-            <ToggleButton value="bold"><FormatBoldIcon /></ToggleButton>
-            <ToggleButton value="italic"><FormatItalicIcon /></ToggleButton>
-            <ToggleButton value="underline"><FormatUnderlinedIcon /></ToggleButton>
-          </ToggleButtonGroup>
-        </Stack>
-      ))}
-    </Stack>
-  ),
-};
 
 // ─── Multiple Selection ──────────────────────────────────────────────────────
 
@@ -140,11 +119,6 @@ export const Vertical = {
         <ToggleButton value="center"><FormatAlignCenterIcon /></ToggleButton>
         <ToggleButton value="right"><FormatAlignRightIcon /></ToggleButton>
       </ToggleButtonGroup>
-      <ToggleButtonGroup variant="info-light" value="left" exclusive orientation="vertical" aria-label="vertical light">
-        <ToggleButton value="left"><FormatAlignLeftIcon /></ToggleButton>
-        <ToggleButton value="center"><FormatAlignCenterIcon /></ToggleButton>
-        <ToggleButton value="right"><FormatAlignRightIcon /></ToggleButton>
-      </ToggleButtonGroup>
     </Stack>
   ),
 };
@@ -163,22 +137,3 @@ export const FullWidth = {
   ),
 };
 
-// ─── Style Comparison ────────────────────────────────────────────────────────
-
-export const StyleComparison = {
-  name: 'Side-by-Side: Primary vs Light',
-  render: () => (
-    <Stack spacing={3} sx={{ p: 2 }}>
-      <ToggleButtonGroup variant="primary" value="center" exclusive aria-label="primary">
-        <ToggleButton value="left"><FormatAlignLeftIcon /></ToggleButton>
-        <ToggleButton value="center"><FormatAlignCenterIcon /></ToggleButton>
-        <ToggleButton value="right"><FormatAlignRightIcon /></ToggleButton>
-      </ToggleButtonGroup>
-      <ToggleButtonGroup variant="primary-light" value="center" exclusive aria-label="light">
-        <ToggleButton value="left"><FormatAlignLeftIcon /></ToggleButton>
-        <ToggleButton value="center"><FormatAlignCenterIcon /></ToggleButton>
-        <ToggleButton value="right"><FormatAlignRightIcon /></ToggleButton>
-      </ToggleButtonGroup>
-    </Stack>
-  ),
-};

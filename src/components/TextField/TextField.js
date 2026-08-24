@@ -47,6 +47,11 @@ export function TextField({
   startAdornment,   // ReactNode rendered inside the input on the left
   endAdornment,     // ReactNode rendered inside the input on the right
   sx = {},
+  // aria-label / aria-labelledby name the INPUT, not the FormControl wrapper.
+  // Left in ...props they spread onto the wrapper <div>, which is invalid ARIA
+  // (aria-label on a div with no role) AND leaves the input unnamed.
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledby,
   ...props
 }) {
   const [isFocused, setIsFocused] = useState(false);
@@ -83,6 +88,10 @@ export function TextField({
         error={error}
         fullWidth={fullWidth}
         slotProps={{
+          htmlInput: {
+            ...(ariaLabel ? { 'aria-label': ariaLabel } : {}),
+            ...(ariaLabelledby ? { 'aria-labelledby': ariaLabelledby } : {}),
+          },
           input: {
             style: {
               color: textColor,

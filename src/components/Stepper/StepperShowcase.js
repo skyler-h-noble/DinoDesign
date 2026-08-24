@@ -10,7 +10,7 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H5, BodySmall, Caption, Label, OverlineSmall,
+  H3, H5, BodySmall, Caption, Label, EyebrowSmall,
 } from '../Typography';
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
@@ -18,7 +18,7 @@ const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
 const COLOR_GROUPS = [
   { label: 'Default', colors: ['default'] },
   { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
-  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+  { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
 ];
 
 const STEPS = ['Account', 'Details', 'Review', 'Confirm', 'Complete', 'Done'];
@@ -101,7 +101,7 @@ export function StepperShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H2>Stepper</H2>
+      <H3>Stepper</H3>
 
       <Grid container sx={{ mt: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
@@ -157,7 +157,7 @@ export function StepperShowcase() {
 
                   {/* Steps */}
                   <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STEPS</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STEPS</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       {[2, 3, 4, 5, 6].map((n) => (
                         <ControlButton key={n} label={String(n)} selected={stepCount === n}
@@ -168,7 +168,7 @@ export function StepperShowcase() {
 
                   {/* Active Step */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ACTIVE STEP</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ACTIVE STEP</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       {STEPS.slice(0, stepCount).map((step, i) => (
                         <ControlButton key={i} label={String(i + 1)} selected={activeStep === i} onClick={() => setActiveStep(i)} />
@@ -178,7 +178,7 @@ export function StepperShowcase() {
 
                   {/* Color */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</EyebrowSmall>
                     <Stack spacing={1.5}>
                       {COLOR_GROUPS.map((group) => (
                         <Box key={group.label}>
@@ -195,7 +195,7 @@ export function StepperShowcase() {
 
                   {/* Size */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       {['small', 'medium', 'large'].map((s) => (
                         <ControlButton key={s} label={cap(s)} selected={size === s} onClick={() => setSize(s)} />
@@ -205,7 +205,7 @@ export function StepperShowcase() {
 
                   {/* Orientation */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ORIENTATION</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ORIENTATION</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       {['horizontal', 'vertical'].map((o) => (
                         <ControlButton key={o} label={cap(o)} selected={orientation === o} onClick={() => setOrientation(o)} />

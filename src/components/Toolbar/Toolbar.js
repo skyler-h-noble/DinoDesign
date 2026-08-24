@@ -15,21 +15,23 @@ import { SHADOW_LEVEL_2 } from '../_shadows';
  * COLORS: default | primary | primary-light | white | black
  *   default → data-theme="Default"
  *   primary → data-theme="Primary"
- *   primary-light → data-theme="Primary-Light"
- *   white → data-theme="White"
- *   black → data-theme="Black"
+ *   primary-light → data-theme="Primary" + data-surface="Surface-Brightest"
+ *   white → data-theme="Neutral" + data-surface="Surface-Brightest"
+ *   black → data-theme="Neutral" + data-surface="Surface-Dimmest"
  *
  * FAB: optional FAB button positioned to the right of the floating toolbar
  *
  * ORIENTATION: horizontal | vertical
  */
 
+// Theme plus, where the colour implies a lightness, a surface — lightness is
+// the surface axis now, and White / Black / *-Light are no longer themes.
 const THEME_MAP = {
-  default: 'Default',
-  primary: 'Primary',
-  'primary-light': 'Primary-Light',
-  white: 'White',
-  black: 'Black',
+  default:         { theme: 'Default' },
+  primary:         { theme: 'Primary' },
+  'primary-light': { theme: 'Primary', surface: 'Surface-Brightest' },
+  white:           { theme: 'Neutral', surface: 'Surface-Brightest' },
+  black:           { theme: 'Neutral', surface: 'Surface-Dimmest' },
 };
 
 export function Toolbar({
@@ -55,7 +57,9 @@ export function Toolbar({
     onChange?.(next);
   }, [isControlled, activeIndex, onChange]);
 
-  const dataTheme = THEME_MAP[color] || THEME_MAP.default;
+  const barTheme = THEME_MAP[color] || THEME_MAP.default;
+  const dataTheme = barTheme.theme;
+  const dataSurface = barTheme.surface;
   const isVertical = orientation === 'vertical';
   const isFloating = type === 'floating';
 
@@ -65,7 +69,7 @@ export function Toolbar({
       aria-orientation={orientation}
       aria-label="Toolbar"
       data-theme={dataTheme}
-      data-surface="Surface"
+      data-surface={dataSurface || 'Surface'}
       className={'toolbar toolbar-' + type + ' toolbar-' + orientation + ' toolbar-' + color + ' ' + className}
       sx={{
         display: 'inline-flex',

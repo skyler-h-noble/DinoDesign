@@ -1,6 +1,6 @@
 // src/components/Typography/Typography.stories.js
 import React from 'react';
-import { Typography, H1, H2, H3, H4, H5, H6, Body, BodySmall, BodyLarge, BodySemibold, BodyBold, Label, Caption, Overline } from './Typography';
+import { Typography, H1, H2, H3, H4, H5, H6, Body, BodySmall, BodyLarge, BodySemibold, BodyBold, Label, Caption, Eyebrow } from './Typography';
 import { Box, Stack } from '@mui/material';
 
 export default { title: 'Data Display/Typography', component: Typography };
@@ -26,7 +26,7 @@ export const AllStyles = {
       <hr />
       <Label>Label: {SAMPLE}</Label>
       <Caption>Caption: {SAMPLE}</Caption>
-      <Overline>Overline: {SAMPLE}</Overline>
+      <Eyebrow>Eyebrow: {SAMPLE}</Eyebrow>
     </Stack>
   ),
 };
@@ -55,11 +55,11 @@ export const DefaultColors = {
   name: 'Default Color Per Style',
   render: () => (
     <Stack spacing={2} sx={{ p: 4 }}>
-      <Caption style={{ display: 'block', color: 'var(--Text-Quiet)' }}>Headings default to Header color, body to Standard, caption/overline to Quiet</Caption>
+      <Caption style={{ display: 'block', color: 'var(--Text-Quiet)' }}>Headings default to Header color, body to Standard, caption to Quiet, eyebrow to Eyebrow</Caption>
       <H4>H4 — defaults to Header</H4>
       <Body>Body — defaults to Standard</Body>
       <Caption>Caption — defaults to Quiet</Caption>
-      <Overline>Overline — defaults to Quiet</Overline>
+      <Eyebrow>Eyebrow — defaults to Quiet</Eyebrow>
     </Stack>
   ),
 };
@@ -73,7 +73,7 @@ export const WidthModes = {
         <Body width="fill" sx={{ backgroundColor: 'var(--Surface-Dim)', p: 1 }}>This fills the container</Body>
       </Box>
       <Box sx={{ border: '1px dashed var(--Border)', p: 2 }}>
-        <Caption style={{ display: 'block', marginBottom: 8, color: 'var(--Text-Quiet)' }}>Hug (default for label/caption/overline) — inline, fits content</Caption>
+        <Caption style={{ display: 'block', marginBottom: 8, color: 'var(--Text-Quiet)' }}>Hug (default for label/caption/eyebrow) — inline, fits content</Caption>
         <Label width="hug" sx={{ backgroundColor: 'var(--Surface-Dim)', p: 1 }}>This hugs content</Label>
       </Box>
       <Box sx={{ border: '1px dashed var(--Border)', p: 2 }}>
@@ -127,7 +127,7 @@ export const HeadingsWithColors = {
     <Stack spacing={3} sx={{ p: 4 }}>
       {['header', 'standard', 'quiet'].map((c) => (
         <Box key={c}>
-          <Overline style={{ display: 'block', marginBottom: 8 }}>{c.toUpperCase()}</Overline>
+          <Eyebrow style={{ display: 'block', marginBottom: 8 }}>{c.toUpperCase()}</Eyebrow>
           <Stack spacing={1}>
             {['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].map((h) => (
               <Typography key={h} textStyle={h} color={c}>{h.toUpperCase()}: {SAMPLE.substring(0, 30)}</Typography>

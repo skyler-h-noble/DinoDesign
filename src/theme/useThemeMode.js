@@ -14,7 +14,7 @@ export function useThemeMode(initialMode = 'light') {
 
   useEffect(() => {
     // Load base CSS files once
-    injectLink('/styles/foundations.css',          'css-foundations');
+    injectLink('/styles/foundation.css',           'css-foundation');
     injectLink('/styles/core.css',                 'css-core');
     injectLink('/styles/Light-Mode.css',           'css-mode');
     injectLink('/styles/base.css',                 'css-base');

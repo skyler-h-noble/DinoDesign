@@ -11,7 +11,7 @@ import AddIcon from '@mui/icons-material/Add';
 import InfoIcon from '@mui/icons-material/Info';
 import { Tooltip } from './Tooltip';
 import {
-  H2, H4, H5, Body, BodySmall, Caption, Label, OverlineSmall
+  H3, H4, H5, Body, BodySmall, Caption, Label, EyebrowSmall
 } from '../Typography';
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
@@ -213,7 +213,7 @@ export function TooltipShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H2>Tooltip</H2>
+      <H3>Tooltip</H3>
       <Tabs value={mainTab} onChange={(e, v) => setMainTab(v)}
         sx={{ mt: 3, mb: 0, borderBottom: '1px solid var(--Border)',
           '& .MuiTabs-indicator': { backgroundColor: 'var(--Buttons-Primary-Button)', height: 3 },
@@ -273,7 +273,7 @@ export function TooltipShowcase() {
 
             {/* Style */}
             <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</EyebrowSmall>
               <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1 }}>
                 {['solid', 'light', 'outline'].map((s) => (
                   <ControlButton key={s} label={cap(s)} selected={variant === s} onClick={() => setVariant(s)} />
@@ -288,7 +288,7 @@ export function TooltipShowcase() {
 
             {/* Color */}
             <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</EyebrowSmall>
               <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
                 {COLORS.map((c) => (
                   <ColorSwatchButton key={c} color={c} selected={color === c} onClick={setColor} />
@@ -298,7 +298,7 @@ export function TooltipShowcase() {
 
             {/* Size */}
             <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</EyebrowSmall>
               <Stack direction="row" spacing={1}>
                 {['small', 'medium', 'large'].map((s) => (
                   <ControlButton key={s} label={cap(s)} selected={size === s} onClick={() => setSize(s)} />
@@ -308,7 +308,7 @@ export function TooltipShowcase() {
 
             {/* Placement */}
             <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>PLACEMENT</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>PLACEMENT</EyebrowSmall>
               <PlacementGrid placement={placement} onSelect={setPlacement} />
             </Box>
 
@@ -320,7 +320,7 @@ export function TooltipShowcase() {
 
             {/* Open */}
             <Box sx={{ mt: 3 }}>
-              <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>OPEN</OverlineSmall>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>OPEN</EyebrowSmall>
               <Stack direction="row" spacing={1}>
                 {['uncontrolled', 'true', 'false'].map((o) => (
                   <ControlButton key={o} label={cap(o)} selected={openMode === o} onClick={() => setOpenMode(o)} />

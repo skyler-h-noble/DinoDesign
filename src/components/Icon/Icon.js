@@ -49,12 +49,17 @@ const COLOR_LABEL_MAP = {
   error:     'Error',
 };
 
-const SIZE_MAP = {
+// The icon scale. Exported so anything that has to restate it — the Button's
+// slot rules, which otherwise inherit MUI's own per-button-size icon sizing —
+// reads these numbers instead of keeping a second copy.
+export const ICON_SIZE_MAP = {
   xs: '12px',
   small: '16px',
   medium: '24px',
-  large: '36px',
+  large: '32px',
 };
+
+const SIZE_MAP = ICON_SIZE_MAP;
 
 export function Icon({
   children,

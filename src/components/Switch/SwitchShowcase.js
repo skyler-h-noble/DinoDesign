@@ -1,15 +1,17 @@
 // src/components/Switch/SwitchShowcase.js
 import React, { useState } from 'react';
 import { Box, Stack, Grid } from '@mui/material';
+import * as MuiIcons from '@mui/icons-material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import { Switch } from './Switch';
+import { Input } from '../Input/Input';
 import { Button } from '../Button/Button';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H5, BodySmall, Caption, Label, OverlineSmall,
+  H3, H5, BodySmall, Caption, Label, EyebrowSmall,
 } from '../Typography';
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
@@ -17,7 +19,7 @@ const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
 const COLOR_GROUPS = [
   { label: 'Default', colors: ['default'] },
   { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
-  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+  { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
 ];
 
 /* ── Helpers ── */
@@ -76,6 +78,11 @@ export function SwitchShowcase() {
   const [size, setSize]         = useState('medium');
   const [checked, setChecked]   = useState(false);
   const [showLabel, setShowLabel] = useState(true);
+  // The design puts a glyph inside the dot, and draws a different one either
+  // side of the toggle — hence a name per state rather than one shared icon.
+  const [showIcon, setShowIcon]     = useState(false);
+  const [iconOnName, setIconOnName]   = useState('Home');
+  const [iconOffName, setIconOffName] = useState('Home');
   const [disabled, setDisabled] = useState(false);
   const [bgTheme, setBgTheme]   = useState(null);
   const [bgSurface, setBgSurface] = useState('Surface');
@@ -83,10 +90,25 @@ export function SwitchShowcase() {
   const effectiveColor = color === 'default' ? 'default' : color;
   const variant = effectiveColor + '-' + style;
 
+  const glyph = (name) => {
+    const Comp = MuiIcons[name];
+    return Comp ? <Comp /> : null;
+  };
+  const iconOn  = showIcon ? glyph(iconOnName)  : undefined;
+  const iconOff = showIcon ? glyph(iconOffName) : undefined;
+
   const generateCode = () => {
     const parts = ['variant="' + variant + '"'];
     if (size !== 'medium') parts.push('size="' + size + '"');
     if (checked) parts.push('checked');
+    if (showIcon) {
+      if (iconOnName === iconOffName) {
+        parts.push('icon={<' + iconOnName + 'Icon />}');
+      } else {
+        parts.push('iconOn={<' + iconOnName + 'Icon />}');
+        parts.push('iconOff={<' + iconOffName + 'Icon />}');
+      }
+    }
     if (showLabel) parts.push('label="Enable notifications"');
     if (disabled) parts.push('disabled');
     if (!showLabel) parts.push('aria-label="Toggle"');
@@ -95,7 +117,7 @@ export function SwitchShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H2>Switch</H2>
+      <H3>Switch</H3>
 
       <Grid container sx={{ mt: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
@@ -108,6 +130,8 @@ export function SwitchShowcase() {
               size={size}
               checked={checked}
               onChange={(e) => setChecked(e.target.checked)}
+              iconOn={iconOn}
+              iconOff={iconOff}
               label={showLabel ? 'Enable notifications' : undefined}
               disabled={disabled}
               aria-label={!showLabel ? 'Toggle' : undefined}
@@ -153,7 +177,7 @@ export function SwitchShowcase() {
 
                   {/* Style */}
                   <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       {['outline', 'light'].map((s) => (
                         <ControlButton key={s} label={cap(s)} selected={style === s} onClick={() => setStyle(s)} />
@@ -163,7 +187,7 @@ export function SwitchShowcase() {
 
                   {/* Color */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</EyebrowSmall>
                     <Stack spacing={1.5}>
                       {COLOR_GROUPS.map((group) => (
                         <Box key={group.label}>
@@ -180,7 +204,7 @@ export function SwitchShowcase() {
 
                   {/* Size */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       {['small', 'medium', 'large'].map((s) => (
                         <ControlButton key={s} label={cap(s)} selected={size === s} onClick={() => setSize(s)} />
@@ -197,6 +221,49 @@ export function SwitchShowcase() {
                     <Switch variant="default-outline" checked={showLabel} onChange={(e) => setShowLabel(e.target.checked)}
                       size="small" aria-label="Show label" />
                   </Box>
+
+                  {/* Icon — the design's `icon` boolean, with a name per state
+                      so ON and OFF can carry different glyphs. */}
+                  <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box>
+                      <Label>Icon</Label>
+                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Glyph inside the dot</Caption>
+                    </Box>
+                    <Switch variant="default-outline" checked={showIcon} onChange={(e) => setShowIcon(e.target.checked)}
+                      size="small" aria-label="Show icon" />
+                  </Box>
+
+                  {showIcon && (
+                    <Box sx={{ mt: 2 }}>
+                      <Stack direction="row" spacing={1.5}>
+                        <Input
+                          label="Icon Name (On)"
+                          value={iconOnName}
+                          onChange={(e) => setIconOnName(e.target.value)}
+                          placeholder="Home"
+                          variant="primary-outline"
+                          size="small"
+                          fullWidth
+                          validation={MuiIcons[iconOnName] ? undefined : 'error'}
+                          validationMessage={MuiIcons[iconOnName] ? undefined : 'No such icon'}
+                        />
+                        <Input
+                          label="Icon Name (Off)"
+                          value={iconOffName}
+                          onChange={(e) => setIconOffName(e.target.value)}
+                          placeholder="Home"
+                          variant="primary-outline"
+                          size="small"
+                          fullWidth
+                          validation={MuiIcons[iconOffName] ? undefined : 'error'}
+                          validationMessage={MuiIcons[iconOffName] ? undefined : 'No such icon'}
+                        />
+                      </Stack>
+                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 8 }}>
+                        <a href="https://mui.com/material-ui/material-icons/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--Hotlink)' }}>Material icon</a> name (e.g. Home, Check, Close, Star)
+                      </Caption>
+                    </Box>
+                  )}
 
                   <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box>

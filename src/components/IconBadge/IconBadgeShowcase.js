@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { IconBadge } from './IconBadge';
 import { Button } from '../Button/Button';
 import { ButtonGroup } from '../ButtonGroup/ButtonGroup';
-import { H2, H3, BodySmall, Label } from '../Typography';
+import { H3, BodySmall, Label } from '../Typography';
 import { VStack, HStack } from '../Stack/Stack';
 import { Card } from '../Card/Card';
 import HomeIcon from '@mui/icons-material/Home';
@@ -19,7 +19,7 @@ const COLOR_GROUPS = [
   { label: 'Default', colors: ['default'] },
   { label: 'Theme', colors: ['primary', 'secondary', 'tertiary'] },
   { label: 'Core', colors: ['white', 'black'] },
-  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+  { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
 ];
 
 const ICONS = [HomeIcon, CodeIcon, CheckCircleOutlineIcon, StarIcon, GridViewIcon, ComputerIcon];
@@ -33,7 +33,7 @@ export function IconBadgeShowcase() {
 
   return (
     <VStack spacing={4} style={{ paddingBottom: 64 }}>
-      <H2>Icon Badge</H2>
+      <H3>Icon Badge</H3>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
         {/* Preview */}

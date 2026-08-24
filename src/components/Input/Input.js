@@ -234,8 +234,7 @@ export function Input({
             : 'var(--Input-Radius, var(--Style-Border-Radius))',
         overflow: 'hidden',
         transition: 'border-color 0.15s ease-in-out',
-        boxShadow: SHADOW_LEVEL_1,
-        '&:hover': { boxShadow: SHADOW_LEVEL_2 },
+        boxShadow: 'none',
         '&:focus-within': {
           outline: '2px solid var(--Focus-Visible)',
           outlineOffset: '2px',

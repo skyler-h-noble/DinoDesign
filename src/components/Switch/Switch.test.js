@@ -57,7 +57,7 @@ describe('Switch Component', () => {
 
   test('renders without label', () => {
     const { container } = render(<Switch aria-label="No label" />);
-    expect(container.querySelector('.switch-primary')).toBeInTheDocument();
+    expect(container.querySelector('.switch-default')).toBeInTheDocument();
   });
 
   // --- Disabled ---
@@ -76,8 +76,15 @@ describe('Switch Component', () => {
 
   // --- Variants ---
 
-  test('defaults to primary variant', () => {
+  // The design file has no colour axis — its switch takes its colour from the
+  // surrounding theme — so a bare <Switch /> is the `default` variant.
+  test('defaults to the default (theme-driven) variant', () => {
     const { container } = render(<Switch aria-label="Test" />);
+    expect(container.querySelector('.switch-default')).toBeInTheDocument();
+  });
+
+  test('variant="primary" still renders the primary variant', () => {
+    const { container } = render(<Switch variant="primary" aria-label="Test" />);
     expect(container.querySelector('.switch-primary')).toBeInTheDocument();
   });
 

@@ -86,9 +86,8 @@ export function MenuButton({ children, className = '', sx = {}, ...props }) {
         border: '1px solid var(--Buttons-' + C + '-Border)',
         borderRadius: 'var(--Style-Border-Radius)',
         cursor: 'pointer',
-        boxShadow: SHADOW_LEVEL_1,
+        boxShadow: 'none',
         transition: 'box-shadow 0.15s ease',
-        '&:hover': { boxShadow: SHADOW_LEVEL_2 },
         '&:focus-visible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '2px' },
         ...sx,
       }}
@@ -162,8 +161,9 @@ export function Menu({ children, className = '', placement = 'bottom-start', sx 
         right: placement === 'bottom-end' ? 0 : 'auto',
         zIndex: 99999, marginTop: '4px',
         border: '1px solid ' + borderToken,
-        borderRadius: 'var(--Style-Border-Radius)',
-        boxShadow: SHADOW_LEVEL_3,
+        // Menu's floating panel — same frame role as Select's dropdown.
+        borderRadius: 'var(--Dropdown-Frame-Radius, var(--Input-Radius, var(--Style-Border-Radius, 4px)))',
+        boxShadow: 'none',
         overflow: 'hidden',
         ...sx,
       }}
@@ -178,7 +178,9 @@ export function Menu({ children, className = '', placement = 'bottom-start', sx 
           fontSize: s.fontSize, fontFamily: 'inherit',
           padding: s.py + ' 0',
           outline: 'none',
-          borderRadius: 'calc(var(--Style-Border-Radius) - 1px)',
+          // Inner surface sits 1px inside the frame above, so it has to
+          // track the SAME token or the two corners disagree.
+          borderRadius: 'calc(var(--Dropdown-Frame-Radius, var(--Input-Radius, var(--Style-Border-Radius, 4px))) - 1px)',
         }}
         onKeyDown={(e) => {
           const items = menuRef.current?.querySelectorAll('[role="menuitem"]:not([aria-disabled="true"])');

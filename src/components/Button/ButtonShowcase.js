@@ -14,7 +14,7 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H5, BodySmall, Caption, Label, OverlineSmall
+  H3, H5, BodySmall, Caption, Label, EyebrowSmall
 } from '../Typography';
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
@@ -22,7 +22,7 @@ const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info'
 const COLOR_GROUPS = [
   { label: 'Default', colors: ['default'] },
   { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
-  { label: 'Semantic', colors: ['info', 'success', 'warning', 'error'] },
+  { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
 ];
 const STYLES = ['solid', 'outline', 'ghost'];
 const CONTENT_TYPES = ['text', 'number', 'letter', 'icon', 'swatch'];
@@ -424,7 +424,7 @@ export function ButtonShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H2>Buttons</H2>
+      <H3>Buttons</H3>
       <Box sx={{ mt: 1 }}>
         <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
       </Box>
@@ -470,7 +470,7 @@ export function ButtonShowcase() {
 
                   {/* Style */}
                   <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</EyebrowSmall>
                     <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', rowGap: 1 }}>
                       {STYLES.map((s) => {
                         const ghostDisabled = s === 'ghost' && (contentType === 'avatar' || contentType === 'swatch');
@@ -484,7 +484,7 @@ export function ButtonShowcase() {
 
                   {/* Color */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</EyebrowSmall>
                     <Stack spacing={1.5}>
                       {COLOR_GROUPS.map((group) => (
                         <Box key={group.label}>
@@ -502,7 +502,7 @@ export function ButtonShowcase() {
 
                   {/* Content type */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>CONTENT TYPE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>CONTENT TYPE</EyebrowSmall>
                     <Select
                       options={CONTENT_TYPES.map((ct) => ({ value: ct, label: cap(ct) }))}
                       value={contentType}
@@ -553,7 +553,7 @@ export function ButtonShowcase() {
                   {/* Start decorative slot (text only) */}
                   {contentType === 'text' && (
                     <Box sx={{ mt: 3 }}>
-                      <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>START DECORATIVE SLOT</OverlineSmall>
+                      <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>START DECORATIVE SLOT</EyebrowSmall>
                       <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', rowGap: 1 }}>
                         {[['none', 'None'], ['icon', 'Icon'], ['avatar', 'Avatar']].map(([val, lbl]) => (
                           <ControlButton key={val} label={lbl} selected={startSlot === val} onClick={() => setStartSlot(val)} />
@@ -600,7 +600,7 @@ export function ButtonShowcase() {
                   {/* End decorative slot (text only) */}
                   {contentType === 'text' && (
                     <Box sx={{ mt: 3 }}>
-                      <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>END DECORATIVE SLOT</OverlineSmall>
+                      <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>END DECORATIVE SLOT</EyebrowSmall>
                       <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', rowGap: 1 }}>
                         {[['none', 'None'], ['icon', 'Icon'], ['avatar', 'Avatar']].map(([val, lbl]) => (
                           <ControlButton key={val} label={lbl} selected={endSlot === val} onClick={() => setEndSlot(val)} />
@@ -656,7 +656,7 @@ export function ButtonShowcase() {
 
                   {/* Size */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</EyebrowSmall>
                     <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', rowGap: 1 }}>
                       {['small', 'medium', 'large'].map((s) => (
                         <ControlButton key={s} label={cap(s)} selected={size === s} onClick={() => setSize(s)} />
@@ -747,7 +747,7 @@ export function ButtonShowcase() {
                     {/* ── 1. Border / fill vs. page ── */}
                     <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
                       <H5>Button vs. page</H5>
-                      <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 12 }}>WCAG 1.4.11 — 3:1</OverlineSmall>
+                      <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 12 }}>WCAG 1.4.11 — 3:1</EyebrowSmall>
                       <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 12 }}>
                         The button must be visually distinguishable from its background.
                       </Caption>
@@ -798,11 +798,11 @@ export function ButtonShowcase() {
                           ? 'Content on button'
                           : 'Text on button'}
                       </H5>
-                      <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 12 }}>
+                      <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 12 }}>
                         {['icon', 'avatar', 'swatch'].includes(contentType)
                           ? 'WCAG 1.4.11 — 3:1'
                           : 'WCAG 1.4.3 — 4.5:1'}
-                      </OverlineSmall>
+                      </EyebrowSmall>
                       {(() => {
                         const isNonText = ['icon', 'avatar', 'swatch'].includes(contentType);
                         const threshold = isNonText ? 3.0 : 4.5;
@@ -824,7 +824,7 @@ export function ButtonShowcase() {
                     {/* ── 3. Focus ring ── */}
                     <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
                       <H5>Focus ring</H5>
-                      <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 12 }}>WCAG 2.4.11 — 3:1</OverlineSmall>
+                      <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 12 }}>WCAG 2.4.11 — 3:1</EyebrowSmall>
                       <A11yRow label="Focus ring vs. background"
                         ratio={getContrast(contrastData.focusVisible, contrastData.background)} threshold={3.0}
                         note="2px solid var(--Focus-Visible), offset 2px" />
@@ -833,7 +833,7 @@ export function ButtonShowcase() {
                     {/* ── 4. Min target area ── */}
                     <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
                       <H5>Min target area</H5>
-                      <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 12 }}>WCAG 2.5.8 — 24 x 24</OverlineSmall>
+                      <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 12 }}>WCAG 2.5.8 — 24 x 24</EyebrowSmall>
                       {(() => {
                         const heights = { small: 32, medium: 40, large: 64 };
                         const h = heights[size] || 40;
@@ -855,7 +855,7 @@ export function ButtonShowcase() {
                     {/* ── 5. Icon / label advisory ── */}
                     <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
                       <H5>Screen reader labels</H5>
-                      <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 12 }}>WCAG 4.1.2 — 1 NAME PER CONTROL</OverlineSmall>
+                      <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 12 }}>WCAG 4.1.2 — 1 NAME PER CONTROL</EyebrowSmall>
                       {['icon', 'avatar', 'swatch'].includes(contentType) ? (
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', py: 1.5, borderBottom: '1px solid var(--Border)' }}>
                           <Box>

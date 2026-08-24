@@ -27,7 +27,7 @@ import { Icon } from '../Icon/Icon';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { Select } from '../Select/Select';
 import {
-  H2, H5, Body, BodySmall, Caption, Label, OverlineSmall,
+  H3, H5, Body, BodySmall, Caption, Label, EyebrowSmall,
 } from '../Typography';
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
@@ -511,7 +511,7 @@ export function GradientShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H2>Gradient</H2>
+      <H3>Gradient</H3>
 
       <Grid container sx={{ mt: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
@@ -561,7 +561,7 @@ export function GradientShowcase() {
 
                   {/* Variant */}
                   <Box>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>VARIANT</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>VARIANT</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
                       {VARIANTS.map((v) => (
                         <ControlButton key={v} label={VARIANT_LABELS[v]} selected={variant === v} onClick={() => setVariant(v)} />
@@ -571,7 +571,7 @@ export function GradientShowcase() {
 
                   {/* Color selector — gradient swatches */}
                   <Box sx={{ mt: 3 }}>
-                    <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</OverlineSmall>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</EyebrowSmall>
                     <Stack direction="row" spacing={1.5}>
                       {GRADIENT_COLORS.map((c) => (
                         <GradientSwatchButton key={c} colorName={c} variant={variant}
@@ -583,7 +583,7 @@ export function GradientShowcase() {
                   {/* ── LINEAR: Angle control ── */}
                   {isLinear && (
                     <Box sx={{ mt: 3 }}>
-                      <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ANGLE</OverlineSmall>
+                      <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ANGLE</EyebrowSmall>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         <AngleDial angle={angle} onChange={setAngle} />
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -604,7 +604,7 @@ export function GradientShowcase() {
                   {/* ── RADIAL: Center position ── */}
                   {isRadial && (
                     <Box sx={{ mt: 3 }}>
-                      <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>CENTER POSITION</OverlineSmall>
+                      <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>CENTER POSITION</EyebrowSmall>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                           <Caption style={{ color: 'var(--Text-Quiet)' }}>X</Caption>
@@ -627,9 +627,9 @@ export function GradientShowcase() {
                   {/* ── STOP LIST (shared by linear + radial) ── */}
                   {isStopBased && (
                     <Box sx={{ mt: 3 }}>
-                      <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+                      <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                         COLOR STOPS ({activeStops.length})
-                      </OverlineSmall>
+                      </EyebrowSmall>
                       {activeStops.map((stop, i) => (
                         <StopRow key={i} stop={stop} index={i} zone={zone} isMeshCard={isMeshCard} families={activeFamilies}
                           onUpdate={updateStop} onDelete={deleteStop} canDelete={activeStops.length > 2} />
@@ -645,9 +645,9 @@ export function GradientShowcase() {
                   {(isMesh || isMeshCard) && (
                     <>
                       <Box sx={{ mt: 3 }}>
-                        <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+                        <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                           BLOBS ({activeBlobs.length}){isMesh && ' — drag on preview to reposition'}
-                        </OverlineSmall>
+                        </EyebrowSmall>
                         {activeBlobs.map((blob, i) => (
                           <BlobRow key={i} blob={blob} index={i} zone={zone} isMeshCard={isMeshCard} families={activeFamilies}
                             onUpdate={updateBlob} onDelete={deleteBlob} canDelete={activeBlobs.length > 2} />
@@ -661,7 +661,7 @@ export function GradientShowcase() {
                       {/* MeshCard card controls */}
                       {isMeshCard && (
                         <Box sx={{ mt: 3 }}>
-                          <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>CARD</OverlineSmall>
+                          <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>CARD</EyebrowSmall>
                           <Stack spacing={2}>
                             <Box sx={{ display: 'flex', gap: 2 }}>
                               <Box sx={{ flex: 1 }}>
@@ -691,7 +691,7 @@ export function GradientShowcase() {
                     {isMeshCard ? (
                       <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
                         <H5>Content is inside a Card</H5>
-                        <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 12 }}>NO GRADIENT CONTRAST REQUIRED</OverlineSmall>
+                        <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 12 }}>NO GRADIENT CONTRAST REQUIRED</EyebrowSmall>
                         <BodySmall style={{ color: 'var(--Text-Quiet)' }}>
                           All 12 tones are available because content lives inside a Card component
                           with its own themed background. The Card ensures text contrast independently.
@@ -701,7 +701,7 @@ export function GradientShowcase() {
                       <>
                         <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
                           <H5>Accessibility zone</H5>
-                          <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 12 }}>WCAG 1.4.3 — 4.5:1 TEXT CONTRAST</OverlineSmall>
+                          <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 12 }}>WCAG 1.4.3 — 4.5:1 TEXT CONTRAST</EyebrowSmall>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                             <Box sx={{
                               px: 2, py: 1, borderRadius: '4px', fontSize: '13px', fontWeight: 700,
@@ -728,9 +728,9 @@ export function GradientShowcase() {
 
                         <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
                           <H5>Tone validation</H5>
-                          <OverlineSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 12 }}>
+                          <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 12 }}>
                             {isStopBased ? 'STOPS' : 'BLOBS'} IN ZONE
-                          </OverlineSmall>
+                          </EyebrowSmall>
                           {(isStopBased ? activeStops : blobs).map((item, i) => {
                             const inZone = getZone(item.tone, item.family) === zone;
                             return (
