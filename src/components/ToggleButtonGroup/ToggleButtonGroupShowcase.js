@@ -1,7 +1,7 @@
 // src/components/ToggleButtonGroup/ToggleButtonGroupShowcase.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
-  Box, Stack, Grid, Tabs, Tab,
+  Box, Stack, Grid,
   Tooltip, IconButton as MuiIconButton,
   Checkbox as MuiCheckbox, FormControlLabel,
 } from '@mui/material';
@@ -23,6 +23,10 @@ import { ToggleButtonGroup, ToggleButton } from './ToggleButtonGroup';
 import { Select } from '../Select/Select';
 import { BackgroundPicker } from '../BackgroundPicker';
 import { PreviewSurface } from '../PreviewSurface';
+// The showcase's own chrome is built from the library, not from MUI — the
+// design system should be dogfooding its Tabs and Button here.
+import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
+import { Button } from '../Button/Button';
 import {
   H3, H4, H5, Body, BodySmall, Caption, Label, EyebrowSmall
 } from '../Typography';
@@ -47,9 +51,12 @@ function getContrast(hex1, hex2) {
   return ((lighter + 0.05) / (darker + 0.05)).toFixed(2);
 }
 
-function getCssVar(varName) {
-  if (typeof window === 'undefined') return null;
-  return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+// The button tokens only exist under [data-theme]/[data-surface], so reading
+// them off documentElement returns "" and every ratio renders as "--". Read
+// them off the preview surface instead, the way ButtonShowcase does.
+function getCssVarFrom(el, varName) {
+  if (!el) return null;
+  return getComputedStyle(el).getPropertyValue(varName).trim() || null;
 }
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
@@ -161,30 +168,15 @@ function ColorSwatchButton({ color, selected, onClick }) {
 
 function ControlButton({ label, selected, onClick }) {
   return (
-    <Box component="button" onClick={onClick}
-      sx={{
-        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-        cursor: 'pointer',
-        border: '2px solid var(--Buttons-Primary-Button)',
-        borderRadius: 'var(--Style-Border-Radius)',
-        backgroundColor: selected ? 'var(--Buttons-Primary-Button)' : 'transparent',
-        color: selected ? 'var(--Buttons-Primary-Text)' : 'var(--Text)',
-        padding: '4px 12px', fontSize: '14px', fontFamily: 'inherit', fontWeight: 500,
-        whiteSpace: 'nowrap', flexShrink: 0,
-        transition: 'background-color 0.15s ease, color 0.15s ease',
-        '&:hover': { backgroundColor: selected ? 'var(--Buttons-Primary-Hover)' : 'var(--Surface-Dim)' },
-        '&:focus-visible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '2px' },
-      }}
-    >
+    <Button selected={selected} variant={selected ? 'default' : 'default-outline'} size="small" onClick={onClick}>
       {label}
-    </Box>
+    </Button>
   );
 }
 
 // --- Main Showcase -----------------------------------------------------------
 
 export function ToggleButtonGroupShowcase() {
-  const [mainTab, setMainTab] = useState(0);
 
   // Playground state
   // Kept: the contrast panel below reports against a colour ramp.
@@ -203,6 +195,7 @@ export function ToggleButtonGroupShowcase() {
   const [alignment, setAlignment] = useState('left');
   const [formats, setFormats] = useState([]);
   const [contrastData, setContrastData] = useState({});
+  const surfaceRef = useRef(null);
 
   const EXCLUSIVE_SEGMENTS = [
     { value: 'left',    label: 'Left',    Icon: FormatAlignLeftIcon,    jsx: 'FormatAlignLeftIcon' },
@@ -267,21 +260,26 @@ export function ToggleButtonGroupShowcase() {
 
   // Contrast data
   useEffect(() => {
-    const C = seg(color);
-    const data = {};
-    const bg = getCssVar('--Background');
+    // Defer one frame so styles are recalculated after a theme/surface change.
+    const raf = requestAnimationFrame(() => {
+      const el = surfaceRef.current;
+      if (!el) return;
+      const v = (name) => getCssVarFrom(el, name);
+      const C = seg(color);
 
-    data.buttonBg = null; // transparent
-    data.text = getCssVar('--Quiet');
-    data.border = getCssVar('--Buttons-' + C + '-Border');
-    data.selectedBg = getCssVar('--Buttons-' + C + '-Button');
-    data.selectedText = getCssVar('--Buttons-' + C + '-Text');
-    data.hover = getCssVar('--Buttons-' + C + '-Hover');
-
-    data.background = bg;
-    data.focusVisible = getCssVar('--Focus-Visible');
-    setContrastData(data);
-  }, [color]);
+      setContrastData({
+        buttonBg: null, // transparent
+        text: v('--Quiet'),
+        border: v('--Buttons-' + C + '-Border'),
+        selectedBg: v('--Buttons-' + C + '-Button'),
+        selectedText: v('--Buttons-' + C + '-Text'),
+        hover: v('--Buttons-' + C + '-Hover'),
+        background: v('--Background'),
+        focusVisible: v('--Focus-Visible'),
+      });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [color, bgTheme, bgSurface]);
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -294,14 +292,14 @@ export function ToggleButtonGroupShowcase() {
         <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
       </Box>
 
-      <Tabs value={mainTab} onChange={(e, v) => setMainTab(v)}
-        sx={{ borderBottom: '1px solid var(--Border)', mb: 0 }}>
-        <Tab label="Playground" />
-        <Tab label="Accessibility" />
-      </Tabs>
+      <Tabs>
+        <TabList>
+          <Tab>Playground</Tab>
+          <Tab>Accessibility</Tab>
+        </TabList>
 
       {/* PLAYGROUND TAB */}
-      {mainTab === 0 && (
+      <TabPanel value={0}>
         <Grid container sx={{ minHeight: 400 }}>
           {/* LEFT: Preview + Code */}
           <Grid item sx={{
@@ -309,8 +307,8 @@ export function ToggleButtonGroupShowcase() {
             flexShrink: 0,
           }}>
             {/* Preview */}
-            <Box
-              component={PreviewSurface}
+            <PreviewSurface
+              ref={surfaceRef}
               theme={bgTheme}
               surface={bgSurface}
               sx={{
@@ -370,7 +368,7 @@ export function ToggleButtonGroupShowcase() {
                   })}
                 </ToggleButtonGroup>
               )}
-            </Box>
+            </PreviewSurface>
 
             {/* Code */}
             <Box sx={{ backgroundColor: '#1e1e1e', borderBottom: '1px solid var(--Border)' }}>
@@ -395,10 +393,6 @@ export function ToggleButtonGroupShowcase() {
             flexShrink: 0,
             p: 3, backgroundColor: 'var(--Container)', overflowY: 'auto',
           }}>
-            <H4>Playground</H4>
-
-
-
             {/* Size */}
             <Box sx={{ mt: 3 }}>
               <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</EyebrowSmall>
@@ -494,10 +488,10 @@ export function ToggleButtonGroupShowcase() {
             </Box>
           </Grid>
         </Grid>
-      )}
+      </TabPanel>
 
       {/* ACCESSIBILITY TAB */}
-      {mainTab === 1 && (
+      <TabPanel value={1}>
         <Box sx={{ p: 4 }}>
           <H4>Accessibility Requirements</H4>
           <BodySmall color="quiet" style={{ marginBottom: 32 }}>
@@ -529,7 +523,7 @@ export function ToggleButtonGroupShowcase() {
                 label="Selected Text vs. Selected Background"
                 ratio={getContrast(contrastData.selectedText, contrastData.selectedBg)}
                 threshold={4.5}
-                note={'var(--Buttons-' + C + '-Text) vs var(--Buttons-' + C + '-Button)'}
+                note={'var(--Buttons-' + seg(color) + '-Text) vs var(--Buttons-' + seg(color) + '-Button)'}
               />
             </Box>
 
@@ -543,7 +537,7 @@ export function ToggleButtonGroupShowcase() {
                 label="Border vs. Background"
                 ratio={getContrast(contrastData.border, contrastData.background)}
                 threshold={3.1}
-                note="var(--Buttons-{C}-Border) vs var(--Background)"
+                note={'var(--Buttons-' + seg(color) + '-Border) vs var(--Background)'}
               />
             </Box>
 
@@ -587,7 +581,8 @@ export function ToggleButtonGroupShowcase() {
             </Box>
           </Stack>
         </Box>
-      )}
+      </TabPanel>
+      </Tabs>
     </Box>
   );
 }
