@@ -5,9 +5,6 @@ import {
   ToggleButtonGroup,
   ToggleButton,
   PrimaryToggleButtonGroup,
-  PrimaryLightToggleButtonGroup,
-  ErrorLightToggleButtonGroup,
-  SuccessLightToggleButtonGroup,
 } from './ToggleButtonGroup';
 import { axe } from 'jest-axe';
 
@@ -71,16 +68,6 @@ describe('ToggleButtonGroup Component', () => {
     expect(container.querySelector('.toggle-group-primary')).toBeInTheDocument();
   });
 
-  test.each([
-    ['primary-light'], ['secondary-light'], ['error-light'], ['success-light'],
-  ])('applies %s variant class', (variant) => {
-    const { container } = render(
-      <ToggleButtonGroup variant={variant} value="a" exclusive aria-label="test">
-        <ToggleButton value="a">A</ToggleButton>
-      </ToggleButtonGroup>
-    );
-    expect(container.querySelector(`.toggle-group-${variant}`)).toBeInTheDocument();
-  });
 
   // --- Sizes ---
 
@@ -180,32 +167,8 @@ describe('Convenience Exports', () => {
     expect(container.querySelector('.toggle-group-primary')).toBeInTheDocument();
   });
 
-  test('PrimaryLightToggleButtonGroup renders', () => {
-    const { container } = render(
-      <PrimaryLightToggleButtonGroup value="a" exclusive aria-label="test">
-        <ToggleButton value="a">A</ToggleButton>
-      </PrimaryLightToggleButtonGroup>
-    );
-    expect(container.querySelector('.toggle-group-primary-light')).toBeInTheDocument();
-  });
 
-  test('ErrorLightToggleButtonGroup renders', () => {
-    const { container } = render(
-      <ErrorLightToggleButtonGroup value="a" exclusive aria-label="test">
-        <ToggleButton value="a">A</ToggleButton>
-      </ErrorLightToggleButtonGroup>
-    );
-    expect(container.querySelector('.toggle-group-error-light')).toBeInTheDocument();
-  });
 
-  test('SuccessLightToggleButtonGroup renders', () => {
-    const { container } = render(
-      <SuccessLightToggleButtonGroup value="a" exclusive aria-label="test">
-        <ToggleButton value="a">A</ToggleButton>
-      </SuccessLightToggleButtonGroup>
-    );
-    expect(container.querySelector('.toggle-group-success-light')).toBeInTheDocument();
-  });
 });
 
 // ─── Accessibility ───────────────────────────────────────────────────────────

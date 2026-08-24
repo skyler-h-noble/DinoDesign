@@ -3,16 +3,16 @@ export {
   ToggleButtonGroup,
   ToggleButton,
   // Primary
+  DefaultToggleButtonGroup,
   PrimaryToggleButtonGroup,
-  // Light
-  PrimaryLightToggleButtonGroup,
-  SecondaryLightToggleButtonGroup,
-  TertiaryLightToggleButtonGroup,
-  NeutralLightToggleButtonGroup,
-  InfoLightToggleButtonGroup,
-  SuccessLightToggleButtonGroup,
-  WarningLightToggleButtonGroup,
-  ErrorLightToggleButtonGroup,
+  SecondaryToggleButtonGroup,
+  TertiaryToggleButtonGroup,
+  NeutralToggleButtonGroup,
+  BlackWhiteToggleButtonGroup,
+  InfoToggleButtonGroup,
+  SuccessToggleButtonGroup,
+  WarningToggleButtonGroup,
+  ErrorToggleButtonGroup,
 } from './ToggleButtonGroup';
 
 export { ToggleButtonGroupShowcase } from './ToggleButtonGroupShowcase';

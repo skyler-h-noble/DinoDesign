@@ -13,7 +13,14 @@ import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
 import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
 import FormatAlignCenterIcon from '@mui/icons-material/FormatAlignCenter';
 import FormatAlignRightIcon from '@mui/icons-material/FormatAlignRight';
+import FormatAlignJustifyIcon from '@mui/icons-material/FormatAlignJustify';
+import StrikethroughSIcon from '@mui/icons-material/StrikethroughS';
+import FormatIndentIncreaseIcon from '@mui/icons-material/FormatIndentIncrease';
+import FormatIndentDecreaseIcon from '@mui/icons-material/FormatIndentDecrease';
+import SubscriptIcon from '@mui/icons-material/Subscript';
+import SuperscriptIcon from '@mui/icons-material/Superscript';
 import { ToggleButtonGroup, ToggleButton } from './ToggleButtonGroup';
+import { Select } from '../Select/Select';
 import {
   H2, H4, H5, Body, BodySmall, Caption, Label, EyebrowSmall
 } from '../Typography';
@@ -44,7 +51,21 @@ function getCssVar(varName) {
 }
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
-const COLORS = ['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+// black-white's tokens are --Buttons-BlackWhite-*, not the capitalised prop.
+const seg = (c) => (c === 'black-white' ? 'BlackWhite' : cap(c));
+const COLOR_GROUPS = [
+  { label: 'Default', colors: ['default'] },
+  { label: 'Theme',   colors: ['primary', 'secondary', 'tertiary', 'neutral', 'black-white'] },
+  { label: 'State',   colors: ['info', 'success', 'warning', 'error'] },
+];
+const STYLES = ['fill', 'outline', 'ghost'];
+// What sits inside a segment. Only `swatch` needs component support; the rest
+// are just different children.
+const CONTENT_TYPES = ['text', 'icon', 'letter', 'number', 'swatch'];
+const SWATCH_COLORS = [
+  'var(--Primary-Color-7)', 'var(--Secondary-Color-7)', 'var(--Tertiary-Color-7)',
+  'var(--Info-Color-7)', 'var(--Success-Color-7)', 'var(--Warning-Color-7)',
+];
 
 // --- Contrast Badge ----------------------------------------------------------
 
@@ -109,7 +130,7 @@ function CopyButton({ code }) {
 // --- Color Swatch Button -----------------------------------------------------
 
 function ColorSwatchButton({ color, selected, onClick }) {
-  const C = cap(color);
+  const C = seg(color);
   return (
     <Tooltip title={C} arrow>
       <Box
@@ -164,22 +185,49 @@ export function ToggleButtonGroupShowcase() {
   const [mainTab, setMainTab] = useState(0);
 
   // Playground state
-  const [style, setStyle] = useState('primary');
-  const [color, setColor] = useState('primary');
+  // Kept: the contrast panel below reports against a colour ramp.
+  const [color, setColor] = useState('default');
   const [size, setSize] = useState('medium');
   const [isDisabled, setIsDisabled] = useState(false);
   const [exclusive, setExclusive] = useState(true);
   const [orientation, setOrientation] = useState('horizontal');
+  // A segmented control is 2-4 segments in practice, so the count is a knob
+  // rather than a fixed three. The tables below are sliced to `segments`.
+  const [segments, setSegments] = useState(3);
+  const [style, setStyle] = useState('fill');
+  const [contentType, setContentType] = useState('icon');
   const [alignment, setAlignment] = useState('left');
   const [formats, setFormats] = useState([]);
   const [contrastData, setContrastData] = useState({});
 
-  const styles = ['primary', 'light'];
+  const EXCLUSIVE_SEGMENTS = [
+    { value: 'left',    label: 'Left',    Icon: FormatAlignLeftIcon,    jsx: 'FormatAlignLeftIcon' },
+    { value: 'center',  label: 'Center',  Icon: FormatAlignCenterIcon,  jsx: 'FormatAlignCenterIcon' },
+    { value: 'right',   label: 'Right',   Icon: FormatAlignRightIcon,   jsx: 'FormatAlignRightIcon' },
+    { value: 'justify', label: 'Justify', Icon: FormatAlignJustifyIcon, jsx: 'FormatAlignJustifyIcon' },
+    { value: 'indent',  label: 'Indent',  Icon: FormatIndentIncreaseIcon, jsx: 'FormatIndentIncreaseIcon' },
+    { value: 'outdent', label: 'Outdent', Icon: FormatIndentDecreaseIcon, jsx: 'FormatIndentDecreaseIcon' },
+  ];
+  const MULTIPLE_SEGMENTS = [
+    { value: 'bold',      label: 'Bold',      Icon: FormatBoldIcon,       jsx: 'FormatBoldIcon' },
+    { value: 'italic',    label: 'Italic',    Icon: FormatItalicIcon,     jsx: 'FormatItalicIcon' },
+    { value: 'underline', label: 'Underline', Icon: FormatUnderlinedIcon, jsx: 'FormatUnderlinedIcon' },
+    { value: 'strike',    label: 'Strike',    Icon: StrikethroughSIcon,   jsx: 'StrikethroughSIcon' },
+    { value: 'sub',       label: 'Subscript', Icon: SubscriptIcon,        jsx: 'SubscriptIcon' },
+    { value: 'sup',       label: 'Superscript', Icon: SuperscriptIcon,    jsx: 'SuperscriptIcon' },
+  ];
+  const activeSegments = (exclusive ? EXCLUSIVE_SEGMENTS : MULTIPLE_SEGMENTS).slice(0, segments);
 
-  // Map style + color to variant string
-  const getVariant = () => {
-    if (style === 'primary') return 'primary';
-    return color + '-' + style;
+
+  // fill is the bare colour name; outline and ghost suffix it.
+  const getVariant = () => (style === 'fill' ? color : color + '-' + style);
+
+  // The label a segment shows, per content type.
+  const segLabel = (seg, i) => {
+    if (contentType === 'letter') return String.fromCharCode(65 + i);
+    if (contentType === 'number') return String(i + 1);
+    if (contentType === 'text') return seg.label;
+    return null; // icon / swatch render no text
   };
 
   // Exclusive handler
@@ -200,46 +248,43 @@ export function ToggleButtonGroupShowcase() {
     if (isDisabled) parts.push('disabled');
     parts.push('aria-label="text formatting"');
 
-    const btns = exclusive
-      ? '<ToggleButton value="left"><FormatAlignLeftIcon /></ToggleButton>\n  <ToggleButton value="center"><FormatAlignCenterIcon /></ToggleButton>\n  <ToggleButton value="right"><FormatAlignRightIcon /></ToggleButton>'
-      : '<ToggleButton value="bold"><FormatBoldIcon /></ToggleButton>\n  <ToggleButton value="italic"><FormatItalicIcon /></ToggleButton>\n  <ToggleButton value="underline"><FormatUnderlinedIcon /></ToggleButton>';
+    const btns = activeSegments
+      .map((seg, i) => {
+        const inner = contentType === 'icon' ? '<' + seg.jsx + ' />' : (segLabel(seg, i) || '');
+        const sw = contentType === 'swatch'
+          ? ' swatch="' + SWATCH_COLORS[i % SWATCH_COLORS.length] + '"'
+          : '';
+        return '<ToggleButton value="' + seg.value + '"' + sw + '>' + inner + '</ToggleButton>';
+      })
+      .join('\n  ');
 
     return '<ToggleButtonGroup ' + parts.join(' ') + '>\n  ' + btns + '\n</ToggleButtonGroup>';
   };
 
   // Contrast data
   useEffect(() => {
-    const C = cap(color);
+    const C = seg(color);
     const data = {};
     const bg = getCssVar('--Background');
 
-    if (style === 'primary') {
-      data.buttonBg = null; // transparent
-      data.text = getCssVar('--Quiet');
-      data.border = getCssVar('--Buttons-Primary-Border');
-      data.selectedBg = getCssVar('--Buttons-Primary-Button');
-      data.selectedText = getCssVar('--Buttons-Primary-Text');
-      data.hover = getCssVar('--Buttons-Primary-Hover');
-    } else if (style === 'light') {
-      data.buttonBg = null; // transparent
-      data.text = getCssVar('--Quiet');
-      data.border = getCssVar('--Buttons-' + C + '-Light-Border');
-      data.selectedBg = getCssVar('--Buttons-' + C + '-Light-Button');
-      data.selectedText = getCssVar('--Buttons-' + C + '-Light-Text');
-      data.hover = getCssVar('--Buttons-Primary-Hover');
-    }
+    data.buttonBg = null; // transparent
+    data.text = getCssVar('--Quiet');
+    data.border = getCssVar('--Buttons-' + C + '-Border');
+    data.selectedBg = getCssVar('--Buttons-' + C + '-Button');
+    data.selectedText = getCssVar('--Buttons-' + C + '-Text');
+    data.hover = getCssVar('--Buttons-' + C + '-Hover');
 
     data.background = bg;
     data.focusVisible = getCssVar('--Focus-Visible');
     setContrastData(data);
-  }, [style, color]);
+  }, [color]);
 
   return (
     <Box sx={{ width: '100%' }}>
       <H2 style={{ marginBottom: 8 }}>ToggleButtonGroup</H2>
       <Body color="quiet" style={{ marginBottom: 24 }}>
-        Toggle button group with primary and light variants.
-        Primary is a single color; light supports all 8 colors.
+        Segmented control for choosing between two, three or four mutually
+        exclusive options — or several at once.
       </Body>
 
       <Tabs value={mainTab} onChange={(e, v) => setMainTab(v)}
@@ -274,9 +319,19 @@ export function ToggleButtonGroupShowcase() {
                   orientation={orientation}
                   aria-label="text alignment"
                 >
-                  <ToggleButton value="left"><FormatAlignLeftIcon /></ToggleButton>
-                  <ToggleButton value="center"><FormatAlignCenterIcon /></ToggleButton>
-                  <ToggleButton value="right"><FormatAlignRightIcon /></ToggleButton>
+                  {activeSegments.map((seg, i) => {
+                    const text = segLabel(seg, i);
+                    return (
+                      <ToggleButton
+                        key={seg.value}
+                        value={seg.value}
+                        aria-label={seg.label}
+                        {...(contentType === 'swatch' ? { swatch: SWATCH_COLORS[i % SWATCH_COLORS.length] } : {})}
+                      >
+                        {contentType === 'icon' ? <seg.Icon /> : text}
+                      </ToggleButton>
+                    );
+                  })}
                 </ToggleButtonGroup>
               ) : (
                 <ToggleButtonGroup
@@ -288,9 +343,19 @@ export function ToggleButtonGroupShowcase() {
                   orientation={orientation}
                   aria-label="text formatting"
                 >
-                  <ToggleButton value="bold"><FormatBoldIcon /></ToggleButton>
-                  <ToggleButton value="italic"><FormatItalicIcon /></ToggleButton>
-                  <ToggleButton value="underline"><FormatUnderlinedIcon /></ToggleButton>
+                  {activeSegments.map((seg, i) => {
+                    const text = segLabel(seg, i);
+                    return (
+                      <ToggleButton
+                        key={seg.value}
+                        value={seg.value}
+                        aria-label={seg.label}
+                        {...(contentType === 'swatch' ? { swatch: SWATCH_COLORS[i % SWATCH_COLORS.length] } : {})}
+                      >
+                        {contentType === 'icon' ? <seg.Icon /> : text}
+                      </ToggleButton>
+                    );
+                  })}
                 </ToggleButtonGroup>
               )}
             </Box>
@@ -320,28 +385,7 @@ export function ToggleButtonGroupShowcase() {
           }}>
             <H4>Playground</H4>
 
-            {/* Style */}
-            <Box sx={{ mt: 3 }}>
-              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</EyebrowSmall>
-              <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1 }}>
-                {styles.map((s) => (
-                  <ControlButton key={s} label={cap(s)} selected={style === s}
-                    onClick={() => setStyle(s)} />
-                ))}
-              </Stack>
-            </Box>
 
-            {/* Color (hidden for primary) */}
-            {style !== 'primary' && (
-              <Box sx={{ mt: 3 }}>
-                <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</EyebrowSmall>
-                <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-                  {COLORS.map((c) => (
-                    <ColorSwatchButton key={c} color={c} selected={color === c} onClick={setColor} />
-                  ))}
-                </Stack>
-              </Box>
-            )}
 
             {/* Size */}
             <Box sx={{ mt: 3 }}>
@@ -349,6 +393,64 @@ export function ToggleButtonGroupShowcase() {
               <Stack direction="row" spacing={1}>
                 {['small', 'medium', 'large'].map((s) => (
                   <ControlButton key={s} label={cap(s)} selected={size === s} onClick={() => setSize(s)} />
+                ))}
+              </Stack>
+            </Box>
+
+            {/* Style */}
+            <Box sx={{ mt: 3 }}>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</EyebrowSmall>
+              <Stack direction="row" spacing={1}>
+                {STYLES.map((st) => (
+                  <ControlButton key={st} label={cap(st)} selected={style === st} onClick={() => setStyle(st)} />
+                ))}
+              </Stack>
+            </Box>
+
+            {/* Colour — Default, Theme, State */}
+            <Box sx={{ mt: 3 }}>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</EyebrowSmall>
+              {COLOR_GROUPS.map((grp) => (
+                <Box key={grp.label} sx={{ mb: 1.5 }}>
+                  <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 4 }}>{grp.label}</Caption>
+                  <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
+                    {grp.colors.map((c) => (
+                      <ColorSwatchButton key={c} color={c} selected={color === c} onClick={setColor} />
+                    ))}
+                  </Stack>
+                </Box>
+              ))}
+            </Box>
+
+            {/* Content type */}
+            <Box sx={{ mt: 3 }}>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>CONTENT TYPE</EyebrowSmall>
+              <Select
+                options={CONTENT_TYPES.map((ct) => ({
+                  value: ct,
+                  label: ct === 'icon' ? 'Icon-Only' : cap(ct),
+                }))}
+                value={contentType}
+                onChange={setContentType}
+                labelPosition="none"
+                size="small"
+              />
+              <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
+                {contentType === 'icon'   ? 'Icon only — each segment needs an aria-label.' :
+                 contentType === 'letter' ? 'Single letter per segment.' :
+                 contentType === 'number' ? 'Single digit per segment.' :
+                 contentType === 'swatch' ? 'Colour chip per segment, sized from --*-Input-Swatch-Radius.' :
+                 'Text label, with optional start and end decorators.'}
+              </Caption>
+            </Box>
+
+            {/* Segment count */}
+            <Box sx={{ mt: 3 }}>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SEGMENTS</EyebrowSmall>
+              <Stack direction="row" spacing={1}>
+                {[2, 3, 4, 5, 6].map((count) => (
+                  <ControlButton key={count} label={String(count)} selected={segments === count}
+                    onClick={() => setSegments(count)} />
                 ))}
               </Stack>
             </Box>
@@ -387,7 +489,7 @@ export function ToggleButtonGroupShowcase() {
         <Box sx={{ p: 4 }}>
           <H4>Accessibility Requirements</H4>
           <BodySmall color="quiet" style={{ marginBottom: 32 }}>
-            Based on current Playground settings: {style} · {style !== 'primary' ? color + ' · ' : ''}{size}
+            Based on current Playground settings: {getVariant()} · {size} · {segments} segments · {contentType}
           </BodySmall>
 
           <Stack spacing={4}>
@@ -401,9 +503,7 @@ export function ToggleButtonGroupShowcase() {
                 label="Text vs. Background"
                 ratio={getContrast(contrastData.text, contrastData.buttonBg || contrastData.background)}
                 threshold={4.5}
-                note={style === 'light'
-                  ? 'Text vs light button bg'
-                  : 'Text vs page background (transparent button bg)'}
+                note="Text vs page background (transparent button bg)"
               />
             </Box>
 
@@ -417,10 +517,7 @@ export function ToggleButtonGroupShowcase() {
                 label="Selected Text vs. Selected Background"
                 ratio={getContrast(contrastData.selectedText, contrastData.selectedBg)}
                 threshold={4.5}
-                note={style === 'primary'
-                  ? 'var(--Buttons-Primary-Text) vs var(--Buttons-Primary-Button)'
-                  : 'var(--Buttons-{C}-Light-Text) vs var(--Buttons-{C}-Light-Button)'
-                }
+                note={'var(--Buttons-' + C + '-Text) vs var(--Buttons-' + C + '-Button)'}
               />
             </Box>
 

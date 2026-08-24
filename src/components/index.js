@@ -72,6 +72,22 @@ export { Rail, RailShowcase } from './Rail';
 export { Toolbar, ToolbarShowcase } from './Toolbar';
 export { NumberField, NumberFieldShowcase } from './NumberField';
 export { ToggleButton } from './ToggleButton';
+// The GROUP is a separate component from the standalone ToggleButton: it owns
+// the selection state, so a segmented control comes from here rather than from
+// wiring individual buttons together.
+export {
+  ToggleButtonGroup,
+  DefaultToggleButtonGroup,
+  PrimaryToggleButtonGroup,
+  SecondaryToggleButtonGroup,
+  TertiaryToggleButtonGroup,
+  NeutralToggleButtonGroup,
+  BlackWhiteToggleButtonGroup,
+  InfoToggleButtonGroup,
+  SuccessToggleButtonGroup,
+  WarningToggleButtonGroup,
+  ErrorToggleButtonGroup,
+} from './ToggleButtonGroup/ToggleButtonGroup';
 
 // ========== INPUTS & FORMS ==========
 // Canonical input: full-featured component with variants, validation,

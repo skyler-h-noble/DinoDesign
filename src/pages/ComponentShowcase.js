@@ -15,6 +15,7 @@ import { CheckboxShowcase } from '../components/Checkbox/CheckboxShowcase';
 import { RadioShowcase } from '../components/Radio/RadioShowcase';
 import { SliderShowcase } from '../components/Slider/SliderShowcase';
 import { SwitchShowcase } from '../components/Switch/SwitchShowcase';
+import { ToggleButtonGroupShowcase } from '../components/ToggleButtonGroup/ToggleButtonGroupShowcase';
 import { BadgeShowcase } from '../components/Badge/BadgeShowcase';
 import { ChipShowcase } from '../components/Chip/ChipShowcase';
 import { DividerShowcase } from '../components/Divider/DividerShowcase';
@@ -148,6 +149,7 @@ const NAV_ITEMS = [
       { id: 'buttons', label: 'Button' },
       { id: 'fab', label: 'FAB' },
       { id: 'buttongroup', label: 'Button Group' },
+      { id: 'togglebuttongroup', label: 'Toggle Button Group' },
       { id: 'input', label: 'Input' },
       { id: 'select', label: 'Select' },
       { id: 'autocomplete', label: 'Autocomplete' },
@@ -395,6 +397,7 @@ function ShowcaseInner() {
             {activeSection === 'input' && <InputShowcase />}
             {activeSection === 'slider' && <SliderShowcase />}
             {activeSection === 'switch' && <SwitchShowcase />}
+            {activeSection === 'togglebuttongroup' && <ToggleButtonGroupShowcase />}
             {activeSection === 'rating' && <RatingShowcase />}
             {activeSection === 'numberfield' && <NumberFieldShowcase />}
             {activeSection === 'searchfield' && <SearchFieldShowcase />}
