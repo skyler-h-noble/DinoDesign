@@ -1,0 +1,16 @@
+# Netlify build configuration.
+#
+# Kept in the repo rather than the dashboard so the build settings travel with
+# the code and can't drift. The command matters: `npm run build` is aliased to
+# build:lib and emits the npm bundle, NOT a deployable site.
+[build]
+  command = "npm run build:app"
+  publish = "build"
+
+# The app is a BrowserRouter SPA. Only "/" is routed today, but any path the
+# router owns must be served index.html rather than a 404 from the CDN.
+# Query strings (?user=<uuid>) pass through untouched.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
