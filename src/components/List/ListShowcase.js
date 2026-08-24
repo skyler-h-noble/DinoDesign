@@ -28,7 +28,7 @@ import { ButtonGroup } from '../ButtonGroup';
 import { Link } from '../Link';
 import { Tag } from '../Tag';
 import {
-  H2, H4, H5, Body, BodySmall, Caption, Label, EyebrowSmall
+  H3, H4, H5, Body, BodySmall, Caption, Label, EyebrowSmall
 } from '../Typography';
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
@@ -356,7 +356,7 @@ export function ListShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H2>List</H2>
+      <H3>List</H3>
       <Tabs value={mainTab} onChange={(e, v) => setMainTab(v)}
         sx={{ mt: 3, mb: 0, borderBottom: '1px solid var(--Border)',
           '& .MuiTabs-indicator': { backgroundColor: 'var(--Buttons-Primary-Button)', height: 3 },

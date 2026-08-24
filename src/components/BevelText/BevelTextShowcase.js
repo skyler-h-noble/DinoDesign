@@ -7,7 +7,7 @@ import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
 import { Slider } from '../Slider/Slider';
 import { SwitchInput } from '../Switch';
-import { H2, Body, BodySmall, Caption, EyebrowSmall } from '../Typography';
+import { H3, Body, BodySmall, Caption, EyebrowSmall } from '../Typography';
 import {
   BEVEL_PRESETS,
   BEVEL_PRESET_NAMES,
@@ -134,7 +134,7 @@ export function BevelTextShowcase() {
 
   return (
     <Box>
-      <H2 style={{ marginBottom: 12 }}>Bevel Display Text</H2>
+      <H3 style={{ marginBottom: 12 }}>Bevel Display Text</H3>
       <Body color="quiet" style={{ marginBottom: 24, maxWidth: 720 }}>
         Straight-line display text with an SVG inset-bevel and optional drop
         shadow. Colors are locked to the active button-palette tokens

@@ -5,7 +5,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import { Typography, HEADER_COLORS, TEXT_COLORS } from './Typography';
 import {
-  H2, H5, BodySmall, Caption, Label, EyebrowSmall
+  H3, H5, BodySmall, Caption, Label, EyebrowSmall
 } from './Typography';
 import { Button } from '../Button/Button';
 import { Checkbox } from '../Checkbox/Checkbox';
@@ -309,7 +309,7 @@ export function TypographyShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H2>Typography</H2>
+      <H3>Typography</H3>
       <Box sx={{ mt: 1 }}>
         <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
       </Box>

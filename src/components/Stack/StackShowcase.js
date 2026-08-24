@@ -14,7 +14,7 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H3, H5, BodySmall, Caption, EyebrowSmall, Body,
+  H3, H5, BodySmall, Caption, EyebrowSmall, Body,
 } from '../Typography';
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
@@ -274,7 +274,7 @@ function Playground() {
 export function StackShowcase() {
   return (
     <Box sx={{ pb: 8 }}>
-      <H2>Stack</H2>
+      <H3>Stack</H3>
       <Body style={{ color: 'var(--Text-Quiet)', marginTop: 8, marginBottom: 32, maxWidth: 640 }}>
         DynoStack is a layout primitive built on MUI Stack with one intelligent addition:
         it automatically enforces a minimum gap between children when it detects small (24px)

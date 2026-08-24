@@ -11,7 +11,7 @@ import { BackgroundPicker } from '../BackgroundPicker';
 import { Button } from '../Button/Button';
 import { Slider } from '../Slider/Slider';
 import {
-  H2, H5, BodySmall, Caption, Label, EyebrowSmall
+  H3, H5, BodySmall, Caption, Label, EyebrowSmall
 } from '../Typography';
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
@@ -109,7 +109,7 @@ export function CircularProgressShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H2>Circular Progress</H2>
+      <H3>Circular Progress</H3>
 
       <Grid container sx={{ mt: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 

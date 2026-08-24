@@ -13,7 +13,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import * as MuiIcons from '@mui/icons-material';
 import { Chip } from './Chip';
 import {
-  H2, H4, H5, Body, BodySmall, BodyBold, Caption, Label, EyebrowSmall
+  H3, H4, H5, Body, BodySmall, BodyBold, Caption, Label, EyebrowSmall
 } from '../Typography';
 
 // --- Contrast Calculator -----------------------------------------------------
@@ -343,7 +343,7 @@ export function ChipShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H2>Chips</H2>
+      <H3>Chips</H3>
 
       <Tabs
         value={mainTab}

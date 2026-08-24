@@ -6,7 +6,7 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
 import { NumberField } from '../NumberField/NumberField';
-import { H2, H3, Body, BodySmall, Caption, EyebrowSmall } from '../Typography';
+import { H3, Body, BodySmall, Caption, EyebrowSmall } from '../Typography';
 import { ContrastCheck } from '../_a11y/ContrastCheck';
 
 const COLORS = [
@@ -42,7 +42,7 @@ export function CopyrightShowcase() {
 
   return (
     <Box>
-      <H2 style={{ marginBottom: 12 }}>Copyright</H2>
+      <H3 style={{ marginBottom: 12 }}>Copyright</H3>
       <Body color="quiet" style={{ marginBottom: 24, maxWidth: 720 }}>
         Standalone copyright strip used at the bottom of pages. Defaults to{' '}
         <code>© {'{year}'} {'{companyName}'}. {'{rights}'}.</code> Pass{' '}

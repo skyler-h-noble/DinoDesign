@@ -7,7 +7,7 @@ import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
 import { Slider } from '../Slider/Slider';
 import { SwitchInput } from '../Switch';
-import { H2, H3, Body, BodySmall, Caption, EyebrowSmall } from '../Typography';
+import { H3, Body, BodySmall, Caption, EyebrowSmall } from '../Typography';
 import { ContrastCheck } from '../_a11y/ContrastCheck';
 import { BEVEL_PRESET_NAMES, BEVEL_THEMES } from '../_bevelPresets';
 
@@ -114,7 +114,7 @@ export function CurvedTextShowcase() {
 
   return (
     <Box>
-      <H2 style={{ marginBottom: 12 }}>Curved Display Text</H2>
+      <H3 style={{ marginBottom: 12 }}>Curved Display Text</H3>
       <Body color="quiet" style={{ marginBottom: 24, maxWidth: 720 }}>
         Decorative text laid along an SVG arc. Chain multiple arcs to build a
         wave — each curve gets its own radius, arc sweep, and direction. Uses

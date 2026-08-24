@@ -27,7 +27,7 @@ import { Icon } from '../Icon/Icon';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { Select } from '../Select/Select';
 import {
-  H2, H5, Body, BodySmall, Caption, Label, EyebrowSmall,
+  H3, H5, Body, BodySmall, Caption, Label, EyebrowSmall,
 } from '../Typography';
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
@@ -511,7 +511,7 @@ export function GradientShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H2>Gradient</H2>
+      <H3>Gradient</H3>
 
       <Grid container sx={{ mt: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 

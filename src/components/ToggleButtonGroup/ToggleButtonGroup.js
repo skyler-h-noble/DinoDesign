@@ -60,14 +60,16 @@ function colorStyles(color, style) {
   };
 
   if (style === 'ghost') {
-    // No chrome at all: no group border, and the selection is a tone shift
-    // rather than a fill. For toolbars, where the control shouldn't compete.
+    // No chrome until something is chosen: no group border, no dividers. The
+    // selected segment is OUTLINED rather than filled, so the control is
+    // invisible at rest and shows exactly one ring once you pick. For
+    // toolbars, where the group shouldn't compete with the content.
     return {
       ...base,
       border:        'transparent',
-      selectedBg:    'var(--Hover)',
-      selectedText:  'var(--Text)',
-      selectedRing:  null,
+      selectedBg:    'transparent',
+      selectedText:  'var(--Buttons-' + C + '-Border)',
+      selectedRing:  'inset 0 0 0 2px var(--Buttons-' + C + '-Border)',
       bevel:         false,
     };
   }

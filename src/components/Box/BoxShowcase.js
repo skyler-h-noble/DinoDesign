@@ -9,7 +9,7 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H5, Body, BodySmall, Caption, EyebrowSmall,
+  H3, H5, Body, BodySmall, Caption, EyebrowSmall,
 } from '../Typography';
 
 const SURFACES = [
@@ -69,7 +69,7 @@ export function BoxShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H2>Box</H2>
+      <H3>Box</H3>
       <Body color="quiet" style={{ marginTop: 8, marginBottom: 24, maxWidth: 720 }}>
         Bare layout primitive — a slot that participates in the design-system
         cascade (<code>data-theme</code> / <code>data-surface</code>) without

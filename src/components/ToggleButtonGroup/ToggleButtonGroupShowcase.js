@@ -21,8 +21,10 @@ import SubscriptIcon from '@mui/icons-material/Subscript';
 import SuperscriptIcon from '@mui/icons-material/Superscript';
 import { ToggleButtonGroup, ToggleButton } from './ToggleButtonGroup';
 import { Select } from '../Select/Select';
+import { BackgroundPicker } from '../BackgroundPicker';
+import { PreviewSurface } from '../PreviewSurface';
 import {
-  H2, H4, H5, Body, BodySmall, Caption, Label, EyebrowSmall
+  H3, H4, H5, Body, BodySmall, Caption, Label, EyebrowSmall
 } from '../Typography';
 
 // --- Contrast Calculator -----------------------------------------------------
@@ -195,6 +197,8 @@ export function ToggleButtonGroupShowcase() {
   // rather than a fixed three. The tables below are sliced to `segments`.
   const [segments, setSegments] = useState(3);
   const [style, setStyle] = useState('fill');
+  const [bgTheme, setBgTheme] = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
   const [contentType, setContentType] = useState('icon');
   const [alignment, setAlignment] = useState('left');
   const [formats, setFormats] = useState([]);
@@ -281,11 +285,14 @@ export function ToggleButtonGroupShowcase() {
 
   return (
     <Box sx={{ width: '100%' }}>
-      <H2 style={{ marginBottom: 8 }}>ToggleButtonGroup</H2>
-      <Body color="quiet" style={{ marginBottom: 24 }}>
+      <H3 style={{ marginBottom: 8 }}>ToggleButtonGroup</H3>
+      <Body color="quiet" style={{ marginBottom: 8 }}>
         Segmented control for choosing between two, three or four mutually
         exclusive options — or several at once.
       </Body>
+      <Box sx={{ mt: 1, mb: 3 }}>
+        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
 
       <Tabs value={mainTab} onChange={(e, v) => setMainTab(v)}
         sx={{ borderBottom: '1px solid var(--Border)', mb: 0 }}>
@@ -302,12 +309,17 @@ export function ToggleButtonGroupShowcase() {
             flexShrink: 0,
           }}>
             {/* Preview */}
-            <Box sx={{
-              p: 4,
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              minHeight: 200, backgroundColor: 'var(--Background)',
-              borderBottom: '1px solid var(--Border)',
-            }}>
+            <Box
+              component={PreviewSurface}
+              theme={bgTheme}
+              surface={bgSurface}
+              sx={{
+                p: 4,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                minHeight: 200,
+                borderBottom: '1px solid var(--Border)',
+              }}
+            >
               {exclusive ? (
                 <ToggleButtonGroup
                   variant={getVariant()}

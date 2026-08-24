@@ -9,7 +9,7 @@ import { Switch } from '../Switch/Switch';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
-  H2, H5, Body, BodySmall, Caption, Label, EyebrowSmall,
+  H3, H5, Body, BodySmall, Caption, Label, EyebrowSmall,
 } from '../Typography';
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
@@ -115,7 +115,7 @@ export function TabsShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H2>Tabs</H2>
+      <H3>Tabs</H3>
 
       <Grid container sx={{ mt: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 

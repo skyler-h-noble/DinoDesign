@@ -12,7 +12,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { Badge } from './Badge';
 import {
-  H2, H4, H5, Body, BodySmall, Caption, Label, EyebrowSmall
+  H3, H4, H5, Body, BodySmall, Caption, Label, EyebrowSmall
 } from '../Typography';
 
 // --- Contrast Calculator -----------------------------------------------------
@@ -231,7 +231,7 @@ export function BadgeShowcase() {
 
   return (
     <Box sx={{ width: '100%' }}>
-      <H2 style={{ marginBottom: 8 }}>Badge</H2>
+      <H3 style={{ marginBottom: 8 }}>Badge</H3>
       <Body color="quiet" style={{ marginBottom: 24 }}>
         Small label attached to an element showing status or count.
         Solid, outline, and light variants across all 8 colors.

@@ -8,7 +8,7 @@ import { Footer } from './Footer';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { Button } from '../Button/Button';
 import { SwitchInput } from '../Switch';
-import { H2, H3, Body, BodySmall, Caption, EyebrowSmall } from '../Typography';
+import { H3, Body, BodySmall, Caption, EyebrowSmall } from '../Typography';
 import { ContrastCheck } from '../_a11y/ContrastCheck';
 
 const SAMPLE_ADDRESS = {
@@ -99,7 +99,7 @@ export function FooterShowcase() {
 
   return (
     <Box>
-      <H2 style={{ marginBottom: 12 }}>Footer</H2>
+      <H3 style={{ marginBottom: 12 }}>Footer</H3>
       <Body color="quiet" style={{ marginBottom: 24, maxWidth: 720 }}>
         Configurable 1–4 column footer. The first column is always the
         company address / contact. Optional <code>socialLinks</code> and{' '}
