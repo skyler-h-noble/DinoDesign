@@ -138,7 +138,7 @@ the cascade do the rest.
 
 ## MUI Integration
 
-`@omnidesign/components` is built on MUI. The `OmniDesignProvider` handles all MUI `ThemeProvider` wiring internally — **you never configure MUI directly**. OmniDesign's CSS custom properties drive all visual values; MUI is purely structural.
+`@omni-design/components` is built on MUI. The `OmniDesignProvider` handles all MUI `ThemeProvider` wiring internally — **you never configure MUI directly**. OmniDesign's CSS custom properties drive all visual values; MUI is purely structural.
 
 **MUI peer dependencies must be installed in the consuming app:**
 ```bash
@@ -522,7 +522,7 @@ headings.
 
 ## Component Imports
 
-All 49 components import from `./components` (or `@omnidesign/components` if installed as a package):
+All 49 components import from `./components` (or `@omni-design/components` if installed as a package):
 
 ```jsx
 import {
@@ -844,7 +844,7 @@ live (the literal `MISSING-LIB-COMPONENT` tag is greppable, so reviews and the
 // MISSING-LIB-COMPONENT: <ComponentName>
 // Needed for: <one line on the use case>
 // Proposed API: <props sketch>
-// Lib-track: open an issue / PR against @omnidesign/components
+// Lib-track: open an issue / PR against @omni-design/components
 ```
 
 Then either:
@@ -878,11 +878,11 @@ Two Claude Code slash commands ship with this package:
   user to confirm, then POSTs it to the OmniDesign admin dashboard for
   review.
 
-To install them in your project after `npm install @omnidesign/components`:
+To install them in your project after `npm install @omni-design/components`:
 
 ```bash
 mkdir -p .claude/commands
-cp node_modules/@omnidesign/components/.claude/commands/*.md \
+cp node_modules/@omni-design/components/.claude/commands/*.md \
   .claude/commands/
 ```
 

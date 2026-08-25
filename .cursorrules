@@ -1,16 +1,16 @@
-This project uses the @omnidesign/components design system.
+This project uses the @omni-design/components design system.
 
 Read these docs before writing any code:
-- node_modules/@omnidesign/components/docs/getting-started.md
-- node_modules/@omnidesign/components/docs/token-system.md
-- node_modules/@omnidesign/components/docs/components.md
+- node_modules/@omni-design/components/docs/getting-started.md
+- node_modules/@omni-design/components/docs/token-system.md
+- node_modules/@omni-design/components/docs/components.md
 
-ALWAYS import components from '@omnidesign/components'
+ALWAYS import components from '@omni-design/components'
 ALWAYS import CSS at the top of App.js:
-  import '@omnidesign/components/public/styles/foundation.css'
-  import '@omnidesign/components/public/styles/core.css'
-  import '@omnidesign/components/public/styles/Light-Mode.css'
-  import '@omnidesign/components/public/styles/base.css'
+  import '@omni-design/components/public/styles/foundation.css'
+  import '@omni-design/components/public/styles/core.css'
+  import '@omni-design/components/public/styles/Light-Mode.css'
+  import '@omni-design/components/public/styles/base.css'
 
 ALWAYS wrap content in a div with data-theme, data-surface, and data-style attributes.
 

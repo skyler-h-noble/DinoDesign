@@ -4,7 +4,7 @@
   //
   // Before this, package.json pointed `types` at dist/index.d.ts — a file
   // nothing ever produced. Every TypeScript consumer therefore wrote its own
-  // `declare module '@omnidesign/components'` shim and it drifted behind the
+  // `declare module '@omni-design/components'` shim and it drifted behind the
   // lib silently: the studio's was missing eleven components that had been
   // shipping for months, and nothing failed until someone imported one.
   //

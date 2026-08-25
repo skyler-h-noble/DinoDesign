@@ -20,7 +20,7 @@ a brand requires only replacing the token CSS files; no component code changes.
 
 ### 1. Install peer dependencies
 
-`@omnidesign/components` is built on MUI and uses Emotion for styling. These must be installed in your app — they are not bundled inside the package:
+`@omni-design/components` is built on MUI and uses Emotion for styling. These must be installed in your app — they are not bundled inside the package:
 
 ```bash
 npm install @mui/material @mui/icons-material @emotion/react @emotion/styled
@@ -29,10 +29,10 @@ npm install @mui/material @mui/icons-material @emotion/react @emotion/styled
 ### 2. Install OmniDesign
 
 ```bash
-npm install @omnidesign/components
+npm install @omni-design/components
 ```
 
-> **Why peer dependencies?** MUI is not bundled inside `@omnidesign/components` to avoid shipping duplicate copies of React and MUI in apps that already use them. Your app provides MUI; OmniDesign provides the token-driven theme layer on top of it. You never need to configure MUI directly — `OmniDesignProvider` handles all of that automatically.
+> **Why peer dependencies?** MUI is not bundled inside `@omni-design/components` to avoid shipping duplicate copies of React and MUI in apps that already use them. Your app provides MUI; OmniDesign provides the token-driven theme layer on top of it. You never need to configure MUI directly — `OmniDesignProvider` handles all of that automatically.
 
 ### Required peer dependency versions
 
@@ -65,7 +65,7 @@ sheets load and becomes visible the moment they're ready.
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import { OmniDesignProvider } from '@omnidesign/components';
+import { OmniDesignProvider } from '@omni-design/components';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -97,9 +97,9 @@ If you manage CSS loading yourself, just import the files and use components
 directly. No Provider needed.
 
 ```jsx
-import '@omnidesign/tokens/base.css';
-import '@omnidesign/tokens/light-mode.css';
-import '@omnidesign/tokens/themes.css';
+import '@omni-design/components/public/styles/foundation.css';
+import '@omni-design/components/public/styles/core.css';
+import '@omni-design/components/public/styles/Light-Mode.css';
 
 // Components work without a Provider
 <Card variant="solid" color="primary">
@@ -151,7 +151,7 @@ Once the Provider is set up, import and use components anywhere in your app.
 No additional wiring required — components inherit the active theme automatically.
 
 ```jsx
-import { Button } from '@omnidesign/components';
+import { Button } from '@omni-design/components';
 
 function MyPage() {
   return (
@@ -170,7 +170,7 @@ Components automatically adapt to the theme of their nearest surface ancestor.
 You never need to pass a theme down manually.
 
 ```jsx
-import { Card, CardContent, Button } from '@omnidesign/components';
+import { Card, CardContent, Button } from '@omni-design/components';
 
 // Card sets the surface context — Button inherits it automatically
 <Card variant="solid" color="primary">
@@ -203,7 +203,7 @@ To nest a different theme inside another:
 `useOmniDesign` hook:
 
 ```jsx
-import { useOmniDesign } from '@omnidesign/components';
+import { useOmniDesign } from '@omni-design/components';
 
 function DarkModeToggle() {
   const { isDark, toggleDarkMode } = useOmniDesign();
@@ -248,7 +248,7 @@ const [dark, setDark] = useState(false);
 Use `setTheme` from `useOmniDesign` to change the root theme at runtime:
 
 ```jsx
-import { useOmniDesign } from '@omnidesign/components';
+import { useOmniDesign } from '@omni-design/components';
 
 function ThemeSwitcher() {
   const { theme, setTheme } = useOmniDesign();
@@ -292,7 +292,7 @@ function ThemeSwitcher() {
 Access the active theme state anywhere inside the Provider:
 
 ```jsx
-import { useOmniDesign } from '@omnidesign/components';
+import { useOmniDesign } from '@omni-design/components';
 
 const {
   theme,           // active theme name e.g. 'Primary'
@@ -364,7 +364,7 @@ Professional   Modern   Bold   Playful
 Types are included. Import them as needed:
 
 ```ts
-import type { DynoTheme, DynoSurface, DynoStyle } from '@omnidesign/components';
+import type { DynoTheme, DynoSurface, DynoStyle } from '@omni-design/components';
 ```
 
 ---
@@ -376,25 +376,25 @@ Dyno ships a `.cursorrules` file that tells Cursor exactly how to use your desig
 ### Option A — Copy from node_modules (quickest)
 After installing, copy the file into your project root:
 ```bash
-cp node_modules/@omnidesign/components/.cursorrules .cursorrules
+cp node_modules/@omni-design/components/.cursorrules .cursorrules
 ```
 
 ### Option B — Copy and paste
 Create a `.cursorrules` file at your project root and paste this in:
 ```
-This project uses the @omnidesign/components design system.
+This project uses the @omni-design/components design system.
 
 Read these docs before writing any code:
-- node_modules/@omnidesign/components/docs/getting-started.md
-- node_modules/@omnidesign/components/docs/token-system.md
-- node_modules/@omnidesign/components/docs/components.md
+- node_modules/@omni-design/components/docs/getting-started.md
+- node_modules/@omni-design/components/docs/token-system.md
+- node_modules/@omni-design/components/docs/components.md
 
-ALWAYS import components from '@omnidesign/components'
+ALWAYS import components from '@omni-design/components'
 ALWAYS import CSS at the top of App.js:
-  import '@omnidesign/components/public/styles/foundation.css'
-  import '@omnidesign/components/public/styles/core.css'
-  import '@omnidesign/components/public/styles/Light-Mode.css'
-  import '@omnidesign/components/public/styles/base.css'
+  import '@omni-design/components/public/styles/foundation.css'
+  import '@omni-design/components/public/styles/core.css'
+  import '@omni-design/components/public/styles/Light-Mode.css'
+  import '@omni-design/components/public/styles/base.css'
 
 ALWAYS wrap content in a div with data-theme, data-surface, and data-style attributes.
 ```

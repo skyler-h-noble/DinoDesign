@@ -1,7 +1,7 @@
 {
-  "name": "@omnidesign/components",
+  "name": "@omni-design/components",
   "version": "0.7.0",
-  "description": "DynoDesign adaptive component library — token-driven React components with customizable CSS theming",
+  "description": "DynoDesign adaptive component library \u2014 token-driven React components with customizable CSS theming",
   "author": "Lise Noble",
   "license": "Apache-2.0",
   "main": "dist/index.js",

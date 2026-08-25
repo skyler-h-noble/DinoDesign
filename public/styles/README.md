@@ -1,6 +1,6 @@
-# `@omnidesign/components` CSS files
+# `@omni-design/components` CSS files
 
-This folder ships as `@omnidesign/components/public/styles/` in the published npm package.
+This folder ships as `@omni-design/components/public/styles/` in the published npm package.
 The files split into two categories — STATIC and DYNAMIC — and they should be treated very differently.
 
 ## DYNAMIC — regenerated per design system
@@ -82,11 +82,11 @@ directly and the bundled copy is never consulted.
 
 ## How files are referenced
 
-Consumers of `@omnidesign/components` import these files directly, e.g.:
+Consumers of `@omni-design/components` import these files directly, e.g.:
 
 ```js
-import '@omnidesign/components/public/styles/Light-Mode.css';
-import '@omnidesign/components/public/styles/core.css';
+import '@omni-design/components/public/styles/Light-Mode.css';
+import '@omni-design/components/public/styles/core.css';
 // etc.
 ```
 

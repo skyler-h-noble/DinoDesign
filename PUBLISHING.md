@@ -36,7 +36,7 @@ Confirms only `dist/`, `CLAUDE.md`, and `README.md` are included.
 ```bash
 npm publish --access public
 ```
-`--access public` is required for scoped packages (`@omnidesign/components`).
+`--access public` is required for scoped packages (`@omni-design/components`).
 
 ---
 
@@ -65,7 +65,7 @@ npm publish --access public
 
 ### 1. Install peer dependencies
 
-`@omnidesign/components` is built on MUI and uses Emotion for styling. These are peer dependencies — they must be installed in the consuming app:
+`@omni-design/components` is built on MUI and uses Emotion for styling. These are peer dependencies — they must be installed in the consuming app:
 
 ```bash
 npm install @mui/material @mui/icons-material @emotion/react @emotion/styled
@@ -74,7 +74,7 @@ npm install @mui/material @mui/icons-material @emotion/react @emotion/styled
 ### 2. Install OmniDesign
 
 ```bash
-npm install @omnidesign/components
+npm install @omni-design/components
 ```
 
 ### 3. Wrap your app in OmniDesignProvider
@@ -82,8 +82,8 @@ npm install @omnidesign/components
 The `OmniDesignProvider` handles all MUI ThemeProvider setup, CSS injection, and token wiring automatically. No manual MUI theme configuration needed.
 
 ```jsx
-import { OmniDesignProvider } from '@omnidesign/components/provider';
-import { Button, Card, Switch, Alert } from '@omnidesign/components';
+import { OmniDesignProvider } from '@omni-design/components/provider';
+import { Button, Card, Switch, Alert } from '@omni-design/components';
 
 function App() {
   return (
@@ -100,7 +100,7 @@ function App() {
 }
 ```
 
-> **Why peer dependencies?** MUI is not bundled inside `@omnidesign/components` to avoid shipping duplicate copies of React and MUI in apps that already use them. The consuming app provides MUI; OmniDesign provides the token-driven theme on top of it.
+> **Why peer dependencies?** MUI is not bundled inside `@omni-design/components` to avoid shipping duplicate copies of React and MUI in apps that already use them. The consuming app provides MUI; OmniDesign provides the token-driven theme on top of it.
 
 ### Required peer dependency versions
 
