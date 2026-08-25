@@ -10,6 +10,7 @@ import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import { Button } from '../Button/Button';
 import { Slider } from '../Slider/Slider';
+import { CodeBlock } from '../CodeBlock/CodeBlock';
 import {
   H3, H5, BodySmall, Caption, Label, EyebrowSmall
 } from '../Typography';
@@ -125,20 +126,12 @@ export function CircularProgressShowcase() {
             />
           </PreviewSurface>
 
-          <Box sx={{ backgroundColor: '#1e1e1e', borderRadius: '8px', overflow: 'hidden', mt: 2 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              px: 2, py: 1, borderBottom: '1px solid #333' }}>
-              <Caption style={{ color: '#9ca3af' }}>JSX</Caption>
-              <CopyButton code={generateCode()} />
-            </Box>
-            <Box sx={{ p: 2, overflow: 'hidden' }}>
-              <Box component="code" sx={{ fontFamily: 'monospace', fontSize: '11px', color: '#e5e7eb',
-                whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowWrap: 'break-word',
-                maxWidth: '100%', display: 'block' }}>
-                {generateCode()}
-              </Box>
-            </Box>
-          </Box>
+          <CodeBlock
+            code={generateCode()}
+            language="JSX"
+            wrap
+            sx={{ mt: 2 }}
+          />
         </Grid>
 
         {/* ── RIGHT: Tabs ── */}

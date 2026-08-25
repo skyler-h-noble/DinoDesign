@@ -26,6 +26,7 @@ import { Button } from '../Button/Button';
 import { Icon } from '../Icon/Icon';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { Select } from '../Select/Select';
+import { CodeBlock as LibCodeBlock } from '../CodeBlock/CodeBlock';
 import {
   H3, H5, Body, BodySmall, Caption, Label, EyebrowSmall,
 } from '../Typography';
@@ -369,18 +370,12 @@ function BlobRow({ blob, index, zone, isMeshCard, families, onUpdate, onDelete, 
 
 function CodeBlock({ code }) {
   return (
-    <Box sx={{ backgroundColor: '#1e1e1e', borderRadius: '8px', overflow: 'hidden', mt: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, py: 1, borderBottom: '1px solid #333' }}>
-        <Caption style={{ color: '#9ca3af' }}>JSX</Caption>
-        <CopyButton code={code} />
-      </Box>
-      <Box sx={{ p: 2, overflow: 'hidden' }}>
-        <Box component="code" sx={{ fontFamily: 'monospace', fontSize: '11px', color: '#e5e7eb',
-          whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxWidth: '100%', display: 'block' }}>
-          {code}
-        </Box>
-      </Box>
-    </Box>
+    <LibCodeBlock
+      code={code}
+      language="JSX"
+      wrap
+      sx={{ mt: 2 }}
+    />
   );
 }
 

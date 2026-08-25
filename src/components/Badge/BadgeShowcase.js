@@ -1,4 +1,5 @@
 // src/components/Badge/BadgeShowcase.js
+import { CodeBlock } from '../CodeBlock/CodeBlock';
 import React, { useState, useEffect } from 'react';
 import {
   Box, Stack, Grid, Tabs, Tab, TextField,
@@ -290,20 +291,11 @@ export function BadgeShowcase() {
             </Box>
 
             {/* Code */}
-            <Box sx={{ backgroundColor: '#1e1e1e', borderBottom: '1px solid var(--Border)' }}>
-              <Box sx={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                px: 2, py: 1, borderBottom: '1px solid #333',
-              }}>
-                <Caption style={{ color: '#9ca3af' }}>JSX</Caption>
-                <CopyButton code={generateCode()} />
-              </Box>
-              <Box sx={{ p: 2, overflow: 'auto' }}>
-                <Box component="code" sx={{ fontFamily: 'monospace', fontSize: '13px', color: '#e5e7eb', whiteSpace: 'pre', display: 'block' }}>
-                  {generateCode()}
-                </Box>
-              </Box>
-            </Box>
+            <CodeBlock
+              code={generateCode()}
+              language="JSX"
+              sx={{ borderRadius: 0, borderBottom: '1px solid var(--Border)' }}
+            />
           </Grid>
 
           {/* RIGHT: Controls */}

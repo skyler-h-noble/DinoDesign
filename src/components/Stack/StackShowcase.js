@@ -13,6 +13,7 @@ import { Link } from '../Link/Link';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
+import { CodeBlock as LibCodeBlock } from '../CodeBlock/CodeBlock';
 import {
   H3, H5, BodySmall, Caption, EyebrowSmall, Body,
 } from '../Typography';
@@ -46,21 +47,12 @@ function ControlButton({ label, selected, onClick }) {
 
 function CodeBlock({ code }) {
   return (
-    <Box sx={{ backgroundColor: '#1e1e1e', borderRadius: '8px', overflow: 'hidden', mt: 1 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        px: 2, py: 1, borderBottom: '1px solid #333' }}>
-        <Caption style={{ color: '#9ca3af' }}>JSX</Caption>
-        <CopyButton code={code} />
-      </Box>
-      <Box sx={{ p: 2 }}>
-        <Box component="code" sx={{
-          fontFamily: 'monospace', fontSize: '11px', color: '#e5e7eb',
-          whiteSpace: 'pre-wrap', wordBreak: 'break-word', display: 'block',
-        }}>
-          {code}
-        </Box>
-      </Box>
-    </Box>
+    <LibCodeBlock
+      code={code}
+      language="JSX"
+      wrap
+      sx={{ mt: 1 }}
+    />
   );
 }
 

@@ -61,6 +61,10 @@ CopyButton.propTypes = {
   label: PropTypes.string,
 };
 
+/** Upper bound on the corner. A code panel reads as a technical surface; past
+ *  this it starts looking like a pill with code in it. */
+const RADIUS_CAP = '12px';
+
 export function CodeBlock({
   code = '',
   language = 'JSX',
@@ -78,7 +82,11 @@ export function CodeBlock({
       data-surface="Surface-Dimmest"
       sx={{
         backgroundColor: 'var(--Background)',
-        borderRadius: 'var(--Style-Border-Radius)',
+        // --Card-Radius, not --Style-Border-Radius: the latter is aliased to
+        // --Button-Radius and goes fully pill on a Playful system, which reads
+        // wrong wrapped around dense monospace. Capped so the block still
+        // shrinks on tight styles but stops growing on round ones.
+        borderRadius: `min(var(--Card-Radius, var(--Style-Border-Radius)), ${RADIUS_CAP})`,
         overflow: 'hidden',
         ...sx,
       }}
