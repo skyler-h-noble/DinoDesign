@@ -28,37 +28,12 @@ import { PreviewSurface } from '../PreviewSurface';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { CodeBlock } from '../CodeBlock/CodeBlock';
 import { Button } from '../Button/Button';
+import { getContrast, getCssVarFrom } from '../contrast';
 import {
   H3, H4, H5, Body, BodySmall, Caption, Label, EyebrowSmall
 } from '../Typography';
 
 // --- Contrast Calculator -----------------------------------------------------
-
-function getLuminance(hex) {
-  const clean = hex.replace('#', '');
-  const r = parseInt(clean.substring(0, 2), 16) / 255;
-  const g = parseInt(clean.substring(2, 4), 16) / 255;
-  const b = parseInt(clean.substring(4, 6), 16) / 255;
-  const toLinear = (v) => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-  return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
-}
-
-function getContrast(hex1, hex2) {
-  if (!hex1 || !hex2 || !hex1.startsWith('#') || !hex2.startsWith('#')) return null;
-  const l1 = getLuminance(hex1);
-  const l2 = getLuminance(hex2);
-  const lighter = Math.max(l1, l2);
-  const darker = Math.min(l1, l2);
-  return ((lighter + 0.05) / (darker + 0.05)).toFixed(2);
-}
-
-// The button tokens only exist under [data-theme]/[data-surface], so reading
-// them off documentElement returns "" and every ratio renders as "--". Read
-// them off the preview surface instead, the way ButtonShowcase does.
-function getCssVarFrom(el, varName) {
-  if (!el) return null;
-  return getComputedStyle(el).getPropertyValue(varName).trim() || null;
-}
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 // black-white's tokens are --Buttons-BlackWhite-*, not the capitalised prop.

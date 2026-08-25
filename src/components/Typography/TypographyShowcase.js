@@ -15,6 +15,7 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import { CodeBlock } from '../CodeBlock/CodeBlock';
+import { getContrast, getCssVar } from '../contrast';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -183,24 +184,6 @@ const STYLE_CONFIG = {
 const SAMPLE_TEXT = 'The quick brown fox jumps over the lazy dog.';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function getLuminance(hex) {
-  const clean = hex.replace('#', '');
-  const r = parseInt(clean.substring(0, 2), 16) / 255;
-  const g = parseInt(clean.substring(2, 4), 16) / 255;
-  const b = parseInt(clean.substring(4, 6), 16) / 255;
-  const toLinear = (v) => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-  return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
-}
-function getContrast(hex1, hex2) {
-  if (!hex1 || !hex2 || !hex1.startsWith('#') || !hex2.startsWith('#')) return null;
-  const l1 = getLuminance(hex1); const l2 = getLuminance(hex2);
-  return ((Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05)).toFixed(2);
-}
-function getCssVar(varName) {
-  if (typeof window === 'undefined') return null;
-  return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
-}
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 

@@ -74,6 +74,7 @@ import { Switch } from '../Switch/Switch';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { H3, H5, BodySmall, Caption, Label, EyebrowSmall } from '../Typography';
 import { CodeBlock } from '../CodeBlock/CodeBlock';
+import { getContrast, getCssVar } from '../contrast';
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 
@@ -107,19 +108,6 @@ const ICON_REGISTRY = {
 
 function getIconComponent(name, style) { return ICON_REGISTRY[name]?.[style] || ICON_REGISTRY[name]?.filled || HomeIcon; }
 function getIconSuffix(style) { return { outlined: 'Outlined', rounded: 'Rounded', twotone: 'TwoTone', sharp: 'Sharp' }[style] || ''; }
-
-function getLuminance(hex) {
-  const c = hex.replace('#', '');
-  const r = parseInt(c.substring(0,2),16)/255, g = parseInt(c.substring(2,4),16)/255, b = parseInt(c.substring(4,6),16)/255;
-  const t = (v) => v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4);
-  return 0.2126*t(r) + 0.7152*t(g) + 0.0722*t(b);
-}
-function getContrast(hex1, hex2) {
-  if (!hex1||!hex2||!hex1.startsWith('#')||!hex2.startsWith('#')) return null;
-  const l1=getLuminance(hex1), l2=getLuminance(hex2);
-  return ((Math.max(l1,l2)+0.05)/(Math.min(l1,l2)+0.05)).toFixed(2);
-}
-function getCssVar(v) { return typeof window==='undefined' ? null : getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
 
 function ContrastBadge({ ratio, threshold }) {
   if (!ratio) return <Caption style={{ color: 'var(--Text-Quiet)' }}>--</Caption>;

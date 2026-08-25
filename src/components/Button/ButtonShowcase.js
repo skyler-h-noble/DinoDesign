@@ -14,6 +14,7 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import { CodeBlock } from '../CodeBlock/CodeBlock';
+import { getContrast, getCssVar, getCssVarFrom } from '../contrast';
 import {
   H3, H5, BodySmall, Caption, Label, EyebrowSmall
 } from '../Typography';
@@ -29,93 +30,6 @@ const STYLES = ['solid', 'outline', 'ghost'];
 const CONTENT_TYPES = ['text', 'number', 'letter', 'icon', 'swatch'];
 
 /* ── Contrast helpers ── */
-
-// Parse any CSS color string into { r, g, b, a } with 0-255 RGB and 0-1 alpha.
-function parseColor(str) {
-  if (!str) return null;
-  const s = str.trim();
-
-  // #RGB
-  if (/^#[0-9a-f]{3}$/i.test(s)) {
-    return {
-      r: parseInt(s[1] + s[1], 16), g: parseInt(s[2] + s[2], 16),
-      b: parseInt(s[3] + s[3], 16), a: 1,
-    };
-  }
-  // #RRGGBB
-  if (/^#[0-9a-f]{6}$/i.test(s)) {
-    return {
-      r: parseInt(s.substring(1, 3), 16), g: parseInt(s.substring(3, 5), 16),
-      b: parseInt(s.substring(5, 7), 16), a: 1,
-    };
-  }
-  // #RRGGBBAA
-  if (/^#[0-9a-f]{8}$/i.test(s)) {
-    return {
-      r: parseInt(s.substring(1, 3), 16), g: parseInt(s.substring(3, 5), 16),
-      b: parseInt(s.substring(5, 7), 16), a: parseInt(s.substring(7, 9), 16) / 255,
-    };
-  }
-  // rgb(r, g, b) or rgba(r, g, b, a)
-  const rgbaMatch = s.match(/rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+%?))?\s*\)/);
-  if (rgbaMatch) {
-    let a = 1;
-    if (rgbaMatch[4] !== undefined) {
-      a = rgbaMatch[4].endsWith('%') ? parseFloat(rgbaMatch[4]) / 100 : parseFloat(rgbaMatch[4]);
-    }
-    return {
-      r: Math.round(parseFloat(rgbaMatch[1])), g: Math.round(parseFloat(rgbaMatch[2])),
-      b: Math.round(parseFloat(rgbaMatch[3])), a,
-    };
-  }
-  return null;
-}
-
-// Alpha-composite foreground over opaque background, return opaque {r,g,b,a:1}.
-function compositeOver(fg, bg) {
-  if (!fg || !bg) return fg || bg;
-  if (fg.a >= 1) return fg;
-  const a = fg.a;
-  return {
-    r: Math.round(fg.r * a + bg.r * (1 - a)),
-    g: Math.round(fg.g * a + bg.g * (1 - a)),
-    b: Math.round(fg.b * a + bg.b * (1 - a)),
-    a: 1,
-  };
-}
-
-function getLuminance(color) {
-  const toLinear = (v) => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-  return 0.2126 * toLinear(color.r / 255) + 0.7152 * toLinear(color.g / 255) + 0.0722 * toLinear(color.b / 255);
-}
-
-// Compute contrast between two CSS color strings. Semi-transparent colors are
-// composited: color1 is the foreground text/icon, color2 is the background.
-// An optional bgBase is the opaque surface behind color2 (for when color2
-// itself is semi-transparent, e.g. a hover overlay on a button fill).
-function getContrast(color1, color2, bgBase) {
-  const fg = parseColor(color1);
-  const bg2 = parseColor(color2);
-  const base = parseColor(bgBase);
-  if (!fg || !bg2) return null;
-  // Resolve bg: composite color2 over bgBase if both exist, else use color2
-  const resolvedBg = base ? compositeOver(bg2, base) : (bg2.a < 1 ? null : bg2);
-  if (!resolvedBg) return null;
-  // Composite fg over resolved bg (handles semi-transparent text)
-  const resolvedFg = compositeOver(fg, resolvedBg);
-  if (!resolvedFg) return null;
-  const l1 = getLuminance(resolvedFg);
-  const l2 = getLuminance(resolvedBg);
-  return ((Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05)).toFixed(2);
-}
-function getCssVar(varName) {
-  if (typeof window === 'undefined') return null;
-  return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
-}
-function getCssVarFrom(el, varName) {
-  if (!el) return null;
-  return getComputedStyle(el).getPropertyValue(varName).trim() || null;
-}
 
 function ContrastBadge({ ratio, threshold }) {
   if (!ratio) return <Caption style={{ color: 'var(--Text-Quiet)' }}>--</Caption>;
@@ -143,14 +57,22 @@ function A11yRow({ label, ratio, threshold, note }) {
   );
 }
 
+// `pass` is three-valued on purpose. null means the ratio could not be
+// measured — a token that did not resolve, or a colour format the parser does
+// not read — and that is NOT a failure. Rendering it as one invents
+// accessibility bugs that aren't there, which is worse than reporting nothing,
+// because someone then goes looking for a contrast problem that does not exist.
 function PassFailBadge({ pass, detail }) {
+  const unmeasured = pass === null || pass === undefined;
   return (
     <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
       <Box sx={{
         px: 1, py: 0.25, borderRadius: '4px', fontSize: '11px', fontWeight: 700,
-        backgroundColor: pass ? 'var(--Tags-Success-BG)' : 'var(--Tags-Error-BG)',
-        color: pass ? 'var(--Tags-Success-Text)' : 'var(--Tags-Error-Text)',
-      }}>{pass ? '✓' : '✗'} {detail ? detail + ' ' : ''}{pass ? 'Pass' : 'Fail'}</Box>
+        backgroundColor: unmeasured ? 'var(--Container-High)' : (pass ? 'var(--Tags-Success-BG)' : 'var(--Tags-Error-BG)'),
+        color: unmeasured ? 'var(--Text-Quiet)' : (pass ? 'var(--Tags-Success-Text)' : 'var(--Tags-Error-Text)'),
+      }}>
+        {unmeasured ? 'Not measured' : `${pass ? '✓' : '✗'} ${detail ? detail + ' ' : ''}${pass ? 'Pass' : 'Fail'}`}
+      </Box>
     </Box>
   );
 }
@@ -751,7 +673,8 @@ export function ButtonShowcase() {
                         const textRatio = contrastData.buttonText ? getContrast(contrastData.buttonText, bg) : null;
                         // Ghost: no fill or border, use text (hotlink) for the check
                         if (style === 'ghost') {
-                          const pass = textRatio && parseFloat(textRatio) >= 3.0;
+                          // null when unmeasured, so the badge says so rather than failing.
+                          const pass = textRatio ? parseFloat(textRatio) >= 3.0 : null;
                           return (
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', py: 1.5, borderBottom: '1px solid var(--Border)' }}>
                               <Box sx={{ flex: 1 }}>
@@ -765,9 +688,12 @@ export function ButtonShowcase() {
                           );
                         }
                         // Solid / Outline: pass if EITHER fill or border meets 3:1
-                        const fillPass = fillRatio && parseFloat(fillRatio) >= 3.0;
-                        const borderPass = borderRatio && parseFloat(borderRatio) >= 3.0;
-                        const overallPass = fillPass || borderPass;
+                        const fillPass = fillRatio ? parseFloat(fillRatio) >= 3.0 : null;
+                        const borderPass = borderRatio ? parseFloat(borderRatio) >= 3.0 : null;
+                        // Neither could be measured -> unknown, not failing.
+                        const overallPass = (fillRatio || borderRatio)
+                          ? (fillPass === true || borderPass === true)
+                          : null;
                         return (
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', py: 1.5, borderBottom: '1px solid var(--Border)' }}>
                             <Box sx={{ flex: 1 }}>
