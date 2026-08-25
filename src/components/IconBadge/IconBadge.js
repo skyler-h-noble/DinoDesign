@@ -60,8 +60,9 @@ export function IconBadge({
   let dataTheme, dataSurface;
   switch (variant) {
     case 'light':
-      dataTheme = theme + '-Light';
-      dataSurface = 'Surface';
+      // Base theme + brightest surface; *-Light themes are not generated.
+      dataTheme = theme;
+      dataSurface = 'Surface-Brightest';
       break;
     case 'dark':
       dataTheme = theme;

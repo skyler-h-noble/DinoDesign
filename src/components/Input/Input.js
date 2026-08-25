@@ -167,7 +167,8 @@ export function Input({
   const activeTextColor = 'var(--Text)';
 
   // Light variant theme attributes for inner div
-  const lightTheme = isLight ? C + '-Light' : undefined;
+  // A light variant is the base theme at data-surface="Surface-Brightest";
+  // *-Light themes are not generated, and this value was never read.
 
   // Validation state overrides border color
   const validationConfig = validation ? VALIDATION_COLORS[validation] : null;

@@ -38,11 +38,11 @@ const SOLID_THEME_MAP = {
   default: 'Default', primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
   info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
 };
-const LIGHT_THEME_MAP = {
-  default: 'Default', primary: 'Primary-Light', secondary: 'Secondary-Light', tertiary: 'Tertiary-Light', neutral: 'Neutral-Light',
-  info: 'Info-Light', success: 'Success-Light', warning: 'Warning-Light', error: 'Error-Light',
-};
-// Dark uses same theme map as solid — difference is the surface level
+// A light card is the SOLID theme at its brightest surface, not a *-Light
+// theme. Generated design systems do not emit *-Light — their sheets carry
+// Default, Primary, Secondary, Tertiary, Neutral and the states — so the old
+// LIGHT_THEME_MAP matched no rule and --Background resolved to nothing.
+// Light and dark now differ from solid only by surface level, as dark already did.
 
 const SIZE_MAP = {
   small:  { gap: '8px',  fontSize: '13px', padding: 'var(--Card-Padding)' },
@@ -87,11 +87,7 @@ export function Card({
 
   // Theme for inner content — omitted for default-color cards so the parent
   // theme inherits through.
-  const dataTheme = isDefaultColor
-    ? ''
-    : variant === 'light'
-      ? LIGHT_THEME_MAP[color]
-      : SOLID_THEME_MAP[color];
+  const dataTheme = isDefaultColor ? '' : SOLID_THEME_MAP[color];
 
   // Surface for inner content — Container for default-color cards so they
   // respect the consumer's card-coloring tokens; Surface (or Surface-Dimmest
@@ -102,7 +98,9 @@ export function Card({
       ? 'Container'
       : isDark
         ? 'Surface-Dimmest'
-        : 'Surface';
+        : variant === 'light'
+          ? 'Surface-Brightest'
+          : 'Surface';
 
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
   const isHorizontal = orientation === 'horizontal';

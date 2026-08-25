@@ -102,10 +102,13 @@ export function Ratio({
   const showPlaceholder = placeholder && React.Children.count(children) === 0;
 
   // data-theme/data-surface for the inner content — mirrors Box.
-  const dataTheme = variant === 'light'
-    ? (color === 'default' ? 'Default' : C + '-Light')
-    : C;
-  const dataSurface = variant === 'dark' ? 'Surface-Dimmest' : 'Surface';
+  // A light variant is the base theme at its BRIGHTEST surface, not a theme of
+  // its own. Generated design systems stopped emitting *-Light themes, so
+  // `C + '-Light'` matched no rule and --Background resolved to nothing.
+  const dataTheme = color === 'default' ? 'Default' : C;
+  const dataSurface = variant === 'dark' ? 'Surface-Dimmest'
+    : variant === 'light' ? 'Surface-Brightest'
+    : 'Surface';
 
   const p = PADDING_MAP[padding] !== undefined ? PADDING_MAP[padding] : PADDING_MAP.none;
   const isClickable = clickable || !!onClick;

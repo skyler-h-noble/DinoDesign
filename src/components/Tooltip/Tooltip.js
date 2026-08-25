@@ -10,7 +10,7 @@ import { Tooltip as MuiTooltip, Box } from '@mui/material';
  *            Info-Medium | Success-Medium | Warning-Medium | Error-Medium
  *            bg: var(--Background)  text: var(--Text)  border: none
  *
- *   light    data-theme: Primary-Light | Secondary-Light | Tertiary-Light | Neutral-Light |
+ *   light    data-theme: base theme + data-surface="Surface-Brightest" —
  *            Info-Light | Success-Light | Warning-Light | Error-Light
  *            bg: var(--Background)  text: var(--Text)  border: none
  *
@@ -36,15 +36,17 @@ const SOLID_THEME_MAP = {
   error: 'Error-Medium',
 };
 
+// A light tooltip is the BASE theme at its brightest surface. Generated design
+// systems do not emit *-Light themes, so the old map matched no rule.
 const LIGHT_THEME_MAP = {
-  primary: 'Primary-Light',
-  secondary: 'Secondary-Light',
-  tertiary: 'Tertiary-Light',
-  neutral: 'Neutral-Light',
-  info: 'Info-Light',
-  success: 'Success-Light',
-  warning: 'Warning-Light',
-  error: 'Error-Light',
+  primary: 'Primary',
+  secondary: 'Secondary',
+  tertiary: 'Tertiary',
+  neutral: 'Neutral',
+  info: 'Info',
+  success: 'Success',
+  warning: 'Warning',
+  error: 'Error',
 };
 
 const SIZE_MAP = {
@@ -102,6 +104,7 @@ export function Tooltip({
         title ? (
           <Box
             data-theme={dataTheme || undefined}
+            data-surface={isLight ? 'Surface-Brightest' : isSolid ? 'Surface' : undefined}
             className={'tooltip-content tooltip-' + variant + ' tooltip-' + color + ' tooltip-' + size + ' ' + className}
             sx={{
               backgroundColor: tooltipBg,

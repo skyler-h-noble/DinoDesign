@@ -111,7 +111,9 @@ export const OMNI_SURFACES = [
 ];
 
 export const SURFACE_STYLE_THEME_MAP = {
-  'light-tonal':       { theme: 'Primary-Light', rootSurface: 'Surface-Dim' },
+  // Primary at its brightest surface — what theme:'Primary-Light' used to mean,
+  // and the only form generated design systems actually define.
+  'light-tonal':       { theme: 'Primary',        rootSurface: 'Surface-Brightest' },
   'grey-professional': { theme: 'Neutral',        rootSurface: 'Surface'     },
   'dark-professional': { theme: 'Neutral-Dark',   rootSurface: 'Surface'     },
 };

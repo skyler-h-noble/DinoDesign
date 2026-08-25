@@ -107,7 +107,9 @@ function lightStyles(color) {
     dotOn:          'var(--Buttons-' + C + '-Border)',
     iconOff:        'var(--Border-Variant)',
     iconOn:         'var(--' + C + '-Color-11)',
-    dataTheme:      C + '-Light',
+    // Base theme + brightest surface; *-Light themes are not generated.
+    dataTheme:      C,
+    dataSurface:    'Surface-Brightest',
   };
 }
 
@@ -329,7 +331,7 @@ export function Switch({
       disableRipple
       {...(isLight && styles.dataTheme ? {
         'data-theme': styles.dataTheme,
-        'data-surface': 'Surface-Dim',
+        'data-surface': styles.dataSurface || 'Surface-Dim',
       } : {})}
       {...props}
     />

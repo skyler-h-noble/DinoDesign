@@ -12,7 +12,7 @@ import { SHADOW_LEVEL_3 } from '../_shadows';
  *
  * VARIANTS:
  *   solid     data-theme="{Theme}" data-surface="Surface"
- *   light     data-theme="{Theme}-Light" data-surface="Surface"
+ *   light     data-theme="{Theme}" data-surface="Surface-Brightest"
  *
  * COLORS: default | primary | secondary | tertiary | neutral | info | success | warning | error
  *
@@ -54,9 +54,12 @@ export function Snackbar({
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
   const TextComp = size === 'small' ? BodySmall : Body;
 
-  const dataTheme = variant === 'light'
-    ? (color === 'default' ? 'Default' : C + '-Light')
-    : C;
+  // A light variant is the base theme at its BRIGHTEST surface, not a theme of
+  // its own. Generated design systems stopped emitting *-Light themes — their
+  // sheets carry Default, Primary, Secondary, Tertiary, Neutral and the states —
+  // so `C + '-Light'` matched no rule and --Background resolved to nothing.
+  const dataTheme = color === 'default' ? 'Default' : C;
+  const dataSurface = variant === 'light' ? 'Surface-Brightest' : 'Surface';
 
   const borderToken = 'var(--Buttons-' + C + '-Border)';
 
@@ -126,7 +129,7 @@ export function Snackbar({
     >
       <Box
         data-theme={dataTheme}
-        data-surface="Surface"
+        data-surface={dataSurface}
         sx={{
           display: 'flex',
           alignItems: 'center',

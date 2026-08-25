@@ -13,7 +13,7 @@ import { BodySmall, Caption } from '../Typography';
  * VARIANT (applies to the whole tree container):
  *   default   data-theme="Default"          data-surface="Surface-Dim"
  *   solid     data-theme="{Theme}"          data-surface="Surface-Dim"
- *   light     data-theme="{Theme}-Light"    data-surface="Surface-Dim"
+ *   light     data-theme="{Theme}"          data-surface="Surface-Brightest"
  *
  * COLORS: default | primary | secondary | tertiary | neutral | info | success | warning | error
  *
@@ -243,9 +243,9 @@ export function OmniTreeView({
 
   // Compute data-theme based on variant
   const colorToken = cap(color);
-  const dataTheme = effectiveVariant === 'light'
-    ? colorToken + '-Light'
-    : colorToken;
+  // Base theme + brightest surface; *-Light themes are not generated.
+  const dataTheme = colorToken;
+  const dataSurface = effectiveVariant === 'light' ? 'Surface-Brightest' : 'Surface-Dim';
 
   // Track selection internally so ItemLabel knows which items are selected
   const [internalSelected, setInternalSelected] = useState(
@@ -269,7 +269,7 @@ export function OmniTreeView({
   return (
     <Box
       data-theme={dataTheme}
-      data-surface="Surface-Dim"
+      data-surface={dataSurface}
       className={
         'omni-treeview' +
         ' omni-treeview-' + effectiveVariant +

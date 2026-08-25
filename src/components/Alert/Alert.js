@@ -48,11 +48,13 @@ export function Alert({
   const C = cap(color === 'default' ? 'Default' : color);
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
 
-  const dataTheme = variant === 'light'
-    ? (color === 'default' ? 'Default' : C + '-Light')
-    : C;
+  // A light variant is the base theme at its BRIGHTEST surface, not a theme of
+  // its own. Generated design systems stopped emitting *-Light themes — their
+  // sheets carry Default, Primary, Secondary, Tertiary, Neutral and the states —
+  // so `C + '-Light'` matched no rule and --Background resolved to nothing.
+  const dataTheme = color === 'default' ? 'Default' : C;
 
-  const dataSurface = 'Surface';
+  const dataSurface = variant === 'light' ? 'Surface-Brightest' : 'Surface';
   const borderToken = 'var(--Buttons-' + C + '-Border)';
 
   const innerContent = (

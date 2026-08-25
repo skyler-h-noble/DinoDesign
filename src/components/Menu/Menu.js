@@ -119,10 +119,15 @@ export function Menu({ children, className = '', placement = 'bottom-start', sx 
   const isOutline = variant === 'outline';
   const borderToken = 'var(--Buttons-' + C + '-Border)';
 
+  // A light variant is the base theme at its BRIGHTEST surface, not a theme of
+  // its own. Generated design systems stopped emitting *-Light themes, so
+  // `C + '-Light'` matched no rule and --Background resolved to nothing.
   const dataTheme = variant === 'light'
-    ? (color === 'default' ? 'Default' : C + '-Light')
+    ? (color === 'default' ? 'Default' : C)
     : variant === 'solid' ? C : undefined;
-  const dataSurface = (variant === 'solid' || variant === 'light') ? 'Surface' : undefined;
+  const dataSurface = variant === 'light' ? 'Surface-Brightest'
+    : variant === 'solid' ? 'Surface'
+    : undefined;
 
   useEffect(() => {
     if (open && menuRef.current) {

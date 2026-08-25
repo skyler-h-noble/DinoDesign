@@ -54,11 +54,15 @@ export function AccordionGroup({
   const effectiveColor = color === 'default' ? 'Default' : cap(color);
   const isConnected = spacing === 0;
 
-  const dataTheme = variant === 'light'
-    ? (color === 'default' ? 'Default' : effectiveColor + '-Light')
-    : effectiveColor;
+  // A light variant is the base theme at its BRIGHTEST surface, not a theme of
+  // its own. Generated design systems stopped emitting *-Light themes — their
+  // sheets carry Default, Primary, Secondary, Tertiary, Neutral and the states —
+  // so `C + '-Light'` matched no rule and --Background resolved to nothing.
+  const dataTheme = color === 'default' ? 'Default' : effectiveColor;
 
-  const dataSurface = variant === 'dark' ? 'Surface-Dimmest' : 'Surface';
+  const dataSurface = variant === 'dark' ? 'Surface-Dimmest'
+    : variant === 'light' ? 'Surface-Brightest'
+    : 'Surface';
 
   if (isConnected) {
     // Connected: single outer shell wrapping all items

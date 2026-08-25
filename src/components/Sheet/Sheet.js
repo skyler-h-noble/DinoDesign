@@ -36,11 +36,14 @@ export function Sheet({
 }) {
   const C = cap(color === 'default' ? 'Default' : color);
 
-  const dataTheme = variant === 'light'
-    ? (color === 'default' ? 'Default' : C + '-Light')
-    : C;
+  // A light variant is the base theme at its BRIGHTEST surface, not a theme of
+  // its own. Generated design systems stopped emitting *-Light themes, so
+  // `C + '-Light'` matched no rule and --Background resolved to nothing.
+  const dataTheme = color === 'default' ? 'Default' : C;
 
-  const dataSurface = variant === 'dark' ? 'Surface-Dimmest' : 'Surface';
+  const dataSurface = variant === 'dark' ? 'Surface-Dimmest'
+    : variant === 'light' ? 'Surface-Brightest'
+    : 'Surface';
 
   const restShadow = elevated ? SHADOW_LEVEL_3 : SHADOW_LEVEL_2;
   const hoverShadow = elevated ? SHADOW_LEVEL_4 : SHADOW_LEVEL_3;

@@ -48,7 +48,11 @@ function lightStyles(color) {
     color: C,
     borderToken: 'var(--Buttons-' + C + '-Border)',
     icon: 'var(--Buttons-' + C + '-Border)',
-    dataTheme: C + '-Light',
+    // Base theme, not C + '-Light'. Generated design systems do not emit
+    // *-Light themes, so that name matched nothing. The light look comes from
+    // the surface level instead — see dataSurface below.
+    dataTheme: C,
+    dataSurface: 'Surface-Brightest',
   };
 }
 
@@ -99,7 +103,7 @@ function CheckboxBoxIcon({ size, variant, checked, indeterminate }) {
 
   // Inner data attributes for light variant
   const innerAttrs = isLight
-    ? { 'data-theme': styles.dataTheme, 'data-surface': 'Surface-Dim' }
+    ? { 'data-theme': styles.dataTheme, 'data-surface': styles.dataSurface || 'Surface-Brightest' }
     : {};
 
   return (
