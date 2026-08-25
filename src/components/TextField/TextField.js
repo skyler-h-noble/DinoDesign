@@ -97,7 +97,11 @@ export function TextField({
             // it here means --Background resolves to the container tone AND the
             // paired --Text / --Border come with it, instead of naming a surface
             // token directly and leaving the foregrounds on the parent's tone.
-            'data-surface': 'Container',
+            //
+            // Disabled is a different SURFACE, not a different colour: saying
+            // Container-Low here brings its foregrounds too, where an sx
+            // override of backgroundColor would have left --Text where it was.
+            'data-surface': disabled ? 'Container-Low' : 'Container',
             style: {
               color: textColor,
             },
@@ -140,7 +144,7 @@ export function TextField({
 
             // Disabled state
             '&.Mui-disabled': {
-              backgroundColor: 'var(--Container-Low)',
+              backgroundColor: 'var(--Background)',
               opacity: 0.6,
             },
           },
@@ -352,7 +356,7 @@ export function TextArea({
         slotProps={{
           input: {
             // See TextField — the input declares its own surface.
-            'data-surface': 'Container',
+            'data-surface': disabled ? 'Container-Low' : 'Container',
             style: {
               color: 'var(--Text)',
             },
@@ -384,7 +388,7 @@ export function TextArea({
             },
 
             '&.Mui-disabled': {
-              backgroundColor: 'var(--Container-Low)',
+              backgroundColor: 'var(--Background)',
               opacity: 0.6,
             },
           },

@@ -104,7 +104,6 @@
     "url": "https://github.com/lwnoble/omni-design"
   },
   "dependencies": {
-    "@dynodesign/components": "^0.4.1",
     "@mui/x-tree-view": "^8.27.2",
     "eslint-plugin-react-hooks": "^7.0.1",
     "react-router-dom": "^7.13.1",
