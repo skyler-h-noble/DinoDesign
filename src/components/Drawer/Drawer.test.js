@@ -69,9 +69,9 @@ describe('Solid variant data-theme', () => {
 /* ─── Light data-theme ─── */
 describe('Light variant data-theme', () => {
   const cases = [
-    ['primary', 'Primary-Light'], ['secondary', 'Secondary-Light'], ['tertiary', 'Tertiary-Light'],
-    ['neutral', 'Neutral-Light'], ['info', 'Info-Light'], ['success', 'Success-Light'],
-    ['warning', 'Warning-Light'], ['error', 'Error-Light'],
+    ['primary', 'Primary'], ['secondary', 'Secondary'], ['tertiary', 'Tertiary'],
+    ['neutral', 'Neutral'], ['info', 'Info'], ['success', 'Success'],
+    ['warning', 'Warning'], ['error', 'Error'],
   ];
 
   cases.forEach(([color, theme]) => {

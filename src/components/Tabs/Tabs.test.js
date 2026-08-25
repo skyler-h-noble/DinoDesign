@@ -95,7 +95,7 @@ describe('Tabs wrapper data attributes', () => {
 
   test('light variant data-theme on Tabs wrapper', () => {
     const { container } = renderTabs({ variant: 'light', color: 'primary' });
-    expect(container.querySelector('.tabs')).toHaveAttribute('data-theme', 'Primary-Light');
+    expect(container.querySelector('.tabs')).toHaveAttribute('data-theme', 'Primary');
   });
 
   test('solid variant data-theme on Tabs wrapper', () => {

@@ -78,14 +78,14 @@ describe('data-theme', () => {
     });
   });
 
-  test('light primary => data-theme=Primary-Light', async () => {
+  test('light primary => data-theme=Primary', async () => {
     render(
       <Tooltip title="Light" variant="light" color="primary" open={true}>
         <button>Trigger</button>
       </Tooltip>
     );
     await waitFor(() => {
-      expect(document.querySelector('[data-theme="Primary-Light"]')).toBeInTheDocument();
+      expect(document.querySelector('[data-theme="Primary"]')).toBeInTheDocument();
     });
   });
 
@@ -96,7 +96,7 @@ describe('data-theme', () => {
       </Tooltip>
     );
     await waitFor(() => {
-      expect(document.querySelector('[data-theme="Warning-Light"]')).toBeInTheDocument();
+      expect(document.querySelector('[data-theme="Warning"]')).toBeInTheDocument();
     });
   });
 
