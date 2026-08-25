@@ -93,6 +93,11 @@ export function TextField({
             ...(ariaLabelledby ? { 'aria-labelledby': ariaLabelledby } : {}),
           },
           input: {
+            // The input is a CONTAINER on whatever surface it sits on. Declaring
+            // it here means --Background resolves to the container tone AND the
+            // paired --Text / --Border come with it, instead of naming a surface
+            // token directly and leaving the foregrounds on the parent's tone.
+            'data-surface': 'Container',
             style: {
               color: textColor,
             },
@@ -108,7 +113,7 @@ export function TextField({
           width: fullWidth ? '100%' : 'auto',
           // Outlined variant styling
           '& .MuiOutlinedInput-root': {
-            backgroundColor: 'var(--Container)',
+            backgroundColor: 'var(--Background)',
             transition: 'all 0.2s ease-in-out',
             color: textColor,
 
@@ -346,6 +351,8 @@ export function TextArea({
         error={error}
         slotProps={{
           input: {
+            // See TextField — the input declares its own surface.
+            'data-surface': 'Container',
             style: {
               color: 'var(--Text)',
             },
@@ -354,7 +361,7 @@ export function TextArea({
         sx={{
           width: fullWidth ? '100%' : 'auto',
           '& .MuiOutlinedInput-root': {
-            backgroundColor: 'var(--Container)',
+            backgroundColor: 'var(--Background)',
             transition: 'all 0.2s ease-in-out',
             color: 'var(--Text)',
 
