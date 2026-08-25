@@ -219,3 +219,8 @@ export default {};
 // OmniDesign rename. Old imports keep working; write the Omni names.
 export { OmniStack as DynoStack } from './Stack/Stack';
 export { OmniTreeView as DynoTreeView } from './TreeView/TreeView';
+
+// A code block on its own dark region. The dark comes from
+// data-theme="Neutral" + data-surface="Surface-Dimmest", not a literal colour,
+// so it follows the system's neutrals in both modes.
+export { CodeBlock, CopyButton } from './CodeBlock/CodeBlock';
