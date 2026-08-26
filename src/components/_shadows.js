@@ -32,17 +32,24 @@ const DS = 'var(--Dropshadow-Color, 20, 20, 20)';
 const _LEVEL_LAYERS = {
   1: [[0.5, 1, 1]],
   2: [[1, 2, 2], [2, 4, 4]],
-  3: [[1, 2, 2], [2, 4, 4], [3, 6, 6]],
+  3: [[1, 2, 2], [2, 4, 4], [4, 8, 8]],
   4: [[1, 2, 2], [2, 4, 4], [4, 8, 8], [8, 16, 16]],
   5: [[1, 2, 2], [2, 4, 4], [4, 8, 8], [8, 16, 16], [16, 32, 32]],
 };
-const _ALPHAS = [0.20, 0.17, 0.15, 0.13, 0.11];
+/* One alpha for every layer — Comeau's stack uses a single opacity throughout.
+   Must match ALPHA in dinodesign-studio/src/utils/dropshadow.ts. */
+const _ALPHA = 0.16;
 
+/* Every layer of a level uses THAT LEVEL's colour token.
+   The token index is the ELEVATION, not the layer: Level-3 draws three layers,
+   all in --Dropshadow-Color-3. It used to take one token per layer, which made
+   the five tokens alpha steps of a single colour and a Level-3 shadow a
+   Level-1 shadow with extras. Depth now comes from layer COUNT and from the
+   colour deepening per level, which is what the design system publishes. */
 function _buildShadow(level) {
   return _LEVEL_LAYERS[level]
-    .map(([x, y, blur], i) => {
-      const n = i + 1;
-      const color = `var(--Dropshadow-Color-${n}, rgba(${DS}, ${_ALPHAS[i]}))`;
+    .map(([x, y, blur]) => {
+      const color = `var(--Dropshadow-Color-${level}, rgba(${DS}, ${_ALPHA}))`;
       return `${x}px ${y}px ${blur}px ${color}`;
     })
     .join(', ');
