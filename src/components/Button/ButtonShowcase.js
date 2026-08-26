@@ -12,6 +12,7 @@ import { Switch } from '../Switch/Switch';
 import { Select } from '../Select/Select';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
+import { useOmniDesign } from '../../OmniDesignProvider';
 import { BackgroundPicker } from '../BackgroundPicker';
 import { CodeBlock } from '../CodeBlock/CodeBlock';
 import { getContrast, getCssVar, getCssVarFrom } from '../contrast';
@@ -180,6 +181,11 @@ export function ButtonShowcase() {
   const [bgTheme, setBgTheme]           = useState(null);
   const [bgSurface, setBgSurface] = useState('Surface');
   const surfaceRef = useRef(null);
+  // The brand CSS is fetched from storage AFTER mount. Measuring before it
+  // applies reads every token as empty, which is how a whole panel ends up
+  // showing "--". cssStatus flips to 'ready' once every sheet has applied, so
+  // taking it as a dependency re-measures exactly once the values exist.
+  const { cssStatus } = useOmniDesign();
 
   // Update swatch color from primary brand token if available
   useEffect(() => {
@@ -302,8 +308,15 @@ export function ButtonShowcase() {
   };
 
   useEffect(() => {
-    // Defer one frame so the browser has recalculated styles after data-theme/data-surface change.
-    const raf = requestAnimationFrame(() => {
+    // Deferred so styles are recalculated after a data-theme/data-surface
+    // change. This is a timeout and NOT requestAnimationFrame on purpose:
+    // rAF does not fire at all in a background or hidden tab, so a page
+    // opened in one measured nothing, and because the deps do not change
+    // afterwards it never retried — every row read "--" forever, even once
+    // the tab was focused. Timers still fire when hidden (throttled), and
+    // getComputedStyle forces the style recalculation by itself, so the
+    // deferral is all that was ever needed.
+    const t = setTimeout(() => {
       const el = surfaceRef.current;
       if (!el) return;
       const v = (name) => getCssVarFrom(el, name);
@@ -342,8 +355,8 @@ export function ButtonShowcase() {
       }
       setContrastData(data);
     });
-    return () => cancelAnimationFrame(raf);
-  }, [style, effectiveColor, bgTheme, bgSurface]);
+    return () => clearTimeout(t);
+  }, [style, effectiveColor, bgTheme, bgSurface, cssStatus]);
 
   return (
     <Box sx={{ pb: 8 }}>

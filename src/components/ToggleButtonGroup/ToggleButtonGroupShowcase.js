@@ -236,8 +236,9 @@ export function ToggleButtonGroupShowcase() {
 
   // Contrast data
   useEffect(() => {
-    // Defer one frame so styles are recalculated after a theme/surface change.
-    const raf = requestAnimationFrame(() => {
+    // Deferred, not requestAnimationFrame: rAF never fires in a background
+    // tab, which left the panel reading "--" permanently.
+    const t = setTimeout(() => {
       const el = surfaceRef.current;
       if (!el) return;
       const v = (name) => getCssVarFrom(el, name);
@@ -254,7 +255,7 @@ export function ToggleButtonGroupShowcase() {
         focusVisible: v('--Focus-Visible'),
       });
     });
-    return () => cancelAnimationFrame(raf);
+    return () => clearTimeout(t);
   }, [color, bgTheme, bgSurface]);
 
   return (
