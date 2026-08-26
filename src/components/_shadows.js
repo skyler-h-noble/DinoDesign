@@ -55,14 +55,32 @@ export const SHADOW_LEVEL_3 = _buildShadow(3);
 export const SHADOW_LEVEL_4 = _buildShadow(4);
 export const SHADOW_LEVEL_5 = _buildShadow(5);
 
+/* Read the BRAND's recipe, fall back to the geometry above.
+ *
+ * The design system publishes --Effect-Level-0 through --Effect-Level-5, and
+ * nothing consumed them: every elevation rendered the table in this file
+ * instead. So a brand could author whatever shadow it liked, ship it in its
+ * CSS, and see the library's own shadow on screen — with the level number
+ * correct and the shape wrong at every level.
+ *
+ * The token comes FIRST so the brand wins. The literal stays as the fallback
+ * for a consumer with no design system loaded, which is the one case a var()
+ * fallback actually fires — and it keeps the geometry documented in one
+ * readable place rather than only inside a generated stylesheet.
+ *
+ * A var() fallback may contain commas, so a multi-layer recipe nests safely.
+ */
+const _token = (level, literal) =>
+  level === 0 ? 'none' : 'var(--Effect-Level-' + level + ', ' + literal + ')';
+
 // Keyed map for dynamic level lookup (e.g. SHADOWS[level])
 export const SHADOWS = {
   0: SHADOW_LEVEL_0,
-  1: SHADOW_LEVEL_1,
-  2: SHADOW_LEVEL_2,
-  3: SHADOW_LEVEL_3,
-  4: SHADOW_LEVEL_4,
-  5: SHADOW_LEVEL_5,
+  1: _token(1, SHADOW_LEVEL_1),
+  2: _token(2, SHADOW_LEVEL_2),
+  3: _token(3, SHADOW_LEVEL_3),
+  4: _token(4, SHADOW_LEVEL_4),
+  5: _token(5, SHADOW_LEVEL_5),
 };
 
 // ─── Bevel Shadow (chained inset shadows for Button-style highlight/lowlight)
