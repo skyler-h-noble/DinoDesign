@@ -2,7 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { axe } from 'jest-axe';
-import { Checkbox } from './Checkbox';
+import { Checkbox, normalizeCheckboxVariant } from './Checkbox';
 
 // ─── Render Tests ─────────────────────────────────────────────────────────────
 
@@ -239,5 +239,72 @@ describe('Checkbox — Accessibility (jest-axe)', () => {
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();
+  });
+});
+// ─── Variant = colour ─────────────────────────────────────────────────────────
+//
+// The -outline / -light shapes were removed. The risk in removing them was
+// never a crash: an unknown variant falls through to the map's default entry,
+// so a hard delete would have silently repainted every existing call site.
+// These tests pin the loud behaviour instead.
+
+describe('Checkbox variant is colour only', () => {
+  const originalEnv = process.env.NODE_ENV;
+  let warn;
+
+  beforeEach(() => {
+    process.env.NODE_ENV = 'development';
+    warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+  afterEach(() => {
+    process.env.NODE_ENV = originalEnv;
+    warn.mockRestore();
+  });
+
+  test('normalizes a legacy shape suffix to its colour', () => {
+    expect(normalizeCheckboxVariant('secondary-outline')).toBe('secondary');
+    expect(normalizeCheckboxVariant('error-light')).toBe('error');
+    expect(normalizeCheckboxVariant('primary-solid')).toBe('primary');
+  });
+
+  test('leaves a plain colour untouched', () => {
+    for (const c of ['default', 'primary', 'black-white']) {
+      expect(normalizeCheckboxVariant(c)).toBe(c);
+    }
+  });
+
+  test('warns once per legacy name, in development only', () => {
+    // A fresh name each run — the warn set is module-level and deduplicates.
+    normalizeCheckboxVariant('tertiary-outline');
+    normalizeCheckboxVariant('tertiary-outline');
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0][0]).toMatch(/variant="tertiary-outline"/);
+    expect(warn.mock.calls[0][0]).toMatch(/colour only/);
+  });
+
+  test('an unknown variant falls back to default, never primary', () => {
+    // primary is a DIFFERENT colour from the brand default; falling back to it
+    // presents an unmarked control as a deliberate one.
+    expect(normalizeCheckboxVariant('nonsense')).toBe('nonsense');
+    const { container } = render(<Checkbox variant="nonsense" />);
+    expect(container.querySelector('.chk-box-icon')).not.toBeNull();
+  });
+
+  test('renders every colour, including black-white', () => {
+    for (const c of ['default', 'primary', 'secondary', 'tertiary', 'neutral',
+                     'info', 'success', 'warning', 'error', 'black-white']) {
+      const { container } = render(<Checkbox variant={c} />);
+      expect(container.querySelector('.chk-box-icon')).not.toBeNull();
+    }
+  });
+
+  test('declares no data-theme or data-surface of its own', () => {
+    // The light variant used to set both. With it gone the box inherits the
+    // surrounding scope, which is what a control on a card should do.
+    const { container } = render(
+      <div data-theme="Primary" data-surface="Container"><Checkbox /></div>,
+    );
+    expect(container.querySelectorAll('[data-theme]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-surface]')).toHaveLength(1);
   });
 });

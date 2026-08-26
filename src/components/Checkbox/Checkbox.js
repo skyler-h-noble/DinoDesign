@@ -4,16 +4,21 @@ import { Checkbox as MuiCheckbox, FormControlLabel, Box } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { Body, BodySmall } from '../Typography';
+import { tokenSegment } from '../_shadows';
 
 /**
  * Checkbox Component
  * Full-featured checkbox with complete design system integration
  *
- * VARIANTS:
- *   PRIMARY variant="primary"           filled BG when checked (primary color only)
- *   OUTLINE variant="{color}-outline"   transparent BG, border + icon when checked
- *   LIGHT   variant="{color}-light"     tinted BG when checked
- *   (No plain/ghost — not accessible without visible boundary)
+ * VARIANT = COLOUR. There is one look: transparent box, coloured border, glyph
+ * on check. `variant` names the colour and nothing else:
+ *   default (--Quiet box) | primary | secondary | tertiary | neutral |
+ *   info | success | warning | error | black-white
+ *
+ * The `{color}-outline` and `{color}-light` shapes were REMOVED — colour now
+ * arrives from the design as a Buttons mode, and shape was never an axis of the
+ * Figma component. Those names still resolve to their colour and warn once in
+ * development; see normalizeCheckboxVariant.
  *
  * SIZES: small (16px box) | medium (20px box) | large (24px box)
  * STATES: checked | unchecked | indeterminate | disabled
@@ -26,7 +31,10 @@ import { Body, BodySmall } from '../Typography';
  *   - FormControlLabel automatically associates the label with the input
  */
 
-const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+// `black-white` capitalises to `Black-white`, which is not a token — the design
+// system emits --Buttons-BlackWhite-*. tokenSegment is the shared mapping
+// Button already uses, so both components name the token the same way.
+const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error', 'black-white'];
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // --- Variant Style Builders --------------------------------------------------
@@ -43,43 +51,60 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const defaultBorder = (C) =>
   C === 'Default' ? 'var(--Quiet)' : 'var(--Buttons-' + C + '-Border)';
 
-function outlineStyles(color) {
-  const C = cap(color);
+// A Checkbox has ONE look. `variant` selects its COLOUR and nothing else.
+//
+// There used to be two shapes, `{color}-outline` and `{color}-light`. They are
+// gone: colour now arrives as a Buttons MODE from the design, and shape was
+// never an axis of the Figma component. What survives is the outline look —
+// transparent box, coloured border, glyph on check — which is what the design
+// has always drawn.
+function colorStyles(color) {
+  const C = tokenSegment(color);
   return {
-    type: 'outline',
     color: C,
     borderToken: defaultBorder(C),
     icon: 'var(--Buttons-' + C + '-Border)',
-  };
-}
-
-function lightStyles(color) {
-  const C = cap(color);
-  return {
-    type: 'light',
-    color: C,
-    borderToken: defaultBorder(C),
-    icon: 'var(--Buttons-' + C + '-Border)',
-    // Base theme, not C + '-Light'. Generated design systems do not emit
-    // *-Light themes, so that name matched nothing. The light look comes from
-    // the surface level instead — see dataSurface below.
-    dataTheme: C,
-    dataSurface: 'Surface-Brightest',
   };
 }
 
 function buildVariantMap() {
   const map = {};
-  COLORS.forEach((color) => {
-    map[color + '-outline'] = outlineStyles(color);
-    map[color + '-light']   = lightStyles(color);
-  });
-  // Shorthand aliases — default to outline
-  map['primary']  = outlineStyles('primary');
-  map['default']  = outlineStyles('default');
-  map['outline']  = outlineStyles('primary');
-  map['light']    = lightStyles('primary');
+  COLORS.forEach((color) => { map[color] = colorStyles(color); });
   return map;
+}
+
+// Legacy shape suffixes resolve to the colour alone.
+//
+// They are NOT quietly accepted: an unknown variant falls through to the map's
+// default entry, so hard-deleting these names would have silently repainted
+// every existing call site in the default colour with no error anywhere — the
+// exact failure this component has already shipped twice (`X-Light` themes no
+// sheet defined, and a Ratio that named a scope instead of inheriting one).
+// Strip the suffix, keep the colour, and say so once in development.
+const SHAPE_SUFFIX = /-(outline|light|solid)$/;
+const warned = new Set();
+
+export function normalizeCheckboxVariant(variant) {
+  const v = String(variant || 'default');
+  if (!SHAPE_SUFFIX.test(v)) return v;
+  const base = v.replace(SHAPE_SUFFIX, '');
+  if (process.env.NODE_ENV !== 'production' && !warned.has(v)) {
+    warned.add(v);
+    console.warn(
+      '[Checkbox] variant="' + v + '" — the -outline/-light/-solid shapes were ' +
+      'removed; a Checkbox has one look and `variant` selects colour only. ' +
+      'Rendering variant="' + base + '". Update the call site.',
+    );
+  }
+  return base;
+}
+
+// Resolve a variant to its styles. Unknown names fall back to `default`, the
+// brand colour — never to `primary`, which is a different colour and would
+// misrepresent an unmarked control as a deliberate one.
+function stylesFor(variant) {
+  const map = buildVariantMap();
+  return map[normalizeCheckboxVariant(variant)] || map.default;
 }
 
 // --- Sizing ------------------------------------------------------------------
@@ -96,11 +121,9 @@ const SIZE_MAP = {
 // --- Custom Icons ------------------------------------------------------------
 
 function CheckboxBoxIcon({ size, variant, checked, indeterminate }) {
-  const variantMap = buildVariantMap();
-  const styles = variantMap[variant] || variantMap.primary;
+  const styles = stylesFor(variant);
   const sizeConfig = SIZE_MAP[size] || SIZE_MAP.medium;
   const isActive = checked || indeterminate;
-  const isLight = styles.type === 'light';
 
   // Outer border always uses the themed border token
   const outerBorder = styles.borderToken;
@@ -113,10 +136,9 @@ function CheckboxBoxIcon({ size, variant, checked, indeterminate }) {
     size === 'large' ? 'var(--Lg-Checkbox-Radius, 4.8px)' :
     'var(--Checkbox-Radius, 4px)';
 
-  // Inner data attributes for light variant
-  const innerAttrs = isLight
-    ? { 'data-theme': styles.dataTheme, 'data-surface': styles.dataSurface || 'Surface-Brightest' }
-    : {};
+  // No inner data-theme/data-surface. The light variant used to set them, and
+  // with it gone the box INHERITS the surrounding scope — which is what a
+  // control sitting on a card should do anyway.
 
   return (
     <Box
@@ -136,7 +158,6 @@ function CheckboxBoxIcon({ size, variant, checked, indeterminate }) {
     >
       {/* Inner themed surface */}
       <Box
-        {...innerAttrs}
         sx={{
           width: '100%',
           height: '100%',
@@ -194,8 +215,7 @@ export function Checkbox({
   inputProps: inputPropsProp = {},
   ...props
 }) {
-  const variantMap = buildVariantMap();
-  const styles = variantMap[variant] || variantMap.primary;
+  const styles = stylesFor(variant);
   const sizeConfig = SIZE_MAP[size] || SIZE_MAP.medium;
   const LabelComp = size === 'small' ? BodySmall : Body;
 
@@ -282,47 +302,64 @@ export function Checkbox({
   return checkboxElement;
 }
 
-// Convenience Exports - Default
-export const DefaultCheckbox          = (p) => <Checkbox variant="default"            {...p} />;
-export const DefaultSolidCheckbox     = (p) => <Checkbox variant="default-solid"      {...p} />;
-export const DefaultOutlineCheckbox   = (p) => <Checkbox variant="default-outline"    {...p} />;
-export const DefaultLightCheckbox     = (p) => <Checkbox variant="default-light"      {...p} />;
+// ─── Convenience Exports ─────────────────────────────────────────────────────
+// One per COLOUR. There is no shape axis on a Checkbox.
 
-// Solid (Primary)
-export const PrimaryCheckbox          = (p) => <Checkbox variant="primary"            {...p} />;
-export const PrimarySolidCheckbox     = (p) => <Checkbox variant="primary-solid"      {...p} />;
+export const DefaultCheckbox     = (p) => <Checkbox variant="default" {...p} />;
+export const PrimaryCheckbox     = (p) => <Checkbox variant="primary" {...p} />;
+export const SecondaryCheckbox   = (p) => <Checkbox variant="secondary" {...p} />;
+export const TertiaryCheckbox    = (p) => <Checkbox variant="tertiary" {...p} />;
+export const NeutralCheckbox     = (p) => <Checkbox variant="neutral" {...p} />;
+export const InfoCheckbox        = (p) => <Checkbox variant="info" {...p} />;
+export const SuccessCheckbox     = (p) => <Checkbox variant="success" {...p} />;
+export const WarningCheckbox     = (p) => <Checkbox variant="warning" {...p} />;
+export const ErrorCheckbox       = (p) => <Checkbox variant="error" {...p} />;
+export const BlackWhiteCheckbox  = (p) => <Checkbox variant="black-white" {...p} />;
 
-// Outline
-export const PrimaryOutlineCheckbox   = (p) => <Checkbox variant="primary-outline"    {...p} />;
-export const SecondaryOutlineCheckbox = (p) => <Checkbox variant="secondary-outline"  {...p} />;
-export const TertiaryOutlineCheckbox  = (p) => <Checkbox variant="tertiary-outline"   {...p} />;
-export const NeutralOutlineCheckbox   = (p) => <Checkbox variant="neutral-outline"    {...p} />;
-export const InfoOutlineCheckbox      = (p) => <Checkbox variant="info-outline"       {...p} />;
-export const SuccessOutlineCheckbox   = (p) => <Checkbox variant="success-outline"    {...p} />;
-export const WarningOutlineCheckbox   = (p) => <Checkbox variant="warning-outline"    {...p} />;
-export const ErrorOutlineCheckbox     = (p) => <Checkbox variant="error-outline"      {...p} />;
+// ─── Deprecated shape-named exports ──────────────────────────────────────────
+//
+// The -solid / -outline / -light shapes are gone; every name below renders its
+// COLOUR. They are kept because they are part of the published package surface
+// and deleting them breaks an import at build time rather than at review time.
+//
+// They delegate to the colour components directly, NOT to variant="X-outline",
+// so using one does not fire the deprecation warning — the warning is meant for
+// hand-written variant strings, which are the ones a design hand-off can still
+// produce. Remove these on the next major.
+export const DefaultSolidCheckbox       = DefaultCheckbox;
+export const DefaultOutlineCheckbox     = DefaultCheckbox;
+export const DefaultLightCheckbox       = DefaultCheckbox;
+export const PrimarySolidCheckbox       = PrimaryCheckbox;
+export const PrimaryOutlineCheckbox     = PrimaryCheckbox;
+export const PrimaryLightCheckbox       = PrimaryCheckbox;
+export const SecondarySolidCheckbox     = SecondaryCheckbox;
+export const SecondaryOutlineCheckbox   = SecondaryCheckbox;
+export const SecondaryLightCheckbox     = SecondaryCheckbox;
+export const TertiarySolidCheckbox      = TertiaryCheckbox;
+export const TertiaryOutlineCheckbox    = TertiaryCheckbox;
+export const TertiaryLightCheckbox      = TertiaryCheckbox;
+export const NeutralSolidCheckbox       = NeutralCheckbox;
+export const NeutralOutlineCheckbox     = NeutralCheckbox;
+export const NeutralLightCheckbox       = NeutralCheckbox;
+export const InfoSolidCheckbox          = InfoCheckbox;
+export const InfoOutlineCheckbox        = InfoCheckbox;
+export const InfoLightCheckbox          = InfoCheckbox;
+export const SuccessSolidCheckbox       = SuccessCheckbox;
+export const SuccessOutlineCheckbox     = SuccessCheckbox;
+export const SuccessLightCheckbox       = SuccessCheckbox;
+export const WarningSolidCheckbox       = WarningCheckbox;
+export const WarningOutlineCheckbox     = WarningCheckbox;
+export const WarningLightCheckbox       = WarningCheckbox;
+export const ErrorSolidCheckbox         = ErrorCheckbox;
+export const ErrorOutlineCheckbox       = ErrorCheckbox;
+export const ErrorLightCheckbox         = ErrorCheckbox;
+export const BlackWhiteSolidCheckbox    = BlackWhiteCheckbox;
+export const BlackWhiteOutlineCheckbox  = BlackWhiteCheckbox;
+export const BlackWhiteLightCheckbox    = BlackWhiteCheckbox;
 
-// Solid (all colors)
-export const SecondarySolidCheckbox   = (p) => <Checkbox variant="secondary-solid"    {...p} />;
-export const TertiarySolidCheckbox    = (p) => <Checkbox variant="tertiary-solid"     {...p} />;
-export const NeutralSolidCheckbox     = (p) => <Checkbox variant="neutral-solid"      {...p} />;
-export const InfoSolidCheckbox        = (p) => <Checkbox variant="info-solid"         {...p} />;
-export const SuccessSolidCheckbox     = (p) => <Checkbox variant="success-solid"      {...p} />;
-export const WarningSolidCheckbox     = (p) => <Checkbox variant="warning-solid"      {...p} />;
-export const ErrorSolidCheckbox       = (p) => <Checkbox variant="error-solid"        {...p} />;
-
-// Light
-export const PrimaryLightCheckbox     = (p) => <Checkbox variant="primary-light"      {...p} />;
-export const SecondaryLightCheckbox   = (p) => <Checkbox variant="secondary-light"    {...p} />;
-export const TertiaryLightCheckbox    = (p) => <Checkbox variant="tertiary-light"     {...p} />;
-export const NeutralLightCheckbox     = (p) => <Checkbox variant="neutral-light"      {...p} />;
-export const InfoLightCheckbox        = (p) => <Checkbox variant="info-light"         {...p} />;
-export const SuccessLightCheckbox     = (p) => <Checkbox variant="success-light"      {...p} />;
-export const WarningLightCheckbox     = (p) => <Checkbox variant="warning-light"      {...p} />;
-export const ErrorLightCheckbox       = (p) => <Checkbox variant="error-light"        {...p} />;
-
-// Aliases
-export const OutlineCheckbox = (p) => <Checkbox variant="primary-outline" {...p} />;
-export const SolidCheckbox   = (p) => <Checkbox variant="primary-solid"   {...p} />;
+// Bare aliases — historically primary, now the brand default.
+export const OutlineCheckbox = DefaultCheckbox;
+export const SolidCheckbox   = DefaultCheckbox;
+export const LightCheckbox   = DefaultCheckbox;
 
 export default Checkbox;

@@ -9,6 +9,7 @@ import {
   Box,
 } from '@mui/material';
 import { BodyLarge, Body, BodySmall } from '../Typography';
+import { tokenSegment } from '../_shadows';
 
 /**
  * Radio Component
@@ -29,8 +30,12 @@ import { BodyLarge, Body, BodySmall } from '../Typography';
  *   - Use RadioGroup with a label for grouped radio buttons
  */
 
-const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+// black-white matches Button and Checkbox. It capitalises to `Black-white`,
+// which is not a token — the system emits --Buttons-BlackWhite-*, so the name
+// goes through the shared tokenSegment mapping rather than cap().
+const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error', 'black-white'];
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+const seg = tokenSegment;
 
 // --- Sizing ------------------------------------------------------------------
 // touchTarget is the 24×24 parent container; box is the outer ring; dot is the
@@ -45,7 +50,7 @@ const SIZE_MAP = {
 // --- Custom Radio Icons ------------------------------------------------------
 
 function RadioCircleIcon({ size, color, checked }) {
-  const C = cap(color);
+  const C = seg(color);
   // Matches Checkbox: the DEFAULT colour draws its ring in --Quiet so an
   // unselected radio reads as a quiet affordance rather than a button. The dot
   // keeps the button token, so selecting one is what brings in the brand
