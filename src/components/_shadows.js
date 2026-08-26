@@ -38,7 +38,7 @@ const _LEVEL_LAYERS = {
 };
 /* One alpha for every layer — Comeau's stack uses a single opacity throughout.
    Must match ALPHA in dinodesign-studio/src/utils/dropshadow.ts. */
-const _ALPHA = 0.16;
+const _ALPHA = 0.10;
 
 /* Every layer of a level uses THAT LEVEL's colour token.
    The token index is the ELEVATION, not the layer: Level-3 draws three layers,
