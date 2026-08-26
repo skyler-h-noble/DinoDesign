@@ -84,6 +84,12 @@ export function Box({
     <MuiBox
       component={component}
       className={'omni-box-elevation' + (className ? ' ' + className : '')}
+      /* The class name is the same for every level, so the DOM said a box was
+         elevated and never by how much — reading the level meant opening
+         Computed and counting comma-separated shadow layers. This makes it a
+         glance, which matters most when a design-to-code conversion picks the
+         wrong level: the wrong number is visible next to the right one. */
+      data-elevation={level}
       sx={{ boxShadow: SHADOWS[level], boxSizing: 'border-box', width: sxW, height: sxH, borderRadius: sxR }}
       style={outerStyle}
       {...props}
