@@ -2,7 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { axe } from 'jest-axe';
-import { Button } from './Button';
+import { Button, normalizeButtonVariant } from './Button';
 
 // ─── Render ───────────────────────────────────────────────────────────────────
 
@@ -220,5 +220,44 @@ describe('Button — Accessibility (jest-axe)', () => {
       <div data-theme="Tertiary"><Button variant="primary">Click me</Button></div>
     );
     expect(await axe(container)).toHaveNoViolations();
+  });
+});
+// ─── The -light shape is removed ──────────────────────────────────────────────
+describe('Button variant -light removal', () => {
+  const originalEnv = process.env.NODE_ENV;
+  let warn;
+  beforeEach(() => {
+    process.env.NODE_ENV = 'development';
+    warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+  afterEach(() => {
+    process.env.NODE_ENV = originalEnv;
+    warn.mockRestore();
+  });
+
+  test('normalizes {color}-light to the solid colour', () => {
+    expect(normalizeButtonVariant('primary-light')).toBe('primary');
+    expect(normalizeButtonVariant('error-light')).toBe('error');
+  });
+
+  test('leaves other shapes alone', () => {
+    for (const v of ['primary', 'primary-outline', 'ghost', 'text',
+                     'black-white', 'black-white-outline', 'danger', 'outline']) {
+      expect(normalizeButtonVariant(v)).toBe(v);
+    }
+  });
+
+  test('warns once per legacy name', () => {
+    normalizeButtonVariant('neutral-light');
+    normalizeButtonVariant('neutral-light');
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0][0]).toMatch(/-light shape was removed/);
+  });
+
+  test('a -light button still renders', () => {
+    // The point of normalizing rather than deleting: no call site goes blank,
+    // and none silently repaints as the brand default either.
+    const { getByRole } = render(<Button variant="success-light">Go</Button>);
+    expect(getByRole('button')).toBeInTheDocument();
   });
 });

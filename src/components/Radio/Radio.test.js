@@ -369,3 +369,24 @@ describe('Radio — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+// ─── Colour coverage ──────────────────────────────────────────────────────────
+describe('Radio colours', () => {
+  test('renders every colour, including black-white', () => {
+    for (const c of ['default', 'primary', 'secondary', 'tertiary', 'neutral',
+                     'info', 'success', 'warning', 'error', 'black-white']) {
+      const { container } = render(<Radio color={c} value={c} />);
+      expect(container.querySelector('.radio-circle-icon')).not.toBeNull();
+    }
+  });
+
+  test('black-white reaches the BlackWhite token, not Black-white', () => {
+    // cap('black-white') gives 'Black-white', which is not a token — the var
+    // would resolve to nothing and the ring would vanish with no error. The
+    // shared tokenSegment map is what prevents that, so assert the output.
+    const { container } = render(<Radio color="black-white" value="bw" />);
+    const ring = container.querySelector('.radio-circle-icon');
+    const css = ring.getAttribute('style') || '';
+    expect(css + JSON.stringify(ring.className)).not.toMatch(/Black-white/);
+  });
+});

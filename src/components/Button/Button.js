@@ -67,8 +67,10 @@ function resolveDecorator(node, buttonSize) {
  *
  * SOLID   — variant="{color}"
  * OUTLINE — variant="{color}-outline"
- * LIGHT   — variant="{color}-light"
- * GHOST   — variant="ghost"
+ * GHOST   — variant="ghost"  (alias: "text")
+ *
+ * The LIGHT shape was removed — see normalizeButtonVariant. "{color}-light"
+ * still resolves, to the SOLID button of that colour, and warns once in dev.
  *
  * ─── SIZES ───────────────────────────────────────────────────────────────────
  *   small:  var(--Small-Button-Height)
@@ -166,36 +168,6 @@ function outlineStyles(color, selected = false) {
   };
 }
 
-function lightStyles(color, elevated = false, selected = false) {
-  const C = cap(color);
-  const restLevel = elevated ? SHADOW_LEVEL_1 : 'none';
-  const hoverLevel = elevated ? SHADOW_LEVEL_2 : SHADOW_LEVEL_1;
-  return {
-    backgroundColor: `var(--${C}-Color-11)`,
-    color: `var(--Text-${C}-Color-11)`,
-    border: `var(--Button-Border-Width) solid var(--Buttons-${C}-Border)`,
-    boxShadow: restLevel,
-    '& .MuiTouchRipple-rippleVisible': {
-      color: `var(--Hover-${C}-Color-11)`,
-    },
-    '&:hover': {
-      backgroundColor: `var(--Hover-${C}-Color-11)`,
-      boxShadow: hoverLevel,
-      ...(!selected && { transform: 'translateY(-1px)' }),
-    },
-    '&:active': {
-      backgroundColor: `var(--Pressed-${C}-Color-11)`,
-      boxShadow: 'none',
-      ...(!selected && { transform: 'translateY(0)' }),
-    },
-    '&.Mui-focusVisible': {
-      backgroundColor: `var(--${C}-Color-11)`,
-      outline: '2px solid var(--Focus-Visible)',
-      outlineOffset: '2px',
-    },
-  };
-}
-
 function ghostStyles(isTextContent, selected = false) {
   return {
     backgroundColor: 'transparent',
@@ -246,18 +218,46 @@ function ghostStyles(isTextContent, selected = false) {
   };
 }
 
+// The `-light` shape is removed. It painted --<C>-Color-11 with
+// --Text-<C>-Color-11, a tinted fill that was never a shape in the Figma
+// component; shape there is solid / outline / ghost / text, and colour now
+// arrives as a Buttons MODE.
+//
+// A hard delete would have been silent: an unknown variant falls through to
+// `variantMap.default`, so every existing `X-light` call site would have
+// repainted as a solid brand-default button with no error. Strip the suffix to
+// the SOLID colour of the same name and say so once in development.
+const LIGHT_SUFFIX = /-light$/;
+const warnedVariants = new Set();
+
+export function normalizeButtonVariant(variant) {
+  const v = String(variant || 'default');
+  if (!LIGHT_SUFFIX.test(v)) return v;
+  const base = v.replace(LIGHT_SUFFIX, '');
+  if (process.env.NODE_ENV !== 'production' && !warnedVariants.has(v)) {
+    warnedVariants.add(v);
+    console.warn(
+      '[Button] variant="' + v + '" — the -light shape was removed. Rendering ' +
+      'variant="' + base + '" (solid). Use a Buttons mode for colour and ' +
+      'solid / -outline / ghost / text for shape.',
+    );
+  }
+  return base;
+}
+
 function buildVariantMap(isTextContent, elevated = false, selected = false, size = 'medium') {
   const map = {};
   COLORS.forEach((color) => {
     map[color]                = solidStyles(color, elevated, selected, size);
     map[`${color}-outline`]   = outlineStyles(color, selected);
-    map[`${color}-light`]     = lightStyles(color, elevated, selected);
   });
-  // Black/white — solid and outline only.
+  // Black/white — solid and outline.
   //
-  // Not a member of COLORS on purpose: that loop also builds `-light`, which
+  // It stayed out of COLORS because that loop used to build `-light` too, which
   // reads --<C>-Color-11, and BlackWhite has no tonal ramp to take a Color-11
-  // from. Solid and outline need only --Buttons-BlackWhite-{Button,Text,Border,
+  // from. With -light gone the exclusion no longer earns its keep, but the two
+  // lines below are explicit and cost nothing, so they stay until the Figma
+  // side settles. Solid and outline need only --Buttons-BlackWhite-{Button,Text,Border,
   // Hover,Pressed,Highlight,Lowlight}, which the system emits in every theme
   // and surface block — so the button resolves to black on a light surface and
   // white on a dark one wherever it is placed, with no prop change.
@@ -431,9 +431,11 @@ export function Button({
   const effectiveFullWidth = fullWidth && !isIconOnly && !letterNumber;
 
   // Ghost avatars/swatches fallback to primary
-  const effectiveVariant = ((avatar || swatch) && (variant === 'ghost' || variant === 'text'))
-    ? 'primary'
-    : variant;
+  const effectiveVariant = normalizeButtonVariant(
+    ((avatar || swatch) && (variant === 'ghost' || variant === 'text'))
+      ? 'primary'
+      : variant,
+  );
 
   const variantMap     = buildVariantMap(isTextContent, elevated, selected, size);
   const variantStyles  = variantMap[effectiveVariant] || variantMap.default;
@@ -766,15 +768,18 @@ export const SuccessOutlineButton   = (p) => <Button variant="success-outline"  
 export const WarningOutlineButton   = (p) => <Button variant="warning-outline"    {...p} />;
 export const ErrorOutlineButton     = (p) => <Button variant="error-outline"      {...p} />;
 
-// Light
-export const PrimaryLightButton     = (p) => <Button variant="primary-light"      {...p} />;
-export const SecondaryLightButton   = (p) => <Button variant="secondary-light"    {...p} />;
-export const TertiaryLightButton    = (p) => <Button variant="tertiary-light"     {...p} />;
-export const NeutralLightButton     = (p) => <Button variant="neutral-light"      {...p} />;
-export const InfoLightButton        = (p) => <Button variant="info-light"         {...p} />;
-export const SuccessLightButton     = (p) => <Button variant="success-light"      {...p} />;
-export const WarningLightButton     = (p) => <Button variant="warning-light"      {...p} />;
-export const ErrorLightButton       = (p) => <Button variant="error-light"        {...p} />;
+// Deprecated: the Light shape is gone. Each renders its SOLID colour.
+// Kept because deleting a published export breaks an import at build time; they
+// point at the solid variant directly so they do not fire the dev warning,
+// which is aimed at hand-written variant strings. Remove on the next major.
+export const PrimaryLightButton     = (p) => <Button variant="primary"            {...p} />;
+export const SecondaryLightButton   = (p) => <Button variant="secondary"          {...p} />;
+export const TertiaryLightButton    = (p) => <Button variant="tertiary"           {...p} />;
+export const NeutralLightButton     = (p) => <Button variant="neutral"            {...p} />;
+export const InfoLightButton        = (p) => <Button variant="info"               {...p} />;
+export const SuccessLightButton     = (p) => <Button variant="success"            {...p} />;
+export const WarningLightButton     = (p) => <Button variant="warning"            {...p} />;
+export const ErrorLightButton       = (p) => <Button variant="error"              {...p} />;
 
 // Ghost / Text
 export const GhostButton  = (p) => <Button variant="ghost" {...p} />;
