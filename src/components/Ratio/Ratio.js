@@ -105,10 +105,20 @@ export function Ratio({
   // A light variant is the base theme at its BRIGHTEST surface, not a theme of
   // its own. Generated design systems stopped emitting *-Light themes, so
   // `C + '-Light'` matched no rule and --Background resolved to nothing.
-  const dataTheme = color === 'default' ? 'Default' : C;
+  //
+  // UNSET MEANS INHERIT. Both axes previously emitted a concrete value on every
+  // Ratio — data-theme="Default" + data-surface="Surface" — which is not a
+  // no-op: `Default` is a real theme in every generated system, so a Ratio
+  // dropped inside a Primary card SWITCHED OUT of it. The Image Placeholder
+  // then filled with Default/Surface's `--Border` and drew its icon in that
+  // scope's `--Background`; on a light brand both land near-white, so the
+  // placeholder rendered as a blank white square with an invisible glyph while
+  // the same component in Figma showed dark-on-light. Emit an attribute only
+  // when the caller actually asked for one, and let the cascade do the rest.
+  const dataTheme = color === 'default' ? undefined : C;
   const dataSurface = variant === 'dark' ? 'Surface-Dimmest'
     : variant === 'light' ? 'Surface-Brightest'
-    : 'Surface';
+    : undefined;
 
   const p = PADDING_MAP[padding] !== undefined ? PADDING_MAP[padding] : PADDING_MAP.none;
   const isClickable = clickable || !!onClick;
