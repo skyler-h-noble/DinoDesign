@@ -31,12 +31,24 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // --- Variant Style Builders --------------------------------------------------
 
+// The DEFAULT colour draws its box in --Quiet, not in a button border token.
+// An unchecked checkbox is a quiet affordance, not a call to action: on a brand
+// whose default button is a saturated colour, --Buttons-Default-Border painted
+// every empty box in that colour and a list of them read as a row of buttons.
+// --Quiet is also the safer token for the job — it is tuned to 4.5:1 against
+// its surface, comfortably past the 3:1 a control outline needs.
+//
+// Only the box moves. The check glyph keeps the button token so that ticking
+// one is what introduces the brand colour.
+const defaultBorder = (C) =>
+  C === 'Default' ? 'var(--Quiet)' : 'var(--Buttons-' + C + '-Border)';
+
 function outlineStyles(color) {
   const C = cap(color);
   return {
     type: 'outline',
     color: C,
-    borderToken: 'var(--Buttons-' + C + '-Border)',
+    borderToken: defaultBorder(C),
     icon: 'var(--Buttons-' + C + '-Border)',
   };
 }
@@ -46,7 +58,7 @@ function lightStyles(color) {
   return {
     type: 'light',
     color: C,
-    borderToken: 'var(--Buttons-' + C + '-Border)',
+    borderToken: defaultBorder(C),
     icon: 'var(--Buttons-' + C + '-Border)',
     // Base theme, not C + '-Light'. Generated design systems do not emit
     // *-Light themes, so that name matched nothing. The light look comes from

@@ -46,7 +46,12 @@ const SIZE_MAP = {
 
 function RadioCircleIcon({ size, color, checked }) {
   const C = cap(color);
-  const ringColor = 'var(--Buttons-' + C + '-Border)';
+  // Matches Checkbox: the DEFAULT colour draws its ring in --Quiet so an
+  // unselected radio reads as a quiet affordance rather than a button. The dot
+  // keeps the button token, so selecting one is what brings in the brand
+  // colour. --Quiet is tuned to 4.5:1 on its surface, past the 3:1 a control
+  // outline requires.
+  const ringColor = C === 'Default' ? 'var(--Quiet)' : 'var(--Buttons-' + C + '-Border)';
   const dotColor = 'var(--Buttons-' + C + '-Border)';
   const sizeConfig = SIZE_MAP[size] || SIZE_MAP.medium;
 
