@@ -199,7 +199,7 @@ export function Switch({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    transition: 'background-color 0.15s ease',
+    transition: 'background-color var(--Motion-Duration-Fast, 150ms) var(--Motion-Easing-Standard, cubic-bezier(0.2, 0, 0, 1))',
     '& > *': { width: sc.icon, height: sc.icon, display: 'block' },
   };
 
@@ -238,7 +238,11 @@ export function Switch({
       // and the root goes on the right.
       paddingRight: (rootW - sc.trackW + THUMB_INSET) + 'px',
       color: 'transparent',
-      transition: 'justify-content 0.15s ease',
+      // KNOWN DEFECT: justify-content is a discrete property, so this
+      // transition is inert and the thumb snaps between ends. Fixing it means
+      // moving the thumb with transform, which needs the switchBase geometry
+      // reworked — see the note in the motion standard.
+      transition: 'justify-content var(--Motion-Duration-Instant, 100ms) var(--Motion-Easing-Standard, cubic-bezier(0.2, 0, 0, 1))',
       transform: 'none',
 
       '& .MuiSwitch-input': { left: 0, top: 0, width: '100%', height: '100%', margin: 0 },
@@ -291,7 +295,7 @@ export function Switch({
       position: 'absolute',
       top: trackTop,
       left: 0,
-      transition: 'background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
+      transition: 'background-color var(--Motion-Duration-Fast, 150ms) var(--Motion-Easing-Standard, cubic-bezier(0.2, 0, 0, 1)), border-color var(--Motion-Duration-Fast, 150ms) var(--Motion-Easing-Standard, cubic-bezier(0.2, 0, 0, 1)), box-shadow var(--Motion-Duration-Fast, 150ms) var(--Motion-Easing-Standard, cubic-bezier(0.2, 0, 0, 1))',
     },
 
     ...sx,
