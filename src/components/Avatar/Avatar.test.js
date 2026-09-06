@@ -32,8 +32,15 @@ describe('Content', () => {
     renderAvatar({ initials: 'ab' });
     expect(screen.getByText('AB')).toBeInTheDocument();
   });
-  test('fallback icon when no src or initials', () => {
+  // A bare <Avatar /> is the PHOTO variant — the lib ships a default photo and
+  // that is the design's default style. The icon fallback is what you get when
+  // the photo is explicitly suppressed.
+  test('bare avatar shows the default photo', () => {
     const { container } = renderAvatar();
+    expect(container.querySelector('.avatar-image')).toBeInTheDocument();
+  });
+  test('fallback icon when the default photo is suppressed', () => {
+    const { container } = renderAvatar({ defaultPhoto: false });
     expect(container.querySelector('.avatar-fallback')).toBeInTheDocument();
   });
   test('image class when src provided', () => {

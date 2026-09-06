@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Box } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import { Icon } from '../Icon/Icon';
-import { Eyebrow, EyebrowSmall, EyebrowLarge, CAP_HEIGHT_TRIM } from '../Typography';
+import { NumberSmall, NumberMedium, NumberLarge, CAP_HEIGHT_TRIM } from '../Typography';
 import { DEFAULT_AVATAR_SRC } from './defaultAvatar';
 
 /**
@@ -60,42 +60,46 @@ const SIZE_MAP = {
   'xx-large':  { size: 160, iconSize: 80 },
 };
 
-// Initials wear the EYEBROW style — same face, weight and tracking as an
-// eyebrow label. Which of the three eyebrow steps a size gets decides its
-// weight and tracking only; the size itself comes from INITIALS_FONT_SIZE
-// below, because an avatar ramp is eight steps wide and the eyebrow ramp is
-// three.
+// Initials wear the NUMBER style — the design's "Avatar-Initials" text style is
+// Font(family: Typography/Number/Small/Font-Family, weight: …/Font-Weight,
+// lineHeight: …/Line-Height, letterSpacing: …/Character-Spacing). That face is
+// the Body face at 700 with ZERO tracking, which is why there is no
+// tracking-cancel hack here: the eyebrow face this used to borrow is tracked
+// out 0.04–0.06em, and centred initials had to be pulled back by half of it.
 //
-// `token` is the step's own token name, needed to cancel its tracking (see the
-// render): letter-spacing adds space AFTER the last letter too, which shifts
-// centred initials left by half the tracking.
-function getInitialsStyle(size) {
+// Which of the three Number steps a size gets decides face and weight only —
+// all three are the same face at 700, so in practice this is about line-height.
+function getInitialsComp(size) {
   switch (size) {
     case 'xxx-small':
     case 'xx-small':
-    case 'x-small':   return { Comp: EyebrowSmall, token: 'Overline-Small' };
-    case 'small':
+    case 'x-small':
+    case 'small':     return NumberSmall;
     case 'medium':
-    case 'large':     return { Comp: Eyebrow,      token: 'Overline-Medium' };
+    case 'large':     return NumberMedium;
     case 'x-large':
-    case 'xx-large':  return { Comp: EyebrowLarge, token: 'Overline-Large' };
-    default:          return { Comp: Eyebrow,      token: 'Overline-Medium' };
+    case 'xx-large':  return NumberLarge;
+    default:          return NumberMedium;
   }
 }
 
-// Size per avatar step. These are the sizes the initials already rendered at —
-// the eyebrow switch changes the face, not the scale. Every value but the
-// smallest is a token; nothing in the type ramp goes down to 7px.
-const INITIALS_FONT_SIZE = {
-  'xxx-small': '7px',
-  'xx-small':  'var(--Legal-Font-Size)',
-  'x-small':   'var(--Number-Small-Font-Size)',
-  'small':     'var(--Number-Small-Font-Size)',
-  'medium':    'var(--Number-Medium-Font-Size)',
-  'large':     'var(--Number-Medium-Font-Size)',
-  'x-large':   'var(--Number-Large-Font-Size)',
-  'xx-large':  'var(--Number-Large-Font-Size)',
-};
+// Initials size is a function of the avatar's DIAMETER, not an independent type
+// step — a 160px avatar and a 24px one are the same glyphs at different scales.
+// The design anchors the ratio: a 24px avatar binds its initials to
+// --Button-Avatar-Text = 14px, i.e. 7/12 of the diameter. Every step is derived
+// from that one anchor, which also makes `customSize` scale correctly (it used
+// to silently borrow medium's fixed size).
+//
+// This is deliberately NOT read from --Number-{Step}-Font-Size. That ramp is
+// 16 / 28 / 36 and stops well short of the 160px avatar, so the largest steps
+// would render initials at under a quarter of the circle.
+const initialsFontSize = (diameter) => Math.round((diameter * 7) / 12) + 'px';
+
+// The design draws the avatar ring at 1px — the same hairline the system uses
+// for a button's border, so it tracks --Button-Border-Width rather than being
+// pinned. (That token is 1px and load-bearing for the Figma button heights; it
+// is only READ here.)
+const BORDER_WIDTH = 'var(--Button-Border-Width, 1px)';
 
 export function Avatar({
   src,
@@ -163,9 +167,22 @@ export function Avatar({
         fontFamily: 'inherit', fontWeight: 600,
         overflow: 'hidden',
         flexShrink: 0,
-        // Photo variant has NO border — the image is the visual. Initials/icon
-        // variants keep the 2px themed border for a visible boundary.
-        border: hasSrc ? 'none' : '2px solid ' + borderColor,
+        // Border per variant, from the design's three Avatar styles:
+        //   Photo    → 1px ring in the SURFACE border. A photo has no palette
+        //              (the image is the visual), so it takes --Border rather
+        //              than the colour prop's button border.
+        //   Initials → 1px ring in the palette's button border. At `default`
+        //              these two resolve to the same value; they diverge once
+        //              a colour prop is set, which is the generalisation the
+        //              design's single default-coloured instance implies.
+        //   Icon     → NO ring. The design's Default style is a filled glyph.
+        // This used to be exactly inverted: no ring on the photo, a 2px ring on
+        // the other two.
+        border: hasSrc
+          ? BORDER_WIDTH + ' solid var(--Border)'
+          : hasInitials
+            ? BORDER_WIDTH + ' solid ' + borderColor
+            : 'none',
         // Inside-button breathing room. Pure margin so the avatar's circular
         // silhouette doesn't get pushed into an ellipse by padding.
         ...(insideButton && { marginLeft: '2px', marginRight: '2px' }),
@@ -197,18 +214,15 @@ export function Avatar({
         />
       )}
       {hasInitials && (() => {
-        const { Comp: TextComp, token } = getInitialsStyle(size);
+        const TextComp = getInitialsComp(size);
         return (
           <TextComp
             sx={{
               color: 'inherit',
-              // No fontWeight override — the eyebrow step carries its own.
-              fontSize: INITIALS_FONT_SIZE[size] || INITIALS_FONT_SIZE.medium,
+              // No fontWeight override — the Number step carries its own (700).
+              fontSize: initialsFontSize(s.size),
               lineHeight: 1,
               textAlign: 'center',
-              // Cancel the trailing half of the eyebrow's tracking. Without
-              // this the initials sit visibly left of centre in the circle.
-              marginInlineEnd: `calc(-1 * var(--${token}-Letter-Spacing, 0px))`,
               // Trim to cap height / baseline — Figma's "cap height to
               // baseline" — so the initials centre on their own letterforms.
               ...CAP_HEIGHT_TRIM,
