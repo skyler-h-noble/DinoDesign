@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useRef, useEffect, useCallb
 import { Box } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Icon } from '../Icon/Icon';
-import { BodySmall, Body } from '../Typography';
+import { BodySmall, Body, SubtitleSmall, Subtitle } from '../Typography';
 import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3 } from '../_shadows';
 
 /**
@@ -23,10 +23,29 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3 } from '../_shadows';
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
+// Menu metrics per size mode.
+//
+// The label size reads --Button-Text (14 / 16 / 20). A menu item is a control
+// label like a button's, and that is the ladder the design system generates for
+// one — there is no separate --Menu-Text. It steps with the brand's button
+// heights, where these were three literals (13 / 14 / 16) that did not.
+//
+// Padding is on the --Sizing-* scale. Medium's 6px is the one value the scale
+// cannot express (it falls between --Sizing-Half and --Sizing-1), the same gap
+// Badge's medium row has.
 const SIZE_MAP = {
-  small:  { py: '4px',  itemPx: '8px',  itemPy: '4px',  fontSize: '13px', minWidth: '140px' },
-  medium: { py: '6px',  itemPx: '12px', itemPy: '6px',  fontSize: '14px', minWidth: '160px' },
-  large:  { py: '8px',  itemPx: '16px', itemPy: '8px',  fontSize: '16px', minWidth: '180px' },
+  small:  {
+    py: 'var(--Sizing-Half)',  itemPx: 'var(--Sizing-1)',
+    itemPy: 'var(--Sizing-Half)', fontSize: 'var(--Sm-Button-Text)', minWidth: '140px',
+  },
+  medium: {
+    py: '6px', itemPx: 'var(--Sizing-1-and-Half)',
+    itemPy: '6px', fontSize: 'var(--Button-Text)', minWidth: '160px',
+  },
+  large:  {
+    py: 'var(--Sizing-1)', itemPx: 'var(--Sizing-2)',
+    itemPy: 'var(--Sizing-1)', fontSize: 'var(--Lg-Button-Text)', minWidth: '180px',
+  },
 };
 
 /* ─── Context ─── */
@@ -209,7 +228,12 @@ export function Menu({ children, className = '', placement = 'bottom-start', sx 
 export function MenuItem({ children, onClick, selected = false, disabled = false, className = '', sx = {}, ...props }) {
   const { setOpen, size } = useDropdown();
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
-  const TextComp = size === 'small' ? BodySmall : Body;
+  // Body ships standard and semibold only — there is no bold Body — so the
+  // selected row steps to Subtitle, which IS Body at 700 (same face, size and
+  // leading). That replaces an inline fontWeight override on a lib component.
+  const TextComp = selected
+    ? (size === 'small' ? SubtitleSmall : Subtitle)
+    : (size === 'small' ? BodySmall : Body);
 
   const handleClick = () => {
     if (disabled) return;
@@ -224,8 +248,12 @@ export function MenuItem({ children, onClick, selected = false, disabled = false
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } }}
       className={'menu-item' + (selected ? ' menu-item-selected' : '') + ' ' + className}
       sx={{
-        display: 'flex', alignItems: 'center', gap: '8px',
+        display: 'flex', alignItems: 'center', gap: 'var(--Sizing-1)',
         padding: s.itemPy + ' ' + s.itemPx,
+        // No fontSize here: TextComp below owns it. Setting both is how the
+        // Accordion ended up rendering bare strings at a different size from
+        // the same text passed through its slot.
+        fontSize: s.fontSize,
         color: disabled ? 'var(--Quiet)' : (selected ? 'var(--Text)' : 'var(--Quiet)'),
         backgroundColor: selected ? 'var(--Hover)' : 'transparent',
         cursor: disabled ? 'not-allowed' : 'pointer',
@@ -240,7 +268,7 @@ export function MenuItem({ children, onClick, selected = false, disabled = false
       }}
       {...props}
     >
-      <TextComp style={{ color: 'inherit', fontWeight: selected ? 600 : 'inherit' }}>{children}</TextComp>
+      <TextComp color="standard" style={{ color: 'inherit' }}>{children}</TextComp>
     </Box>
   );
 }

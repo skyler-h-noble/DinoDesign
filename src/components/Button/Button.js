@@ -8,13 +8,26 @@ import { Badge as DDBadge } from '../Badge/Badge';
 import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, bevelShadow, tokenSegment } from '../_shadows';
 
 // Auto-size mapping for start/end decorators based on Button size
-// Padding on the label wrapper — Figma's "Typography Holder". Small and medium
-// share 4px vertical / 2px horizontal; large is square at 4px.
+// Padding on the label wrapper — Figma's "Typography Holder", which the design
+// system now generates per size mode as --Button-Text-Padding (4 / 4 / 8).
+//
+// This used to be '4px 2px' at small and medium, so the horizontal was half the
+// vertical. The design's value is a single number applied on both axes, which
+// widens a small or medium button's label box by 2px each side.
 const LABEL_PADDING_BY_SIZE = {
-  small:  '4px 2px',
-  medium: '4px 2px',
-  large:  '4px',
+  small:  'var(--Sm-Button-Text-Padding)',
+  medium: 'var(--Button-Text-Padding)',
+  large:  'var(--Lg-Button-Text-Padding)',
 };
+
+// Initials on an avatar inside a button. The design system generates this per
+// size mode as --Avatar-Text (14 / 12 / 18), derived from the button height —
+// it was three literals, one of which reached for a type-ramp token that is
+// not the avatar's.
+const avatarTextFor = (size) =>
+  size === 'small' ? 'var(--Sm-Avatar-Text)'
+    : size === 'large' ? 'var(--Lg-Avatar-Text)'
+      : 'var(--Avatar-Text)';
 
 const DECORATOR_SIZE_MAP = {
   small:  { avatar: 'xxx-small', icon: 'small'  },
@@ -288,12 +301,12 @@ const SIZE_HEIGHT = {
 // buttons take their min-width from the button HEIGHT instead, so they stay
 // square. getSizingStyles overrides minWidth for those.
 const SIZE_BASE = {
-  small:  { minHeight: 'var(--Small-Button-Height)', minWidth: 'var(--Button-Min-Width)', fontSize: '13px', '--_height': 'var(--Small-Button-Height)' },
-  large:  { minHeight: 'var(--Large-Button-Height)', minWidth: 'var(--Lg-Button-Min-Width, var(--Button-Min-Width))', fontSize: '17px', '--_height': 'var(--Large-Button-Height)' },
+  small:  { minHeight: 'var(--Small-Button-Height)', minWidth: 'var(--Button-Min-Width)', fontSize: 'var(--Sm-Button-Text)', '--_height': 'var(--Small-Button-Height)' },
+  large:  { minHeight: 'var(--Large-Button-Height)', minWidth: 'var(--Lg-Button-Min-Width, var(--Button-Min-Width))', fontSize: 'var(--Lg-Button-Text)', '--_height': 'var(--Large-Button-Height)' },
   medium: {
     minHeight: 'var(--Button-Height)',
     minWidth:  'var(--Button-Min-Width)',
-    fontSize:  '15px',
+    fontSize:  'var(--Button-Text)',
     '--_height': 'var(--Button-Height)',
   },
 };
@@ -305,7 +318,7 @@ function getSizingStyles({ size, iconOnly, letterNumber, avatar }) {
   // Icon / Avatar — fixed square, no padding, no min-width/height
   if (iconOnly) {
     const fontSize = avatar
-      ? (size === 'small' ? 'var(--Button-ExtraSmall-Font-Size)' : size === 'large' ? '18px' : '14px')
+      ? (avatarTextFor(size))
       : (size === 'small' ? '0.875rem' : base.fontSize);
     return {
       height:  squareSize,
@@ -504,7 +517,7 @@ export function Button({
   const renderStartIcon = () => {
     if (avatar && children) {
       const avatarSize     = SIZE_HEIGHT[size] || SIZE_HEIGHT.medium;
-      const avatarFontSize = size === 'small' ? 'var(--Button-ExtraSmall-Font-Size)' : size === 'large' ? '18px' : '14px';
+      const avatarFontSize = avatarTextFor(size);
       return (
         <MuiAvatar
           sx={{
@@ -548,17 +561,18 @@ export function Button({
           marginRight: '0px !important',
         },
         // MUI sizes icons per BUTTON size (18/20/22), which silently overrode
-        // the Icon component's own scale — a medium button's icon rendered at
-        // 20px where the scale says 24. Restate the scale here so the icon is
-        // the size the design system says it is, whatever button it sits in.
+        // the design system's own scale. Restate it here — and specifically as
+        // --Button-Icon (16 / 20 / 32), the size generated for an icon sitting
+        // in a button, rather than the generic Icon ramp (16 / 24 / 32). The
+        // two only differ at medium, which is why it went unnoticed.
         '[class*="btn-"] .MuiButton-iconSizeSmall .MuiSvgIcon-root, [class*="btn-"] .MuiButton-iconSizeSmall > *': {
-          fontSize: ICON_SIZE_MAP.small + ' !important',
+          fontSize: 'var(--Sm-Button-Icon) !important',
         },
         '[class*="btn-"] .MuiButton-iconSizeMedium .MuiSvgIcon-root, [class*="btn-"] .MuiButton-iconSizeMedium > *': {
-          fontSize: ICON_SIZE_MAP.medium + ' !important',
+          fontSize: 'var(--Button-Icon) !important',
         },
         '[class*="btn-"] .MuiButton-iconSizeLarge .MuiSvgIcon-root, [class*="btn-"] .MuiButton-iconSizeLarge > *': {
-          fontSize: ICON_SIZE_MAP.large + ' !important',
+          fontSize: 'var(--Lg-Button-Icon) !important',
         },
       }} />
       <MuiButton
@@ -652,7 +666,7 @@ export function Button({
         },
         ...(avatar && {
           '& .MuiAvatar-root': {
-            fontSize: size === 'small' ? 'var(--Button-ExtraSmall-Font-Size)' : size === 'large' ? '18px' : '14px',
+            fontSize: avatarTextFor(size),
           },
         }),
         '& .MuiButton-endIcon': {
