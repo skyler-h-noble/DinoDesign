@@ -197,6 +197,7 @@ export function OmniTreeView({
   // Style
   color          = 'default',
   variant        = 'solid',     // 'solid' | 'light'
+  surface,                      // any of the five levels; wins over `variant`
   density        = 'default',   // 'compact' | 'default'
   animation      = 'slide',     // 'none' | 'slide' | 'spring'
 
@@ -245,7 +246,10 @@ export function OmniTreeView({
   const colorToken = cap(color);
   // Base theme + brightest surface; *-Light themes are not generated.
   const dataTheme = colorToken;
-  const dataSurface = effectiveVariant === 'light' ? 'Surface-Brightest' : 'Surface-Dim';
+  /* Explicit surface override — see the note on Alert. `variant` reaches only
+   * three of the five surface levels; this takes any of them and wins, with
+   * the variant mapping kept as the default so existing usage is untouched. */
+  const dataSurface = surface || (effectiveVariant === 'light' ? 'Surface-Brightest' : 'Surface-Dim');
 
   // Track selection internally so ItemLabel knows which items are selected
   const [internalSelected, setInternalSelected] = useState(

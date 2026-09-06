@@ -26,6 +26,7 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export function Sheet({
   children,
+  surface,
   variant = 'solid',
   color = 'default',
   elevated = false,
@@ -41,9 +42,12 @@ export function Sheet({
   // `C + '-Light'` matched no rule and --Background resolved to nothing.
   const dataTheme = color === 'default' ? 'Default' : C;
 
-  const dataSurface = variant === 'dark' ? 'Surface-Dimmest'
+  /* Explicit surface override — see the note on Alert. `variant` reaches only
+   * three of the five surface levels; this takes any of them and wins, with
+   * the variant mapping kept as the default so existing usage is untouched. */
+  const dataSurface = surface || (variant === 'dark' ? 'Surface-Dimmest'
     : variant === 'light' ? 'Surface-Brightest'
-    : 'Surface';
+    : 'Surface');
 
   const restShadow = elevated ? SHADOW_LEVEL_3 : SHADOW_LEVEL_2;
   const hoverShadow = elevated ? SHADOW_LEVEL_4 : SHADOW_LEVEL_3;

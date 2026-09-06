@@ -37,6 +37,7 @@ const SIZE_MAP = {
 export function Alert({
   children,
   variant = 'light',
+  surface,
   color = 'info',
   size = 'medium',
   startDecorator,
@@ -54,7 +55,16 @@ export function Alert({
   // so `C + '-Light'` matched no rule and --Background resolved to nothing.
   const dataTheme = color === 'default' ? 'Default' : C;
 
-  const dataSurface = variant === 'light' ? 'Surface-Brightest' : 'Surface';
+  /* Explicit surface override.
+   *
+   * `variant` only ever reached three of the system's five surface levels —
+   * light -> Surface-Brightest, dark -> Surface-Dimmest, anything else ->
+   * Surface — so Surface-Dim and Surface-Bright were unreachable, and the
+   * names did not match the data-surface vocabulary the rest of the system
+   * speaks. This takes any of the five directly and wins over the variant
+   * mapping, which stays as the default so existing usage is untouched.
+   * Same shape as Card's surface prop. */
+  const dataSurface = surface || (variant === 'light' ? 'Surface-Brightest' : 'Surface');
   const borderToken = 'var(--Buttons-' + C + '-Border)';
 
   const innerContent = (

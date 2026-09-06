@@ -9,10 +9,19 @@ import { SHADOWS } from '../_shadows';
  * A theme-aware container with no visual styling of its own. Use it when you
  * need a slot that participates in the design-system cascade (data-theme /
  * data-surface) without inheriting any of the chrome that Ratio or Card
- * would bring. No border-radius, no padding, no data-theme of its own —
- * it inherits theme from its parent unless you pass `theme`.
+ * would bring. No padding and no data-theme of its own — it inherits theme
+ * from its parent unless you pass `theme`. No border-radius either, unless you
+ * opt in with `radius` (see below); bare stays the default.
  *
  * Props:
+ *   radius     — 'none' (default) | 'small' | 'medium' | 'large'. Reads the
+ *                brand's card radii, so a Box that opts in rounds exactly like
+ *                a Card of that size. Default stays 'none' — Box is the
+ *                primitive you reach for when you do NOT want Card's chrome,
+ *                and silently rounding every existing Box would change every
+ *                layout slot already built on it.
+ *                A boolean would be the wrong control here: radius is not
+ *                on/off, and the system publishes three sizes.
  *   theme      — optional data-theme override for everything inside
  *   surface    — optional data-surface override (Surface | Container | Container-Low | etc.)
  *   elevation  — 0–5. When > 0, the Box renders an OUTER wrapper that carries
@@ -23,15 +32,27 @@ import { SHADOWS } from '../_shadows';
  *   component  — root element tag (default: 'div')
  *   children, className, sx, ...props — forwarded
  *
+ * The radius map. --Card-Radius and its Sm/Lg siblings are what the design
+ * system publishes for container corners; Box reuses them rather than
+ * inventing a parallel scale that would drift from Card's.
+ *
  * For a themed shell with border + shadow + padding, use <Ratio> (sized) or
  * <Card> (with header/actions). Box is intentionally bare so that nested
  * tokens resolve correctly without competing styling.
  */
 
+const RADIUS = {
+  none: undefined,
+  small: 'var(--Sm-Card-Radius, var(--Card-Radius))',
+  medium: 'var(--Card-Radius)',
+  large: 'var(--Lg-Card-Radius, var(--Card-Radius))',
+};
+
 export function Box({
   children,
   theme,
   surface,
+  radius = 'none',
   elevation = 0,
   component = 'div',
   className = '',
@@ -40,6 +61,9 @@ export function Box({
   ...props
 }) {
   const level = Math.max(0, Math.min(5, elevation | 0));
+  // Unknown values fall back to bare rather than throwing — a typo should not
+  // take a layout down.
+  const radiusValue = RADIUS[radius];
 
   // Flat (no elevation): a single bare element — children are direct, so any
   // flex/gap/padding the caller passes works as-is.
@@ -50,7 +74,7 @@ export function Box({
         data-theme={theme || undefined}
         data-surface={surface || undefined}
         className={'omni-box' + (className ? ' ' + className : '')}
-        sx={{ background: 'var(--Background)', boxSizing: 'border-box', ...sx }}
+        sx={{ background: 'var(--Background)', boxSizing: 'border-box', ...(radiusValue ? { borderRadius: radiusValue } : {}), ...sx }}
         style={style}
         {...props}
       >
@@ -90,7 +114,10 @@ export function Box({
          glance, which matters most when a design-to-code conversion picks the
          wrong level: the wrong number is visible next to the right one. */
       data-elevation={level}
-      sx={{ boxShadow: SHADOWS[level], boxSizing: 'border-box', width: sxW, height: sxH, borderRadius: sxR }}
+      /* Radius goes on the OUTER shell so the shadow follows the corner rather
+         than squaring off behind a rounded surface; the inner box already
+         inherits it. An explicit sx.borderRadius still wins. */
+      sx={{ boxShadow: SHADOWS[level], boxSizing: 'border-box', width: sxW, height: sxH, borderRadius: sxR !== undefined ? sxR : radiusValue }}
       style={outerStyle}
       {...props}
     >
