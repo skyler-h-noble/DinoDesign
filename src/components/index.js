@@ -224,3 +224,15 @@ export { OmniTreeView as DynoTreeView } from './TreeView/TreeView';
 // data-theme="Neutral" + data-surface="Surface-Dimmest", not a literal colour,
 // so it follows the system's neutrals in both modes.
 export { CodeBlock, CopyButton } from './CodeBlock/CodeBlock';
+
+// ========== DATA VISUALISATION ==========
+// Single-series charts on the surface-paired tokens: --Icons-Primary for the
+// mark, --Border-Variant for tracks and gridlines, --Text / --Quiet for labels.
+// They re-theme with data-surface, which the --Chart-1..10 palette (for
+// MULTI-series charts) deliberately does not.
+//
+// `geometry` is exported too: it is pure math with no React or DOM, shared with
+// the Figma plugin so the two renderers cannot disagree about where a slice
+// ends or how a curve bends.
+export { BarChart, LineChart, PieChart, CHART_TOKENS, CHART_LABEL_TYPE } from './Charts';
+export * as chartGeometry from './Charts/geometry';
