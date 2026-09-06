@@ -66,10 +66,35 @@ function buildVariantMap() {
 
 // --- Sizing ------------------------------------------------------------------
 
+// Every value here is a token, not a measurement. The design specifies ONE
+// badge — a 16px counter with 4px side padding, an 8px status dot, and the
+// Buttons/Extra-Small type style — which is this table's `small` row. The other
+// two rows extend that row along the scales it already sits on:
+//
+//   height   16 / 20 / 24  → --Sizing-2 / --Sizing-2-and-Half / --Sizing-3
+//   digits   10 / 14 / 16  → --Sm-/--/--Lg- Button-Numbers
+//
+// The counter's type style is "Button-Numbers": the Buttons/Small FACE at a
+// size that follows the component's size mode. Face, weight, line-height and
+// tracking therefore stay fixed across all three rows and only the size steps
+// — which is why `typeStep` below is Button-Small everywhere.
+//
+// Two medium values stay off-scale: 6px padding and a 10px dot fall between
+// --Sizing-Half (4) and --Sizing-1 (8), which the scale cannot express. They
+// are the correct halves/quarters of a 20px badge, just not nameable.
 const SIZE_MAP = {
-  small:  { minW: 16, height: 16, fontSize: '10px', padding: '0 4px', dotSize: 8 },
-  medium: { minW: 20, height: 20, fontSize: '12px', padding: '0 6px', dotSize: 10 },
-  large:  { minW: 24, height: 24, fontSize: '14px', padding: '0 8px', dotSize: 12 },
+  small:  {
+    size: 'var(--Sizing-2)',          padX: 'var(--Sizing-Half)',
+    dot:  'var(--Sizing-1)',          digits: 'var(--Sm-Button-Numbers)',
+  },
+  medium: {
+    size: 'var(--Sizing-2-and-Half)', padX: '6px',
+    dot:  '10px',                     digits: 'var(--Button-Numbers)',
+  },
+  large:  {
+    size: 'var(--Sizing-3)',          padX: 'var(--Sizing-1)',
+    dot:  'var(--Sizing-1-and-Half)', digits: 'var(--Lg-Button-Numbers)',
+  },
 };
 
 // --- Component ---------------------------------------------------------------
@@ -107,17 +132,22 @@ export function Badge({
   const badgeSx = {
     '& .MuiBadge-badge': {
       // Sizing
-      minWidth: dot ? sc.dotSize : sc.minW,
-      height: dot ? sc.dotSize : sc.height,
-      padding: dot ? 0 : sc.padding,
-      fontSize: sc.fontSize,
-      fontWeight: 600,
-      // Pull from the Typography system's Body family token (same value as
-      // Caption / BodySmall / Body), so the badge text matches the design
-      // system's body font instead of inheriting whatever the parent uses.
-      fontFamily: 'var(--Body-Font-Family)',
-      lineHeight: 1,
-      borderRadius: dot ? '50%' : sc.height / 2 + 'px',
+      minWidth: dot ? sc.dot : sc.size,
+      height: dot ? sc.dot : sc.size,
+      padding: dot ? 0 : '0 ' + sc.padX,
+      // Type: the Buttons/Small face, sized by the size-moded Button-Numbers
+      // token. Not four hand-set properties — a brand that re-picks its button
+      // face or weight now moves the badge with it.
+      fontFamily:    'var(--Button-Small-Font-Family)',
+      fontWeight:    'var(--Button-Small-Font-Weight)',
+      lineHeight:    'var(--Button-Small-Line-Height)',
+      letterSpacing: 'var(--Button-Small-Letter-Spacing)',
+      fontSize:      sc.digits,
+      // Fully round. The design binds the radius to the SAME token as the
+      // size — --Sizing-2 on a 16px counter, --Sizing-1 on an 8px dot — so any
+      // value at or above half the height reads as a pill. Matching that
+      // binding keeps the two in step if the scale is ever retuned.
+      borderRadius: dot ? sc.dot : sc.size,
 
       // Colors
       backgroundColor: styles.bg,

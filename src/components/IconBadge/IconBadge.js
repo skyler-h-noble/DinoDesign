@@ -14,7 +14,8 @@ import { Box } from '@mui/material';
  * VARIANTS:
  *   solid  — data-theme="{Theme}" data-surface="Surface"
  *            bg: var(--Background), icon: var(--Text)
- *   light  — data-theme="{Theme}-Light" data-surface="Surface"
+ *   light  — data-theme="{Theme}" data-surface="Surface-Brightest"
+ *            (there is no "{Theme}-Light" theme; -light IS the brightest surface)
  *            bg: var(--Background), icon: var(--Text)
  *   dark   — data-theme="{Theme}" data-surface="Surface-Dimmest"
  *            bg: var(--Background), icon: var(--Text)
