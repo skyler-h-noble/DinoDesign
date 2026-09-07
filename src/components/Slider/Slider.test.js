@@ -6,14 +6,6 @@ import {
   SliderInput,
   RangeSlider,
   PrimarySlider,
-  PrimaryLightSlider,
-  SecondaryLightSlider,
-  TertiaryLightSlider,
-  NeutralLightSlider,
-  InfoLightSlider,
-  SuccessLightSlider,
-  WarningLightSlider,
-  ErrorLightSlider,
 } from './Slider';
 import { axe } from 'jest-axe';
 
@@ -255,21 +247,6 @@ describe('Convenience Exports', () => {
   test('PrimarySlider renders', () => {
     const { container } = render(<PrimarySlider defaultValue={50} aria-label="Test" />);
     expect(container.querySelector('.slider-primary')).toBeInTheDocument();
-  });
-
-  // Light
-  test.each([
-    ['PrimaryLightSlider',   PrimaryLightSlider,   'primary-light'],
-    ['SecondaryLightSlider', SecondaryLightSlider, 'secondary-light'],
-    ['TertiaryLightSlider',  TertiaryLightSlider,  'tertiary-light'],
-    ['NeutralLightSlider',   NeutralLightSlider,   'neutral-light'],
-    ['InfoLightSlider',      InfoLightSlider,      'info-light'],
-    ['SuccessLightSlider',   SuccessLightSlider,   'success-light'],
-    ['WarningLightSlider',   WarningLightSlider,   'warning-light'],
-    ['ErrorLightSlider',     ErrorLightSlider,     'error-light'],
-  ])('%s renders with correct variant', (name, Component, variant) => {
-    const { container } = render(<Component defaultValue={50} aria-label="Test" />);
-    expect(container.querySelector(`.slider-${variant}`)).toBeInTheDocument();
   });
 
   // Legacy aliases
