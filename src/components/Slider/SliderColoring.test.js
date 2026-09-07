@@ -56,6 +56,17 @@ describe('surface tokens, not the button palette', () => {
     render(<Slider defaultValue={40} valueLabelDisplay="on" />);
     expect(css()).toContain('--Label-ExtraSmall-Font-Size');
   });
+
+  test('...including its weight', () => {
+    /* There were two fontWeight keys in the same object — the token, then a
+       literal 600 below it. The later key silently won, so the label read
+       three of its four properties from the type scale and invented the
+       fourth, which is invisible whenever the scale happens to say 600. */
+    render(<Slider defaultValue={40} valueLabelDisplay="on" />);
+    const c = css().replace(/\s+/g, '');
+    expect(c).toContain('font-weight:var(--Label-ExtraSmall-Font-Weight)');
+    expect(c).not.toContain('font-weight:600');
+  });
 });
 
 describe('a named colour moves the fill only', () => {

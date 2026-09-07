@@ -273,7 +273,6 @@ export function Slider({
       fontWeight: 'var(--Label-ExtraSmall-Font-Weight)',
       letterSpacing: 'var(--Label-ExtraSmall-Letter-Spacing)',
       lineHeight: 'var(--Label-ExtraSmall-Line-Height)',
-      fontWeight: 600,
       borderRadius: 'var(--Sizing-1, 8px)',
       padding: 'var(--Sizing-Half, 4px) var(--Sizing-1, 8px)',
       '&::before': {
