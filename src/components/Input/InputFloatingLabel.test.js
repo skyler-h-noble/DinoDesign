@@ -1,4 +1,4 @@
-import { floatingLabelGeometry } from './Input';
+import { floatingLabelGeometry, ADORNMENT_GAP } from './Input';
 
 /* The two offsets were constants — 16px down, +32px right with a start
    adornment. Each was tuned for one size and wrong at the others, and the
@@ -20,17 +20,21 @@ describe('horizontal', () => {
   });
 
   test('with an adornment: clears exactly what the adornment occupies', () => {
-    // margin + icon + gap = 32 / 36 / 40, not the old flat 44 / 46 / 48.
-    expect(floatingLabelGeometry(SIZES.small,  true).labelX).toBe(32);
-    expect(floatingLabelGeometry(SIZES.medium, true).labelX).toBe(36);
-    expect(floatingLabelGeometry(SIZES.large,  true).labelX).toBe(40);
+    /* margin + icon + gap = 36 / 40 / 44, not the old flat 44 / 46 / 48.
+       These were 32 / 36 / 40 while the gap was split between the adornment's
+       4px marginRight and a 4px input paddingLeft; the label counted only one
+       half, so it sat 4px inside the text at every size. One ADORNMENT_GAP of
+       8 now, counted once, by both. */
+    expect(floatingLabelGeometry(SIZES.small,  true).labelX).toBe(36);
+    expect(floatingLabelGeometry(SIZES.medium, true).labelX).toBe(40);
+    expect(floatingLabelGeometry(SIZES.large,  true).labelX).toBe(44);
   });
 
   test('the label starts where the input text starts', () => {
     /* The property that actually matters — if these disagree, the label jumps
        sideways the moment it shrinks, which is what the bug looked like. */
     for (const cfg of Object.values(SIZES)) {
-      const textX = cfg.leftPad + cfg.iconSize + 4;
+      const textX = cfg.leftPad + cfg.iconSize + ADORNMENT_GAP;
       expect(floatingLabelGeometry(cfg, true).labelX).toBe(textX);
     }
   });

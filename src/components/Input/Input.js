@@ -97,10 +97,14 @@ const SIZE_MAP = {
   large:  { height: 'var(--Large-Button-Height)',  fontSize: '17px', labelSize: '17px', padding: '4px var(--Input-Padding, 16px)', iconSize: 20 },
 };
 
-const FLOATING_SIZE_MAP = {
-  small:  { height: '48px', fontSize: '13px', labelSize: '11px', padding: '20px var(--Input-Padding, 12px) 4px', leftPad: 12, iconSize: 16 },
-  medium: { height: '56px', fontSize: '15px', labelSize: '12px', padding: '22px var(--Input-Padding, 14px) 6px', leftPad: 14, iconSize: 18 },
-  large:  { height: '64px', fontSize: '17px', labelSize: '14px', padding: '24px var(--Input-Padding, 16px) 6px', leftPad: 16, iconSize: 20 },
+export const FLOATING_SIZE_MAP = {
+  /* padTop/padBottom repeat the first and third values of `padding`. They are
+     the band the typed text occupies, and the adornments take the same pair so
+     they share it — see the adornment block below. Kept as numbers rather than
+     parsed back out of the string, which contains a var() and does not parse. */
+  small:  { height: '48px', fontSize: '13px', labelSize: '11px', padding: '20px var(--Input-Padding, 12px) 4px', padTop: 20, padBottom: 4, leftPad: 12, iconSize: 16 },
+  medium: { height: '56px', fontSize: '15px', labelSize: '12px', padding: '22px var(--Input-Padding, 14px) 6px', padTop: 22, padBottom: 6, leftPad: 14, iconSize: 18 },
+  large:  { height: '64px', fontSize: '17px', labelSize: '14px', padding: '24px var(--Input-Padding, 16px) 6px', padTop: 24, padBottom: 6, leftPad: 16, iconSize: 20 },
 };
 
 /**
@@ -151,13 +155,25 @@ const tokenFont = (t) => ({
   letterSpacing: 'var(--' + t + '-Letter-Spacing)',
 });
 
+/** Space between a start adornment and the text after it.
+ *
+ *  Load-bearing in two places that must agree: the adornment's marginRight and
+ *  the label's x offset. Split across two numbers (a 4px margin plus a 4px
+ *  input padding) they drifted apart — the label sat 4px off the text it is
+ *  supposed to be the label FOR. One constant, used by both. */
+export const ADORNMENT_GAP = 8;
+
 export function floatingLabelGeometry(sizeConfig, hasStartAdornment) {
   const leftPad = sizeConfig.leftPad || 14;
   const fieldH  = parseInt(sizeConfig.height, 10) || 56;
   const fontPx  = parseInt(sizeConfig.fontSize, 10) || 15;
   return {
+    /* Only correct because the adornment is pinned to exactly iconSize wide
+       below. It used to be arithmetic over an adornment whose real width was
+       whatever its content happened to measure — a "$" is not 18px — so the
+       label missed the text by the difference. */
     labelX: hasStartAdornment
-      ? leftPad + (sizeConfig.iconSize || 18) + 4
+      ? leftPad + (sizeConfig.iconSize || 18) + ADORNMENT_GAP
       : leftPad,
     restingY: Math.round((fieldH - fontPx * LABEL_LINE_HEIGHT) / 2),
     // Sits in the field's top padding, bottom-aligned to where the text starts.
@@ -372,11 +388,17 @@ export function Input({
                 padding: 0,
                 borderRadius: 0,
                 transition: 'color 0.15s ease-in-out',
-                // When the label floats, the input element has heavy top
-                // padding to clear it. Align adornments to the input's text
-                // baseline (bottom) so they line up with the typed text
-                // instead of floating up next to the shrunken label.
-                ...(isFloating && { alignItems: 'flex-end' }),
+                /* Stretch, so the adornments can take the same vertical
+                   padding as the input and land on its text band by
+                   construction.
+
+                   This was `flex-end` plus a marginBottom on each adornment —
+                   two hacks pulling opposite ways: the row bottom-aligned
+                   everything, then a fixed 8px lifted the adornments back up.
+                   Neither number knew the input's real padding, so the
+                   adornment missed the text by whatever the size config said
+                   that day, and every size missed it differently. */
+                ...(isFloating && { alignItems: 'stretch' }),
 
                 '& fieldset': {
                   border: 'none',
@@ -415,22 +437,42 @@ export function Input({
                 // breathing room from the left edge and pushes it up by the
                 // input's bottom padding so it centers with the input text.
                 ...(isFloating && {
+                  /* MUI caps an adornment at max-height 2em and centres it in
+                     its own box, which is why it could never line up with a
+                     text row that sits inside 22px of top padding. Releasing
+                     the cap and giving it the input's own padTop/padBottom
+                     puts its centre exactly where the text's centre is, at
+                     every size, with no number to keep in sync. */
+                  '& .MuiInputAdornment-root': {
+                    maxHeight: 'none',
+                    height: 'auto',
+                    alignSelf: 'stretch',
+                    alignItems: 'center',
+                    paddingTop: sizeConfig.padTop + 'px',
+                    paddingBottom: sizeConfig.padBottom + 'px',
+                    marginTop: 0,
+                    marginBottom: 0,
+                  },
                   '& .MuiInputAdornment-positionStart': {
                     marginLeft: (sizeConfig.leftPad || 14) + 'px',
-                    marginRight: '4px',
-                    marginBottom: '8px',
+                    marginRight: ADORNMENT_GAP + 'px',
+                    /* Pinned so floatingLabelGeometry's labelX is true rather
+                       than approximate — the label's x is computed from
+                       iconSize, so the adornment has to actually BE iconSize
+                       wide whatever glyph or icon is inside it. */
+                    width: sizeConfig.iconSize + 'px',
+                    minWidth: sizeConfig.iconSize + 'px',
+                    justifyContent: 'center',
                   },
                   '& .MuiInputAdornment-positionEnd': {
                     marginRight: '8px',
-                    marginBottom: '8px',
                   },
-                  // Input already has the left padding it needs when no
-                  // adornment is present; when one IS present, drop the
-                  // input's left padding so text doesn't get pushed further
-                  // right than the adornment.
+                  /* The gap is the adornment's marginRight alone. Splitting it
+                     with an input paddingLeft is what let the two halves drift
+                     out of step with the label. */
                   ...(startAdornment && {
-                    '& input': { paddingLeft: '4px' },
-                    '& textarea': { paddingLeft: '4px' },
+                    '& input': { paddingLeft: 0 },
+                    '& textarea': { paddingLeft: 0 },
                   }),
                 }),
               },
