@@ -53,6 +53,10 @@ export function TextField({
   // (aria-label on a div with no role) AND leaves the input unnamed.
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledby,
+  /* Held out of ...props so the spread cannot overwrite the composed handlers
+     below — the field tracks its own focus for the border colour. */
+  onFocus: onFocusProp,
+  onBlur: onBlurProp,
   ...props
 }) {
   const [isFocused, setIsFocused] = useState(false);
@@ -84,8 +88,12 @@ export function TextField({
         size={size}
         type={type}
         required={required}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
+        /* Compose, do not replace. {...props} spreads below this, so a caller
+           passing onFocus used to overwrite these outright — the handler fired,
+           but isFocused stopped updating and the field lost its focus border
+           while still looking otherwise correct. */
+        onFocus={(e) => { setIsFocused(true); onFocusProp?.(e); }}
+        onBlur={(e) => { setIsFocused(false); onBlurProp?.(e); }}
         error={error}
         fullWidth={fullWidth}
         slotProps={{
