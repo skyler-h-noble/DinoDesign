@@ -402,6 +402,15 @@ export function Button({
 }) {
   const isIconOnly     = iconOnly || avatar || swatch;
 
+  /* Types that render NO readable text, and therefore need an accessible name.
+   * Kept separate from isIconOnly, which drives SIZING — letterNumber sizes
+   * like a labelled button but reads like an unlabelled one.
+   *
+   * letterNumber is the dangerous one and was missing here. An unnamed avatar
+   * announces as nothing, which gets noticed; an unnamed letterNumber announces
+   * as "123, button", which sounds deliberate and so never gets investigated. */
+  const isLabelless    = isIconOnly || letterNumber;
+
   /*
    * Accessible naming for icon buttons.
    *
@@ -418,12 +427,14 @@ export function Button({
   if (process.env.NODE_ENV !== 'production') {
     const named =
       props['aria-label'] || props['aria-labelledby'] || props.title;
-    if (isIconOnly && !named) {
+    if (isLabelless && !named) {
       // eslint-disable-next-line no-console
       console.error(
-        '[OmniDesign] An icon-only <Button> has no accessible name. A screen ' +
-        'reader announces it as just "button". Add aria-label="…" describing ' +
-        'the ACTION ("Delete item"), not the icon ("trash").',
+        '[OmniDesign] A <Button> with no visible text has no accessible name. ' +
+        'A screen reader announces it as just "button" — or, for letterNumber, ' +
+        'reads the characters ("123") as if they were the label. Add ' +
+        'aria-label="…" describing the ACTION ("Your account"), not the ' +
+        'content ("JD") or the icon ("trash").',
       );
     }
     if (named) {
