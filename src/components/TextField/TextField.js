@@ -1,5 +1,6 @@
 // src/components/TextField/TextField.js
 import React, { useState } from 'react';
+import { Input } from '../Input/Input';
 import {
   TextField as MuiTextField,
   Box,
@@ -314,128 +315,53 @@ export function URLTextField({
  * Textarea Component
  * Multi-line text input
  */
+/**
+ * TextArea — Input, multiline.
+ *
+ * A thin delegation, not a component. It used to be a second implementation
+ * wrapping MUI's TextField directly, and the two had drifted apart in every
+ * way that matters:
+ *
+ *   - No borderRadius at all, so it inherited MUI's corner instead of
+ *     --Input-Radius. A TextArea beside a TextInput had a visibly different
+ *     corner, and the STUDIO ships a CSS override to paper over it
+ *     (libRadiusOverrideCSS) whose own comment says "the real fix is for the
+ *     lib to read the token". This is that fix — the override can go.
+ *   - error / errorMessage where Input has validation / validationMessage, so
+ *     the same state was spelled two ways depending on which control you
+ *     reached for.
+ *   - No size, no variant, no colour, no adornments, no floating label.
+ *
+ * Input already takes multiline / rows / maxRows and renders a <textarea>, so
+ * there was never a second thing to build — only a second thing to maintain.
+ * The export stays so callers do not break; everything it can do is now
+ * everything Input can do.
+ */
 export function TextArea({
-  label,
-  value = '',
-  onChange,
-  placeholder,
+  // Mapped: TextArea spoke error/errorMessage, Input speaks validation.
   error = false,
   errorMessage = '',
-  disabled = false,
-  helperText = '',
   rows = 4,
-  required = false,
   fullWidth = true,
+  /* Textareas resize. The browser default is `both`, which lets a user drag one
+     wider than its column and break the layout — so the default here is
+     vertical: more room for text, no effect on the surrounding grid.
+     `none` is deliberately NOT the default. Enlarging a textarea to see more of
+     what you have typed is a real affordance for low-vision and motor users;
+     if you do turn it off, pair it with maxRows so the field grows itself. */
+  resize = 'vertical',
   sx = {},
   ...props
 }) {
-  const [isFocused, setIsFocused] = useState(false);
-
-  const borderColor = error
-    ? 'var(--Buttons-Error-Border)'
-    : isFocused
-    ? 'var(--Buttons-Primary-Border)'
-    : 'var(--Border)';
-
   return (
-    <Box sx={{ width: fullWidth ? '100%' : 'auto' }}>
-      <MuiTextField
-        label={label}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        disabled={disabled}
-        variant="outlined"
-        multiline
-        rows={rows}
-        required={required}
-        fullWidth={fullWidth}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-        error={error}
-        slotProps={{
-          input: {
-            // See TextField — the input declares its own surface.
-            'data-surface': disabled ? 'Container-Low' : 'Container',
-            style: {
-              color: 'var(--Text)',
-            },
-          },
-        }}
-        sx={{
-          width: fullWidth ? '100%' : 'auto',
-          '& .MuiOutlinedInput-root': {
-            backgroundColor: 'var(--Background)',
-            transition: 'all 0.2s ease-in-out',
-            color: 'var(--Text)',
-
-            '& fieldset': {
-              borderColor: borderColor,
-              transition: 'border-color 0.2s ease-in-out',
-            },
-
-            '&:hover fieldset': {
-              borderColor: error
-                ? 'var(--Buttons-Error-Border)'
-                : 'var(--Buttons-Primary-Border)',
-            },
-
-            '&.Mui-focused fieldset': {
-              borderColor: error
-                ? 'var(--Buttons-Error-Border)'
-                : 'var(--Buttons-Primary-Border)',
-              borderWidth: '2px',
-            },
-
-            '&.Mui-disabled': {
-              backgroundColor: 'var(--Background)',
-              opacity: 0.6,
-            },
-          },
-
-          '& .MuiInputLabel-root': {
-            color: error
-              ? 'var(--Text)'
-              : isFocused
-              ? 'var(--Text)'
-              : 'var(--Text-Quiet)',
-            transition: 'all 0.2s ease-in-out',
-            fontSize: '14px',
-            fontWeight: 500,
-
-            '&.Mui-focused': {
-              color: error ? 'var(--Text)' : 'var(--Text)',
-              fontWeight: 600,
-            },
-
-            '&.Mui-error': {
-              color: 'var(--Text)',
-            },
-
-            '&.Mui-disabled': {
-              color: 'var(--Text-Secondary)',
-              opacity: 0.6,
-            },
-          },
-
-          ...sx,
-        }}
-        {...props}
-      />
-      {error && errorMessage && (
-        <FormHelperText
-          error={true}
-          sx={{
-            color: 'var(--Buttons-Error-Border)',
-            marginTop: '4px',
-            fontSize: '12px',
-            fontWeight: 500,
-          }}
-        >
-          {errorMessage}
-        </FormHelperText>
-      )}
-    </Box>
+    <Input
+      multiline
+      rows={rows}
+      fullWidth={fullWidth}
+      {...(error && { validation: 'error', validationMessage: errorMessage })}
+      sx={{ '& textarea': { resize }, ...sx }}
+      {...props}
+    />
   );
 }
 

@@ -1,5 +1,5 @@
 // src/components/Input/Input.js
-import React from 'react';
+import React, { useId } from 'react';
 import {
   TextField as MuiTextField,
   FormHelperText,
@@ -193,6 +193,9 @@ export function Input({
   validation,
   validationMessage,
   disabled = false,
+  // Caller-supplied id wins; otherwise one is generated so the label can point
+  // at the field. Named idProp because `id` would shadow it inside the body.
+  id: idProp,
   value,
   defaultValue,
   onChange,
@@ -222,6 +225,21 @@ export function Input({
   const sizeConfig = isFloating
     ? (FLOATING_SIZE_MAP[size] || FLOATING_SIZE_MAP.medium)
     : (SIZE_MAP[size] || SIZE_MAP.medium);
+
+  /* The standard label must be ASSOCIATED with the field, not merely adjacent.
+   *
+   * It rendered as a bare <label> with no htmlFor, and the input is its sibling
+   * rather than its child — so there was no association, explicit or implicit.
+   * With labelPosition="standard", which is the DEFAULT, a screen reader
+   * announced the field as unlabelled while sighted users saw the label sitting
+   * right above it. Invisible in the render, passes every visual check.
+   *
+   * It surfaced only when TextArea was collapsed onto Input: the old TextArea
+   * wrapped MUI directly and MUI wires label-to-input itself, so its test
+   * started failing the moment it stopped doing that. The floating label was
+   * never affected — MUI owns that one. */
+  const generatedId = useId();
+  const inputId = idProp || generatedId;
 
   const { labelX, restingY, shrunkY } = floatingLabelGeometry(sizeConfig, !!startAdornment);
   const labelStyle = FLOATING_LABEL_STYLE[size] || FLOATING_LABEL_STYLE.medium;
@@ -257,6 +275,7 @@ export function Input({
     return (
       <LabelComp
         component="label"
+        htmlFor={inputId}
         sx={{
           display: 'block',
           marginBottom: '6px',
@@ -321,6 +340,7 @@ export function Input({
             type={type}
             disabled={disabled}
             placeholder={placeholder}
+            id={inputId}
             multiline={multiline}
             rows={rows}
             maxRows={maxRows}
