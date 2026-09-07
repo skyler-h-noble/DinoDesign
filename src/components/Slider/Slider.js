@@ -29,16 +29,41 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // --- Style Builder -----------------------------------------------------------
 
+/* The slider is drawn from the SURFACE tokens, not the button palette.
+ *
+ * That is what makes its contrast hold by construction rather than by check,
+ * and each pairing is doing a specific job:
+ *
+ *   rail    --Background fill with a 1px --Border edge. It was --Border-VARIANT
+ *           as a fill and no edge at all — and Border-Variant is the token
+ *           documented as DECORATIVE, carrying no contrast requirement. A
+ *           slider's rail is the boundary of an interactive control, so it
+ *           needs --Border, which is the 3:1 one.
+ *
+ *   thumb   --Border fill with a 1px --Background border. The border is not
+ *           decoration: it separates the handle from the fill it sits on AND
+ *           from the focus ring outside it, so both comparisons are against a
+ *           known colour instead of against whatever the handle overlaps.
+ *
+ *   label   --Text ground with --Background text — the surface's own pair,
+ *           inverted. Legible on any surface by definition, which a colour from
+ *           the button palette is not guaranteed to be.
+ *
+ * A named `color` still routes the FILL through the button palette, so
+ * color="success" is a green slider; everything that carries a contrast
+ * requirement stays on the surface tokens. */
 function colorStyles(color) {
   const C = cap(color);
+  const isDefault = color === 'default';
   return {
-    thumb:          'var(--Buttons-' + C + '-Button)',
-    thumbBorder:    '1px solid var(--Buttons-' + C + '-Border)',
-    track:          'var(--Buttons-' + C + '-Button)',
-    trackBorder:    '1px solid var(--Buttons-' + C + '-Border)',
-    rail:           'var(--Border-Variant)',
-    valueLabel:     'var(--Buttons-' + C + '-Text)',
-    valueLabelText: 'var(--Buttons-' + C + '-Button)',
+    thumb:          'var(--Border)',
+    thumbBorder:    '1px solid var(--Background)',
+    track:          isDefault ? 'var(--Button)' : 'var(--Buttons-' + C + '-Button)',
+    trackBorder:    '1px solid var(--Border)',
+    rail:           'var(--Background)',
+    railBorder:     '1px solid var(--Border)',
+    valueLabel:     'var(--Text)',
+    valueLabelText: 'var(--Background)',
   };
 }
 
@@ -98,11 +123,16 @@ export function Slider({
 
   const totalTrack = sizeConfig.track + 2; // inner height + 1px border each side
 
-  // When inverted, the rail gets track styling and the track gets rail styling
+  /* Inverted swaps which side is FILLED, not which side has an edge.
+   *
+   * Both the rail and the track carry a 1px --Border now: the whole bar is one
+   * outlined shape whose fill moves, so the control's outline stays continuous
+   * whichever side is selected. Previously only one of them had a border, so
+   * inverting visibly changed the shape's outline as well as its fill. */
   const railBg     = isInverted ? styles.track       : styles.rail;
-  const railBorder = isInverted ? styles.trackBorder  : null;
+  const railBorder = styles.railBorder;
   const trackBg    = isInverted ? styles.rail         : styles.track;
-  const trackBr    = isInverted ? null                : styles.trackBorder;
+  const trackBr    = styles.trackBorder;
 
   const sliderSx = {
     // Root
@@ -168,14 +198,33 @@ export function Slider({
         boxShadow: `${bevelShadow(variant)}, ${SHADOW_LEVEL_2}`,
       },
 
+      /* The outer ring of the focus indicator. The inner --Background ring is
+         the thumb's own border, so this only adds the --Focus-Visible one —
+         flush against it, which is what keeps the 3:1 measurable. */
+      '&.Mui-focusVisible::before, &:focus-visible::before': {
+        boxShadow: `${bevelShadow(variant)}, ${SHADOW_LEVEL_2}, 0 0 0 1px var(--Focus-Visible)`,
+      },
+
       '&.Mui-active::before': {
         // Pressed: keep bevel, drop elevation (matches Button's pressed state)
         boxShadow: bevelShadow(variant),
       },
 
       '&.Mui-focusVisible': {
-        outline: '2px solid var(--Focus-Visible)',
-        outlineOffset: '2px',
+        /* Double ring, NO gap — the structure the design specifies:
+         *
+         *     handle fill │ 1px --Background │ 1px --Focus-Visible
+         *
+         * It was `outline: 2px --Focus-Visible` with `outline-offset: 2px`,
+         * and the 2px gap is the problem: it shows whatever is BEHIND the
+         * thumb — the rail, the fill, or the page — so the focus indicator's
+         * 3:1 was measured against an unknown colour that changes as the thumb
+         * moves along the track.
+         *
+         * The --Background ring is what makes it measurable. It is already the
+         * thumb's border, so the focus state only adds the outer ring, drawn
+         * as a box-shadow so it follows the circle rather than the box. */
+        outline: 'none',
         borderRadius: '50%',
       },
       '&.Mui-focusVisible::before': {
@@ -217,10 +266,16 @@ export function Slider({
     '& .MuiSlider-valueLabel': {
       backgroundColor: styles.valueLabel,
       color: styles.valueLabelText,
-      fontSize: sizeConfig.labelSize,
+      /* Labels-Extra-Small, the style the design uses — not a hardcoded 11/12/13.
+         The three pixel values matched no token and no style in the system. */
+      fontFamily: 'var(--Font-Families-Body, var(--Body-Font-Family))',
+      fontSize: 'var(--Label-ExtraSmall-Font-Size)',
+      fontWeight: 'var(--Label-ExtraSmall-Font-Weight)',
+      letterSpacing: 'var(--Label-ExtraSmall-Letter-Spacing)',
+      lineHeight: 'var(--Label-ExtraSmall-Line-Height)',
       fontWeight: 600,
-      borderRadius: '6px',
-      padding: '2px 8px',
+      borderRadius: 'var(--Sizing-1, 8px)',
+      padding: 'var(--Sizing-Half, 4px) var(--Sizing-1, 8px)',
       '&::before': {
         backgroundColor: styles.valueLabel,
       },
@@ -272,6 +327,13 @@ export function Slider({
       name={name}
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledby}
+      /* Native `disabled` already blocks interaction, but it also drops the
+         control out of the tab order — so a keyboard user tabs straight past
+         and never learns the slider is there. aria-disabled restores the
+         announcement without re-enabling anything: the native attribute is
+         still what actually disables it. Both say the same thing, which is
+         redundant rather than conflicting. */
+      slotProps={disabled ? { input: { 'aria-disabled': 'true' } } : undefined}
       className={'slider-' + variant + ' ' + className}
       sx={sliderSx}
       {...props}
