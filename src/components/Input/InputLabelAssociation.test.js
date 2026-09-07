@@ -73,6 +73,24 @@ describe('TextArea is Input, multiline', () => {
     )).not.toThrow();
   });
 
+  test('Input multiline gets the same resize default as TextArea', () => {
+    /* The default lives on Input, not on TextArea — otherwise the two entry
+       points to the same control could disagree about it. */
+    render(<Input label="Notes" multiline rows={3} />);
+    const css = Array.from(document.styleSheets)
+      .flatMap(ss => { try { return Array.from(ss.cssRules); } catch { return []; } })
+      .map(r => r.cssText).join('');
+    expect(css.replace(/\s+/g, '')).toContain('resize:vertical');
+  });
+
+  test('resize can be turned off', () => {
+    render(<Input label="Notes" multiline resize="none" />);
+    const css = Array.from(document.styleSheets)
+      .flatMap(ss => { try { return Array.from(ss.cssRules); } catch { return []; } })
+      .map(r => r.cssText).join('');
+    expect(css.replace(/\s+/g, '')).toContain('resize:none');
+  });
+
   test('resize defaults to vertical, never the browser default', () => {
     /* The browser default is `both`, which lets a user drag a textarea wider
        than its column and break the layout. `none` is deliberately not the

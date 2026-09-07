@@ -343,23 +343,16 @@ export function TextArea({
   errorMessage = '',
   rows = 4,
   fullWidth = true,
-  /* Textareas resize. The browser default is `both`, which lets a user drag one
-     wider than its column and break the layout — so the default here is
-     vertical: more room for text, no effect on the surrounding grid.
-     `none` is deliberately NOT the default. Enlarging a textarea to see more of
-     what you have typed is a real affordance for low-vision and motor users;
-     if you do turn it off, pair it with maxRows so the field grows itself. */
-  resize = 'vertical',
-  sx = {},
   ...props
 }) {
+  /* `resize` is Input's — forwarded through ...props, not reimplemented here,
+     so <Input multiline> and <TextArea> cannot disagree about the default. */
   return (
     <Input
       multiline
       rows={rows}
       fullWidth={fullWidth}
       {...(error && { validation: 'error', validationMessage: errorMessage })}
-      sx={{ '& textarea': { resize }, ...sx }}
       {...props}
     />
   );

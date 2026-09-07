@@ -204,6 +204,14 @@ export function Input({
   multiline = false,
   rows,
   maxRows,
+  /* Textareas resize, and the browser default is `both` — a user can drag one
+     wider than its column and break the layout. Vertical gives more room for
+     text with no effect on the surrounding grid.
+     `none` is deliberately not the default: enlarging a textarea to read back
+     what you have typed is a real affordance for low-vision and motor users,
+     and removing it without offering auto-grow just makes long input painful.
+     Pair `none` with maxRows if you do set it. Ignored when not multiline. */
+  resize = 'vertical',
   startAdornment,
   endAdornment,
   fullWidth = false,
@@ -397,6 +405,7 @@ export function Input({
                 '& textarea': {
                   padding: sizeConfig.padding,
                   color: 'inherit',
+                  resize,
                   '&::placeholder': { color: 'var(--Quiet)', opacity: 1 },
                 },
 
