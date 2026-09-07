@@ -8,6 +8,10 @@ import AddIcon from '@mui/icons-material/Add';
 import { Icon } from '../Icon/Icon';
 import { Body, BodySmall } from '../Typography';
 import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
+/* The SAME map Input uses, imported rather than copied. A NumberField beside an
+   Input must not read as a different control, and two copies of a mapping drift
+   the first time one is edited. */
+import { FLOATING_LABEL_STYLE } from '../Input/Input';
 
 /**
  * NumberField Component
@@ -67,7 +71,17 @@ export function NumberField({
   const effectiveColor = color === 'default' ? 'primary' : color;
   const C = cap(effectiveColor);
   const isLight = styleVariant === 'light';
-  const borderToken = 'var(--Buttons-' + C + '-Border)';
+  /* The design draws the field from the SURFACE tokens, not the button palette:
+     border --Border, fill --Background, and the steppers use --Hover/--Pressed.
+     A named `color` still routes through the button palette, which is what makes
+     color="success" a themed field — but `default` now matches the design
+     instead of borrowing a button's border. */
+  const borderToken = color === 'default'
+    ? 'var(--Border)'
+    : 'var(--Buttons-' + C + '-Border)';
+  const fieldBg = color === 'default'
+    ? 'var(--Background)'
+    : 'var(--Buttons-' + C + '-Light-Button, var(--Background))';
   const activeTextColor = color === 'default' ? 'var(--Text)' : 'var(--Text-' + C + ')';
 
   const isOutlined = variant === 'outlined';
@@ -143,13 +157,34 @@ export function NumberField({
 
   useEffect(() => stopHold, [stopHold]);
 
+  /* Did a pointer sequence already step? Then the click that follows it must
+     not step again. Ref, not state, because it is read and written inside one
+     event sequence and a re-render between them would lose the guard. */
+  const pointerSteppedRef = useRef(false);
+
   const holdHandlers = (dir) => ({
     onPointerDown: (e) => {
       // Only respond to primary button / touch / pen.
       if (e.button !== undefined && e.button !== 0) return;
       e.preventDefault();
       try { e.currentTarget.setPointerCapture?.(e.pointerId); } catch (_) {}
+      pointerSteppedRef.current = true;
       startHold(dir);
+    },
+    /* A CLICK with no pointer sequence before it still has to work.
+     *
+     * The stepper bound pointer and key handlers only, so a mouse press worked
+     * and a keyboard press worked — but a synthetic click did nothing. Screen
+     * readers and voice control routinely dispatch a bare `click` with no
+     * preceding pointerdown, so "Increase" was inert for exactly the users who
+     * cannot press and hold. It failed silently: the button was focusable,
+     * announced correctly, and did nothing.
+     *
+     * Guarded so a real pointer press does not step twice — pointerdown fires
+     * first, sets the flag, and the click that follows is ignored. */
+    onClick: () => {
+      if (pointerSteppedRef.current) { pointerSteppedRef.current = false; return; }
+      stepBy(dir);
     },
     onPointerUp: (e) => {
       try { e.currentTarget.releasePointerCapture?.(e.pointerId); } catch (_) {}
@@ -185,16 +220,36 @@ export function NumberField({
     if (e.key === 'ArrowDown') { e.preventDefault(); decrement(); }
   };
 
+  /* Stepper button.
+   *
+   * TRANSPARENT AT REST, so the field's own fill shows through — the design has
+   * no separate button colour, only the hover and pressed states appearing on
+   * top of it. It previously painted --Buttons-{C}-Light-Button at rest, which
+   * put a visible block in the corner of every field.
+   *
+   * The state tokens are the SURFACE ones (--Hover, --Pressed), not the button
+   * palette's, because these sit on the field's surface rather than being
+   * buttons in their own right.
+   *
+   * FOCUS is an INSET border, not an offset outline. The steppers live inside a
+   * clipped container, so an outline drawn outside the element is cut off by
+   * the field's own overflow:hidden — it was invisible on the very control that
+   * most needs it. */
   const stepperSx = {
     display: 'flex', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: 'var(--Buttons-' + C + '-Light-Button, transparent)',
-    color: 'var(--Buttons-' + C + '-Light-Text, var(--Text))',
-    cursor: 'pointer', outline: 'none', flexShrink: 0, border: 'none',
+    backgroundColor: 'transparent',
+    color: color === 'default' ? 'var(--Text)' : 'var(--Text-' + C + ')',
+    cursor: 'pointer', outline: 'none', flexShrink: 0, border: 'none', padding: 0,
+    borderRadius: 'var(--Button-Icon-Radius, 0)',
     transition: 'background-color 0.15s ease',
-    '&:hover': { backgroundColor: 'var(--Buttons-' + C + '-Hover)' },
-    '&:active': { backgroundColor: 'var(--Buttons-' + C + '-Pressed)' },
-    '&:focus-visible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px' },
-    '&:disabled': { opacity: 0.4, cursor: 'not-allowed' },
+    '&:hover:not(:disabled)': { backgroundColor: 'var(--Hover)' },
+    '&:active:not(:disabled)': { backgroundColor: 'var(--Pressed)' },
+    '&:focus-visible': {
+      outline: 'none',
+      boxShadow: 'inset 0 0 0 1px var(--Focus-Visible)',
+    },
+    /* --Disabled is the system's own 0.38, not a number picked here. */
+    '&:disabled': { opacity: 'var(--Disabled, 0.38)', cursor: 'not-allowed' },
   };
 
   // No data-surface — inherit parent scope; field uses --Hover for affordance.
@@ -251,21 +306,55 @@ export function NumberField({
         <Box {...innerAttrs}>
           <Box sx={{
             position: 'relative', display: 'flex', alignItems: 'stretch',
-            minHeight: sc.height,
-            backgroundColor: 'var(--Hover)',
+            /* The stepper stack sets the floor.
+             *
+             * Two buttons at --Sizing-3 with a 1px rule between them is 49px,
+             * and each of those 24px is the minimum target area — they cannot
+             * be shorter. So the FIELD cannot be shorter either, whatever its
+             * size prop says: --Small-Button-Height is 24px and --Button-Height
+             * is 32px, and both would have clipped the steppers.
+             *
+             * They used to be `flex: 1`, which "fixed" this by letting each
+             * button shrink to 11px in a small field — below the minimum, and
+             * invisible as a bug because the icons still drew. */
+            minHeight: 'max(' + sc.height + ', calc(var(--Sizing-3, 24px) * 2 + 1px))',
+            /* --Background, not --Hover. The field was painting its own HOVER
+               colour at rest, which left nothing for hover to move to and made
+               every field read as already-interacted-with. */
+            backgroundColor: fieldBg,
           }}>
-            {/* Floating label */}
+            {/* Floating label.
+              *
+              * Two design-system text styles, not one size scaled: at rest it
+              * sits where the input TEXT will be, so it is Body; shrunk it is a
+              * label above the text, so it is Label. Same mapping Input uses.
+              *
+              * It was hardcoded — left:'14px' whatever the padding, fontSize
+              * from sc, and scale(0.75) on top. scale() shrinks the RENDERED
+              * PIXELS, so weight and tracking shrank with it and the result was
+              * a squashed Body rather than a Label. */}
             {isFloating && label && (
               <Box sx={{
                 position: 'absolute',
                 top: hasValue || focused ? '6px' : '50%',
-                left: '14px',
-                transform: hasValue || focused ? 'scale(0.75)' : 'translateY(-50%)',
+                left: sc.padding.split(' ')[1] || '14px',
+                transform: hasValue || focused ? 'none' : 'translateY(-50%)',
                 transformOrigin: 'top left',
                 color: focused ? activeTextColor : 'var(--Quiet)',
-                fontSize: sc.fontSize, fontWeight: 400,
+                fontFamily: 'var(--Font-Families-Body, var(--Body-Font-Family))',
+                ...(hasValue || focused
+                  ? {
+                      fontSize:      'var(--' + (FLOATING_LABEL_STYLE[size] || FLOATING_LABEL_STYLE.medium).shrunk + '-Font-Size)',
+                      fontWeight:    'var(--' + (FLOATING_LABEL_STYLE[size] || FLOATING_LABEL_STYLE.medium).shrunk + '-Font-Weight)',
+                      letterSpacing: 'var(--' + (FLOATING_LABEL_STYLE[size] || FLOATING_LABEL_STYLE.medium).shrunk + '-Letter-Spacing)',
+                    }
+                  : {
+                      fontSize:      'var(--' + (FLOATING_LABEL_STYLE[size] || FLOATING_LABEL_STYLE.medium).resting + '-Font-Size)',
+                      fontWeight:    'var(--' + (FLOATING_LABEL_STYLE[size] || FLOATING_LABEL_STYLE.medium).resting + '-Font-Weight)',
+                      letterSpacing: 'var(--' + (FLOATING_LABEL_STYLE[size] || FLOATING_LABEL_STYLE.medium).resting + '-Letter-Spacing)',
+                    }),
                 pointerEvents: 'none',
-                transition: 'top 0.15s ease, transform 0.15s ease, color 0.15s ease',
+                transition: 'top 0.15s ease, font-size 0.15s ease, color 0.15s ease',
                 zIndex: 1,
               }}>
                 {label}
@@ -304,17 +393,36 @@ export function NumberField({
               }}
             />
 
-            {/* Up/Down steppers */}
-            <Box sx={{ display: 'flex', flexDirection: 'column', borderLeft: '1px solid ' + borderToken }}>
+            {/* Up/Down steppers.
+              *
+              * A fixed-height pair CENTRED in the column, not two halves
+              * stretched to fill it. They were `flex: 1`, so each button grew to
+              * half the field — 22px in a small field, 36px in a large one, and
+              * the icons floated in the middle of a tall empty box. The design
+              * has them at a constant --Sizing-3 whatever the field height, with
+              * the column centring the pair.
+              *
+              * The rule between them is a Box rather than <Divider>: it is a
+              * 1px line inside a compound component, and importing Divider here
+              * brings its own margins and orientation logic for no gain. */}
+            <Box sx={{
+              display: 'flex', flexDirection: 'column',
+              justifyContent: 'center', alignItems: 'stretch',
+              borderLeft: '1px solid ' + borderToken,
+              flexShrink: 0,
+            }}>
               <Box component="button" type="button" aria-label="Increase" {...holdHandlers(1)}
                 disabled={disabled || atMax}
-                sx={{ ...stepperSx, flex: 1, width: 32, borderBottom: '1px solid ' + borderToken }}>
-                <Icon size="small"><KeyboardArrowUpIcon /></Icon>
+                sx={{ ...stepperSx, width: 'var(--Sizing-4, 32px)', height: 'var(--Sizing-3, 24px)' }}>
+                <Icon size="medium"><KeyboardArrowUpIcon /></Icon>
               </Box>
+              <Box aria-hidden="true" sx={{
+                height: '1px', backgroundColor: borderToken, flexShrink: 0,
+              }} />
               <Box component="button" type="button" aria-label="Decrease" {...holdHandlers(-1)}
                 disabled={disabled || atMin}
-                sx={{ ...stepperSx, flex: 1, width: 32 }}>
-                <Icon size="small"><KeyboardArrowDownIcon /></Icon>
+                sx={{ ...stepperSx, width: 'var(--Sizing-4, 32px)', height: 'var(--Sizing-3, 24px)' }}>
+                <Icon size="medium"><KeyboardArrowDownIcon /></Icon>
               </Box>
             </Box>
           </Box>

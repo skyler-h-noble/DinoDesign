@@ -11,7 +11,8 @@ import { Box } from '@mui/material';
  *   Track (back circle): var(--Border-Variant)
  *   Fill (progress arc):  var(--Buttons-{Color}-Border)
  *
- * SIZES: small (24px), medium (40px), large (56px)
+ * SIZES: small (24px), medium (40px), large (56px), or a number for a custom
+ *        diameter in px — thickness scales with it.
  * VALUE: 0–100 — when provided, shows static arc + optional center label.
  *        When omitted, renders indeterminate spinning animation.
  *
@@ -43,7 +44,22 @@ export function CircularProgress({
   ...props
 }) {
   const C = COLOR_LABEL_MAP[color] || 'Primary';
-  const s = SIZE_MAP[size] || SIZE_MAP.medium;
+  /* `size` takes a named step OR a diameter in px.
+   *
+   * The three named steps are this component's own scale (24/40/56). A number
+   * exists because the spinner is reused at the ICON scale (16/24/32) — Loader
+   * needs 32px to match its design, and there is no named step for it here.
+   * Better one component with a diameter escape hatch than a second SVG that
+   * has to be kept looking identical.
+   *
+   * Thickness scales with the diameter rather than being fixed, so a 16px
+   * spinner does not carry a 40px spinner's stroke: the named steps sit at
+   * about diameter/11, and that ratio is what a numeric size follows. */
+  const s = typeof size === 'number'
+    ? { diameter: size, thickness: Math.max(2, Math.round(size / 11)),
+        fontSize: Math.max(8, Math.round(size / 3.3)) + 'px',
+        labelSize: Math.max(8, Math.round(size / 3.3)) + 'px' }
+    : (SIZE_MAP[size] || SIZE_MAP.medium);
   const t = thicknessOverride || s.thickness;
   const hasValue = value !== undefined && value !== null;
   const clampedValue = hasValue ? Math.min(100, Math.max(0, value)) : 0;

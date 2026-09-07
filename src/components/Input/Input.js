@@ -103,6 +103,68 @@ const FLOATING_SIZE_MAP = {
   large:  { height: '64px', fontSize: '17px', labelSize: '14px', padding: '24px var(--Input-Padding, 16px) 6px', leftPad: 16, iconSize: 20 },
 };
 
+/**
+ * Floating-label geometry.
+ *
+ * Exported and pure so the arithmetic can be tested directly. The rendered
+ * transform cannot be: jsdom reports MUI's own base rule rather than the
+ * emotion override, so a DOM assertion here would pass whatever these values
+ * were — which is exactly how the constants survived.
+ *
+ * X — the resting label must start where the input TEXT starts, or it jumps
+ * sideways as it shrinks. With a start adornment the text begins after it, so
+ * the label clears what the adornment actually occupies: marginLeft + icon +
+ * gap. This was a flat +32, which is 8px too far at large and 12px at small —
+ * the error grew as the icon got SMALLER.
+ *
+ * Y — the resting label is centred in the field. This was a flat 16px, which
+ * centred `small` and left `large` 4px high — the error grew as the field got
+ * TALLER. Two constants, two errors, running in opposite directions.
+ */
+export const LABEL_LINE_HEIGHT = 1.4375;   // MUI InputLabel's own line-height
+
+/**
+ * Which design-system text style each state of a floating label uses.
+ *
+ * A floating label is two styles, not one size scaled: at rest it sits exactly
+ * where the input TEXT will be, so it is Body; shrunk it becomes a label above
+ * the text, which is what Label is for.
+ *
+ * It previously used neither — hardcoded pixels (13/15/17) with scale(0.75) on
+ * top, so a large field's shrunk label rendered at 12.75px, a number in no
+ * token and matching no style in the system. And because scale() shrinks the
+ * RENDERED PIXELS, the weight and letter-spacing shrank with it: the result was
+ * a squashed Body rather than a Label, which is precisely what having separate
+ * Label steps is meant to avoid.
+ *
+ * So the transition animates FONT-SIZE, not scale.
+ */
+export const FLOATING_LABEL_STYLE = {
+  small:  { resting: 'Body-Small',  shrunk: 'Label-ExtraSmall' },
+  medium: { resting: 'Body-Medium', shrunk: 'Label-Small' },
+  large:  { resting: 'Body-Large',  shrunk: 'Label-Medium' },
+};
+
+const tokenFont = (t) => ({
+  fontSize:      'var(--' + t + '-Font-Size)',
+  fontWeight:    'var(--' + t + '-Font-Weight)',
+  letterSpacing: 'var(--' + t + '-Letter-Spacing)',
+});
+
+export function floatingLabelGeometry(sizeConfig, hasStartAdornment) {
+  const leftPad = sizeConfig.leftPad || 14;
+  const fieldH  = parseInt(sizeConfig.height, 10) || 56;
+  const fontPx  = parseInt(sizeConfig.fontSize, 10) || 15;
+  return {
+    labelX: hasStartAdornment
+      ? leftPad + (sizeConfig.iconSize || 18) + 4
+      : leftPad,
+    restingY: Math.round((fieldH - fontPx * LABEL_LINE_HEIGHT) / 2),
+    // Sits in the field's top padding, bottom-aligned to where the text starts.
+    shrunkY: 6,
+  };
+}
+
 // --- Validation icons --------------------------------------------------------
 
 const VALIDATION_ICONS = {
@@ -160,6 +222,9 @@ export function Input({
   const sizeConfig = isFloating
     ? (FLOATING_SIZE_MAP[size] || FLOATING_SIZE_MAP.medium)
     : (SIZE_MAP[size] || SIZE_MAP.medium);
+
+  const { labelX, restingY, shrunkY } = floatingLabelGeometry(sizeConfig, !!startAdornment);
+  const labelStyle = FLOATING_LABEL_STYLE[size] || FLOATING_LABEL_STYLE.medium;
 
   // Extract color name from variant (e.g. "primary-outline" → "primary")
   const colorName = variant.replace(/-outline$/, '').replace(/-light$/, '');
@@ -343,13 +408,35 @@ export function Input({
 
               '& .MuiInputLabel-root': {
                 color: 'var(--Quiet)',
-                fontSize: sizeConfig.fontSize,
+                fontFamily: 'var(--Font-Families-Body, var(--Body-Font-Family))',
+                ...tokenFont(labelStyle.resting),
                 transformOrigin: 'top left',
-                // Shift the label right when a start adornment is present so
-                // the shrunken label doesn't sit on top of the icon.
-                transform: 'translate(' + ((sizeConfig.leftPad || 14) + (startAdornment ? 32 : 0)) + 'px, 16px) scale(1)',
+                // font-size animates too, since the shrink is a real style
+                // change now rather than a scale on the resting one.
+                transition: 'transform 0.15s ease, font-size 0.15s ease, color 0.15s ease',
+                /* Both offsets are COMPUTED from the size config. They used to
+                 * be the constants 16px and 32px, which were tuned for one size
+                 * and wrong at the other two.
+                 *
+                 * X — the resting label must sit exactly where the input text
+                 * sits, or it visibly jumps sideways when it shrinks. With a
+                 * start adornment the text begins after it, so the label has to
+                 * clear the SAME distance the adornment actually occupies:
+                 * its marginLeft, its icon, its marginRight. The old flat 32
+                 * was 8px too far at large and 12px too far at small, because
+                 * the icon is 20/18/16 — it got further wrong as the icon got
+                 * smaller.
+                 *
+                 * Y — the resting label is vertically CENTRED in the field.
+                 * A constant 16px centred the small field and left large 4px
+                 * high, which is why the error grew with the size. */
+                transform: 'translate(' + labelX + 'px, ' + restingY + 'px)',
                 '&.MuiInputLabel-shrink': {
-                  transform: 'translate(' + ((sizeConfig.leftPad || 14) + (startAdornment ? 32 : 0)) + 'px, 6px) scale(0.75)',
+                  /* Shrunk, it sits in the field's top padding, bottom-aligned
+                     to where the text begins. No scale() — it becomes a real
+                     Label style, weight and tracking included. */
+                  transform: 'translate(' + labelX + 'px, ' + shrunkY + 'px)',
+                  ...tokenFont(labelStyle.shrunk),
                   color: 'var(--Quiet)',
                 },
                 '&.Mui-focused': { color: activeTextColor },

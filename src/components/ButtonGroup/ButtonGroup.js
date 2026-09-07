@@ -29,6 +29,9 @@ import { Box } from '@mui/material';
  *   value / defaultValue / onChange — controlled or uncontrolled
  *   Each child button should carry a `value` prop.
  *   Falls back to index (0, 1, 2…) if no value prop is present.
+ *   multiple — any number of segments selected at once; value is an ARRAY and
+ *              onChange receives the next array. Clicking a selected segment
+ *              deselects it.
  *
  * ─── SIZES ───────────────────────────────────────────────────────────────────
  *   small | medium (default) | large
@@ -71,6 +74,11 @@ export function ButtonGroup({
   equalWidth = false,   // back-compat alias → fit="equal"
 
   // Selection
+  //   multiple=false (default) — one segment at a time; `value` is that value.
+  //   multiple=true            — any number; `value` is an ARRAY of values, and
+  //                              onChange receives the next array. Clicking a
+  //                              selected segment deselects it.
+  multiple = false,
   value: controlledValue,
   defaultValue,
   onChange,
@@ -81,9 +89,18 @@ export function ButtonGroup({
   'aria-label': ariaLabel,
   ...props
 }) {
-  const [internalValue, setInternalValue] = useState(defaultValue ?? null);
+  const [internalValue, setInternalValue] = useState(
+    defaultValue ?? (multiple ? [] : null),
+  );
   const isControlled   = controlledValue !== undefined;
   const selectedValue  = isControlled ? controlledValue : internalValue;
+
+  /* In multiple mode the value is an array. Normalised here so a caller that
+     passes a bare value — or nothing — does not crash `.includes`. */
+  const selectedList = multiple
+    ? (Array.isArray(selectedValue) ? selectedValue : selectedValue == null ? [] : [selectedValue])
+    : null;
+  const isValueSelected = (v) => multiple ? selectedList.includes(v) : selectedValue === v;
 
   const isHorizontal = orientation === 'horizontal';
   const isConnected  = spacing === 0;
@@ -106,8 +123,17 @@ export function ButtonGroup({
   const count = childArray.length;
 
   const handleClick = (childValue, childOnClick) => (e) => {
-    if (!isControlled) setInternalValue(childValue);
-    onChange?.(childValue, e);
+    /* Single mode passes the value; multiple passes the NEXT ARRAY, so a
+       controlled caller can set state from it directly without reimplementing
+       the toggle. Clicking a selected segment removes it — a multi-select with
+       no way to deselect is a one-way door. */
+    const next = multiple
+      ? (selectedList.includes(childValue)
+          ? selectedList.filter(v => v !== childValue)
+          : [...selectedList, childValue])
+      : childValue;
+    if (!isControlled) setInternalValue(next);
+    onChange?.(next, e);
     childOnClick?.(e);
   };
 
@@ -117,7 +143,7 @@ export function ButtonGroup({
     const isFirst    = index === 0;
     const isLast     = index === count - 1;
     const childValue = child.props.value ?? index;
-    const isSelected = selectedValue === childValue;
+    const isSelected = isValueSelected(childValue);
 
     // ── Border radius in connected mode ───────────────────────────────────
     let borderRadius;
@@ -183,6 +209,21 @@ export function ButtonGroup({
       '&:hover': { border: 'none !important' },
     } : {};
 
+    /* A segment must not LIFT on hover.
+     *
+     * Button raises itself 1px on hover — right for a standalone button, wrong
+     * for a segmented control, where the segments share edges. One segment
+     * rising breaks the shared border, shifts its own baseline against its
+     * neighbours, and reads as the group resizing rather than as a hover.
+     *
+     * Suppressed for every state, not just hover: :active restores
+     * translateY(0), which is a no-op here but would otherwise leave the two
+     * declarations disagreeing about who owns the transform. */
+    const noLiftSx = {
+      transform: 'none !important',
+      '&:hover, &:active, &:focus-visible': { transform: 'none !important' },
+    };
+
     const buttonSx = {
       // Grid items stretch to fill their 1fr cell via the default
       // justify-self:stretch — do NOT set width:100% here. An explicit
@@ -192,6 +233,7 @@ export function ButtonGroup({
       // that negative margin OVERLAP the shared edge into a single border —
       // the same collapse the flex (hug/fill) modes already get.
       ...positionalSx,
+      ...noLiftSx,
       ...selectedSx,
       ...unselectedSx,
       ...ghostSx,

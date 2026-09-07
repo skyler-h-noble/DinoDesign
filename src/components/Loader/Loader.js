@@ -1,7 +1,6 @@
 // src/components/Loader/Loader.js
 import React from 'react';
 import {
-  CircularProgress,
   LinearProgress,
   Box,
   Stack,
@@ -9,17 +8,34 @@ import {
   Skeleton,
   Paper,
 } from '@mui/material';
+/* The LIB's CircularProgress, not MUI's.
+ *
+ * It renders the comet-trail gradient arc the design specifies — a stroke
+ * fading from 0 to full alpha as it sweeps — and it reads the brand's own
+ * --Buttons-{Color}-Border and --Border-Variant. MUI's has neither, which is
+ * why this file used to hardcode a colour to compensate. */
+import { CircularProgress } from '../CircularProgress';
 
 /**
  * Loader Component
- * Circular progress indicator with optional message
- * 
- * @param {number} size - Loader size in pixels (default: 40)
- * @param {string} message - Loading message text
- * @param {object} props - Additional props
+ *
+ * Circular progress indicator with an optional message.
+ *
+ * SIZES: small (16px) | medium (24px) | large (32px), or a number in px.
+ *   This is the ICON scale, not CircularProgress's own 24/40/56, because a
+ *   loader appears where an icon would — inline in a button, beside a label —
+ *   and the design's large is 32px.
+ *
+ * COLORS: the 8 brand colors, via --Buttons-{Color}-Border.
+ *   Previously hardcoded to var(--Primary-Color-11): a raw palette TONE rather
+ *   than a semantic token, so it ignored the surface it sat on and could not
+ *   follow a themed section.
  */
+const LOADER_SIZE_MAP = { small: 16, medium: 24, large: 32 };
+
 export function Loader({
-  size = 40,
+  size = 'medium',
+  color = 'primary',
   message = 'Loading...',
   sx = {},
   // Names the progressbar, not the Stack wrapper. Left in ...props it landed
@@ -40,12 +56,10 @@ export function Loader({
       {...props}
     >
       <CircularProgress
-        size={size}
+        size={typeof size === 'number' ? size : (LOADER_SIZE_MAP[size] ?? LOADER_SIZE_MAP.medium)}
+        color={color}
         aria-label={ariaLabelledby ? undefined : ariaLabel}
         aria-labelledby={ariaLabelledby}
-        sx={{
-          color: 'var(--Primary-Color-11)',
-        }}
       />
       {message && (
         <Typography
