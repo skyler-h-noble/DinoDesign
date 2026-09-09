@@ -164,17 +164,35 @@ const tokenFont = (t) => ({
 export const ADORNMENT_GAP = 8;
 
 export function floatingLabelGeometry(sizeConfig, hasStartAdornment) {
-  const leftPad = sizeConfig.leftPad || 14;
   const fieldH  = parseInt(sizeConfig.height, 10) || 56;
   const fontPx  = parseInt(sizeConfig.fontSize, 10) || 15;
+
+  /* THE TEXT INSET IS A TOKEN, SO THE LABEL'S MUST BE THE SAME TOKEN.
+   *
+   * This was `leftPad`, a plain number, while the input's own padding is
+   * var(--Input-Padding, <leftPad>px). The number is only the FALLBACK — a
+   * design system that defines --Input-Padding overrides it, and the generated
+   * CSS defines it as 4px (or 2px below an 8px radius). So the text sat at 4px
+   * while the label sat at 14px, and the label missed the text it labels by
+   * ten pixels on every plain field.
+   *
+   * Nothing reported it because both values are individually reasonable. The
+   * only fix is for the two to read ONE source, which means the label carries
+   * the var too rather than a number hoping to match it. */
+  const pad = 'var(--Input-Padding, ' + (sizeConfig.leftPad || 14) + 'px)';
+
+  /* What a start adornment occupies: its own width — pinned to iconSize below,
+     because a "$" is not 18px — plus the single gap. Added to the SAME pad, so
+     the two cases cannot drift apart from each other either. */
+  const clearance = (sizeConfig.iconSize || 18) + ADORNMENT_GAP;
+
   return {
-    /* Only correct because the adornment is pinned to exactly iconSize wide
-       below. It used to be arithmetic over an adornment whose real width was
-       whatever its content happened to measure — a "$" is not 18px — so the
-       label missed the text by the difference. */
-    labelX: hasStartAdornment
-      ? leftPad + (sizeConfig.iconSize || 18) + ADORNMENT_GAP
-      : leftPad,
+    /** A CSS length, not a number: it has to carry the variable through. */
+    labelX: hasStartAdornment ? 'calc(' + pad + ' + ' + clearance + 'px)' : pad,
+    /** The adornment's own inset, so the row starts where the text would. */
+    padX: pad,
+    /** Numeric clearance, for asserting the arithmetic without a layout. */
+    clearance: hasStartAdornment ? clearance : 0,
     restingY: Math.round((fieldH - fontPx * LABEL_LINE_HEIGHT) / 2),
     // Sits in the field's top padding, bottom-aligned to where the text starts.
     shrunkY: 6,
@@ -265,7 +283,7 @@ export function Input({
   const generatedId = useId();
   const inputId = idProp || generatedId;
 
-  const { labelX, restingY, shrunkY } = floatingLabelGeometry(sizeConfig, !!startAdornment);
+  const { labelX, padX, restingY, shrunkY } = floatingLabelGeometry(sizeConfig, !!startAdornment);
   const labelStyle = FLOATING_LABEL_STYLE[size] || FLOATING_LABEL_STYLE.medium;
 
   // Extract color name from variant (e.g. "primary-outline" → "primary")
@@ -454,7 +472,11 @@ export function Input({
                     marginBottom: 0,
                   },
                   '& .MuiInputAdornment-positionStart': {
-                    marginLeft: (sizeConfig.leftPad || 14) + 'px',
+                    /* The same token the text and label use. A literal here
+                       put the adornment at 14px while the text it precedes
+                       started at var(--Input-Padding) — the same mismatch one
+                       element over. */
+                    marginLeft: padX,
                     marginRight: ADORNMENT_GAP + 'px',
                     /* Pinned so floatingLabelGeometry's labelX is true rather
                        than approximate — the label's x is computed from
@@ -501,12 +523,12 @@ export function Input({
                  * Y — the resting label is vertically CENTRED in the field.
                  * A constant 16px centred the small field and left large 4px
                  * high, which is why the error grew with the size. */
-                transform: 'translate(' + labelX + 'px, ' + restingY + 'px)',
+                transform: 'translate(' + labelX + ', ' + restingY + 'px)',
                 '&.MuiInputLabel-shrink': {
                   /* Shrunk, it sits in the field's top padding, bottom-aligned
                      to where the text begins. No scale() — it becomes a real
                      Label style, weight and tracking included. */
-                  transform: 'translate(' + labelX + 'px, ' + shrunkY + 'px)',
+                  transform: 'translate(' + labelX + ', ' + shrunkY + 'px)',
                   ...tokenFont(labelStyle.shrunk),
                   color: 'var(--Quiet)',
                 },

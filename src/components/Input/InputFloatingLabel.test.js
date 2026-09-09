@@ -12,10 +12,28 @@ const SIZES = {
 };
 
 describe('horizontal', () => {
-  test('no adornment: the label starts at the input padding', () => {
+  test('no adornment: the label reads the same token as the text', () => {
+    /* Not a number equal to the padding — the TOKEN. The input's own inset is
+       var(--Input-Padding, <leftPad>px), where the number is only a fallback,
+       and the generated CSS defines that variable as 4px (2px below an 8px
+       radius). A literal leftPad here put the label at 14px while the text sat
+       at 4px: ten pixels apart, on every plain field, with both values
+       individually reasonable so nothing reported it. */
     for (const [n, cfg] of Object.entries(SIZES)) {
       expect([n, floatingLabelGeometry(cfg, false).labelX])
-        .toEqual([n, cfg.leftPad]);
+        .toEqual([n, `var(--Input-Padding, ${cfg.leftPad}px)`]);
+    }
+  });
+
+  test('a bare number can never come back', () => {
+    // The failure mode is a label that agrees with the FALLBACK and disagrees
+    // with the variable, which looks correct until a design system loads.
+    for (const cfg of Object.values(SIZES)) {
+      for (const withAdornment of [false, true]) {
+        const { labelX } = floatingLabelGeometry(cfg, withAdornment);
+        expect(typeof labelX).toBe('string');
+        expect(labelX).toContain('var(--Input-Padding');
+      }
     }
   });
 
@@ -25,17 +43,22 @@ describe('horizontal', () => {
        4px marginRight and a 4px input paddingLeft; the label counted only one
        half, so it sat 4px inside the text at every size. One ADORNMENT_GAP of
        8 now, counted once, by both. */
-    expect(floatingLabelGeometry(SIZES.small,  true).labelX).toBe(36);
-    expect(floatingLabelGeometry(SIZES.medium, true).labelX).toBe(40);
-    expect(floatingLabelGeometry(SIZES.large,  true).labelX).toBe(44);
+    expect(floatingLabelGeometry(SIZES.small,  true).clearance).toBe(24);
+    expect(floatingLabelGeometry(SIZES.medium, true).clearance).toBe(26);
+    expect(floatingLabelGeometry(SIZES.large,  true).clearance).toBe(28);
   });
 
   test('the label starts where the input text starts', () => {
     /* The property that actually matters — if these disagree, the label jumps
        sideways the moment it shrinks, which is what the bug looked like. */
+    /* Both sides are now the same expression: the token, plus what the
+       adornment occupies. Asserting the composed string is what makes "one
+       source" checkable — the previous version compared two numbers, which
+       agreed with each other and disagreed with the CSS. */
     for (const cfg of Object.values(SIZES)) {
-      const textX = cfg.leftPad + cfg.iconSize + ADORNMENT_GAP;
-      expect(floatingLabelGeometry(cfg, true).labelX).toBe(textX);
+      const clearance = cfg.iconSize + ADORNMENT_GAP;
+      expect(floatingLabelGeometry(cfg, true).labelX)
+        .toBe(`calc(var(--Input-Padding, ${cfg.leftPad}px) + ${clearance}px)`);
     }
   });
 });
@@ -67,7 +90,11 @@ describe('the constants cannot come back', () => {
 
   test('missing config falls back without producing NaN', () => {
     const g = floatingLabelGeometry({}, true);
-    for (const v of Object.values(g)) expect(Number.isFinite(v)).toBe(true);
+    // labelX and padX are CSS lengths now; the rest stay numeric.
+    for (const [k, v] of Object.entries(g)) {
+      if (typeof v === 'string') expect(v).not.toContain('NaN');
+      else expect([k, Number.isFinite(v)]).toEqual([k, true]);
+    }
   });
 });
 

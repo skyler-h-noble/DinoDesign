@@ -12,18 +12,30 @@ const css = () => Array.from(document.styleSheets)
   .map(r => r.cssText).join('');
 
 describe('the label starts where the text starts', () => {
-  test.each(['small', 'medium', 'large'])('%s: labelX is the adornment box plus one gap', (size) => {
+  test.each(['small', 'medium', 'large'])('%s: labelX is the padding token plus the adornment box', (size) => {
     /* Text x = adornment marginLeft + adornment width + adornment marginRight,
-       with the input contributing no left padding of its own. The label must
-       compute the same sum from the same parts. */
+       with the input contributing no left padding of its own. The label
+       composes the same sum from the same parts — and the marginLeft is the
+       TOKEN, not a number, so all three read one value. */
     const cfg = FLOATING_SIZE_MAP[size];
     const { labelX } = floatingLabelGeometry(cfg, true);
-    expect(labelX).toBe(cfg.leftPad + cfg.iconSize + ADORNMENT_GAP);
+    expect(labelX).toBe(
+      `calc(var(--Input-Padding, ${cfg.leftPad}px) + ${cfg.iconSize + ADORNMENT_GAP}px)`,
+    );
   });
 
-  test('with no adornment the label sits at the plain left padding', () => {
+  test('with no adornment the label sits at the padding token', () => {
     const cfg = FLOATING_SIZE_MAP.medium;
-    expect(floatingLabelGeometry(cfg, false).labelX).toBe(cfg.leftPad);
+    expect(floatingLabelGeometry(cfg, false).labelX)
+      .toBe(`var(--Input-Padding, ${cfg.leftPad}px)`);
+  });
+
+  test('the adornment starts at that token too, not a literal', () => {
+    /* One element over, the same mistake: a numeric marginLeft put the
+       adornment at 14px while the text it precedes began at
+       var(--Input-Padding). */
+    render(<Input label="Email" labelPosition="floating" startAdornment={<AttachMoneyIcon />} />);
+    expect(css()).toContain('margin-left: var(--Input-Padding');
   });
 
   test('the gap is ONE number, not a margin plus a padding', () => {
@@ -117,8 +129,10 @@ describe('the shrunk label is a real text style', () => {
     const cfg = FLOATING_SIZE_MAP.large;
     const g = floatingLabelGeometry(cfg, true);
     render(<Input size="large" label="Email" labelPosition="floating" startAdornment={<AttachMoneyIcon />} />);
+    // labelX is a CSS length now, so no "px" is appended to it.
     const c = css().replace(/\s+/g, '');
-    expect(c).toContain('translate(' + g.labelX + 'px,' + g.restingY + 'px)');
-    expect(c).toContain('translate(' + g.labelX + 'px,' + g.shrunkY + 'px)');
+    const x = g.labelX.replace(/\s+/g, '');
+    expect(c).toContain('translate(' + x + ',' + g.restingY + 'px)');
+    expect(c).toContain('translate(' + x + ',' + g.shrunkY + 'px)');
   });
 });
