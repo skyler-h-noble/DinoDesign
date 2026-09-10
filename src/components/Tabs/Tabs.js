@@ -64,33 +64,38 @@ const DARK_THEME_MAP = {
  */
 const SIZE_MAP = {
   small: {
-    px: 'var(--Sm-Button-Padding, 10px)',
-    py: '6px',
-    fontSize: 'var(--Sm-Button-Text, 13px)',
-    iconSize: 'var(--Sm-Button-Icon, 16px)',
-    gap: 'var(--Sm-Button-Text-Padding, 4px)',
+    px: 'var(--Sm-Button-Padding, 8px)',
+    fontSize: 'var(--Sm-Button-Text, 14px)',
+    iconSize: 'var(--Sm-Button-Icon, 20px)',
+    textPad: 'var(--Sm-Button-Text-Padding, 4px)',
     indicatorThickness: '2px',
-    minHeight: 'var(--Sm-Button-Height, 32px)',
+    minHeight: 'var(--Sm-Button-Height, 24px)',
   },
   medium: {
-    px: 'var(--Button-Padding, 14px)',
-    py: '8px',
-    fontSize: 'var(--Button-Text, 14px)',
-    iconSize: 'var(--Button-Icon, 18px)',
-    gap: 'var(--Button-Text-Padding, 6px)',
+    px: 'var(--Button-Padding, 8px)',
+    fontSize: 'var(--Button-Text, 16px)',
+    iconSize: 'var(--Button-Icon, 20px)',
+    textPad: 'var(--Button-Text-Padding, 4px)',
     indicatorThickness: '2px',
-    minHeight: 'var(--Button-Height, 40px)',
+    minHeight: 'var(--Button-Height, 32px)',
   },
   large: {
-    px: 'var(--Lg-Button-Padding, 18px)',
-    py: '10px',
-    fontSize: 'var(--Lg-Button-Text, 16px)',
-    iconSize: 'var(--Lg-Button-Icon, 20px)',
-    gap: 'var(--Lg-Button-Text-Padding, 8px)',
+    px: 'var(--Lg-Button-Padding, 16px)',
+    fontSize: 'var(--Lg-Button-Text, 20px)',
+    iconSize: 'var(--Lg-Button-Icon, 32px)',
+    textPad: 'var(--Lg-Button-Text-Padding, 8px)',
     indicatorThickness: '2px',
-    minHeight: 'var(--Lg-Button-Height, 48px)',
+    minHeight: 'var(--Lg-Button-Height, 56px)',
   },
 };
+
+/* The gap BETWEEN a tab's parts, distinct from the padding around its text.
+ *
+ * The design has both and they do different jobs: 2px separates the icon from
+ * the label's box, and Button-Text-Padding pads the label inside that box. One
+ * number cannot stand in for the pair — collapsing them either crowds the icon
+ * or over-pads the text. */
+const TAB_CONTENT_GAP = '2px';
 
 /* ─── Context ─── */
 const TabsContext = createContext({
@@ -440,8 +445,12 @@ export function Tab({
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: s.gap,
-        padding: iconOnly ? 'calc(' + s.py + ' + 4px) ' + s.py + ' ' + s.py : 'calc(' + s.py + ' + 4px) ' + s.px + ' ' + s.py + ' ' + s.px,
+        gap: TAB_CONTENT_GAP,
+        /* Horizontal padding only. Height comes from minHeight with the
+           content centred, which is how the design builds it — a vertical
+           padding on top of a min-height specifies the same measurement twice
+           and the two disagree the moment either changes. */
+        padding: '0 ' + (iconOnly ? '0' : s.px),
         minHeight: s.minHeight,
         fontSize: s.fontSize,
         fontFamily: 'inherit',
@@ -491,7 +500,17 @@ export function Tab({
       )}
       {!iconOnly && children && (() => {
         const LabelComp = size === 'small' ? Caption : BodySmall;
-        return <LabelComp style={{ color: 'inherit', fontWeight: 'inherit' }}>{children}</LabelComp>;
+        /* The label's own padding, matching the design's Typography Holder.
+           It is what separates the text from an icon beside it without moving
+           the icon away from the tab's edge — which a single gap would do. */
+        return (
+          <Box
+            className="tab-label"
+            sx={{ display: 'inline-flex', alignItems: 'center', padding: '4px ' + s.textPad }}
+          >
+            <LabelComp style={{ color: 'inherit', fontWeight: 'inherit' }}>{children}</LabelComp>
+          </Box>
+        );
       })()}
       {endDecorator && (
         <Box

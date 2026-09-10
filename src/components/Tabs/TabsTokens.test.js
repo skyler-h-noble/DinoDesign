@@ -31,13 +31,34 @@ describe('tab metrics come from the button tokens', () => {
     expect({ size, missing }).toEqual({ size, missing: [] });
   });
 
-  test('the fallbacks are the values that used to ship', () => {
-    /* A consumer with no design system CSS loaded must see exactly what it saw
-       before — the tokens are an addition, not a change of default. */
+  test('the fallbacks are the DESIGN values, not the old lib ones', () => {
+    /* Changed deliberately. The fallbacks used to be what the lib happened to
+       ship — 14px padding, 40px height — which meant a consumer with no design
+       system CSS saw a tab that matched nothing. They are the design's own
+       numbers now, so the untokenised case is the design rather than an
+       accident of what was typed first. */
     renderTabs('medium');
     const c = css().replace(/\s+/g, '');
-    expect(c).toContain('var(--Button-Padding,14px)');
-    expect(c).toContain('var(--Button-Height,40px)');
+    expect(c).toContain('var(--Button-Padding,8px)');
+    expect(c).toContain('var(--Button-Height,32px)');
+  });
+
+  test('the content gap is separate from the text padding', () => {
+    /* Two measurements doing different jobs: 2px separates the icon from the
+       label's box, Button-Text-Padding pads the label inside it. Collapsing
+       them into one either crowds the icon or over-pads the text. */
+    renderTabs('medium');
+    const c = css().replace(/\s+/g, '');
+    expect(c).toContain('gap:2px');
+    expect(c).toContain('padding:4pxvar(--Button-Text-Padding,4px)');
+  });
+
+  test('height comes from minHeight, not a vertical padding as well', () => {
+    // Specifying the same measurement twice means the two disagree the moment
+    // either changes.
+    renderTabs('medium');
+    const c = css().replace(/\s+/g, '');
+    expect(c).toContain('padding:0var(--Button-Padding,8px)');
   });
 
   test('no bare pixel padding survives', () => {
