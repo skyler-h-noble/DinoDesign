@@ -51,10 +51,45 @@ const DARK_THEME_MAP = {
   info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
 };
 
+/* A tab is built from BUTTON metrics, which is what keeps it the same size and
+ * type as the buttons beside it in a nav bar. These were hardcoded — 10/14/18px
+ * padding, 4/6/8px gap, 32/40/48px heights — so a design system that changed
+ * its button padding moved every button and left the tabs where they were.
+ *
+ * The numbers kept as fallbacks are the ones that shipped, so a consumer with
+ * no design system CSS loaded sees exactly what it saw before.
+ *
+ * The indicator is 2px, not 3. The design draws a 2px selector, and the extra
+ * pixel came from nowhere in particular.
+ */
 const SIZE_MAP = {
-  small:  { px: '10px', py: '6px',  fontSize: '13px', iconSize: '16px', gap: '4px', indicatorThickness: '3px', minHeight: '32px' },
-  medium: { px: '14px', py: '8px',  fontSize: '14px', iconSize: '18px', gap: '6px', indicatorThickness: '3px', minHeight: '40px' },
-  large:  { px: '18px', py: '10px', fontSize: '16px', iconSize: '20px', gap: '8px', indicatorThickness: '3px', minHeight: '48px' },
+  small: {
+    px: 'var(--Sm-Button-Padding, 10px)',
+    py: '6px',
+    fontSize: 'var(--Sm-Button-Text, 13px)',
+    iconSize: 'var(--Sm-Button-Icon, 16px)',
+    gap: 'var(--Sm-Button-Text-Padding, 4px)',
+    indicatorThickness: '2px',
+    minHeight: 'var(--Sm-Button-Height, 32px)',
+  },
+  medium: {
+    px: 'var(--Button-Padding, 14px)',
+    py: '8px',
+    fontSize: 'var(--Button-Text, 14px)',
+    iconSize: 'var(--Button-Icon, 18px)',
+    gap: 'var(--Button-Text-Padding, 6px)',
+    indicatorThickness: '2px',
+    minHeight: 'var(--Button-Height, 40px)',
+  },
+  large: {
+    px: 'var(--Lg-Button-Padding, 18px)',
+    py: '10px',
+    fontSize: 'var(--Lg-Button-Text, 16px)',
+    iconSize: 'var(--Lg-Button-Icon, 20px)',
+    gap: 'var(--Lg-Button-Text-Padding, 8px)',
+    indicatorThickness: '2px',
+    minHeight: 'var(--Lg-Button-Height, 48px)',
+  },
 };
 
 /* ─── Context ─── */
