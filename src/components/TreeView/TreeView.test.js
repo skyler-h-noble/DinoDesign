@@ -73,15 +73,20 @@ describe('Wrapper element', () => {
 
 /* ─── Solid data-theme ─── */
 describe('Solid variant data-theme', () => {
+  /* BARE names, all eight. The -Medium shades these used to assert were
+     removed from the Theme collection: it is nine modes now, Default plus the
+     eight palettes. A data-theme naming a mode that is not generated binds to
+     nothing and paints the parent's palette, which reads as the component
+     ignoring its colour prop rather than as a missing token. */
   const cases = [
     ['primary',   'Primary'],
     ['secondary', 'Secondary'],
     ['tertiary',  'Tertiary'],
     ['neutral',   'Neutral'],
-    ['info',      'Info-Medium'],
-    ['success',   'Success-Medium'],
-    ['warning',   'Warning-Medium'],
-    ['error',     'Error-Medium'],
+    ['info',      'Info'],
+    ['success',   'Success'],
+    ['warning',   'Warning'],
+    ['error',     'Error'],
   ];
 
   cases.forEach(([color, theme]) => {
@@ -95,21 +100,19 @@ describe('Solid variant data-theme', () => {
 
 /* ─── Light data-theme ─── */
 describe('Light variant data-theme', () => {
-  const cases = [
-    ['primary',   'Primary-Light'],
-    ['secondary', 'Secondary-Light'],
-    ['tertiary',  'Tertiary-Light'],
-    ['neutral',   'Neutral-Light'],
-    ['info',      'Info-Light'],
-    ['success',   'Success-Light'],
-    ['warning',   'Warning-Light'],
-    ['error',     'Error-Light'],
-  ];
+  /* `light` is a SURFACE, not a theme — same palette, brighter level. The
+     -Light themes went with the -Medium ones, and the surface ladder is what
+     that distinction was always for, which is why theme and surface travel
+     separately everywhere else in this system. */
+  const cases = ['primary', 'secondary', 'tertiary', 'neutral',
+                 'info', 'success', 'warning', 'error'];
 
-  cases.forEach(([color, theme]) => {
-    test('light ' + color + ' → data-theme="' + theme + '"', () => {
+  cases.forEach((color) => {
+    test('light ' + color + ' → bare theme on Surface-Brightest', () => {
       const { container } = renderTree({ variant: 'light', color });
-      expect(container.querySelector('[data-theme="' + theme + '"]')).toBeInTheDocument();
+      const wrapper = container.querySelector('.omni-treeview');
+      expect(wrapper).toHaveAttribute('data-theme', color.charAt(0).toUpperCase() + color.slice(1));
+      expect(wrapper).toHaveAttribute('data-surface', 'Surface-Brightest');
     });
   });
 });
@@ -205,12 +208,13 @@ describe('Convenience exports', () => {
     expect(container.querySelector('[data-theme="Primary"]')).toBeInTheDocument();
   });
 
-  test('LightTreeView renders light data-theme', () => {
+  test('LightTreeView renders the bare theme on the bright surface', () => {
     const { container } = render(
       <LightTreeView color="success" items={SIMPLE_ITEMS} />
     );
     expect(container.querySelector('.omni-treeview-light')).toBeInTheDocument();
-    expect(container.querySelector('[data-theme="Success-Light"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-theme="Success"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-surface="Surface-Brightest"]')).toBeInTheDocument();
   });
 });
 

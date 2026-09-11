@@ -44,8 +44,6 @@ import { Checkbox } from '../Checkbox/Checkbox';
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
-/** The palettes generated with Light / Medium / Dark shades rather than one. */
-const STATE_COLORS = ['info', 'success', 'warning', 'error'];
 
 const DENSITY_MAP = {
   compact: { minHeight: '24px', fontSize: '13px', iconSize: 16, gap: '6px' },
@@ -386,23 +384,26 @@ export function OmniTreeView({
       disableSelection, focusItem, toggle, select]);
 
   const colorToken = cap(color);
-  /* Solid is the BARE theme for a brand palette and the -Medium shade for a
-     state one. Not an inconsistency: the state palettes are generated with
-     three shades — Light, Medium, Dark — because a warning has to read as a
-     warning on a bright surface and on a dim one, while Primary has the whole
-     Surface ladder to do that job. So "solid" means "the full-strength shade",
-     which is the bare name where there is only one and -Medium where there
-     are three.
-
-     No data-theme at all on `default`: the Theme collection has no Default
-     mode to pin, so naming one would bind the tree to a palette that does not
-     exist and leave it painting Figma's fallbacks. Inheriting the page is
-     both correct and what a default variant means. */
-  const dataTheme = effectiveVariant === 'default'
-    ? undefined
-    : effectiveVariant === 'light'
-      ? `${colorToken}-Light`
-      : STATE_COLORS.includes(color) ? `${colorToken}-Medium` : colorToken;
+  /* The BARE theme name, always.
+   *
+   * This briefly emitted `Info-Medium` for a solid state colour and
+   * `{Color}-Light` for the light variant, because the tests asked for them
+   * and they were the only thing in the file that said anything. They were
+   * asking for themes that no longer exist: the Theme collection is nine
+   * modes — Default plus the eight palettes, bare — and the Light / Medium /
+   * Dark shades were removed.
+   *
+   * A data-theme naming a mode that is not generated binds to nothing and
+   * paints the parent's palette, which reads as "this component ignores its
+   * colour prop" rather than as a missing token. The shipped code had a
+   * comment saying exactly this and I overrode it on the strength of failing
+   * tests; the comment was right.
+   *
+   * `light` is therefore a SURFACE, not a theme. That is what the surface
+   * ladder is for — same palette, brighter level — and it is why the two
+   * travel separately everywhere else in this system.
+   */
+  const dataTheme = effectiveVariant === 'default' ? undefined : colorToken;
   const dataSurface = surface
     || (effectiveVariant === 'light' ? 'Surface-Brightest' : 'Surface-Dim');
 
