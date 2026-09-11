@@ -175,3 +175,59 @@ describe('Rail — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+/* --- The design's two Styles --- */
+describe('Label style', () => {
+  /* Not decoration: the Style decides WHERE the state paints. Contained wraps
+     the icon and the label together; outside paints a circle around the icon
+     alone and leaves the label plain beneath it. */
+  test('contained by default', () => {
+    const { container } = renderRail();
+    expect(container.querySelector('.rail-label-contained')).toBeInTheDocument();
+  });
+  test('outside when asked', () => {
+    const { container } = renderRail({ labelStyle: 'outside' });
+    expect(container.querySelector('.rail-label-outside')).toBeInTheDocument();
+  });
+});
+
+/* --- The slot takes an avatar --- */
+describe('Avatar in the slot', () => {
+  /* An account at the foot of a rail is the same item shape with a face in
+     it. The avatar is passed through UNWRAPPED — inside <Icon> it would take
+     the icon's colour and sizing, which is right for a glyph and wrong for a
+     picture. */
+  test('renders an avatar instead of an icon', () => {
+    render(<Rail items={[{ avatar: <img alt="" data-testid="face" src="a.png" />, label: 'Account' }]} />);
+    expect(screen.getByTestId('face')).toBeInTheDocument();
+  });
+  test('the item is still a tab with its label as the name', () => {
+    render(<Rail items={[{ avatar: <span data-testid="face" />, label: 'Account' }]} />);
+    expect(screen.getByRole('tab', { name: 'Account' })).toBeInTheDocument();
+  });
+});
+
+/* --- Disabled --- */
+describe('Disabled items', () => {
+  test('does not select on click', () => {
+    const onChange = jest.fn();
+    render(<Rail items={[
+      { icon: <HomeIcon />, label: 'Home' },
+      { icon: <InboxIcon />, label: 'Inbox', disabled: true },
+    ]} onChange={onChange} />);
+    fireEvent.click(screen.getByRole('tab', { name: 'Inbox' }));
+    expect(onChange).not.toHaveBeenCalled();
+  });
+});
+
+/* --- Label element --- */
+describe('Label typography', () => {
+  /* Caption renders a <p>, and a <p> inside a <button> is not phrasing
+     content — the browser was silently repairing the markup. The design's
+     style is Labels/Extra-Small, which the lib publishes, so it is both the
+     right type and valid nesting. */
+  test('the label is not a paragraph inside the button', () => {
+    const { container } = renderRail();
+    expect(container.querySelector('button p')).toBeNull();
+  });
+});
