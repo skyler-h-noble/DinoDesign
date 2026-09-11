@@ -43,7 +43,7 @@
  *     "defaultTheme": "Default",
  *     "defaultStyle": "Modern",
  *     "defaultSurface": "Surface",
- *     "darkTheme": "Neutral-Dark"
+ *     "darkTheme": "Neutral"
  *   }
  *
  *   All fields are optional — only include the files you have.
@@ -86,15 +86,19 @@ const OmniDesignContext = createContext(null);
 
 // ─── Valid values ─────────────────────────────────────────────────────────────
 
+/* Nine themes plus the three bars. The -Light / -Medium / -Dark shades are
+ * gone: a shade and a surface level were two ways of saying one thing, and the
+ * surface ladder already walks that axis — `theme="Primary"
+ * surface="Surface-Brightest"` is what `theme="Primary-Light"` used to be.
+ *
+ * This list had kept all 24, so anything driven by it — a theme picker, a
+ * validation check — offered fifteen names a generated design system does not
+ * define. They bind nothing and paint the parent's palette, which reads as the
+ * picker being broken rather than the name being dead. */
 export const OMNI_THEMES = [
   'Default',
-  'Primary-Light', 'Primary',
-  'Secondary-Light', 'Secondary',
-  'Tertiary-Light', 'Tertiary',
-  'Neutral-Light', 'Neutral',
-  'Error-Light', 'Success-Light', 'Warning-Light', 'Info-Light',
-  'Primary-Dark', 'Secondary-Dark', 'Tertiary-Dark', 'Neutral-Dark',
-  'Error-Dark', 'Success-Dark', 'Warning-Dark', 'Info-Dark',
+  'Primary', 'Secondary', 'Tertiary', 'Neutral',
+  'Info', 'Success', 'Warning', 'Error',
   'App-Bar', 'Nav-Bar', 'Status',
 ];
 
@@ -115,7 +119,9 @@ export const SURFACE_STYLE_THEME_MAP = {
   // and the only form generated design systems actually define.
   'light-tonal':       { theme: 'Primary',        rootSurface: 'Surface-Brightest' },
   'grey-professional': { theme: 'Neutral',        rootSurface: 'Surface'     },
-  'dark-professional': { theme: 'Neutral-Dark',   rootSurface: 'Surface'     },
+  // The mirror of light-tonal: same palette, the other end of the ramp. What
+  // theme:'Neutral-Dark' used to mean, and the only form that is defined.
+  'dark-professional': { theme: 'Neutral',        rootSurface: 'Surface-Dimmest' },
 };
 
 // ─── Style tag IDs ────────────────────────────────────────────────────────────
@@ -309,7 +315,7 @@ async function fetchThemeManifest(themeURL) {
  *
  * Dark mode — uncontrolled:
  * @param {boolean}  props.defaultDarkMode   Initial dark mode (default: false)
- * @param {string}   props.darkTheme         data-theme in dark mode (default: 'Neutral-Dark')
+ * @param {string}   props.darkTheme         data-theme in dark mode (default: 'Neutral')
  *
  * Dark mode — controlled:
  * @param {boolean}  props.darkMode
@@ -342,7 +348,7 @@ export function OmniDesignProvider({
 
   // Dark mode
   defaultDarkMode = false,
-  darkTheme:      darkThemeProp = 'Neutral-Dark',
+  darkTheme:      darkThemeProp = 'Neutral',
 
   // Controlled dark mode
   darkMode: controlledDarkMode,
@@ -432,7 +438,7 @@ export function OmniDesignProvider({
     : (manifestThemeConfig.defaultSurface ?? defaultSurfaceProp);
 
   const resolvedDefaultStyle = manifestThemeConfig.defaultStyle ?? defaultStyleProp;
-  const resolvedDarkTheme    = darkThemeProp !== 'Neutral-Dark'
+  const resolvedDarkTheme    = darkThemeProp !== 'Neutral'
     ? darkThemeProp
     : (manifestThemeConfig.darkTheme ?? darkThemeProp);
 
