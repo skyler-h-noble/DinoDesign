@@ -231,3 +231,26 @@ describe('Label typography', () => {
     expect(container.querySelector('button p')).toBeNull();
   });
 });
+
+/* --- Three sizes --- */
+describe('Size', () => {
+  /* Rail-Width is mode-scoped in Figma — 80 / 72 / 96 across medium / small /
+     large — so a rail holding one number could only ever be the medium one.
+     In CSS a mode is the Sm-/Lg- prefix, the same idiom Button and Tabs use. */
+  test('medium by default', () => {
+    const { container } = renderRail();
+    expect(container.querySelector('.rail-medium')).toBeInTheDocument();
+  });
+  test('small and large are selectable', () => {
+    expect(renderRail({ size: 'small' }).container.querySelector('.rail-small'))
+      .toBeInTheDocument();
+    expect(renderRail({ size: 'large' }).container.querySelector('.rail-large'))
+      .toBeInTheDocument();
+  });
+  test('an unknown size falls back to medium rather than to no width', () => {
+    // var(undefined) would collapse the rail to nothing, which reads as a
+    // rendering fault rather than as a bad prop.
+    const { container } = renderRail({ size: 'enormous' });
+    expect(container.querySelector('.rail-medium')).toBeInTheDocument();
+  });
+});

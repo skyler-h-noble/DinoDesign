@@ -48,7 +48,22 @@ import { LabelExtraSmall } from '../Typography';
  * EXPANDED IS NOT IN THE DESIGN. The Figma page covers the collapsed rail
  * only, so the expanded arrangement below is unchanged and is this file's
  * own — marked so nobody reads it as having been checked against Figma. */
-const COLLAPSED_WIDTH = 'var(--Rail-Width, 80px)';
+/* Three sizes, one per Component-Size mode.
+ *
+ * Rail-Width is mode-scoped in Figma — 80 / 72 / 96 across medium / small /
+ * large — so a rail that held one number could only ever be the medium one.
+ * In CSS a mode is the Sm-/Lg- prefix, which is the same shape Tabs and
+ * Button already use, so this is that idiom rather than a new one.
+ *
+ * The fallbacks are the DESIGN's numbers. An unbound token then renders the
+ * intended width instead of an invented one — the same rule the Tabs metrics
+ * follow, and the reason a missing variable looks like a design rather than
+ * a bug. */
+const RAIL_WIDTH = {
+  small: 'var(--Sm-Rail-Width, 72px)',
+  medium: 'var(--Rail-Width, 80px)',
+  large: 'var(--Lg-Rail-Width, 96px)',
+};
 const PARTIAL_WIDTH = 240;
 const FULL_WIDTH = 320;
 
@@ -89,6 +104,12 @@ export function Rail({
      Contained is the default because it is what the Nav Rail component is
      assembled from in the file. */
   labelStyle = 'contained',
+  /* Which Component-Size mode this rail resolves at. A prop rather than
+     something inferred from the viewport: the size is a decision about the
+     product, not about the window — a dense tool wants the small rail at
+     every width — and Figma expresses it the same way, as a mode a designer
+     sets rather than a breakpoint. */
+  size = 'medium',
   className = '',
   sx = {},
   ...props
@@ -112,7 +133,7 @@ export function Rail({
      either way so the style below does not have to know which it got. */
   const width = isExpanded
     ? (expandedWidth === 'full' ? FULL_WIDTH : PARTIAL_WIDTH) + 'px'
-    : COLLAPSED_WIDTH;
+    : (RAIL_WIDTH[size] || RAIL_WIDTH.medium);
 
   const renderItems = () => {
     if (sections && sections.length > 0) {
@@ -172,6 +193,7 @@ export function Rail({
         + (expandable ? ' rail-expandable' : ' rail-fixed')
         + (isExpanded ? ' rail-expanded' : ' rail-collapsed')
         + ' rail-label-' + (labelStyle === 'outside' ? 'outside' : 'contained')
+        + ' rail-' + (RAIL_WIDTH[size] ? size : 'medium')
         + ' ' + className
       }
       sx={{
