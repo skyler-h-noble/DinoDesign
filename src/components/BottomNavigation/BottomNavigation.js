@@ -1,39 +1,82 @@
 // src/components/BottomNavigation/BottomNavigation.js
 import React, { useState, useCallback } from 'react';
 import { Box } from '@mui/material';
+import { LabelExtraSmall } from '../Typography';
 
 /**
- * BottomNavigation Component
+ * BottomNavigation — the design's Nav-Bar.
  *
- * Always: data-surface="Surface-Dim", bg var(--Background)
+ * Read off Omni-Designs / Nav-Bar (7442:31297) and Nav Item (5670:49999)
+ * rather than from what a bottom bar usually looks like. The component set
+ * has three axes and this has all three:
  *
- * BAR COLORS (sets data-theme):
- *   default        data-theme="Nav-Bar"
- *   primary        data-theme="Primary"
- *   primary-light  data-theme="Primary-Light"
- *   primary-medium data-theme="Primary-Medium"
- *   primary-dark   data-theme="Primary-Dark"
- *   white          data-theme="White"
- *   black          data-theme="Black"
+ *   Style        Fixed | Floating      square and edge to edge, or a pill
+ *   Orientation  Horizontal | Vertical the BAR's direction
+ *   Labels       Default | No Labels
  *
- * SELECTED STATE:
- *   Without backfill: icon/label color var(--Text)
- *   With backfill:    pill bg var(--Buttons-Primary-Button),
- *                     pill border 1px solid var(--Buttons-Primary-Border),
- *                     icon/label color var(--Buttons-Primary-Text)
+ * ── Two different words called "fixed", and one called "orientation" ──────
+ * Worth stating because both were already here meaning something else:
  *
- * UNSELECTED: icon/label color var(--Text-Quiet)
+ *   `fixed`        POSITIONING — pinned to the bottom of the viewport. What
+ *                  this prop has always meant, and it is orthogonal: a
+ *                  floating bar is usually pinned too.
+ *   `variant`      the design's Style — whether the bar is a square band or a
+ *                  rounded pill.
+ *
+ *   `orientation`  the BAR's direction, which is what the design means: the
+ *                  horizontal variant is 398x83 and the vertical one is
+ *                  64x377, a rail of actions rather than a bar.
+ *   `labelOrientation` REMOVED. It meant the label's position relative to the
+ *                  icon, and the design has only one answer — under it, 4px
+ *                  away, in every variant. One word for two axes is how the
+ *                  vertical BAR ended up unreachable: asking for
+ *                  orientation="vertical" moved the label, not the bar.
+ *
+ * ── What the selected state paints ───────────────────────────────────────
+ * A filled circle behind the icon in --Text, with the icon reversed out of
+ * it. Not --Buttons-Primary-Button with a border, which is what this drew:
+ * that made the selected item look like a primary BUTTON sitting in the bar,
+ * and it tied the bar's accent to the Primary palette rather than to whatever
+ * theme the bar is set to.
  */
 
+/* The bar's palette. Nine themes — the -Light / -Medium / -Dark shades are
+   gone, and so are White and Black, which were never Theme modes at all. Each
+   of those bound nothing and left the bar on its parent's palette, which
+   reads as barColor being ignored rather than as a dead name. */
 const THEME_MAP = {
-  'default':        'Nav-Bar',
-  'primary':        'Primary',
-  'primary-light':  'Primary-Light',
-  'primary-medium': 'Primary-Medium',
-  'primary-dark':   'Primary-Dark',
-  'white':          'White',
-  'black':          'Black',
+  'default':   'Nav-Bar',
+  'primary':   'Primary',
+  'secondary': 'Secondary',
+  'tertiary':  'Tertiary',
+  'neutral':   'Neutral',
+  'info':      'Info',
+  'success':   'Success',
+  'warning':   'Warning',
+  'error':     'Error',
 };
+
+/** Item width, and the icon holder inside it. Both from the design. */
+const ITEM_WIDTH = 40;
+const HOLDER_MIN = 32;
+const HOLDER_PAD = 'var(--Sizing-1, 8px)';
+/* 40, not 16. The holder is a CIRCLE — a radius at half its height would be a
+   rounded square at any larger size, and the design states a radius past the
+   height so it stays circular however the icon grows. */
+const HOLDER_RADIUS = '40px';
+const ICON_SIZE = 'var(--Icon-Size, 24px)';
+/** Icon to label. 4, and not the 2 the rail uses — a bar has room. */
+const ITEM_GAP = 'var(--Sizing-Half, 4px)';
+
+/** Bar padding, per orientation. Straight from the two variants. */
+const BAR_PAD = {
+  horizontal: { px: 'var(--Button-Height, 32px)', py: '12px' },
+  vertical: { px: 'var(--Sizing-1-and-Half, 12px)', py: 'var(--Sizing-2, 16px)' },
+};
+
+/** A floating bar is a pill. The design's 83 is the horizontal bar's own
+ *  height, which is what makes the ends semicircular at any length. */
+const FLOATING_RADIUS = '83px';
 
 export function BottomNavigation({
   items = [],
@@ -41,10 +84,14 @@ export function BottomNavigation({
   defaultValue = 0,
   onChange,
   showLabels = true,
-  labelOrientation = 'vertical',
-  backfill = true,
+  /** The design's Style: a square band, or a floating pill. */
+  variant = 'fixed',
+  /** The BAR's direction. */
+  orientation = 'horizontal',
   barColor = 'default',
+  /** Pinned to the viewport. Positioning, not appearance — see the note above. */
   fixed = true,
+  'aria-label': ariaLabel = 'Bottom navigation',
   className = '',
   sx = {},
   ...props
@@ -58,38 +105,56 @@ export function BottomNavigation({
     onChange?.(index);
   }, [isControlled, onChange]);
 
-  const effectiveOrientation = (items.length > 4) ? 'vertical' : labelOrientation;
-  const isHorizontal = effectiveOrientation === 'horizontal';
-
+  const isVertical = orientation === 'vertical';
+  const isFloating = variant === 'floating';
   const dataTheme = THEME_MAP[barColor] || THEME_MAP.default;
+  const pad = isVertical ? BAR_PAD.vertical : BAR_PAD.horizontal;
 
   return (
     <Box
       component="nav"
-      role="navigation"
-      aria-label="Bottom navigation"
       data-theme={dataTheme}
       data-surface="Surface-Dim"
-      className={'bottom-nav bottom-nav-' + barColor +
-        (showLabels ? ' bottom-nav-labels' : '') +
-        (isHorizontal && showLabels ? ' bottom-nav-horizontal' : '') +
-        (backfill ? ' bottom-nav-backfill' : '') +
-        (fixed ? ' bottom-nav-fixed' : '') +
-        (className ? ' ' + className : '')}
+      aria-label={ariaLabel}
+      className={
+        'bottom-nav'
+        /* Three axes, three class prefixes, and none of them reuses a name
+           that used to mean something else.
+           
+           bottom-nav-fixed stays POSITIONING, which is what it has always
+           meant here. The design's Style axis gets bottom-nav-style-* rather
+           than taking the bare word, and the bar's direction gets
+           bottom-nav-bar-* rather than bottom-nav-horizontal — that one used
+           to describe the LABEL's position, so quietly repurposing it would
+           leave every existing stylesheet targeting the wrong thing and
+           looking like it still worked. */
+        + ' bottom-nav-' + barColor
+        + ' bottom-nav-style-' + (isFloating ? 'floating' : 'fixed')
+        + ' bottom-nav-bar-' + orientation
+        + (showLabels ? ' bottom-nav-labels' : ' bottom-nav-no-labels')
+        + (fixed ? ' bottom-nav-fixed' : '')
+        + (className ? ' ' + className : '')
+      }
       sx={{
         display: 'flex',
+        flexDirection: isVertical ? 'column' : 'row',
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'var(--Background)',
-        borderTop: '1px solid var(--Border)',
+        /* No top border. The design draws none — the bar's own surface is
+           what separates it, and a hairline on a floating pill would trace
+           one edge of a shape that has no edges. */
+        borderRadius: isFloating ? FLOATING_RADIUS : 0,
         fontFamily: 'inherit',
-        width: '100%',
+        width: isVertical ? 'fit-content' : '100%',
+        px: pad.px,
+        py: pad.py,
         ...(fixed && {
           position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
           zIndex: 1100,
+          ...(isVertical
+            ? { top: '50%', left: 0, transform: 'translateY(-50%)' }
+            : { bottom: 0, left: 0, right: 0 }),
         }),
         ...sx,
       }}
@@ -97,118 +162,91 @@ export function BottomNavigation({
     >
       <Box
         role="tablist"
+        aria-orientation={isVertical ? 'vertical' : 'horizontal'}
         sx={{
           display: 'flex',
+          flexDirection: isVertical ? 'column' : 'row',
           alignItems: 'center',
-          justifyContent: 'space-around',
-          width: '100%',
-          maxWidth: 600,
-          height: showLabels && !isHorizontal ? 72 : 64,
-          px: 1,
+          /* Spread across the bar when it is horizontal; a fixed gap when it
+             is vertical, where there is no width to spread into. Both are the
+             design's — space-around was neither, and it left uneven margins
+             at the two ends. */
+          justifyContent: isVertical ? 'flex-start' : 'space-between',
+          gap: isVertical ? '10px' : 0,
+          width: isVertical ? 'auto' : '100%',
+          maxWidth: isVertical ? undefined : 600,
         }}
       >
-        {items.map((item, index) => {
-          const isSelected = index === activeIndex;
-          return (
-            <BottomNavItem
-              key={item.key || index}
-              icon={item.icon}
-              label={item.label}
-              selected={isSelected}
-              showLabel={showLabels}
-              horizontal={isHorizontal}
-              backfill={backfill}
-              onClick={() => handleSelect(index)}
-              ariaLabel={item.label || 'Tab ' + (index + 1)}
-            />
-          );
-        })}
+        {items.map((item, index) => (
+          <BottomNavItem
+            key={item.key || index}
+            icon={item.icon}
+            label={item.label}
+            selected={index === activeIndex}
+            showLabel={showLabels}
+            onClick={() => handleSelect(index)}
+            ariaLabel={item.label || item.ariaLabel}
+          />
+        ))}
       </Box>
     </Box>
   );
 }
 
-function BottomNavItem({
-  icon, label, selected, showLabel, horizontal, backfill, onClick, ariaLabel,
-}) {
-  const unselectedColor = 'var(--Text-Quiet)';
-  const selectedColor = 'var(--Text)';
-  const pillBg = 'var(--Buttons-Primary-Button)';
-  const pillBorder = '1px solid var(--Buttons-Primary-Border)';
-  const pillText = 'var(--Buttons-Primary-Text)';
-
-  const iconColor = selected
-    ? (backfill ? pillText : selectedColor)
-    : unselectedColor;
-
-  const labelColor = selected
-    ? (backfill && horizontal ? pillText : selectedColor)
-    : unselectedColor;
-
-  const isVertical = !horizontal;
-
-  const pillContent = (
-    <Box sx={{
-      display: 'flex',
-      flexDirection: horizontal ? 'row' : 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: horizontal ? 0.75 : 0,
-      ...(selected && backfill && {
-        backgroundColor: pillBg,
-        border: pillBorder,
-        borderRadius: '16px',
-        px: horizontal ? 2 : 2.5,
-        py: 0.5,
-      }),
-      ...(!selected || !backfill ? { px: horizontal ? 1 : 0, border: '1px solid transparent' } : {}),
-      transition: 'background-color 0.2s ease, border-color 0.2s ease',
-    }}>
-      <Box sx={{
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: '24px', color: iconColor,
-        transition: 'color 0.15s ease',
-        '& .MuiSvgIcon-root': { fontSize: 'inherit', color: 'inherit' },
-      }}>
-        {icon}
-      </Box>
-      {showLabel && horizontal && label && (
-        <Box sx={{
-          fontSize: '13px', fontWeight: selected ? 600 : 500,
-          color: selected && backfill ? pillText : (selected ? selectedColor : unselectedColor),
-          whiteSpace: 'nowrap', lineHeight: 1,
-          transition: 'color 0.15s ease',
-        }}>
-          {label}
-        </Box>
-      )}
-    </Box>
-  );
-
+function BottomNavItem({ icon, label, selected, showLabel, onClick, ariaLabel }) {
   return (
     <Box
       component="button" type="button" role="tab"
       aria-selected={selected} aria-label={ariaLabel} onClick={onClick}
+      className={'bottom-nav-item' + (selected ? ' bottom-nav-item-selected' : '')}
       sx={{
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        flex: 1, gap: isVertical && showLabel ? 0.25 : 0,
-        border: 'none', backgroundColor: 'transparent', cursor: 'pointer', outline: 'none',
-        fontFamily: 'inherit', py: 1, minWidth: 0,
-        transition: 'transform 0.1s ease',
-        '&:hover': { transform: 'scale(1.04)' },
-        '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '-2px', borderRadius: '8px' },
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        gap: ITEM_GAP,
+        width: ITEM_WIDTH,
+        flexShrink: 0,
+        border: 'none', backgroundColor: 'transparent', cursor: 'pointer',
+        padding: 0, fontFamily: 'inherit', outline: 'none',
+        '&:focus-visible': {
+          outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px',
+          borderRadius: '8px',
+        },
       }}
     >
-      {pillContent}
-      {showLabel && isVertical && label && (
-        <Box sx={{
-          fontSize: '11px', fontWeight: selected ? 600 : 400, color: labelColor,
-          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-          maxWidth: '100%', lineHeight: 1.2, mt: 0.25,
-          transition: 'color 0.15s ease',
-        }}>
+      {/* Icon-Holder — the circle that carries the selected state. */}
+      <Box sx={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        minWidth: HOLDER_MIN, minHeight: HOLDER_MIN,
+        padding: HOLDER_PAD,
+        borderRadius: HOLDER_RADIUS,
+        /* --Text, and the icon reverses out of it. The pair has to move
+           together: a fill and a foreground picked separately is how a
+           selected item ends up dark-on-dark the first time someone changes
+           the bar's theme. */
+        backgroundColor: selected ? 'var(--Text)' : 'transparent',
+        color: selected ? 'var(--Background)' : 'var(--Quiet)',
+        fontSize: ICON_SIZE,
+        transition: 'background-color 0.2s ease, color 0.15s ease',
+        '& .MuiSvgIcon-root': { fontSize: 'inherit', color: 'inherit' },
+        '.bottom-nav-item:hover &': selected ? {} : { color: 'var(--Text)' },
+      }}>
+        {icon}
+      </Box>
+
+      {showLabel && label && (
+        /* LabelExtraSmall — the design's Labels/Extra-Small. This was a Box
+           with an inline 11px, which matched the size and none of the weight,
+           letter-spacing or line height, and would not follow a brand that
+           moved its label scale. */
+        <LabelExtraSmall
+          className="bottom-nav-label"
+          style={{
+            color: selected ? 'var(--Text)' : 'var(--Quiet)',
+            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+            maxWidth: '100%',
+          }}
+        >
           {label}
-        </Box>
+        </LabelExtraSmall>
       )}
     </Box>
   );

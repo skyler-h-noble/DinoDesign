@@ -58,33 +58,32 @@ describe('Data attributes', () => {
 
 /* --- data-theme per barColor --- */
 describe('data-theme per barColor', () => {
+  /* The nine themes. primary-light / primary-dark / white / black were here
+     and are not Theme modes — they bound nothing and left the bar on its
+     parent's palette, which reads as barColor being ignored rather than as a
+     dead name. A light bar is now the palette on a brighter SURFACE. */
   test('default sets data-theme="Nav-Bar"', () => {
     const { container } = renderNav();
     expect(container.querySelector('[data-theme="Nav-Bar"]')).toBeInTheDocument();
   });
-  test('primary sets data-theme="Primary"', () => {
-    const { container } = renderNav({ barColor: 'primary' });
-    expect(container.querySelector('[data-theme="Primary"]')).toBeInTheDocument();
-  });
-  test('primary-light sets data-theme="Primary-Light"', () => {
-    const { container } = renderNav({ barColor: 'primary-light' });
-    expect(container.querySelector('[data-theme="Primary-Light"]')).toBeInTheDocument();
-  });
-  test('primary-dark sets data-theme="Primary-Dark"', () => {
-    const { container } = renderNav({ barColor: 'primary-dark' });
-    expect(container.querySelector('[data-theme="Primary-Dark"]')).toBeInTheDocument();
-  });
-  test('white sets data-theme="White"', () => {
-    const { container } = renderNav({ barColor: 'white' });
-    expect(container.querySelector('[data-theme="White"]')).toBeInTheDocument();
-  });
-  test('black sets data-theme="Black"', () => {
-    const { container } = renderNav({ barColor: 'black' });
-    expect(container.querySelector('[data-theme="Black"]')).toBeInTheDocument();
+
+  for (const [prop, theme] of [
+    ['primary', 'Primary'], ['secondary', 'Secondary'], ['tertiary', 'Tertiary'],
+    ['neutral', 'Neutral'], ['info', 'Info'], ['success', 'Success'],
+    ['warning', 'Warning'], ['error', 'Error'],
+  ]) {
+    test(`${prop} sets data-theme="${theme}"`, () => {
+      const { container } = renderNav({ barColor: prop });
+      expect(container.querySelector(`[data-theme="${theme}"]`)).toBeInTheDocument();
+    });
+  }
+
+  test('an unknown barColor falls back rather than binding nothing', () => {
+    const { container } = renderNav({ barColor: 'chartreuse' });
+    expect(container.querySelector('[data-theme="Nav-Bar"]')).toBeInTheDocument();
   });
 });
 
-/* --- Selection --- */
 describe('Selection', () => {
   test('first item selected by default', () => {
     renderNav();
@@ -123,30 +122,54 @@ describe('Labels', () => {
 });
 
 /* --- Horizontal constraint --- */
-describe('Horizontal constraint', () => {
-  test('5 items forces vertical', () => {
-    const { container } = render(<BottomNavigation items={ITEMS_5} showLabels labelOrientation="horizontal" />);
-    expect(container.querySelector('.bottom-nav-horizontal')).not.toBeInTheDocument();
+describe('Orientation is the BAR, not the label', () => {
+  /* This used to be labelOrientation — whether the label sat beside the icon
+     or under it — with an automatic override forcing "vertical" past four
+     items. The design has neither: the label is always under the icon, and
+     Orientation is the bar's own direction, 398x83 against 64x377.
+     
+     One word for two axes is how the vertical BAR ended up unreachable.
+     Asking for orientation="vertical" moved the label. */
+  test('horizontal by default', () => {
+    const { container } = renderNav();
+    expect(container.querySelector('.bottom-nav-bar-horizontal')).toBeInTheDocument();
   });
-  test('4 items allows horizontal', () => {
-    const { container } = render(<BottomNavigation items={ITEMS_4} showLabels labelOrientation="horizontal" />);
-    expect(container.querySelector('.bottom-nav-horizontal')).toBeInTheDocument();
+  test('vertical when asked, whatever the item count', () => {
+    const { container } = render(
+      <BottomNavigation items={ITEMS_5} orientation="vertical" />
+    );
+    expect(container.querySelector('.bottom-nav-bar-vertical')).toBeInTheDocument();
+  });
+  test('five items do not silently change the arrangement', () => {
+    const { container } = render(<BottomNavigation items={ITEMS_5} />);
+    expect(container.querySelector('.bottom-nav-bar-horizontal')).toBeInTheDocument();
   });
 });
 
-/* --- Backfill --- */
-describe('Backfill', () => {
-  test('backfill class when enabled', () => {
-    const { container } = renderNav({ backfill: true });
-    expect(container.querySelector('.bottom-nav-backfill')).toBeInTheDocument();
+describe('Style — fixed band or floating pill', () => {
+  /* Replaces `backfill`, which drew the selected item as a --Buttons-Primary
+     pill with a border. That made it look like a primary BUTTON sitting in
+     the bar, and tied the accent to the Primary palette rather than to the
+     theme the bar is set to. The design fills a circle in --Text and reverses
+     the icon out of it, always — there is no off switch, so there is no prop.
+     
+     What IS a choice is the bar's shape. */
+  test('fixed by default', () => {
+    const { container } = renderNav();
+    expect(container.querySelector('.bottom-nav-style-fixed')).toBeInTheDocument();
   });
-  test('no backfill class when disabled', () => {
-    const { container } = renderNav({ backfill: false });
-    expect(container.querySelector('.bottom-nav-backfill')).not.toBeInTheDocument();
+  test('floating when asked', () => {
+    const { container } = renderNav({ variant: 'floating' });
+    expect(container.querySelector('.bottom-nav-style-floating')).toBeInTheDocument();
+  });
+  test('style and positioning are separate axes', () => {
+    // A floating bar is usually pinned too — the words are not alternatives.
+    const { container } = renderNav({ variant: 'floating', fixed: true });
+    expect(container.querySelector('.bottom-nav-style-floating')).toBeInTheDocument();
+    expect(container.querySelector('.bottom-nav-fixed')).toBeInTheDocument();
   });
 });
 
-/* --- Fixed --- */
 describe('Fixed', () => {
   test('fixed on by default', () => {
     const { container } = renderNav();
@@ -168,9 +191,9 @@ describe('Defaults', () => {
     const { container } = renderNav();
     expect(container.querySelector('.bottom-nav-labels')).toBeInTheDocument();
   });
-  test('backfill on', () => {
+  test('style defaults to fixed', () => {
     const { container } = renderNav();
-    expect(container.querySelector('.bottom-nav-backfill')).toBeInTheDocument();
+    expect(container.querySelector('.bottom-nav-style-fixed')).toBeInTheDocument();
   });
   test('fixed on', () => {
     const { container } = renderNav();
