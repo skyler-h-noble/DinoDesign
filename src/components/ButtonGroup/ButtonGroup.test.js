@@ -301,3 +301,55 @@ describe('ButtonGroup — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+/* --- The light variant is a surface, not a theme --- */
+describe('Light variant', () => {
+  /* It used to wrap unselected segments in data-theme="{Color}-Light", and
+     there is no such theme — every one of the nine bound nothing, so a light
+     error group and a light success group rendered identically and both took
+     the page's palette. Default-Light was never a theme even before the
+     shades went. */
+  const renderLight = (color) => render(
+    <ButtonGroup variant="light" color={color} defaultValue="a">
+      <Button value="a">One</Button>
+      <Button value="b">Two</Button>
+    </ButtonGroup>
+  );
+
+  test('names the bare palette, never a -Light theme', () => {
+    const { container } = renderLight('error');
+    expect(container.querySelector('[data-theme="Error"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-theme="Error-Light"]')).toBeNull();
+  });
+
+  test('lightens with the surface, not the theme name', () => {
+    const { container } = renderLight('success');
+    const wrapper = container.querySelector('[data-theme="Success"]');
+    expect(wrapper).toHaveAttribute('data-surface', 'Surface-Brightest');
+  });
+
+  test('two colours are actually different', () => {
+    // The failure this replaces was invisible precisely because it was
+    // uniform: every colour produced the same unthemed result.
+    const { container: a } = renderLight('error');
+    const { container: b } = renderLight('info');
+    expect(a.querySelector('[data-theme="Error"]')).toBeInTheDocument();
+    expect(b.querySelector('[data-theme="Info"]')).toBeInTheDocument();
+  });
+
+  test('default INHERITS rather than pinning the Default mode', () => {
+    /* Naming Default would override whatever themed section the group sits
+       in — the same bug Modal had. The surface still lightens it. */
+    const { container } = renderLight('default');
+    const wrapper = container.querySelector('[data-surface="Surface-Brightest"]');
+    expect(wrapper).toBeInTheDocument();
+    expect(wrapper).not.toHaveAttribute('data-theme');
+  });
+
+  test('only the UNSELECTED segments are lightened', () => {
+    // The selected one fills with the palette's button colour; lightening it
+    // would erase the thing that marks it as selected.
+    const { container } = renderLight('primary');
+    expect(container.querySelectorAll('[data-surface="Surface-Brightest"]')).toHaveLength(1);
+  });
+});

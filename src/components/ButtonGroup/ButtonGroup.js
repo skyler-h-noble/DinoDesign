@@ -7,8 +7,9 @@ import { Box } from '@mui/material';
  *
  * ─── VARIANTS ────────────────────────────────────────────────────────────────
  *   outlined  transparent bg, colored border, selected button fills
- *   light     unselected buttons carry data-theme="{Color}-Light" + data-surface="Surface"
- *             selected button fills with var(--Buttons-{Color}-Button)
+ *   light     unselected buttons carry data-theme="{Color}" +
+ *             data-surface="Surface-Brightest"; selected fills with
+ *             var(--Buttons-{Color}-Button)
  *   ghost     no border on container or buttons; selected fills
  *
  * ─── COLORS ──────────────────────────────────────────────────────────────────
@@ -42,18 +43,17 @@ import { Box } from '@mui/material';
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
-// Maps color → light theme name for data-theme attribute
-const LIGHT_THEME = {
-  default:   'Default-Light',
-  primary:   'Primary-Light',
-  secondary: 'Secondary-Light',
-  tertiary:  'Tertiary-Light',
-  neutral:   'Neutral-Light',
-  info:      'Info-Light',
-  success:   'Success-Light',
-  warning:   'Warning-Light',
-  error:     'Error-Light',
-};
+/* The `light` variant is a SURFACE, not a theme.
+ *
+ * This was a map to {Color}-Light — nine names, none of which is a theme any
+ * more. Every one bound nothing, so the light variant's unselected segments
+ * took whatever palette the page was on: a light error group and a light
+ * success group rendered identically. Default-Light was never a theme even
+ * before the shades went.
+ *
+ * The palette is just the group's own colour now, and the level does the
+ * lightening. Nothing to map. */
+const LIGHT_SURFACE = 'Surface-Brightest';
 
 export function ButtonGroup({
   variant = 'outlined',    // 'outlined' | 'light' | 'ghost'
@@ -117,7 +117,11 @@ export function ButtonGroup({
   const btnBorder    = 'var(--Buttons-' + C + '-Border)';
   const btnBg        = 'var(--Buttons-' + C + '-Button)';
   const btnText      = 'var(--Buttons-' + C + '-Text)';
-  const lightTheme   = LIGHT_THEME[color] || 'Default-Light';
+  /* `default` gets no data-theme at all — it INHERITS. Naming the Default
+     mode would pin the group to the app's theme and override whatever themed
+     section it sits in, which is the bug the Modal had. The other eight name
+     their palette, because that is the whole point of asking for one. */
+  const lightTheme   = color === 'default' ? undefined : C;
 
   const childArray = React.Children.toArray(children).filter(Boolean);
   const count = childArray.length;
@@ -199,7 +203,13 @@ export function ButtonGroup({
       },
       '&:active': {
         backgroundColor: 'var(--Pressed)',
-        color:           'var(--Buttons-Default-Text)',
+        /* --Text, not --Buttons-Default-Text. The pressed colour was pinned to
+           the DEFAULT palette's button text whatever colour the group was, so
+           pressing a segment in an error group painted it with the default
+           button's label colour — on --Pressed, which is a surface token, not
+           a button fill. The pair have to come from the same place, and the
+           surface is what is underneath. */
+        color:           'var(--Text)',
       },
     } : {};
 
@@ -269,7 +279,7 @@ export function ButtonGroup({
         <Box
           key={index}
           data-theme={lightTheme}
-          data-surface="Surface"
+          data-surface={LIGHT_SURFACE}
           sx={{ display: 'contents' }}
         >
           {clonedButton}
