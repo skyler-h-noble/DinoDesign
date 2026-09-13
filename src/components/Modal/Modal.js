@@ -8,9 +8,21 @@ import { useOmniDesign } from '../../OmniDesignProvider';
  * Modal Component
  *
  * VARIANTS:
- *   default  data-surface="Container-High", bg: var(--Background), border: none
- *   soft     data-theme={Color}-Light, data-surface="Container-High"
+ *   default  provider's theme,  data-surface="Container-High"
  *   solid    data-theme={Color}, data-surface="Container-High"
+ *   soft     data-theme={Color}, data-surface="Surface-Brightest"
+ *
+ * The two coloured variants now differ by SURFACE rather than by theme name.
+ * soft used to ask for {Color}-Light, and there is no such theme — the shades
+ * were removed and a level does that job. It bound nothing, so a soft modal
+ * silently inherited whatever palette the page was on: soft error and soft
+ * success rendered identically, and both looked like the page.
+ *
+ * Soft moves to the SURFACE ladder rather than dropping a container level,
+ * and the distinction matters. Containers are an ELEVATION axis — the levels
+ * are opacities against the page, and Container-Highest is the tone itself —
+ * so Container-Low would have made the modal more transparent, not paler. On
+ * black cards that ramp even runs the other way.
  *
  * COLORS: primary, secondary, tertiary, neutral, info, success, warning, error
  *
@@ -25,13 +37,21 @@ import { useOmniDesign } from '../../OmniDesignProvider';
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
-const SOLID_THEME_MAP = {
+/* One map, not two. The palette is the same for solid and soft — what
+   differs is the level it sits on — so a second map was a second place to
+   keep the same eight names in step, and the copy that fell behind was the
+   one naming themes that no longer exist. */
+const THEME_MAP = {
   primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
-  info: 'Info-Medium', success: 'Success-Medium', warning: 'Warning-Medium', error: 'Error-Medium',
+  info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
 };
-const SOFT_THEME_MAP = {
-  primary: 'Primary-Light', secondary: 'Secondary-Light', tertiary: 'Tertiary-Light', neutral: 'Neutral-Light',
-  info: 'Info-Light', success: 'Success-Light', warning: 'Warning-Light', error: 'Error-Light',
+
+/** Where each variant sits. Solid stays a raised container; soft is the same
+ *  palette at the brightest surface, which is what {Color}-Light meant. */
+const VARIANT_SURFACE = {
+  default: 'Container-High',
+  solid: 'Container-High',
+  soft: 'Surface-Brightest',
 };
 
 const SIZE_MAP = {
@@ -93,7 +113,9 @@ export function Modal({
   // Get current theme context so the portal inherits the right tokens
   let omniCtx;
   try { omniCtx = useOmniDesign(); } catch { omniCtx = null; }
-  const providerTheme = omniCtx?.theme || 'Default';
+  /* The provider's THEME is deliberately not read any more — see the
+     data-theme note below. Its style still is: data-style is a different
+     axis and the modal does pin that. */
   const providerStyle = omniCtx?.style || 'Modern';
 
   const isDefault = variant === 'default';
@@ -101,9 +123,8 @@ export function Modal({
   const isSolid = variant === 'solid';
   const isFullscreen = layout === 'fullscreen';
 
-  const dataTheme = isSolid ? SOLID_THEME_MAP[color]
-    : isSoft ? SOFT_THEME_MAP[color]
-    : null;
+  const dataTheme = (isSolid || isSoft) ? THEME_MAP[color] : null;
+  const dataSurface = VARIANT_SURFACE[variant] || VARIANT_SURFACE.default;
 
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
   const transConfig = TRANSITION_KEYFRAMES[transition];
@@ -165,8 +186,18 @@ export function Modal({
         aria-label={title || 'Modal'}
         ref={modalRef}
         tabIndex={-1}
-        data-surface="Container-High"
-        data-theme={dataTheme || providerTheme}
+        data-surface={dataSurface}
+        /* No data-theme on `default` — INHERIT, do not pin.
+           
+           This was `dataTheme || providerTheme`, which is never empty, so a
+           default modal always stamped the app-level theme onto itself. Inside
+           a themed section that overrides the section: open a default modal
+           from a Primary region and it snaps back to whatever the provider is
+           set to, which reads as the modal ignoring its surroundings.
+           
+           Default means "whatever is around me". Omitting the attribute is how
+           the cascade is asked for; naming a theme is how it is refused. */
+        data-theme={dataTheme || undefined}
         data-style={providerStyle}
         className={'modal modal-' + variant + ' modal-' + size + ' modal-' + layout +
           (isSoft || isSolid ? ' modal-' + color : '') +
