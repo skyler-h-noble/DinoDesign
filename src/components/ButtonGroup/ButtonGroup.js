@@ -345,8 +345,10 @@ export const SuccessOutlineButtonGroup   = (p) => <ButtonGroup variant="outlined
 export const WarningOutlineButtonGroup   = (p) => <ButtonGroup variant="outlined" color="warning"   {...p} />;
 export const ErrorOutlineButtonGroup     = (p) => <ButtonGroup variant="outlined" color="error"     {...p} />;
 
-// Light
-export const DefaultLightButtonGroup    = (p) => <ButtonGroup variant="light" color="default"   {...p} />;
+/* Light. No DefaultLight — "default" means inherit whatever palette is
+   around, and a lighter version of inherit names nothing to lighten. A group
+   that wants to be paler on the page's own palette asks for the surface, not
+   for a colour it does not have. */
 export const PrimaryLightButtonGroup    = (p) => <ButtonGroup variant="light" color="primary"   {...p} />;
 export const SecondaryLightButtonGroup  = (p) => <ButtonGroup variant="light" color="secondary" {...p} />;
 export const TertiaryLightButtonGroup   = (p) => <ButtonGroup variant="light" color="tertiary"  {...p} />;

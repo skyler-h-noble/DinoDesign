@@ -328,7 +328,10 @@ export const BlackWhiteCheckbox  = (p) => <Checkbox variant="black-white" {...p}
 // produce. Remove these on the next major.
 export const DefaultSolidCheckbox       = DefaultCheckbox;
 export const DefaultOutlineCheckbox     = DefaultCheckbox;
-export const DefaultLightCheckbox       = DefaultCheckbox;
+/* No DefaultLightCheckbox. It aliased DefaultCheckbox, so it rendered fine
+   and taught a combination that does not exist — "default" is inherit, and
+   there is no palette under it to take a light tone from. An alias that
+   works is the worst kind of wrong name: nothing ever reports it. */
 export const PrimarySolidCheckbox       = PrimaryCheckbox;
 export const PrimaryOutlineCheckbox     = PrimaryCheckbox;
 export const PrimaryLightCheckbox       = PrimaryCheckbox;
