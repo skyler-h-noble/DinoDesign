@@ -1,8 +1,8 @@
 // src/components/BottomNavigation/BottomNavigation.js
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Box } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { LabelExtraSmall } from '../Typography';
+import { LabelExtraSmall, LabelSmall } from '../Typography';
 
 /**
  * BottomNavigation — the design's Nav-Bar.
@@ -51,8 +51,18 @@ import { LabelExtraSmall } from '../Typography';
  * circles in one bar say two things are current.
  *
  * It is a button, not a tab. It performs an action rather than switching a
- * panel, so it carries no aria-selected and never becomes the value. And a
- * tablist may hold nothing BUT tabs — so with a ring in the row, the row
+ * panel, so it carries no aria-selected and never becomes the value.
+ *
+ * With `actions` it is a SPEED DIAL: the ring opens a panel of actions above
+ * the bar, each an icon and a label, stacked in the ring's own column so the
+ * first action sits directly over the ring and the rest climb from there.
+ * Labels flow into the open space — leftward from a ring at the end, rightward
+ * from a centred one. The panel is the library's menu shell (the same frame
+ * radius, border and surface) rather than the standalone SpeedDial's fan of
+ * mini-FABs with tooltip labels: a label that only appears on hover is no
+ * label on a phone, which is where a bottom bar is.
+ *
+ * And a tablist may hold nothing BUT tabs — so with a ring in the row, the row
  * stops being the tablist. An empty tablist beside it OWNS the tabs by id
  * (aria-owns), which gives assistive tech the same list of tabs it had, with
  * the button outside it, while the DOM keeps every control in one flex row
@@ -252,11 +262,11 @@ export function BottomNavigation({
           if (!fabAction) return [el];
           const at = fabPosition === 'center' ? Math.ceil(all.length / 2) : all.length;
           return index === at - 1
-            ? [el, <BottomNavFab key="fab" {...fabAction} showLabel={showLabels} />]
+            ? [el, <BottomNavFab key="fab" {...fabAction} showLabel={showLabels} position={fabPosition} />]
             : [el];
         })}
         {fabAction && items.length === 0 && (
-          <BottomNavFab key="fab" {...fabAction} showLabel={showLabels} />
+          <BottomNavFab key="fab" {...fabAction} showLabel={showLabels} position={fabPosition} />
         )}
       </Box>
     </Box>
@@ -322,68 +332,174 @@ function BottomNavItem({ id, icon, label, selected, showLabel, onClick, ariaLabe
   );
 }
 
+/** The small ring inside a speed-dial row: the FAB's own outline at the
+ *  item's holder size, so a row reads as "one of the ring's". */
+const DIAL_RING = 32;
+
 /** The action ring. The same column as an item — same width, same holder
  *  size, the same gap to a label below — so it sits on the items' baseline
  *  and takes exactly one item's place. What differs is the holder: an
  *  OUTLINE in the default button's border colour, with the glyph in that
- *  colour too, on no fill. */
-function BottomNavFab({ icon, label, onClick, showLabel }) {
+ *  colour too, on no fill.
+ *
+ *  Given `actions`, it opens a speed dial instead of acting — see the note
+ *  at the top. */
+function BottomNavFab({ icon, label, onClick, showLabel, actions, position = 'end' }) {
+  const isDial = Array.isArray(actions) && actions.length > 0;
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef(null);
+
+  /* Outside click and Escape close it — the same two exits the standalone
+     SpeedDial and the Menu have, so a dial in the bar dismisses the way every
+     other floating thing in the system does. */
+  useEffect(() => {
+    if (!open) return undefined;
+    const onDown = (e) => {
+      if (rootRef.current && !rootRef.current.contains(e.target)) setOpen(false);
+    };
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  const handleClick = (e) => {
+    if (isDial) setOpen((o) => !o);
+    onClick?.(e);
+  };
+
+  const ringSx = (size) => ({
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    minWidth: size, minHeight: size,
+    boxSizing: 'border-box',
+    borderRadius: HOLDER_RADIUS,
+    /* The outline button's border, which the system holds at 3:1
+       against its surface — the ring is a clickable edge and that is the
+       non-text floor. The glyph takes the same colour so ring and plus
+       read as one control rather than a plus inside a decoration. */
+    borderWidth: 'var(--Button-Border-Width, 1px)',
+    borderStyle: 'solid',
+    borderColor: 'var(--Buttons-Default-Border)',
+    color: 'var(--Buttons-Default-Border)',
+    backgroundColor: 'transparent',
+    '& .MuiSvgIcon-root': { fontSize: 'inherit', color: 'inherit' },
+  });
+
+  const atEnd = position !== 'center';
+
   return (
-    <Box
-      component="button" type="button"
-      aria-label={label || 'Action'} onClick={onClick}
-      className="bottom-nav-fab"
-      sx={{
-        display: 'flex', flexDirection: 'column', alignItems: 'center',
-        gap: ITEM_GAP,
-        width: ITEM_WIDTH,
-        flexShrink: 0,
-        border: 'none', backgroundColor: 'transparent', cursor: 'pointer',
-        padding: 0, fontFamily: 'inherit', outline: 'none',
-        '&:focus-visible': {
-          outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px',
-          borderRadius: '8px',
-        },
-      }}
-    >
-      <Box sx={{
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        minWidth: HOLDER_MIN, minHeight: HOLDER_MIN,
-        padding: HOLDER_PAD,
-        borderRadius: HOLDER_RADIUS,
-        boxSizing: 'border-box',
-        /* The outline button's border, which the system holds at 3:1
-           against its surface — the ring is a clickable edge and that is the
-           non-text floor. The glyph takes the same colour so ring and plus
-           read as one control rather than a plus inside a decoration. */
-        borderWidth: 'var(--Button-Border-Width, 1px)',
-        borderStyle: 'solid',
-        borderColor: 'var(--Buttons-Default-Border)',
-        color: 'var(--Buttons-Default-Border)',
-        backgroundColor: 'transparent',
-        fontSize: ICON_SIZE,
-        transition: 'background-color 0.15s ease',
-        '& .MuiSvgIcon-root': { fontSize: 'inherit', color: 'inherit' },
-        '.bottom-nav-fab:hover &': { backgroundColor: 'var(--Hover)' },
-        '.bottom-nav-fab:active &': { backgroundColor: 'var(--Pressed)' },
-      }}>
-        {icon || <AddIcon />}
+    <Box ref={rootRef} sx={{ position: 'relative', display: 'flex', flexShrink: 0 }}>
+      <Box
+        component="button" type="button"
+        aria-label={label || 'Action'} onClick={handleClick}
+        {...(isDial ? { 'aria-haspopup': 'menu', 'aria-expanded': open } : {})}
+        className={'bottom-nav-fab' + (open ? ' bottom-nav-fab-open' : '')}
+        sx={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          gap: ITEM_GAP,
+          width: ITEM_WIDTH,
+          flexShrink: 0,
+          border: 'none', backgroundColor: 'transparent', cursor: 'pointer',
+          padding: 0, fontFamily: 'inherit', outline: 'none',
+          '&:focus-visible': {
+            outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px',
+            borderRadius: '8px',
+          },
+        }}
+      >
+        <Box sx={{
+          ...ringSx(HOLDER_MIN),
+          padding: HOLDER_PAD,
+          fontSize: ICON_SIZE,
+          transition: 'background-color 0.15s ease, transform 0.2s ease',
+          /* The plus turns into a cross by turning, not by swapping icons —
+             the same move the standalone SpeedDial makes. */
+          transform: open ? 'rotate(45deg)' : 'none',
+          '.bottom-nav-fab:hover &': { backgroundColor: 'var(--Hover)' },
+          '.bottom-nav-fab:active &': { backgroundColor: 'var(--Pressed)' },
+        }}>
+          {icon || <AddIcon />}
+        </Box>
+
+        {/* A label under the ring only when the items carry theirs, or the ring
+            sits higher than its neighbours. */}
+        {showLabel && label && (
+          <LabelExtraSmall
+            className="bottom-nav-label"
+            style={{
+              color: 'var(--Buttons-Default-Border)',
+              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+              maxWidth: '100%',
+            }}
+          >
+            {label}
+          </LabelExtraSmall>
+        )}
       </Box>
 
-      {/* A label under the ring only when the items carry theirs, or the ring
-          sits higher than its neighbours. Empty rather than absent: an item
-          with no label text still reserves nothing, and neither does this. */}
-      {showLabel && label && (
-        <LabelExtraSmall
-          className="bottom-nav-label"
-          style={{
-            color: 'var(--Buttons-Default-Border)',
-            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-            maxWidth: '100%',
+      {isDial && open && (
+        /* The menu shell: the same frame radius, border and surface as the
+           library's Menu, so a dial in the bar is the same shape as every
+           other panel in the system. Anchored to the ring's column — its
+           rings stack straight up from the FAB — with the labels flowing
+           into the open space. */
+        <Box
+          role="menu"
+          aria-label={label || 'Actions'}
+          className="bottom-nav-dial"
+          data-surface="Surface-Brightest"
+          sx={{
+            position: 'absolute',
+            bottom: 'calc(100% + var(--Sizing-1, 8px))',
+            ...(atEnd ? { right: 0 } : { left: 0 }),
+            zIndex: 1,
+            display: 'flex',
+            /* Reverse, so the first action is the one nearest the ring. */
+            flexDirection: 'column-reverse',
+            padding: 'var(--Sizing-1, 8px)',
+            gap: 'var(--Sizing-1, 8px)',
+            backgroundColor: 'var(--Background)',
+            color: 'var(--Text)',
+            border: '1px solid var(--Border)',
+            borderRadius: 'var(--Dropdown-Frame-Radius, var(--Input-Radius, var(--Style-Border-Radius, 4px)))',
+            boxShadow: 'var(--Effect-Level-3, none)',
+            whiteSpace: 'nowrap',
           }}
         >
-          {label}
-        </LabelExtraSmall>
+          {actions.map((a, i) => (
+            <Box
+              key={a.key || i}
+              component="button" type="button" role="menuitem"
+              aria-label={a.label}
+              className="bottom-nav-dial-item"
+              onClick={(e) => { setOpen(false); a.onClick?.(e); }}
+              sx={{
+                display: 'flex', alignItems: 'center', gap: 'var(--Sizing-1, 8px)',
+                /* Ring first from a centred FAB, label first from one at the
+                   end — either way the ring lands in the FAB's own column. */
+                flexDirection: atEnd ? 'row-reverse' : 'row',
+                border: 'none', backgroundColor: 'transparent', cursor: 'pointer',
+                padding: 0, fontFamily: 'inherit', color: 'inherit', outline: 'none',
+                borderRadius: HOLDER_RADIUS,
+                '&:hover': { backgroundColor: 'var(--Hover)' },
+                '&:active': { backgroundColor: 'var(--Pressed)' },
+                '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px' },
+              }}
+            >
+              {/* The ring column is the FAB column's width, so the small ring
+                  centres on the big one. */}
+              <Box sx={{ width: ITEM_WIDTH, display: 'flex', justifyContent: 'center', flexShrink: 0 }}>
+                <Box sx={{ ...ringSx(DIAL_RING), fontSize: 'var(--Icon-Size-Small, 16px)' }}>
+                  {a.icon || <AddIcon />}
+                </Box>
+              </Box>
+              <LabelSmall style={{ color: 'inherit' }}>{a.label}</LabelSmall>
+            </Box>
+          ))}
+        </Box>
       )}
     </Box>
   );
