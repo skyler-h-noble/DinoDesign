@@ -45,36 +45,36 @@ describe('data-theme', () => {
     });
   });
 
-  test('solid info => data-theme=Info-Medium', async () => {
+  test('solid info => data-theme=Info', async () => {
     render(
       <Tooltip title="Info" variant="solid" color="info" open={true}>
         <button>Trigger</button>
       </Tooltip>
     );
     await waitFor(() => {
-      expect(document.querySelector('[data-theme="Info-Medium"]')).toBeInTheDocument();
+      expect(document.querySelector('[data-theme="Info"]')).toBeInTheDocument();
     });
   });
 
-  test('solid success => data-theme=Success-Medium', async () => {
+  test('solid success => data-theme=Success', async () => {
     render(
       <Tooltip title="Suc" variant="solid" color="success" open={true}>
         <button>Trigger</button>
       </Tooltip>
     );
     await waitFor(() => {
-      expect(document.querySelector('[data-theme="Success-Medium"]')).toBeInTheDocument();
+      expect(document.querySelector('[data-theme="Success"]')).toBeInTheDocument();
     });
   });
 
-  test('solid error => data-theme=Error-Medium', async () => {
+  test('solid error => data-theme=Error', async () => {
     render(
       <Tooltip title="Err" variant="solid" color="error" open={true}>
         <button>Trigger</button>
       </Tooltip>
     );
     await waitFor(() => {
-      expect(document.querySelector('[data-theme="Error-Medium"]')).toBeInTheDocument();
+      expect(document.querySelector('[data-theme="Error"]')).toBeInTheDocument();
     });
   });
 

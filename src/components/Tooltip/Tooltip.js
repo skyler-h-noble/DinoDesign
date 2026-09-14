@@ -6,7 +6,7 @@ import { Tooltip as MuiTooltip, Box } from '@mui/material';
  * Tooltip Component
  *
  * STYLES:
- *   solid    data-theme: Primary | Secondary | Tertiary | Neutral |
+ *   solid    data-theme: the bare palette — Primary | Secondary | Tertiary |
  *            Info-Medium | Success-Medium | Warning-Medium | Error-Medium
  *            bg: var(--Background)  text: var(--Text)  border: none
  *
@@ -30,10 +30,13 @@ const SOLID_THEME_MAP = {
   secondary: 'Secondary',
   tertiary: 'Tertiary',
   neutral: 'Neutral',
-  info: 'Info-Medium',
-  success: 'Success-Medium',
-  warning: 'Warning-Medium',
-  error: 'Error-Medium',
+  /* Bare, like the other four. The -Medium shades were removed and these
+     bound nothing, so a solid info tooltip took the page's palette instead of
+     Info — the same hole the light map above was already fixed for. */
+  info: 'Info',
+  success: 'Success',
+  warning: 'Warning',
+  error: 'Error',
 };
 
 // A light tooltip is the BASE theme at its brightest surface. Generated design

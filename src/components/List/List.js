@@ -15,27 +15,26 @@ const DEFAULT_LAYERS = {
   secondary: BodySmallSemibold,   // supporting / role → Body-Small-Semibold
 };
 
-const SOLID_THEME_MAP = {
+/* One map. solid and light are the same PALETTE on different levels, so a
+   second map was a second place to keep the same eight names in step — and
+   the copy that fell behind was the one naming themes that no longer exist.
+   
+   Every entry in the old light map, and the four state entries in the solid
+   one, bound nothing: a light error list and a light success list rendered
+   identically, both taking whatever palette the page was on. */
+const THEME_MAP = {
   primary: 'Primary',
   secondary: 'Secondary',
   tertiary: 'Tertiary',
   neutral: 'Neutral',
-  info: 'Info-Medium',
-  success: 'Success-Medium',
-  warning: 'Warning-Medium',
-  error: 'Error-Medium',
+  info: 'Info',
+  success: 'Success',
+  warning: 'Warning',
+  error: 'Error',
 };
 
-const LIGHT_THEME_MAP = {
-  primary: 'Primary-Light',
-  secondary: 'Secondary-Light',
-  tertiary: 'Tertiary-Light',
-  neutral: 'Neutral-Light',
-  info: 'Info-Light',
-  success: 'Success-Light',
-  warning: 'Warning-Light',
-  error: 'Error-Light',
-};
+/** light lightens by LEVEL. solid leaves the surface to the page. */
+const LIGHT_SURFACE = 'Surface-Brightest';
 
 const SIZE_MAP = {
   small:  { py: 0.5, px: 1.5, fontSize: '13px', iconSize: 16, decoratorSize: 28, gap: 1, checkSize: 'small' },
@@ -266,10 +265,10 @@ export function List({
   const isDefault = variant === 'default';
 
   const wrapperDataAttrs = {};
-  if (isSolid && SOLID_THEME_MAP[color]) {
-    wrapperDataAttrs['data-theme'] = SOLID_THEME_MAP[color];
-  } else if (isLight && LIGHT_THEME_MAP[color]) {
-    wrapperDataAttrs['data-theme'] = LIGHT_THEME_MAP[color];
+  if ((isSolid || isLight) && THEME_MAP[color]) {
+    wrapperDataAttrs['data-theme'] = THEME_MAP[color];
+    // The palette is the same either way; the level is the variant.
+    if (isLight) wrapperDataAttrs['data-surface'] = LIGHT_SURFACE;
   }
 
   const handleItemSelect = (index) => {

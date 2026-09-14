@@ -11,7 +11,7 @@ export default {
   argTypes: {
     color: {
       control: 'select',
-      options: ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'white', 'black', 'info', 'success', 'warning', 'error'],
+      options: ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'],
     },
     variant: {
       control: 'select',
@@ -41,7 +41,7 @@ Dark.args = { color: 'primary', variant: 'dark', size: 'medium' };
 
 export const AllColors = () => (
   <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-    {['default', 'primary', 'secondary', 'tertiary', 'neutral', 'white', 'black', 'info', 'success', 'warning', 'error'].map(color => (
+    {['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'].map(color => (
       <div key={color} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
         <IconBadge color={color}><HomeIcon /></IconBadge>
         <span style={{ fontSize: 10, color: 'var(--Quiet)' }}>{color}</span>
