@@ -200,3 +200,28 @@ describe('Stack — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+/* --- A layout primitive does not paint --- */
+describe('Background', () => {
+  /* It painted var(--Background) unconditionally, on the reasoning that with
+     no surface set it resolves to the inherited value and is a no-op. That
+     holds only while the parent is painting the same flat colour. Over a hero
+     image, a gradient, or a Card at a Container level, an unsurfaced Stack
+     punches an opaque rectangle through it — which is how a row of buttons
+     ends up with a visible slab behind it. */
+  test('no background when no surface is declared', () => {
+    const { container } = render(<OmniStack><span>a</span></OmniStack>);
+    const el = container.querySelector('.omni-stack');
+    expect(el.style.background).toBe('');
+  });
+
+  test('paints when given a surface', () => {
+    const { container } = render(<OmniStack data-surface="Container"><span>a</span></OmniStack>);
+    expect(container.querySelector('.omni-stack')).toHaveAttribute('data-surface', 'Container');
+  });
+
+  test('paints when given a theme', () => {
+    const { container } = render(<OmniStack data-theme="Primary"><span>a</span></OmniStack>);
+    expect(container.querySelector('.omni-stack')).toHaveAttribute('data-theme', 'Primary');
+  });
+});

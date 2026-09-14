@@ -68,11 +68,20 @@ const ICON_SIZE = 'var(--Icon-Size, 24px)';
 /** Icon to label. 4, and not the 2 the rail uses — a bar has room. */
 const ITEM_GAP = 'var(--Sizing-Half, 4px)';
 
-/** Bar padding, per orientation. Straight from the two variants. */
-const BAR_PAD = {
+/** Bar padding — FLOATING only.
+ *
+ *  A floating bar is a pill sitting on the page, and the padding is what
+ *  holds its contents off its own rounded ends. A FIXED bar is the edge of
+ *  the screen: it has nothing to be held off, and the inset only pushed the
+ *  first and last items away from the corners a thumb actually reaches.
+ *
+ *  So it is not "padding per orientation" — it is padding per STYLE, and the
+ *  orientation only decides which way round it goes. */
+const FLOATING_PAD = {
   horizontal: { px: 'var(--Button-Height, 32px)', py: '12px' },
   vertical: { px: 'var(--Sizing-1-and-Half, 12px)', py: 'var(--Sizing-2, 16px)' },
 };
+const NO_PAD = { px: 0, py: 0 };
 
 /** A floating bar is a pill. The design's 83 is the horizontal bar's own
  *  height, which is what makes the ends semicircular at any length. */
@@ -108,7 +117,9 @@ export function BottomNavigation({
   const isVertical = orientation === 'vertical';
   const isFloating = variant === 'floating';
   const dataTheme = THEME_MAP[barColor] || THEME_MAP.default;
-  const pad = isVertical ? BAR_PAD.vertical : BAR_PAD.horizontal;
+  const pad = !isFloating
+    ? NO_PAD
+    : (isVertical ? FLOATING_PAD.vertical : FLOATING_PAD.horizontal);
 
   return (
     <Box

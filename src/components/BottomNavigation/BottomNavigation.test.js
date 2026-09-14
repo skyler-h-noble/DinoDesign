@@ -232,3 +232,32 @@ describe('BottomNavigation — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+/* --- Padding belongs to the style, not the orientation --- */
+describe('Padding', () => {
+  /* A floating bar is a pill sitting on the page, and the padding holds its
+     contents off its own rounded ends. A FIXED bar is the edge of the screen:
+     it has nothing to be held off, and the inset only pushed the first and
+     last items away from the corners a thumb actually reaches. */
+  const padOf = (props) => {
+    const { container } = renderNav(props);
+    const bar = container.querySelector('.bottom-nav');
+    const cs = getComputedStyle(bar);
+    return { x: cs.paddingLeft, y: cs.paddingTop };
+  };
+
+  test('fixed has none', () => {
+    const p = padOf({ variant: 'fixed' });
+    expect([p.x, p.y]).toEqual(['0px', '0px']);
+  });
+
+  test('floating has it', () => {
+    const p = padOf({ variant: 'floating' });
+    expect(p.x).not.toBe('0px');
+  });
+
+  test('a vertical FIXED bar has none either — style decides, not direction', () => {
+    const p = padOf({ variant: 'fixed', orientation: 'vertical' });
+    expect([p.x, p.y]).toEqual(['0px', '0px']);
+  });
+});

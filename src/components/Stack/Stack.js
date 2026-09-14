@@ -130,10 +130,22 @@ export function OmniStack({
         (className ? ' ' + className : '')
       }
       sx={{
-        // Paint the current surface so a Stack that carries data-theme/
-        // data-surface actually shows its background (matches Box). When no
-        // surface is set it resolves to the inherited parent color — a no-op.
-        background: 'var(--Background)',
+        /* Paint ONLY when this Stack was given a surface.
+         *
+         * It painted var(--Background) unconditionally, on the reasoning that
+         * with no surface set it resolves to the inherited value and is
+         * therefore a no-op. It is a no-op only while the parent is painting
+         * that same flat colour. The moment the parent paints anything else —
+         * a hero image, a gradient, a Card at a Container level — an
+         * unsurfaced Stack punches an opaque rectangle through it, which is
+         * how a row of buttons ends up with a visible slab behind it.
+         *
+         * A layout primitive should not paint. Declaring a surface is how you
+         * ask it to, and that is the rule everywhere else in this system:
+         * data-theme + data-surface, or nothing. */
+        ...(props['data-surface'] || props['data-theme']
+          ? { background: 'var(--Background)' }
+          : {}),
         // A fixed width is the OUTER width (matches a Figma frame: padding sits
         // inside it). Without border-box, width + padding overflow the frame.
         boxSizing: 'border-box',
