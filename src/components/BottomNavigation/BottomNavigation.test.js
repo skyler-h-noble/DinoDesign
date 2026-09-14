@@ -261,3 +261,67 @@ describe('Padding', () => {
     expect([p.x, p.y]).toEqual(['0px', '0px']);
   });
 });
+
+describe('The FAB is in the bar', () => {
+  /* An action among the items, the way Rail's fabAction is: a ring the size
+     of an item's icon holder, outlined rather than filled. It takes an
+     item's place in the row so it lands where a thumb already goes. */
+  const fab = { label: 'Create', onClick: jest.fn() };
+  const order = (container) =>
+    Array.from(container.querySelectorAll('.bottom-nav-item, .bottom-nav-fab'))
+      .map((el) => (el.classList.contains('bottom-nav-fab') ? 'FAB' : el.getAttribute('aria-label')));
+
+  test('absent unless asked for', () => {
+    const { container } = renderNav();
+    expect(container.querySelector('.bottom-nav-fab')).toBeNull();
+  });
+
+  test('at the end by default', () => {
+    const { container } = renderNav({ items: ITEMS_4, fabAction: fab });
+    expect(order(container)).toEqual(['Home', 'Favorites', 'Profile', 'Stars', 'FAB']);
+  });
+
+  test('centred splits the items either side of it', () => {
+    const { container } = renderNav({ items: ITEMS_4, fabAction: fab, fabPosition: 'center' });
+    expect(order(container)).toEqual(['Home', 'Favorites', 'FAB', 'Profile', 'Stars']);
+  });
+
+  test('an odd count puts the extra item before it', () => {
+    const { container } = renderNav({ items: ITEMS_5, fabAction: fab, fabPosition: 'center' });
+    expect(order(container)).toEqual(['Home', 'Favorites', 'Profile', 'FAB', 'Stars', 'Search']);
+  });
+
+  test('is a button, not a tab — it acts, it is never the value', () => {
+    const onChange = jest.fn();
+    renderNav({ items: ITEMS_4, fabAction: fab, onChange });
+    const ring = screen.getByRole('button', { name: 'Create' });
+    expect(ring).not.toHaveAttribute('role', 'tab');
+    expect(ring).not.toHaveAttribute('aria-selected');
+    fireEvent.click(ring);
+    expect(fab.onClick).toHaveBeenCalled();
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getAllByRole('tab')).toHaveLength(4);
+  });
+
+  test('outlined in the default button border, on no fill', () => {
+    /* Not a filled circle: the selected item is the filled circle, and two
+       filled circles in one bar say two things are current. */
+    const { container } = renderNav({ items: ITEMS_4, fabAction: fab });
+    const holder = container.querySelector('.bottom-nav-fab > div');
+    /* jsdom drops a var() from a computed border colour, so read the
+       injected rule rather than the computed style. */
+    const rule = [...document.styleSheets]
+      .flatMap((sheet) => { try { return [...sheet.cssRules]; } catch { return []; } })
+      .map((r) => r.cssText)
+      .find((t) => t.startsWith('.' + [...holder.classList].find((c) => c.startsWith('css-'))));
+    expect(rule).toContain('border-color: var(--Buttons-Default-Border)');
+    expect(rule).toContain('color: var(--Buttons-Default-Border)');
+    expect(rule).toContain('background-color: transparent');
+    expect(rule).not.toMatch(/background-color: var\(--Text\)/);
+  });
+
+  test('has no accessibility violations', async () => {
+    const { container } = renderNav({ items: ITEMS_4, fabAction: fab, fabPosition: 'center' });
+    expect(await axe(container)).toHaveNoViolations();
+  });
+});

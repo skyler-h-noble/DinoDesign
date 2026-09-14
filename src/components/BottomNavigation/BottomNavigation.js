@@ -1,6 +1,7 @@
 // src/components/BottomNavigation/BottomNavigation.js
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { Box } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import { LabelExtraSmall } from '../Typography';
 
 /**
@@ -38,7 +39,30 @@ import { LabelExtraSmall } from '../Typography';
  * that made the selected item look like a primary BUTTON sitting in the bar,
  * and it tied the bar's accent to the Primary palette rather than to whatever
  * theme the bar is set to.
+ *
+ * ── The FAB is IN the bar ────────────────────────────────────────────────
+ * `fabAction` renders an action among the items, the way Rail's does: a
+ * ring the size of an item's icon holder, outlined rather than filled, with
+ * the icon in the outline's colour. It takes an item's place in the row —
+ * at the end, or in the middle with the items split either side — so it
+ * lands where a thumb already goes rather than floating over the content
+ * beside the bar. Outlined, because a solid FAB in the bar reads as a
+ * selected item: the selected state is a FILLED circle, and two filled
+ * circles in one bar say two things are current.
+ *
+ * It is a button, not a tab. It performs an action rather than switching a
+ * panel, so it carries no aria-selected and never becomes the value. And a
+ * tablist may hold nothing BUT tabs — so with a ring in the row, the row
+ * stops being the tablist. An empty tablist beside it OWNS the tabs by id
+ * (aria-owns), which gives assistive tech the same list of tabs it had, with
+ * the button outside it, while the DOM keeps every control in one flex row
+ * where the ring can take an item's place. Without a ring the row is the
+ * tablist as it always was.
  */
+
+/* Ids for aria-owns. A counter rather than useId, which needs React 18 and
+   this package still peers on 17. */
+let nextBarId = 0;
 
 /* The bar's palette. Nine themes — the -Light / -Medium / -Dark shades are
    gone, and so are White and Black, which were never Theme modes at all. Each
@@ -98,6 +122,12 @@ export function BottomNavigation({
   /** The BAR's direction. */
   orientation = 'horizontal',
   barColor = 'default',
+  /** An action in the bar: { icon, label, onClick }. Rendered as an outlined
+   *  ring among the items — see the note above. */
+  fabAction,
+  /** Where the ring sits: after the last item, or in the middle with the
+   *  items split either side of it. */
+  fabPosition = 'end',
   /** Pinned to the viewport. Positioning, not appearance — see the note above. */
   fixed = true,
   'aria-label': ariaLabel = 'Bottom navigation',
@@ -120,6 +150,13 @@ export function BottomNavigation({
   const pad = !isFloating
     ? NO_PAD
     : (isVertical ? FLOATING_PAD.vertical : FLOATING_PAD.horizontal);
+
+  const idBase = useRef(null);
+  if (idBase.current === null) idBase.current = 'bottom-nav-' + (nextBarId++);
+  const tabId = (index) => idBase.current + '-tab-' + index;
+  /* The tablist is the row itself unless a FAB shares the row — see the
+     note above. */
+  const ownsTabs = !!fabAction;
 
   return (
     <Box
@@ -171,9 +208,17 @@ export function BottomNavigation({
       }}
       {...props}
     >
+      {ownsTabs && (
+        <Box
+          role="tablist"
+          aria-orientation={isVertical ? 'vertical' : 'horizontal'}
+          aria-owns={items.map((_, i) => tabId(i)).join(' ')}
+          sx={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}
+        />
+      )}
       <Box
-        role="tablist"
-        aria-orientation={isVertical ? 'vertical' : 'horizontal'}
+        role={ownsTabs ? undefined : 'tablist'}
+        aria-orientation={ownsTabs ? undefined : (isVertical ? 'vertical' : 'horizontal')}
         sx={{
           display: 'flex',
           flexDirection: isVertical ? 'column' : 'row',
@@ -191,6 +236,7 @@ export function BottomNavigation({
         {items.map((item, index) => (
           <BottomNavItem
             key={item.key || index}
+            id={ownsTabs ? tabId(index) : undefined}
             icon={item.icon}
             label={item.label}
             selected={index === activeIndex}
@@ -198,16 +244,29 @@ export function BottomNavigation({
             onClick={() => handleSelect(index)}
             ariaLabel={item.label || item.ariaLabel}
           />
-        ))}
+        )).flatMap((el, index, all) => {
+          /* Centred goes after the first half — for four items that is two
+             and two; for five, three and two, because a middle that rounds
+             down leaves the ring nearer the start of a bar whose selected
+             item is usually first. `end` is simply last. */
+          if (!fabAction) return [el];
+          const at = fabPosition === 'center' ? Math.ceil(all.length / 2) : all.length;
+          return index === at - 1
+            ? [el, <BottomNavFab key="fab" {...fabAction} showLabel={showLabels} />]
+            : [el];
+        })}
+        {fabAction && items.length === 0 && (
+          <BottomNavFab key="fab" {...fabAction} showLabel={showLabels} />
+        )}
       </Box>
     </Box>
   );
 }
 
-function BottomNavItem({ icon, label, selected, showLabel, onClick, ariaLabel }) {
+function BottomNavItem({ id, icon, label, selected, showLabel, onClick, ariaLabel }) {
   return (
     <Box
-      component="button" type="button" role="tab"
+      component="button" type="button" role="tab" id={id}
       aria-selected={selected} aria-label={ariaLabel} onClick={onClick}
       className={'bottom-nav-item' + (selected ? ' bottom-nav-item-selected' : '')}
       sx={{
@@ -252,6 +311,73 @@ function BottomNavItem({ icon, label, selected, showLabel, onClick, ariaLabel })
           className="bottom-nav-label"
           style={{
             color: selected ? 'var(--Text)' : 'var(--Quiet)',
+            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+            maxWidth: '100%',
+          }}
+        >
+          {label}
+        </LabelExtraSmall>
+      )}
+    </Box>
+  );
+}
+
+/** The action ring. The same column as an item — same width, same holder
+ *  size, the same gap to a label below — so it sits on the items' baseline
+ *  and takes exactly one item's place. What differs is the holder: an
+ *  OUTLINE in the default button's border colour, with the glyph in that
+ *  colour too, on no fill. */
+function BottomNavFab({ icon, label, onClick, showLabel }) {
+  return (
+    <Box
+      component="button" type="button"
+      aria-label={label || 'Action'} onClick={onClick}
+      className="bottom-nav-fab"
+      sx={{
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        gap: ITEM_GAP,
+        width: ITEM_WIDTH,
+        flexShrink: 0,
+        border: 'none', backgroundColor: 'transparent', cursor: 'pointer',
+        padding: 0, fontFamily: 'inherit', outline: 'none',
+        '&:focus-visible': {
+          outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px',
+          borderRadius: '8px',
+        },
+      }}
+    >
+      <Box sx={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        minWidth: HOLDER_MIN, minHeight: HOLDER_MIN,
+        padding: HOLDER_PAD,
+        borderRadius: HOLDER_RADIUS,
+        boxSizing: 'border-box',
+        /* The outline button's border, which the system holds at 3:1
+           against its surface — the ring is a clickable edge and that is the
+           non-text floor. The glyph takes the same colour so ring and plus
+           read as one control rather than a plus inside a decoration. */
+        borderWidth: 'var(--Button-Border-Width, 1px)',
+        borderStyle: 'solid',
+        borderColor: 'var(--Buttons-Default-Border)',
+        color: 'var(--Buttons-Default-Border)',
+        backgroundColor: 'transparent',
+        fontSize: ICON_SIZE,
+        transition: 'background-color 0.15s ease',
+        '& .MuiSvgIcon-root': { fontSize: 'inherit', color: 'inherit' },
+        '.bottom-nav-fab:hover &': { backgroundColor: 'var(--Hover)' },
+        '.bottom-nav-fab:active &': { backgroundColor: 'var(--Pressed)' },
+      }}>
+        {icon || <AddIcon />}
+      </Box>
+
+      {/* A label under the ring only when the items carry theirs, or the ring
+          sits higher than its neighbours. Empty rather than absent: an item
+          with no label text still reserves nothing, and neither does this. */}
+      {showLabel && label && (
+        <LabelExtraSmall
+          className="bottom-nav-label"
+          style={{
+            color: 'var(--Buttons-Default-Border)',
             whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
             maxWidth: '100%',
           }}
