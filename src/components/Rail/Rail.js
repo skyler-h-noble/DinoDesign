@@ -257,6 +257,12 @@ export function Rail({
           gap: isExpanded ? 0 : ITEM_GAP,
           px: isExpanded ? 0 : RAIL_PAD_X,
           width: '100%',
+          /* The padding has to come OUT of the 100%, not be added to it.
+             Without this the list is the rail's width plus 16px of padding,
+             the overflow is clipped on the right, and "centred" lands every
+             item 8px right of the rail's centre — wherever the page does not
+             happen to load a CSS reset that sets border-box for it. */
+          boxSizing: 'border-box',
         }}>
         {renderItems()}
       </Box>

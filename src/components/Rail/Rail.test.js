@@ -254,3 +254,15 @@ describe('Size', () => {
     expect(container.querySelector('.rail-medium')).toBeInTheDocument();
   });
 });
+
+describe('the items are centred in the rail', () => {
+  test('the list takes its padding out of the rail width, not in addition to it', () => {
+    /* 100% wide plus 8px a side is the rail's width plus 16px; the overflow
+       is clipped on the right and every "centred" item sits 8px right of
+       the rail's centre. Border-box is what makes 100% mean the rail. */
+    const { container } = render(<Rail items={[{ icon: <span />, label: 'Home' }]} />);
+    const list = container.querySelector('[role="tablist"]');
+    expect(getComputedStyle(list).boxSizing).toBe('border-box');
+    expect(getComputedStyle(list).width).toBe('100%');
+  });
+});
