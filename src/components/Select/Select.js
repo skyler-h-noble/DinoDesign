@@ -14,7 +14,20 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
  * MODES: standard (text), color (swatches)
  * LABEL: top | floating | none
  * SIZES: small (32/48px), medium (40/56px), large (56/64px)
- * SELECTION STYLE: default | light | solid
+ * SELECTION STYLE: default | solid
+ *
+ * There was a `light` style. It is gone with the -Light button shades it
+ * named: --Buttons-{C}-Light-{Button,Text,Border} are published by no design
+ * system and none of the three carried a fallback, so all three declarations
+ * were invalid at computed-value time and a selected option rendered
+ * unstyled — no fill, no text colour, no border. For a lighter selected row,
+ * put the dropdown on data-surface="Surface-Brightest" and keep the style.
+ *
+ * NOTE: `default` and `solid` currently return identical styles. They are kept
+ * apart because the rendered class (select-style-default / -solid) is a
+ * consumer-facing hook, so a stylesheet outside this file can still select
+ * between them — which is the test for redundancy, not whether the values
+ * match. If nothing turns out to target those classes, the prop should go.
  * DIVIDERS: optional divider between each option
  * COLOR LABELS: show/hide text labels next to color swatches (aria-label always present)
  * START DECORATION: icon or avatar
@@ -56,14 +69,6 @@ function getSelectedStyles(selectionStyle, isSelected, colorName) {
       fontWeight: 600,
     };
   }
-  if (selectionStyle === 'light') {
-    return {
-      backgroundColor: 'var(--Buttons-' + C + '-Light-Button)',
-      color: 'var(--Buttons-' + C + '-Light-Text)',
-      border: '1px solid var(--Buttons-' + C + '-Light-Border)',
-      fontWeight: 600,
-    };
-  }
   // default selection style
   return {
     backgroundColor: 'var(--Buttons-' + C + '-Button)',
@@ -81,7 +86,7 @@ export function Select({
   label,
   labelPosition = 'top',
   size = 'medium',
-  variant = 'outline',        // 'outline' | 'light'
+  variant = 'outline',        // 'outline' — see the note on `light` above
   color = 'primary',          // 'default' | 'primary' | 'secondary' | ...
   selectionStyle = 'default',
   mode = 'standard',
@@ -97,8 +102,37 @@ export function Select({
 }) {
   const effectiveColor = color === 'default' ? 'primary' : color;
   const C = cap(effectiveColor);
-  const isLight = variant === 'light';
+  /* There was an `isLight = variant === 'light'` here, read by nothing. So
+     variant="light" never changed a colour, a token or a style — its ONLY
+     effect was the class name below, which is why it looked supported. */
   const borderToken = 'var(--Buttons-' + C + '-Border)';
+
+  /* Normalise both props, so neither can emit a class for a style that no
+     longer exists. A stale class is not harmless here: select-variant-light
+     is a consumer-facing hook, and a brand stylesheet still targeting it
+     would keep styling a variant the component no longer implements. */
+  if (process.env.NODE_ENV !== 'production') {
+    if (variant === 'light') {
+      // eslint-disable-next-line no-console
+      console.warn(
+        '[Select] variant="light" was removed and had never done anything — '
+        + 'it was read by no code path. Rendering outline. For a lighter '
+        + 'Select, use data-surface="Surface-Brightest" on its container.',
+      );
+    }
+    if (selectionStyle === 'light') {
+      // eslint-disable-next-line no-console
+      console.warn(
+        '[Select] selectionStyle="light" was removed with the -Light button '
+        + 'shades. It named --Buttons-{C}-Light-{Button,Text,Border}, which no '
+        + 'design system publishes, and carried no fallbacks — a selected '
+        + 'option rendered with no fill, no text colour and no border. '
+        + 'Rendering default.',
+      );
+    }
+  }
+  const effectiveVariant = variant === 'light' ? 'outline' : variant;
+  const effectiveSelectionStyle = selectionStyle === 'light' ? 'default' : selectionStyle;
   const activeTextColor = color === 'default' ? 'var(--Text)' : 'var(--Text-' + C + ')';
   const [internalValue, setInternalValue] = useState(defaultValue);
   const [open, setOpen] = useState(false);
@@ -284,7 +318,7 @@ export function Select({
           const optLabel = typeof opt === 'string' ? opt : opt.label;
           const optColor = typeof opt === 'object' ? opt.color : null;
           const isSelected = optValue === currentValue;
-          const styles = getSelectedStyles(selectionStyle, isSelected, effectiveColor);
+          const styles = getSelectedStyles(effectiveSelectionStyle, isSelected, effectiveColor);
           const isLast = idx === total - 1;
 
           return (
@@ -386,8 +420,8 @@ export function Select({
       className={
         'select-wrapper select-' + size +
         ' select-label-' + labelPosition +
-        ' select-style-' + selectionStyle +
-        ' select-variant-' + variant +
+        ' select-style-' + effectiveSelectionStyle +
+        ' select-variant-' + effectiveVariant +
         (open ? ' select-open' : '') +
         (disabled ? ' select-disabled' : '') +
         (className ? ' ' + className : '')
