@@ -237,6 +237,10 @@ export { CodeBlock, CopyButton } from './CodeBlock/CodeBlock';
 export { BarChart, LineChart, PieChart, CHART_TOKENS, CHART_LABEL_TYPE } from './Charts';
 export * as chartGeometry from './Charts/geometry';
 
+/* What a region shows instead of data. A slot on Table and List rather than a
+   state variant on either — see StateMessage.js. */
+export { StateMessage } from './StateMessage';
+
 /* Loading placeholders — a state of the real components, not a separate
    skeleton. See _ghost.js for why. */
 export { Ghost, useGhost, ghostBlockSx } from './_ghost';

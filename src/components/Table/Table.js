@@ -1,6 +1,7 @@
 // src/components/Table/Table.js
 import React from 'react';
 import { Box } from '@mui/material';
+import { Ghost } from '../_ghost';
 
 /**
  * Table Component
@@ -52,6 +53,16 @@ export function Table({
   footerRows,
   variant = 'default',
   color = 'primary',
+  /* Data states. `loading` and `skeletonRows` are PROPS because loading has no
+     copy; `empty` and `error` are SLOTS because they do — "no invoices yet"
+     and "no results for that filter" are the same design and different words,
+     which a component cannot author. Slots also keep Table at its 288 variant
+     combinations instead of the 1,440 a five-value state property would make,
+     and an empty table does not look different in Primary and in Error. */
+  loading = false,
+  skeletonRows = 3,
+  empty,
+  error,
   size = 'medium',
   stripe = 'none',
   stickyHeader = false,
@@ -161,9 +172,34 @@ export function Table({
     textAlign: 'left',
   });
 
+  /* Precedence: error beats loading beats empty. A failed request that is
+     retrying is still an error the user has to see, and a request that
+     returned nothing is not empty until it has finished. Ordering these the
+     other way produces the classic flash of "no results" before the data
+     lands. */
+  const dataState = error ? 'error' : loading ? 'loading' : (rows && rows.length === 0 && empty) ? 'empty' : null;
+
+  /* The header is kept in every state. Dropping it makes the region change
+     width between states, so the page jumps each time a filter runs — the same
+     reflow Ghost exists to avoid. */
+  const renderMessageRow = (content) => (
+    <Box component="tbody">
+      <Box component="tr">
+        <Box
+          component="td"
+          colSpan={columns ? columns.length : 1}
+          sx={{ padding: 0, border: 'none' }}
+        >
+          {content}
+        </Box>
+      </Box>
+    </Box>
+  );
+
   // Build table from columns/rows if provided
   const renderStructured = () => {
-    if (!columns || !rows) return null;
+    if (!columns) return null;
+    if (!rows && !dataState) return null;
 
     return (
       <>
@@ -184,6 +220,31 @@ export function Table({
             ))}
           </Box>
         </Box>
+        {dataState === 'loading' && renderMessageRow(
+          /* Real rows of placeholder text, ghosted — so the column widths and
+             row heights are the ones the data will land in. A generic block
+             here would resize the moment the rows arrived. */
+          <Ghost label="Loading">
+            <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+              <Box component="tbody">
+                {Array.from({ length: skeletonRows }).map((_, ri) => (
+                  <Box component="tr" key={'sk-' + ri} data-surface={getRowSurface(ri)}>
+                    {columns.map((_c, ci) => (
+                      <Box component="td" key={'skc-' + ri + '-' + ci} sx={getCellSx()}>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      </Box>
+                    ))}
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+          </Ghost>,
+        )}
+
+        {dataState === 'error' && renderMessageRow(error)}
+        {dataState === 'empty' && renderMessageRow(empty)}
+
+        {!dataState && rows && (
         <Box component="tbody">
           {rows.map((row, ri) => (
             <Box
@@ -209,7 +270,10 @@ export function Table({
             </Box>
           ))}
         </Box>
-        {footerRows && footerRows.length > 0 && (
+        )}
+        {/* The footer follows the rows: totals over placeholder data would be
+            wrong, and totals over an error message are meaningless. */}
+        {!dataState && footerRows && footerRows.length > 0 && (
           <Box component="tfoot">
             {footerRows.map((row, fi) => (
               <Box component="tr" key={'f-' + fi}>
@@ -237,6 +301,10 @@ export function Table({
     <Box
       className={'table-wrapper table-' + variant + (isSolid || isLight || isOutlined ? ' table-' + color : '') + ' ' + className}
       {...wrapperDataAttrs}
+      /* On the WRAPPER, not on Ghost's inner div: this is the element a screen
+         reader lands on, and aria-busy has to be on the region whose content is
+         in flux, not on a node buried inside a cell. */
+      aria-busy={dataState === 'loading' ? 'true' : undefined}
       sx={{
         width: '100%',
         overflow: 'auto',

@@ -2,6 +2,7 @@
 import React from 'react';
 import { Box, Checkbox, Radio } from '@mui/material';
 import { EyebrowSmall, SubtitleLarge, Body, BodySmallSemibold } from '../Typography';
+import { Ghost } from '../_ghost';
 
 // Default three-layer typography for the text frame. Order is top→bottom:
 //   eyebrow   — EyebrowSmall  (optional metadata kicker on top)
@@ -255,6 +256,9 @@ export function ListItem({
 export function List({
   children, items, variant = 'default', color = 'primary', size = 'medium',
   orientation = 'vertical', dividers = false, selectionMode = 'none',
+  /* Same split as Table: loading has no copy so it is a prop; empty and error
+     need words, so they are slots holding a StateMessage. */
+  loading = false, skeletonRows = 3, empty, error,
   selectedIndices = [], onSelectionChange, clickable = false,
   component = 'ul', className = '', sx = {}, ...props
 }) {
@@ -283,7 +287,33 @@ export function List({
     }
   };
 
+  /* error > loading > empty. A request that returned nothing is not empty
+     until it has finished — the other order gives the classic flash of "no
+     results" a moment before the data lands. */
+  const dataState = error ? 'error' : loading ? 'loading' : (items && items.length === 0 && empty) ? 'empty' : null;
+
   const renderItems = () => {
+    if (dataState === 'loading') {
+      /* Real ListItems, ghosted, so the row height and decorator positions are
+         the ones the data will land in. */
+      return (
+        <Box component="li" sx={{ listStyle: 'none' }}>
+          <Ghost label="Loading">
+            {Array.from({ length: skeletonRows }).map((_, i) => (
+              <ListItem key={'sk-' + i} size={size} variant={variant} color={color}>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              </ListItem>
+            ))}
+          </Ghost>
+        </Box>
+      );
+    }
+    /* The message is a <li> because the parent is a <ul>: a bare <div> in a
+       list is invalid and some screen readers drop it, so the one thing the
+       user needs to hear would be the thing not announced. */
+    if (dataState === 'error') return <Box component="li" sx={{ listStyle: 'none' }}>{error}</Box>;
+    if (dataState === 'empty') return <Box component="li" sx={{ listStyle: 'none' }}>{empty}</Box>;
+
     if (items && items.length > 0) {
       const elements = [];
       items.forEach((item, index) => {
@@ -340,6 +370,7 @@ export function List({
 
   return (
     <Box component={component} role={isSelectable ? 'listbox' : 'list'}
+      aria-busy={dataState === 'loading' ? 'true' : undefined}
       aria-multiselectable={selectionMode === 'checkbox' ? true : undefined}
       {...wrapperDataAttrs}
       className={'list-container list-' + variant + ' list-' + color + ' ' + className}
