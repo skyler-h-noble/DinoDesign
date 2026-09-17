@@ -254,3 +254,26 @@ describe('Autocomplete — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+describe('the light variant is gone', () => {
+  test('variant="light" renders outline and warns', () => {
+    /* It was documented as data-theme="{C}-Light" + data-surface="Surface-Dim"
+       and implemented as nothing at all — isLight was read by no code path.
+       The class assertion is the load-bearing one: autocomplete-variant-light
+       is a consumer hook, so leaving it renderable keeps a brand stylesheet
+       styling a variant that no longer exists. */
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const { container } = render(<Autocomplete options={['Apple']} variant="light" />);
+    expect(container.querySelector('.autocomplete-variant-light')).not.toBeInTheDocument();
+    expect(container.querySelector('.autocomplete-variant-outline')).toBeInTheDocument();
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  test('outline warns about nothing', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    render(<Autocomplete options={['Apple']} variant="outline" />);
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+});

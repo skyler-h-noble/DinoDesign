@@ -14,7 +14,15 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
  *
  * VARIANTS:
  *   outline   Outer border shell + data-surface="Container"
- *   light     Outer border shell + data-theme="{C}-Light" data-surface="Surface-Dim"
+ *
+ * There was a `light` variant. The docblock described it as
+ * data-theme="{C}-Light" + data-surface="Surface-Dim" — a theme shade that no
+ * longer exists, for a behaviour the code never implemented: `isLight` was
+ * computed and read by no code path, so the prop was accepted and changed
+ * nothing but a class name. Documented behaviour and actual behaviour were
+ * both wrong, in different directions.
+ *
+ * For a lighter Autocomplete, put it on data-surface="Surface-Brightest"
  *
  * COLORS: default | primary | secondary | tertiary | neutral | info | success | warning | error
  *
@@ -66,7 +74,7 @@ export function Autocomplete({
   placeholder = 'Type to search',
   helperText,
   size = 'medium',
-  variant = 'outline',         // 'outline' | 'light'
+  variant = 'outline',         // 'outline' — `light` was removed, see above
   color = 'primary',           // 'default' | 'primary' | ...
   loading = false,
   loadingText = 'Loading\u2026',
@@ -81,7 +89,15 @@ export function Autocomplete({
 }) {
   const effectiveColor = color === 'default' ? 'primary' : color;
   const C = cap(effectiveColor);
-  const isLight = variant === 'light';
+  if (process.env.NODE_ENV !== 'production' && variant === 'light') {
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[Autocomplete] variant="light" was removed and had never done anything '
+      + '— it was read by no code path. For a lighter Autocomplete use '
+      + 'data-surface="Surface-Brightest" on its container.',
+    );
+  }
+  const effectiveVariant = variant === 'light' ? 'outline' : variant;
   const borderToken = 'var(--Buttons-' + C + '-Border)';
   const activeTextColor = color === 'default' ? 'var(--Text)' : 'var(--Text-' + C + ')';
 
@@ -174,7 +190,7 @@ export function Autocomplete({
   return (
     <Box
       ref={wrapperRef}
-      className={'autocomplete autocomplete-' + size + ' autocomplete-variant-' + variant +
+      className={'autocomplete autocomplete-' + size + ' autocomplete-variant-' + effectiveVariant +
         (open ? ' autocomplete-open' : '') +
         (disabled ? ' autocomplete-disabled' : '') +
         (className ? ' ' + className : '')}
