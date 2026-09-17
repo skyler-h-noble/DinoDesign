@@ -1,6 +1,7 @@
 // src/components/Icon/Icon.js
 import React from 'react';
 import { Box } from '@mui/material';
+import { useGhost, ghostBlockSx } from '../_ghost';
 
 /**
  * Icon Component
@@ -73,6 +74,7 @@ export function Icon({
   'aria-label': ariaLabel,
   ...props
 }) {
+  const ghost = useGhost();
   const C = COLOR_LABEL_MAP[color] || 'Default';
 
   // Resolve font size
@@ -109,6 +111,15 @@ export function Icon({
         flexShrink: 0,
         // Two-tone: set CSS variable for the secondary fill
         ...(twoTone && { '--twotone-variant': variantToken }),
+        /* A ghosting icon is a square of its own size — the glyph is hidden by
+           the block's transparent colour, and width/height come from fontSize
+           above, so it occupies exactly the space the real icon will. */
+        ...(ghost ? {
+          ...ghostBlockSx({ animate: ghost.animate }),
+          width: resolvedSize,
+          height: resolvedSize,
+          '& .MuiSvgIcon-root': { visibility: 'hidden' },
+        } : {}),
         '& .MuiSvgIcon-root': {
           fontSize: 'inherit',
           color: 'inherit',

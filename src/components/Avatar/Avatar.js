@@ -5,6 +5,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import { Icon } from '../Icon/Icon';
 import { NumberSmall, NumberMedium, NumberLarge, CAP_HEIGHT_TRIM } from '../Typography';
 import { DEFAULT_AVATAR_SRC } from './defaultAvatar';
+import { useGhost, ghostBlockSx } from '../_ghost';
 
 /**
  * Avatar Component
@@ -124,6 +125,7 @@ export function Avatar({
   sx = {},
   ...props
 }) {
+  const ghost = useGhost();
   const [imgError, setImgError] = useState(false);
   // Custom size — pixel diameter from `customSize` prop, icon ~50% of that.
   const s = size === 'custom' && customSize
@@ -154,6 +156,7 @@ export function Avatar({
       aria-label={alt || initials || 'Avatar'}
       tabIndex={isClickable ? 0 : undefined}
       onClick={isClickable ? onClick : undefined}
+      {...(ghost ? { 'data-ghost-block': 'true' } : {})}
       className={'avatar avatar-' + size + ' avatar-' + color +
         (isClickable ? ' avatar-clickable' : '') +
         (hasSrc ? ' avatar-image' : hasInitials ? ' avatar-initials' : ' avatar-fallback') +
@@ -164,6 +167,11 @@ export function Avatar({
         borderRadius: '50%',
         backgroundColor: bg,
         color: textColor,
+        /* Keeps the circle — a ghosting avatar is the avatar's own geometry
+           with the photo and initials gone, so the row does not reflow when
+           the real one loads. The 50% radius above already wins over the
+           block's default. */
+        ...(ghost ? ghostBlockSx({ radius: '50%', animate: ghost.animate }) : {}),
         fontFamily: 'inherit', fontWeight: 600,
         overflow: 'hidden',
         flexShrink: 0,

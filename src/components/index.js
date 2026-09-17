@@ -236,3 +236,7 @@ export { CodeBlock, CopyButton } from './CodeBlock/CodeBlock';
 // ends or how a curve bends.
 export { BarChart, LineChart, PieChart, CHART_TOKENS, CHART_LABEL_TYPE } from './Charts';
 export * as chartGeometry from './Charts/geometry';
+
+/* Loading placeholders — a state of the real components, not a separate
+   skeleton. See _ghost.js for why. */
+export { Ghost, useGhost, ghostBlockSx } from './_ghost';
