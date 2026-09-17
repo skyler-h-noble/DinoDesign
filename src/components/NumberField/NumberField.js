@@ -47,7 +47,7 @@ export function NumberField({
   max,
   step = 1,
   variant = 'outlined',   // 'outlined' | 'spinner'
-  style: styleVariant = 'outline', // 'outline' | 'light'
+  style: styleVariant = 'outline', // 'outline' — `light` was removed
   color = 'default',
   size = 'medium',
   label,
@@ -70,7 +70,19 @@ export function NumberField({
 
   const effectiveColor = color === 'default' ? 'primary' : color;
   const C = cap(effectiveColor);
-  const isLight = styleVariant === 'light';
+  /* There was an `isLight = styleVariant === 'light'` here, read by no code
+     path — the third copy of that shape in the library, after Select and
+     Input. A flag nothing reads is why a removed variant keeps looking
+     supported: the prop is accepted, nothing renders differently, and there
+     is no error to report. */
+  if (process.env.NODE_ENV !== 'production' && styleVariant === 'light') {
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[NumberField] style="light" was removed and had never done anything — '
+      + 'it was read by no code path. For a lighter field use '
+      + 'data-surface="Surface-Brightest" on its container.',
+    );
+  }
   /* The design draws the field from the SURFACE tokens, not the button palette:
      border --Border, fill --Background, and the steppers use --Hover/--Pressed.
      A named `color` still routes through the button palette, which is what makes
@@ -79,9 +91,13 @@ export function NumberField({
   const borderToken = color === 'default'
     ? 'var(--Border)'
     : 'var(--Buttons-' + C + '-Border)';
-  const fieldBg = color === 'default'
-    ? 'var(--Background)'
-    : 'var(--Buttons-' + C + '-Light-Button, var(--Background))';
+  /* Both arms are --Background. The coloured arm used to read
+     var(--Buttons-{C}-Light-Button, var(--Background)), and since no design
+     system publishes that token the fallback always fired — so the `color`
+     prop has never changed this fill, only the border and text. Writing it as
+     the value it actually resolves to, rather than leaving a token that reads
+     as though colour reaches the fill. */
+  const fieldBg = 'var(--Background)';
   const activeTextColor = color === 'default' ? 'var(--Text)' : 'var(--Text-' + C + ')';
 
   const isOutlined = variant === 'outlined';

@@ -166,3 +166,41 @@ describe('Input — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+describe('the light variant is gone', () => {
+  /* It shipped with no test at all, which is part of why it survived: its only
+     difference from outline was a background token no design system publishes,
+     so the fallback always fired and the two variants rendered identically.
+     Nothing looked wrong, and nothing asserted otherwise. */
+
+  test('a *-light variant falls back to outline rather than rendering blank', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    for (const v of ['primary-light', 'secondary-light', 'light']) {
+      const { container } = render(<Input variant={v} label="Amount" />);
+      // It still renders a usable field — the fallback is the point.
+      expect(container.querySelector('input')).toBeInTheDocument();
+    }
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  test('an outline variant warns about nothing', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    render(<Input variant="primary-outline" label="Amount" />);
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  test('the light convenience exports are gone', () => {
+    // They were never in src/components/index.js, so removing them cannot
+    // break a consumer — but a re-export added later would bring the variant
+    // back without anyone deciding to.
+    const mod = require('./Input');
+    for (const name of [
+      'PrimaryLightInput', 'SecondaryLightInput', 'TertiaryLightInput',
+      'NeutralLightInput', 'LightInput',
+    ]) {
+      expect(mod[name]).toBeUndefined();
+    }
+  });
+});

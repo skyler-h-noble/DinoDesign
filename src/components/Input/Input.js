@@ -54,7 +54,20 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // --- Variant Style Builders --------------------------------------------------
 
-/* Hover and pressed move the BORDER, not the background.
+/* There was a `light` variant — eight colours plus a bare alias, and five
+   convenience exports. It is gone.
+
+   Its only difference from `outline` was the background:
+   var(--Buttons-{C}-Light-Button, var(--Hover)). No design system publishes
+   that token, so the fallback ALWAYS fired and every *-light field rendered
+   byte-identical to its *-outline twin. Not broken — worse than broken. A
+   user picking between two variants saw the same field twice with no error
+   and no way to tell which one had taken effect.
+
+   A lighter input is a lighter SURFACE: put the field on
+   data-surface="Surface-Brightest" and keep variant="{color}-outline".
+
+   Hover and pressed move the BORDER, not the background.
 
    The field's resting background is already --Hover: an input wants a visible
    affordance against the surface, and that scrim is what gives it one. So the
@@ -74,26 +87,12 @@ function outlineStyles(color) {
   };
 }
 
-function lightStyles(color) {
-  const C = cap(color);
-  return {
-    bg: 'var(--Buttons-' + C + '-Light-Button, var(--Hover))',
-    border: 'var(--Buttons-' + C + '-Border)',
-    hoverBorder: 'var(--Buttons-' + C + '-Hover)',
-    pressedBorder: 'var(--Buttons-' + C + '-Pressed)',
-    text: 'var(--Text)',
-    focusBg: 'var(--Buttons-' + C + '-Light-Button, var(--Hover))',
-  };
-}
-
 function buildVariantMap() {
   const map = {};
   COLORS.forEach((color) => {
     map[color + '-outline'] = outlineStyles(color);
-    map[color + '-light']   = lightStyles(color);
   });
   map['outline'] = outlineStyles('primary');
-  map['light']   = lightStyles('primary');
   return map;
 }
 
@@ -275,7 +274,20 @@ export function Input({
   const variantMap = buildVariantMap();
   const styles = variantMap[variant] || variantMap['primary-outline'];
   const isFloating = labelPosition === 'floating';
-  const isLight = variant.endsWith('-light');
+
+  /* A *-light variant now falls through to primary-outline via the || above,
+     which is the right rendering but a silent one — so say so once in dev.
+     There was also an `isLight` here, read by no code path: the same dead
+     flag Select had, and the same reason the variant looked supported. */
+  if (process.env.NODE_ENV !== 'production' && /-light$|^light$/.test(variant)) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[Input] variant="' + variant + '" was removed. It differed from '
+      + '"' + variant.replace(/-?light$/, '') + '-outline" only by a token no '
+      + 'design system publishes, so the two rendered identically. For a '
+      + 'lighter field use data-surface="Surface-Brightest" on its container.',
+    );
+  }
   const sizeConfig = isFloating
     ? (FLOATING_SIZE_MAP[size] || FLOATING_SIZE_MAP.medium)
     : (SIZE_MAP[size] || SIZE_MAP.medium);
@@ -307,9 +319,6 @@ export function Input({
      border it sits next to. */
   const activeTextColor = 'var(--Text)';
 
-  // Light variant theme attributes for inner div
-  // A light variant is the base theme at data-surface="Surface-Brightest";
-  // *-Light themes are not generated, and this value was never read.
 
   // Validation state overrides border color
   const validationConfig = validation ? VALIDATION_COLORS[validation] : null;
@@ -601,13 +610,10 @@ export const SuccessOutlineInput   = (p) => <Input variant="success-outline"   {
 export const WarningOutlineInput   = (p) => <Input variant="warning-outline"   {...p} />;
 export const ErrorOutlineInput     = (p) => <Input variant="error-outline"     {...p} />;
 
-export const PrimaryLightInput   = (p) => <Input variant="primary-light"   {...p} />;
-export const SecondaryLightInput = (p) => <Input variant="secondary-light" {...p} />;
-export const TertiaryLightInput  = (p) => <Input variant="tertiary-light"  {...p} />;
-export const NeutralLightInput   = (p) => <Input variant="neutral-light"   {...p} />;
-
+/* The five *LightInput convenience exports are gone with the variant. None of
+   them was in src/components/index.js, so none was reachable from the package
+   and none can be a breaking change for a consumer. */
 export const OutlineInput = (p) => <Input variant="primary-outline" {...p} />;
 export const PrimaryInput = (p) => <Input variant="primary-outline" {...p} />;
-export const LightInput   = (p) => <Input variant="primary-light"   {...p} />;
 
 export default Input;
