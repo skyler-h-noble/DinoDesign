@@ -103,7 +103,7 @@ export function Icon({
         justifyContent: 'center',
         fontSize: resolvedSize,
         color: colorToken,
-        opacity: disabled ? 0.38 : 1,
+        opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
         cursor: disabled ? 'not-allowed' : 'inherit',
         lineHeight: 1,
         flexShrink: 0,

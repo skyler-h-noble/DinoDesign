@@ -352,7 +352,7 @@ export function Switch({
               color: disabled ? 'var(--Text-Quiet)' : 'var(--Text)',
               fontSize: size === 'small' ? '13px' : '15px',
               fontWeight: 500,
-              opacity: disabled ? 0.6 : 1,
+              opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
             }}
           >
             {label}

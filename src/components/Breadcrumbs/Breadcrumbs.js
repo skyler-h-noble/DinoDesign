@@ -62,6 +62,7 @@ export function Breadcrumbs({
           cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit',
           color: 'var(--Quiet)', borderRadius: '4px',
           '&:hover': { backgroundColor: 'var(--Hover)', color: 'var(--Text)' },
+          '&:active': { backgroundColor: 'var(--Pressed)', color: 'var(--Text)' },
           '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '1px' },
         }}
       >
@@ -206,7 +207,14 @@ export function BreadcrumbItem({ children, href, className = '', sx = {}, ...pro
         cursor: isLink ? 'pointer' : 'default',
         transition: 'color 0.15s ease',
         ...(isLink && {
-          '&:hover': { color: 'var(--Link-Hover)', textDecorationThickness: '2px' },
+          /* Links do not change COLOUR on hover — the design system emits no
+             hover tone for them and the underline carries the state instead.
+             This read `color: var(--Link-Hover)`, a variable nothing defines,
+             and with no fallback the whole declaration is invalid at computed-
+             value time: the colour fell back to `inherit`, so hovering a
+             breadcrumb link made it stop looking like a link. */
+          '&:hover': { textDecorationThickness: '2px' },
+          '&:active': { textDecorationThickness: '3px' },
           '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px', borderRadius: '2px' },
         }),
         ...sx,

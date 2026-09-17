@@ -73,6 +73,7 @@ export function Card({
   elevated = false,
   draggable: draggableProp = false,
   onClick,
+  disabled = false,
   href,
   className = '',
   sx = {},
@@ -105,7 +106,11 @@ export function Card({
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
   const isHorizontal = orientation === 'horizontal';
   const isDraggable = !!draggableProp;
-  const isClickable = clickable || !!onClick || !!href || selected || isDraggable;
+  /* A disabled card is not clickable. Deriving it here rather than guarding
+     each state means the role, tabIndex and onClick all drop together — a card
+     that merely LOOKED disabled but kept role="button" and tabIndex={0} would
+     still be reachable by keyboard and still fire. */
+  const isClickable = !disabled && (clickable || !!onClick || !!href || selected || isDraggable);
   const component = href ? 'a' : 'div';
 
   // Border color token — selected uses theme-specific border
@@ -135,6 +140,7 @@ export function Card({
         role={isClickable ? 'button' : undefined}
         tabIndex={isClickable ? 0 : undefined}
         aria-pressed={selected ? true : undefined}
+        aria-disabled={disabled || undefined}
         draggable={isDraggable || undefined}
         className={
           'card card-' + variant + ' card-' + size + ' card-' + orientation
@@ -152,6 +158,11 @@ export function Card({
           overflow: 'hidden',
           textDecoration: 'none',
           transition: 'box-shadow 0.2s ease, border-color 0.2s ease, transform 0.1s ease',
+          ...(disabled && {
+            opacity: 'var(--Disabled, 0.38)',
+            cursor: 'not-allowed',
+            pointerEvents: 'none',
+          }),
           ...(isClickable && !isDraggable && {
             cursor: 'pointer',
             '&:hover': {

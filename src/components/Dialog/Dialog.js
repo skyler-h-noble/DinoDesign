@@ -3,11 +3,15 @@ import React, { forwardRef } from 'react';
 import {
   Dialog as MuiDialog, DialogTitle as MuiDialogTitle, DialogContent as MuiDialogContent,
   DialogContentText as MuiDialogContentText, DialogActions as MuiDialogActions,
-  Slide, Grow, Fade, Zoom, IconButton,
+  Slide, Grow, Fade, Zoom,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { Box } from '@mui/material';
 import { useOmniDesign } from '../../OmniDesignProvider';
+import { IconButton } from '../Button/Button';
+/* The lib's own icon button — <Button iconOnly> — not MUI's, so hover,
+   pressed, focus-visible and disabled all come from Button rather than
+   being re-derived at each call site. */
 
 /**
  * Dialog Component
@@ -113,6 +117,8 @@ export const dialogButtonStyles = {
     color: 'var(--Buttons-Primary-Text)',
     border: '1px solid var(--Buttons-Primary-Border)',
     '&:hover': { backgroundColor: 'var(--Buttons-Primary-Hover)' },
+    '&:active': { backgroundColor: 'var(--Buttons-Primary-Pressed)' },
+    '&:disabled': { opacity: 'var(--Disabled, 0.38)', cursor: 'not-allowed' },
   },
   outline: {
     ...btnBase,
@@ -120,6 +126,8 @@ export const dialogButtonStyles = {
     color: 'var(--Text)',
     border: '1px solid var(--Border)',
     '&:hover': { backgroundColor: 'var(--Hover)' },
+    '&:active': { backgroundColor: 'var(--Pressed)' },
+    '&:disabled': { opacity: 'var(--Disabled, 0.38)', cursor: 'not-allowed' },
   },
 };
 
@@ -204,7 +212,8 @@ export function Dialog({
               aria-label="Close dialog"
               onClick={(e) => onClose(e, 'closeButton')}
               size="small"
-              sx={{ color: 'var(--Text-Quiet)', '&:hover': { backgroundColor: 'var(--Hover)' } }}
+              variant="ghost"
+              sx={{ color: 'var(--Text-Quiet)' }}
             >
               <CloseIcon fontSize="small" />
             </IconButton>

@@ -694,7 +694,7 @@ export function Button({
         },
 
         '&.Mui-disabled': {
-          opacity: 0.6,
+          opacity: 'var(--Disabled, 0.38)',
           cursor: 'not-allowed',
           pointerEvents: 'none',
           backgroundColor: variantStyles.backgroundColor,

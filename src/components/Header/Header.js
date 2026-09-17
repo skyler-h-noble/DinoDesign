@@ -5,11 +5,16 @@ import {
   Toolbar,
   Typography,
   Box,
-  IconButton,
   Container,
   Stack,
 } from '@mui/material';
 import { Brightness4 as DarkModeIcon, Brightness7 as LightModeIcon } from '@mui/icons-material';
+import { IconButton } from '../Button/Button';
+/* The lib's own icon button — <Button iconOnly> — not MUI's. Every state
+   an icon button has lives in Button; importing MUI's meant
+   re-deriving hover, pressed, focus and disabled by hand at each call
+   site, which is how this file ended up with an rgba(0,0,0,0.04)
+   hover that is invisible on a dark surface. */
 
 /**
  * Header Component
@@ -158,13 +163,9 @@ export function SimpleHeader({
         </Typography>
         {onModeChange && (
           <IconButton
+            variant="ghost"
             onClick={onModeChange}
-            sx={{
-              color: 'var(--Text)',
-              '&:hover': {
-                backgroundColor: 'rgba(0,0,0,0.04)',
-              },
-            }}
+            aria-label={mode === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
           >
             {mode === 'light' ? (
               <DarkModeIcon sx={{ fontSize: '1.5rem' }} />
@@ -271,13 +272,9 @@ export function CenteredHeader({
           </Typography>
           {onModeChange && (
             <IconButton
+              variant="ghost"
               onClick={onModeChange}
-              sx={{
-                color: 'var(--Text)',
-                '&:hover': {
-                  backgroundColor: 'rgba(0,0,0,0.04)',
-                },
-              }}
+              aria-label={mode === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
             >
               {mode === 'light' ? (
                 <DarkModeIcon sx={{ fontSize: '1.5rem' }} />

@@ -206,7 +206,7 @@ export function Rating({
           } : {},
           '&:disabled': {
             cursor: 'not-allowed',
-            opacity: 0.5,
+            opacity: 'var(--Disabled, 0.38)',
           },
         }}
       >
@@ -226,7 +226,7 @@ export function Rating({
         (className ? ' ' + className : '')}
       sx={{
         display: 'inline-flex', alignItems: 'center', gap: s.gap + 'px',
-        opacity: disabled ? 0.5 : 1,
+        opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
         fontFamily: 'inherit',
         ...sx,
       }}

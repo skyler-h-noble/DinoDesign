@@ -103,12 +103,18 @@ export function Step({
   children,
   icon,
   label,
+  disabled = false,
   _index = 0,
   className = '',
   sx = {},
   ...props
 }) {
-  const { orientation, size, color, activeStep, clickable, onStepClick, dashedIncomplete, totalSteps } = useStepperContext();
+  const { orientation, size, color, activeStep, clickable: groupClickable, onStepClick, dashedIncomplete, totalSteps } = useStepperContext();
+  /* `clickable` is a Stepper-level switch, so before this a step you cannot
+     reach yet was styled and announced exactly like one you can. Folding
+     disabled into it here drops the role, tabIndex, key handler and onClick
+     together rather than only dimming the indicator. */
+  const clickable = groupClickable && !disabled;
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
   const C = COLOR_LABEL_MAP[color] || 'Primary';
   const isHorizontal = orientation === 'horizontal';
@@ -138,6 +144,7 @@ export function Step({
       role={clickable ? 'button' : undefined}
       aria-label={clickable ? 'Go to step ' + (_index + 1) : undefined}
       aria-current={isActive ? 'step' : undefined}
+      aria-disabled={disabled || undefined}
       className={
         'step-indicator step-indicator-' + size
         + (isActive ? ' step-indicator-active' : '')
@@ -164,9 +171,10 @@ export function Step({
         flexShrink: 0,
         position: 'relative',
         transition: 'background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease',
-        cursor: clickable ? 'pointer' : 'default',
+        cursor: disabled ? 'not-allowed' : clickable ? 'pointer' : 'default',
         outline: 'none',
         padding: 0,
+        ...(disabled && { opacity: 'var(--Disabled, 0.38)' }),
 
         // 24×24 minimum touch target via ::after for small size
         ...(size === 'small' && {

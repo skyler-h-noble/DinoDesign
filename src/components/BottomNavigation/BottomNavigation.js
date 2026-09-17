@@ -253,6 +253,7 @@ export function BottomNavigation({
             showLabel={showLabels}
             onClick={() => handleSelect(index)}
             ariaLabel={item.label || item.ariaLabel}
+            disabled={item.disabled}
           />
         )).flatMap((el, index, all) => {
           /* Centred goes after the first half — for four items that is two
@@ -273,11 +274,12 @@ export function BottomNavigation({
   );
 }
 
-function BottomNavItem({ id, icon, label, selected, showLabel, onClick, ariaLabel }) {
+function BottomNavItem({ id, icon, label, selected, showLabel, onClick, ariaLabel, disabled }) {
   return (
     <Box
       component="button" type="button" role="tab" id={id}
       aria-selected={selected} aria-label={ariaLabel} onClick={onClick}
+      disabled={disabled} aria-disabled={disabled || undefined}
       className={'bottom-nav-item' + (selected ? ' bottom-nav-item-selected' : '')}
       sx={{
         display: 'flex', flexDirection: 'column', alignItems: 'center',
@@ -290,6 +292,7 @@ function BottomNavItem({ id, icon, label, selected, showLabel, onClick, ariaLabe
           outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px',
           borderRadius: '8px',
         },
+        '&:disabled': { opacity: 'var(--Disabled, 0.38)', cursor: 'not-allowed' },
       }}
     >
       {/* Icon-Holder — the circle that carries the selected state. */}
@@ -307,7 +310,22 @@ function BottomNavItem({ id, icon, label, selected, showLabel, onClick, ariaLabe
         fontSize: ICON_SIZE,
         transition: 'background-color 0.2s ease, color 0.15s ease',
         '& .MuiSvgIcon-root': { fontSize: 'inherit', color: 'inherit' },
-        '.bottom-nav-item:hover &': selected ? {} : { color: 'var(--Text)' },
+        /* The item had a focus ring and nothing else — no hover, no pressed.
+           It read as covered because the FAB menu further down this file has
+           both, which is the trap in auditing a directory rather than a
+           control.
+
+           These sit on the HOLDER, not the button: the button is a transparent
+           column containing the icon circle and the label, so a scrim on it
+           would paint a rectangle behind the text as well. Selected keeps its
+           --Text fill and moves the scrim on top of it. */
+        '.bottom-nav-item:hover &': selected
+          ? { backgroundColor: 'var(--Text)' }
+          : { color: 'var(--Text)', backgroundColor: 'var(--Hover)' },
+        '.bottom-nav-item:active &': selected
+          ? { backgroundColor: 'var(--Text)' }
+          : { color: 'var(--Text)', backgroundColor: 'var(--Pressed)' },
+        '.bottom-nav-item:disabled:hover &': { backgroundColor: 'transparent' },
       }}>
         {icon}
       </Box>
@@ -487,6 +505,7 @@ function BottomNavFab({ icon, label, onClick, showLabel, actions, position = 'en
                 '&:hover': { backgroundColor: 'var(--Hover)' },
                 '&:active': { backgroundColor: 'var(--Pressed)' },
                 '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px' },
+                '&:disabled': { opacity: 'var(--Disabled, 0.38)', cursor: 'not-allowed' },
               }}
             >
               {/* The ring column is the FAB column's width, so the small ring

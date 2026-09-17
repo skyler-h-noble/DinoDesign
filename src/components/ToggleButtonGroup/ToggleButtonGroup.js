@@ -57,6 +57,7 @@ function colorStyles(color, style) {
     text:      'var(--Quiet)',
     hover:     'var(--Buttons-' + C + '-Hover)',
     hoverText: 'var(--Buttons-' + C + '-Text)',
+    pressed:   'var(--Buttons-' + C + '-Pressed)',
   };
 
   if (style === 'ghost') {
@@ -301,6 +302,12 @@ export function ToggleButtonGroup({
         color: styles.hoverText,
       },
 
+      // Pressed
+      '&:active': {
+        backgroundColor: styles.pressed,
+        color: styles.hoverText,
+      },
+
       // Selected — the filled segment carries the bevel, like a solid Button.
       // Unselected segments are transparent, so a bevel there would draw an
       // edge around nothing.
@@ -311,9 +318,22 @@ export function ToggleButtonGroup({
         ...(styles.selectedRing ? { boxShadow: styles.selectedRing } : {}),
       },
 
-      // Selected + hover
+      /* Selected + hover / pressed.
+
+         Both of these repainted styles.selectedBg — the RESTING colour — so a
+         selected segment gave no feedback at all on hover, and none on press.
+         The ringed styles (ghost, outline) have a transparent fill, so they
+         take the surface scrim instead of a button tone; the filled style
+         moves along its own button ramp like a solid Button does. */
       '&.Mui-selected:hover': {
-        backgroundColor: styles.selectedBg,
+        backgroundColor: styles.selectedRing ? 'var(--Hover)' : styles.hover,
+        color: styles.selectedText,
+        ...(styles.bevel ? { boxShadow: bevelShadow(styles.color) } : {}),
+        ...(styles.selectedRing ? { boxShadow: styles.selectedRing } : {}),
+      },
+
+      '&.Mui-selected:active': {
+        backgroundColor: styles.selectedRing ? 'var(--Pressed)' : styles.pressed,
         color: styles.selectedText,
         ...(styles.bevel ? { boxShadow: bevelShadow(styles.color) } : {}),
         ...(styles.selectedRing ? { boxShadow: styles.selectedRing } : {}),
@@ -328,7 +348,7 @@ export function ToggleButtonGroup({
 
       // Disabled
       '&.Mui-disabled': {
-        opacity: 0.6,
+        opacity: 'var(--Disabled, 0.38)',
         color: styles.text,
         backgroundColor: styles.bg,
       },

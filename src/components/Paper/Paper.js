@@ -93,6 +93,7 @@ export function InteractivePaper({
   children,
   surface = 'Container',
   onClick,
+  disabled = false,
   hoverable = true,
   sx = {},
   ...props
@@ -117,12 +118,34 @@ export function InteractivePaper({
       elevation={hoverable && isHovered ? hoverElevation : elevation}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onClick={onClick}
+      onClick={disabled ? undefined : onClick}
+      role={onClick ? 'button' : undefined}
+      aria-disabled={disabled || undefined}
+      tabIndex={onClick && !disabled ? 0 : undefined}
+      onKeyDown={onClick && !disabled ? (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(e); }
+      } : undefined}
       sx={{
         padding: 2,
         borderRadius: '8px',
         cursor: onClick ? 'pointer' : 'default',
         transition: 'all 0.2s ease-in-out',
+        /* `hoverable` already swaps the surface and elevation, but that is a
+           separate opt-in: a Paper given only an onClick got cursor:pointer
+           and no feedback whatsoever, and no keyboard route in either. */
+        ...(disabled && {
+          opacity: 'var(--Disabled, 0.38)',
+          cursor: 'not-allowed',
+          pointerEvents: 'none',
+        }),
+        ...(onClick && !disabled && {
+          '&:hover': { backgroundColor: 'var(--Hover)' },
+          '&:active': { backgroundColor: 'var(--Pressed)' },
+          '&:focus-visible': {
+            outline: '2px solid var(--Focus-Visible)',
+            outlineOffset: '2px',
+          },
+        }),
         ...sx,
       }}
       {...props}

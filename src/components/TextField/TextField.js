@@ -154,7 +154,7 @@ export function TextField({
             // Disabled state
             '&.Mui-disabled': {
               backgroundColor: 'var(--Background)',
-              opacity: 0.6,
+              opacity: 'var(--Disabled, 0.38)',
             },
           },
 
@@ -178,7 +178,7 @@ export function TextField({
             // Disabled
             '&.Mui-disabled': {
               color: 'var(--Text-Secondary)',
-              opacity: 0.6,
+              opacity: 'var(--Disabled, 0.38)',
             },
           },
 

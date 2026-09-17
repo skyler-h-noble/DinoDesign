@@ -347,7 +347,12 @@ function RailItem({ item, selected, expanded, labelStyle, onClick }) {
         boxShadow: selected && onItem ? 'var(--Shadow-1, none)' : 'none',
         color: 'inherit',
         cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 'calc(var(--Disabled, 38) / 100)' : 1,
+        /* The token is a RATIO now, so the divide is gone. It read
+           calc(var(--Disabled, 38) / 100) because Figma stores 38 — its UI
+           expresses opacity in percent — and every consumer doing that
+           arithmetic is one that can forget it: opacity:38 clamps to 1 and
+           renders a disabled control at full strength. */
+        opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
         fontFamily: 'inherit',
         textAlign: expanded ? 'left' : 'center',
         transition: 'background-color 0.15s ease, color 0.15s ease',

@@ -137,7 +137,7 @@ export function ListItem({
         py: s.py, px: s.px,
         minHeight: '32px',
         fontSize: s.fontSize, fontFamily: 'inherit', color: 'var(--Text)', listStyle: 'none',
-        cursor: isFocusable ? 'pointer' : 'default', opacity: disabled ? 0.5 : 1,
+        cursor: isFocusable ? 'pointer' : 'default', opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
         position: 'relative',
         transition: 'background-color 0.15s ease, box-shadow 0.15s ease',
         // Card chrome — only when the row is clickable. Non-clickable rows

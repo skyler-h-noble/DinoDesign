@@ -18,10 +18,14 @@
 
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Box, Tooltip, IconButton } from '@mui/material';
+import { Box, Tooltip } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import { Caption } from '../Typography/Typography';
+import { IconButton } from '../Button/Button';
+/* The lib's own icon button — <Button iconOnly> — not MUI's, so hover,
+   pressed, focus-visible and disabled all come from Button rather than
+   being re-derived at each call site. */
 
 /** Copy-to-clipboard control. Confirms for two seconds, then resets. */
 function CopyButton({ code, label = 'Copy code' }) {
@@ -46,8 +50,6 @@ function CopyButton({ code, label = 'Copy code' }) {
         aria-label={copied ? 'Copied' : label}
         sx={{
           color: copied ? 'var(--Icons-Success, var(--Text))' : 'var(--Quiet)',
-          '&:hover': { backgroundColor: 'var(--Hover)', color: 'var(--Text)' },
-          '&:focus-visible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '2px' },
         }}
       >
         {copied ? <CheckIcon fontSize="small" /> : <ContentCopyIcon fontSize="small" />}

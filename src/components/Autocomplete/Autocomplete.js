@@ -191,7 +191,7 @@ export function Autocomplete({
               display: 'block', marginBottom: '6px',
               color: disabled ? 'var(--Quiet)' : 'var(--Text)',
               fontWeight: 500,
-              opacity: disabled ? 0.6 : 1,
+              opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
             }}
           >
             {label}
@@ -211,7 +211,7 @@ export function Autocomplete({
         overflow: 'hidden',
         transition: 'border-color 0.15s ease',
         boxShadow: 'none',
-        opacity: disabled ? 0.5 : 1,
+        opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
         '&:focus-within': {
           outline: '2px solid var(--Focus-Visible)',
           outlineOffset: '2px',

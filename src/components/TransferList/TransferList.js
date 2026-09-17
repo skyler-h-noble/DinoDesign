@@ -119,7 +119,7 @@ export function TransferList({
               display: 'flex',
               flexDirection: 'column',
               gap: 0,
-              opacity: disabled ? 0.5 : 1,
+              opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
             }}
           >
             {/* HEADER — min-h 40, hstack, left/top aligned */}

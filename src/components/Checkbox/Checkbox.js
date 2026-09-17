@@ -251,13 +251,20 @@ export function Checkbox({
         color: 'inherit',
         transition: 'background-color 0.15s ease-in-out',
         '&.Mui-checked, &.MuiCheckbox-indeterminate': { color: 'inherit' },
+        /* Suppressing MUI's ripple halo is right — it is a circle of the wrong
+           colour around a square box — but nothing replaced it, so hovering a
+           checkbox did nothing at all. The border is the channel, as on Input:
+           the box interior carries the checked state and must stay readable. */
         '&:hover': { backgroundColor: 'transparent' },
+        '&:hover .chk-box-icon': { borderColor: 'var(--Text)' },
+        '&:active .chk-box-icon': { borderColor: 'var(--Text)', backgroundColor: 'var(--Pressed)' },
+        '&.Mui-disabled .chk-box-icon': { opacity: 'var(--Disabled, 0.38)' },
         '&.Mui-focusVisible .chk-box-icon': {
           outline: '2px solid var(--Focus-Visible)',
           outlineOffset: '2px',
         },
         '&.Mui-disabled': {
-          opacity: 0.6,
+          opacity: 'var(--Disabled, 0.38)',
           cursor: 'not-allowed',
           pointerEvents: 'none',
         },

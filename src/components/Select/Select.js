@@ -405,7 +405,7 @@ export function Select({
               display: 'block', marginBottom: '6px',
               color: disabled ? 'var(--Quiet)' : 'var(--Text)',
               fontWeight: 500,
-              opacity: disabled ? 0.6 : 1,
+              opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
             }}
           >
             {label}
@@ -457,7 +457,7 @@ export function Select({
           fontSize: sizeConfig.fontSize,
           fontFamily: 'inherit',
           cursor: disabled ? 'not-allowed' : 'pointer',
-          opacity: disabled ? 0.5 : 1,
+          opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
           outline: 'none', textAlign: 'left', position: 'relative',
           transition: 'color 0.15s ease',
         }}

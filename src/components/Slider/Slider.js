@@ -298,7 +298,7 @@ export function Slider({
 
     // Disabled
     '&.Mui-disabled': {
-      opacity: 0.6,
+      opacity: 'var(--Disabled, 0.38)',
       cursor: 'not-allowed',
       pointerEvents: 'none',
       '& .MuiSlider-thumb::before': {
@@ -356,7 +356,7 @@ export function Slider({
             color: disabled ? 'var(--Text-Quiet)' : 'var(--Text)',
             fontSize: size === 'small' ? '13px' : '15px',
             fontWeight: 500,
-            opacity: disabled ? 0.6 : 1,
+            opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
           }}
         >
           {label}

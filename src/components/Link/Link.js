@@ -173,7 +173,7 @@ export function Link({
         // ── Color ────────────────────────────────────────────────
         color:         colors.base,
         cursor:        disabled ? 'not-allowed' : 'pointer',
-        opacity:       disabled ? 0.5 : 1,
+        opacity:       disabled ? 'var(--Disabled, 0.38)' : 1,
         pointerEvents: disabled ? 'none' : 'auto',
 
         // ── Touch target (WCAG 2.5.8) ────────────────────────────

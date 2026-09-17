@@ -12,7 +12,6 @@ import {
   Drawer,
   AppBar,
   Toolbar,
-  IconButton,
   List,
   ListItemButton,
   ListItemIcon,
@@ -31,6 +30,11 @@ import HomeIcon from '@mui/icons-material/Home';
 import SettingsIcon from '@mui/icons-material/Settings';
 import InfoIcon from '@mui/icons-material/Info';
 import HelpIcon from '@mui/icons-material/Help';
+import { scrimStates } from '../_states';
+import { IconButton } from '../Button/Button';
+/* The lib's own icon button — <Button iconOnly> — not MUI's, so hover,
+   pressed, focus-visible and disabled all come from Button rather than
+   being re-derived at each call site. */
 
 /**
  * MainLayout Component
@@ -86,9 +90,7 @@ export function MainLayout({
             }}
             sx={{
               color: 'var(--Text)',
-              '&:hover': {
-                backgroundColor: 'var(--Container-High)',
-              },
+              ...scrimStates({ muiPrefix: true }),
               transition: 'all 0.2s ease-in-out',
               justifyContent: compact ? 'center' : 'flex-start',
               px: compact ? 1 : 2,
@@ -138,9 +140,9 @@ export function MainLayout({
           {/* Mobile Menu Button */}
           {isMobile && effectiveLayout !== 'rail' && (
             <IconButton
-              edge="start"
-              color="inherit"
+              variant="ghost"
               onClick={() => setMobileDrawerOpen(!mobileDrawerOpen)}
+              aria-label={mobileDrawerOpen ? 'Close navigation' : 'Open navigation'}
               sx={{ mr: 2 }}
             >
               {mobileDrawerOpen ? <CloseIcon /> : <MenuIcon />}
@@ -252,7 +254,9 @@ export function MainLayout({
               )}
               <IconButton
                 size="small"
+                variant="ghost"
                 onClick={() => setSideNavCollapsed(!sideNavCollapsed)}
+                aria-label={sideNavCollapsed ? 'Expand navigation' : 'Collapse navigation'}
                 sx={{ color: 'var(--Icons-Primary)' }}
               >
                 {sideNavCollapsed ? '›' : '‹'}

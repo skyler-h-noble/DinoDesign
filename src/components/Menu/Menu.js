@@ -257,11 +257,12 @@ export function MenuItem({ children, onClick, selected = false, disabled = false
         color: disabled ? 'var(--Quiet)' : (selected ? 'var(--Text)' : 'var(--Quiet)'),
         backgroundColor: selected ? 'var(--Hover)' : 'transparent',
         cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.5 : 1,
+        opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
         outline: 'none', transition: 'background-color 0.1s ease, color 0.1s ease',
         userSelect: 'none',
         ...(!disabled && {
           '&:hover': { backgroundColor: 'var(--Hover)', color: 'var(--Text)' },
+          '&:active': { backgroundColor: 'var(--Pressed)', color: 'var(--Text)' },
           '&:focus-visible': { backgroundColor: 'var(--Hover)', color: 'var(--Text)', outline: '3px solid var(--Focus-Visible)', outlineOffset: '-3px' },
         }),
         ...sx,

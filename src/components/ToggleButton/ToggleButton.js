@@ -18,6 +18,56 @@ import ViewListIcon from '@mui/icons-material/ViewList';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import GridViewIcon from '@mui/icons-material/GridView';
 
+/* One state table for every toggle in this file.
+
+   These selectors were copy-pasted into seven sx blocks — the single button,
+   the generic group, and the five preset groups. That is why hover was the
+   ONLY state any of them had: adding pressed or focus-visible meant making the
+   same edit seven times and keeping it in step forever, so nobody did.
+
+   Three things were also wrong in all seven copies at once, which is the other
+   half of the argument for having one:
+     - hover painted --Container-High, a CONTAINER level, where the rest of the
+       lib uses the surface scrim --Hover / --Pressed for a control with no
+       fill of its own;
+     - selected hover repainted --Buttons-Primary-Button, the resting colour,
+       so a selected segment gave no feedback at all;
+     - selected text was the literal '#fff', which is wrong on any brand whose
+       primary is light enough to need dark text. */
+const TOGGLE_STATES = {
+  color: 'var(--Text)',
+  backgroundColor: 'transparent',
+  textTransform: 'none',
+  fontWeight: 500,
+  '&:hover': {
+    backgroundColor: 'var(--Hover)',
+  },
+  '&:active': {
+    backgroundColor: 'var(--Pressed)',
+  },
+  '&.Mui-focusVisible': {
+    outline: '2px solid var(--Focus-Visible)',
+    outlineOffset: '2px',
+    /* Segments sit edge to edge, so an un-raised ring is overdrawn by the
+       neighbour's border on one side and looks like a three-sided box. */
+    zIndex: 1,
+  },
+  '&.Mui-disabled': {
+    color: 'var(--Quiet)',
+    opacity: 'var(--Disabled, 0.38)',
+  },
+  '&.Mui-selected': {
+    backgroundColor: 'var(--Buttons-Primary-Button)',
+    color: 'var(--Buttons-Primary-Text)',
+    '&:hover': {
+      backgroundColor: 'var(--Buttons-Primary-Hover)',
+    },
+    '&:active': {
+      backgroundColor: 'var(--Buttons-Primary-Pressed)',
+    },
+  },
+};
+
 /**
  * ToggleButton Component
  * Single toggle button with design system styling
@@ -54,20 +104,10 @@ export function ToggleButton({
       onChange={onChange}
       sx={{
         border: '1px solid var(--Border)',
-        color: 'var(--Text)',
-        backgroundColor: selected ? 'var(--Buttons-Primary-Button)' : 'transparent',
-        '&:hover': {
-          backgroundColor: selected ? 'var(--Buttons-Primary-Button)' : 'var(--Container-High)',
-        },
-        '&.Mui-selected': {
-          backgroundColor: 'var(--Buttons-Primary-Button)',
-          color: '#fff',
-          '&:hover': {
-            backgroundColor: 'var(--Buttons-Primary-Button)',
-          },
-        },
-        textTransform: 'none',
-        fontWeight: 500,
+        /* The `selected` prop already puts .Mui-selected on the root, and that
+           selector outranks a root-level backgroundColor — so the ternary this
+           replaced was doing nothing the table does not do. */
+        ...TOGGLE_STATES,
         ...sx,
       }}
       {...props}
@@ -108,23 +148,10 @@ export function ToggleButtonGroup({
         '& .MuiToggleButton-root': {
           border: 'none',
           borderRight: '1px solid var(--Border)',
-          color: 'var(--Text)',
-          backgroundColor: 'transparent',
-          textTransform: 'none',
-          fontWeight: 500,
           '&:last-child': {
             borderRight: 'none',
           },
-          '&:hover': {
-            backgroundColor: 'var(--Container-High)',
-          },
-          '&.Mui-selected': {
-            backgroundColor: 'var(--Buttons-Primary-Button)',
-            color: '#fff',
-            '&:hover': {
-              backgroundColor: 'var(--Buttons-Primary-Button)',
-            },
-          },
+          ...TOGGLE_STATES,
         },
         ...sx,
       }}
@@ -174,21 +201,10 @@ export function TextFormatToggleGroup({
         '& .MuiToggleButton-root': {
           border: 'none',
           borderRight: '1px solid var(--Border)',
-          color: 'var(--Text)',
-          backgroundColor: 'transparent',
           '&:last-child': {
             borderRight: 'none',
           },
-          '&:hover': {
-            backgroundColor: 'var(--Container-High)',
-          },
-          '&.Mui-selected': {
-            backgroundColor: 'var(--Buttons-Primary-Button)',
-            color: '#fff',
-            '&:hover': {
-              backgroundColor: 'var(--Buttons-Primary-Button)',
-            },
-          },
+          ...TOGGLE_STATES,
         },
         ...sx,
       }}
@@ -238,21 +254,10 @@ export function AlignmentToggleGroup({
         '& .MuiToggleButton-root': {
           border: 'none',
           borderRight: '1px solid var(--Border)',
-          color: 'var(--Text)',
-          backgroundColor: 'transparent',
           '&:last-child': {
             borderRight: 'none',
           },
-          '&:hover': {
-            backgroundColor: 'var(--Container-High)',
-          },
-          '&.Mui-selected': {
-            backgroundColor: 'var(--Buttons-Primary-Button)',
-            color: '#fff',
-            '&:hover': {
-              backgroundColor: 'var(--Buttons-Primary-Button)',
-            },
-          },
+          ...TOGGLE_STATES,
         },
         ...sx,
       }}
@@ -302,21 +307,10 @@ export function ViewModeToggleGroup({
         '& .MuiToggleButton-root': {
           border: 'none',
           borderRight: '1px solid var(--Border)',
-          color: 'var(--Text)',
-          backgroundColor: 'transparent',
           '&:last-child': {
             borderRight: 'none',
           },
-          '&:hover': {
-            backgroundColor: 'var(--Container-High)',
-          },
-          '&.Mui-selected': {
-            backgroundColor: 'var(--Buttons-Primary-Button)',
-            color: '#fff',
-            '&:hover': {
-              backgroundColor: 'var(--Buttons-Primary-Button)',
-            },
-          },
+          ...TOGGLE_STATES,
         },
         ...sx,
       }}
@@ -366,23 +360,10 @@ export function SizeToggleGroup({
         '& .MuiToggleButton-root': {
           border: 'none',
           borderRight: '1px solid var(--Border)',
-          color: 'var(--Text)',
-          backgroundColor: 'transparent',
-          textTransform: 'none',
-          fontWeight: 500,
           '&:last-child': {
             borderRight: 'none',
           },
-          '&:hover': {
-            backgroundColor: 'var(--Container-High)',
-          },
-          '&.Mui-selected': {
-            backgroundColor: 'var(--Buttons-Primary-Button)',
-            color: '#fff',
-            '&:hover': {
-              backgroundColor: 'var(--Buttons-Primary-Button)',
-            },
-          },
+          ...TOGGLE_STATES,
         },
         ...sx,
       }}
@@ -431,23 +412,10 @@ export function VerticalToggleButtonGroup({
         '& .MuiToggleButton-root': {
           border: 'none',
           borderBottom: '1px solid var(--Border)',
-          color: 'var(--Text)',
-          backgroundColor: 'transparent',
-          textTransform: 'none',
-          fontWeight: 500,
           '&:last-child': {
             borderBottom: 'none',
           },
-          '&:hover': {
-            backgroundColor: 'var(--Container-High)',
-          },
-          '&.Mui-selected': {
-            backgroundColor: 'var(--Buttons-Primary-Button)',
-            color: '#fff',
-            '&:hover': {
-              backgroundColor: 'var(--Buttons-Primary-Button)',
-            },
-          },
+          ...TOGGLE_STATES,
         },
         ...sx,
       }}
@@ -485,9 +453,9 @@ export function DisabledToggleButton({
       selected={selected}
       sx={{
         border: '1px solid var(--Border)',
-        color: 'var(--Text)',
-        opacity: 0.5,
-        backgroundColor: selected ? 'var(--Buttons-Primary-Button)' : 'transparent',
+        /* Was a literal 0.5 — one of ten different disabled opacities the lib
+           had picked independently. The token is what Figma binds. */
+        ...TOGGLE_STATES,
         ...sx,
       }}
       {...props}

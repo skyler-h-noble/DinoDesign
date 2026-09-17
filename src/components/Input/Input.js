@@ -54,11 +54,21 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // --- Variant Style Builders --------------------------------------------------
 
+/* Hover and pressed move the BORDER, not the background.
+
+   The field's resting background is already --Hover: an input wants a visible
+   affordance against the surface, and that scrim is what gives it one. So the
+   usual ghost-button idiom (rest transparent -> --Hover -> --Pressed) has
+   nowhere to go here; painting --Hover over --Hover is a no-op, which is
+   exactly why this component had no hover state at all. The border is the one
+   channel still free, and it is where a text field conventionally shows it. */
 function outlineStyles(color) {
   const C = cap(color);
   return {
     bg: 'var(--Hover)',
     border: 'var(--Buttons-' + C + '-Border)',
+    hoverBorder: 'var(--Buttons-' + C + '-Hover)',
+    pressedBorder: 'var(--Buttons-' + C + '-Pressed)',
     text: 'var(--Text)',
     focusBg: 'var(--Hover)',
   };
@@ -69,6 +79,8 @@ function lightStyles(color) {
   return {
     bg: 'var(--Buttons-' + C + '-Light-Button, var(--Hover))',
     border: 'var(--Buttons-' + C + '-Border)',
+    hoverBorder: 'var(--Buttons-' + C + '-Hover)',
+    pressedBorder: 'var(--Buttons-' + C + '-Pressed)',
     text: 'var(--Text)',
     focusBg: 'var(--Buttons-' + C + '-Light-Button, var(--Hover))',
   };
@@ -209,10 +221,10 @@ const VALIDATION_ICONS = {
 };
 
 const VALIDATION_COLORS = {
-  info:    { border: 'var(--Buttons-Info-Border)',    icon: 'var(--Icons-Info)',    text: 'var(--Hotlink)' },
-  success: { border: 'var(--Buttons-Success-Border)', icon: 'var(--Icons-Success)', text: 'var(--Text-Success)' },
-  warning: { border: 'var(--Buttons-Warning-Border)', icon: 'var(--Icons-Warning)', text: 'var(--Text-Warning)' },
-  error:   { border: 'var(--Buttons-Error-Border)',   icon: 'var(--Icons-Error)',   text: 'var(--Text-Error)' },
+  info:    { border: 'var(--Buttons-Info-Border)',    hoverBorder: 'var(--Buttons-Info-Hover)',    pressedBorder: 'var(--Buttons-Info-Pressed)',    icon: 'var(--Icons-Info)',    text: 'var(--Hotlink)' },
+  success: { border: 'var(--Buttons-Success-Border)', hoverBorder: 'var(--Buttons-Success-Hover)', pressedBorder: 'var(--Buttons-Success-Pressed)', icon: 'var(--Icons-Success)', text: 'var(--Text-Success)' },
+  warning: { border: 'var(--Buttons-Warning-Border)', hoverBorder: 'var(--Buttons-Warning-Hover)', pressedBorder: 'var(--Buttons-Warning-Pressed)', icon: 'var(--Icons-Warning)', text: 'var(--Text-Warning)' },
+  error:   { border: 'var(--Buttons-Error-Border)',   hoverBorder: 'var(--Buttons-Error-Hover)',   pressedBorder: 'var(--Buttons-Error-Pressed)',   icon: 'var(--Icons-Error)',   text: 'var(--Text-Error)' },
 };
 
 // --- Component ---------------------------------------------------------------
@@ -287,8 +299,12 @@ export function Input({
   const labelStyle = FLOATING_LABEL_STYLE[size] || FLOATING_LABEL_STYLE.medium;
 
   // Extract color name from variant (e.g. "primary-outline" → "primary")
-  const colorName = variant.replace(/-outline$/, '').replace(/-light$/, '');
-  const C = cap(colorName);
+  /* There was a `colorName`/`C` pair derived from the variant STRING here,
+     used by nothing. It was also wrong: variant 'outline' has no '-outline'
+     suffix to strip, so it yielded --Buttons-Outline-*, a family that does not
+     exist. The state tokens below come off the variant-map entry instead, which
+     is built from the palette argument and therefore cannot disagree with the
+     border it sits next to. */
   const activeTextColor = 'var(--Text)';
 
   // Light variant theme attributes for inner div
@@ -298,7 +314,8 @@ export function Input({
   // Validation state overrides border color
   const validationConfig = validation ? VALIDATION_COLORS[validation] : null;
   const ValidationIcon = validation ? VALIDATION_ICONS[validation] : null;
-  const effectiveBorder = validationConfig ? validationConfig.border : styles.border;
+  const stateSource = validationConfig || styles;
+  const effectiveBorder = stateSource.border;
 
   // Pass aria attributes to the actual <input> element
   const mergedInputProps = {
@@ -324,7 +341,7 @@ export function Input({
           color: disabled ? 'var(--Quiet)' : 'var(--Text)',
           fontSize: sizeConfig.labelSize,
           fontWeight: 500,
-          opacity: disabled ? 0.6 : 1,
+          opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
         }}
       >
         {label}
@@ -362,6 +379,14 @@ export function Input({
         overflow: 'hidden',
         transition: 'border-color 0.15s ease-in-out',
         boxShadow: 'none',
+        /* A disabled field takes no state. Guarding here rather than inside
+           each selector matters: :hover still MATCHES a disabled input (only
+           pointer-events would stop it), so an unguarded rule would light up
+           a control that cannot be used. */
+        ...(!disabled && {
+          '&:hover': { borderColor: stateSource.hoverBorder },
+          '&:active': { borderColor: stateSource.pressedBorder },
+        }),
         '&:focus-within': {
           outline: '2px solid var(--Focus-Visible)',
           outlineOffset: '2px',
@@ -432,7 +457,7 @@ export function Input({
                 },
 
                 '&.Mui-disabled': {
-                  opacity: 0.6,
+                  opacity: 'var(--Disabled, 0.38)',
                   cursor: 'not-allowed',
                 },
 
@@ -533,7 +558,7 @@ export function Input({
                   color: 'var(--Quiet)',
                 },
                 '&.Mui-focused': { color: activeTextColor },
-                '&.Mui-disabled': { color: 'var(--Quiet)', opacity: 0.6 },
+                '&.Mui-disabled': { color: 'var(--Quiet)', opacity: 'var(--Disabled, 0.38)' },
               },
 
               '& .MuiOutlinedInput-notchedOutline legend': { display: 'none' },

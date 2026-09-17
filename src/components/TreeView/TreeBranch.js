@@ -132,7 +132,7 @@ export function TreeBranch({
           color: 'inherit',
           textAlign: 'left',
           cursor: disabled ? 'not-allowed' : 'pointer',
-          opacity: disabled ? 0.5 : 1,
+          opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
           outline: 'none',
           transition: 'background-color 0.15s ease, color 0.15s ease',
           '&:hover': !disabled ? { backgroundColor: 'var(--Hover)' } : {},

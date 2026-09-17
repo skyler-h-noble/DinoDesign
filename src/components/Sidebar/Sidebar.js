@@ -11,7 +11,6 @@ import {
   Typography,
   Divider,
   Collapse,
-  IconButton,
   Badge,
   Tooltip,
   Avatar,
@@ -20,6 +19,11 @@ import {
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { scrimStates } from '../_states';
+import { IconButton } from '../Button/Button';
+/* The lib's own icon button — <Button iconOnly> — not MUI's, so hover,
+   pressed, focus-visible and disabled all come from Button rather than
+   being re-derived at each call site. */
 
 /**
  * Sidebar Component
@@ -138,18 +142,13 @@ export function Sidebar({
                       color: isSelected && !hasSubmenu
                         ? 'var(--Buttons-Primary-Text)'
                         : 'var(--Text)',
-                      '&:hover': {
-                        backgroundColor: isSelected && !hasSubmenu
-                          ? 'var(--Buttons-Primary-Button)'
-                          : 'var(--Container-High)',
-                      },
-                      '&.Mui-selected': {
-                        backgroundColor: 'var(--Buttons-Primary-Button)',
-                        color: 'var(--Buttons-Primary-Text)',
-                        '&:hover': {
-                          backgroundColor: 'var(--Buttons-Primary-Button)',
-                        },
-                      },
+                      ...scrimStates({
+                        muiPrefix: true,
+                        selectedBg: 'var(--Buttons-Primary-Button)',
+                        selectedText: 'var(--Buttons-Primary-Text)',
+                        selectedHover: 'var(--Buttons-Primary-Hover)',
+                        selectedPressed: 'var(--Buttons-Primary-Pressed)',
+                      }),
                       transition: 'all 0.2s ease-in-out',
                     }}
                   >
@@ -199,13 +198,13 @@ export function Sidebar({
                             pl: 4,
                             backgroundColor: 'transparent',
                             color: 'var(--Text)',
-                            '&:hover': {
-                              backgroundColor: 'var(--Container-High)',
-                            },
-                            '&.Mui-selected': {
-                              backgroundColor: 'var(--Buttons-Primary-Button)',
-                              color: 'var(--Buttons-Primary-Text)',
-                            },
+                            ...scrimStates({
+                              muiPrefix: true,
+                              selectedBg: 'var(--Buttons-Primary-Button)',
+                              selectedText: 'var(--Buttons-Primary-Text)',
+                              selectedHover: 'var(--Buttons-Primary-Hover)',
+                              selectedPressed: 'var(--Buttons-Primary-Pressed)',
+                            }),
                           }}
                         >
                           {subitem.icon && (
@@ -348,11 +347,11 @@ export function CollapsibleSidebar({
           </Typography>
         )}
         <IconButton
+          variant="ghost"
           onClick={onToggle}
           size="small"
-          sx={{
-            color: 'var(--Icons-Primary)',
-          }}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          sx={{ color: 'var(--Icons-Primary)' }}
         >
           <ChevronRightIcon
             sx={{
@@ -637,23 +636,18 @@ export function MinimalSidebar({
     >
       {items.map((item, index) => (
         <Tooltip key={index} title={item.label} placement="right">
+          /* The fill, the text and every state come from the VARIANT now.
+             This used to paint them by hand, which cost it a pressed state, a
+             hover that repainted the resting colour when selected, and a
+             --Container-High tint that does not move with the surface. */
           <IconButton
-            onClick={() => handleItemClick(item, index)}
+            variant={selectedItem === index ? 'primary' : 'ghost'}
             selected={selectedItem === index}
+            onClick={() => handleItemClick(item, index)}
+            aria-label={item.label}
             sx={{
               width: 56,
               height: 56,
-              backgroundColor: selectedItem === index
-                ? 'var(--Buttons-Primary-Button)'
-                : 'transparent',
-              color: selectedItem === index
-                ? 'var(--Buttons-Primary-Text)'
-                : 'var(--Icons-Primary)',
-              '&:hover': {
-                backgroundColor: selectedItem === index
-                  ? 'var(--Buttons-Primary-Button)'
-                  : 'var(--Container-High)',
-              },
               borderRadius: '8px',
               transition: 'all 0.2s ease-in-out',
             }}

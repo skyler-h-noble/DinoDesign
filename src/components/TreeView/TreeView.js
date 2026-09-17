@@ -161,7 +161,7 @@ function TreeNode({
           fontWeight: isSelected ? 600 : 400,
           backgroundColor: isSelected ? 'var(--Pressed)' : 'transparent',
           cursor: disabled ? 'not-allowed' : 'pointer',
-          opacity: disabled ? 0.45 : 1,
+          opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
           transition: 'color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease',
           ...(disabled ? {} : {
             '&:hover': { color: 'var(--Text)', backgroundColor: 'var(--Hover)' },

@@ -270,7 +270,7 @@ export function TabList({
     '&:hover': { color: 'var(--Text)', backgroundColor: 'var(--Hover)' },
     '&:active': { backgroundColor: 'var(--Pressed)' },
     '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '-3px' },
-    '&:disabled': { opacity: 0.3, cursor: 'default', '&:hover': { backgroundColor: 'transparent', color: 'var(--Text-Quiet)' } },
+    '&:disabled': { opacity: 'var(--Disabled, 0.38)', cursor: 'default', '&:hover': { backgroundColor: 'transparent', color: 'var(--Text-Quiet)' } },
   };
 
   const tabListContent = items.map((child, index) =>
@@ -466,7 +466,7 @@ export function Tab({
           ? (isSelected ? s.indicatorThickness + ' solid ' + indicatorColor : s.indicatorThickness + ' solid transparent')
           : 'none',
         cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.5 : 1,
+        opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
         position: 'relative',
         outline: 'none',
         transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease',

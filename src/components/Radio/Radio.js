@@ -156,13 +156,19 @@ export function Radio({
         color: 'inherit',
         transition: 'background-color 0.15s ease-in-out',
         '&.Mui-checked': { color: 'inherit' },
+        /* Same as Checkbox: the ripple halo is suppressed and the ring takes
+           the state instead, so the dot stays the one thing that means
+           "selected". */
         '&:hover': { backgroundColor: 'transparent' },
+        '&:hover .radio-circle-icon': { borderColor: 'var(--Text)' },
+        '&:active .radio-circle-icon': { borderColor: 'var(--Text)', backgroundColor: 'var(--Pressed)' },
+        '&.Mui-disabled .radio-circle-icon': { opacity: 'var(--Disabled, 0.38)' },
         '&.Mui-focusVisible .radio-circle-icon': {
           outline: '2px solid var(--Focus-Visible)',
           outlineOffset: '2px',
         },
         '&.Mui-disabled': {
-          opacity: 0.6,
+          opacity: 'var(--Disabled, 0.38)',
           cursor: 'not-allowed',
           pointerEvents: 'none',
         },
@@ -247,7 +253,7 @@ export function RadioGroup({
             fontWeight: 500,
             mb: 1,
             '&.Mui-focused': { color: 'var(--Text)' },
-            '&.Mui-disabled': { color: 'var(--Text-Quiet)', opacity: 0.6 },
+            '&.Mui-disabled': { color: 'var(--Text-Quiet)', opacity: 'var(--Disabled, 0.38)' },
           }}
         >
           {label}

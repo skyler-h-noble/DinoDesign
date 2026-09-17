@@ -136,7 +136,7 @@ export function Fab({
           fontWeight: 600,
           // Interaction
           cursor: disabled ? 'not-allowed' : 'pointer',
-          opacity: disabled ? 0.5 : 1,
+          opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
           outline: 'none',
           flexShrink: 0,
           transition: 'background-color 0.15s ease, box-shadow 0.2s ease, transform 0.1s ease',

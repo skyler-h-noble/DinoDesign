@@ -264,7 +264,7 @@ export function NumberField({
           display: 'block', marginBottom: '6px',
           color: disabled ? 'var(--Quiet)' : 'var(--Text)',
           fontWeight: 500,
-          opacity: disabled ? 0.6 : 1,
+          opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
         }}
       >
         {label}
@@ -295,7 +295,7 @@ export function NumberField({
           overflow: 'hidden',
           transition: 'border-color 0.15s ease',
           boxShadow: 'none',
-          opacity: disabled ? 0.5 : 1,
+          opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
           '&:focus-within': {
             outline: '2px solid var(--Focus-Visible)',
             outlineOffset: '2px',
@@ -452,7 +452,7 @@ export function NumberField({
 
       <Box sx={{
         display: 'inline-flex', alignItems: 'center', gap: size === 'small' ? 0.5 : 1,
-        opacity: disabled ? 0.5 : 1,
+        opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
       }}>
         {/* Decrement — icon button, uses size-aware icon-button radius. */}
         <Box component="button" type="button" aria-label="Decrease" {...holdHandlers(-1)}

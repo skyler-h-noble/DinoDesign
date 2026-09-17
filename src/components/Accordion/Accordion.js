@@ -232,7 +232,7 @@ export function Accordion({
           backgroundColor: 'var(--Background)',
           overflow: 'hidden',
           boxShadow: SHADOW_LEVEL_2,
-          opacity: disabled ? 0.5 : 1,
+          opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
           ...sx,
         }}
         {...props}
@@ -328,6 +328,16 @@ export function AccordionSummary({
         borderRadius: 0,
         '&:hover': !disabled ? {
           color: 'var(--Text)',
+          backgroundColor: 'var(--Hover)',
+          '& .omni-icon': { color: 'var(--Text)' },
+        } : {},
+        /* The summary is a full-width button, so a scrim is the only pressed
+           feedback available — there is no fill to darken and no border to
+           move. Colour alone could not carry it: hover already takes the text
+           to --Text, which leaves pressed nowhere to go. */
+        '&:active': !disabled ? {
+          color: 'var(--Text)',
+          backgroundColor: 'var(--Pressed)',
           '& .omni-icon': { color: 'var(--Text)' },
         } : {},
         '&:focus-visible': {

@@ -260,7 +260,9 @@ export function Modal({
                   flexShrink: 0, ml: 1,
                   transition: 'background-color 0.15s ease, color 0.15s ease',
                   '&:hover': { backgroundColor: 'var(--Hover)', color: 'var(--Text)' },
+                  '&:active': { backgroundColor: 'var(--Pressed)', color: 'var(--Text)' },
                   '&:focus-visible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '2px' },
+                  '&:disabled': { opacity: 'var(--Disabled, 0.38)', cursor: 'not-allowed' },
                 }}
               >
                 <CloseIcon sx={{ fontSize: 20 }} />
