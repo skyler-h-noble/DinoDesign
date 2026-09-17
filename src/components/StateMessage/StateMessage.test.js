@@ -170,3 +170,52 @@ describe('accessibility', () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 });
+
+describe('the footer is decided per state', () => {
+  const footer = [['Sum', '120']];
+  /* Queried inside the <tfoot>, because "Total" is also a COLUMN HEADER here —
+     a getByText on the whole table matches both and passes for the wrong
+     reason. */
+  const tfootText = (container) => container.querySelector('tfoot')?.textContent ?? '';
+
+  it('shows the total when the table is empty', () => {
+    /* The case the first version got wrong. A filtered view with no matching
+       invoices has a real total: zero. Hiding it makes the user wonder whether
+       the filter or the sum failed, when the answer is "none, and they add up
+       to nothing". */
+    const { container } = render(
+      <Table columns={cols} rows={[]} footerRows={[['Sum', '0']]}
+        empty={<StateMessage title="No matches" />} />,
+    );
+    expect(tfootText(container)).toContain('Sum');
+    expect(tfootText(container)).toContain('0');
+  });
+
+  it('keeps the footer while loading rather than removing it', () => {
+    // A total that vanishes and reappears moves the table's height twice.
+    const { container } = render(
+      <Table columns={cols} rows={[]} footerRows={footer} loading />,
+    );
+    expect(container.querySelector('tfoot')).toBeInTheDocument();
+  });
+
+  it('drops the footer on error', () => {
+    /* The one state where dropping is right. A total computed over data that
+       failed to arrive is not missing, it is WRONG — and a wrong number shown
+       confidently is worse than no number. Partial failures are the sharp
+       case: some rows land, the sum looks plausible, and nothing says it is
+       short. */
+    const { container } = render(
+      <Table columns={cols} rows={[]} footerRows={footer}
+        error={<StateMessage type="error" title="Could not load" />} />,
+    );
+    expect(container.querySelector('tfoot')).not.toBeInTheDocument();
+  });
+
+  it('shows the footer normally with rows', () => {
+    const { container } = render(
+      <Table columns={cols} rows={[['Acme', '10']]} footerRows={footer} />,
+    );
+    expect(tfootText(container)).toContain('120');
+  });
+});

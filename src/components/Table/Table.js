@@ -1,7 +1,7 @@
 // src/components/Table/Table.js
 import React from 'react';
 import { Box } from '@mui/material';
-import { Ghost } from '../_ghost';
+import { Ghost, ghostBlockSx } from '../_ghost';
 
 /**
  * Table Component
@@ -179,6 +179,11 @@ export function Table({
      lands. */
   const dataState = error ? 'error' : loading ? 'loading' : (rows && rows.length === 0 && empty) ? 'empty' : null;
 
+  const hasFooter = Boolean(footerRows && footerRows.length > 0);
+  /* Shown whenever there is one, EXCEPT on error — see the note at the
+     <tfoot> below for why error is the exception rather than the rule. */
+  const footerShown = hasFooter && dataState !== 'error';
+
   /* The header is kept in every state. Dropping it makes the region change
      width between states, so the page jumps each time a filter runs — the same
      reflow Ghost exists to avoid. */
@@ -271,9 +276,25 @@ export function Table({
           ))}
         </Box>
         )}
-        {/* The footer follows the rows: totals over placeholder data would be
-            wrong, and totals over an error message are meaningless. */}
-        {!dataState && footerRows && footerRows.length > 0 && (
+        /* The footer is decided PER STATE, not dropped wholesale.
+
+           loading — ghosted, not hidden. A total that vanishes and reappears
+             moves the table's height twice, which is the reflow the header is
+             already kept to avoid; and the total genuinely IS loading, so a
+             placeholder is the honest thing to show rather than a gap.
+
+           empty — SHOWN as given. This is the case the first version got
+             wrong. A filtered view with no matching invoices has a real total:
+             zero. Hiding it makes the user wonder whether the filter or the
+             sum failed, when the answer is simply "none, and they add up to
+             nothing".
+
+           error — dropped, and this is the one that must stay dropped. A total
+             computed over data that failed to arrive is not missing, it is
+             WRONG, and a wrong number shown confidently is worse than no
+             number. Partial failures are the sharp case: some rows land, the
+             sum looks plausible, and nothing on screen says it is short. */
+        {footerShown && (
           <Box component="tfoot">
             {footerRows.map((row, fi) => (
               <Box component="tr" key={'f-' + fi}>
@@ -284,6 +305,10 @@ export function Table({
                     sx={{
                       ...getFooterSx(),
                       ...(columns[ci] && columns[ci].align ? { textAlign: columns[ci].align } : {}),
+                      /* Ghosted on the CELL, not via a <Ghost> wrapper: Ghost
+                         renders a <div>, and a div inside <tfoot> is invalid
+                         markup that browsers hoist out of the table. */
+                      ...(dataState === 'loading' ? ghostBlockSx() : {}),
                     }}
                   >
                     {cell}
