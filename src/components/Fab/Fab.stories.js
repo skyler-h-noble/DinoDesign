@@ -20,7 +20,7 @@ export const Variants = {
     <Box sx={{ p: 4 }}>
       <Stack direction="row" spacing={3}>
         <Fab variant="solid" ariaLabel="Solid" />
-        <Fab variant="light" ariaLabel="Light" />
+        <Fab ariaLabel="Solid" />
       </Stack>
     </Box>
   ),
@@ -40,7 +40,7 @@ export const LightColors = {
   render: () => (
     <Box sx={{ p: 4 }}>
       <Stack direction="row" spacing={2} flexWrap="wrap">
-        {COLORS.map((c) => <Fab key={c} variant="light" color={c} ariaLabel={c} />)}
+        {COLORS.map((c) => <Fab key={c} color={c} ariaLabel={c} />)}
       </Stack>
     </Box>
   ),
@@ -64,7 +64,7 @@ export const Extended = {
       <Stack spacing={2}>
         <Fab extended label="Navigate" icon={<NavigationIcon sx={{ fontSize: 'inherit' }} />} ariaLabel="Navigate" />
         <Fab extended label="Edit" icon={<EditIcon sx={{ fontSize: 'inherit' }} />} color="secondary" ariaLabel="Edit" />
-        <Fab extended label="Like" icon={<FavoriteIcon sx={{ fontSize: 'inherit' }} />} variant="light" color="error" ariaLabel="Like" />
+        <Fab extended label="Like" icon={<FavoriteIcon sx={{ fontSize: 'inherit' }} />} color="error" ariaLabel="Like" />
       </Stack>
     </Box>
   ),

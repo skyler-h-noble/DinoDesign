@@ -9,7 +9,15 @@ import { SHADOW_LEVEL_3, SHADOW_LEVEL_4, bevelShadow } from '../_shadows';
  *
  * VARIANTS:
  *   solid   bg: var(--Buttons-{C}-Button), text: var(--Buttons-{C}-Text), border: var(--Buttons-{C}-Border)
- *   light   bg: var(--Buttons-{C}-Light-Button), text: var(--Buttons-{C}-Light-Text), border: var(--Buttons-{C}-Light-Border)
+ *
+ * There was a `light` variant. It is gone, along with the -Light button shades
+ * it named: no design system publishes --Buttons-{C}-Light-Button and the five
+ * tokens carried no fallbacks, so every declaration was invalid at computed-
+ * value time and the whole variant rendered as an unstyled box. It had never
+ * painted anything on any brand.
+ *
+ * A lighter FAB is a lighter SURFACE, not a lighter button token — put the Fab
+ * on data-surface="Surface-Brightest" and keep variant="solid".
  *
  * COLORS: primary, secondary, tertiary, neutral, info, success, warning, error
  *
@@ -35,17 +43,8 @@ const SIZE_MAP = {
   large:  { size: 56, iconSize: 36, fontSize: '15px', px: 20, gap: 10 },
 };
 
-function getTokens(variant, color) {
+function getTokens(color) {
   const C = COLOR_MAP[color] || 'Primary';
-  if (variant === 'light') {
-    return {
-      bg: 'var(--Buttons-' + C + '-Light-Button)',
-      text: 'var(--Buttons-' + C + '-Light-Text)',
-      border: 'var(--Buttons-' + C + '-Light-Border)',
-      hover: 'var(--Buttons-' + C + '-Light-Hover)',
-      active: 'var(--Buttons-' + C + '-Light-Pressed)',
-    };
-  }
   return {
     bg: 'var(--Buttons-' + C + '-Button)',
     text: 'var(--Buttons-' + C + '-Text)',
@@ -79,7 +78,20 @@ export function Fab({
   sx = {},
   ...props
 }) {
-  const tokens = getTokens(variant, color);
+  /* `variant` stays as a prop so an existing variant="solid" keeps working and
+     does not fall through ...props onto the <button> as an unknown attribute.
+     Anything else normalises to solid — there is only one variant now. */
+  if (process.env.NODE_ENV !== 'production' && variant !== 'solid') {
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[Fab] variant="' + variant + '" is not a Fab variant; rendering solid. '
+      + 'The light variant was removed with the -Light button shades — it named '
+      + 'tokens no design system publishes, so it rendered as an unstyled box. '
+      + 'For a lighter FAB, put it on data-surface="Surface-Brightest".',
+    );
+  }
+  const effectiveVariant = 'solid';
+  const tokens = getTokens(color);
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
   const iconEl = icon || children || <AddIcon sx={{ fontSize: s.iconSize }} />;
 
@@ -95,7 +107,7 @@ export function Fab({
         aria-label={effectiveLabel}
         onClick={onClick}
         disabled={disabled}
-        className={'fab fab-' + variant + ' fab-' + color + ' fab-' + size +
+        className={'fab fab-' + effectiveVariant + ' fab-' + color + ' fab-' + size +
           (extended ? ' fab-extended' : '') +
           (animate ? ' fab-animate' : '') +
           (disabled ? ' fab-disabled' : '') +

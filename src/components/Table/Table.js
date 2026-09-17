@@ -9,7 +9,8 @@ import { Box } from '@mui/material';
  *   default   No color selection. Borders: var(--Border), Text: var(--Text)
  *   outlined  Container border: var(--Buttons-{C}-Border), internal: var(--Border), Text: var(--Text)
  *   light     Header bg: var(--Buttons-{C}-Button), header text: var(--Buttons-{C}-Text), body text: var(--Text), borders: var(--Border)
- *   solid     Wrapper gets data-theme="{Color}-Medium", borders: var(--Border), text: var(--Text)
+ *   solid     Wrapper gets data-theme="{Color}", borders: var(--Border), text: var(--Text).
+ *             The surface is left to the page, matching List.
  *
  * SIZES:
  *   small   py: 4px,  fontSize: 13px
@@ -24,6 +25,17 @@ import { Box } from '@mui/material';
  */
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+/* Theme modes, by the colour prop. Same table as List, and deliberately a
+   LOOKUP rather than cap(color): the nine modes are a closed set, so an
+   unrecognised colour has to emit no data-theme at all rather than a name the
+   cascade will not match. cap('black-white') would produce "Black-white",
+   which binds to nothing and paints the parent's palette — the same silent
+   failure this fixes. */
+const THEME_MAP = {
+  primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
+  info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
+};
 
 const SIZE_MAP = {
   small:  { py: '4px',  px: '8px',  fontSize: '13px', headerFontSize: '12px' },
@@ -60,10 +72,16 @@ export function Table({
     ? '1px solid var(--Buttons-' + C + '-Border)'
     : 'none';
 
-  // Wrapper data attributes for solid theme
+  /* Wrapper data attributes for the solid theme.
+
+     This was C + '-Medium'. The Theme collection is nine BARE modes — there is
+     no Primary-Medium — so the attribute matched no rule, --Background never
+     resolved, and the solid table painted whatever palette its parent had.
+     It reads as the colour prop being ignored rather than as a missing token,
+     which is why it survived the shade removal. */
   const wrapperDataAttrs = {};
-  if (isSolid) {
-    wrapperDataAttrs['data-theme'] = C + '-Medium';
+  if (isSolid && THEME_MAP[color]) {
+    wrapperDataAttrs['data-theme'] = THEME_MAP[color];
   }
 
   // Header styles per variant

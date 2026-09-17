@@ -40,9 +40,25 @@ describe('Variants', () => {
     expect(container.querySelector('.fab-solid')).toBeInTheDocument();
   });
 
-  test('light class', () => {
+  test('there is no light variant — it normalises to solid', () => {
+    /* It named --Buttons-{C}-Light-Button and four siblings, none of which any
+       design system publishes, and none carried a fallback. A var() with an
+       undefined variable and no fallback makes the whole declaration invalid,
+       so background, text, border, hover and pressed all dropped: the variant
+       rendered as an unstyled box on every brand. */
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
     const { container } = renderFab({ variant: 'light' });
-    expect(container.querySelector('.fab-light')).toBeInTheDocument();
+    expect(container.querySelector('.fab-light')).not.toBeInTheDocument();
+    expect(container.querySelector('.fab-solid')).toBeInTheDocument();
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  test('solid is silent', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    renderFab({ variant: 'solid' });
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
   });
 });
 

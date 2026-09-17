@@ -43,12 +43,35 @@ describe('Table', () => {
     expect(container.querySelector('.table-' + v)).toBeInTheDocument();
   });
 
-  test('solid applies data-theme', () => {
+  test('solid applies the bare theme mode', () => {
     const { container } = render(
       <Table variant="solid" color="primary" columns={cols} rows={data} />
     );
     const w = container.querySelector('.table-wrapper');
-    expect(w.getAttribute('data-theme')).toBe('Primary-Medium');
+    expect(w.getAttribute('data-theme')).toBe('Primary');
+  });
+
+  test('solid never emits a -Light / -Medium / -Dark shade', () => {
+    /* The shades were removed from the Theme collection, so a shaded name
+       matches no rule: --Background never resolves and the table paints its
+       parent's palette. That looks like the color prop being ignored, not like
+       a missing token, which is how the old value survived the removal. */
+    for (const color of ['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error']) {
+      const { container } = render(
+        <Table variant="solid" color={color} columns={cols} rows={data} />
+      );
+      const theme = container.querySelector('.table-wrapper').getAttribute('data-theme');
+      expect(theme).not.toMatch(/-(Light|Medium|Dark)$/);
+    }
+  });
+
+  test('an unrecognised colour emits no data-theme at all', () => {
+    // Better than a name the cascade cannot match: no attribute means the
+    // table inherits, which is a defensible result rather than a broken one.
+    const { container } = render(
+      <Table variant="solid" color="black-white" columns={cols} rows={data} />
+    );
+    expect(container.querySelector('.table-wrapper').hasAttribute('data-theme')).toBe(false);
   });
 
   test('stripe odd applies data-surface', () => {
