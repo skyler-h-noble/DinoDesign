@@ -135,7 +135,18 @@ export function AccordionGroup({
               marginBottom: '-1px',
               boxShadow: 'none',
             },
+            /* The summary follows its segment, or its focus ring is a square
+               inside a rounded corner. Set here rather than in JS because the
+               segment's own corners are applied by these descendant selectors,
+               which the component cannot read. */
+            '& > .accordion-segment .accordion-summary': {
+              borderRadius: 0,
+            },
             '& > .accordion-segment:first-of-type': {
+              borderTopLeftRadius: RADIUS,
+              borderTopRightRadius: RADIUS,
+            },
+            '& > .accordion-segment:first-of-type .accordion-summary': {
               borderTopLeftRadius: RADIUS,
               borderTopRightRadius: RADIUS,
             },
@@ -143,6 +154,13 @@ export function AccordionGroup({
               borderBottomLeftRadius: RADIUS,
               borderBottomRightRadius: RADIUS,
               marginBottom: 0,
+            },
+            /* Only when it is also collapsed — an expanded last segment has
+               its details below the summary, so the summary is not the bottom
+               edge. */
+            '& > .accordion-segment:last-of-type .accordion-summary:not(.accordion-summary-expanded)': {
+              borderBottomLeftRadius: RADIUS,
+              borderBottomRightRadius: RADIUS,
             },
             ...sx,
           }}
@@ -325,7 +343,24 @@ export function AccordionSummary({
         cursor: disabled ? 'not-allowed' : 'pointer',
         textAlign: 'left',
         transition: 'color 0.2s ease, background-color 0.15s ease',
-        borderRadius: 0,
+        /* The ring below is drawn with `outline`, and an outline takes its
+           corner radius from the element it sits on — so a square summary
+           inside a rounded segment produced a SQUARE ring whose corners were
+           then clipped by the segment's overflow:hidden. It read as a broken
+           rectangle rather than a focus indicator.
+
+           Matching the segment fixes it for free: the browser draws an
+           `outline` concentric with the border radius, so an inset ring inside
+           an 8px corner comes out at 5px without anyone computing it. That is
+           the same geometry Figma parameterises by hand as
+           Accordian-Inner-Focus-Radius (8 - 3 = 5) and Accordian-Focus-Radius
+           (8 + 3 = 11).
+
+           Only the TOP corners when expanded: the details panel sits directly
+           beneath, so rounding the bottom would curve the hover scrim inward
+           mid-panel. Collapsed, the summary IS the segment, so it takes all
+           four. A grouped segment overrides both — see the group rules. */
+        borderRadius: expanded ? RADIUS + ' ' + RADIUS + ' 0 0' : RADIUS,
         '&:hover': !disabled ? {
           color: 'var(--Text)',
           backgroundColor: 'var(--Hover)',
