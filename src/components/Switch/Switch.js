@@ -78,7 +78,12 @@ function outlineStyles(color) {
     type: 'outline',
     color: C,
     trackOff:       'var(--Background)',
-    trackOffBorder: 'var(--Border-Variant)',
+    /* --Border, not --Border-Variant. In the OFF state this edge is the only
+       thing drawing the control at all — the track is the page colour — so it
+       is the control's boundary and carries WCAG 1.4.11's 3:1. Border-Variant
+       is documented as DECORATIVE and guarantees no ratio, which is the same
+       mistake Slider's rail had before it was moved to --Border. */
+    trackOffBorder: 'var(--Border)',
     // ON is a FILLED track, same as the design's default. It used to be
     // transparent, which read as "nothing happened" next to the default
     // variant — only the border changed colour.
@@ -96,8 +101,12 @@ function lightStyles(color) {
   return {
     type: 'light',
     color: C,
+    /* Was --Border-Variant as the FILL with no edge — a decorative token doing
+       the whole job of showing an interactive control. The fill can stay quiet;
+       the EDGE is what has to be findable, so the pairing inverts: the track
+       keeps a soft fill and gains the 3:1 border the outline variant uses. */
     trackOff:       'var(--Border-Variant)',
-    trackOffBorder: 'transparent',
+    trackOffBorder: 'var(--Border)',
     // The light tone fills the track. There are no --Buttons-*-Light-* tokens
     // in the export, so this uses Color-11 — the same tone Button's light
     // variant fills with.
@@ -105,7 +114,10 @@ function lightStyles(color) {
     trackOnBorder:  'var(--Buttons-' + C + '-Border)',
     dotOff:         'var(--Quiet)',
     dotOn:          'var(--Buttons-' + C + '-Border)',
-    iconOff:        'var(--Border-Variant)',
+    /* The off icon sits ON the track, so it needs a ratio against it. Quiet is
+       the 4.5:1 token tuned per surface; Border-Variant guaranteed nothing and
+       put a decorative tone on a mark the user is meant to read. */
+    iconOff:        'var(--Quiet)',
     iconOn:         'var(--' + C + '-Color-11)',
     // Base theme + brightest surface; *-Light themes are not generated.
     dataTheme:      C,
