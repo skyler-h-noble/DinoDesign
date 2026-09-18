@@ -39,7 +39,21 @@ const path = require('path');
 
 const COMPONENTS = path.join(__dirname);
 
-const read = (rel) => fs.readFileSync(path.join(COMPONENTS, rel), 'utf8');
+/* Returns null for a missing file rather than throwing.
+
+   It used to throw, and that was worse than a failing assertion: the reads
+   happen at describe() time, so deleting a registered component made the whole
+   suite fail to COLLECT — reporting "0 tests" and silently removing 180
+   passing ones from the run. A suite that vanishes looks like a suite that
+   passed. The "points at files that exist" test below was meant to catch
+   exactly this and could not, because collection crashed before it ran. */
+const read = (rel) => {
+  try {
+    return fs.readFileSync(path.join(COMPONENTS, rel), 'utf8');
+  } catch {
+    return null;
+  }
+};
 
 /* Strip comments before matching. This file argues about hover in prose, and
    so do several components — matching a comment would let a component pass by
@@ -103,7 +117,6 @@ const REGISTRY = [
   { control: 'Sidebar rail button', file: 'Sidebar/Sidebar.js', delegatesTo: 'Button/Button.js', renders: /<IconButton\b/ },
   { control: 'MainLayout nav row',  file: 'MainLayout/MainLayout.js' },
   { control: 'MainLayout menu btn', file: 'MainLayout/MainLayout.js', delegatesTo: 'Button/Button.js', renders: /<IconButton\b/ },
-  { control: 'Header icon button',  file: 'Header/Header.js', delegatesTo: 'Button/Button.js', renders: /<IconButton\b/ },
   // Paper itself is a surface with no onClick. InteractivePaper is the
   // clickable export, and its docblock promises hover and focus.
   { control: 'InteractivePaper',    file: 'Paper/Paper.js', within: ['export function InteractivePaper', 'export function ElevatedPaper'] },
@@ -165,6 +178,7 @@ const EXEMPT = {
 };
 
 function slice(src, within) {
+  if (src === null) return null;
   if (!within) return src;
   const [from, to] = within;
   const a = src.indexOf(from);
@@ -176,7 +190,19 @@ function slice(src, within) {
 describe('every clickable control has every interaction state', () => {
   for (const entry of REGISTRY) {
     describe(entry.control, () => {
-      const own = code(slice(read(entry.file), entry.within));
+      const raw = slice(read(entry.file), entry.within);
+
+      if (raw === null) {
+        it('exists', () => {
+          throw new Error(
+            `REGISTRY names ${entry.file}, which is not on disk. Remove the `
+            + 'entry if the component was deleted, or fix the path.',
+          );
+        });
+        return;
+      }
+
+      const own = code(raw);
 
       if (entry.delegatesTo) {
         it(`renders ${entry.delegatesTo.split('/')[0]}, which owns the states`, () => {
@@ -191,7 +217,8 @@ describe('every clickable control has every interaction state', () => {
         });
       }
 
-      const src = entry.delegatesTo ? code(read(entry.delegatesTo)) : own;
+      const delegate = entry.delegatesTo ? read(entry.delegatesTo) : null;
+      const src = entry.delegatesTo ? code(delegate || '') : own;
       for (const [state, patterns] of Object.entries(STATES)) {
         it(`implements ${state}`, () => {
           const found = patterns.some((p) => p.test(src));
