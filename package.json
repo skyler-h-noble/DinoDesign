@@ -39,7 +39,7 @@
     "start": "react-scripts start",
     "dev-api": "node dev-server.js",
     "build:app": "react-scripts build",
-    "build:lib": "rollup -c rollup.config.js && npm run build:types",
+    "build:lib": "npm run clean:lib && rollup -c rollup.config.js && npm run build:types",
     "build": "npm run build:lib",
     "test": "react-scripts test",
     "test:coverage": "react-scripts test --coverage --watchAll=false",
@@ -50,7 +50,8 @@
     "prepublishOnly": "npm run build:lib",
     "predeploy": "npm run build:app",
     "deploy": "gh-pages -d build",
-    "build:types": "npx -y -p typescript@5.9 tsc -p tsconfig.dts.json"
+    "build:types": "npx -y -p typescript@5.9 tsc -p tsconfig.dts.json",
+    "clean:lib": "rm -rf dist"
   },
   "peerDependencies": {
     "@emotion/react": ">=11.0.0",
