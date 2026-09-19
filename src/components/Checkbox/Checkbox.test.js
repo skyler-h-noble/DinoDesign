@@ -308,3 +308,59 @@ describe('Checkbox variant is colour only', () => {
     expect(container.querySelectorAll('[data-surface]')).toHaveLength(1);
   });
 });
+
+/* Checkbox and Radio sit side by side in the same form, so their label and
+ * spacing tables have to agree. Radio's was right and Checkbox's was not:
+ *
+ *   gap    6 / 8 / 10  — 6 and 10 are not on the Sizing scale (Quarter 2,
+ *                        Half 4, 1 = 8, 1-and-Half 12), so both could only
+ *                        ever be literals. Radio ships 4 / 8 / 12.
+ *   label  a hardcoded 13/15/17px `fontSize` that OVERRODE the typography
+ *          component it sat on, so the real Body sizes never reached it.
+ *   large  `size === 'small' ? BodySmall : Body` gave a LARGE checkbox the
+ *          MEDIUM component — the third step had no branch.
+ */
+describe('label and gap follow the same table Radio uses', () => {
+  const cssFor = (el) => {
+    const cls = (el.className || '').split(/\s+/).find((c) => c.startsWith('css-'));
+    if (!cls) return '';
+    return Array.from(document.styleSheets)
+      .flatMap((sheet) => Array.from(sheet.cssRules || []))
+      .filter((r) => (r.selectorText || '').includes('.' + cls))
+      .map((r) => r.cssText)
+      .join('\n');
+  };
+
+  test.each([
+    ['small', '4px'],
+    ['medium', '8px'],
+    ['large', '12px'],
+  ])('%s gap is %s, a real Sizing rung', (size, expected) => {
+    const { container } = render(<Checkbox size={size} label="Label" />);
+    const root = container.querySelector('.MuiFormControlLabel-root');
+    expect(cssFor(root)).toContain('gap: ' + expected);
+  });
+
+  /* MUI's FormControlLabel wraps any non-MUI-Typography label in a Typography
+     of its own, so the LIB's component is a CHILD of .MuiFormControlLabel-label,
+     not that element. Querying the wrapper found MuiTypography-body1 for every
+     size and could not tell them apart. */
+  const libLabel = (c) => c.querySelector('[class*="typography-body"]');
+
+  test('the label carries no hardcoded font-size', () => {
+    const { container } = render(<Checkbox size="large" label="Label" />);
+    /* The typography component owns the size. A font-size here would mean the
+       override is back and the Body tokens are being cancelled again. */
+    expect(cssFor(libLabel(container))).not.toMatch(/font-size:\s*1[357]px/);
+  });
+
+  test.each([
+    ['small', 'typography-body-small'],
+    ['medium', 'typography-body'],
+    ['large', 'typography-body-large'],
+  ])('%s uses %s', (size, expected) => {
+    const { container } = render(<Checkbox size={size} label="Label" />);
+    const cls = libLabel(container).className.split(/\s+/);
+    expect(cls).toContain(expected);
+  });
+});
