@@ -255,3 +255,103 @@ describe('Breadcrumbs — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+/* The separator channel is ONE value at every size.
+ *
+ * It was 6 / 8 / 10 in literal pixels — 6 and 10 are not on the Sizing scale,
+ * so neither could ever be a token. The gap sits on the CONTAINER, so it
+ * applies either side of every separator; what that channel tracks is the
+ * text (14 / 16 / 18), and a half-text channel targets 7 / 8 / 9, all of which
+ * snap to --Sizing-1.
+ *
+ * Checkbox's 4 / 8 / 12 was the tempting thing to copy and would have been
+ * wrong: that ramp is keyed to a CONTROL's box size, and 12px either side of a
+ * separator is a 24px channel that breaks a trail into separate words.
+ */
+describe('the separator gap does not scale with size', () => {
+  const cssFor = (el) => {
+    const cls = (el.className || '').split(/\s+/).find((c) => c.startsWith('css-'));
+    if (!cls) return '';
+    return Array.from(document.styleSheets)
+      .flatMap((sheet) => Array.from(sheet.cssRules || []))
+      .filter((r) => (r.selectorText || '').includes('.' + cls))
+      .map((r) => r.cssText)
+      .join('\n');
+  };
+
+  test.each(['small', 'medium', 'large'])('%s uses var(--Sizing-1)', (size) => {
+    const { container } = render(
+      <Breadcrumbs size={size}>
+        <span>Home</span><span>Products</span><span>Shoes</span>
+      </Breadcrumbs>
+    );
+    const list = container.querySelector('ol, ul') || container.firstChild;
+    expect(cssFor(list)).toContain('var(--Sizing-1)');
+  });
+
+  test('and carries no hardcoded pixel gap', () => {
+    const { container } = render(
+      <Breadcrumbs size="large"><span>A</span><span>B</span></Breadcrumbs>
+    );
+    const list = container.querySelector('ol, ul') || container.firstChild;
+    expect(cssFor(list)).not.toMatch(/gap:\s*(6|10)px/);
+  });
+});
+
+/* The current page is marked by WEIGHT, not colour alone.
+ *
+ * The design sets `Type=current` in SemiBold and `Type=default` in Regular.
+ * Weight survives greyscale and colour-blindness, so it carries the meaning
+ * even where the colour difference does not — and it is the one signal that
+ * still reads once the underline is the only other cue.
+ *
+ * From the token, not a literal 600: a brand that re-picks its semibold has
+ * to move this with it.
+ */
+describe('the current crumb is semibold', () => {
+  const cssFor = (el) => {
+    const cls = (el.className || '').split(/\s+/).find((c) => c.startsWith('css-'));
+    if (!cls) return '';
+    return Array.from(document.styleSheets)
+      .flatMap((sheet) => Array.from(sheet.cssRules || []))
+      .filter((r) => (r.selectorText || '').includes('.' + cls))
+      .map((r) => r.cssText)
+      .join('\n');
+  };
+
+  test('reads the semibold token, not a hardcoded weight', () => {
+    const { container } = render(
+      <Breadcrumbs><span>Home</span><span>Products</span><span>Shoes</span></Breadcrumbs>
+    );
+    const current = container.querySelector('.breadcrumb-current');
+    expect(current).toBeInTheDocument();
+    expect(cssFor(current)).toContain('--Body-Medium-Semibold-Font-Weight');
+  });
+
+  /* Colour splits the two roles as well as weight: the crumbs that ARE links
+     take the link role, the current page takes --Text. It used to paint the
+     links --Quiet, the muted-TEXT role — legible, but not announcing itself as
+     a link. The current page keeps --Text rather than the design's Hotlink: it
+     is not a link, and in a system where every hotlink is underlined, a
+     hotlink-coloured item with no underline is a colour with nothing behind
+     it. */
+  test('links take the link role, the current page takes --Text', () => {
+    const { container } = render(
+      <Breadcrumbs><span>Home</span><span>Products</span><span>Shoes</span></Breadcrumbs>
+    );
+    const first = container.querySelectorAll('.breadcrumb-item')[0];
+    const current = container.querySelector('.breadcrumb-current');
+    expect(cssFor(first)).toContain('var(--Link, var(--Hotlink))');
+    expect(cssFor(first)).not.toContain('var(--Quiet)');
+    expect(cssFor(current)).toContain('var(--Text)');
+  });
+
+  test('and the other crumbs are not bolded', () => {
+    const { container } = render(
+      <Breadcrumbs><span>Home</span><span>Products</span><span>Shoes</span></Breadcrumbs>
+    );
+    const first = container.querySelectorAll('.breadcrumb-item')[0];
+    expect(first.className).not.toContain('breadcrumb-current');
+    expect(cssFor(first)).not.toContain('Semibold-Font-Weight');
+  });
+});

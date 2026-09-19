@@ -8,7 +8,8 @@ import { BodySmall, Caption } from '../Typography';
  *
  * A navigational trail showing page hierarchy within the application.
  *
- * SIZES: small | medium | large  — scales font-size and gap
+ * SIZES: small | medium | large  — scales font-size and vertical padding.
+ * The GAP does not scale; see the note on GAP below.
  * SEPARATOR: any React node (default "/")
  * CONDENSE: collapses middle crumbs into "…" (keeps first + last N)
  * BACK ONLY MOBILE: at ≤600px, shows only "← Parent" link
@@ -17,10 +18,25 @@ import { BodySmall, Caption } from '../Typography';
  * The last child is treated as the current page (not a link, aria-current="page").
  */
 
+/* ONE value, deliberately not a row in the table below.
+ *
+ * The gap sits on the container, so it applies on BOTH sides of every
+ * separator — each "/" lives in a 2x channel. What that channel should track
+ * is the TEXT, and the text is 14 / 16 / 18, so a half-text channel targets
+ * 7 / 8 / 9 — all three of which snap to the same rung.
+ *
+ * It was 6 / 8 / 10 as literal pixels. Neither 6 nor 10 is on the Sizing scale
+ * (Quarter 2, Half 4, 1 = 8, 1-and-Half 12), so they could only ever be
+ * hardcoded. Copying Checkbox's 4 / 8 / 12 would have been worse, not better:
+ * that ramp separates a control from its label and is keyed to the BOX size,
+ * and at large it would put 12px each side of a separator — a 24px channel
+ * that reads as separate words rather than a trail. */
+const GAP = 'var(--Sizing-1)';
+
 const SIZE_MAP = {
-  small:  { fontSize: 'var(--Body-Small-Font-Size)', gap: '6px',  py: '4px' },
-  medium: { fontSize: 'var(--Body-Font-Size)',       gap: '8px',  py: '6px' },
-  large:  { fontSize: 'var(--Body-Large-Font-Size)', gap: '10px', py: '8px' },
+  small:  { fontSize: 'var(--Body-Small-Font-Size)', py: '4px' },
+  medium: { fontSize: 'var(--Body-Font-Size)',       py: '6px' },
+  large:  { fontSize: 'var(--Body-Large-Font-Size)', py: '8px' },
 };
 
 export function Breadcrumbs({
@@ -104,8 +120,26 @@ export function Breadcrumbs({
         className={'breadcrumb-item' + (isLast ? ' breadcrumb-current' : '')}
         sx={{
           display: 'inline-flex', alignItems: 'center',
-          ...(isLast && { color: 'var(--Text)', fontWeight: 600 }),
-          ...(!isLast && { color: 'var(--Quiet)' }),
+          /* Semibold, from the token rather than a literal 600. The design
+             sets the current crumb in SemiBold and the links in Regular, so
+             the page you are on is marked by WEIGHT — a signal that survives
+             greyscale and does not depend on colour alone. A hardcoded 600
+             would not move with a brand that re-picks its semibold. */
+          ...(isLast && {
+            color: 'var(--Text)',
+            fontWeight: 'var(--Body-Medium-Semibold-Font-Weight, 600)',
+          }),
+          /* The link role, spelled exactly as Link.js spells it — `--Link` is
+             never defined by anything, so the fallback to `--Hotlink` (which
+             the generator does emit) is the value that actually lands. This is
+             the one case where a var() fallback is correct rather than dead.
+
+             Was `--Quiet`, the muted-TEXT role. Contrast was fine (Quiet is
+             tuned to 4.5:1), but a link painted as muted text does not
+             announce itself as a link, and every crumb except the last IS
+             one. Only the wrapper is set: a <Link> child still paints itself,
+             so this changes the plain-text case to match the design. */
+          ...(!isLast && { color: 'var(--Link, var(--Hotlink))' }),
           // Truncate long crumbs
           maxWidth: '200px',
           '& > *': { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
@@ -144,7 +178,7 @@ export function Breadcrumbs({
           display: 'flex',
           flexWrap: 'wrap',
           alignItems: 'center',
-          gap: s.gap,
+          gap: GAP,
           listStyle: 'none',
           margin: 0,
           padding: 0,
@@ -165,7 +199,7 @@ export function Breadcrumbs({
             '@media (max-width: 600px)': {
               display: 'flex',
               alignItems: 'center',
-              gap: '4px',
+              gap: 'var(--Sizing-Half)',
               fontSize: s.fontSize,
               color: 'var(--Link)',
             },
