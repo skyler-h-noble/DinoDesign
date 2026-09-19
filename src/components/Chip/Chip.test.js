@@ -6,7 +6,6 @@ import {
   PrimaryChip,
   ErrorChip,
   PrimaryOutlineChip,
-  SuccessLightChip,
 } from './Chip';
 import { axe } from 'jest-axe';
 
@@ -44,10 +43,19 @@ describe('Chip Component', () => {
     expect(container.querySelector(`.chip-${variant}`)).toBeInTheDocument();
   });
 
-  test.each([['primary-light'], ['success-light']])('applies %s variant class', (variant) => {
-    const { container } = render(<Chip variant={variant} label="Test" />);
-    expect(container.querySelector(`.chip-${variant}`)).toBeInTheDocument();
-  });
+  /* The -light shape was removed. Chip resolves an unknown variant as
+     `variantMap[variant] || variantMap['primary']`, so a hard delete would
+     have repainted success-light as PRIMARY silently; normalizeChipVariant
+     strips the suffix to the solid chip of the SAME colour instead, and the
+     class names what painted rather than what was asked for. */
+  test.each([['primary-light', 'chip-primary'], ['success-light', 'chip-success']])(
+    '%s renders as %s, with no -light class',
+    (variant, expected) => {
+      const { container } = render(<Chip variant={variant} label="Test" />);
+      expect(container.querySelector('.' + expected)).toBeInTheDocument();
+      expect(container.querySelector('[class*="-light"]')).not.toBeInTheDocument();
+    },
+  );
 
   test.each(['small', 'medium', 'large'])('renders %s size', (size) => {
     const { container } = render(<Chip size={size} label="Test" />);
@@ -125,9 +133,17 @@ describe('Convenience Exports', () => {
     expect(container.querySelector('.chip-primary-outline')).toBeInTheDocument();
   });
 
-  test('SuccessLightChip renders', () => {
-    const { container } = render(<SuccessLightChip label="Test" />);
-    expect(container.querySelector('.chip-success-light')).toBeInTheDocument();
+  /* A light chip is a SURFACE, not a shape: an outline chip whose bg is
+     var(--Background) and text var(--Text), placed in the palette's brightest
+     zone. Both follow the cascade, so the label stays paired with the fill. */
+  test('a light chip is -outline inside a Surface-Brightest zone', () => {
+    const { container } = render(
+      <Chip variant="success-outline" label="Test"
+            data-theme="Success" data-surface="Surface-Brightest" />,
+    );
+    const chip = container.querySelector('.chip-success-outline');
+    expect(chip).toBeInTheDocument();
+    expect(chip.getAttribute('data-surface')).toBe('Surface-Brightest');
   });
 });
 

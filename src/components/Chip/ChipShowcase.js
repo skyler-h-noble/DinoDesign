@@ -222,7 +222,6 @@ export function ChipShowcase() {
   const getVariant = () => {
     if (style === 'solid') return color;
     if (style === 'outline') return color + '-outline';
-    if (style === 'light') return color + '-light';
     return color;
   };
 
@@ -292,10 +291,9 @@ export function ChipShowcase() {
     const C = cap(color);
     const data = {};
 
-    if (style === 'solid' || style === 'light') {
+    if (style === 'solid') {
       data.chipBg = getCssVar('--Buttons-' + C + '-Button');
       data.chipText = getCssVar('--Buttons-' + C + '-Text');
-      data.chipBorder = style === 'light' ? getCssVar('--Buttons-' + C + '-Border') : null;
       data.hover = getCssVar('--Buttons-' + C + '-Hover');
       data.active = getCssVar('--Buttons-' + C + '-Pressed');
     } else if (style === 'outline') {
@@ -397,7 +395,7 @@ export function ChipShowcase() {
             <Box sx={{ mt: 3 }}>
               <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</EyebrowSmall>
               <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1 }}>
-                {['solid', 'outline', 'light'].map((s) => (
+                {['solid', 'outline'].map((s) => (
                   <ControlButton
                     key={s}
                     label={cap(s)}

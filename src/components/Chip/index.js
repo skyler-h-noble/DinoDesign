@@ -19,15 +19,6 @@ export {
   SuccessOutlineChip,
   WarningOutlineChip,
   ErrorOutlineChip,
-  // Light
-  PrimaryLightChip,
-  SecondaryLightChip,
-  TertiaryLightChip,
-  NeutralLightChip,
-  InfoLightChip,
-  SuccessLightChip,
-  WarningLightChip,
-  ErrorLightChip,
 } from './Chip';
 
 export { ChipShowcase } from './ChipShowcase';

@@ -621,7 +621,13 @@ export function Button({
         ? resolvedStartDecorator
         : (avatar ? renderStartIcon() : startIcon)}
       endIcon={resolvedEndDecorator !== undefined ? resolvedEndDecorator : endIcon}
-      className={`btn-${variant} ${className}`}
+      // effectiveVariant, not variant: the class must name what actually
+      // PAINTED. `primary-light` normalises to solid primary, and a ghost
+      // avatar/swatch normalises to primary — emitting the raw name put a
+      // `btn-primary-light` (a shape that no longer exists) and a
+      // `btn-ghost` (on a solid button) into the DOM for consumer CSS and
+      // tests to match on.
+      className={`btn-${effectiveVariant} ${className}`}
       role="button"
       sx={{
         // Size-aware radius — pulls the Sm/Lg variant so each button size

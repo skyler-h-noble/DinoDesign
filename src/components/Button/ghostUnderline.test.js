@@ -96,3 +96,29 @@ describe('a filled button is not underlined', () => {
     expect(libClasses).toContain('btn-ghost');
   });
 });
+
+describe('the removed -light shape does not reach the DOM', () => {
+  /* `-light` was removed from the lib: normalizeButtonVariant strips the
+     suffix and renders the SOLID button of the same colour. The class name
+     used to be built from the RAW variant, so a `primary-light` call site
+     still wrote `btn-primary-light` onto a button that had painted solid —
+     a hook for a shape that no longer exists. Consumer CSS (the studio's
+     bevel block) matched on exactly those class names. */
+  it('renders btn-primary, not btn-primary-light', () => {
+    const { container } = render(<Button variant="primary-light">Save</Button>);
+    const libClasses = container.querySelector('button').className
+      .split(/\s+/)
+      .filter((c) => c.startsWith('btn-'));
+    expect(libClasses).toContain('btn-primary');
+    expect(libClasses).not.toContain('btn-primary-light');
+  });
+
+  it('names the paint on a ghost avatar button, which normalises to primary', () => {
+    const { container } = render(<Button variant="ghost" avatar aria-label="Account" />);
+    const libClasses = container.querySelector('button').className
+      .split(/\s+/)
+      .filter((c) => c.startsWith('btn-'));
+    expect(libClasses).toContain('btn-primary');
+    expect(libClasses).not.toContain('btn-ghost');
+  });
+});

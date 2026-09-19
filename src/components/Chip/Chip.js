@@ -10,7 +10,9 @@ import CancelIcon from '@mui/icons-material/Cancel';
  * VARIANTS:
  *   SOLID   variant="{color}"           filled chip, all 8 colors
  *   OUTLINE variant="{color}-outline"   bordered chip, all 8 colors
- *   LIGHT   variant="{color}-light"     filled + bordered chip, all 8 colors
+ *
+ * The LIGHT shape was removed — see normalizeChipVariant. A "light" chip is
+ * data-theme="{Color}" + data-surface="Surface-Brightest" on a -outline chip.
  *
  * SIZES: small (24px) | medium (32px) | large (40px)
  *   - All sizes maintain 24x24 minimum touch target (WCAG 2.2 AA)
@@ -54,25 +56,42 @@ function outlineStyles(color) {
   };
 }
 
-function lightStyles(color) {
-  const C = cap(color);
-  return {
-    bg:       'var(--Buttons-' + C + '-Button)',
-    text:     'var(--Buttons-' + C + '-Text)',
-    border:   '1px solid var(--Buttons-' + C + '-Border)',
-    hoverBg:  'var(--Buttons-' + C + '-Hover)',
-    activeBg: 'var(--Buttons-' + C + '-Pressed)',
-  };
-}
-
 function buildVariantMap() {
   const map = {};
   COLORS.forEach((color) => {
     map[color]                = solidStyles(color);
     map[color + '-outline']   = outlineStyles(color);
-    map[color + '-light']     = lightStyles(color);
   });
   return map;
+}
+
+// The `-light` shape is removed. It was solidStyles PLUS a border — the SAME
+// --Buttons-{C}-Button fill as the solid chip — so `success-light` painted the
+// solid button green, never the light surface its name promised. In this
+// system "light" is a SURFACE, not a shape: data-theme="{Color}" +
+// data-surface="Surface-Brightest" on a `-outline` chip, whose bg is
+// var(--Background) and text var(--Text), so both follow the zone.
+//
+// Not a hard delete. Chip resolves an unknown variant as
+// `variantMap[variant] || variantMap['primary']`, so deleting the entries
+// would have repainted every `success-light` chip as PRIMARY with no error.
+// Strip the suffix to the solid chip of the same name and say so once in dev.
+const LIGHT_SUFFIX = /-light$/;
+const warnedVariants = new Set();
+
+export function normalizeChipVariant(variant) {
+  const v = String(variant || 'primary');
+  if (!LIGHT_SUFFIX.test(v)) return v;
+  const base = v.replace(LIGHT_SUFFIX, '');
+  if (process.env.NODE_ENV !== 'production' && !warnedVariants.has(v)) {
+    warnedVariants.add(v);
+    console.warn(
+      '[Chip] variant="' + v + '" — the -light shape was removed. Rendering ' +
+      'variant="' + base + '" (solid). For a light chip use variant="' + base +
+      '-outline" with data-theme + data-surface="Surface-Brightest".',
+    );
+  }
+  return base;
 }
 
 // --- Sizing ------------------------------------------------------------------
@@ -172,7 +191,8 @@ export function Chip({
   ...props
 }) {
   const variantMap = buildVariantMap();
-  const styles = variantMap[variant] || variantMap['primary'];
+  const effectiveVariant = normalizeChipVariant(variant);
+  const styles = variantMap[effectiveVariant] || variantMap['primary'];
 
   // Delete button requires large chip (24x24 delete icon needs space)
   const effectiveSize = onDelete ? 'large' : sizeProp;
@@ -343,7 +363,7 @@ export function Chip({
       clickable={isClickable && !disabled}
       disabled={disabled}
       onClick={isClickable ? onClick : undefined}
-      className={'chip-' + variant + ' ' + className}
+      className={'chip-' + effectiveVariant + ' ' + className}
       sx={chipSx}
       {...selectionProps}
       {...props}
@@ -374,13 +394,5 @@ export const WarningOutlineChip    = (p) => <Chip variant="warning-outline"    {
 export const ErrorOutlineChip      = (p) => <Chip variant="error-outline"      {...p} />;
 
 // Light
-export const PrimaryLightChip    = (p) => <Chip variant="primary-light"    {...p} />;
-export const SecondaryLightChip  = (p) => <Chip variant="secondary-light"  {...p} />;
-export const TertiaryLightChip   = (p) => <Chip variant="tertiary-light"   {...p} />;
-export const NeutralLightChip    = (p) => <Chip variant="neutral-light"    {...p} />;
-export const InfoLightChip       = (p) => <Chip variant="info-light"       {...p} />;
-export const SuccessLightChip    = (p) => <Chip variant="success-light"    {...p} />;
-export const WarningLightChip    = (p) => <Chip variant="warning-light"    {...p} />;
-export const ErrorLightChip      = (p) => <Chip variant="error-light"      {...p} />;
 
 export default Chip;
