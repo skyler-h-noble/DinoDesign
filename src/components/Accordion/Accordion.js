@@ -3,7 +3,10 @@ import React, { useState, createContext, useContext } from 'react';
 import { Box } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Icon } from '../Icon/Icon';
-import { EyebrowSmall, BodyLarge, Body, BodySmall } from '../Typography';
+import {
+  EyebrowSmall, BodyLarge, Body, BodySmall,
+  BodyLargeSemibold, BodySemibold, BodySmallSemibold,
+} from '../Typography';
 import { SHADOW_LEVEL_2 } from '../_shadows';
 
 /**
@@ -271,8 +274,18 @@ export function Accordion({
 /* Title and body both step with the accordion's size, so "Accordion Title" and
    "Accordion Body" render at the mode's scale rather than one fixed size.
    Medium is the default, matching the design. */
-const TITLE_COMPS = { small: BodySmall, medium: Body, large: BodyLarge };
-const BODY_COMPS  = { small: BodySmall, medium: Body, large: BodyLarge };
+/* The title is the SEMIBOLD step, not Body with a weight painted on.
+ *
+ * It used to render Body and override fontWeight: 600 inline — which is the
+ * pattern Menu already removed, and for the reason that matters here: 600 is a
+ * literal, while the semibold style reads var(--Body-Medium-Semibold-Font-Weight).
+ * Figma binds that same token. So a brand whose semibold is 650 moved in the
+ * design file and stayed at 600 in the build, and nothing said so.
+ *
+ * Body ships standard and semibold only — there is no bold Body — so semibold
+ * is the step, not Subtitle, which is 700. */
+const TITLE_COMPS = { small: BodySmallSemibold, medium: BodySemibold, large: BodyLargeSemibold };
+const BODY_COMPS  = { small: BodySmall,         medium: Body,         large: BodyLarge };
 
 export function AccordionSummary({
   children,
@@ -408,7 +421,7 @@ export function AccordionSummary({
           </EyebrowSmall>
         )}
         {children !== undefined && children !== null && (
-          <TitleComp style={{ ...lineSx, color: 'inherit', fontWeight: 600 }}>
+          <TitleComp style={{ ...lineSx, color: 'inherit' }}>
             {children}
           </TitleComp>
         )}
