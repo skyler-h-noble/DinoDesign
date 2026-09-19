@@ -142,13 +142,12 @@ export function BadgeShowcase() {
   // Playground state
   const [style, setStyle] = useState('solid');
   const [color, setColor] = useState('primary');
-  const [size, setSize] = useState('medium');
   const [badgeContent, setBadgeContent] = useState('5');
   const [isDot, setIsDot] = useState(false);
   const [showZero, setShowZero] = useState(false);
   const [contrastData, setContrastData] = useState({});
 
-  const styles = ['solid', 'outline', 'light'];
+  const styles = ['solid', 'outline'];
 
   // Map style + color to variant string
   const getVariant = () => {
@@ -166,7 +165,7 @@ export function BadgeShowcase() {
 
   // Code snippet
   const generateCode = () => {
-    const parts = ['variant="' + getVariant() + '"', 'size="' + size + '"'];
+    const parts = ['variant="' + getVariant() + '"'];
     if (isDot) {
       parts.push('dot');
     } else {
@@ -183,17 +182,19 @@ export function BadgeShowcase() {
     const C = cap(color);
     const data = {};
 
-    if (style === 'solid') {
-      data.badgeBg = getCssVar('--Buttons-' + C + '-Button');
-      data.badgeText = getCssVar('--Buttons-' + C + '-Text');
+if (style === 'solid') {
+      // The ICONS pair, matching the component and the design. A badge needs
+      // 3:1 against its surround (WCAG 1.4.11) and --Buttons-<C>-Button is a
+      // fill with no such contract; --Icons-<C> is picked to contrast with the
+      // surface, and --Icons-On-<C> is held at 4.5:1 on it.
+      data.badgeBg = getCssVar('--Icons-' + C);
+      data.badgeText = getCssVar('--Icons-On-' + C);
       data.badgeBorder = null;
     } else if (style === 'outline') {
       data.badgeBg = getCssVar('--Background');
       data.badgeText = getCssVar('--Text');
-      data.badgeBorder = getCssVar('--Buttons-' + C + '-Border');
-    } else if (style === 'light') {
-      data.badgeBg = getCssVar('--Buttons-' + C + '-Button');
-      data.badgeText = getCssVar('--Buttons-' + C + '-Text');
+      // Still the Buttons border token: a 1px boundary is what it is held to
+      // 3:1 for, which --Icons-<C> (a fill role) is not.
       data.badgeBorder = getCssVar('--Buttons-' + C + '-Border');
     }
 
@@ -202,18 +203,12 @@ export function BadgeShowcase() {
     setContrastData(data);
   }, [style, color]);
 
-  const sizeDetails = {
-    small:  { badge: '16px', dot: '8px', font: '10px' },
-    medium: { badge: '20px', dot: '10px', font: '12px' },
-    large:  { badge: '24px', dot: '12px', font: '14px' },
-  };
-
   return (
     <Box sx={{ width: '100%' }}>
       <H3 style={{ marginBottom: 8 }}>Badge</H3>
       <Body color="quiet" style={{ marginBottom: 24 }}>
         Small label attached to an element showing status or count.
-        Solid, outline, and light variants across all 8 colors.
+        Solid and outline variants across all 8 colors.
       </Body>
 
       <Tabs value={mainTab} onChange={(e, v) => setMainTab(v)}
@@ -240,7 +235,6 @@ export function BadgeShowcase() {
               <Stack direction="row" spacing={6} alignItems="center">
                 <Badge
                   variant={getVariant()}
-                  size={size}
                   badgeContent={getParsedContent()}
                   dot={isDot}
                   showZero={showZero}
@@ -249,7 +243,6 @@ export function BadgeShowcase() {
                 </Badge>
                 <Badge
                   variant={getVariant()}
-                  size={size}
                   badgeContent={getParsedContent()}
                   dot={isDot}
                   showZero={showZero}
@@ -258,7 +251,6 @@ export function BadgeShowcase() {
                 </Badge>
                 <Badge
                   variant={getVariant()}
-                  size={size}
                   badgeContent={getParsedContent()}
                   dot={isDot}
                   showZero={showZero}
@@ -305,16 +297,14 @@ export function BadgeShowcase() {
               </Stack>
             </Box>
 
-            {/* Size */}
+            {/* No size control: Badge has one size. Counter vs dot is a TYPE,
+                and the DOT toggle below is what selects it. The table that used
+                to sit here was hand-typed and had already drifted — it listed
+                fonts of 10/12/14 against a ladder of 10/12/16. */}
             <Box sx={{ mt: 3 }}>
               <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</EyebrowSmall>
-              <Stack direction="row" spacing={1}>
-                {['small', 'medium', 'large'].map((s) => (
-                  <ControlButton key={s} label={cap(s)} selected={size === s} onClick={() => setSize(s)} />
-                ))}
-              </Stack>
-              <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
-                Badge {sizeDetails[size]?.badge} · Dot {sizeDetails[size]?.dot} · Font {sizeDetails[size]?.font}
+              <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>
+                Counter 16px · Dot 8px · Padding 4px · Digits 11px
               </Caption>
             </Box>
 
@@ -365,7 +355,7 @@ export function BadgeShowcase() {
         <Box sx={{ p: 4 }}>
           <H4>Accessibility Requirements</H4>
           <BodySmall color="quiet" style={{ marginBottom: 32 }}>
-            Based on current Playground settings: {style} · {color} · {size}
+            Based on current Playground settings: {style} · {color}
           </BodySmall>
 
           <Stack spacing={4}>
@@ -422,21 +412,22 @@ export function BadgeShowcase() {
             <Box sx={{ p: 3, backgroundColor: 'var(--Container)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
               <H5>Badge Sizing</H5>
               <BodySmall color="quiet" style={{ marginBottom: 16 }}>
-                Badge dimensions per size setting
+                One size. A count has to read the same whether it hangs off a
+                20px icon or a 56px FAB, so it does not scale with its anchor.
               </BodySmall>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 1.5, borderBottom: '1px solid var(--Border)' }}>
                 <Box>
-                  <BodySmall>Badge height ({size})</BodySmall>
+                  <BodySmall>Counter</BodySmall>
                   <Caption style={{ color: 'var(--Text-Quiet)' }}>
-                    {sizeDetails[size]?.badge} height · {sizeDetails[size]?.font} font · pill shape
+                    16px height · 4px side padding · 11px digits · pill shape
                   </Caption>
                 </Box>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 1.5, borderBottom: '1px solid var(--Border)' }}>
                 <Box>
-                  <BodySmall>Dot size ({size})</BodySmall>
+                  <BodySmall>Status dot</BodySmall>
                   <Caption style={{ color: 'var(--Text-Quiet)' }}>
-                    {sizeDetails[size]?.dot} diameter circle
+                    8px diameter circle
                   </Caption>
                 </Box>
               </Box>

@@ -162,7 +162,7 @@ export function Sidebar({
                         }}
                       >
                         {item.badge ? (
-                          <Badge badgeContent={item.badge} color="error">
+                          <Badge badgeContent={item.badge} variant="error">
                             {item.icon}
                           </Badge>
                         ) : (
@@ -403,7 +403,7 @@ export function CollapsibleSidebar({
                     }}
                   >
                     {item.badge ? (
-                      <Badge badgeContent={item.badge} color="error">
+                      <Badge badgeContent={item.badge} variant="error">
                         {item.icon}
                       </Badge>
                     ) : (
@@ -653,7 +653,7 @@ export function MinimalSidebar({
             }}
           >
             {item.badge ? (
-              <Badge badgeContent={item.badge} color="error">
+              <Badge badgeContent={item.badge} variant="error">
                 {item.icon}
               </Badge>
             ) : (

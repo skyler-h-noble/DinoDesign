@@ -9,9 +9,27 @@ import { Badge as MuiBadge, Box } from '@mui/material';
  * VARIANTS:
  *   SOLID   variant="{color}"           filled badge, all 8 colors
  *   OUTLINE variant="{color}-outline"   bordered badge, all 8 colors
- *   LIGHT   variant="{color}-light"     tinted badge, all 8 colors
  *
- * SIZES: small (16px) | medium (20px) | large (24px)
+ * The LIGHT shape was removed — see normalizeBadgeVariant.
+ *
+ * COLOUR comes from the ICONS palette, matching the design, which binds
+ * Icons/<palette> and Icons/On-<palette>. Not the Buttons palette: a badge is
+ * a non-text element under WCAG 1.4.11 and needs 3:1 against its surround.
+ * --Buttons-<C>-Button is a FILL and carries no such guarantee (it is
+ * --Buttons-<C>-Border that does), whereas --Icons-<C> is picked to contrast
+ * with the surface and --Icons-On-<C> is held at 4.5:1 on it.
+ *
+ * SIZE: one. 16px counter, 4px side padding, 8px dot.
+ *
+ * There is no size prop any more — see the SIZE note below. The two badges
+ * the design draws are TYPES, not sizes:
+ *
+ *   type="standard"  16px pill carrying badgeContent   (default)
+ *   type="status"     8px dot, no content
+ *
+ * `type` is the design's own axis name, so the Figma property and this prop
+ * read the same. `dot` is the older spelling of the same thing and still
+ * works — passing either gives the status dot.
  *
  * FEATURES:
  *   badgeContent: number | string | ReactNode
@@ -30,8 +48,8 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 function solidStyles(color) {
   const C = cap(color);
   return {
-    bg:     'var(--Buttons-' + C + '-Button)',
-    text:   'var(--Buttons-' + C + '-Text)',
+    bg:     'var(--Icons-' + C + ')',
+    text:   'var(--Icons-On-' + C + ')',
     border: 'none',
   };
 }
@@ -41,15 +59,9 @@ function outlineStyles(color) {
   return {
     bg:     'var(--Background)',
     text:   'var(--Text)',
-    border: '1px solid var(--Buttons-' + C + '-Border)',
-  };
-}
-
-function lightStyles(color) {
-  const C = cap(color);
-  return {
-    bg:     'var(--Buttons-' + C + '-Button)',
-    text:   'var(--Buttons-' + C + '-Text)',
+    // The OUTLINE keeps the Buttons border token. It is a 1px boundary, which
+    // is what --Buttons-<C>-Border is held to 3:1 for; --Icons-<C> is the fill
+    // role and has no boundary contract.
     border: '1px solid var(--Buttons-' + C + '-Border)',
   };
 }
@@ -59,49 +71,77 @@ function buildVariantMap() {
   COLORS.forEach((color) => {
     map[color]              = solidStyles(color);
     map[color + '-outline'] = outlineStyles(color);
-    map[color + '-light']   = lightStyles(color);
   });
   return map;
 }
 
+/* The `-light` shape is removed, as on Button and Chip. It was solidStyles
+   plus a border — the same fill as the solid badge — so it never rendered the
+   tint its name promised.
+   Not a hard delete: the lookup below falls back to variantMap['primary'], so
+   deleting the entries would have repainted every error-light badge as PRIMARY
+   with no error. Strip the suffix to the solid badge of the SAME colour. */
+const LIGHT_SUFFIX = /-light$/;
+const warnedVariants = new Set();
+
+export function normalizeBadgeVariant(variant) {
+  const v = String(variant || 'primary');
+  if (!LIGHT_SUFFIX.test(v)) return v;
+  const base = v.replace(LIGHT_SUFFIX, '');
+  if (process.env.NODE_ENV !== 'production' && !warnedVariants.has(v)) {
+    warnedVariants.add(v);
+    console.warn(
+      '[Badge] variant="' + v + '" — the -light shape was removed. Rendering ' +
+      'variant="' + base + '" (solid).',
+    );
+  }
+  return base;
+}
+
 // --- Sizing ------------------------------------------------------------------
 
-// Every value here is a token, not a measurement. The design specifies ONE
-// badge — a 16px counter with 4px side padding, an 8px status dot, and the
-// Buttons/Extra-Small type style — which is this table's `small` row. The other
-// two rows extend that row along the scales it already sits on:
+// Every value here is a token, not a measurement, and there is one row.
 //
-//   height   16 / 20 / 24  → --Sizing-2 / --Sizing-2-and-Half / --Sizing-3
-//   digits   10 / 14 / 16  → --Sm-/--/--Lg- Button-Numbers
+// This was a three-row ladder (16 / 20 / 24) extrapolated from the single
+// badge the design draws. Its middle row could not be written in the Sizing
+// scale at all — 6px padding and a 10px dot fall between --Sizing-Half (4)
+// and --Sizing-1 (8), which steps in 4s — and that row was the DEFAULT. A
+// value the token system cannot name is a good sign it was invented.
 //
-// The counter's type style is "Button-Numbers": the Buttons/Small FACE at a
-// size that follows the component's size mode. Face, weight, line-height and
-// tracking therefore stay fixed across all three rows and only the size steps
-// — which is why `typeStep` below is Button-Small everywhere.
-//
-// Two medium values stay off-scale: 6px padding and a 10px dot fall between
-// --Sizing-Half (4) and --Sizing-1 (8), which the scale cannot express. They
-// are the correct halves/quarters of a 20px badge, just not nameable.
-const SIZE_MAP = {
-  small:  {
-    size: 'var(--Sizing-2)',          padX: 'var(--Sizing-Half)',
-    dot:  'var(--Sizing-1)',          digits: 'var(--Sm-Button-Numbers)',
-  },
-  medium: {
-    size: 'var(--Sizing-2-and-Half)', padX: '6px',
-    dot:  '10px',                     digits: 'var(--Button-Numbers)',
-  },
-  large:  {
-    size: 'var(--Sizing-3)',          padX: 'var(--Sizing-1)',
-    dot:  'var(--Sizing-1-and-Half)', digits: 'var(--Lg-Button-Numbers)',
-  },
+// Nor is there a digits row: the counter's type is the design's own Badge
+// style (11/12), one value rather than a ladder. A count is an absolute
+// affordance — it has to read the same hanging off a 20px icon or a 56px FAB
+// — so it does not scale with its anchor, which is why no major system ships
+// a "large" badge either.
+const BADGE = {
+  size: 'var(--Sizing-2)',      // 16
+  padX: 'var(--Sizing-Half)',   //  4
+  dot:  'var(--Sizing-1)',      //  8
 };
+
+/* `size` is accepted and ignored. Removing the prop outright would have let it
+   fall into ...props and reach MuiBadge, which forwards unknown props to the
+   DOM — a React warning at best, a stray attribute at worst. Warn once
+   instead, the same treatment the removed -light shape gets. */
+const warnedSizes = new Set();
+
+function warnRemovedSize(size) {
+  if (size === undefined) return;
+  if (process.env.NODE_ENV === 'production' || warnedSizes.has(size)) return;
+  warnedSizes.add(size);
+  console.warn(
+    '[Badge] size="' + size + '" — Badge has one size and the prop was ' +
+    'removed. Rendering the 16px counter. For the 8px status dot use \n' +
+    'type="status".',
+  );
+}
 
 // --- Component ---------------------------------------------------------------
 
 export function Badge({
   variant = 'primary',
-  size = 'medium',
+  size,
+  type = 'standard',
   badgeContent,
   max = 99,
   showZero = false,
@@ -115,39 +155,51 @@ export function Badge({
   ...props
 }) {
   const variantMap = buildVariantMap();
-  const styles = variantMap[variant] || variantMap['primary'];
-  const sc = SIZE_MAP[size] || SIZE_MAP.medium;
+  const effectiveVariant = normalizeBadgeVariant(variant);
+  const styles = variantMap[effectiveVariant] || variantMap['primary'];
+  warnRemovedSize(size);
+  const sc = BADGE;
+
+  /* Either spelling selects the dot. `type` is the design's axis (Figma:
+     Type = standard | status); `dot` predates it and is kept working rather
+     than swapped, so no existing call site changes behaviour. OR, not a
+     precedence rule — `dot` alone still means status, and there is no
+     combination where one silently cancels the other. */
+  const isStatus = type === 'status' || dot;
 
   // Determine display content
   let displayContent = badgeContent;
-  if (dot) {
+  if (isStatus) {
     displayContent = '';
   } else if (typeof badgeContent === 'number' && badgeContent > max) {
     displayContent = max + '+';
   }
 
   // Visibility
-  const isInvisible = invisible || (!dot && !showZero && (badgeContent === 0 || badgeContent === undefined || badgeContent === null));
+  const isInvisible = invisible || (!isStatus && !showZero && (badgeContent === 0 || badgeContent === undefined || badgeContent === null));
 
   const badgeSx = {
     '& .MuiBadge-badge': {
       // Sizing
-      minWidth: dot ? sc.dot : sc.size,
-      height: dot ? sc.dot : sc.size,
-      padding: dot ? 0 : '0 ' + sc.padX,
-      // Type: the Buttons/Small face, sized by the size-moded Button-Numbers
-      // token. Not four hand-set properties — a brand that re-picks its button
-      // face or weight now moves the badge with it.
-      fontFamily:    'var(--Button-Small-Font-Family)',
-      fontWeight:    'var(--Button-Small-Font-Weight)',
-      lineHeight:    'var(--Button-Small-Line-Height)',
-      letterSpacing: 'var(--Button-Small-Letter-Spacing)',
-      fontSize:      sc.digits,
+      minWidth: isStatus ? sc.dot : sc.size,
+      height: isStatus ? sc.dot : sc.size,
+      padding: isStatus ? 0 : '0 ' + sc.padX,
+      // Type: the design's own Badge style, 11/12. This was composed from
+      // --Button-Small-* plus --Sm-Button-Numbers, which resolves to 10 with a
+      // 14 leading — a pixel small on a leading too loose. 11 is not a rung of
+      // the Button-Numbers ladder either (10 / 12 / 16 at the three button
+      // heights), so no Button token can carry it; face, weight and tracking
+      // still come from the Buttons/Small role, which is what the style binds.
+      fontFamily:    'var(--Badge-Font-Family, var(--Button-Small-Font-Family))',
+      fontWeight:    'var(--Badge-Font-Weight, var(--Button-Small-Font-Weight))',
+      lineHeight:    'var(--Badge-Line-Height, 12px)',
+      letterSpacing: 'var(--Badge-Letter-Spacing, var(--Button-Small-Letter-Spacing))',
+      fontSize:      'var(--Badge-Font-Size, 11px)',
       // Fully round. The design binds the radius to the SAME token as the
       // size — --Sizing-2 on a 16px counter, --Sizing-1 on an 8px dot — so any
       // value at or above half the height reads as a pill. Matching that
       // binding keeps the two in step if the scale is ever retuned.
-      borderRadius: dot ? sc.dot : sc.size,
+      borderRadius: isStatus ? sc.dot : sc.size,
 
       // Colors
       backgroundColor: styles.bg,
@@ -171,14 +223,14 @@ export function Badge({
 
   return (
     <MuiBadge
-      badgeContent={dot ? '' : displayContent}
+      badgeContent={isStatus ? '' : displayContent}
       max={max}
       showZero={showZero}
       invisible={isInvisible}
       overlap={overlap}
       anchorOrigin={anchorOrigin}
-      variant={dot ? 'dot' : 'standard'}
-      className={'badge-' + variant + ' ' + className}
+      variant={isStatus ? 'dot' : 'standard'}
+      className={'badge-' + effectiveVariant + ' ' + className}
       sx={badgeSx}
       {...props}
     >
@@ -210,13 +262,5 @@ export const WarningOutlineBadge    = (p) => <Badge variant="warning-outline"   
 export const ErrorOutlineBadge      = (p) => <Badge variant="error-outline"      {...p} />;
 
 // Light
-export const PrimaryLightBadge    = (p) => <Badge variant="primary-light"    {...p} />;
-export const SecondaryLightBadge  = (p) => <Badge variant="secondary-light"  {...p} />;
-export const TertiaryLightBadge   = (p) => <Badge variant="tertiary-light"   {...p} />;
-export const NeutralLightBadge    = (p) => <Badge variant="neutral-light"    {...p} />;
-export const InfoLightBadge       = (p) => <Badge variant="info-light"       {...p} />;
-export const SuccessLightBadge    = (p) => <Badge variant="success-light"    {...p} />;
-export const WarningLightBadge    = (p) => <Badge variant="warning-light"    {...p} />;
-export const ErrorLightBadge      = (p) => <Badge variant="error-light"      {...p} />;
 
 export default Badge;
