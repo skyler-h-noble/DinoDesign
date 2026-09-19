@@ -53,8 +53,11 @@ const COLOR_LABEL_MAP = {
 // The icon scale. Exported so anything that has to restate it — the Button's
 // slot rules, which otherwise inherit MUI's own per-button-size icon sizing —
 // reads these numbers instead of keeping a second copy.
+/* `xs: 12px` was removed with Avatar's xxx-small. Nothing in the library or
+   any consumer used it, and Figma has no 12px icon — its smallest is the 16px
+   Button-Icon-Only on a small button. A size nobody asks for still has to be
+   kept in step with the design, which is a cost with no return. */
 export const ICON_SIZE_MAP = {
-  xs: '12px',
   small: '16px',
   medium: '24px',
   large: '32px',

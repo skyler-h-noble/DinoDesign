@@ -314,7 +314,7 @@ export function IconShowcase() {
                   <Box sx={{ mt: 3 }}>
                     <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SIZE</EyebrowSmall>
                     <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-                      {['xs','small','medium','large','custom'].map((s) => <ControlButton key={s} label={s === 'xs' ? 'XS' : cap(s)} selected={size===s} onClick={() => setSize(s)} />)}
+                      {['small','medium','large','custom'].map((s) => <ControlButton key={s} label={cap(s)} selected={size===s} onClick={() => setSize(s)} />)}
                     </Stack>
                     {size === 'custom' && (
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1.5 }}>

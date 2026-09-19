@@ -24,15 +24,31 @@ const LABEL_PADDING_BY_SIZE = {
 // size mode as --Avatar-Text (14 / 12 / 18), derived from the button height —
 // it was three literals, one of which reached for a type-ramp token that is
 // not the avatar's.
+/* The initials INSIDE a button's avatar decorator — Button-Avatar-Text, which
+   is 9 / 12 / 23 and sits on the same 7/12 of the diameter the standalone
+   avatar uses. Not --Avatar-Text (12 / 14 / 18): that is the ramp for an
+   avatar-ONLY button, whose circle is a different size again
+   (Button-Avatar-Only, 24 / 32 / 56). Reading the wrong one put oversized
+   initials in a decorator. */
 const avatarTextFor = (size) =>
-  size === 'small' ? 'var(--Sm-Avatar-Text)'
-    : size === 'large' ? 'var(--Lg-Avatar-Text)'
-      : 'var(--Avatar-Text)';
+  size === 'small' ? 'var(--Sm-Button-Avatar-Text, 9px)'
+    : size === 'large' ? 'var(--Lg-Button-Avatar-Text, 23px)'
+      : 'var(--Button-Avatar-Text, 12px)';
 
+/* Decorator sizes, in PIXELS, from Figma's Component-Size ramp.
+ *
+ * These used to name standalone Avatar/Icon sizes, and that was the mistake —
+ * a button's decorator has its OWN ramp (Button-Avatar, Button-Icon) which does
+ * not line up with the standalone ones. Two of the six were wrong because of
+ * it: a medium button drew a 24px avatar where the design says 20, and both
+ * small and medium drew the wrong icon.
+ *
+ * 20 is not a named size in either component, which is precisely why the
+ * mapping could not be expressed as a name. Both take a pixel size instead. */
 const DECORATOR_SIZE_MAP = {
-  small:  { avatar: 'xxx-small', icon: 'small'  },
-  medium: { avatar: 'xx-small',  icon: 'medium' },
-  large:  { avatar: 'small',     icon: 'large'  },
+  small:  { avatar: 16, icon: 20 },
+  medium: { avatar: 20, icon: 20 },
+  large:  { avatar: 40, icon: 32 },
 };
 
 // Auto-detect decorator type by React element type and resize it.
@@ -44,13 +60,18 @@ function resolveDecorator(node, buttonSize) {
   if (!React.isValidElement(node)) return node;
   const mapping = DECORATOR_SIZE_MAP[buttonSize] || DECORATOR_SIZE_MAP.medium;
   if (node.type === DDAvatar) {
-    // Button avatars: size to the button (small→16, medium→24, large→40) AND
-    // get 2px horizontal padding so they sit correctly beside the label /
-    // within a group segment. insideButton applies the 2px L/R margin.
-    return React.cloneElement(node, { size: mapping.avatar, insideButton: true });
+    // Button avatars: 16 / 20 / 40 by button size, matching Button-Avatar, AND
+    // 2px horizontal padding so they sit correctly beside the label or within
+    // a group segment. insideButton applies the 2px L/R margin.
+    return React.cloneElement(node, {
+      size: 'custom', customSize: mapping.avatar, insideButton: true,
+    });
   }
   if (node.type === DDIcon) {
-    return React.cloneElement(node, { size: mapping.icon });
+    // 20 / 20 / 32, matching Button-Icon. Small and medium share 20 — that is
+    // the design, not a copy-paste: the small button is 24px tall and a 16px
+    // icon left it looking underfilled beside a 20px avatar.
+    return React.cloneElement(node, { size: 'custom', fontSize: mapping.icon });
   }
   return node;
 }

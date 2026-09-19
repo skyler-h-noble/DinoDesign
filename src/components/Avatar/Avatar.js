@@ -17,7 +17,13 @@ import { useGhost, ghostBlockSx } from '../_ghost';
  *   fallback for a bare avatar.
  *
  * SIZES (Figma-aligned):
- *   xxx-small  16   |  xx-small  24   |  x-small   32   |  small  40
+ *   xx-small   24   |  x-small   32   |  small     40
+ *
+ * There was an xxx-small at 16. It is gone: Figma has no 16px STANDALONE
+ * avatar, and the only thing that wanted one was Button's decorator — which
+ * has its own ramp (Button-Avatar 16/20/40) and now passes a pixel size
+ * directly. A named size that exists for one internal caller is a public API
+ * paying for a private need.
  *   medium     56   |  large     64   |  x-large   80   |  xx-large 160
  *   custom     — pass `customSize` (pixel diameter); icon ~50%.
  *
@@ -51,7 +57,6 @@ const COLOR_MAP = {
 // avatar. 'custom' falls back to whatever `customSize` is passed (a number
 // of pixels). Icon size scales as a rough 50% of the avatar diameter.
 const SIZE_MAP = {
-  'xxx-small': { size: 16,  iconSize: 10 },
   'xx-small':  { size: 24,  iconSize: 14 },
   'x-small':   { size: 32,  iconSize: 18 },
   small:       { size: 40,  iconSize: 22 },
@@ -72,7 +77,6 @@ const SIZE_MAP = {
 // all three are the same face at 700, so in practice this is about line-height.
 function getInitialsComp(size) {
   switch (size) {
-    case 'xxx-small':
     case 'xx-small':
     case 'x-small':
     case 'small':     return NumberSmall;

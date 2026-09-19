@@ -31,9 +31,8 @@ const CONTENT_TYPES = ['photo', 'icon', 'initials'];
 const CONTENT_LABELS = { photo: 'Photo', icon: 'Icon', initials: 'Initials' };
 
 // All 8 Figma sizes + custom.
-const SIZES = ['xxx-small', 'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'];
+const SIZES = ['xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'];
 const SIZE_LABELS = {
-  'xxx-small': 'XXXS',
   'xx-small':  'XXS',
   'x-small':   'XS',
   small:       'Small',
