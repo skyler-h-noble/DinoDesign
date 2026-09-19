@@ -175,21 +175,36 @@ export function ButtonGroup({
     } : {};
 
     // ── Selected styles ───────────────────────────────────────────────────
-    // The selected segment is already "on" — it must NOT change on hover.
-    // Without this, it inherits the solid Button's &:hover (which paints
-    // var(--Buttons-{C}-Hover), a near-white scrim) and flips light on hover.
+    /* Selection escalates by ONE step, and where it lands depends on the group
+       style. An outlined (or light) group goes outline -> SOLID; a ghost group
+       goes ghost -> OUTLINE, not ghost -> solid. A ghost group is chosen when
+       the control should stay quiet, and filling a segment undoes exactly
+       that; an outline still reads clearly against two borderless neighbours.
+       (This used to fill on both: the variant stayed 'ghost' while the rules
+       below painted btnBg at !important, so a selected ghost segment rendered
+       as a solid fill with no border.)
+
+       Either way the segment is "on" and must NOT react to hover. Without the
+       freeze it inherits the Button's own &:hover — var(--Buttons-{C}-Hover),
+       a near-white scrim — and flips light on hover. Frozen across active and
+       focus for the same reason. The focus RING still shows: it is an
+       `outline`, which none of these three properties touch. */
+    const selectedPaint = isGhost
+      ? {
+          // The `-outline` variant's own paint, pinned so hover cannot move it.
+          backgroundColor: 'var(--Background) !important',
+          color:           'var(--Text) !important',
+          borderColor:     btnBorder + ' !important',
+        }
+      : {
+          backgroundColor: btnBg     + ' !important',
+          color:           btnText   + ' !important',
+          borderColor:     btnBorder + ' !important',
+        };
+
     const selectedSx = isSelected ? {
-      backgroundColor:  btnBg    + ' !important',
-      color:            btnText  + ' !important',
-      borderColor:      btnBorder + ' !important',
-      // The selected segment is "on" — freeze it across hover, active (press)
-      // AND focus so it never picks up the solid Button's hover/active scrim.
-      // Only unselected segments should react to :hover / :active.
-      '&:hover, &:active, &.Mui-focusVisible, &:focus-visible': {
-        backgroundColor: btnBg    + ' !important',
-        color:           btnText  + ' !important',
-        borderColor:     btnBorder + ' !important',
-      },
+      ...selectedPaint,
+      '&:hover, &:active, &.Mui-focusVisible, &:focus-visible': selectedPaint,
     } : {};
 
     // ── Unselected styles ─────────────────────────────────────────────────
@@ -213,8 +228,10 @@ export function ButtonGroup({
       },
     } : {};
 
-    // ── Ghost: no border on individual buttons ────────────────────────────
-    const ghostSx = isGhost ? {
+    /* Ghost: no border on individual buttons — UNSELECTED ones only.
+       This is spread AFTER selectedSx, so an unscoped `border: none` erased
+       the border that IS the selected ghost segment's whole treatment. */
+    const ghostSx = isGhost && !isSelected ? {
       border: 'none !important',
       '&:hover': { border: 'none !important' },
     } : {};
@@ -256,12 +273,13 @@ export function ButtonGroup({
     };
 
     const clonedButton = React.cloneElement(child, {
-      // Selected → filled (solidStyles applies the per-variant bevel).
-      // Unselected → outline (flat). Ghost group stays ghost on both.
-      // An explicit child.variant always wins.
+      /* One step of escalation from the group's own style:
+           outlined / light   unselected `-outline`  ->  selected SOLID
+           ghost              unselected `ghost`     ->  selected `-outline`
+         An explicit child.variant always wins. */
       variant: child.props.variant ?? (
         isGhost
-          ? 'ghost'
+          ? (isSelected ? color + '-outline' : 'ghost')
           : isSelected
             ? color
             : color + '-outline'

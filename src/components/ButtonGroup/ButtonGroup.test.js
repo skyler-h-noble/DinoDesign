@@ -353,3 +353,70 @@ describe('Light variant', () => {
     expect(container.querySelectorAll('[data-surface="Surface-Brightest"]')).toHaveLength(1);
   });
 });
+
+/* Selection escalates by ONE step from the group's own style:
+ *
+ *   outlined / light   `-outline`  ->  SOLID
+ *   ghost              `ghost`     ->  `-outline`
+ *
+ * The ghost row is the one that changed. It used to fill on both: the child's
+ * variant stayed 'ghost' while the group's own rules painted --Buttons-{C}-
+ * Button at !important, so a selected ghost segment rendered as a solid fill
+ * with no border — the loud treatment, in the group style chosen precisely
+ * because the control should stay quiet.
+ *
+ * Asserted on the lib's own btn-* class, which names the variant that actually
+ * painted. A bare /outline/ over the whole className matches MUI's internals.
+ */
+describe('selection escalates one step from the group style', () => {
+  const libClass = (el) => (el.className || '').split(/\s+/).filter((c) => c.startsWith('btn-'));
+
+  const segments = (container) =>
+    Array.from(container.querySelectorAll('button'));
+
+  /* emotion runs in speedy mode — the <style> nodes are empty and only
+     cssRules carries the text. Match on the element's own generated class so
+     a rule is attributed to the segment it actually styles. */
+  const emotionCss = (el) => {
+    const cls = (el.className || '').split(/\s+/).find((c) => c.startsWith('css-'));
+    if (!cls) return '';
+    return Array.from(document.styleSheets)
+      .flatMap((sheet) => Array.from(sheet.cssRules || []))
+      .filter((r) => (r.selectorText || '').includes('.' + cls))
+      .map((r) => r.cssText)
+      .join('\n');
+  };
+
+  test('an outlined group fills the selected segment', () => {
+    const { container } = render(
+      <ButtonGroup value="a" onChange={() => {}} aria-label="t">
+        <Button value="a">A</Button>
+        <Button value="b">B</Button>
+      </ButtonGroup>
+    );
+    const [selected, unselected] = segments(container);
+    expect(libClass(selected)).toContain('btn-default');
+    expect(libClass(unselected)).toContain('btn-default-outline');
+  });
+
+  test('a ghost group outlines it instead of filling it', () => {
+    const { container } = render(
+      <ButtonGroup variant="ghost" value="a" onChange={() => {}} aria-label="t">
+        <Button value="a">A</Button>
+        <Button value="b">B</Button>
+      </ButtonGroup>
+    );
+    const [selected, unselected] = segments(container);
+    expect(libClass(selected)).toContain('btn-default-outline');
+    expect(libClass(selected)).not.toContain('btn-default');
+    expect(libClass(unselected)).toContain('btn-ghost');
+
+    /* The variant name alone is NOT enough, and asserting only that passed
+       with the bug still in: `ghostSx` is spread after `selectedSx`, so an
+       unscoped `border: none !important` erased the border while the class
+       still said `-outline`. Assert the rule that actually reaches the
+       element. */
+    expect(emotionCss(selected)).not.toContain('border: none');
+    expect(emotionCss(unselected)).toContain('border: none');
+  });
+});
