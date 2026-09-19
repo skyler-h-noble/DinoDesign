@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useRef, useEffect, useCallb
 import { Box } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Icon } from '../Icon/Icon';
-import { BodySmall, Body, SubtitleSmall, Subtitle } from '../Typography';
+import { BodySmall, Body, BodyLarge, SubtitleSmall, Subtitle, SubtitleLarge } from '../Typography';
 import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3 } from '../_shadows';
 
 /**
@@ -33,6 +33,12 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 // Padding is on the --Sizing-* scale. Medium's 6px is the one value the scale
 // cannot express (it falls between --Sizing-Half and --Sizing-1), the same gap
 // Badge's medium row has.
+/* Menu type, by component size. Subtitle IS Body at 700 — same face, size and
+   leading — which is how a selected row gets its weight without an inline
+   fontWeight override on a lib component. */
+const MENU_TEXT          = { small: BodySmall,     medium: Body,     large: BodyLarge };
+const MENU_TEXT_SELECTED = { small: SubtitleSmall, medium: Subtitle, large: SubtitleLarge };
+
 const SIZE_MAP = {
   small:  {
     py: 'var(--Sizing-Half)',  itemPx: 'var(--Sizing-1)',
@@ -118,8 +124,11 @@ export function MenuButton({ children, className = '', sx = {}, ...props }) {
       {...props}
     >
       {typeof children === 'string' ? (
-        size === 'small' ? <BodySmall style={{ color: 'inherit', fontWeight: 600 }}>{children}</BodySmall>
-          : <Body style={{ color: 'inherit', fontWeight: 600 }}>{children}</Body>
+        React.createElement(
+          MENU_TEXT[size] || MENU_TEXT.medium,
+          { style: { color: 'inherit', fontWeight: 600 } },
+          children,
+        )
       ) : children}
       <Icon size="small" sx={{ color: 'var(--Quiet)', transition: 'transform 0.2s ease', transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}>
         <ExpandMoreIcon />
@@ -231,9 +240,15 @@ export function MenuItem({ children, onClick, selected = false, disabled = false
   // Body ships standard and semibold only — there is no bold Body — so the
   // selected row steps to Subtitle, which IS Body at 700 (same face, size and
   // leading). That replaces an inline fontWeight override on a lib component.
+  /* Three sizes, not two. `large` used to fall through to Body because the
+     ternary only asked about small — so a large menu rendered at medium type
+     while every other component in the row grew. Figma has three
+     Component-Size modes, and a mode the code silently ignores is worse than
+     one it does not offer: the design file and the build disagree and neither
+     says so. */
   const TextComp = selected
-    ? (size === 'small' ? SubtitleSmall : Subtitle)
-    : (size === 'small' ? BodySmall : Body);
+    ? (MENU_TEXT_SELECTED[size] || MENU_TEXT_SELECTED.medium)
+    : (MENU_TEXT[size] || MENU_TEXT.medium);
 
   const handleClick = () => {
     if (disabled) return;
