@@ -13,10 +13,15 @@ import { Box } from '@mui/material';
  *
  * ORIENTATION: horizontal | vertical
  *
- * SIZES:
- *   small   1px
- *   medium  2px
- *   large   4px
+ * SIZES (Component-Size `Divider`):
+ *   small   0.5px   hairline — a true half-pixel on 2x, rounded by the
+ *                   browser on 1x, which is the usual hairline trade
+ *   medium  1px
+ *   large   2px
+ *
+ * This was 1 / 2 / 4, one step heavy at every size — and that ramp is the one
+ * the design assigns to the STEP BAR (the stepper's connector), not to a
+ * divider. The two had effectively been swapped.
  *
  * INDICATOR (optional text label centered on the divider):
  *   Works on both horizontal and vertical orientations.
@@ -67,7 +72,7 @@ function getIndicatorStyles(color, indicatorStyle) {
   };
 }
 
-const SIZE_MAP = { small: 1, medium: 2, large: 4 };
+const SIZE_MAP = { small: 0.5, medium: 1, large: 2 };
 
 export function Divider({
   color = 'default',

@@ -120,3 +120,41 @@ describe('Divider — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+/* Thickness comes from Component-Size `Divider` — 0.5 / 1 / 2.
+ *
+ * It was 1 / 2 / 4, one step heavy at every size. That ramp is the one the
+ * design assigns to the STEP BAR (the stepper's connector), which the lib had
+ * pinned flat at 2 — so the two ramps had effectively been swapped between the
+ * two components.
+ *
+ * 0.5px is a deliberate hairline: a true half-pixel on a 2x display, rounded
+ * by the browser on 1x. That is the usual hairline trade, not a rounding bug.
+ */
+describe('thickness follows the Divider ramp, not the step bar ramp', () => {
+  const cssFor = (el) => {
+    const cls = (el.className || '').split(/\s+/).find((c) => c.startsWith('css-'));
+    if (!cls) return '';
+    return Array.from(document.styleSheets)
+      .flatMap((sheet) => Array.from(sheet.cssRules || []))
+      .filter((r) => (r.selectorText || '').includes('.' + cls))
+      .map((r) => r.cssText)
+      .join('\n');
+  };
+
+  test.each([
+    ['small', '0.5px'],
+    ['medium', '1px'],
+    ['large', '2px'],
+  ])('vertical %s is %s wide', (size, expected) => {
+    const { container } = render(<Divider orientation="vertical" size={size} />);
+    const el = container.querySelector('.divider-vertical');
+    expect(cssFor(el)).toContain('width: ' + expected);
+  });
+
+  test('large is 2px, not the 4px the step bar uses', () => {
+    const { container } = render(<Divider orientation="vertical" size="large" />);
+    const el = container.querySelector('.divider-vertical');
+    expect(cssFor(el)).not.toContain('width: 4px');
+  });
+});

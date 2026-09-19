@@ -352,3 +352,107 @@ describe('Stepper — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+/* The status ladder — three separable steps, only one of them filled.
+ *
+ *   incomplete   Quiet outline, Quiet number,  no fill
+ *   complete     brand outline, --Text number, no fill
+ *   current      brand outline, brand FILL
+ *
+ * This used to fill complete AND current (`isActive || isCompleted`), leaving
+ * the two one pixel of border apart while incomplete was the only one that
+ * looked different — so the step you are ON was the hardest to pick out.
+ * Incomplete also drew its ring in the brand colour; Quiet is what stops a
+ * column of unreached steps reading as a row of buttons.
+ */
+describe('the status ladder', () => {
+  const cssFor = (el) => {
+    const cls = (el.className || '').split(/\s+/).find((c) => c.startsWith('css-'));
+    if (!cls) return '';
+    return Array.from(document.styleSheets)
+      .flatMap((sheet) => Array.from(sheet.cssRules || []))
+      .filter((r) => (r.selectorText || '').includes('.' + cls))
+      .map((r) => r.cssText)
+      .join('\n');
+  };
+
+  const threeSteps = (extra = {}) => render(
+    <Stepper activeStep={1} color="primary" {...extra}>
+      <Step label="One" /><Step label="Two" /><Step label="Three" />
+    </Stepper>
+  );
+
+  test('only the CURRENT step is filled', () => {
+    const { container } = threeSteps();
+    const done = container.querySelector('.step-indicator-completed');
+    const now  = container.querySelector('.step-indicator-active');
+    const todo = container.querySelector('.step-indicator-incomplete');
+
+    expect(cssFor(now)).toContain('background-color: var(--Buttons-Primary-Button)');
+    expect(cssFor(done)).toContain('background-color: transparent');
+    expect(cssFor(todo)).toContain('background-color: transparent');
+  });
+
+  test('incomplete draws its ring and number in Quiet, not the brand', () => {
+    const { container } = threeSteps();
+    const todo = container.querySelector('.step-indicator-incomplete');
+    expect(cssFor(todo)).toContain('var(--Quiet)');
+    expect(cssFor(todo)).not.toContain('var(--Buttons-Primary-Border)');
+  });
+
+  test('a filled indicator takes the token PAIRED with its fill', () => {
+    /* Not --Text: per invariant 3 the label is derived from the fill, so a
+       palette whose button is light would put light text on a light fill. */
+    const { container } = threeSteps();
+    const now = container.querySelector('.step-indicator-active');
+    expect(cssFor(now)).toContain('var(--Buttons-Primary-Text)');
+  });
+
+  test('every ring is one border width', () => {
+    const { container } = threeSteps();
+    for (const sel of ['.step-indicator-active', '.step-indicator-completed']) {
+      expect(cssFor(container.querySelector(sel))).toContain('var(--Button-Border-Width, 1px)');
+    }
+  });
+});
+
+/* noCount — the dot stepper. The lib had no equivalent at all: StepIndicator
+ * always rendered `icon || index+1` inside a 24/32/40 circle, so an 8px dot
+ * was unreachable. Diameters are Component-Size `No Count Step` (8/12/16). */
+describe('variant="noCount" draws dots', () => {
+  const cssFor = (el) => {
+    const cls = (el.className || '').split(/\s+/).find((c) => c.startsWith('css-'));
+    if (!cls) return '';
+    return Array.from(document.styleSheets)
+      .flatMap((sheet) => Array.from(sheet.cssRules || []))
+      .filter((r) => (r.selectorText || '').includes('.' + cls))
+      .map((r) => r.cssText)
+      .join('\n');
+  };
+
+  test.each([['small', '8px'], ['medium', '12px'], ['large', '16px']])(
+    '%s dot is %s', (size, expected) => {
+      const { container } = render(
+        <Stepper activeStep={0} size={size} variant="noCount">
+          <Step label="One" /><Step label="Two" />
+        </Stepper>
+      );
+      expect(cssFor(container.querySelector('.step-indicator'))).toContain('width: ' + expected);
+    });
+
+  test('and shows no number', () => {
+    const { container } = render(
+      <Stepper activeStep={0} variant="noCount">
+        <Step label="One" /><Step label="Two" />
+      </Stepper>
+    );
+    expect(container.querySelector('.step-indicator').textContent).toBe('');
+  });
+
+  test('while the default variant still numbers them', () => {
+    const { container } = render(
+      <Stepper activeStep={0}><Step label="One" /><Step label="Two" /></Stepper>
+    );
+    expect(container.querySelector('.step-indicator').textContent).toBe('1');
+  });
+});

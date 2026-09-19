@@ -33,10 +33,24 @@ const COLOR_LABEL_MAP = {
   info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
 };
 
+/* connectorThickness comes from Component-Size `Step bar` — 1 / 2 / 4.
+   It was a flat 2 at every size, which is the MEDIUM value, so small
+   connectors were double weight and large ones half. The 1/2/4 ramp is also
+   what the lib's Divider was using; the design assigns that one to the step
+   bar and gives Divider a lighter 0.5 / 1 / 2, so the two were swapped. */
 const SIZE_MAP = {
-  small:  { indicator: 24, fontSize: '11px', labelFontSize: '13px', connectorThickness: 2, gap: 0 },
-  medium: { indicator: 32, fontSize: '13px', labelFontSize: '14px', connectorThickness: 2, gap: 0 },
-  large:  { indicator: 40, fontSize: '16px', labelFontSize: '16px', connectorThickness: 2, gap: 0 },
+  /* fontSize is the Button-Numbers ramp, the same one Badge reads — the design
+     binds Button/Button-Numbers on the step indicator. It was 11 / 13 / 16 in
+     literal pixels, so a brand that re-picked its button heights moved the
+     design's step numbers and not the lib's.
+     dot is Component-Size `No Count Step` (8 / 12 / 16), the diameter of a
+     noCount step. */
+  small:  { indicator: 24, fontSize: 'var(--Sm-Button-Numbers, 10px)', dot: 8,
+            labelFontSize: '13px', connectorThickness: 1, gap: 0 },
+  medium: { indicator: 32, fontSize: 'var(--Button-Numbers, 12px)',    dot: 12,
+            labelFontSize: '14px', connectorThickness: 2, gap: 0 },
+  large:  { indicator: 40, fontSize: 'var(--Lg-Button-Numbers, 16px)', dot: 16,
+            labelFontSize: '16px', connectorThickness: 4, gap: 0 },
 };
 
 /* ─── Context ─── */
@@ -49,6 +63,7 @@ const StepperContext = createContext({
   onStepClick: null,
   dashedIncomplete: false,
   totalSteps: 0,
+  variant: 'count',
 });
 export const useStepperContext = () => useContext(StepperContext);
 
@@ -62,6 +77,11 @@ export function Stepper({
   clickable = false,
   onStepClick,
   dashedIncomplete = false,
+  /* 'count' draws a numbered circle, 'noCount' a plain dot — the design's
+     Style axis. Named `variant`, not `style`: React already owns `style` as
+     the inline-style prop, so the Figma property name cannot be used verbatim
+     here. The VALUES match exactly, which is what a converter reads. */
+  variant = 'count',
   className = '',
   sx = {},
   ...props
@@ -71,7 +91,7 @@ export function Stepper({
   const isHorizontal = orientation === 'horizontal';
 
   return (
-    <StepperContext.Provider value={{ orientation, size, color, activeStep, clickable, onStepClick, dashedIncomplete, totalSteps }}>
+    <StepperContext.Provider value={{ orientation, size, color, activeStep, clickable, onStepClick, dashedIncomplete, totalSteps, variant }}>
       <Box
         component="ol"
         role="list"
@@ -109,7 +129,7 @@ export function Step({
   sx = {},
   ...props
 }) {
-  const { orientation, size, color, activeStep, clickable: groupClickable, onStepClick, dashedIncomplete, totalSteps } = useStepperContext();
+  const { orientation, size, color, activeStep, clickable: groupClickable, onStepClick, dashedIncomplete, totalSteps, variant } = useStepperContext();
   /* `clickable` is a Stepper-level switch, so before this a step you cannot
      reach yet was styled and announced exactly like one you can. Folding
      disabled into it here drops the role, tabIndex, key handler and onClick
@@ -126,12 +146,34 @@ export function Step({
   const displayContent = icon || (_index + 1);
   const displayLabel = label || children;
 
-  // Token resolution
-  const borderToken = 'var(--Buttons-' + C + '-Border)';
-  const bgToken = (isActive || isCompleted) ? 'var(--Buttons-' + C + '-Button)' : 'transparent';
-  const textToken = (isActive || isCompleted) ? 'var(--Buttons-' + C + '-Text)' : 'var(--Text)';
-  const hoverToken = (isActive || isCompleted) ? 'var(--Buttons-' + C + '-Hover)' : 'var(--Hover)';
-  const activeToken = (isActive || isCompleted) ? 'var(--Buttons-' + C + '-Pressed)' : 'var(--Pressed)';
+  /* The status ladder, three separable steps:
+   *
+   *   incomplete   Quiet outline, Quiet number,  no fill   — not reached
+   *   complete     brand outline, --Text number, no fill   — done
+   *   current      brand outline, brand FILL               — you are here
+   *
+   * Only the current step fills. This used to fill complete as well
+   * (`isActive || isCompleted`), leaving those two a single pixel of border
+   * apart while incomplete was the only one that looked different — so the
+   * step you are ON was the hardest to pick out, which is backwards. It also
+   * painted incomplete's ring in the brand colour; the design uses Quiet, so a
+   * column of unreached steps reads as quiet rather than as a row of buttons.
+   * (Same reasoning as Checkbox's default box, which draws in --Quiet for
+   * exactly that.)
+   *
+   * The number on a FILLED indicator takes --Buttons-<C>-Text, the token
+   * paired with that fill, rather than --Text. The design binds --Text there,
+   * which resolves legibly on the current theme but is the surface's text
+   * colour, not the fill's: per invariant 3 the label is derived from the
+   * fill, so a palette whose button is light would put light text on it. */
+  const borderToken = isIncomplete ? 'var(--Quiet)' : 'var(--Buttons-' + C + '-Border)';
+  const bgToken     = isActive ? 'var(--Buttons-' + C + '-Button)' : 'transparent';
+  const textToken   = isActive     ? 'var(--Buttons-' + C + '-Text)'
+                    : isIncomplete ? 'var(--Quiet)'
+                    : 'var(--Text)';
+  const hoverToken  = isActive ? 'var(--Buttons-' + C + '-Hover)' : 'var(--Hover)';
+  const activeToken = isActive ? 'var(--Buttons-' + C + '-Pressed)' : 'var(--Pressed)';
+  const isDot       = variant === 'noCount';
 
   const indicatorEl = (
     <Box
@@ -156,12 +198,16 @@ export function Step({
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        width: s.indicator + 'px',
-        height: s.indicator + 'px',
-        minWidth: s.indicator + 'px',
-        minHeight: s.indicator + 'px',
+        width: (isDot ? s.dot : s.indicator) + 'px',
+        height: (isDot ? s.dot : s.indicator) + 'px',
+        minWidth: (isDot ? s.dot : s.indicator) + 'px',
+        minHeight: (isDot ? s.dot : s.indicator) + 'px',
         borderRadius: '50%',
-        border: (isActive ? '2px' : '1px') + ' solid ' + borderToken,
+        /* ONE border width. It was 2px on the current step and 1px elsewhere,
+           carrying a distinction the fill now makes far more clearly; the
+           design system has a single --Button-Border-Width (1px) and this is
+           the same ring. */
+        border: 'var(--Button-Border-Width, 1px) solid ' + borderToken,
         backgroundColor: bgToken,
         color: textToken,
         fontSize: s.fontSize,
@@ -204,7 +250,7 @@ export function Step({
         }),
       }}
     >
-      {displayContent}
+      {isDot ? null : displayContent}
     </Box>
   );
 
