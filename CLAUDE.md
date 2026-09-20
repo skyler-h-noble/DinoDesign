@@ -583,22 +583,33 @@ import {
 // variant: 'primary' | 'secondary' | 'tertiary' | 'neutral' |
 //          'info' | 'success' | 'warning' | 'error' |
 //          'black-white' |
-//          + '-outline' + '-light' variants | 'ghost' | 'text'
+//          + '-outline' variants | 'ghost' | 'text'
 //          ('black-white' has solid + outline only — see below)
+//
+// There is no '-light' SHAPE on Button. It was removed in 0.9.0: it painted
+// --<C>-Color-11, a tinted fill that was never a shape in the design, where
+// shape is solid / outline / ghost / text and COLOUR arrives as a Buttons
+// mode. A '{color}-light' call site still renders — normalizeButtonVariant
+// strips the suffix to the solid button of the same colour and warns once in
+// development — so nothing breaks silently, but do not write new ones.
+// (Switch and ButtonGroup DO still have a light variant; they are different
+// things. Switch's is a tinted track; ButtonGroup's changes the SURFACE of
+// the unselected segments, not the theme.)
 // size: 'small' | 'medium' | 'large'
 <Button variant="primary" size="medium" startIcon={<AddIcon />}>
   Save Changes
 </Button>
 <Button variant="primary-outline">Cancel</Button>
-<Button variant="primary-light">Secondary Action</Button>
 
 // black-white resolves itself against whatever it is placed on: black on a
 // light surface, white on a dark one, with a label that always clears 4.5:1.
 // Works on every theme and surface with no prop change.
 <Button variant="black-white">Works anywhere</Button>
 <Button variant="black-white-outline">Also anywhere</Button>
-// No 'black-white-light': that variant reads --<Color>-Color-11, and
-// black-white is a resolved pair rather than a palette, so it has no tones.
+// black-white is solid + outline, like every other colour now that the light
+// shape is gone. It was the first to lose one: -light read --<C>-Color-11 and
+// black-white is a resolved pair rather than a palette, so it has no tones to
+// read — which is the same reason the shape did not survive anywhere else.
 ```
 
 ### ButtonGroup
@@ -656,7 +667,7 @@ import {
 
 ### TextField / Input
 ```jsx
-// data-surface="Container-Lowest" set internally
+// data-surface set internally: "Container", or "Container-Low" when disabled
 <TextField
   label="Email"
   variant="primary-outline"
