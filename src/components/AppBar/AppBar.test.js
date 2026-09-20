@@ -23,17 +23,22 @@ describe('AppBar', () => {
 
 /* --- Always present: data-surface --- */
 describe('Data attributes always present', () => {
-  test('always has data-surface="Surface-Bright"', () => {
+  /* The default surface is "Surface", and a barColor that implies a lightness
+     overrides it (primary-light / white -> Surface-Brightest, black ->
+     Surface-Dimmest). Surface-Bright was never the default. */
+  test('defaults to data-surface="Surface"', () => {
     const { container } = render(<DesktopAppBar />);
-    expect(container.querySelector('[data-surface="Surface-Bright"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-surface="Surface"]')).toBeInTheDocument();
   });
-  test('data-surface present for non-default barColor', () => {
+  /* Only a barColor that implies a LIGHTNESS carries a surface of its own;
+     the rest keep the default. Lightness is the surface axis. */
+  test('a barColor with no lightness keeps the default surface', () => {
     const { container } = render(<DesktopAppBar barColor="primary" />);
-    expect(container.querySelector('[data-surface="Surface-Bright"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-surface="Surface"]')).toBeInTheDocument();
   });
-  test('data-surface on mobile', () => {
+  test('black is Surface-Dimmest, on mobile too', () => {
     const { container } = render(<MobileAppBar mobileVariant="small" title="P" barColor="black" />);
-    expect(container.querySelector('[data-surface="Surface-Bright"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-surface="Surface-Dimmest"]')).toBeInTheDocument();
   });
 });
 
@@ -52,9 +57,14 @@ describe('data-theme per barColor', () => {
     const { container } = render(<DesktopAppBar barColor="primary-light" />);
     expect(container.querySelector('[data-theme="Primary"][data-surface="Surface-Brightest"]')).toBeInTheDocument();
   });
-  test('primary-dark sets data-theme="Primary"', () => {
+  /* `primary-dark` is not a barColor — the map is default / primary /
+     primary-light / white / black — so it falls back to the default theme.
+     That default is "App-Bar", which is a real CSS theme (CSS_ONLY_THEMES):
+     it is emitted in the stylesheet and only absent from Figma's Theme
+     collection, which is capped at ten modes. */
+  test('an unknown barColor falls back to the App-Bar theme', () => {
     const { container } = render(<DesktopAppBar barColor="primary-dark" />);
-    expect(container.querySelector('[data-theme="Primary"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-theme="App-Bar"]')).toBeInTheDocument();
   });
   test('white sets data-theme="Neutral"', () => {
     const { container } = render(<DesktopAppBar barColor="white" />);
@@ -82,7 +92,9 @@ describe('DesktopAppBar', () => {
   });
   test('hamburger menu', () => {
     render(<DesktopAppBar menuType="hamburger" />);
-    expect(screen.getByLabelText('Menu')).toBeInTheDocument();
+    /* The accessible name is "Open navigation menu" — naming the ACTION, not
+       the glyph, which is the lib's own icon-button rule. */
+    expect(screen.getByLabelText('Open navigation menu')).toBeInTheDocument();
   });
   test('expanded nav with 3 links', () => {
     render(<DesktopAppBar menuType="expanded" navLinks={['Home', 'About', 'Help']} />);
@@ -90,12 +102,14 @@ describe('DesktopAppBar', () => {
   });
   test('forces hamburger when navLinks > 3', () => {
     render(<DesktopAppBar menuType="expanded" navLinks={['A', 'B', 'C', 'D']} />);
-    expect(screen.getByLabelText('Menu')).toBeInTheDocument();
+    expect(screen.getByLabelText('Open navigation menu')).toBeInTheDocument();
     expect(screen.queryByLabelText('Main navigation')).not.toBeInTheDocument();
   });
+  /* The Login button renders only when an onLogin handler is supplied —
+     loginType alone does not produce one. */
   test('login button', () => {
-    render(<DesktopAppBar loginType="login" />);
-    expect(screen.getByText('Login')).toBeInTheDocument();
+    render(<DesktopAppBar loginType="login" onLogin={jest.fn()} />);
+    expect(screen.getByRole('button', { name: 'Login' })).toBeInTheDocument();
   });
   test('search field', () => {
     render(<DesktopAppBar searchPosition="right" />);

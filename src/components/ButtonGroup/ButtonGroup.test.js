@@ -111,8 +111,10 @@ describe('ButtonGroup Component', () => {
         <Button>Disabled</Button>
       </ButtonGroup>
     );
-    expect(screen.getByText('Disabled')).toBeDisabled();
-    expect(screen.getByText('Enabled')).not.toBeDisabled();
+    /* getByText returns the label <span> inside the button, which is never
+       "disabled" — the attribute is on the <button>. Query by role. */
+    expect(screen.getAllByRole('button', { name: 'Disabled' })[0]).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Enabled' })).not.toBeDisabled();
   });
 
   // Event handling tests
@@ -251,7 +253,10 @@ describe('ButtonGroup Component', () => {
         <Button>Other</Button>
       </ButtonGroup>
     );
-    const button = screen.getByText('Focus me');
+    /* Focus lands on the <button>; getByText returns the inner label span,
+       which is not focusable, so .focus() was a no-op and focus stayed on
+       <body>. */
+    const button = screen.getByRole('button', { name: 'Focus me' });
     button.focus();
     expect(button).toHaveFocus();
   });
@@ -264,7 +269,7 @@ describe('ButtonGroup Component', () => {
         <Button>Third</Button>
       </ButtonGroup>
     );
-    const first = screen.getByText('First');
+    const first = screen.getByRole('button', { name: 'First' });
     first.focus();
     expect(first).toHaveFocus();
   });
@@ -318,8 +323,11 @@ describe('Light variant', () => {
 
   test('names the bare palette, never a -Light theme', () => {
     const { container } = renderLight('error');
+    /* The second line asserted the SAME selector was null — so this test
+       required an element to be both present and absent and could never
+       pass. What it means to check is that the STALE name is absent. */
     expect(container.querySelector('[data-theme="Error"]')).toBeInTheDocument();
-    expect(container.querySelector('[data-theme="Error"]')).toBeNull();
+    expect(container.querySelector('[data-theme="Error-Light"]')).toBeNull();
   });
 
   test('lightens with the surface, not the theme name', () => {

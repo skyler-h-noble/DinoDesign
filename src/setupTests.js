@@ -36,3 +36,12 @@ if (typeof globalThis.ResizeObserver === 'undefined') {
     disconnect() {}
   };
 }
+
+/* TextEncoder / TextDecoder — jsdom does not provide them, and react-router 7
+   reaches for TextEncoder at import time, so App.test.js could not even load.
+   Unlike the ResizeObserver stub above these are NOT no-ops: Node has real,
+   spec-correct implementations in `util`, so the right move is to hand those
+   through rather than invent a substitute. */
+const { TextEncoder, TextDecoder } = require('util');
+if (typeof globalThis.TextEncoder === 'undefined') globalThis.TextEncoder = TextEncoder;
+if (typeof globalThis.TextDecoder === 'undefined') globalThis.TextDecoder = TextDecoder;

@@ -255,13 +255,20 @@ export function Step({
   );
 
   // Connector line
+  const connectorTraversed = _index < activeStep;
   const connectorEl = !isLast ? (
     <Box
       className={
+        /* A connector is about the SEGMENT between two steps, not about the
+           step it hangs off — so it is traversed or not, with no third case.
+           It used to reuse the step's own isCompleted / isIncomplete, and the
+           ACTIVE step is neither, so the connector leading out of the step you
+           are on got no class at all. That also meant dashedIncomplete never
+           dashed it: the one segment you have most clearly not travelled yet
+           rendered solid. */
         'step-connector'
-        + (isCompleted ? ' step-connector-completed' : '')
-        + (isIncomplete ? ' step-connector-incomplete' : '')
-        + (dashedIncomplete && isIncomplete ? ' step-connector-dashed' : '')
+        + (connectorTraversed ? ' step-connector-completed' : ' step-connector-incomplete')
+        + (dashedIncomplete && !connectorTraversed ? ' step-connector-dashed' : '')
       }
       aria-hidden="true"
       sx={{
@@ -282,8 +289,8 @@ export function Step({
               marginTop: '4px',
               marginBottom: '4px',
             }),
-        backgroundColor: isCompleted ? 'var(--Buttons-' + C + '-Button)' : 'var(--Border)',
-        ...(dashedIncomplete && isIncomplete && {
+        backgroundColor: connectorTraversed ? 'var(--Buttons-' + C + '-Button)' : 'var(--Border)',
+        ...(dashedIncomplete && !connectorTraversed && {
           backgroundColor: 'transparent',
           backgroundImage: isHorizontal
             ? 'repeating-linear-gradient(90deg, var(--Border) 0px, var(--Border) 6px, transparent 6px, transparent 12px)'
