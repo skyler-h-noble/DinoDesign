@@ -90,7 +90,7 @@ function resolveDecorator(node, buttonSize) {
  *
  *   Button-Contents (inner)
  *     background: var(--Buttons-{Color}-Button)
- *     border-radius: var(--Button-Inner-Radius)  ← radius - 1
+ *     border-radius: var(--Button-Inner-Focus-Radius)  ← radius - 1
  *     contains: Slot (icon) + Typography + Slot2 (icon)
  *
  *     Bevel Overlay (pseudo-element)
