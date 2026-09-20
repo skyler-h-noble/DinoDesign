@@ -249,7 +249,7 @@ describe('TreeView — Accessibility (jest-axe)', () => {
 
   test('has no violations in light theme', async () => {
     const { container } = render(
-      <div data-theme="Primary-Light">
+      <div data-theme="Primary">
         <OmniTreeView variant="light" color="primary" items={SIMPLE_ITEMS} />
       </div>
     );

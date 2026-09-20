@@ -14,7 +14,7 @@ import { SHADOW_LEVEL_2 } from '../_shadows';
  *
  * VARIANTS (on AccordionGroup):
  *   solid     data-theme="{Theme}" data-surface="Surface"
- *   light     data-theme="{Theme}-Light" data-surface="Surface"
+ *   light     data-theme="{Theme}"       data-surface="Surface-Brightest"
  *   dark      data-theme="{Theme}" data-surface="Surface-Dimmest"
  *
  * COLORS: default | primary | secondary | tertiary | neutral | info | success | warning | error

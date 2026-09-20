@@ -12,7 +12,7 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3 } from '../_shadows';
  * VARIANTS (on Menu popup):
  *   outline   bg transparent, border var(--Buttons-{C}-Border)
  *   solid     data-theme="{Theme}" data-surface="Surface"
- *   light     data-theme="{Theme}-Light" data-surface="Surface"
+ *   light     data-theme="{Theme}"       data-surface="Surface-Brightest"
  *
  * COLORS: default | primary | secondary | tertiary | neutral | info | success | warning | error
  *

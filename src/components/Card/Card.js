@@ -16,7 +16,7 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3, SHADOW_LEVEL_4 } from '
  * VARIANTS + DATA ATTRIBUTES (on inner content):
  *   default   No data-theme.              data-surface="Container"        bg: var(--Background)
  *   solid     data-theme="{Theme}"        data-surface="Surface"          bg: var(--Background)
- *   light     data-theme="{Theme}-Light"  data-surface="Surface"          bg: var(--Background)
+ *   light     data-theme="{Theme}"        data-surface="Surface-Brightest" bg: var(--Background)
  *   dark      data-theme="{Theme}"        data-surface="Surface-Dimmest"  bg: var(--Background)
  *
  * BORDERS:

@@ -8,10 +8,15 @@ import { SHADOW_LEVEL_2, SHADOW_LEVEL_3, SHADOW_LEVEL_4 } from '../_shadows';
  *
  * A generic surface container matching Card/Box two-layer structure.
  *
- * VARIANTS:
- *   solid     data-theme="{Theme}" data-surface="Surface"
- *   light     data-theme="{Theme}-Light" data-surface="Surface"
- *   dark      data-theme="{Theme}" data-surface="Surface-Dimmest"
+ * NO VARIANTS. A Sheet is a surface container and nothing else: the caller
+ * sets `color` (-> data-theme) and `surface` (-> data-surface) and the cascade
+ * supplies --Background / --Text for that pairing.
+ *
+ * It used to carry variant="solid|light|dark", which only ever chose between
+ * three of the five surface levels — Surface, Surface-Brightest,
+ * Surface-Dimmest — under names that said nothing about which. `surface` takes
+ * ANY of the five and says so, so the variant axis was a smaller, vaguer
+ * version of a prop that already existed.
  *
  * COLORS: default | primary | secondary | tertiary | neutral | info | success | warning | error
  *
@@ -24,10 +29,26 @@ import { SHADOW_LEVEL_2, SHADOW_LEVEL_3, SHADOW_LEVEL_4 } from '../_shadows';
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
+/* `variant` is accepted and ignored. Deleting the prop outright would let it
+   fall into ...props and reach the DOM as an attribute; warn once instead,
+   the same treatment Badge's removed `size` gets. */
+const warnedVariants = new Set();
+
+function warnRemovedVariant(variant) {
+  if (variant === undefined) return;
+  if (process.env.NODE_ENV === 'production' || warnedVariants.has(variant)) return;
+  warnedVariants.add(variant);
+  console.warn(
+    '[Sheet] variant="' + variant + '" — Sheet has no variants. Set `surface` ' +
+    'directly: light was surface="Surface-Brightest", dark was ' +
+    'surface="Surface-Dimmest", solid was the default surface="Surface".',
+  );
+}
+
 export function Sheet({
   children,
-  surface,
-  variant = 'solid',
+  surface = 'Surface',
+  variant,
   color = 'default',
   elevated = false,
   component = 'div',
@@ -42,12 +63,8 @@ export function Sheet({
   // `C + '-Light'` matched no rule and --Background resolved to nothing.
   const dataTheme = color === 'default' ? 'Default' : C;
 
-  /* Explicit surface override — see the note on Alert. `variant` reaches only
-   * three of the five surface levels; this takes any of them and wins, with
-   * the variant mapping kept as the default so existing usage is untouched. */
-  const dataSurface = surface || (variant === 'dark' ? 'Surface-Dimmest'
-    : variant === 'light' ? 'Surface-Brightest'
-    : 'Surface');
+  warnRemovedVariant(variant);
+  const dataSurface = surface;
 
   const restShadow = elevated ? SHADOW_LEVEL_3 : SHADOW_LEVEL_2;
   const hoverShadow = elevated ? SHADOW_LEVEL_4 : SHADOW_LEVEL_3;
@@ -55,7 +72,7 @@ export function Sheet({
   return (
     <Box
       component={component}
-      className={'sheet sheet-' + variant + ' sheet-' + color +
+      className={'sheet sheet-' + color +
         (elevated ? ' sheet-elevated' : '') +
         (className ? ' ' + className : '')}
       sx={{
@@ -87,8 +104,5 @@ export function Sheet({
 }
 
 /* ─── Convenience Exports ─── */
-export const SolidSheet = (p) => <Sheet variant="solid" {...p} />;
-export const LightSheet = (p) => <Sheet variant="light" {...p} />;
-export const DarkSheet  = (p) => <Sheet variant="dark"  {...p} />;
 
 export default Sheet;

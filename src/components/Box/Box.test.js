@@ -42,19 +42,19 @@ describe('data-theme', () => {
     expect(container.querySelector('[data-theme]')).not.toBeInTheDocument();
   });
 
-  test('Primary-Light', () => {
-    const { container } = renderBox({ color: 'Primary-Light' });
-    expect(container.querySelector('[data-theme="Primary-Light"]')).toBeInTheDocument();
+  test('Primary', () => {
+    const { container } = renderBox({ color: 'Primary' });
+    expect(container.querySelector('[data-theme="Primary"]')).toBeInTheDocument();
   });
 
-  test('Primary-Medium', () => {
-    const { container } = renderBox({ color: 'Primary-Medium' });
-    expect(container.querySelector('[data-theme="Primary-Medium"]')).toBeInTheDocument();
+  test('Primary', () => {
+    const { container } = renderBox({ color: 'Primary' });
+    expect(container.querySelector('[data-theme="Primary"]')).toBeInTheDocument();
   });
 
-  test('Primary-Dark', () => {
-    const { container } = renderBox({ color: 'Primary-Dark' });
-    expect(container.querySelector('[data-theme="Primary-Dark"]')).toBeInTheDocument();
+  test('Primary', () => {
+    const { container } = renderBox({ color: 'Primary' });
+    expect(container.querySelector('[data-theme="Primary"]')).toBeInTheDocument();
   });
 
   test('Secondary', () => {
@@ -62,14 +62,14 @@ describe('data-theme', () => {
     expect(container.querySelector('[data-theme="Secondary"]')).toBeInTheDocument();
   });
 
-  test('Info-Light', () => {
-    const { container } = renderBox({ color: 'Info-Light' });
-    expect(container.querySelector('[data-theme="Info-Light"]')).toBeInTheDocument();
+  test('Info', () => {
+    const { container } = renderBox({ color: 'Info' });
+    expect(container.querySelector('[data-theme="Info"]')).toBeInTheDocument();
   });
 
-  test('Error-Dark', () => {
-    const { container } = renderBox({ color: 'Error-Dark' });
-    expect(container.querySelector('[data-theme="Error-Dark"]')).toBeInTheDocument();
+  test('Error', () => {
+    const { container } = renderBox({ color: 'Error' });
+    expect(container.querySelector('[data-theme="Error"]')).toBeInTheDocument();
   });
 });
 
@@ -81,7 +81,7 @@ describe('Color class', () => {
   });
 
   test('adds lowercase color class for compound', () => {
-    const { container } = renderBox({ color: 'Success-Light' });
+    const { container } = renderBox({ color: 'Success' });
     expect(container.querySelector('.themed-box-success-light')).toBeInTheDocument();
   });
 

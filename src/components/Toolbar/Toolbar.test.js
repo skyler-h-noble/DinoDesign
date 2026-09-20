@@ -42,9 +42,9 @@ describe('Theme', () => {
     const { container } = renderToolbar({ barColor: 'primary' });
     expect(container.querySelector('[data-theme="Primary"]')).toBeInTheDocument();
   });
-  test('black → data-theme="Neutral-Dark"', () => {
+  test('black → data-theme="Neutral"', () => {
     const { container } = renderToolbar({ barColor: 'black' });
-    expect(container.querySelector('[data-theme="Neutral-Dark"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-theme="Neutral"]')).toBeInTheDocument();
   });
   test('data-surface="Surface"', () => {
     const { container } = renderToolbar();
@@ -131,8 +131,8 @@ describe('FAB', () => {
 describe('Bar colors', () => {
   const cases = [
     ['default', 'Nav-Bar'], ['primary', 'Primary'],
-    ['primary-light', 'Primary-Light'], ['primary-medium', 'Primary-Medium'],
-    ['primary-dark', 'Primary-Dark'], ['white', 'Neutral'], ['black', 'Neutral-Dark'],
+    ['primary-light', 'Primary'], ['primary-medium', 'Primary'],
+    ['primary-dark', 'Primary'], ['white', 'Neutral'], ['black', 'Neutral'],
   ];
   cases.forEach(([color, theme]) => {
     test(color + ' → ' + theme, () => {

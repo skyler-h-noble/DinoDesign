@@ -319,7 +319,7 @@ describe('Light variant', () => {
   test('names the bare palette, never a -Light theme', () => {
     const { container } = renderLight('error');
     expect(container.querySelector('[data-theme="Error"]')).toBeInTheDocument();
-    expect(container.querySelector('[data-theme="Error-Light"]')).toBeNull();
+    expect(container.querySelector('[data-theme="Error"]')).toBeNull();
   });
 
   test('lightens with the surface, not the theme name', () => {

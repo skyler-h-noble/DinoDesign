@@ -52,9 +52,9 @@ describe('data-theme per barColor', () => {
     const { container } = render(<DesktopAppBar barColor="primary-light" />);
     expect(container.querySelector('[data-theme="Primary"][data-surface="Surface-Brightest"]')).toBeInTheDocument();
   });
-  test('primary-dark sets data-theme="Primary-Dark"', () => {
+  test('primary-dark sets data-theme="Primary"', () => {
     const { container } = render(<DesktopAppBar barColor="primary-dark" />);
-    expect(container.querySelector('[data-theme="Primary-Dark"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-theme="Primary"]')).toBeInTheDocument();
   });
   test('white sets data-theme="Neutral"', () => {
     const { container } = render(<DesktopAppBar barColor="white" />);

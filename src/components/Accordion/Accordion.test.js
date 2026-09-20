@@ -40,10 +40,10 @@ describe('Solid variant data-theme', () => {
     ['secondary', 'Secondary'],
     ['tertiary', 'Tertiary'],
     ['neutral', 'Neutral'],
-    ['info', 'Info-Medium'],
-    ['success', 'Success-Medium'],
-    ['warning', 'Warning-Medium'],
-    ['error', 'Error-Medium'],
+    ['info', 'Info'],
+    ['success', 'Success'],
+    ['warning', 'Warning'],
+    ['error', 'Error'],
   ];
 
   cases.forEach(([color, theme]) => {
@@ -59,14 +59,14 @@ describe('Solid variant data-theme', () => {
 /* ─── Light data-theme ─── */
 describe('Light variant data-theme', () => {
   const cases = [
-    ['primary', 'Primary-Light'],
-    ['secondary', 'Secondary-Light'],
-    ['tertiary', 'Tertiary-Light'],
-    ['neutral', 'Neutral-Light'],
-    ['info', 'Info-Light'],
-    ['success', 'Success-Light'],
-    ['warning', 'Warning-Light'],
-    ['error', 'Error-Light'],
+    ['primary', 'Primary'],
+    ['secondary', 'Secondary'],
+    ['tertiary', 'Tertiary'],
+    ['neutral', 'Neutral'],
+    ['info', 'Info'],
+    ['success', 'Success'],
+    ['warning', 'Warning'],
+    ['error', 'Error'],
   ];
 
   cases.forEach(([color, theme]) => {
@@ -259,7 +259,7 @@ describe('Convenience exports', () => {
       </LightAccordionGroup>
     );
     expect(container.querySelector('.accordion-group-light')).toBeInTheDocument();
-    expect(container.querySelector('[data-theme="Success-Light"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-theme="Success"]')).toBeInTheDocument();
   });
 });
 

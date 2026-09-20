@@ -54,8 +54,8 @@ describe('Standard variant', () => {
 describe('Solid variant data-theme', () => {
   const cases = [
     ['primary', 'Primary'], ['secondary', 'Secondary'], ['tertiary', 'Tertiary'],
-    ['neutral', 'Neutral'], ['info', 'Info-Medium'], ['success', 'Success-Medium'],
-    ['warning', 'Warning-Medium'], ['error', 'Error-Medium'],
+    ['neutral', 'Neutral'], ['info', 'Info'], ['success', 'Success'],
+    ['warning', 'Warning'], ['error', 'Error'],
   ];
 
   cases.forEach(([color, theme]) => {

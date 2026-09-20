@@ -67,10 +67,10 @@ describe('Solid variant data-theme', () => {
     ['secondary', 'Secondary'],
     ['tertiary', 'Tertiary'],
     ['neutral', 'Neutral'],
-    ['info', 'Info-Medium'],
-    ['success', 'Success-Medium'],
-    ['warning', 'Warning-Medium'],
-    ['error', 'Error-Medium'],
+    ['info', 'Info'],
+    ['success', 'Success'],
+    ['warning', 'Warning'],
+    ['error', 'Error'],
   ];
 
   cases.forEach(([color, theme]) => {
@@ -236,7 +236,7 @@ describe('Convenience exports', () => {
     const { container } = render(
       <SolidCard color="info"><CardContent>T</CardContent></SolidCard>
     );
-    expect(container.querySelector('[data-theme="Info-Medium"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-theme="Info"]')).toBeInTheDocument();
   });
 
   test('LightCard renders with data-theme', () => {

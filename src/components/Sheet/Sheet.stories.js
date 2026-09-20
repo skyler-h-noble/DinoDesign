@@ -22,11 +22,11 @@ export const Variants = {
   name: 'All Variants (Default / Solid / Light)',
   render: () => (
     <Stack spacing={3} sx={{ p: 4, maxWidth: 400 }}>
-      {['default', 'solid', 'light'].map((v) => (
+      {['Surface', 'Surface-Brightest', 'Surface-Dimmest'].map((v) => (
         <Box key={v}>
           <Box sx={{ mb: 1, fontSize: '12px', color: 'var(--Text-Quiet)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{v}</Box>
-          <Sheet variant={v} color="primary">
-            <Box sx={{ fontWeight: 700 }}>{v.charAt(0).toUpperCase() + v.slice(1)} Sheet</Box>
+          <Sheet surface={v} color="primary">
+            <Box sx={{ fontWeight: 700 }}>{v} Sheet</Box>
             <Box sx={{ color: 'var(--Text-Quiet)', fontSize: '13px', mt: 0.5 }}>Content within the sheet surface.</Box>
           </Sheet>
         </Box>
@@ -40,7 +40,7 @@ export const SolidColors = {
   render: () => (
     <Stack spacing={2} sx={{ p: 4, maxWidth: 400 }}>
       {['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'].map((c) => (
-        <Sheet key={c} variant="solid" color={c}>
+        <Sheet key={c} color={c}>
           <Box sx={{ fontWeight: 700 }}>{c.charAt(0).toUpperCase() + c.slice(1)}</Box>
         </Sheet>
       ))}
@@ -53,7 +53,7 @@ export const LightColors = {
   render: () => (
     <Stack spacing={2} sx={{ p: 4, maxWidth: 400 }}>
       {['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'].map((c) => (
-        <Sheet key={c} variant="light" color={c}>
+        <Sheet key={c} surface="Surface-Brightest" color={c}>
           <Box sx={{ fontWeight: 700 }}>{c.charAt(0).toUpperCase() + c.slice(1)}</Box>
         </Sheet>
       ))}
@@ -107,7 +107,7 @@ export const ComponentOverride = {
       <Sheet component="section">
         <Box sx={{ fontWeight: 700 }}>Renders as {'<section>'}</Box>
       </Sheet>
-      <Sheet component="aside" variant="light" color="info">
+      <Sheet component="aside" surface="Surface-Brightest" color="info">
         <Box sx={{ fontWeight: 700 }}>Renders as {'<aside>'}</Box>
       </Sheet>
     </Stack>
@@ -118,9 +118,9 @@ export const Nested = {
   name: 'Nested Sheets',
   render: () => (
     <Box sx={{ p: 4, maxWidth: 400 }}>
-      <Sheet variant="light" color="neutral">
+      <Sheet surface="Surface-Brightest" color="neutral">
         <Box sx={{ fontWeight: 700, mb: 1 }}>Outer Sheet (Light/Neutral)</Box>
-        <Sheet variant="solid" color="primary" sx={{ mt: 1 }}>
+        <Sheet color="primary" sx={{ mt: 1 }}>
           <Box sx={{ fontWeight: 700 }}>Inner Sheet (Solid/Primary)</Box>
           <Box sx={{ fontSize: '13px', mt: 0.5 }}>Nested within the outer sheet.</Box>
         </Sheet>
