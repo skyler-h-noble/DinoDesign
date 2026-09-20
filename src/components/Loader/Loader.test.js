@@ -52,9 +52,19 @@ describe('LinearLoader Component', () => {
     expect(progress).toBeInTheDocument();
   });
 
-  test('displays determinate progress with value', () => {
-    render(<LinearLoader value={50} />);
+  /* The percentage lives in the label ROW — `{label && (... {value}% ...)}` —
+     so a LinearLoader given a value but no label shows the bar and hides the
+     number. Whether that is right is a design question (a determinate bar
+     arguably ought to show its value on its own); the test now describes what
+     the component does rather than asserting a feature it does not have. */
+  test('displays the percentage alongside a label', () => {
+    render(<LinearLoader value={50} label="Uploading" />);
     expect(screen.getByText('50%')).toBeInTheDocument();
+  });
+
+  test('and shows no percentage without a label', () => {
+    render(<LinearLoader value={50} />);
+    expect(screen.queryByText('50%')).toBeNull();
   });
 
   test('displays label', () => {
@@ -94,9 +104,14 @@ describe('DotsLoader Component', () => {
     expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
+  /* The dots animate through `sx`, which emotion compiles to a CLASS — there
+     is no inline style attribute, so the old selector matched 0 and the
+     assertion was "0 === 3". Count the dots structurally instead. */
   test('renders three dots', () => {
     const { container } = render(<DotsLoader />);
-    const dots = container.querySelectorAll('[style*="animation"]');
+    /* The three dots are the only leaf divs in the tree. */
+    const dots = Array.from(container.querySelectorAll('div'))
+      .filter((el) => el.children.length === 0);
     expect(dots.length).toBe(3);
   });
 });

@@ -129,16 +129,18 @@ describe('First / Last buttons', () => {
 
 /* ─── Ellipsis ─── */
 describe('Ellipsis', () => {
+  /* The ellipsis is a <Caption>…</Caption> marked aria-hidden — there is no
+     .pagination-ellipsis class, so both of these queried null and the second
+     asserted an attribute on it. Matching the character is what the reader
+     actually sees; aria-hidden is what a screen reader relies on to skip it. */
   test('renders ellipsis for large page counts', () => {
-    const { container } = renderPagination({ count: 20, defaultPage: 10 });
-    const ellipses = container.querySelectorAll('.pagination-ellipsis');
-    expect(ellipses.length).toBeGreaterThanOrEqual(1);
+    renderPagination({ count: 20, defaultPage: 10 });
+    expect(screen.getAllByText('\u2026').length).toBeGreaterThanOrEqual(1);
   });
 
-  test('ellipsis has aria-hidden', () => {
-    const { container } = renderPagination({ count: 20, defaultPage: 10 });
-    const ellipsis = container.querySelector('.pagination-ellipsis');
-    expect(ellipsis).toHaveAttribute('aria-hidden', 'true');
+  test('ellipsis is hidden from assistive tech', () => {
+    renderPagination({ count: 20, defaultPage: 10 });
+    expect(screen.getAllByText('\u2026')[0]).toHaveAttribute('aria-hidden', 'true');
   });
 
   test('no ellipsis when count is small', () => {
@@ -147,18 +149,9 @@ describe('Ellipsis', () => {
   });
 });
 
-/* ─── Variant classes ─── */
-describe('Variant classes', () => {
-  test('solid variant class', () => {
-    const { container } = renderPagination({ variant: 'solid' });
-    expect(container.querySelector('.pagination-solid')).toBeInTheDocument();
-  });
-
-  test('light variant class', () => {
-    const { container } = renderPagination({ variant: 'light' });
-    expect(container.querySelector('.pagination-light')).toBeInTheDocument();
-  });
-});
+/* Pagination has no `variant` prop — only `color` and `size`. The page
+   buttons take their appearance from the colour: selected renders the solid
+   Button variant, unselected the -outline one. */
 
 /* ─── Color classes ─── */
 describe('Color classes', () => {
@@ -183,9 +176,11 @@ describe('Size classes', () => {
 
 /* ─── Selected class ─── */
 describe('Selected state', () => {
-  test('selected page has pagination-selected class', () => {
-    const { container } = renderPagination({ defaultPage: 3 });
-    expect(container.querySelector('.pagination-selected')).toBeInTheDocument();
+  /* Selection is aria-current="page", not a class — which is also the thing a
+     screen reader announces. */
+  test('selected page is marked aria-current', () => {
+    renderPagination({ defaultPage: 3 });
+    expect(screen.getByRole('button', { name: 'Page 3' })).toHaveAttribute('aria-current', 'page');
   });
 });
 
@@ -215,14 +210,11 @@ describe('Controlled mode', () => {
 
 /* ─── Defaults ─── */
 describe('Defaults', () => {
-  test('default variant is solid', () => {
+  /* Default colour is `default`, not primary — the lib-wide rule. And there is
+     no variant axis to have a default for. */
+  test('default color is default', () => {
     const { container } = renderPagination();
-    expect(container.querySelector('.pagination-solid')).toBeInTheDocument();
-  });
-
-  test('default color is primary', () => {
-    const { container } = renderPagination();
-    expect(container.querySelector('.pagination-primary')).toBeInTheDocument();
+    expect(container.querySelector('.pagination-default')).toBeInTheDocument();
   });
 
   test('default size is medium', () => {
