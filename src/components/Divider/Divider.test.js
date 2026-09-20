@@ -142,19 +142,26 @@ describe('thickness follows the Divider ramp, not the step bar ramp', () => {
       .join('\n');
   };
 
+  /* Read from the token, with the design's number as the fallback — so the
+     assertion is on BOTH: the right variable, and the right value behind it.
+     Checking only the number would pass on a hardcoded literal; checking only
+     the variable would pass on a wrong fallback. */
   test.each([
-    ['small', '0.5px'],
-    ['medium', '1px'],
-    ['large', '2px'],
-  ])('vertical %s is %s wide', (size, expected) => {
+    ['small',  'var(--Sm-Divider, 0.5px)'],
+    ['medium', 'var(--Divider, 1px)'],
+    ['large',  'var(--Lg-Divider, 2px)'],
+  ])('vertical %s reads %s', (size, expected) => {
     const { container } = render(<Divider orientation="vertical" size={size} />);
     const el = container.querySelector('.divider-vertical');
     expect(cssFor(el)).toContain('width: ' + expected);
   });
 
-  test('large is 2px, not the 4px the step bar uses', () => {
+  test('large falls back to 2px, not the 4px the step bar uses', () => {
     const { container } = render(<Divider orientation="vertical" size="large" />);
     const el = container.querySelector('.divider-vertical');
-    expect(cssFor(el)).not.toContain('width: 4px');
+    /* The indicator pill's own radius is 12px, so match the WIDTH declaration
+       rather than the string 4px anywhere in the rule. */
+    expect(cssFor(el)).not.toContain('width: var(--Lg-Divider, 4px)');
+    expect(cssFor(el)).toContain('width: var(--Lg-Divider, 2px)');
   });
 });

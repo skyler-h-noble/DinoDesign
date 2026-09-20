@@ -45,12 +45,20 @@ const SIZE_MAP = {
      design's step numbers and not the lib's.
      dot is Component-Size `No Count Step` (8 / 12 / 16), the diameter of a
      noCount step. */
-  small:  { indicator: 24, fontSize: 'var(--Sm-Button-Numbers, 10px)', dot: 8,
-            labelFontSize: '13px', connectorThickness: 1, gap: 0 },
-  medium: { indicator: 32, fontSize: 'var(--Button-Numbers, 12px)',    dot: 12,
-            labelFontSize: '14px', connectorThickness: 2, gap: 0 },
-  large:  { indicator: 40, fontSize: 'var(--Lg-Button-Numbers, 16px)', dot: 16,
-            labelFontSize: '16px', connectorThickness: 4, gap: 0 },
+  /* connectorThickness and dot read their tokens with the DESIGN's numbers as
+     fallbacks — Component-Size / Other / `Step bar` (1/2/4) and
+     `No Count Step` (8/12/16), which componentSizePayload writes. Same idiom
+     as Rail-Width and the Divider ramp: an unbound token renders the intended
+     weight rather than an invented one. */
+  small:  { indicator: 24, fontSize: 'var(--Sm-Button-Numbers, 10px)',
+            dot: 'var(--Sm-No-Count-Step, 8px)',
+            labelFontSize: '13px', connectorThickness: 'var(--Sm-Step-Bar, 1px)', gap: 0 },
+  medium: { indicator: 32, fontSize: 'var(--Button-Numbers, 12px)',
+            dot: 'var(--No-Count-Step, 12px)',
+            labelFontSize: '14px', connectorThickness: 'var(--Step-Bar, 2px)', gap: 0 },
+  large:  { indicator: 40, fontSize: 'var(--Lg-Button-Numbers, 16px)',
+            dot: 'var(--Lg-No-Count-Step, 16px)',
+            labelFontSize: '16px', connectorThickness: 'var(--Lg-Step-Bar, 4px)', gap: 0 },
 };
 
 /* ─── Context ─── */
@@ -198,10 +206,13 @@ export function Step({
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        width: (isDot ? s.dot : s.indicator) + 'px',
-        height: (isDot ? s.dot : s.indicator) + 'px',
-        minWidth: (isDot ? s.dot : s.indicator) + 'px',
-        minHeight: (isDot ? s.dot : s.indicator) + 'px',
+        /* `dot` is a token string and `indicator` a number, so the 'px' goes
+           on the number only — appending it to a var() would emit
+           `var(--No-Count-Step, 12px)px`, which the browser drops silently. */
+        width: isDot ? s.dot : s.indicator + 'px',
+        height: isDot ? s.dot : s.indicator + 'px',
+        minWidth: isDot ? s.dot : s.indicator + 'px',
+        minHeight: isDot ? s.dot : s.indicator + 'px',
         borderRadius: '50%',
         /* ONE border width. It was 2px on the current step and 1px elsewhere,
            carrying a distinction the fill now makes far more clearly; the
@@ -275,17 +286,20 @@ export function Step({
         flex: 1,
         ...(isHorizontal
           ? {
-              height: s.connectorThickness + 'px',
+              height: s.connectorThickness,
               minWidth: '20px',
               alignSelf: 'flex-start',
-              marginTop: (s.indicator / 2 - s.connectorThickness / 2) + 'px',
+              /* calc, not arithmetic: connectorThickness is a token now, so
+                 `indicator / 2 - thickness / 2` would produce NaN. The maths
+                 moves into CSS, where the variable can actually resolve. */
+              marginTop: `calc(${s.indicator / 2}px - ${s.connectorThickness} / 2)`,
               marginLeft: '8px',
               marginRight: '8px',
             }
           : {
-              width: s.connectorThickness + 'px',
+              width: s.connectorThickness,
               minHeight: '24px',
-              marginLeft: (s.indicator / 2 - s.connectorThickness / 2) + 'px',
+              marginLeft: `calc(${s.indicator / 2}px - ${s.connectorThickness} / 2)`,
               marginTop: '4px',
               marginBottom: '4px',
             }),

@@ -430,8 +430,13 @@ describe('variant="noCount" draws dots', () => {
       .join('\n');
   };
 
-  test.each([['small', '8px'], ['medium', '12px'], ['large', '16px']])(
-    '%s dot is %s', (size, expected) => {
+  /* Token AND fallback: the number alone would pass on a hardcoded literal,
+     the variable alone on a wrong fallback. */
+  test.each([
+    ['small',  'var(--Sm-No-Count-Step, 8px)'],
+    ['medium', 'var(--No-Count-Step, 12px)'],
+    ['large',  'var(--Lg-No-Count-Step, 16px)'],
+  ])('%s dot reads %s', (size, expected) => {
       const { container } = render(
         <Stepper activeStep={0} size={size} variant="noCount">
           <Step label="One" /><Step label="Two" />
