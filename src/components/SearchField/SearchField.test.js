@@ -36,17 +36,23 @@ describe('SearchField', () => {
 });
 
 /* --- Structure --- */
+/* The inner field sets NO data-surface, deliberately: it INHERITS the parent's
+   surface so the field blends with whatever container it sits in, and uses
+   --Hover — a subtle tint of that same surface — for affordance rather than
+   dragging the brand --Background through. These asserted a fixed
+   Container-Lowest, which pinned the field to one level regardless of where
+   it was placed. */
 describe('Structure', () => {
-  test('has data-surface="Container-Lowest"', () => {
+  test('the inner field inherits rather than pinning a surface', () => {
     const { container } = renderField();
-    expect(container.querySelector('[data-surface="Container-Lowest"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-surface]')).toBeNull();
   });
 
-  test('border parent wraps surface container', () => {
+  test('the border shell is the outer element', () => {
     const { container } = renderField();
     const borderBox = container.querySelector('.search-field');
-    const surfaceBox = container.querySelector('[data-surface="Container-Lowest"]');
-    expect(borderBox).toContainElement(surfaceBox);
+    expect(borderBox).toBeInTheDocument();
+    expect(borderBox.querySelector('input')).toBeInTheDocument();
   });
 });
 

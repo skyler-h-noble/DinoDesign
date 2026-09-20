@@ -6,7 +6,10 @@ import { BodySmall, Caption } from '../Typography';
 /**
  * Tabs Component Suite
  *
- * Tabs      — context provider + wrapper (carries data-theme, data-surface)
+ * Tabs      — context provider + LAYOUT wrapper. Carries no data-theme or
+ *             data-surface: it paints nothing (flex + overflow only), and the
+ *             pair belongs on whatever paints. That is TabList, which sets
+ *             backgroundColor: var(--Background).
  * TabList   — container for Tab items (no data attributes)
  * Tab       — individual tab trigger
  * TabPanel  — content pane shown when tab is selected

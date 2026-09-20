@@ -26,9 +26,14 @@ describe('Autocomplete', () => {
     expect(screen.getByRole('combobox')).toBeInTheDocument();
   });
 
-  test('has data-surface', () => {
+  /* It pins no surface at all — it inherits the one it is placed on, so the
+     field matches its container. The docblock claimed data-surface="Container"
+     and the test claimed "Container-Lowest"; the code set neither. For a
+     lighter Autocomplete the documented route is data-surface="Surface-
+     Brightest" on the container, not a deeper inset level here. */
+  test('pins no surface of its own', () => {
     const { container } = renderAC();
-    expect(container.querySelector('[data-surface="Container-Lowest"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-surface]')).toBeNull();
   });
 });
 
@@ -113,8 +118,11 @@ describe('Selection', () => {
     // Pass both value and inputValue so the component knows selection state
     renderAC({ value: OPTIONS[1], inputValue: 'Canada' });
     fireEvent.focus(screen.getByRole('combobox'));
-    const opts = screen.getAllByRole('option');
-    expect(opts[1]).toHaveAttribute('aria-selected', 'true');
+    /* inputValue FILTERS the list, so after typing 'Canada' there is no
+       opts[1] to index — the selected one is the only one left. Indexing a
+       filtered list is what made this fail. */
+    expect(screen.getByRole('option', { name: /Canada/ }))
+      .toHaveAttribute('aria-selected', 'true');
   });
 });
 
@@ -181,12 +189,15 @@ describe('Sizes', () => {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-describe('Styles', () => {
-  ['default', 'solid'].forEach((st) => {
-    test(st + ' class', () => {
-      const { container } = renderAC({ style: st });
-      expect(container.querySelector('.autocomplete-style-' + st)).toBeInTheDocument();
-    });
+/* There is no `style` VARIANT on Autocomplete — `style` is React's inline-style
+   prop, so passing the string 'default' into it made React warn ("expects a
+   mapping from style properties to values, not a string") and the assertion
+   looked for an .autocomplete-style-* class that has never existed. The axis
+   is `variant`, and after `light` was removed it has exactly one value. */
+describe('Variant', () => {
+  test('outline is the only variant, and is the default', () => {
+    const { container } = renderAC();
+    expect(container.querySelector('.autocomplete-variant-outline')).toBeInTheDocument();
   });
 });
 

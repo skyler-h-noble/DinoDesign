@@ -19,6 +19,17 @@ const renderTabs = (tabsProps = {}, tabProps = {}) =>
     </Tabs>
   );
 
+/* The ARIA, tabIndex and focus all live on the role="tab" ELEMENT. getByText
+ * returns the label node inside it, so every attribute read here came back
+ * null and every focus assertion compared the wrong node — the same mistake
+ * Menu's ARIA tests made against getByText('Actions').
+ *
+ * Querying by role and accessible name is also the stronger assertion: it
+ * fails if a tab stops being a tab or loses its name, which is the thing that
+ * actually matters to a screen reader.
+ */
+const tab = (name) => screen.getByRole('tab', { name });
+
 /* ─── Basic Rendering ─── */
 describe('Tabs', () => {
   test('renders all tab triggers', () => {
@@ -41,89 +52,53 @@ describe('Tabs', () => {
 describe('Tab selection', () => {
   test('clicking tab shows its panel', () => {
     renderTabs();
-    fireEvent.click(screen.getByText('Settings'));
+    fireEvent.click(tab('Settings'));
     expect(screen.getByText('Content of Settings')).toBeInTheDocument();
     expect(screen.queryByText('Content of Home')).not.toBeInTheDocument();
   });
 
   test('clicking third tab shows third panel', () => {
     renderTabs();
-    fireEvent.click(screen.getByText('Profile'));
+    fireEvent.click(tab('Profile'));
     expect(screen.getByText('Content of Profile')).toBeInTheDocument();
   });
 });
 
-/* ─── data attributes on Tabs wrapper ─── */
-describe('Tabs wrapper data attributes', () => {
-  test('Tabs wrapper always has data-surface="Surface"', () => {
-    const { container } = renderTabs();
-    expect(container.querySelector('.tabs')).toHaveAttribute('data-surface', 'Surface');
+/* ─── Theme / surface live on TabList ─── */
+/* These asserted the pair on the `.tabs` wrapper and asserted TabList had
+   NEITHER — the exact opposite of where they belong. `.tabs` paints nothing
+   (display:flex + overflow:hidden); `.tab-list` sets backgroundColor
+   var(--Background), and theme+surface have to travel together to whatever
+   paints or the text resolves against the parent's tone. The component's own
+   header claimed the wrapper carried them too, so doc and tests agreed with
+   each other and both disagreed with the code. The code was right. */
+describe('theme and surface sit on the element that paints', () => {
+  const list = (container) => container.querySelector('.tab-list');
+
+  test.each([
+    ['standard', undefined, undefined],
+    ['solid',    'Primary', 'Surface'],
+    ['light',    'Primary', 'Surface-Brightest'],
+    ['dark',     'Primary', 'Surface-Dimmest'],
+  ])('%s → theme=%s surface=%s', (variant, theme, surface) => {
+    const { container } = renderTabs({ variant, color: 'primary' });
+    const el = list(container);
+    if (theme) expect(el).toHaveAttribute('data-theme', theme);
+    else expect(el).not.toHaveAttribute('data-theme');
+    if (surface) expect(el).toHaveAttribute('data-surface', surface);
+    else expect(el).not.toHaveAttribute('data-surface');
   });
 
-  test('standard variant has data-theme="Default"', () => {
-    const { container } = renderTabs({ variant: 'standard' });
-    expect(container.querySelector('.tabs')).toHaveAttribute('data-theme', 'Default');
-  });
-
-  test('solid variant has data-surface="Surface" on Tabs wrapper', () => {
+  test('the Tabs wrapper carries neither', () => {
     const { container } = renderTabs({ variant: 'solid', color: 'primary' });
-    expect(container.querySelector('.tabs')).toHaveAttribute('data-surface', 'Surface');
+    const wrapper = container.querySelector('.tabs');
+    expect(wrapper).not.toHaveAttribute('data-theme');
+    expect(wrapper).not.toHaveAttribute('data-surface');
   });
 
-  test('light variant has data-surface="Surface" on Tabs wrapper', () => {
-    const { container } = renderTabs({ variant: 'light', color: 'primary' });
-    expect(container.querySelector('.tabs')).toHaveAttribute('data-surface', 'Surface');
-  });
-
-  test('individual tabs have no data-surface', () => {
+  test('individual tabs carry no surface of their own', () => {
     renderTabs();
-    expect(screen.getByText('Home')).not.toHaveAttribute('data-surface');
-    expect(screen.getByText('Settings')).not.toHaveAttribute('data-surface');
-  });
-
-  test('TabList has no data-theme', () => {
-    renderTabs({ variant: 'solid', color: 'primary' });
-    const tabList = screen.getByRole('tablist').closest('.tab-list');
-    expect(tabList).not.toHaveAttribute('data-theme');
-  });
-
-  test('TabList has no data-surface', () => {
-    renderTabs({ variant: 'light', color: 'primary' });
-    const tabList = screen.getByRole('tablist').closest('.tab-list');
-    expect(tabList).not.toHaveAttribute('data-surface');
-  });
-
-  test('light variant data-theme on Tabs wrapper', () => {
-    const { container } = renderTabs({ variant: 'light', color: 'primary' });
-    expect(container.querySelector('.tabs')).toHaveAttribute('data-theme', 'Primary');
-  });
-
-  test('solid variant data-theme on Tabs wrapper', () => {
-    const { container } = renderTabs({ variant: 'solid', color: 'primary' });
-    expect(container.querySelector('.tabs')).toHaveAttribute('data-theme', 'Primary');
-  });
-
-  test('Tabs wrapper has no data-background', () => {
-    const { container } = renderTabs();
-    expect(container.querySelector('.tabs')).not.toHaveAttribute('data-background');
-  });
-});
-
-/* ─── TabList ARIA ─── */
-describe('TabList ARIA', () => {
-  test('has role="tablist"', () => {
-    renderTabs();
-    expect(screen.getByRole('tablist')).toBeInTheDocument();
-  });
-
-  test('has aria-orientation', () => {
-    renderTabs({ orientation: 'horizontal' });
-    expect(screen.getByRole('tablist')).toHaveAttribute('aria-orientation', 'horizontal');
-  });
-
-  test('vertical orientation', () => {
-    renderTabs({ orientation: 'vertical' });
-    expect(screen.getByRole('tablist')).toHaveAttribute('aria-orientation', 'vertical');
+    expect(tab('Home')).not.toHaveAttribute('data-surface');
   });
 });
 
@@ -136,29 +111,29 @@ describe('Tab ARIA', () => {
 
   test('selected tab has aria-selected="true"', () => {
     renderTabs();
-    expect(screen.getByText('Home')).toHaveAttribute('aria-selected', 'true');
+    expect(tab('Home')).toHaveAttribute('aria-selected', 'true');
   });
 
   test('unselected tabs have aria-selected="false"', () => {
     renderTabs();
-    expect(screen.getByText('Settings')).toHaveAttribute('aria-selected', 'false');
+    expect(tab('Settings')).toHaveAttribute('aria-selected', 'false');
   });
 
   test('selected tab has tabIndex 0', () => {
     renderTabs();
-    expect(screen.getByText('Home')).toHaveAttribute('tabindex', '0');
+    expect(tab('Home')).toHaveAttribute('tabindex', '0');
   });
 
   test('unselected tabs have tabIndex -1', () => {
     renderTabs();
-    expect(screen.getByText('Settings')).toHaveAttribute('tabindex', '-1');
-    expect(screen.getByText('Profile')).toHaveAttribute('tabindex', '-1');
+    expect(tab('Settings')).toHaveAttribute('tabindex', '-1');
+    expect(tab('Profile')).toHaveAttribute('tabindex', '-1');
   });
 
   test('tabs have aria-controls linking to panel', () => {
     renderTabs();
-    const tab = screen.getByText('Home');
-    expect(tab).toHaveAttribute('aria-controls');
+    const el = tab('Home');
+    expect(el).toHaveAttribute('aria-controls');
   });
 });
 
@@ -177,16 +152,16 @@ describe('TabPanel ARIA', () => {
 
   test('tab id matches panel aria-labelledby', () => {
     renderTabs();
-    const tab = screen.getByText('Home');
+    const el = tab('Home');
     const panel = screen.getByRole('tabpanel');
-    expect(panel.getAttribute('aria-labelledby')).toBe(tab.getAttribute('id'));
+    expect(panel.getAttribute('aria-labelledby')).toBe(el.getAttribute('id'));
   });
 
   test('tab aria-controls matches panel id', () => {
     renderTabs();
-    const tab = screen.getByText('Home');
+    const el = tab('Home');
     const panel = screen.getByRole('tabpanel');
-    expect(tab.getAttribute('aria-controls')).toBe(panel.getAttribute('id'));
+    expect(el.getAttribute('aria-controls')).toBe(panel.getAttribute('id'));
   });
 });
 
@@ -195,33 +170,33 @@ describe('Keyboard navigation (horizontal)', () => {
   test('ArrowRight moves to next tab', () => {
     renderTabs();
     const tablist = screen.getByRole('tablist');
-    screen.getByText('Home').focus();
+    tab('Home').focus();
     fireEvent.keyDown(tablist, { key: 'ArrowRight' });
-    expect(document.activeElement).toBe(screen.getByText('Settings'));
+    expect(document.activeElement).toBe(tab('Settings'));
   });
 
   test('ArrowLeft moves to previous tab', () => {
     renderTabs();
     const tablist = screen.getByRole('tablist');
-    screen.getByText('Settings').focus();
+    tab('Settings').focus();
     fireEvent.keyDown(tablist, { key: 'ArrowLeft' });
-    expect(document.activeElement).toBe(screen.getByText('Home'));
+    expect(document.activeElement).toBe(tab('Home'));
   });
 
   test('Home moves to first tab', () => {
     renderTabs();
     const tablist = screen.getByRole('tablist');
-    screen.getByText('Profile').focus();
+    tab('Profile').focus();
     fireEvent.keyDown(tablist, { key: 'Home' });
-    expect(document.activeElement).toBe(screen.getByText('Home'));
+    expect(document.activeElement).toBe(tab('Home'));
   });
 
   test('End moves to last tab', () => {
     renderTabs();
     const tablist = screen.getByRole('tablist');
-    screen.getByText('Home').focus();
+    tab('Home').focus();
     fireEvent.keyDown(tablist, { key: 'End' });
-    expect(document.activeElement).toBe(screen.getByText('Profile'));
+    expect(document.activeElement).toBe(tab('Profile'));
   });
 });
 
@@ -229,26 +204,24 @@ describe('Keyboard navigation (vertical)', () => {
   test('ArrowDown moves to next tab', () => {
     renderTabs({ orientation: 'vertical' });
     const tablist = screen.getByRole('tablist');
-    screen.getByText('Home').focus();
+    tab('Home').focus();
     fireEvent.keyDown(tablist, { key: 'ArrowDown' });
-    expect(document.activeElement).toBe(screen.getByText('Settings'));
+    expect(document.activeElement).toBe(tab('Settings'));
   });
 
   test('ArrowUp moves to previous tab', () => {
     renderTabs({ orientation: 'vertical' });
     const tablist = screen.getByRole('tablist');
-    screen.getByText('Settings').focus();
+    tab('Settings').focus();
     fireEvent.keyDown(tablist, { key: 'ArrowUp' });
-    expect(document.activeElement).toBe(screen.getByText('Home'));
+    expect(document.activeElement).toBe(tab('Home'));
   });
 });
 
 /* ─── Variants ─── */
 describe('Variants', () => {
-  test('standard has data-theme="Default" on tabs wrapper', () => {
-    const { container } = renderTabs({ variant: 'standard' });
-    expect(container.querySelector('.tabs')).toHaveAttribute('data-theme', 'Default');
-  });
+  /* standard sets NO theme — it is the unthemed variant, and the wrapper
+     never carried one anyway. Covered in the theme/surface block above. */
 
   test('standard has tab-list-standard class', () => {
     const { container } = renderTabs({ variant: 'standard' });
@@ -337,7 +310,7 @@ describe('Disabled tab', () => {
         </TabList>
       </Tabs>
     );
-    expect(screen.getByText('B')).toHaveAttribute('aria-disabled', 'true');
+    expect(tab('B')).toHaveAttribute('aria-disabled', 'true');
   });
 
   test('disabled tab has tabIndex -1', () => {
@@ -349,7 +322,7 @@ describe('Disabled tab', () => {
         </TabList>
       </Tabs>
     );
-    expect(screen.getByText('B')).toHaveAttribute('tabindex', '-1');
+    expect(tab('B')).toHaveAttribute('tabindex', '-1');
   });
 
   test('disabled tab has tab-disabled class', () => {

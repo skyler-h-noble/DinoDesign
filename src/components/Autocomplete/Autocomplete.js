@@ -13,7 +13,9 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
  * Autocomplete Component
  *
  * VARIANTS:
- *   outline   Outer border shell + data-surface="Container"
+ *   outline   Outer border shell. Sets NO data-surface — it inherits the
+ *             surface it is placed on, so the field matches its container
+ *             rather than pinning one level.
  *
  * There was a `light` variant. The docblock described it as
  * data-theme="{C}-Light" + data-surface="Surface-Dim" — a theme shade that no

@@ -386,7 +386,20 @@ export function ToggleButtonGroup({
       aria-label={ariaLabel}
       {...props}
     >
-      {children}
+      {/* Group `disabled` is forwarded to every child EXPLICITLY.
+          MuiToggleButtonGroup clones its children to pass `disabled`, but the
+          children here are the lib's ToggleButton wrapper rather than a
+          MuiToggleButton, so the clone applied the Mui-disabled CLASS and the
+          prop never reached the underlying button: the rendered element had
+          `Mui-disabled` and `tabindex="0"` with no `disabled` attribute. That
+          is a control that LOOKS unavailable and is still focusable and
+          activatable — the worst of both, and invisible without a keyboard.
+          A child's own `disabled` still wins when it is already true. */}
+      {React.Children.map(children, (child) => (
+        React.isValidElement(child) && disabled
+          ? React.cloneElement(child, { disabled: true })
+          : child
+      ))}
     </MuiToggleButtonGroup>
   );
 }

@@ -24,9 +24,12 @@ describe('Select', () => {
     renderSelect();
     expect(screen.getByRole('combobox')).toBeInTheDocument();
   });
-  test('has data-surface', () => {
+  /* No pinned surface: the trigger reads the closest data-theme/data-surface
+     from its ANCESTORS so the control matches wherever it is placed, rather
+     than forcing Container-Lowest on every one. */
+  test('does not pin its own surface', () => {
     const { container } = renderSelect();
-    expect(container.querySelector('[data-surface="Container-Lowest"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-surface="Container-Lowest"]')).toBeNull();
   });
 });
 
