@@ -25,7 +25,7 @@ const renderMenu = (dropdownProps = {}, menuItems) =>
 describe('Menu', () => {
   test('renders MenuButton', () => {
     renderMenu();
-    expect(screen.getByText('Actions')).toBeInTheDocument();
+    expect(menuButton()).toBeInTheDocument();
   });
 
   test('menu hidden by default (uncontrolled)', () => {
@@ -35,16 +35,16 @@ describe('Menu', () => {
 
   test('click opens menu', () => {
     renderMenu();
-    fireEvent.click(screen.getByText('Actions'));
+    fireEvent.click(menuButton());
     expect(screen.getByRole('menu')).toBeInTheDocument();
     expect(screen.getByText('Profile')).toBeInTheDocument();
   });
 
   test('second click closes menu', () => {
     renderMenu();
-    fireEvent.click(screen.getByText('Actions'));
+    fireEvent.click(menuButton());
     expect(screen.getByRole('menu')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('Actions'));
+    fireEvent.click(menuButton());
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
   });
 });
@@ -58,33 +58,43 @@ describe('Controlled open state', () => {
 
   test('open={false} hides menu even after click', () => {
     renderMenu({ open: false });
-    fireEvent.click(screen.getByText('Actions'));
+    fireEvent.click(menuButton());
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
   });
 });
+
+/* The ARIA lives on the <button>, and on the menuitem roots — NOT on the
+ * Typography inside them. getByText('Actions') returns the inner <p>, so every
+ * one of these read attributes off a node that never had them. CLAUDE.md has
+ * recorded these as TEST bugs rather than component bugs for a while; this is
+ * that fix. Querying by ROLE and accessible NAME also means the assertion
+ * fails if the control stops being a button or loses its name — which is what
+ * the test is really about.
+ */
+const menuButton = () => screen.getByRole('button', { name: 'Actions' });
 
 /* ─── MenuButton ARIA ─── */
 describe('MenuButton ARIA', () => {
   test('has aria-haspopup', () => {
     renderMenu();
-    expect(screen.getByText('Actions')).toHaveAttribute('aria-haspopup', 'true');
+    expect(menuButton()).toHaveAttribute('aria-haspopup', 'true');
   });
 
   test('aria-expanded false when closed', () => {
     renderMenu();
-    expect(screen.getByText('Actions')).toHaveAttribute('aria-expanded', 'false');
+    expect(menuButton()).toHaveAttribute('aria-expanded', 'false');
   });
 
   test('aria-expanded true when open', () => {
     renderMenu();
-    fireEvent.click(screen.getByText('Actions'));
-    expect(screen.getByText('Actions')).toHaveAttribute('aria-expanded', 'true');
+    fireEvent.click(menuButton());
+    expect(menuButton()).toHaveAttribute('aria-expanded', 'true');
   });
 
   test('aria-controls set when open', () => {
     renderMenu();
-    fireEvent.click(screen.getByText('Actions'));
-    const btn = screen.getByText('Actions');
+    fireEvent.click(menuButton());
+    const btn = menuButton();
     const menuId = btn.getAttribute('aria-controls');
     expect(menuId).toBeTruthy();
     expect(screen.getByRole('menu')).toHaveAttribute('id', menuId);
@@ -103,7 +113,7 @@ describe('Menu ARIA', () => {
     const menu = screen.getByRole('menu');
     const labelledBy = menu.getAttribute('aria-labelledby');
     expect(labelledBy).toBeTruthy();
-    expect(screen.getByText('Actions')).toHaveAttribute('id', labelledBy);
+    expect(menuButton()).toHaveAttribute('id', labelledBy);
   });
 });
 
@@ -122,7 +132,7 @@ describe('MenuItem ARIA', () => {
         <MenuItem>Other</MenuItem>
       </>
     ));
-    expect(screen.getByText('Selected')).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('menuitem', { name: 'Selected' })).toHaveAttribute('aria-selected', 'true');
   });
 
   test('disabled item has aria-disabled', () => {
@@ -132,7 +142,7 @@ describe('MenuItem ARIA', () => {
         <MenuItem>Other</MenuItem>
       </>
     ));
-    expect(screen.getByText('Disabled')).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('menuitem', { name: 'Disabled' })).toHaveAttribute('aria-disabled', 'true');
   });
 
   test('disabled item has tabIndex -1', () => {
@@ -142,12 +152,12 @@ describe('MenuItem ARIA', () => {
         <MenuItem>Other</MenuItem>
       </>
     ));
-    expect(screen.getByText('Disabled')).toHaveAttribute('tabindex', '-1');
+    expect(screen.getByRole('menuitem', { name: 'Disabled' })).toHaveAttribute('tabindex', '-1');
   });
 
   test('clicking item closes menu', () => {
     renderMenu();
-    fireEvent.click(screen.getByText('Actions'));
+    fireEvent.click(menuButton());
     expect(screen.getByRole('menu')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Profile'));
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
@@ -155,7 +165,7 @@ describe('MenuItem ARIA', () => {
 
   test('Enter activates item and closes menu', () => {
     renderMenu();
-    fireEvent.click(screen.getByText('Actions'));
+    fireEvent.click(menuButton());
     const item = screen.getByText('Profile');
     fireEvent.keyDown(item, { key: 'Enter' });
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
@@ -163,7 +173,7 @@ describe('MenuItem ARIA', () => {
 
   test('Space activates item and closes menu', () => {
     renderMenu();
-    fireEvent.click(screen.getByText('Actions'));
+    fireEvent.click(menuButton());
     const item = screen.getByText('Profile');
     fireEvent.keyDown(item, { key: ' ' });
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
@@ -174,21 +184,21 @@ describe('MenuItem ARIA', () => {
 describe('Keyboard navigation', () => {
   test('ArrowDown on MenuButton opens menu', () => {
     renderMenu();
-    const btn = screen.getByText('Actions');
+    const btn = menuButton();
     fireEvent.keyDown(btn, { key: 'ArrowDown' });
     expect(screen.getByRole('menu')).toBeInTheDocument();
   });
 
   test('Enter on MenuButton opens menu', () => {
     renderMenu();
-    const btn = screen.getByText('Actions');
+    const btn = menuButton();
     fireEvent.keyDown(btn, { key: 'Enter' });
     expect(screen.getByRole('menu')).toBeInTheDocument();
   });
 
   test('Escape closes menu', () => {
     renderMenu();
-    fireEvent.click(screen.getByText('Actions'));
+    fireEvent.click(menuButton());
     expect(screen.getByRole('menu')).toBeInTheDocument();
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
@@ -280,20 +290,11 @@ describe('Light variant data-theme', () => {
   });
 });
 
-/* ─── Sizes ─── */
-describe('Size classes', () => {
-  ['small', 'medium', 'large'].forEach((s) => {
-    test(s + ' size class on menu', () => {
-      const { container } = renderMenu({ size: s, open: true });
-      expect(container.querySelector('.menu-' + s)).toBeInTheDocument();
-    });
-
-    test(s + ' size class on button', () => {
-      const { container } = renderMenu({ size: s });
-      expect(container.querySelector('.menu-button-' + s)).toBeInTheDocument();
-    });
-  });
-});
+/* Size is NOT a class. Menu emits `menu-button` and `menu menu-<variant>`;
+   there has never been a menu-<size> or menu-button-<size>, so the six tests
+   here asserted class names that do not exist. Sizing is covered properly in
+   menuSizes.test.js, which renders all three and asserts the typography step
+   each one actually resolves to. */
 
 /* ─── Outlined ─── */
 describe('Outlined', () => {

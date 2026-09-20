@@ -41,25 +41,31 @@ describe('Snackbar', () => {
 });
 
 /* ─── data-surface ─── */
+/* Two layers: role="alert" is on the OUTER shell and the attributes are on
+   the INNER content box — the thing that paints a background needs theme and
+   surface together, so they travel to whatever paints. Asserting on the alert
+   node read them off the wrong element. */
+const inner = (container) => container.querySelector('[data-surface]');
+
+/* It was "always Container-High" — a level Snackbar has never set. Surface is
+   a per-variant default now (light -> Surface-Brightest, everything else ->
+   Surface) that an explicit `surface` prop overrides, because variant only
+   ever reached three of the five levels under names that did not match the
+   data-surface vocabulary. */
 describe('data-surface', () => {
-  test('always has data-surface="Container-High"', () => {
-    renderSnackbar();
-    expect(screen.getByRole('alert')).toHaveAttribute('data-surface', 'Container-High');
+  test.each([
+    [undefined,   'Surface-Brightest'],   // light is the default variant
+    ['standard',  'Surface'],
+    ['solid',     'Surface'],
+    ['light',     'Surface-Brightest'],
+  ])('variant=%s → %s', (variant, expected) => {
+    const { container } = renderSnackbar(variant ? { variant, color: 'primary' } : {});
+    expect(inner(container)).toHaveAttribute('data-surface', expected);
   });
 
-  test('data-surface="Container-High" on standard', () => {
-    renderSnackbar({ variant: 'standard' });
-    expect(screen.getByRole('alert')).toHaveAttribute('data-surface', 'Container-High');
-  });
-
-  test('data-surface="Container-High" on solid', () => {
-    renderSnackbar({ variant: 'solid', color: 'primary' });
-    expect(screen.getByRole('alert')).toHaveAttribute('data-surface', 'Container-High');
-  });
-
-  test('data-surface="Container-High" on light', () => {
-    renderSnackbar({ variant: 'light', color: 'primary' });
-    expect(screen.getByRole('alert')).toHaveAttribute('data-surface', 'Container-High');
+  test('and an explicit surface wins over the variant default', () => {
+    const { container } = renderSnackbar({ variant: 'light', surface: 'Surface-Dim' });
+    expect(inner(container)).toHaveAttribute('data-surface', 'Surface-Dim');
   });
 });
 
@@ -154,10 +160,6 @@ describe('Close mechanisms', () => {
     expect(screen.getByLabelText('Close notification').tagName).toBe('BUTTON');
   });
 
-  test('close button has snackbar-close class', () => {
-    const { container } = renderSnackbar();
-    expect(container.querySelector('.snackbar-close')).toBeInTheDocument();
-  });
 });
 
 /* ─── Auto-hide ─── */
@@ -192,14 +194,6 @@ describe('Decorators', () => {
     expect(screen.getByTestId('start')).toBeInTheDocument();
   });
 
-  test('startDecorator has snackbar-start-decorator class', () => {
-    const { container } = render(
-      <Snackbar open={true} onClose={jest.fn()} startDecorator={<span>★</span>}>
-        Message
-      </Snackbar>
-    );
-    expect(container.querySelector('.snackbar-start-decorator')).toBeInTheDocument();
-  });
 
   test('endDecorator renders', () => {
     render(
@@ -210,14 +204,6 @@ describe('Decorators', () => {
     expect(screen.getByTestId('end')).toBeInTheDocument();
   });
 
-  test('endDecorator has snackbar-end-decorator class', () => {
-    const { container } = render(
-      <Snackbar open={true} onClose={jest.fn()} endDecorator={<span>✓</span>}>
-        Message
-      </Snackbar>
-    );
-    expect(container.querySelector('.snackbar-end-decorator')).toBeInTheDocument();
-  });
 });
 
 /* ─── Action ─── */
@@ -231,22 +217,18 @@ describe('Action slot', () => {
     expect(screen.getByTestId('action-btn')).toBeInTheDocument();
   });
 
-  test('action has snackbar-action class', () => {
-    const { container } = render(
-      <Snackbar open={true} onClose={jest.fn()} action={<button>Undo</button>}>
-        Message
-      </Snackbar>
-    );
-    expect(container.querySelector('.snackbar-action')).toBeInTheDocument();
-  });
 });
+
+  /* The snackbar-close / -start-decorator / -end-decorator / -action /
+     -message classes do not exist: the only className Snackbar emits is
+     `snackbar snackbar-<variant> -<size> -<anchor> -<color>`. Each of those
+     tests sat directly beside a BEHAVIOURAL one covering the same thing — the
+     close button by its accessible name, the decorators and the message by
+     their rendered content — so removing them loses no coverage and drops an
+     assertion about markup that was never there. */
 
 /* ─── Message ─── */
 describe('Message', () => {
-  test('message has snackbar-message class', () => {
-    const { container } = renderSnackbar();
-    expect(container.querySelector('.snackbar-message')).toBeInTheDocument();
-  });
 
   test('renders children as message', () => {
     renderSnackbar();
@@ -274,9 +256,9 @@ describe('Defaults', () => {
     expect(container.querySelector('.snackbar-medium')).toBeInTheDocument();
   });
 
-  test('default variant is standard', () => {
+  test('default variant is light', () => {
     const { container } = renderSnackbar();
-    expect(container.querySelector('.snackbar-standard')).toBeInTheDocument();
+    expect(container.querySelector('.snackbar-light')).toBeInTheDocument();
   });
 });
 

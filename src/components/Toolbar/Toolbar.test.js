@@ -33,39 +33,52 @@ describe('Toolbar', () => {
 });
 
 /* --- Theme --- */
+/* The prop is `color`, not `barColor`. Passed under the old name it fell into
+   ...props, never reached THEME_MAP, and every one of these assertions was
+   really testing the DEFAULT toolbar. And "Nav-Bar" is not a theme: App-Bar,
+   Nav-Bar and Status are generated but excluded from the Theme collection —
+   generateFigmaJSON warns about exactly these three — so a bar takes a real
+   palette and says which surface of it. Lightness is the SURFACE axis now,
+   which is why white and black both resolve to Neutral. */
 describe('Theme', () => {
-  test('default → data-theme="Nav-Bar"', () => {
-    const { container } = renderToolbar();
-    expect(container.querySelector('[data-theme="Nav-Bar"]')).toBeInTheDocument();
+  const cases = [
+    ['default',       'Default', undefined],
+    ['primary',       'Primary', undefined],
+    ['primary-light', 'Primary', 'Surface-Brightest'],
+    ['white',         'Neutral', 'Surface-Brightest'],
+    ['black',         'Neutral', 'Surface-Dimmest'],
+  ];
+
+  cases.forEach(([color, theme, surface]) => {
+    test(color + ' → data-theme="' + theme + '"' + (surface ? ' + ' + surface : ''), () => {
+      const { container } = renderToolbar({ color });
+      const bar = container.querySelector('.toolbar');
+      expect(bar).toHaveAttribute('data-theme', theme);
+      expect(bar).toHaveAttribute('data-surface', surface || 'Surface');
+    });
   });
-  test('primary → data-theme="Primary"', () => {
-    const { container } = renderToolbar({ barColor: 'primary' });
-    expect(container.querySelector('[data-theme="Primary"]')).toBeInTheDocument();
-  });
-  test('black → data-theme="Neutral"', () => {
-    const { container } = renderToolbar({ barColor: 'black' });
-    expect(container.querySelector('[data-theme="Neutral"]')).toBeInTheDocument();
-  });
-  test('data-surface="Surface"', () => {
-    const { container } = renderToolbar();
-    expect(container.querySelector('[data-surface="Surface"]')).toBeInTheDocument();
+
+  /* primary-medium and primary-dark were colours once. They are not in
+     THEME_MAP now, so they fall through to default rather than silently
+     painting a shade that no longer exists. */
+  test.each(['primary-medium', 'primary-dark'])('%s is not a colour and falls back', (color) => {
+    const { container } = renderToolbar({ color });
+    expect(container.querySelector('.toolbar')).toHaveAttribute('data-theme', 'Default');
   });
 });
 
-/* --- Modes --- */
-describe('Modes', () => {
-  test('icon mode class', () => {
-    const { container } = renderToolbar({ mode: 'icon' });
-    expect(container.querySelector('.toolbar-icon')).toBeInTheDocument();
+/* --- Types --- */
+/* There is no `mode` prop, and no basicLeft/basicRight. The axis is `type`:
+   floating (pill, shadow) or contextual (standard radius, no shadow). */
+describe('Types', () => {
+  test.each(['floating', 'contextual'])('%s adds its class', (type) => {
+    const { container } = renderToolbar({ type });
+    expect(container.querySelector('.toolbar-' + type)).toBeInTheDocument();
   });
-  test('basic mode class', () => {
-    const { container } = renderToolbar({ mode: 'basic', basicLeft: { label: 'Back' }, basicRight: { label: 'Next' } });
-    expect(container.querySelector('.toolbar-basic')).toBeInTheDocument();
-  });
-  test('basic renders two buttons', () => {
-    renderToolbar({ mode: 'basic', basicLeft: { label: 'Back' }, basicRight: { label: 'Next' } });
-    expect(screen.getByText('Back')).toBeInTheDocument();
-    expect(screen.getByText('Next')).toBeInTheDocument();
+
+  test('floating is the default', () => {
+    const { container } = renderToolbar();
+    expect(container.querySelector('.toolbar-floating')).toBeInTheDocument();
   });
 });
 
@@ -127,20 +140,9 @@ describe('FAB', () => {
   });
 });
 
-/* --- Bar colors --- */
-describe('Bar colors', () => {
-  const cases = [
-    ['default', 'Nav-Bar'], ['primary', 'Primary'],
-    ['primary-light', 'Primary'], ['primary-medium', 'Primary'],
-    ['primary-dark', 'Primary'], ['white', 'Neutral'], ['black', 'Neutral'],
-  ];
-  cases.forEach(([color, theme]) => {
-    test(color + ' → ' + theme, () => {
-      const { container } = renderToolbar({ barColor: color });
-      expect(container.querySelector('[data-theme="' + theme + '"]')).toBeInTheDocument();
-    });
-  });
-});
+/* The old "Bar colors" block is folded into Theme above — it asserted the
+   same table through the same wrong prop name, plus two colours that no
+   longer exist. */
 
 // ─── Accessibility — jest-axe ─────────────────────────────────────────────────
 
