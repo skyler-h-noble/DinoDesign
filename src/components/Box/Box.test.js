@@ -7,11 +7,22 @@ import { axe } from 'jest-axe';
 const renderBox = (props = {}) =>
   render(<Box {...props}>Test content</Box>);
 
+/* Box was rewritten as a BARE LAYOUT PRIMITIVE: theme / surface / radius /
+ * elevation, and no chrome of its own. These tests targeted the component it
+ * replaced — `color` and `border` props, a `.themed-box-<color>` class ladder,
+ * and a `themed-box` root that the DynoDesign -> OmniDesign rename turned into
+ * `omni-box`. Nothing here was testing Box; it was testing a component that no
+ * longer exists, on a class name that no longer exists.
+ *
+ * (It also declared test('Primary') three times, identically, so three of the
+ * counted assertions were one assertion.)
+ */
+
 /* --- Basic Rendering --- */
 describe('Box', () => {
   test('renders', () => {
     const { container } = renderBox();
-    expect(container.querySelector('.themed-box')).toBeInTheDocument();
+    expect(container.querySelector('.omni-box')).toBeInTheDocument();
   });
 
   test('renders children', () => {
@@ -21,87 +32,79 @@ describe('Box', () => {
 
   test('renders as div by default', () => {
     const { container } = renderBox();
-    expect(container.querySelector('div.themed-box')).toBeInTheDocument();
+    expect(container.querySelector('div.omni-box')).toBeInTheDocument();
   });
 
   test('renders with component prop', () => {
     const { container } = renderBox({ component: 'section' });
-    expect(container.querySelector('section.themed-box')).toBeInTheDocument();
+    expect(container.querySelector('section.omni-box')).toBeInTheDocument();
   });
 });
 
-/* --- data-theme --- */
-describe('data-theme', () => {
-  test('sets data-theme when color provided', () => {
-    const { container } = renderBox({ color: 'Primary' });
-    expect(container.querySelector('[data-theme="Primary"]')).toBeInTheDocument();
+/* --- theme / surface --- */
+describe('theme and surface are direct props', () => {
+  test.each(['Primary', 'Secondary', 'Info', 'Error'])('theme="%s"', (theme) => {
+    const { container } = renderBox({ theme });
+    expect(container.querySelector('[data-theme="' + theme + '"]')).toBeInTheDocument();
   });
 
-  test('no data-theme when color omitted', () => {
+  test('surface is set independently', () => {
+    const { container } = renderBox({ surface: 'Container' });
+    expect(container.querySelector('[data-surface="Container"]')).toBeInTheDocument();
+  });
+
+  /* Bare by default is the whole point: Box INHERITS its parent's theme so a
+     nested slot does not reset the cascade. */
+  test('neither is set by default', () => {
     const { container } = renderBox();
     expect(container.querySelector('[data-theme]')).not.toBeInTheDocument();
-  });
-
-  test('Primary', () => {
-    const { container } = renderBox({ color: 'Primary' });
-    expect(container.querySelector('[data-theme="Primary"]')).toBeInTheDocument();
-  });
-
-  test('Primary', () => {
-    const { container } = renderBox({ color: 'Primary' });
-    expect(container.querySelector('[data-theme="Primary"]')).toBeInTheDocument();
-  });
-
-  test('Primary', () => {
-    const { container } = renderBox({ color: 'Primary' });
-    expect(container.querySelector('[data-theme="Primary"]')).toBeInTheDocument();
-  });
-
-  test('Secondary', () => {
-    const { container } = renderBox({ color: 'Secondary' });
-    expect(container.querySelector('[data-theme="Secondary"]')).toBeInTheDocument();
-  });
-
-  test('Info', () => {
-    const { container } = renderBox({ color: 'Info' });
-    expect(container.querySelector('[data-theme="Info"]')).toBeInTheDocument();
-  });
-
-  test('Error', () => {
-    const { container } = renderBox({ color: 'Error' });
-    expect(container.querySelector('[data-theme="Error"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-surface]')).not.toBeInTheDocument();
   });
 });
 
-/* --- Color class --- */
-describe('Color class', () => {
-  test('adds lowercase color class', () => {
-    const { container } = renderBox({ color: 'Primary' });
-    expect(container.querySelector('.themed-box-primary')).toBeInTheDocument();
-  });
-
-  test('adds lowercase color class for compound', () => {
-    const { container } = renderBox({ color: 'Success' });
-    expect(container.querySelector('.themed-box-success-light')).toBeInTheDocument();
-  });
-
-  test('no color class when color omitted', () => {
+/* --- radius --- */
+describe('radius opts in, and is not a boolean', () => {
+  /* Three sizes, reading the brand's Card radii rather than a parallel scale.
+     'none' stays the default — silently rounding every existing Box would
+     change every layout slot already built on it. */
+  test('defaults to none', () => {
     const { container } = renderBox();
-    const el = container.querySelector('.themed-box');
-    expect(el.className).not.toContain('themed-box-');
+    expect(container.querySelector('.omni-box').getAttribute('style') || '')
+      .not.toContain('border-radius');
+  });
+
+  test.each(['small', 'medium', 'large'])('%s reads a Card radius token', (radius) => {
+    const { container } = renderBox({ radius });
+    const cls = (container.querySelector('.omni-box').className || '')
+      .split(/\s+/).find((c) => c.startsWith('css-'));
+    const css = Array.from(document.styleSheets)
+      .flatMap((sheet) => Array.from(sheet.cssRules || []))
+      .filter((r) => (r.selectorText || '').includes('.' + cls))
+      .map((r) => r.cssText).join('');
+    expect(css).toMatch(/border-radius:\s*var\(--/);
   });
 });
 
-/* --- Border --- */
-describe('Border', () => {
-  test('bordered class when border=true', () => {
-    const { container } = renderBox({ border: true });
-    expect(container.querySelector('.themed-box-bordered')).toBeInTheDocument();
+/* --- elevation --- */
+describe('elevation wraps rather than paints', () => {
+  /* Above 0 the shadow goes on an OUTER wrapper that sets NO surface, so it
+     resolves from the surface the box SITS ON — physically where the shadow
+     falls — not from the box's own. */
+  test('flat by default: one element, no wrapper', () => {
+    const { container } = renderBox();
+    expect(container.querySelector('.omni-box-elevation')).toBeNull();
   });
 
-  test('no bordered class by default', () => {
-    const { container } = renderBox();
-    expect(container.querySelector('.themed-box-bordered')).not.toBeInTheDocument();
+  test('elevated adds the wrapper', () => {
+    const { container } = renderBox({ elevation: 2 });
+    expect(container.querySelector('.omni-box-elevation')).toBeInTheDocument();
+  });
+
+  test('and the wrapper carries no surface of its own', () => {
+    const { container } = renderBox({ elevation: 2, surface: 'Container' });
+    const wrapper = container.querySelector('.omni-box-elevation');
+    expect(wrapper).not.toHaveAttribute('data-surface');
+    expect(container.querySelector('[data-surface="Container"]')).toBeInTheDocument();
   });
 });
 
@@ -110,32 +113,6 @@ describe('Custom props', () => {
   test('accepts custom className', () => {
     const { container } = renderBox({ className: 'my-box' });
     expect(container.querySelector('.my-box')).toBeInTheDocument();
-  });
-});
-
-/* --- Defaults --- */
-describe('Defaults', () => {
-  test('no data-theme by default', () => {
-    const { container } = renderBox();
-    expect(container.querySelector('[data-theme]')).not.toBeInTheDocument();
-  });
-
-  test('not bordered by default', () => {
-    const { container } = renderBox();
-    expect(container.querySelector('.themed-box-bordered')).not.toBeInTheDocument();
-  });
-});
-
-/* --- data-surface --- */
-describe('data-surface', () => {
-  test('sets data-surface="Surface" when color provided', () => {
-    const { container } = renderBox({ color: 'Primary' });
-    expect(container.querySelector('[data-surface="Surface"]')).toBeInTheDocument();
-  });
-
-  test('no data-surface when color omitted', () => {
-    const { container } = renderBox();
-    expect(container.querySelector('[data-surface]')).not.toBeInTheDocument();
   });
 });
 

@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react';
 import {
   Tag, TAG_COLORS, TAG_COLOR_TOKEN_MAP,
   PrimaryTag, SecondaryTag, TertiaryTag, NeutralTag,
-  InfoTag, SuccessTag, WarningTag, ErrorTag, BlackTag, WhiteTag,
+  InfoTag, SuccessTag, WarningTag, ErrorTag,
 } from './Tag';
 import { axe } from 'jest-axe';
 
@@ -62,12 +62,13 @@ describe('TAG_COLOR_TOKEN_MAP', () => {
     expect(TAG_COLOR_TOKEN_MAP.primary).toBe('Primary');
   });
 
-  test('black maps to Black', () => {
-    expect(TAG_COLOR_TOKEN_MAP.black).toBe('Black');
-  });
-
-  test('white maps to White', () => {
-    expect(TAG_COLOR_TOKEN_MAP.white).toBe('White');
+  /* No black/white. Tag's COLOR_TOKEN_MAP covers default plus the eight
+     palettes; BlackWhite is a BUTTON palette. */
+  test('covers default and the eight palettes, and nothing else', () => {
+    expect(Object.keys(TAG_COLOR_TOKEN_MAP).sort()).toEqual(
+      ['default', 'error', 'info', 'neutral', 'primary', 'secondary',
+       'success', 'tertiary', 'warning'],
+    );
   });
 });
 
@@ -83,8 +84,9 @@ describe('Convenience exports', () => {
     [SuccessTag,   'tag-success'],
     [WarningTag,   'tag-warning'],
     [ErrorTag,     'tag-error'],
-    [BlackTag,     'tag-black'],
-    [WhiteTag,     'tag-white'],
+    /* No BlackTag / WhiteTag. Tag's COLORS are default + the eight palettes;
+       BlackWhite is a BUTTON palette and was never a Tag colour, so these two
+       imports resolved to undefined and took the suite down with them. */
   ];
 
   cases.forEach(([Component, className]) => {

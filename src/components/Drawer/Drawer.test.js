@@ -37,48 +37,35 @@ describe('Drawer', () => {
   });
 });
 
-/* ─── Variants (no data-theme) ─── */
-describe('Standard variant', () => {
-  test('no data-theme on standard', () => {
-    const { container } = renderDrawer({ variant: 'standard' });
-    expect(container.querySelector('.drawer')).not.toHaveAttribute('data-theme');
+/* ─── Theming ─── */
+/* Drawer has NO color prop and no variants — its own header says so: the
+   content it holds (TreeView, nav items) does its own theming, and the drawer
+   inherits the provider's theme and sits on Surface-Dim, matching Sidebar.
+   The three describes removed here asserted variant="standard|solid|light",
+   a drawer-standard class and a per-colour data-theme ladder, none of which
+   this component has. */
+describe('inherits rather than choosing a theme', () => {
+  /* It DOES set data-theme — from the PROVIDER, not from a prop — paired with
+     a fixed data-surface="Surface-Dim", matching Sidebar. What it has no way
+     to do is take a per-drawer colour. */
+  test('takes data-theme from the provider, at a fixed Surface-Dim', () => {
+    const { container } = renderDrawer();
+    const drawer = container.querySelector('.drawer');
+    expect(drawer).toHaveAttribute('data-theme', 'Default');
+    expect(drawer).toHaveAttribute('data-surface', 'Surface-Dim');
   });
 
-  test('has drawer-standard class', () => {
-    const { container } = renderDrawer({ variant: 'standard' });
-    expect(container.querySelector('.drawer-standard')).toBeInTheDocument();
+  test('and a color prop changes nothing', () => {
+    const { container } = renderDrawer({ color: 'error' });
+    expect(container.querySelector('.drawer')).toHaveAttribute('data-theme', 'Default');
   });
-});
 
-/* ─── Solid data-theme ─── */
-describe('Solid variant data-theme', () => {
-  const cases = [
-    ['primary', 'Primary'], ['secondary', 'Secondary'], ['tertiary', 'Tertiary'],
-    ['neutral', 'Neutral'], ['info', 'Info'], ['success', 'Success'],
-    ['warning', 'Warning'], ['error', 'Error'],
-  ];
-
-  cases.forEach(([color, theme]) => {
-    test('solid ' + color + ' → data-theme="' + theme + '"', () => {
-      const { container } = renderDrawer({ variant: 'solid', color });
-      expect(container.querySelector('[data-theme="' + theme + '"]')).toBeInTheDocument();
-    });
-  });
-});
-
-/* ─── Light data-theme ─── */
-describe('Light variant data-theme', () => {
-  const cases = [
-    ['primary', 'Primary'], ['secondary', 'Secondary'], ['tertiary', 'Tertiary'],
-    ['neutral', 'Neutral'], ['info', 'Info'], ['success', 'Success'],
-    ['warning', 'Warning'], ['error', 'Error'],
-  ];
-
-  cases.forEach(([color, theme]) => {
-    test('light ' + color + ' → data-theme="' + theme + '"', () => {
-      const { container } = renderDrawer({ variant: 'light', color });
-      expect(container.querySelector('[data-theme="' + theme + '"]')).toBeInTheDocument();
-    });
+  test('and no variant class', () => {
+    const { container } = renderDrawer();
+    const cls = container.querySelector('.drawer').className;
+    for (const stale of ['drawer-standard', 'drawer-solid', 'drawer-light']) {
+      expect(cls).not.toContain(stale);
+    }
   });
 });
 
@@ -111,10 +98,13 @@ describe('Close mechanisms', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  /* The backdrop carries no class — it is the sibling Box rendered before the
+     dialog when hideBackdrop is false. Selecting it by a `.drawer-backdrop`
+     class that has never existed made this a null click. */
   test('backdrop click triggers onClose', () => {
     const onClose = jest.fn();
     const { container } = renderDrawer({ onClose });
-    const backdrop = container.querySelector('.drawer-backdrop');
+    const backdrop = container.querySelector('[role="dialog"]').previousElementSibling;
     fireEvent.click(backdrop);
     expect(onClose).toHaveBeenCalled();
   });
@@ -142,9 +132,11 @@ describe('DrawerClose', () => {
     expect(screen.getByLabelText('Close drawer').tagName).toBe('BUTTON');
   });
 
-  test('close button has drawer-close class', () => {
-    const { container } = renderDrawer();
-    expect(container.querySelector('.drawer-close')).toBeInTheDocument();
+  /* The close control is a lib Button with an accessible NAME, not a class —
+     which is the thing that actually has to be right for a screen reader. */
+  test('close button is reachable by its accessible name', () => {
+    renderDrawer();
+    expect(screen.getByRole('button', { name: 'Close drawer' })).toBeInTheDocument();
   });
 
   test('clicking close button triggers onClick', () => {
@@ -197,10 +189,7 @@ describe('Defaults', () => {
     expect(container.querySelector('.drawer-medium')).toBeInTheDocument();
   });
 
-  test('default variant is standard', () => {
-    const { container } = renderDrawer();
-    expect(container.querySelector('.drawer-standard')).toBeInTheDocument();
-  });
+  /* No variant axis at all — see the theming block above. */
 });
 
 /* ─── Body scroll lock ─── */

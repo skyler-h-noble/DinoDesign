@@ -3,7 +3,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import {
   AccordionGroup, Accordion, AccordionSummary, AccordionDetails,
-  DefaultAccordionGroup, SolidAccordionGroup, LightAccordionGroup,
+  SolidAccordionGroup, LightAccordionGroup,
 } from './Accordion';
 import { axe } from 'jest-axe';
 
@@ -47,11 +47,16 @@ describe('Solid variant data-theme', () => {
   ];
 
   cases.forEach(([color, theme]) => {
-    test('solid ' + color + ' → data-theme="' + theme + '"', () => {
+    /* The attributes sit on each ITEM, not on the group. The group passes
+       them down through GroupContext and is otherwise a layout container;
+       what paints a background is the item, and theme+surface have to travel
+       together to whatever paints. These asserted the older shape where the
+       group carried them. */
+    test('solid ' + color + ' → item data-theme="' + theme + '"', () => {
       const { container } = renderAccordion({ variant: 'solid', color });
-      const group = container.querySelector('.accordion-group');
-      expect(group).toHaveAttribute('data-theme', theme);
-      expect(group).toHaveAttribute('data-surface', 'Surface');
+      const item = container.querySelector('.accordion');
+      expect(item).toHaveAttribute('data-theme', theme);
+      expect(item).toHaveAttribute('data-surface', 'Surface');
     });
   });
 });
@@ -70,11 +75,14 @@ describe('Light variant data-theme', () => {
   ];
 
   cases.forEach(([color, theme]) => {
-    test('light ' + color + ' → data-theme="' + theme + '"', () => {
+    /* A light group is the base theme at its BRIGHTEST surface — never a
+       *-Light theme, and never theme-without-surface: a background painted
+       with one and not the other resolves against the parent's tone. */
+    test('light ' + color + ' → item data-theme="' + theme + '" at Surface-Brightest', () => {
       const { container } = renderAccordion({ variant: 'light', color });
-      const group = container.querySelector('.accordion-group');
-      expect(group).toHaveAttribute('data-theme', theme);
-      expect(group).not.toHaveAttribute('data-surface');
+      const item = container.querySelector('.accordion');
+      expect(item).toHaveAttribute('data-theme', theme);
+      expect(item).toHaveAttribute('data-surface', 'Surface-Brightest');
     });
   });
 });
@@ -233,14 +241,9 @@ describe('Dividers', () => {
 
 /* ─── Convenience Exports ─── */
 describe('Convenience exports', () => {
-  test('DefaultAccordionGroup renders default variant', () => {
-    const { container } = render(
-      <DefaultAccordionGroup>
-        <Accordion><AccordionSummary>T</AccordionSummary><AccordionDetails>C</AccordionDetails></Accordion>
-      </DefaultAccordionGroup>
-    );
-    expect(container.querySelector('.accordion-group-default')).toBeInTheDocument();
-  });
+  /* No DefaultAccordionGroup. On AccordionGroup "default" is a COLOUR
+     (color='default'), not a variant — the same move Sheet made — so this
+     export went and the import resolved to undefined. */
 
   test('SolidAccordionGroup renders with data-theme', () => {
     const { container } = render(
