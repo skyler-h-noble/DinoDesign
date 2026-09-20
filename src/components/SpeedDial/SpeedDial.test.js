@@ -21,9 +21,14 @@ describe('SpeedDial', () => {
     expect(container.querySelector('.speed-dial')).toBeInTheDocument();
   });
 
-  test('renders FAB button', () => {
-    const { container } = renderDial();
-    expect(container.querySelector('.speed-dial-fab')).toBeInTheDocument();
+  /* The controls are lib <Fab> components, which carry their own btn-* class
+     — there is no speed-dial-fab / speed-dial-action. The main FAB is
+     identified by its accessible name and its aria-haspopup="menu", which is
+     what a screen reader uses to find it. */
+  test('renders the main FAB with menu semantics', () => {
+    renderDial();
+    const fab = screen.getByRole('button', { expanded: false });
+    expect(fab).toHaveAttribute('aria-haspopup', 'menu');
   });
 
   test('FAB has aria-label', () => {
@@ -86,10 +91,10 @@ describe('Open / Close', () => {
 
 /* ─── Actions ─── */
 describe('Actions', () => {
-  test('renders action buttons', () => {
+  test('renders one control per action, inside the menu', () => {
     const { container } = renderDial();
-    const actions = container.querySelectorAll('.speed-dial-action');
-    expect(actions.length).toBe(3);
+    const menu = container.querySelector('[role="menu"]');
+    expect(menu.querySelectorAll('button').length).toBe(3);
   });
 
   test('actions have role="menuitem"', () => {
@@ -191,9 +196,12 @@ describe('Defaults', () => {
     expect(container.querySelector('.speed-dial-solid')).toBeInTheDocument();
   });
 
-  test('default color is primary', () => {
+  /* The default colour is 'default', not 'primary' — the lib-wide default
+     (see feedback on Buttons: default is the brand green, primary is a
+     different colour and is only used when a design marks it). */
+  test('default color is default', () => {
     const { container } = renderDial();
-    expect(container.querySelector('.speed-dial-primary')).toBeInTheDocument();
+    expect(container.querySelector('.speed-dial-default')).toBeInTheDocument();
   });
 
   test('default direction is up', () => {

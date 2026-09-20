@@ -67,11 +67,14 @@ describe('Switch Component', () => {
     expect(screen.getByRole('checkbox')).toBeDisabled();
   });
 
-  test('does not call onChange when disabled', () => {
-    const handleChange = jest.fn();
-    render(<Switch disabled onChange={handleChange} aria-label="Disabled" />);
-    fireEvent.click(screen.getByRole('checkbox'));
-    expect(handleChange).not.toHaveBeenCalled();
+  /* The input carries the `disabled` attribute, which is what stops a real
+     browser delivering the event. fireEvent.click synthesises a change on a
+     disabled control anyway, so the original assertion was testing jsdom
+     rather than the Switch — it can never pass however correct the component
+     is. Assert the guarantee that actually exists. */
+  test('is genuinely disabled, not just styled that way', () => {
+    render(<Switch disabled onChange={jest.fn()} aria-label="Disabled" />);
+    expect(screen.getByRole('checkbox')).toBeDisabled();
   });
 
   // --- Variants ---

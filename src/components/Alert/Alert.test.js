@@ -47,9 +47,12 @@ describe('Standard variant', () => {
     expect(screen.getByRole('alert')).not.toHaveAttribute('data-surface');
   });
 
-  test('no alert-inner element', () => {
+  /* alert-inner exists for EVERY variant now — it is the layer that paints,
+     so it is where data-theme and data-surface live. It used to be rendered
+     only for `light`, which is why these asserted its absence. */
+  test('still has the inner painted layer', () => {
     const { container } = renderAlert({ variant: 'standard' });
-    expect(container.querySelector('.alert-inner')).not.toBeInTheDocument();
+    expect(container.querySelector('.alert-inner')).toBeInTheDocument();
   });
 });
 
@@ -70,9 +73,9 @@ describe('Outline variant', () => {
     expect(screen.getByRole('alert')).not.toHaveAttribute('data-surface');
   });
 
-  test('no alert-inner element', () => {
+  test('still has the inner painted layer', () => {
     const { container } = renderAlert({ variant: 'outline' });
-    expect(container.querySelector('.alert-inner')).not.toBeInTheDocument();
+    expect(container.querySelector('.alert-inner')).toBeInTheDocument();
   });
 
   test('has color class', () => {
@@ -93,9 +96,9 @@ describe('Light variant', () => {
     expect(container.querySelector('.alert-inner')).toBeInTheDocument();
   });
 
-  test('alert-inner has data-surface="Surface"', () => {
+  test('alert-inner has data-surface="Surface-Brightest"', () => {
     const { container } = renderAlert({ variant: 'light' });
-    expect(container.querySelector('.alert-inner')).toHaveAttribute('data-surface', 'Surface');
+    expect(container.querySelector('.alert-inner')).toHaveAttribute('data-surface', 'Surface-Brightest');
   });
 
   test('outer wrapper (role="alert") has NO data-theme', () => {
@@ -243,9 +246,9 @@ describe('Border structure for themed variants', () => {
 
 /* ─── Defaults ─── */
 describe('Defaults', () => {
-  test('default variant is standard', () => {
+  test('default variant is light', () => {
     const { container } = renderAlert();
-    expect(container.querySelector('.alert-standard')).toBeInTheDocument();
+    expect(container.querySelector('.alert-light')).toBeInTheDocument();
   });
 
   test('default size is medium', () => {

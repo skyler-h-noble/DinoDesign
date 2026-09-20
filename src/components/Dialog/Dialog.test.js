@@ -159,7 +159,9 @@ describe('AlertDialog', () => {
         Content
       </AlertDialog>
     );
-    fireEvent.click(screen.getByText('Confirm'));
+    /* The title is also "Confirm", so getByText matched the <h2> and the
+       button both. Query the BUTTON by role and name. */
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
     expect(onConfirm).toHaveBeenCalled();
   });
 });

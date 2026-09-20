@@ -7,9 +7,15 @@ import { axe } from 'jest-axe';
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const NormalChild = () => <div data-testid="child">Normal</div>;
-const SmallBySizeProp = () => <div data-testid="small-size" size="small">Small</div>;
-const SmallByDataAttr = () => <div data-testid="small-attr" data-size="small">Small</div>;
-const SmallByHeight   = () => <div data-testid="small-height" height={24}>Small</div>;
+/* The marker prop has to be on the ELEMENT Stack receives, not inside a
+   component it renders. isSmallChild reads child.props, and a wrapper like
+   `() => <div size="small"/>` has no props of its own — Stack cannot see what
+   its children render internally, which is a React constraint rather than a
+   gap in the detection. Written the old way these three could never pass
+   however correct the component was. */
+const SmallBySizeProp = (p) => <div data-testid="small-size" {...p}>Small</div>;
+const SmallByDataAttr = (p) => <div data-testid="small-attr" {...p}>Small</div>;
+const SmallByHeight   = (p) => <div data-testid="small-height" {...p}>Small</div>;
 
 // ─── Basic rendering ──────────────────────────────────────────────────────────
 
@@ -50,21 +56,21 @@ describe('Smart gap detection', () => {
 
   test('child with size="small" — adds enforcement class', () => {
     const { container } = render(
-      <OmniStack><SmallBySizeProp /></OmniStack>
+      <OmniStack><SmallBySizeProp size="small" /></OmniStack>
     );
     expect(container.querySelector('.omni-stack-min-gap-enforced')).toBeInTheDocument();
   });
 
   test('child with data-size="small" — adds enforcement class', () => {
     const { container } = render(
-      <OmniStack><SmallByDataAttr /></OmniStack>
+      <OmniStack><SmallByDataAttr data-size="small" /></OmniStack>
     );
     expect(container.querySelector('.omni-stack-min-gap-enforced')).toBeInTheDocument();
   });
 
   test('child with height={24} — adds enforcement class', () => {
     const { container } = render(
-      <OmniStack><SmallByHeight /></OmniStack>
+      <OmniStack><SmallByHeight height={24} /></OmniStack>
     );
     expect(container.querySelector('.omni-stack-min-gap-enforced')).toBeInTheDocument();
   });
@@ -73,7 +79,7 @@ describe('Smart gap detection', () => {
     const { container } = render(
       <OmniStack>
         <NormalChild />
-        <SmallBySizeProp />
+        <SmallBySizeProp size="small" />
         <NormalChild />
       </OmniStack>
     );
@@ -87,7 +93,7 @@ describe('enforceMinGap=false', () => {
   test('does not add enforcement class even with small children', () => {
     const { container } = render(
       <OmniStack enforceMinGap={false}>
-        <SmallBySizeProp />
+        <SmallBySizeProp size="small" />
       </OmniStack>
     );
     expect(container.querySelector('.omni-stack-min-gap-enforced')).not.toBeInTheDocument();
@@ -99,7 +105,7 @@ describe('enforceMinGap=false', () => {
 describe('data-min-gap-enforced attribute', () => {
   test('set to "true" when enforcement is active', () => {
     const { container } = render(
-      <OmniStack><SmallBySizeProp /></OmniStack>
+      <OmniStack><SmallBySizeProp size="small" /></OmniStack>
     );
     const stack = container.querySelector('.omni-stack');
     expect(stack).toHaveAttribute('data-min-gap-enforced', 'true');
