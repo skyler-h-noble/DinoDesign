@@ -461,3 +461,53 @@ describe('variant="noCount" draws dots', () => {
     expect(container.querySelector('.step-indicator').textContent).toBe('1');
   });
 });
+
+describe('the step reads its type and focus from tokens', () => {
+  /* Same technique the dot tests use: emotion puts sx into a generated class,
+     so the value is in the stylesheet rather than the inline style. */
+  const cssFor = (el) => {
+    const cls = (el.className || '').split(/\s+/).find((c) => c.startsWith('css-'));
+    if (!cls) return '';
+    return Array.from(document.styleSheets)
+      .flatMap((sheet) => Array.from(sheet.cssRules || []))
+      .filter((r) => (r.selectorText || '').includes('.' + cls))
+      .map((r) => r.cssText)
+      .join('\n');
+  };
+
+  it('takes the digit weight from the Button-Small type style, not a literal', () => {
+    /* The design binds Typography/Buttons/Small to the step's digit. It was a
+       hard-coded 700, so a brand picking a lighter button face moved the
+       design's numbers and not the lib's. Token AND fallback, for the reason
+       the dot tests give: the number alone would pass on a literal. */
+    const { container } = render(
+      <Stepper activeStep={1}>
+        {LABELS.map((l, i) => <Step key={i} label={l} />)}
+      </Stepper>,
+    );
+    const indicator = container.querySelector('[class*="step-indicator"]');
+    expect(indicator).toBeTruthy();
+    expect(cssFor(indicator)).toContain('var(--Button-Small-Font-Weight, 700)');
+  });
+
+  it('draws a 2px focus ring at a 1px offset', () => {
+    /* 2px is what the design draws and what 35 other components use; this was
+       one of the 21 on 3px. The 1px offset keeps the ring clear of the step's
+       own border without swallowing it. */
+    const src = require('fs').readFileSync(__dirname + '/Stepper.js', 'utf8');
+    expect(src).toContain("outline: '2px solid var(--Focus-Visible)'");
+    expect(src).toContain("outlineOffset: '1px'");
+    expect(src).not.toContain("outline: '3px solid var(--Focus-Visible)'");
+  });
+
+  it('carries no dead size config', () => {
+    /* labelFontSize sat in SIZE_MAP as 13/14/16 literal pixels and nothing ever
+       read it — labels render through BodySmall and Caption, which size
+       themselves from the type tokens. A dead entry that looks like
+       configuration is worse than none: the next person tunes it and nothing
+       happens. It survives only in the comment that says why it is gone. */
+    const src = require('fs').readFileSync(__dirname + '/Stepper.js', 'utf8');
+    const lines = src.split('\n').filter((l) => l.includes('labelFontSize'));
+    expect(lines.every((l) => l.trim().startsWith('/*') || l.includes('is NOT here'))).toBe(true);
+  });
+});

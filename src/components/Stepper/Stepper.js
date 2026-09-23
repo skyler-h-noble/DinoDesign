@@ -45,20 +45,26 @@ const SIZE_MAP = {
      design's step numbers and not the lib's.
      dot is Component-Size `No Count Step` (8 / 12 / 16), the diameter of a
      noCount step. */
-  /* connectorThickness and dot read their tokens with the DESIGN's numbers as
+  /* labelFontSize is NOT here. It sat in this table as 13 / 14 / 16 literal
+     pixels and nothing ever read it — the label renders through BodySmall and
+     Caption, which take their size from the type tokens already. A dead entry
+     that looks like configuration is worse than none: the next person tunes it
+     and nothing happens.
+
+     connectorThickness and dot read their tokens with the DESIGN's numbers as
      fallbacks — Component-Size / Other / `Step bar` (1/2/4) and
      `No Count Step` (8/12/16), which componentSizePayload writes. Same idiom
      as Rail-Width and the Divider ramp: an unbound token renders the intended
      weight rather than an invented one. */
   small:  { indicator: 24, fontSize: 'var(--Sm-Button-Numbers, 10px)',
             dot: 'var(--Sm-No-Count-Step, 8px)',
-            labelFontSize: '13px', connectorThickness: 'var(--Sm-Step-Bar, 1px)', gap: 0 },
+            connectorThickness: 'var(--Sm-Step-Bar, 1px)', gap: 0 },
   medium: { indicator: 32, fontSize: 'var(--Button-Numbers, 12px)',
             dot: 'var(--No-Count-Step, 12px)',
-            labelFontSize: '14px', connectorThickness: 'var(--Step-Bar, 2px)', gap: 0 },
+            connectorThickness: 'var(--Step-Bar, 2px)', gap: 0 },
   large:  { indicator: 40, fontSize: 'var(--Lg-Button-Numbers, 16px)',
             dot: 'var(--Lg-No-Count-Step, 16px)',
-            labelFontSize: '16px', connectorThickness: 'var(--Lg-Step-Bar, 4px)', gap: 0 },
+            connectorThickness: 'var(--Lg-Step-Bar, 4px)', gap: 0 },
 };
 
 /* ─── Context ─── */
@@ -223,7 +229,14 @@ export function Step({
         color: textToken,
         fontSize: s.fontSize,
         fontFamily: 'inherit',
-        fontWeight: 700,
+        /* The design binds Typography/Buttons/Small to the step's digit, so
+           the weight comes from there rather than a literal 700 — a brand that
+           picks a lighter button face moved the design's numbers and not the
+           lib's. */
+        fontWeight: 'var(--Button-Small-Font-Weight, 700)',
+        /* The digit is centred by the flex box above, so the line box only has
+           to not add leading of its own. Figma trims cap-height-to-baseline;
+           text-box-trim is the CSS equivalent and falls back to this. */
         lineHeight: 1,
         flexShrink: 0,
         position: 'relative',
@@ -255,8 +268,13 @@ export function Step({
             backgroundColor: activeToken,
           },
           '&:focus-visible': {
-            outline: '3px solid var(--Focus-Visible)',
-            outlineOffset: '2px',
+            /* 2px, matching the design and the 35 other components that use
+               2px — this was one of the 21 on 3px. The 1px offset is what
+               makes the ring's radius 3 against a 4 outer corner elsewhere in
+               the system; on a circular step it simply keeps the ring clear of
+               the border without swallowing it. */
+            outline: '2px solid var(--Focus-Visible)',
+            outlineOffset: '1px',
           },
         }),
       }}
