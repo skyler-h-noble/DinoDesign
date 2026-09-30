@@ -88,7 +88,17 @@ const REGISTRY = [
   { control: 'Accordion summary',   file: 'Accordion/Accordion.js' },
   { control: 'MenuItem',            file: 'Menu/Menu.js' },
   { control: 'ToggleButton',        file: 'ToggleButton/ToggleButton.js' },
-  { control: 'ToggleButtonGroup',   file: 'ToggleButtonGroup/ToggleButtonGroup.js' },
+  /* ToggleButtonGroup is NOT listed, and its absence is the point.
+   *
+   * It was retired: the file is now a shim rendering ButtonGroup, which carries
+   * all four states and is checked on its own row above. A shim with no styles
+   * of its own cannot pass a source-level check for hover/pressed/focus, and
+   * making it pass would mean restating rules it deliberately does not own.
+   *
+   * That is the delegation rule this suite already accepts elsewhere — a nested
+   * icon button defers to IconButton rather than spelling the states out again.
+   * Listing the shim would be the opposite: four copies of a rule with one
+   * home. */
   { control: 'Checkbox',            file: 'Checkbox/Checkbox.js' },
   { control: 'Radio',               file: 'Radio/Radio.js' },
   { control: 'Switch',              file: 'Switch/Switch.js' },

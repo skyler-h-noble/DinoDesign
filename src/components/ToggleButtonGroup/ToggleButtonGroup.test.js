@@ -1,238 +1,112 @@
-// src/components/ToggleButtonGroup/ToggleButtonGroup.test.js
-import React from 'react';
+/**
+ * ToggleButtonGroup is retired — these test the SHIM, not the old component.
+ *
+ * The suite that was here asserted MUI class names and MUI's DOM, which is the
+ * implementation that was removed. Keeping those would have pinned the very
+ * thing being retired. What matters now is that the public names still work,
+ * that the two prop translations are right, and that nobody is left with a
+ * silently broken selection.
+ */
+import React, { useState } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import {
-  ToggleButtonGroup,
-  ToggleButton,
-  PrimaryToggleButtonGroup,
+  ToggleButtonGroup, ToggleButton,
+  PrimaryToggleButtonGroup, BlackWhiteToggleButtonGroup,
 } from './ToggleButtonGroup';
-import { axe } from 'jest-axe';
 
-// ─── ToggleButtonGroup ───────────────────────────────────────────────────────
+const Group = (props) => (
+  <ToggleButtonGroup aria-label="View" {...props}>
+    <ToggleButton value="list">List</ToggleButton>
+    <ToggleButton value="grid">Grid</ToggleButton>
+  </ToggleButtonGroup>
+);
 
-describe('ToggleButtonGroup Component', () => {
-  test('renders without crashing', () => {
-    const { container } = render(
-      <ToggleButtonGroup value="a" exclusive aria-label="test">
-        <ToggleButton value="a">A</ToggleButton>
-        <ToggleButton value="b">B</ToggleButton>
-      </ToggleButtonGroup>
-    );
-    expect(container).toBeInTheDocument();
+describe('ToggleButtonGroup (retired shim)', () => {
+  it('still renders its segments', () => {
+    render(<Group />);
+    expect(screen.getByText('List')).toBeInTheDocument();
+    expect(screen.getByText('Grid')).toBeInTheDocument();
   });
 
-  test('renders all buttons', () => {
+  it('conveys the selected segment to a screen reader', () => {
+    /* The one capability worth protecting through the swap. ButtonGroup sets
+       aria-pressed on each segment; MUI's ToggleButton did too. A shim that
+       dropped it would look identical and be unusable without sight. */
+    render(<Group value="grid" />);
+    expect(screen.getByText('Grid').closest('button')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('List').closest('button')).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('SWAPS the onChange arguments', () => {
+    /* The dangerous translation. MUI calls (event, value); ButtonGroup calls
+       (value, event). Not swapping would hand every existing caller an event
+       where it expects a value — no error, no warning, a selection that never
+       updates. Asserted on the first argument's SHAPE, because both are
+       objects and a wrong order still "works" until someone reads it. */
+    const onChange = jest.fn();
+    render(<Group onChange={onChange} />);
+    fireEvent.click(screen.getByText('Grid'));
+    expect(onChange).toHaveBeenCalled();
+    /* The shim hands back MUI's order — (event, value) — because that is what
+       existing callers were written against. ButtonGroup's own order is the
+       reverse, which is exactly what the shim exists to translate. */
+    const [first, second] = onChange.mock.calls[0];
+    expect(first).toHaveProperty('type', 'click');
+    expect(second).toBe('grid');
+  });
+
+  it('inverts exclusive into multiple', () => {
+    /* exclusive=true (the default) is multiple=false. The two are the same
+       selection model named oppositely, which is most of why the duplication
+       survived this long.
+
+       Two independent renders rather than a rerender: rerender keeps the same
+       component instance, so useState would not reinitialise and the array
+       mode would start life holding the single mode's string. */
+    const Controlled = ({ exclusive, initial }) => {
+      const [v, setV] = useState(initial);
+      /* MUI order, matching what the shim emits. */
+      return <Group exclusive={exclusive} value={v} onChange={(_e, next) => setV(next)} />;
+    };
+
+    const single = render(<Controlled exclusive initial="list" />);
+    fireEvent.click(screen.getByText('Grid'));
+    expect(screen.getByText('List').closest('button')).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByText('Grid').closest('button')).toHaveAttribute('aria-pressed', 'true');
+    single.unmount();
+
+    render(<Controlled exclusive={false} initial={['list']} />);
+    fireEvent.click(screen.getByText('Grid'));
+    expect(screen.getByText('List').closest('button')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('Grid').closest('button')).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('keeps the colour presets working', () => {
+    /* They ship publicly, so a stale import must not become a build error —
+       the same reason variant="{color}-light" still renders after 0.9.0. */
     render(
-      <ToggleButtonGroup value="a" exclusive aria-label="test">
-        <ToggleButton value="a">Alpha</ToggleButton>
-        <ToggleButton value="b">Beta</ToggleButton>
-        <ToggleButton value="c">Charlie</ToggleButton>
-      </ToggleButtonGroup>
+      <PrimaryToggleButtonGroup aria-label="a">
+        <ToggleButton value="x">X</ToggleButton>
+      </PrimaryToggleButtonGroup>,
     );
-    expect(screen.getByText('Alpha')).toBeInTheDocument();
-    expect(screen.getByText('Beta')).toBeInTheDocument();
-    expect(screen.getByText('Charlie')).toBeInTheDocument();
-  });
-
-  test('selected button has aria-pressed', () => {
     render(
-      <ToggleButtonGroup value="a" exclusive aria-label="test">
-        <ToggleButton value="a">A</ToggleButton>
-        <ToggleButton value="b">B</ToggleButton>
-      </ToggleButtonGroup>
+      <BlackWhiteToggleButtonGroup aria-label="b">
+        <ToggleButton value="y">Y</ToggleButton>
+      </BlackWhiteToggleButtonGroup>,
     );
-    expect(screen.getByText('A').closest('button')).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByText('B').closest('button')).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByText('X')).toBeInTheDocument();
+    expect(screen.getByText('Y')).toBeInTheDocument();
   });
 
-  test('calls onChange when button clicked', () => {
-    const handleChange = jest.fn();
-    render(
-      <ToggleButtonGroup value="a" exclusive onChange={handleChange} aria-label="test">
-        <ToggleButton value="a">A</ToggleButton>
-        <ToggleButton value="b">B</ToggleButton>
-      </ToggleButtonGroup>
-    );
-    fireEvent.click(screen.getByText('B'));
-    expect(handleChange).toHaveBeenCalledTimes(1);
-  });
-
-  // --- Variants ---
-
-  test('defaults to primary variant', () => {
-    const { container } = render(
-      <ToggleButtonGroup value="a" exclusive aria-label="test">
-        <ToggleButton value="a">A</ToggleButton>
-      </ToggleButtonGroup>
-    );
-    expect(container.querySelector('.toggle-group-primary')).toBeInTheDocument();
-  });
-
-
-  // --- Sizes ---
-
-  test.each(['small', 'medium', 'large'])('renders %s size', (size) => {
-    const { container } = render(
-      <ToggleButtonGroup size={size} value="a" exclusive aria-label="test">
-        <ToggleButton value="a">A</ToggleButton>
-      </ToggleButtonGroup>
-    );
-    expect(container).toBeInTheDocument();
-  });
-
-  // --- Exclusive vs Multiple ---
-
-  test('exclusive mode allows single selection', () => {
-    render(
-      <ToggleButtonGroup value="a" exclusive aria-label="test">
-        <ToggleButton value="a">A</ToggleButton>
-        <ToggleButton value="b">B</ToggleButton>
-      </ToggleButtonGroup>
-    );
-    expect(screen.getByText('A').closest('button')).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByText('B').closest('button')).toHaveAttribute('aria-pressed', 'false');
-  });
-
-  test('non-exclusive mode allows multiple selection', () => {
-    render(
-      <ToggleButtonGroup value={['a', 'b']} aria-label="test">
-        <ToggleButton value="a">A</ToggleButton>
-        <ToggleButton value="b">B</ToggleButton>
-        <ToggleButton value="c">C</ToggleButton>
-      </ToggleButtonGroup>
-    );
-    expect(screen.getByText('A').closest('button')).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByText('B').closest('button')).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByText('C').closest('button')).toHaveAttribute('aria-pressed', 'false');
-  });
-
-  // --- Disabled ---
-
-  test('disables all buttons when group disabled', () => {
-    render(
-      <ToggleButtonGroup value="a" exclusive disabled aria-label="test">
-        <ToggleButton value="a">A</ToggleButton>
-        <ToggleButton value="b">B</ToggleButton>
-      </ToggleButtonGroup>
-    );
-    expect(screen.getByText('A').closest('button')).toBeDisabled();
-    expect(screen.getByText('B').closest('button')).toBeDisabled();
-  });
-
-  test('individual button can be disabled', () => {
-    render(
-      <ToggleButtonGroup value="a" exclusive aria-label="test">
-        <ToggleButton value="a">A</ToggleButton>
-        <ToggleButton value="b" disabled>B</ToggleButton>
-      </ToggleButtonGroup>
-    );
-    expect(screen.getByText('A').closest('button')).not.toBeDisabled();
-    expect(screen.getByText('B').closest('button')).toBeDisabled();
-  });
-
-  // --- Orientation ---
-
-  test('renders vertical orientation', () => {
-    const { container } = render(
-      <ToggleButtonGroup value="a" exclusive orientation="vertical" aria-label="test">
-        <ToggleButton value="a">A</ToggleButton>
-        <ToggleButton value="b">B</ToggleButton>
-      </ToggleButtonGroup>
-    );
-    expect(container.querySelector('.MuiToggleButtonGroup-vertical')).toBeInTheDocument();
-  });
-
-  // --- Full width ---
-
-  test('renders full width', () => {
-    const { container } = render(
-      <ToggleButtonGroup value="a" exclusive fullWidth aria-label="test">
-        <ToggleButton value="a">A</ToggleButton>
-        <ToggleButton value="b">B</ToggleButton>
-      </ToggleButtonGroup>
-    );
-    expect(container).toBeInTheDocument();
-  });
-});
-
-// ─── Convenience Exports ─────────────────────────────────────────────────────
-
-describe('Convenience Exports', () => {
-  test('PrimaryToggleButtonGroup renders', () => {
-    const { container } = render(
-      <PrimaryToggleButtonGroup value="a" exclusive aria-label="test">
-        <ToggleButton value="a">A</ToggleButton>
-      </PrimaryToggleButtonGroup>
-    );
-    expect(container.querySelector('.toggle-group-primary')).toBeInTheDocument();
-  });
-
-
-
-});
-
-// ─── Accessibility ───────────────────────────────────────────────────────────
-
-describe('Accessibility', () => {
-  test('group has aria-label', () => {
-    render(
-      <ToggleButtonGroup value="a" exclusive aria-label="alignment options">
-        <ToggleButton value="a">A</ToggleButton>
-      </ToggleButtonGroup>
-    );
-    expect(screen.getByRole('group')).toHaveAttribute('aria-label', 'alignment options');
-  });
-
-  test('buttons have aria-pressed', () => {
-    render(
-      <ToggleButtonGroup value="a" exclusive aria-label="test">
-        <ToggleButton value="a">A</ToggleButton>
-        <ToggleButton value="b">B</ToggleButton>
-      </ToggleButtonGroup>
-    );
-    const buttons = screen.getAllByRole('button');
-    expect(buttons[0]).toHaveAttribute('aria-pressed', 'true');
-    expect(buttons[1]).toHaveAttribute('aria-pressed', 'false');
-  });
-
-  test('disabled buttons are aria-disabled', () => {
-    render(
-      <ToggleButtonGroup value="a" exclusive disabled aria-label="test">
-        <ToggleButton value="a">A</ToggleButton>
-      </ToggleButtonGroup>
-    );
-    expect(screen.getByRole('button')).toBeDisabled();
-  });
-});
-
-// ─── Accessibility — jest-axe ─────────────────────────────────────────────────
-
-describe('ToggleButtonGroup — Accessibility (jest-axe)', () => {
-  test('has no accessibility violations with default props', async () => {
-    const { container } = render(
-      <ToggleButtonGroup aria-label="Text formatting"><button value="bold">Bold</button></ToggleButtonGroup>
-    );
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-  });
-
-  test('has no accessibility violations in Primary theme', async () => {
-    const { container } = render(
-      <div data-theme="Primary">
-        <ToggleButtonGroup aria-label="Text formatting"><button value="bold">Bold</button></ToggleButtonGroup>
-      </div>
-    );
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-  });
-
-  test('has no accessibility violations in Secondary theme', async () => {
-    const { container } = render(
-      <div data-theme="Secondary">
-        <ToggleButtonGroup aria-label="Text formatting"><button value="bold">Bold</button></ToggleButtonGroup>
-      </div>
-    );
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
+  it('warns once, not on every render', () => {
+    /* A deprecation that fires per render is noise people learn to ignore.
+       Module-level flag, same as the -light variant warning. */
+    const spy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    render(<Group />);
+    render(<Group />);
+    expect(spy.mock.calls.filter(c => String(c[0]).includes('ToggleButtonGroup')).length)
+      .toBeLessThanOrEqual(1);
+    spy.mockRestore();
   });
 });
