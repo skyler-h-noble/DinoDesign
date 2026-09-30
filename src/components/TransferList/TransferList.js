@@ -34,7 +34,21 @@ import { SHADOW_LEVEL_2 } from '../_shadows';
 function not(a, b) { return a.filter((v) => !b.includes(v)); }
 function intersection(a, b) { return a.filter((v) => b.includes(v)); }
 
+/* ZONE PROPS — `theme` and `surface`.
+ *
+ * They become data-theme / data-surface on the root, which redefines
+ * --Background, --Text, --Border, --Quiet, --Hover and --Pressed for
+ * everything inside, so the component takes its colours from the zone it sits
+ * in rather than from a prop.
+ *
+ * Deliberately NOT derived from `color`: that chooses which PALETTE a filled
+ * part draws from, while `theme` moves the whole surface, including the parts
+ * carrying a contrast requirement that have to stay on zone tokens.
+ *
+ * Undefined when not passed, so the component INHERITS its ancestor's zone. */
 export function TransferList({
+  theme,
+  surface,
   leftItems: controlledLeft,
   rightItems: controlledRight,
   defaultLeftItems = [],
@@ -218,6 +232,8 @@ export function TransferList({
         (disabled ? ' transfer-list-disabled' : '') +
         (className ? ' ' + className : '')
       }
+      data-theme={theme || undefined}
+      data-surface={surface || undefined}
       role="group"
       aria-label="Transfer list"
       sx={{

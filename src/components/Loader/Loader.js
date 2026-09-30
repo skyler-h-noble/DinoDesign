@@ -33,7 +33,16 @@ import { CircularProgress } from '../CircularProgress';
  */
 const LOADER_SIZE_MAP = { small: 16, medium: 24, large: 32 };
 
+/* ZONE PROPS — `theme` and `surface`. They become data-theme / data-surface on
+ * the root, so the loader takes its colours from the zone it sits in rather
+ * than from a prop. Undefined when not passed, so it INHERITS its ancestor's
+ * zone; an empty string would match [data-theme] and pin it to nothing.
+ *
+ * Not derived from `color`: that picks the PALETTE the spinner draws from,
+ * while `theme` moves the surface the message text reads from. */
 export function Loader({
+  theme,
+  surface,
   size = 'medium',
   color = 'primary',
   message = 'Loading...',
@@ -54,6 +63,9 @@ export function Loader({
         ...sx,
       }}
       {...props}
+    
+      data-theme={theme || undefined}
+      data-surface={surface || undefined}
     >
       <CircularProgress
         size={typeof size === 'number' ? size : (LOADER_SIZE_MAP[size] ?? LOADER_SIZE_MAP.medium)}

@@ -90,7 +90,27 @@ const SIZE_MAP = {
 
 // --- Component ---------------------------------------------------------------
 
+/* ZONE PROPS — `theme` and `surface`.
+ *
+ * They become data-theme / data-surface on the root, which redefines
+ * --Background, --Text, --Border, --Quiet, --Hover and --Pressed for
+ * everything inside. That is how a slider takes its colours from the zone it
+ * sits in rather than from a prop, and it is why the thumb follows for free:
+ * the thumb is var(--Border) with a var(--Background) edge, so it recolours
+ * with the zone without this file knowing anything about themes.
+ *
+ * Deliberately NOT derived from `variant`. The two are different knobs, and
+ * the docblock above says why: `variant` routes the FILL through the button
+ * palette, while everything carrying a contrast requirement — thumb, rail,
+ * label — stays on surface tokens. Folding the theme into `variant` would
+ * make a palette choice silently restyle the contrast-bearing parts too.
+ *
+ * Both are undefined when not passed, so the slider INHERITS its ancestor's
+ * zone. An empty string would match [data-theme] selectors and pin it to
+ * nothing, which is worse than absent. */
 export function Slider({
+  theme,
+  surface,
   variant = 'primary',
   size = 'medium',
   value,
@@ -334,6 +354,8 @@ export function Slider({
          redundant rather than conflicting. */
       slotProps={disabled ? { input: { 'aria-disabled': 'true' } } : undefined}
       className={'slider-' + variant + ' ' + className}
+      data-theme={theme || undefined}
+      data-surface={surface || undefined}
       sx={sliderSx}
       {...props}
     />
