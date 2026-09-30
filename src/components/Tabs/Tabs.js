@@ -23,14 +23,15 @@ import { BodySmall, Caption } from '../Typography';
  * TABS (individual):
  *   Unselected: text var(--Text-Quiet), fontWeight 400
  *   Selected:   text var(--Text), fontWeight 600
- *   Indicator (3px): var(--Buttons-{Color}-Border) for standard, var(--Text) for solid/light/dark
+ *   Indicator (2px): var(--Buttons-{Color}-Border) for standard, var(--Text) for solid/light/dark
+ *   Baseline (1px):  var(--Border-Variant) — the rule the tabs sit on
  *   Hover: var(--Hover)
  *   Active: var(--Pressed)
  *   Focus: 3px inset var(--Focus-Visible)
  *   TabList border: var(--Border-Variant)
  *
  * SIZES: small | medium | large
- * ORIENTATION: horizontal | vertical
+ * ORIENTATION: horizontal | vertical-left | vertical-right ('vertical' = right)
  * DECORATORS: startDecorator / endDecorator per tab
  * ICON ONLY: tabs show only icon, no text
  */
@@ -100,6 +101,79 @@ const SIZE_MAP = {
  * or over-pads the text. */
 const TAB_CONTENT_GAP = '2px';
 
+/* Baseline and indicator are DIFFERENT thicknesses and that is the design.
+ *
+ * The baseline is a 1px rule the whole list sits on; the indicator is the 2px
+ * mark under the selected tab. Figma draws them as two layers — `Baseline` at
+ * 1px spanning the list, `Selector` at 2px per tab — flush at the same outer
+ * edge, so the indicator covers the baseline where it lands.
+ *
+ * Collapsing them to one number is the obvious "simplification" and it is
+ * wrong in both directions: a 2px baseline reads as a border, and a 1px
+ * indicator disappears next to it. */
+const BASELINE_THICKNESS = '1px';
+
+/* Which edge the baseline and indicator sit on, per orientation.
+ *
+ * 'vertical' is kept as an alias for 'vertical-right' — that is what the
+ * component drew before Vertical-Left existed, so an existing consumer keeps
+ * its rendering. Figma names the two explicitly, hence the pair here. */
+const EDGE = {
+  'horizontal': 'Bottom',
+  'vertical-left': 'Left',
+  'vertical-right': 'Right',
+  'vertical': 'Right',
+};
+export const edgeFor = (orientation) => EDGE[orientation] || 'Bottom';
+export const isHorizontalOrientation = (orientation) => orientation === 'horizontal';
+
+/* The baseline and indicator as plain objects, so they can be asserted
+ * directly.
+ *
+ * Not an aesthetic preference: jsdom cannot parse a border shorthand whose
+ * colour is a var(), so `toHaveStyle('border-bottom: 1px solid var(--X)')`
+ * reduces to an empty expectation and PASSES against anything. A DOM test of
+ * these two would be green whatever the component drew. */
+export function baselineStyle(orientation, baseline = true) {
+  if (!baseline) return {};
+  return { ['border' + edgeFor(orientation)]: BASELINE_THICKNESS + ' solid var(--Border-Variant)' };
+}
+
+/* Hover previews the indicator at half strength.
+ *
+ * It uses the SAME token as the selector, not --Border-Variant. The baseline is
+ * already --Border-Variant, so a hover mark in that colour would land a 2px
+ * line on top of the 1px rule in the same tone — reading as "the baseline got
+ * thicker" rather than "this tab is hovered". And on a vertical list, where
+ * there is no baseline behind the tab, it would be a neutral grey unrelated to
+ * the brand-coloured selector it is previewing.
+ *
+ * color-mix, not opacity: Figma dims the Hover LAYER to 50%, which in CSS is a
+ * half-transparent border colour. `opacity: 0.5` on the tab would fade the
+ * label and icon too.
+ *
+ * A selected tab gets nothing — it already draws the indicator at full
+ * strength, and painting a 50% mark over it would lighten the selection. */
+export function hoverIndicatorStyle(orientation, isSelected, thickness, color) {
+  if (isSelected) return {};
+  return {
+    ['border' + edgeFor(orientation)]:
+      thickness + ' solid color-mix(in srgb, ' + color + ' 50%, transparent)',
+  };
+}
+
+export function indicatorStyle(orientation, isSelected, thickness, color) {
+  /* Every edge is stated, three of them 'none', so switching orientation
+     cannot leave a stale border behind from the previous one. */
+  return {
+    borderBottom: 'none',
+    borderLeft: 'none',
+    borderRight: 'none',
+    ['border' + edgeFor(orientation)]:
+      thickness + ' solid ' + (isSelected ? color : 'transparent'),
+  };
+}
+
 /* ─── Context ─── */
 const TabsContext = createContext({
   value: 0,
@@ -109,6 +183,7 @@ const TabsContext = createContext({
   size: 'medium',
   orientation: 'horizontal',
   scrollable: false,
+  baseline: true,
   tabsId: '',
 });
 export const useTabsContext = () => useContext(TabsContext);
@@ -124,6 +199,10 @@ export function Tabs({
   size = 'medium',
   orientation = 'horizontal',
   scrollable = false,
+  /* The rule the tabs sit on. Default true, matching the Figma component's
+     Baseline boolean, which also defaults on. Turned off where the container
+     already provides the separation — an AppBar's own edge, for instance. */
+  baseline = true,
   className = '',
   sx = {},
   ...props
@@ -143,14 +222,14 @@ export function Tabs({
   }, [controlled, onChange]);
 
   return (
-    <TabsContext.Provider value={{ value, setValue, variant, color, size, orientation, scrollable, tabsId }}>
+    <TabsContext.Provider value={{ value, setValue, variant, color, size, orientation, scrollable, baseline, tabsId }}>
       <Box
         className={'tabs tabs-' + orientation + ' tabs-' + size + ' tabs-' + variant
           + (variant !== 'standard' ? ' tabs-' + color : '')
           + (scrollable ? ' tabs-scrollable' : '') + ' ' + className}
         sx={{
           display: 'flex',
-          flexDirection: orientation === 'horizontal' ? 'column' : 'row',
+          flexDirection: isHorizontalOrientation(orientation) ? 'column' : 'row',
           width: '100%',
           overflow: 'hidden',
           ...sx,
@@ -171,16 +250,20 @@ export function TabList({
   sx = {},
   ...props
 }) {
-  const { variant, color, size, orientation, scrollable, tabsId } = useTabsContext();
+  const { variant, color, size, orientation, scrollable, baseline, tabsId } = useTabsContext();
   const tabListRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
-  const isHorizontal = orientation === 'horizontal';
+  const isHorizontal = isHorizontalOrientation(orientation);
   const isStandard = variant === 'standard';
   const isSolid = variant === 'solid';
   const isLight = variant === 'light';
   const isDark = variant === 'dark';
+
+  /* The baseline goes on the same edge the indicator does, so the 2px
+     indicator lands on top of the 1px rule rather than beside it. */
+  const baselineSx = baselineStyle(orientation, baseline);
 
   // Theme/surface for the TabList (and individual Tabs inherit via context)
   const dataTheme = isStandard ? undefined
@@ -272,7 +355,16 @@ export function TabList({
     transition: 'color 0.15s ease, background-color 0.15s ease',
     '&:hover': { color: 'var(--Text)', backgroundColor: 'var(--Hover)' },
     '&:active': { backgroundColor: 'var(--Pressed)' },
-    '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '-3px' },
+    /* The ring sits 1px IN from the edge, not flush against it.
+     *
+     * outline-offset is measured to the outline's INNER edge, so a 3px outline at
+     * -3px lands its outer edge exactly on the border — flush. -4px moves it one
+     * more pixel in, leaving the 1px gap Figma draws: the Focus-Visible frame is
+     * 129x30 at (1,1) inside a 131x32 tab, with a 3px INSIDE stroke.
+     *
+     * The arithmetic is why this is easy to get wrong in either direction: the
+     * number is the ring's thickness PLUS the gap, not the gap. */
+    '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '-4px' },
     '&:disabled': { opacity: 'var(--Disabled, 0.38)', cursor: 'default', '&:hover': { backgroundColor: 'transparent', color: 'var(--Text-Quiet)' } },
   };
 
@@ -297,7 +389,13 @@ export function TabList({
         gap: 0,
         position: 'relative',
         backgroundColor: 'var(--Background)',
-        padding: '4px',
+        ...baselineSx,
+        /* Figma's Tabs frame has no padding: the tabs sit flush and the
+           baseline runs the full width. The 4px is for the variants that
+           paint a surface behind the tabs, where a selected tab's background
+           would otherwise touch the container's edge. Standard has no such
+           background, so it takes Figma's zero. */
+        padding: (isStandard && !rounded) ? 0 : '4px',
         // overflow: hidden so the active Tab's square-cornered background gets
         // clipped by the parent's border radius when `rounded` is on. Harmless
         // when rounded is off (nothing pokes out of a square container).
@@ -387,7 +485,7 @@ export function Tab({
 }) {
   const { value, setValue, variant, color, size, orientation, tabsId } = useTabsContext();
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
-  const isHorizontal = orientation === 'horizontal';
+  const isHorizontal = isHorizontalOrientation(orientation);
   const isStandard = variant === 'standard';
   const isSolid = variant === 'solid';
   const isLight = variant === 'light';
@@ -462,12 +560,13 @@ export function Tab({
         color: isSelected ? 'var(--Text)' : 'var(--Quiet)',
         backgroundColor: 'transparent',
         border: 'none',
-        borderBottom: isHorizontal
-          ? (isSelected ? s.indicatorThickness + ' solid ' + indicatorColor : s.indicatorThickness + ' solid transparent')
-          : 'none',
-        borderRight: !isHorizontal
-          ? (isSelected ? s.indicatorThickness + ' solid ' + indicatorColor : s.indicatorThickness + ' solid transparent')
-          : 'none',
+        /* The indicator sits on ONE edge, chosen by orientation — bottom when
+           horizontal, left or right when vertical. Transparent when
+           unselected rather than absent, so selecting a tab cannot change its
+           size; Figma gets the same result by absolutely positioning the
+           Selector with an edge constraint, which is why all fifteen of its
+           Tab variants measure the same. */
+        ...indicatorStyle(orientation, isSelected, s.indicatorThickness, indicatorColor),
         cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
         position: 'relative',
@@ -480,13 +579,15 @@ export function Tab({
         ...(!disabled && {
           '&:hover': {
             backgroundColor: 'var(--Hover)',
+            ...hoverIndicatorStyle(orientation, isSelected, s.indicatorThickness, indicatorColor),
           },
           '&:active': {
             backgroundColor: 'var(--Pressed)',
           },
           '&:focus-visible': {
             outline: '3px solid var(--Focus-Visible)',
-            outlineOffset: '-3px',
+            // 3px ring + 1px gap; see the note on the TabList ring above.
+            outlineOffset: '-4px',
           },
         }),
         ...sx,
