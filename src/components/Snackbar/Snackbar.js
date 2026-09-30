@@ -11,8 +11,21 @@ import { SHADOW_LEVEL_3 } from '../_shadows';
  * Snackbar (Toast) Component
  *
  * VARIANTS:
- *   solid     data-theme="{Theme}" data-surface="Surface"
  *   light     data-theme="{Theme}" data-surface="Surface-Brightest"
+ *
+ *   `solid` was RETIRED 2026-09-28. It still renders — it resolves to light and
+ *   warns once in development, the same shim the -light button variants got —
+ *   but do not write new ones and the converter must never emit one.
+ *
+ *   Why: a toast carries semantic colour, so on a solid fill that colour is
+ *   also the background its label must survive on. The label then has to flip
+ *   per theme AND per mode, which is 18 combinations to verify instead of 9.
+ *   On Surface-Brightest the colour lives in the border and icon while the
+ *   text sits on a reliable background — the same reasoning that keeps a
+ *   Carousel dot's 3:1 in its border rather than its fill. Alert is already
+ *   single-surface, and a toast is a floating alert, so the two now agree.
+ *
+ *   `surface` still reaches all five levels directly if a design needs one.
  *
  * COLORS: default | primary | secondary | tertiary | neutral | info | success | warning | error
  *
@@ -32,6 +45,9 @@ const SIZE_MAP = {
   medium: { px: '16px', py: '10px', fontSize: '14px', gap: '12px', minWidth: '300px' },
   large:  { px: '20px', py: '14px', fontSize: '16px', gap: '16px', minWidth: '360px' },
 };
+
+/** Warn once per session, not once per render. */
+let warnedSolid = false;
 
 export function Snackbar({
   children,
@@ -69,7 +85,21 @@ export function Snackbar({
    * speaks. This takes any of the five directly and wins over the variant
    * mapping, which stays as the default so existing usage is untouched.
    * Same shape as Card's surface prop. */
-  const dataSurface = surface || (variant === 'light' ? 'Surface-Brightest' : 'Surface');
+  /* `solid` is retired. It resolves to light rather than throwing, because a
+     published stylesheet and an un-upgraded consumer both have to keep
+     working — the same contract --Button-Standard-* keeps in CSS. The warning
+     is what stops it surviving silently. */
+  if (process.env.NODE_ENV !== 'production' && variant === 'solid' && !warnedSolid) {
+    warnedSolid = true;
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[Snackbar] variant="solid" is retired and now renders as "light". ' +
+      'A solid fill makes the label carry the semantic colour as its own ' +
+      'background, doubling the contrast combinations to verify. ' +
+      'Use the default, or pass `surface` to reach a specific level.',
+    );
+  }
+  const dataSurface = surface || 'Surface-Brightest';
 
   const borderToken = 'var(--Buttons-' + C + '-Border)';
 
@@ -123,7 +153,30 @@ export function Snackbar({
         position: 'fixed',
         left: '50%',
         transform: 'translateX(-50%)',
-        ...(anchor === 'top' ? { top: '16px' } : { bottom: '16px' }),
+        /* Offset from the edge the snackbar is anchored to.
+         *
+         * --SnackBar-Top / --SnackBar-Bottom are per-device: they are the
+         * platform's system chrome (status bar + app bar at the top, home
+         * indicator or gesture bar at the bottom) plus the clearance that
+         * gives the shadow somewhere to fall. A phone reserves 98px at the
+         * top where a desktop reserves 24, so a fixed number lands a snackbar
+         * on top of the app bar's title on every touch platform.
+         *
+         * The two ends are deliberately asymmetric on every device but
+         * Desktop: the top clears the app bar as well as the status bar,
+         * while the bottom clears only the OS indicator — a bottom nav is a
+         * template's choice, not the device's, so a template that places one
+         * adds its height rather than this reserving space for a bar that may
+         * not be there.
+         *
+         * The fallback is the DESKTOP value, not a smaller "safe" one. These
+         * variables are defined by a generated foundation.css and by nothing
+         * in this library, so the fallback is what an unthemed consumer
+         * actually gets — and it should be the design system's answer for a
+         * device with no chrome, not a number that contradicts it. */
+        ...(anchor === 'top'
+          ? { top: 'var(--SnackBar-Top, 24px)' }
+          : { bottom: 'var(--SnackBar-Bottom, 24px)' }),
         zIndex: 1400,
         minWidth: s.minWidth,
         maxWidth: 'min(560px, calc(100vw - 32px))',

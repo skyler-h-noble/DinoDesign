@@ -72,13 +72,35 @@ describe('the sizes that were removed stay removed', () => {
        with no consumer. */
     const { container } = render(<Avatar size="xxx-small" initials="LN" />);
     const av = container.querySelector('.avatar');
-    // Falls back to medium (56) rather than rendering a 16px avatar.
+    // Falls back to medium (32 after the 2026-09-28 realignment) rather than
+    // rendering a 16px avatar.
     expect(`${av.getAttribute('style') || ''}`).not.toMatch(/(^|[^0-9])16px/);
   });
 
-  it('Icon has no xs', () => {
+  it('the Icon ladder is Figma\'s seven steps, in order', () => {
+    /* Was "Icon has no xs", asserting a three-step ladder. That ladder was
+       three names stretched across Figma's seven rungs, each having drifted to
+       whichever rung it was nearest — the lib's `small` was Figma's `xxs` and
+       its `large` was Figma's `medium`. Realigned 2026-09-28.
+
+       Asserted as the full ordered list rather than spot-checks: the bug was a
+       ladder with holes, so a test that only checks the rungs that exist
+       cannot see the next hole appear. */
     const { ICON_SIZE_MAP } = require('../Icon/Icon');
-    expect(ICON_SIZE_MAP.xs).toBeUndefined();
-    expect(Object.keys(ICON_SIZE_MAP)).toEqual(['small', 'medium', 'large']);
+    expect(Object.keys(ICON_SIZE_MAP))
+      .toEqual(['xxs', 'xs', 'small', 'medium', 'large', 'xl', 'xxl']);
+    expect(Object.values(ICON_SIZE_MAP))
+      .toEqual(['16px', '20px', '24px', '32px', '40px', '56px', '72px']);
+  });
+
+  it('Icon and Avatar agree rung for rung', () => {
+    /* They are one Figma collection — `Icons & Avatars`, one set of modes
+       driving both Icon-Size and Avatar-Size. Two ladders in code that are one
+       ladder in the design is how the offset survived: each could be
+       self-consistent while disagreeing with the other. */
+    const { ICON_SIZE_MAP } = require('../Icon/Icon');
+    const rungs = ['xxs', 'xs', 'small', 'medium', 'large', 'xl', 'xxl'];
+    const icon = rungs.map((r) => parseInt(ICON_SIZE_MAP[r], 10));
+    expect(icon).toEqual([16, 20, 24, 32, 40, 56, 72]);
   });
 });

@@ -1,7 +1,7 @@
 // src/components/Avatar/Avatar.js
 import React, { useState } from 'react';
 import { Box } from '@mui/material';
-import PersonIcon from '@mui/icons-material/Person';
+import { AvatarGlyph } from './AvatarGlyph';
 import { Icon } from '../Icon/Icon';
 import { NumberSmall, NumberMedium, NumberLarge, CAP_HEIGHT_TRIM } from '../Typography';
 import { DEFAULT_AVATAR_SRC } from './defaultAvatar';
@@ -13,7 +13,7 @@ import { useGhost, ghostBlockSx } from '../_ghost';
  * CONTENT (priority): real src → initials → explicit icon → DEFAULT PHOTO.
  *   The default avatar IS the photo: a bare <Avatar /> shows the built-in photo.
  *   The three Figma variants map to: bare <Avatar /> (photo), initials="…"
- *   (initials), icon={…} (icon). defaultPhoto={false} restores the Person-icon
+ *   (initials), icon={…} (icon). defaultPhoto={false} restores the brand glyph
  *   fallback for a bare avatar.
  *
  * SIZES (Figma-aligned):
@@ -56,15 +56,68 @@ const COLOR_MAP = {
 // initials. Larger sizes use larger type tokens so initials scale with the
 // avatar. 'custom' falls back to whatever `customSize` is passed (a number
 // of pixels). Icon size scales as a rough 50% of the avatar diameter.
+/* ALIGNED TO FIGMA 2026-09-28 — and this MOVED THREE EXISTING NAMES.
+ *
+ * The two ladders held the same pixel values under names offset by two steps:
+ *
+ *   Figma  xxs 16 · xs 20 · small 24 · medium 32 · large 40 · xl 56 · xxl 72
+ *   was                     xx-small 24 · x-small 32 · small 40 · medium 56 …
+ *
+ * So a designer picking "medium" got 32 and a developer writing size="medium"
+ * got 56, with nothing to report it — both sides used one vocabulary for
+ * different rungs. The initials ramp confirmed the offset independently
+ * (Figma small -> 14 was the lib's xx-small -> 14).
+ *
+ * BREAKING, and it cannot be shimmed. `small`, `medium` and `large` exist in
+ * both ladders with different values, so there is no way to tell which one a
+ * call site meant — a runtime warning would have to fire on every usage,
+ * including the correct ones. The old x- and xx- spellings CAN be mapped,
+ * because they do not exist in the new ladder and their pixel values are
+ * unambiguous; see LEGACY_SIZE_ALIAS below.
+ *
+ *   size="small"   40 -> 24
+ *   size="medium"  56 -> 32
+ *   size="large"   64 -> 40
+ *
+ * x-large (80) and xx-large (160) are KEPT. Figma's ladder stops at 72, and
+ * dropping them would delete the only sizes an avatar-led layout has — a
+ * profile header is not a 72px avatar. They are lib-only extensions above the
+ * design's range, and that is recorded here rather than left to be rediscovered
+ * as a gap.
+ */
 const SIZE_MAP = {
-  'xx-small':  { size: 24,  iconSize: 14 },
-  'x-small':   { size: 32,  iconSize: 18 },
-  small:       { size: 40,  iconSize: 22 },
-  medium:      { size: 56,  iconSize: 28 },
-  large:       { size: 64,  iconSize: 32 },
+  xxs:         { size: 16,  iconSize: 9 },
+  xs:          { size: 20,  iconSize: 12 },
+  small:       { size: 24,  iconSize: 14 },
+  medium:      { size: 32,  iconSize: 18 },
+  large:       { size: 40,  iconSize: 22 },
+  xl:          { size: 56,  iconSize: 28 },
+  xxl:         { size: 72,  iconSize: 40 },
+  /* Above Figma's range — no mode exists for these. */
   'x-large':   { size: 80,  iconSize: 40 },
   'xx-large':  { size: 160, iconSize: 80 },
 };
+
+/* The two spellings that CAN be carried over, because the new ladder has no
+   name colliding with them and the pixel value is unchanged. Warned once so a
+   consumer learns the new name rather than discovering it when the alias goes. */
+const LEGACY_SIZE_ALIAS = { 'xx-small': 'small', 'x-small': 'medium' };
+let warnedLegacySize = false;
+
+function resolveSizeName(size) {
+  const mapped = LEGACY_SIZE_ALIAS[size];
+  if (!mapped) return size;
+  if (process.env.NODE_ENV !== 'production' && !warnedLegacySize) {
+    warnedLegacySize = true;
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[Avatar] size="${size}" is the old ladder's name for ${SIZE_MAP[mapped].size}px. ` +
+      `Use size="${mapped}". The ladder was realigned to Figma on 2026-09-28; ` +
+      'note that small, medium and large also changed value.',
+    );
+  }
+  return mapped;
+}
 
 // Initials wear the NUMBER style — the design's "Avatar-Initials" text style is
 // Font(family: Typography/Number/Small/Font-Family, weight: …/Font-Weight,
@@ -117,8 +170,9 @@ export function Avatar({
   initials,
   icon,
   color = 'default',
-  // Default size is x-small (XS, 32px) per the design spec's default avatar.
-  size = 'x-small',
+  /* 32px, which the realigned ladder calls `medium` — it was `x-small` under
+     the old names. The pixel value is unchanged; only the word moved. */
+  size = 'medium',
   customSize,
   clickable = false,
   onClick,
@@ -134,7 +188,7 @@ export function Avatar({
   // Custom size — pixel diameter from `customSize` prop, icon ~50% of that.
   const s = size === 'custom' && customSize
     ? { size: customSize, iconSize: Math.round(customSize * 0.5) }
-    : (SIZE_MAP[size] || SIZE_MAP.medium);
+    : (SIZE_MAP[resolveSizeName(size)] || SIZE_MAP.medium);
   const C = COLOR_MAP[color] || COLOR_MAP.default;
 
   // Photo source: an explicit src wins; otherwise the built-in default photo —
@@ -247,7 +301,7 @@ export function Avatar({
       })()}
       {isFallback && (
         <Icon size={size} sx={{ color: 'inherit' }}>
-          {icon || <PersonIcon />}
+          {icon || <AvatarGlyph />}
         </Icon>
       )}
     </Box>

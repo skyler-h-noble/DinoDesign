@@ -53,14 +53,41 @@ const COLOR_LABEL_MAP = {
 // The icon scale. Exported so anything that has to restate it — the Button's
 // slot rules, which otherwise inherit MUI's own per-button-size icon sizing —
 // reads these numbers instead of keeping a second copy.
-/* `xs: 12px` was removed with Avatar's xxx-small. Nothing in the library or
-   any consumer used it, and Figma has no 12px icon — its smallest is the 16px
-   Button-Icon-Only on a small button. A size nobody asks for still has to be
-   kept in step with the design, which is a cost with no return. */
+/* ALIGNED TO FIGMA 2026-09-28 — and this MOVED ALL THREE EXISTING NAMES.
+ *
+ * The lib carried three steps of a ladder Figma has seven of, and the names
+ * were offset by two rungs:
+ *
+ *   Figma  xxs 16 · xs 20 · small 24 · medium 32 · large 40 · xl 56 · xxl 72
+ *   was           small 16 ·          medium 24 ·  large 32
+ *
+ * So the lib's `small` was Figma's `xxs`, and its `large` was Figma's
+ * `medium`. Same offset Avatar had, found the same way, and neither side could
+ * report it because both used one vocabulary for different rungs.
+ *
+ *   size="small"   16 -> 24
+ *   size="medium"  24 -> 32
+ *   size="large"   32 -> 40
+ *
+ * BREAKING and unshimmable, for the same reason as Avatar: all three names
+ * exist in both ladders with different values, so no runtime check can tell
+ * which one a call site meant.
+ *
+ * The four sizes the lib never had are added rather than left out. A ladder
+ * with holes is what produced the offset in the first place — three names
+ * stretched across seven rungs, each drifting to whichever rung it was nearest.
+ *
+ * (An earlier note here recorded removing `xs: 12px` because "Figma has no
+ * 12px icon". That was true of the old reading and is now moot: Figma's xs is
+ * 20, and this ladder is Figma's.) */
 export const ICON_SIZE_MAP = {
-  small: '16px',
-  medium: '24px',
-  large: '32px',
+  xxs: '16px',
+  xs: '20px',
+  small: '24px',
+  medium: '32px',
+  large: '40px',
+  xl: '56px',
+  xxl: '72px',
 };
 
 const SIZE_MAP = ICON_SIZE_MAP;
