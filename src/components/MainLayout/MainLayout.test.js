@@ -89,11 +89,16 @@ describe('DefaultMainLayout Component', () => {
     expect(screen.getByText('Design System')).toBeInTheDocument();
   });
 
-  test('displays theme mode options', () => {
-    render(<DefaultMainLayout />);
-    expect(screen.getByText('Light')).toBeInTheDocument();
-    expect(screen.getByText('Professional')).toBeInTheDocument();
-    expect(screen.getByText('Dark')).toBeInTheDocument();
+  /* It shows the CURRENT mode, not a list of options — one of three labels
+     renders at a time, keyed off `mode`. This expected all three present at
+     once, which only held when there was a picker listing them. */
+  test.each([
+    ['light',        '\u2600\ufe0f Light Mode (Tonal)'],
+    ['professional', '\ud83d\udcbc Light Mode (Professional)'],
+    ['dark',         '\ud83c\udf19 Dark Mode'],
+  ])('mode=%s shows its own label', (mode, label) => {
+    render(<DefaultMainLayout mode={mode} />);
+    expect(screen.getByText(label)).toBeInTheDocument();
   });
 
   test('displays demo sections', () => {

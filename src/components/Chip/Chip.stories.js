@@ -16,8 +16,6 @@ export default {
         'info', 'success', 'warning', 'error',
         'primary-outline', 'secondary-outline', 'tertiary-outline', 'neutral-outline',
         'info-outline', 'success-outline', 'warning-outline', 'error-outline',
-        'primary-light', 'secondary-light', 'tertiary-light', 'neutral-light',
-        'info-light', 'success-light', 'warning-light', 'error-light',
       ],
     },
     size: { control: 'select', options: ['small', 'medium', 'large'] },
@@ -73,7 +71,7 @@ export const LightColors = {
   render: () => (
     <Stack direction="row" spacing={2} sx={{ p: 4, flexWrap: "wrap", gap: 2 }}>
       {["primary", "secondary", "tertiary", "neutral", "info", "success", "warning", "error"].map((c) => (
-        <Chip key={c} variant={c + "-light"} label={c.charAt(0).toUpperCase() + c.slice(1)} />
+        <Chip key={c} variant={c + "-outline"} label={c.charAt(0).toUpperCase() + c.slice(1)} />
       ))}
     </Stack>
   ),
@@ -85,7 +83,7 @@ export const StyleComparison = {
     <Stack direction="row" spacing={4} sx={{ p: 4 }}>
       <Chip variant="info" label="Solid" />
       <Chip variant="info-outline" label="Outline" />
-      <Chip variant="info-light" label="Light" />
+      <Chip variant="info-outline" label="Outline" />
     </Stack>
   ),
 };
@@ -104,7 +102,7 @@ export const WithDecorators = {
     <Stack direction="row" spacing={2} sx={{ p: 4 }}>
       <Chip label="With Icon" startDecorator={<FaceIcon />} />
       <Chip label="Check" endDecorator={<CheckIcon />} variant="success" />
-      <Chip label="Both" startDecorator={<StarIcon />} endDecorator={<CheckIcon />} variant="info-light" />
+      <Chip label="Both" startDecorator={<StarIcon />} endDecorator={<CheckIcon />} variant="info-outline" />
     </Stack>
   ),
 };

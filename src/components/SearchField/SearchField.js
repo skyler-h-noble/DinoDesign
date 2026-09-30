@@ -122,10 +122,20 @@ export function SearchField({
             ? 'var(--Lg-Input-Radius, var(--Input-Radius, var(--Style-Border-Radius)))'
             : 'var(--Input-Radius, var(--Style-Border-Radius))',
         overflow: 'hidden',
-        opacity: disabled ? 0.5 : 1,
+        opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
         transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
         boxShadow: 'none',
         width: '100%',
+        /* Hover and pressed move the BORDER, matching Input: this field's
+           resting background is already --Hover, so a background scrim would
+           paint --Hover over --Hover and show nothing.
+           Guarded on !disabled because :hover still MATCHES a disabled field —
+           only pointer-events would stop it — so an unguarded rule lights up a
+           control that cannot be used. */
+        ...(!disabled && {
+          '&:hover': { borderColor: 'var(--Buttons-' + C + '-Hover)' },
+          '&:active': { borderColor: 'var(--Buttons-' + C + '-Pressed)' },
+        }),
         '&:focus-within': {
           outline: '2px solid var(--Focus-Visible)',
           outlineOffset: '2px',
@@ -199,6 +209,7 @@ export function SearchField({
               color: 'var(--Quiet)', cursor: 'pointer', flexShrink: 0, padding: 0,
               transition: 'color 0.15s ease, background-color 0.15s ease',
               '&:hover': { backgroundColor: 'var(--Hover)', color: activeTextColor },
+              '&:active': { backgroundColor: 'var(--Pressed)', color: activeTextColor },
               '&:focus-visible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px' },
             }}
           >

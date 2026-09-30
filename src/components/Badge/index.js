@@ -20,14 +20,6 @@ export {
   WarningOutlineBadge,
   ErrorOutlineBadge,
   // Light
-  PrimaryLightBadge,
-  SecondaryLightBadge,
-  TertiaryLightBadge,
-  NeutralLightBadge,
-  InfoLightBadge,
-  SuccessLightBadge,
-  WarningLightBadge,
-  ErrorLightBadge,
 } from './Badge';
 
 export { BadgeShowcase } from './BadgeShowcase';

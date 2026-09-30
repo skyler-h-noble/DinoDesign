@@ -3,6 +3,14 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Colors } from './Colors';
 
+/* The showcase grew: labels like "Primary", "Text" and "Border" now appear in
+ * several sections at once — brand, buttons, icons, tags — so getByText threw
+ * on ambiguity rather than failing an assertion. These tests are checking that
+ * a label is PRESENT, not that it is unique, so they ask for at least one.
+ *
+ * (A getByText that starts matching two nodes is not a stronger test than
+ * getAllByText — it is a test that has stopped running.)
+ */
 describe('Colors Component', () => {
   test('renders Colors component', () => {
     const { container } = render(<Colors />);
@@ -11,94 +19,99 @@ describe('Colors Component', () => {
 
   test('renders Brand Colors section', () => {
     render(<Colors />);
-    expect(screen.getByText('Brand Colors (Static)')).toBeInTheDocument();
+    expect(screen.getAllByText('Brand Colors (Static)').length).toBeGreaterThan(0);
   });
 
   test('renders Background Colors section', () => {
     render(<Colors />);
-    expect(screen.getByText('Background Colors (Dynamic)')).toBeInTheDocument();
+    expect(screen.getAllByText('Background Colors (Dynamic)').length).toBeGreaterThan(0);
   });
 
   test('renders Dynamic Colors section', () => {
     render(<Colors />);
-    expect(screen.getByText('Dynamic Colors (Update with Mode, Background & Surface)')).toBeInTheDocument();
+    expect(screen.getAllByText('Dynamic Colors (Update with Mode, Background & Surface)').length).toBeGreaterThan(0);
   });
 
   test('renders How to Use section', () => {
     render(<Colors />);
-    expect(screen.getByText('How to Use')).toBeInTheDocument();
+    expect(screen.getAllByText('How to Use').length).toBeGreaterThan(0);
   });
 
   test('displays Primary, Secondary, Tertiary brand colors', () => {
     render(<Colors />);
-    expect(screen.getByText('Primary')).toBeInTheDocument();
-    expect(screen.getByText('Secondary')).toBeInTheDocument();
-    expect(screen.getByText('Tertiary')).toBeInTheDocument();
+    expect(screen.getAllByText('Primary').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Secondary').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Tertiary').length).toBeGreaterThan(0);
   });
 
   test('displays background color variants', () => {
     render(<Colors />);
-    expect(screen.getByText('Default Background')).toBeInTheDocument();
-    expect(screen.getByText('Primary Background')).toBeInTheDocument();
-    expect(screen.getByText('Secondary Background')).toBeInTheDocument();
-    expect(screen.getByText('Tertiary Background')).toBeInTheDocument();
-    expect(screen.getByText('Neutral Background')).toBeInTheDocument();
-    expect(screen.getByText('Neutral-Variant Background')).toBeInTheDocument();
+    expect(screen.getAllByText('Default Background').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Primary Background').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Secondary Background').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Tertiary Background').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Neutral Background').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Neutral-Variant Background').length).toBeGreaterThan(0);
   });
 
   test('displays Layout & Surfaces colors', () => {
     render(<Colors />);
-    expect(screen.getByText('Layout & Surfaces')).toBeInTheDocument();
-    expect(screen.getByText('Background')).toBeInTheDocument();
-    expect(screen.getByText('Container')).toBeInTheDocument();
-    expect(screen.getByText('Border')).toBeInTheDocument();
+    expect(screen.getAllByText('Layout & Surfaces').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Background').length).toBeGreaterThan(0);
+    /* 'Container' is not in Layout & Surfaces — that section is Background,
+       Border and Border-Variant. */
+    expect(screen.getAllByText('Border-Variant').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Border').length).toBeGreaterThan(0);
   });
 
   test('displays Text & Links colors', () => {
     render(<Colors />);
-    expect(screen.getByText('Text & Links')).toBeInTheDocument();
-    expect(screen.getByText('Text')).toBeInTheDocument();
-    expect(screen.getByText('Text-Secondary')).toBeInTheDocument();
+    expect(screen.getAllByText('Text & Links').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Text').length).toBeGreaterThan(0);
+    /* Text & Links is Header / Text / Text-Quiet / Hotlink /
+       Hotlink-Visited — there is no Text-Secondary swatch. */
+    expect(screen.getAllByText('Text-Quiet').length).toBeGreaterThan(0);
   });
 
   test('displays Button Primary colors', () => {
     render(<Colors />);
-    expect(screen.getByText('Buttons - Primary')).toBeInTheDocument();
-    expect(screen.getByText('Button BG')).toBeInTheDocument();
-    expect(screen.getByText('Button Text')).toBeInTheDocument();
+    expect(screen.getAllByText('Buttons - Primary').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Button BG').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Button Text').length).toBeGreaterThan(0);
   });
 
   test('displays Button Secondary colors', () => {
     render(<Colors />);
-    expect(screen.getByText('Buttons - Secondary')).toBeInTheDocument();
+    expect(screen.getAllByText('Buttons - Secondary').length).toBeGreaterThan(0);
   });
 
   test('displays Button State colors', () => {
     render(<Colors />);
-    expect(screen.getByText('Buttons - State')).toBeInTheDocument();
-    expect(screen.getByText('Info Button')).toBeInTheDocument();
-    expect(screen.getByText('Success Button')).toBeInTheDocument();
-    expect(screen.getByText('Warning Button')).toBeInTheDocument();
-    expect(screen.getByText('Error Button')).toBeInTheDocument();
+    expect(screen.getAllByText('Buttons - State').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Info Button').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Success Button').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Warning Button').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Error Button').length).toBeGreaterThan(0);
   });
 
   test('displays Icons colors', () => {
     render(<Colors />);
-    expect(screen.getByText('Icons')).toBeInTheDocument();
-    expect(screen.getByText('Default')).toBeInTheDocument();
-    expect(screen.getByText('Primary')).toBeInTheDocument();
+    expect(screen.getAllByText('Icons').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Default').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Primary').length).toBeGreaterThan(0);
   });
 
   test('displays Tags & Badges colors', () => {
     render(<Colors />);
-    expect(screen.getByText('Tags & Badges')).toBeInTheDocument();
-    expect(screen.getByText('Primary BG')).toBeInTheDocument();
-    expect(screen.getByText('Primary Text')).toBeInTheDocument();
+    /* The section is 'Chips & Badges'. */
+    expect(screen.getAllByText('Chips & Badges').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Primary BG').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Primary Text').length).toBeGreaterThan(0);
   });
 
   test('displays static colors explanation', () => {
     render(<Colors />);
-    expect(screen.getByText('Static Colors')).toBeInTheDocument();
+    expect(screen.getAllByText('Static Colors').length).toBeGreaterThan(0);
   });
 
   test('displays dynamic colors explanation', () => {
@@ -111,20 +124,26 @@ describe('Colors Component', () => {
 
   test('displays example usage', () => {
     render(<Colors />);
-    expect(screen.getByText('Example Usage')).toBeInTheDocument();
+    expect(screen.getAllByText('Example Usage').length).toBeGreaterThan(0);
   });
 
   test('displays CSS variable names', () => {
     render(<Colors />);
-    expect(screen.getByText('--Primary-Color-11')).toBeInTheDocument();
-    expect(screen.getByText('--Secondary-Color-11')).toBeInTheDocument();
-    expect(screen.getByText('--Tertiary-Color-11')).toBeInTheDocument();
+    expect(screen.getAllByText('--Primary-Color-11').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('--Secondary-Color-11').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('--Tertiary-Color-11').length).toBeGreaterThan(0);
   });
 
+  /* Swatches paint through `sx`, which emotion compiles to a CLASS — there is
+     no inline style attribute to match, so the old selector returned 0 and the
+     assertion was really "0 > 10". Each swatch also prints its CSS variable
+     name, so counting those counts the swatches without depending on how the
+     colour is applied. */
   test('renders multiple color swatches', () => {
     const { container } = render(<Colors />);
-    const swatches = container.querySelectorAll('[style*="background-color"]');
-    expect(swatches.length).toBeGreaterThan(10);
+    const varNames = Array.from(container.querySelectorAll('*'))
+      .filter((el) => el.children.length === 0 && /^--[A-Za-z]/.test(el.textContent.trim()));
+    expect(varNames.length).toBeGreaterThan(10);
   });
 
   test('all color swatches are 80x80', () => {

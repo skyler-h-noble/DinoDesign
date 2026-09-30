@@ -120,3 +120,48 @@ describe('Divider — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+/* Thickness comes from Component-Size `Divider` — 0.5 / 1 / 2.
+ *
+ * It was 1 / 2 / 4, one step heavy at every size. That ramp is the one the
+ * design assigns to the STEP BAR (the stepper's connector), which the lib had
+ * pinned flat at 2 — so the two ramps had effectively been swapped between the
+ * two components.
+ *
+ * 0.5px is a deliberate hairline: a true half-pixel on a 2x display, rounded
+ * by the browser on 1x. That is the usual hairline trade, not a rounding bug.
+ */
+describe('thickness follows the Divider ramp, not the step bar ramp', () => {
+  const cssFor = (el) => {
+    const cls = (el.className || '').split(/\s+/).find((c) => c.startsWith('css-'));
+    if (!cls) return '';
+    return Array.from(document.styleSheets)
+      .flatMap((sheet) => Array.from(sheet.cssRules || []))
+      .filter((r) => (r.selectorText || '').includes('.' + cls))
+      .map((r) => r.cssText)
+      .join('\n');
+  };
+
+  /* Read from the token, with the design's number as the fallback — so the
+     assertion is on BOTH: the right variable, and the right value behind it.
+     Checking only the number would pass on a hardcoded literal; checking only
+     the variable would pass on a wrong fallback. */
+  test.each([
+    ['small',  'var(--Sm-Divider, 0.5px)'],
+    ['medium', 'var(--Divider, 1px)'],
+    ['large',  'var(--Lg-Divider, 2px)'],
+  ])('vertical %s reads %s', (size, expected) => {
+    const { container } = render(<Divider orientation="vertical" size={size} />);
+    const el = container.querySelector('.divider-vertical');
+    expect(cssFor(el)).toContain('width: ' + expected);
+  });
+
+  test('large falls back to 2px, not the 4px the step bar uses', () => {
+    const { container } = render(<Divider orientation="vertical" size="large" />);
+    const el = container.querySelector('.divider-vertical');
+    /* The indicator pill's own radius is 12px, so match the WIDTH declaration
+       rather than the string 4px anywhere in the rule. */
+    expect(cssFor(el)).not.toContain('width: var(--Lg-Divider, 4px)');
+    expect(cssFor(el)).toContain('width: var(--Lg-Divider, 2px)');
+  });
+});

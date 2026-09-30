@@ -41,21 +41,34 @@ describe('Variants', () => {
     renderModal({ variant: 'default' });
     expect(screen.getByRole('dialog')).not.toHaveAttribute('data-theme');
   });
-  test('soft — data-theme Primary-Light', () => {
+  test('soft — the bare theme on the brightest surface', () => {
+    /* soft asked for Primary-Light, and there is no such theme. It bound
+       nothing, so soft error and soft success rendered identically and both
+       looked like the page. The palette is the same as solid now; the LEVEL
+       is what differs. */
     renderModal({ variant: 'soft', color: 'primary' });
-    expect(screen.getByRole('dialog')).toHaveAttribute('data-theme', 'Primary-Light');
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveAttribute('data-theme', 'Primary');
+    expect(dialog).toHaveAttribute('data-surface', 'Surface-Brightest');
   });
   test('solid — data-theme Primary', () => {
     renderModal({ variant: 'solid', color: 'primary' });
     expect(screen.getByRole('dialog')).toHaveAttribute('data-theme', 'Primary');
   });
-  test('solid info → Info-Medium', () => {
+  test('solid info → Info', () => {
     renderModal({ variant: 'solid', color: 'info' });
-    expect(screen.getByRole('dialog')).toHaveAttribute('data-theme', 'Info-Medium');
+    expect(screen.getByRole('dialog')).toHaveAttribute('data-theme', 'Info');
   });
-  test('soft success → Success-Light', () => {
+  test('soft success → Success, and a solid one differs only by level', () => {
     renderModal({ variant: 'soft', color: 'success' });
-    expect(screen.getByRole('dialog')).toHaveAttribute('data-theme', 'Success-Light');
+    const soft = screen.getByRole('dialog');
+    expect(soft).toHaveAttribute('data-theme', 'Success');
+    expect(soft).toHaveAttribute('data-surface', 'Surface-Brightest');
+  });
+
+  test('solid stays a raised container', () => {
+    renderModal({ variant: 'solid', color: 'success' });
+    expect(screen.getByRole('dialog')).toHaveAttribute('data-surface', 'Container-High');
   });
 });
 

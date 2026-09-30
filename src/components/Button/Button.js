@@ -8,18 +8,47 @@ import { Badge as DDBadge } from '../Badge/Badge';
 import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, bevelShadow, tokenSegment } from '../_shadows';
 
 // Auto-size mapping for start/end decorators based on Button size
-// Padding on the label wrapper — Figma's "Typography Holder". Small and medium
-// share 4px vertical / 2px horizontal; large is square at 4px.
+// Padding on the label wrapper — Figma's "Typography Holder", which the design
+// system now generates per size mode as --Button-Text-Padding (4 / 4 / 8).
+//
+// This used to be '4px 2px' at small and medium, so the horizontal was half the
+// vertical. The design's value is a single number applied on both axes, which
+// widens a small or medium button's label box by 2px each side.
 const LABEL_PADDING_BY_SIZE = {
-  small:  '4px 2px',
-  medium: '4px 2px',
-  large:  '4px',
+  small:  'var(--Sm-Button-Text-Padding)',
+  medium: 'var(--Button-Text-Padding)',
+  large:  'var(--Lg-Button-Text-Padding)',
 };
 
+// Initials on an avatar inside a button. The design system generates this per
+// size mode as --Avatar-Text (14 / 12 / 18), derived from the button height —
+// it was three literals, one of which reached for a type-ramp token that is
+// not the avatar's.
+/* The initials INSIDE a button's avatar decorator — Button-Avatar-Text, which
+   is 9 / 12 / 23 and sits on the same 7/12 of the diameter the standalone
+   avatar uses. Not --Avatar-Text (12 / 14 / 18): that is the ramp for an
+   avatar-ONLY button, whose circle is a different size again
+   (Button-Avatar-Only, 24 / 32 / 56). Reading the wrong one put oversized
+   initials in a decorator. */
+const avatarTextFor = (size) =>
+  size === 'small' ? 'var(--Sm-Button-Avatar-Text, 9px)'
+    : size === 'large' ? 'var(--Lg-Button-Avatar-Text, 23px)'
+      : 'var(--Button-Avatar-Text, 12px)';
+
+/* Decorator sizes, in PIXELS, from Figma's Component-Size ramp.
+ *
+ * These used to name standalone Avatar/Icon sizes, and that was the mistake —
+ * a button's decorator has its OWN ramp (Button-Avatar, Button-Icon) which does
+ * not line up with the standalone ones. Two of the six were wrong because of
+ * it: a medium button drew a 24px avatar where the design says 20, and both
+ * small and medium drew the wrong icon.
+ *
+ * 20 is not a named size in either component, which is precisely why the
+ * mapping could not be expressed as a name. Both take a pixel size instead. */
 const DECORATOR_SIZE_MAP = {
-  small:  { avatar: 'xxx-small', icon: 'small'  },
-  medium: { avatar: 'xx-small',  icon: 'medium' },
-  large:  { avatar: 'small',     icon: 'large'  },
+  small:  { avatar: 16, icon: 20 },
+  medium: { avatar: 20, icon: 20 },
+  large:  { avatar: 40, icon: 32 },
 };
 
 // Auto-detect decorator type by React element type and resize it.
@@ -31,13 +60,18 @@ function resolveDecorator(node, buttonSize) {
   if (!React.isValidElement(node)) return node;
   const mapping = DECORATOR_SIZE_MAP[buttonSize] || DECORATOR_SIZE_MAP.medium;
   if (node.type === DDAvatar) {
-    // Button avatars: size to the button (small→16, medium→24, large→40) AND
-    // get 2px horizontal padding so they sit correctly beside the label /
-    // within a group segment. insideButton applies the 2px L/R margin.
-    return React.cloneElement(node, { size: mapping.avatar, insideButton: true });
+    // Button avatars: 16 / 20 / 40 by button size, matching Button-Avatar, AND
+    // 2px horizontal padding so they sit correctly beside the label or within
+    // a group segment. insideButton applies the 2px L/R margin.
+    return React.cloneElement(node, {
+      size: 'custom', customSize: mapping.avatar, insideButton: true,
+    });
   }
   if (node.type === DDIcon) {
-    return React.cloneElement(node, { size: mapping.icon });
+    // 20 / 20 / 32, matching Button-Icon. Small and medium share 20 — that is
+    // the design, not a copy-paste: the small button is 24px tall and a 16px
+    // icon left it looking underfilled beside a 20px avatar.
+    return React.cloneElement(node, { size: 'custom', fontSize: mapping.icon });
   }
   return node;
 }
@@ -56,7 +90,7 @@ function resolveDecorator(node, buttonSize) {
  *
  *   Button-Contents (inner)
  *     background: var(--Buttons-{Color}-Button)
- *     border-radius: var(--Button-Inner-Radius)  ← radius - 1
+ *     border-radius: var(--Button-Inner-Focus-Radius)  ← radius - 1
  *     contains: Slot (icon) + Typography + Slot2 (icon)
  *
  *     Bevel Overlay (pseudo-element)
@@ -288,12 +322,12 @@ const SIZE_HEIGHT = {
 // buttons take their min-width from the button HEIGHT instead, so they stay
 // square. getSizingStyles overrides minWidth for those.
 const SIZE_BASE = {
-  small:  { minHeight: 'var(--Small-Button-Height)', minWidth: 'var(--Button-Min-Width)', fontSize: '13px', '--_height': 'var(--Small-Button-Height)' },
-  large:  { minHeight: 'var(--Large-Button-Height)', minWidth: 'var(--Lg-Button-Min-Width, var(--Button-Min-Width))', fontSize: '17px', '--_height': 'var(--Large-Button-Height)' },
+  small:  { minHeight: 'var(--Small-Button-Height)', minWidth: 'var(--Button-Min-Width)', fontSize: 'var(--Sm-Button-Text)', '--_height': 'var(--Small-Button-Height)' },
+  large:  { minHeight: 'var(--Large-Button-Height)', minWidth: 'var(--Lg-Button-Min-Width, var(--Button-Min-Width))', fontSize: 'var(--Lg-Button-Text)', '--_height': 'var(--Large-Button-Height)' },
   medium: {
     minHeight: 'var(--Button-Height)',
     minWidth:  'var(--Button-Min-Width)',
-    fontSize:  '15px',
+    fontSize:  'var(--Button-Text)',
     '--_height': 'var(--Button-Height)',
   },
 };
@@ -305,7 +339,7 @@ function getSizingStyles({ size, iconOnly, letterNumber, avatar }) {
   // Icon / Avatar — fixed square, no padding, no min-width/height
   if (iconOnly) {
     const fontSize = avatar
-      ? (size === 'small' ? 'var(--Button-ExtraSmall-Font-Size)' : size === 'large' ? '18px' : '14px')
+      ? (avatarTextFor(size))
       : (size === 'small' ? '0.875rem' : base.fontSize);
     return {
       height:  squareSize,
@@ -389,6 +423,15 @@ export function Button({
 }) {
   const isIconOnly     = iconOnly || avatar || swatch;
 
+  /* Types that render NO readable text, and therefore need an accessible name.
+   * Kept separate from isIconOnly, which drives SIZING — letterNumber sizes
+   * like a labelled button but reads like an unlabelled one.
+   *
+   * letterNumber is the dangerous one and was missing here. An unnamed avatar
+   * announces as nothing, which gets noticed; an unnamed letterNumber announces
+   * as "123, button", which sounds deliberate and so never gets investigated. */
+  const isLabelless    = isIconOnly || letterNumber;
+
   /*
    * Accessible naming for icon buttons.
    *
@@ -405,12 +448,14 @@ export function Button({
   if (process.env.NODE_ENV !== 'production') {
     const named =
       props['aria-label'] || props['aria-labelledby'] || props.title;
-    if (isIconOnly && !named) {
+    if (isLabelless && !named) {
       // eslint-disable-next-line no-console
       console.error(
-        '[OmniDesign] An icon-only <Button> has no accessible name. A screen ' +
-        'reader announces it as just "button". Add aria-label="…" describing ' +
-        'the ACTION ("Delete item"), not the icon ("trash").',
+        '[OmniDesign] A <Button> with no visible text has no accessible name. ' +
+        'A screen reader announces it as just "button" — or, for letterNumber, ' +
+        'reads the characters ("123") as if they were the label. Add ' +
+        'aria-label="…" describing the ACTION ("Your account"), not the ' +
+        'content ("JD") or the icon ("trash").',
       );
     }
     if (named) {
@@ -504,7 +549,7 @@ export function Button({
   const renderStartIcon = () => {
     if (avatar && children) {
       const avatarSize     = SIZE_HEIGHT[size] || SIZE_HEIGHT.medium;
-      const avatarFontSize = size === 'small' ? 'var(--Button-ExtraSmall-Font-Size)' : size === 'large' ? '18px' : '14px';
+      const avatarFontSize = avatarTextFor(size);
       return (
         <MuiAvatar
           sx={{
@@ -548,17 +593,18 @@ export function Button({
           marginRight: '0px !important',
         },
         // MUI sizes icons per BUTTON size (18/20/22), which silently overrode
-        // the Icon component's own scale — a medium button's icon rendered at
-        // 20px where the scale says 24. Restate the scale here so the icon is
-        // the size the design system says it is, whatever button it sits in.
+        // the design system's own scale. Restate it here — and specifically as
+        // --Button-Icon (16 / 20 / 32), the size generated for an icon sitting
+        // in a button, rather than the generic Icon ramp (16 / 24 / 32). The
+        // two only differ at medium, which is why it went unnoticed.
         '[class*="btn-"] .MuiButton-iconSizeSmall .MuiSvgIcon-root, [class*="btn-"] .MuiButton-iconSizeSmall > *': {
-          fontSize: ICON_SIZE_MAP.small + ' !important',
+          fontSize: 'var(--Sm-Button-Icon) !important',
         },
         '[class*="btn-"] .MuiButton-iconSizeMedium .MuiSvgIcon-root, [class*="btn-"] .MuiButton-iconSizeMedium > *': {
-          fontSize: ICON_SIZE_MAP.medium + ' !important',
+          fontSize: 'var(--Button-Icon) !important',
         },
         '[class*="btn-"] .MuiButton-iconSizeLarge .MuiSvgIcon-root, [class*="btn-"] .MuiButton-iconSizeLarge > *': {
-          fontSize: ICON_SIZE_MAP.large + ' !important',
+          fontSize: 'var(--Lg-Button-Icon) !important',
         },
       }} />
       <MuiButton
@@ -575,7 +621,13 @@ export function Button({
         ? resolvedStartDecorator
         : (avatar ? renderStartIcon() : startIcon)}
       endIcon={resolvedEndDecorator !== undefined ? resolvedEndDecorator : endIcon}
-      className={`btn-${variant} ${className}`}
+      // effectiveVariant, not variant: the class must name what actually
+      // PAINTED. `primary-light` normalises to solid primary, and a ghost
+      // avatar/swatch normalises to primary — emitting the raw name put a
+      // `btn-primary-light` (a shape that no longer exists) and a
+      // `btn-ghost` (on a solid button) into the DOM for consumer CSS and
+      // tests to match on.
+      className={`btn-${effectiveVariant} ${className}`}
       role="button"
       sx={{
         // Size-aware radius — pulls the Sm/Lg variant so each button size
@@ -652,7 +704,7 @@ export function Button({
         },
         ...(avatar && {
           '& .MuiAvatar-root': {
-            fontSize: size === 'small' ? 'var(--Button-ExtraSmall-Font-Size)' : size === 'large' ? '18px' : '14px',
+            fontSize: avatarTextFor(size),
           },
         }),
         '& .MuiButton-endIcon': {
@@ -669,7 +721,7 @@ export function Button({
         },
 
         '&.Mui-disabled': {
-          opacity: 0.6,
+          opacity: 'var(--Disabled, 0.38)',
           cursor: 'not-allowed',
           pointerEvents: 'none',
           backgroundColor: variantStyles.backgroundColor,

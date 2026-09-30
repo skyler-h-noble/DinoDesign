@@ -2,6 +2,7 @@
 import React from 'react';
 import { Box, Checkbox, Radio } from '@mui/material';
 import { EyebrowSmall, SubtitleLarge, Body, BodySmallSemibold } from '../Typography';
+import { Ghost } from '../_ghost';
 
 // Default three-layer typography for the text frame. Order is top→bottom:
 //   eyebrow   — EyebrowSmall  (optional metadata kicker on top)
@@ -15,27 +16,26 @@ const DEFAULT_LAYERS = {
   secondary: BodySmallSemibold,   // supporting / role → Body-Small-Semibold
 };
 
-const SOLID_THEME_MAP = {
+/* One map. solid and light are the same PALETTE on different levels, so a
+   second map was a second place to keep the same eight names in step — and
+   the copy that fell behind was the one naming themes that no longer exist.
+   
+   Every entry in the old light map, and the four state entries in the solid
+   one, bound nothing: a light error list and a light success list rendered
+   identically, both taking whatever palette the page was on. */
+const THEME_MAP = {
   primary: 'Primary',
   secondary: 'Secondary',
   tertiary: 'Tertiary',
   neutral: 'Neutral',
-  info: 'Info-Medium',
-  success: 'Success-Medium',
-  warning: 'Warning-Medium',
-  error: 'Error-Medium',
+  info: 'Info',
+  success: 'Success',
+  warning: 'Warning',
+  error: 'Error',
 };
 
-const LIGHT_THEME_MAP = {
-  primary: 'Primary-Light',
-  secondary: 'Secondary-Light',
-  tertiary: 'Tertiary-Light',
-  neutral: 'Neutral-Light',
-  info: 'Info-Light',
-  success: 'Success-Light',
-  warning: 'Warning-Light',
-  error: 'Error-Light',
-};
+/** light lightens by LEVEL. solid leaves the surface to the page. */
+const LIGHT_SURFACE = 'Surface-Brightest';
 
 const SIZE_MAP = {
   small:  { py: 0.5, px: 1.5, fontSize: '13px', iconSize: 16, decoratorSize: 28, gap: 1, checkSize: 'small' },
@@ -138,7 +138,7 @@ export function ListItem({
         py: s.py, px: s.px,
         minHeight: '32px',
         fontSize: s.fontSize, fontFamily: 'inherit', color: 'var(--Text)', listStyle: 'none',
-        cursor: isFocusable ? 'pointer' : 'default', opacity: disabled ? 0.5 : 1,
+        cursor: isFocusable ? 'pointer' : 'default', opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
         position: 'relative',
         transition: 'background-color 0.15s ease, box-shadow 0.15s ease',
         // Card chrome — only when the row is clickable. Non-clickable rows
@@ -256,6 +256,9 @@ export function ListItem({
 export function List({
   children, items, variant = 'default', color = 'primary', size = 'medium',
   orientation = 'vertical', dividers = false, selectionMode = 'none',
+  /* Same split as Table: loading has no copy so it is a prop; empty and error
+     need words, so they are slots holding a StateMessage. */
+  loading = false, skeletonRows = 3, empty, error,
   selectedIndices = [], onSelectionChange, clickable = false,
   component = 'ul', className = '', sx = {}, ...props
 }) {
@@ -266,10 +269,10 @@ export function List({
   const isDefault = variant === 'default';
 
   const wrapperDataAttrs = {};
-  if (isSolid && SOLID_THEME_MAP[color]) {
-    wrapperDataAttrs['data-theme'] = SOLID_THEME_MAP[color];
-  } else if (isLight && LIGHT_THEME_MAP[color]) {
-    wrapperDataAttrs['data-theme'] = LIGHT_THEME_MAP[color];
+  if ((isSolid || isLight) && THEME_MAP[color]) {
+    wrapperDataAttrs['data-theme'] = THEME_MAP[color];
+    // The palette is the same either way; the level is the variant.
+    if (isLight) wrapperDataAttrs['data-surface'] = LIGHT_SURFACE;
   }
 
   const handleItemSelect = (index) => {
@@ -284,7 +287,33 @@ export function List({
     }
   };
 
+  /* error > loading > empty. A request that returned nothing is not empty
+     until it has finished — the other order gives the classic flash of "no
+     results" a moment before the data lands. */
+  const dataState = error ? 'error' : loading ? 'loading' : (items && items.length === 0 && empty) ? 'empty' : null;
+
   const renderItems = () => {
+    if (dataState === 'loading') {
+      /* Real ListItems, ghosted, so the row height and decorator positions are
+         the ones the data will land in. */
+      return (
+        <Box component="li" sx={{ listStyle: 'none' }}>
+          <Ghost label="Loading">
+            {Array.from({ length: skeletonRows }).map((_, i) => (
+              <ListItem key={'sk-' + i} size={size} variant={variant} color={color}>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              </ListItem>
+            ))}
+          </Ghost>
+        </Box>
+      );
+    }
+    /* The message is a <li> because the parent is a <ul>: a bare <div> in a
+       list is invalid and some screen readers drop it, so the one thing the
+       user needs to hear would be the thing not announced. */
+    if (dataState === 'error') return <Box component="li" sx={{ listStyle: 'none' }}>{error}</Box>;
+    if (dataState === 'empty') return <Box component="li" sx={{ listStyle: 'none' }}>{empty}</Box>;
+
     if (items && items.length > 0) {
       const elements = [];
       items.forEach((item, index) => {
@@ -341,6 +370,7 @@ export function List({
 
   return (
     <Box component={component} role={isSelectable ? 'listbox' : 'list'}
+      aria-busy={dataState === 'loading' ? 'true' : undefined}
       aria-multiselectable={selectionMode === 'checkbox' ? true : undefined}
       {...wrapperDataAttrs}
       className={'list-container list-' + variant + ' list-' + color + ' ' + className}

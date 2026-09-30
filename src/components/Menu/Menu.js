@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useRef, useEffect, useCallb
 import { Box } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Icon } from '../Icon/Icon';
-import { BodySmall, Body } from '../Typography';
+import { BodySmall, Body, BodyLarge, SubtitleSmall, Subtitle, SubtitleLarge } from '../Typography';
 import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3 } from '../_shadows';
 
 /**
@@ -12,7 +12,7 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3 } from '../_shadows';
  * VARIANTS (on Menu popup):
  *   outline   bg transparent, border var(--Buttons-{C}-Border)
  *   solid     data-theme="{Theme}" data-surface="Surface"
- *   light     data-theme="{Theme}-Light" data-surface="Surface"
+ *   light     data-theme="{Theme}"       data-surface="Surface-Brightest"
  *
  * COLORS: default | primary | secondary | tertiary | neutral | info | success | warning | error
  *
@@ -23,10 +23,35 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3 } from '../_shadows';
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
+// Menu metrics per size mode.
+//
+// The label size reads --Button-Text (14 / 16 / 20). A menu item is a control
+// label like a button's, and that is the ladder the design system generates for
+// one — there is no separate --Menu-Text. It steps with the brand's button
+// heights, where these were three literals (13 / 14 / 16) that did not.
+//
+// Padding is on the --Sizing-* scale. Medium's 6px is the one value the scale
+// cannot express (it falls between --Sizing-Half and --Sizing-1), the same gap
+// Badge's medium row has.
+/* Menu type, by component size. Subtitle IS Body at 700 — same face, size and
+   leading — which is how a selected row gets its weight without an inline
+   fontWeight override on a lib component. */
+const MENU_TEXT          = { small: BodySmall,     medium: Body,     large: BodyLarge };
+const MENU_TEXT_SELECTED = { small: SubtitleSmall, medium: Subtitle, large: SubtitleLarge };
+
 const SIZE_MAP = {
-  small:  { py: '4px',  itemPx: '8px',  itemPy: '4px',  fontSize: '13px', minWidth: '140px' },
-  medium: { py: '6px',  itemPx: '12px', itemPy: '6px',  fontSize: '14px', minWidth: '160px' },
-  large:  { py: '8px',  itemPx: '16px', itemPy: '8px',  fontSize: '16px', minWidth: '180px' },
+  small:  {
+    py: 'var(--Sizing-Half)',  itemPx: 'var(--Sizing-1)',
+    itemPy: 'var(--Sizing-Half)', fontSize: 'var(--Sm-Button-Text)', minWidth: '140px',
+  },
+  medium: {
+    py: '6px', itemPx: 'var(--Sizing-1-and-Half)',
+    itemPy: '6px', fontSize: 'var(--Button-Text)', minWidth: '160px',
+  },
+  large:  {
+    py: 'var(--Sizing-1)', itemPx: 'var(--Sizing-2)',
+    itemPy: 'var(--Sizing-1)', fontSize: 'var(--Lg-Button-Text)', minWidth: '180px',
+  },
 };
 
 /* ─── Context ─── */
@@ -99,8 +124,11 @@ export function MenuButton({ children, className = '', sx = {}, ...props }) {
       {...props}
     >
       {typeof children === 'string' ? (
-        size === 'small' ? <BodySmall style={{ color: 'inherit', fontWeight: 600 }}>{children}</BodySmall>
-          : <Body style={{ color: 'inherit', fontWeight: 600 }}>{children}</Body>
+        React.createElement(
+          MENU_TEXT[size] || MENU_TEXT.medium,
+          { style: { color: 'inherit', fontWeight: 600 } },
+          children,
+        )
       ) : children}
       <Icon size="small" sx={{ color: 'var(--Quiet)', transition: 'transform 0.2s ease', transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}>
         <ExpandMoreIcon />
@@ -209,7 +237,18 @@ export function Menu({ children, className = '', placement = 'bottom-start', sx 
 export function MenuItem({ children, onClick, selected = false, disabled = false, className = '', sx = {}, ...props }) {
   const { setOpen, size } = useDropdown();
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
-  const TextComp = size === 'small' ? BodySmall : Body;
+  // Body ships standard and semibold only — there is no bold Body — so the
+  // selected row steps to Subtitle, which IS Body at 700 (same face, size and
+  // leading). That replaces an inline fontWeight override on a lib component.
+  /* Three sizes, not two. `large` used to fall through to Body because the
+     ternary only asked about small — so a large menu rendered at medium type
+     while every other component in the row grew. Figma has three
+     Component-Size modes, and a mode the code silently ignores is worse than
+     one it does not offer: the design file and the build disagree and neither
+     says so. */
+  const TextComp = selected
+    ? (MENU_TEXT_SELECTED[size] || MENU_TEXT_SELECTED.medium)
+    : (MENU_TEXT[size] || MENU_TEXT.medium);
 
   const handleClick = () => {
     if (disabled) return;
@@ -224,23 +263,28 @@ export function MenuItem({ children, onClick, selected = false, disabled = false
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } }}
       className={'menu-item' + (selected ? ' menu-item-selected' : '') + ' ' + className}
       sx={{
-        display: 'flex', alignItems: 'center', gap: '8px',
+        display: 'flex', alignItems: 'center', gap: 'var(--Sizing-1)',
         padding: s.itemPy + ' ' + s.itemPx,
+        // No fontSize here: TextComp below owns it. Setting both is how the
+        // Accordion ended up rendering bare strings at a different size from
+        // the same text passed through its slot.
+        fontSize: s.fontSize,
         color: disabled ? 'var(--Quiet)' : (selected ? 'var(--Text)' : 'var(--Quiet)'),
         backgroundColor: selected ? 'var(--Hover)' : 'transparent',
         cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.5 : 1,
+        opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
         outline: 'none', transition: 'background-color 0.1s ease, color 0.1s ease',
         userSelect: 'none',
         ...(!disabled && {
           '&:hover': { backgroundColor: 'var(--Hover)', color: 'var(--Text)' },
+          '&:active': { backgroundColor: 'var(--Pressed)', color: 'var(--Text)' },
           '&:focus-visible': { backgroundColor: 'var(--Hover)', color: 'var(--Text)', outline: '3px solid var(--Focus-Visible)', outlineOffset: '-3px' },
         }),
         ...sx,
       }}
       {...props}
     >
-      <TextComp style={{ color: 'inherit', fontWeight: selected ? 600 : 'inherit' }}>{children}</TextComp>
+      <TextComp color="standard" style={{ color: 'inherit' }}>{children}</TextComp>
     </Box>
   );
 }

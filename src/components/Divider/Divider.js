@@ -13,10 +13,15 @@ import { Box } from '@mui/material';
  *
  * ORIENTATION: horizontal | vertical
  *
- * SIZES:
- *   small   1px
- *   medium  2px
- *   large   4px
+ * SIZES (Component-Size `Divider`):
+ *   small   0.5px   hairline — a true half-pixel on 2x, rounded by the
+ *                   browser on 1x, which is the usual hairline trade
+ *   medium  1px
+ *   large   2px
+ *
+ * This was 1 / 2 / 4, one step heavy at every size — and that ramp is the one
+ * the design assigns to the STEP BAR (the stepper's connector), not to a
+ * divider. The two had effectively been swapped.
  *
  * INDICATOR (optional text label centered on the divider):
  *   Works on both horizontal and vertical orientations.
@@ -67,7 +72,25 @@ function getIndicatorStyles(color, indicatorStyle) {
   };
 }
 
-const SIZE_MAP = { small: 1, medium: 2, large: 4 };
+/* One per Component-Size mode, read from the token with the DESIGN's number
+ * as the fallback — the same idiom Rail uses for Rail-Width. An unbound token
+ * then renders the intended weight rather than an invented one, so a missing
+ * variable looks like the design instead of a bug.
+ *
+ * The source is Component-Size / Other / `Divider` (0.5 / 1 / 2 across small /
+ * medium / large), which componentSizePayload now writes. In CSS a mode is the
+ * Sm-/Lg- prefix, matching Button, Tabs and Rail.
+ *
+ * NOTE: nothing emits --Divider to CSS yet — the payload reaches Figma, not
+ * the stylesheet — so today the fallback is what paints. That is deliberate
+ * rather than pending: it makes the value overridable by a consumer and names
+ * where it comes from, and the number stops being a bare literal with no
+ * stated source. */
+const SIZE_MAP = {
+  small:  'var(--Sm-Divider, 0.5px)',
+  medium: 'var(--Divider, 1px)',
+  large:  'var(--Lg-Divider, 2px)',
+};
 
 export function Divider({
   color = 'default',
@@ -96,7 +119,7 @@ export function Divider({
         className={'divider-vertical divider-' + color + ' ' + className}
         sx={{
           display: 'inline-block',
-          width: thickness + 'px',
+          width: thickness,
           alignSelf: 'stretch',
           minHeight: 24,
           backgroundColor: lineColor,
@@ -130,7 +153,7 @@ export function Divider({
         }}
         {...props}
       >
-        <Box sx={{ flex: topFlex, width: thickness + 'px', backgroundColor: lineColor }} />
+        <Box sx={{ flex: topFlex, width: thickness, backgroundColor: lineColor }} />
         <Box
           sx={{
             display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
@@ -143,7 +166,7 @@ export function Divider({
         >
           {displayText}
         </Box>
-        <Box sx={{ flex: bottomFlex, width: thickness + 'px', backgroundColor: lineColor }} />
+        <Box sx={{ flex: bottomFlex, width: thickness, backgroundColor: lineColor }} />
       </Box>
     );
   }
@@ -157,7 +180,7 @@ export function Divider({
         className={'divider-horizontal divider-' + color + ' ' + className}
         sx={{
           width: '100%',
-          height: thickness + 'px',
+          height: thickness,
           backgroundColor: lineColor,
           flexShrink: 0,
           ...sx,
@@ -180,7 +203,7 @@ export function Divider({
       sx={{ display: 'flex', alignItems: 'center', width: '100%', ...sx }}
       {...props}
     >
-      <Box sx={{ flex: leftFlex, height: thickness + 'px', backgroundColor: lineColor }} />
+      <Box sx={{ flex: leftFlex, height: thickness, backgroundColor: lineColor }} />
       <Box
         sx={{
           display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
@@ -193,7 +216,7 @@ export function Divider({
       >
         {displayText}
       </Box>
-      <Box sx={{ flex: rightFlex, height: thickness + 'px', backgroundColor: lineColor }} />
+      <Box sx={{ flex: rightFlex, height: thickness, backgroundColor: lineColor }} />
     </Box>
   );
 }

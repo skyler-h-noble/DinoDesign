@@ -1,6 +1,7 @@
 // src/components/Typography/Typography.js
 import React from 'react';
 import { Box } from '@mui/material';
+import { useGhost, ghostBlockSx } from '../_ghost';
 
 /**
  * Typography Component
@@ -677,6 +678,12 @@ export function Typography({
     ? 'var(--' + sizeToken + '-Text-Transform, ' + (config.textTransform || 'none') + ')'
     : (config.textTransform || 'none');
 
+  /* Inside a <Ghost> region the text keeps its box and loses its ink. Reading
+     the region from context rather than taking a prop is what keeps call sites
+     unchanged: a card full of headings and body copy ghosts without a single
+     edit, and there is no per-element prop to forget. */
+  const ghost = useGhost();
+
   const colorValue = resolveColor(style, color, config.defaultColor);
   const resolvedWidth = width || config.defaultWidth;
   const isFill = resolvedWidth === 'fill';
@@ -714,6 +721,7 @@ export function Typography({
           textOverflow: 'ellipsis',
           whiteSpace:   'nowrap',
         }),
+        ...(ghost ? ghostBlockSx({ animate: ghost.animate }) : {}),
         ...sx,
       }}
       {...props}

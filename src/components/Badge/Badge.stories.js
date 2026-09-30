@@ -16,11 +16,8 @@ export default {
         'info', 'success', 'warning', 'error',
         'primary-outline', 'secondary-outline', 'tertiary-outline', 'neutral-outline',
         'info-outline', 'success-outline', 'warning-outline', 'error-outline',
-        'primary-light', 'secondary-light', 'tertiary-light', 'neutral-light',
-        'info-light', 'success-light', 'warning-light', 'error-light',
       ],
     },
-    size: { control: 'select', options: ['small', 'medium', 'large'] },
     badgeContent: { control: 'text' },
     dot: { control: 'boolean' },
     showZero: { control: 'boolean' },
@@ -87,9 +84,11 @@ export const ShowZero = {
 export const Sizes = {
   render: () => (
     <Stack direction="row" spacing={6} sx={{ p: 4 }}>
-      <Badge badgeContent={5} size="small"><MailIcon sx={{ fontSize: 32 }} /></Badge>
-      <Badge badgeContent={5} size="medium"><MailIcon sx={{ fontSize: 32 }} /></Badge>
-      <Badge badgeContent={5} size="large"><MailIcon sx={{ fontSize: 32 }} /></Badge>
+{/* One badge, anchored to icons of different sizes — the count stays 16px
+          because it has to read the same wherever it hangs. */}
+      <Badge badgeContent={5}><MailIcon sx={{ fontSize: 20 }} /></Badge>
+      <Badge badgeContent={5}><MailIcon sx={{ fontSize: 32 }} /></Badge>
+      <Badge badgeContent={5}><MailIcon sx={{ fontSize: 48 }} /></Badge>
     </Stack>
   ),
 };
@@ -131,7 +130,7 @@ export const LightColors = {
   render: () => (
     <Stack direction="row" spacing={4} sx={{ p: 4, flexWrap: 'wrap', gap: 3 }}>
       {['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'].map((c) => (
-        <Badge key={c} variant={c + '-light'} badgeContent={8}>
+        <Badge key={c} variant={c + '-outline'} badgeContent={8}>
           <MailIcon sx={{ fontSize: 32, color: 'var(--Text-Quiet)' }} />
         </Badge>
       ))}
@@ -147,7 +146,7 @@ export const StyleComparison = {
     <Stack direction="row" spacing={6} sx={{ p: 4 }}>
       <Badge variant="primary" badgeContent={3}><MailIcon sx={{ fontSize: 32, color: 'var(--Text-Quiet)' }} /></Badge>
       <Badge variant="primary-outline" badgeContent={3}><MailIcon sx={{ fontSize: 32, color: 'var(--Text-Quiet)' }} /></Badge>
-      <Badge variant="primary-light" badgeContent={3}><MailIcon sx={{ fontSize: 32, color: 'var(--Text-Quiet)' }} /></Badge>
+      <Badge variant="primary-outline" badgeContent={3}><MailIcon sx={{ fontSize: 32, color: 'var(--Text-Quiet)' }} /></Badge>
     </Stack>
   ),
 };

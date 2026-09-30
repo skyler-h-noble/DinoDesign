@@ -7,8 +7,9 @@ import { Box } from '@mui/material';
  *
  * ─── VARIANTS ────────────────────────────────────────────────────────────────
  *   outlined  transparent bg, colored border, selected button fills
- *   light     unselected buttons carry data-theme="{Color}-Light" + data-surface="Surface"
- *             selected button fills with var(--Buttons-{Color}-Button)
+ *   light     unselected buttons carry data-theme="{Color}" +
+ *             data-surface="Surface-Brightest"; selected fills with
+ *             var(--Buttons-{Color}-Button)
  *   ghost     no border on container or buttons; selected fills
  *
  * ─── COLORS ──────────────────────────────────────────────────────────────────
@@ -29,6 +30,9 @@ import { Box } from '@mui/material';
  *   value / defaultValue / onChange — controlled or uncontrolled
  *   Each child button should carry a `value` prop.
  *   Falls back to index (0, 1, 2…) if no value prop is present.
+ *   multiple — any number of segments selected at once; value is an ARRAY and
+ *              onChange receives the next array. Clicking a selected segment
+ *              deselects it.
  *
  * ─── SIZES ───────────────────────────────────────────────────────────────────
  *   small | medium (default) | large
@@ -39,18 +43,17 @@ import { Box } from '@mui/material';
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
-// Maps color → light theme name for data-theme attribute
-const LIGHT_THEME = {
-  default:   'Default-Light',
-  primary:   'Primary-Light',
-  secondary: 'Secondary-Light',
-  tertiary:  'Tertiary-Light',
-  neutral:   'Neutral-Light',
-  info:      'Info-Light',
-  success:   'Success-Light',
-  warning:   'Warning-Light',
-  error:     'Error-Light',
-};
+/* The `light` variant is a SURFACE, not a theme.
+ *
+ * This was a map to {Color}-Light — nine names, none of which is a theme any
+ * more. Every one bound nothing, so the light variant's unselected segments
+ * took whatever palette the page was on: a light error group and a light
+ * success group rendered identically. Default-Light was never a theme even
+ * before the shades went.
+ *
+ * The palette is just the group's own colour now, and the level does the
+ * lightening. Nothing to map. */
+const LIGHT_SURFACE = 'Surface-Brightest';
 
 export function ButtonGroup({
   variant = 'outlined',    // 'outlined' | 'light' | 'ghost'
@@ -71,6 +74,11 @@ export function ButtonGroup({
   equalWidth = false,   // back-compat alias → fit="equal"
 
   // Selection
+  //   multiple=false (default) — one segment at a time; `value` is that value.
+  //   multiple=true            — any number; `value` is an ARRAY of values, and
+  //                              onChange receives the next array. Clicking a
+  //                              selected segment deselects it.
+  multiple = false,
   value: controlledValue,
   defaultValue,
   onChange,
@@ -81,9 +89,18 @@ export function ButtonGroup({
   'aria-label': ariaLabel,
   ...props
 }) {
-  const [internalValue, setInternalValue] = useState(defaultValue ?? null);
+  const [internalValue, setInternalValue] = useState(
+    defaultValue ?? (multiple ? [] : null),
+  );
   const isControlled   = controlledValue !== undefined;
   const selectedValue  = isControlled ? controlledValue : internalValue;
+
+  /* In multiple mode the value is an array. Normalised here so a caller that
+     passes a bare value — or nothing — does not crash `.includes`. */
+  const selectedList = multiple
+    ? (Array.isArray(selectedValue) ? selectedValue : selectedValue == null ? [] : [selectedValue])
+    : null;
+  const isValueSelected = (v) => multiple ? selectedList.includes(v) : selectedValue === v;
 
   const isHorizontal = orientation === 'horizontal';
   const isConnected  = spacing === 0;
@@ -100,14 +117,27 @@ export function ButtonGroup({
   const btnBorder    = 'var(--Buttons-' + C + '-Border)';
   const btnBg        = 'var(--Buttons-' + C + '-Button)';
   const btnText      = 'var(--Buttons-' + C + '-Text)';
-  const lightTheme   = LIGHT_THEME[color] || 'Default-Light';
+  /* `default` gets no data-theme at all — it INHERITS. Naming the Default
+     mode would pin the group to the app's theme and override whatever themed
+     section it sits in, which is the bug the Modal had. The other eight name
+     their palette, because that is the whole point of asking for one. */
+  const lightTheme   = color === 'default' ? undefined : C;
 
   const childArray = React.Children.toArray(children).filter(Boolean);
   const count = childArray.length;
 
   const handleClick = (childValue, childOnClick) => (e) => {
-    if (!isControlled) setInternalValue(childValue);
-    onChange?.(childValue, e);
+    /* Single mode passes the value; multiple passes the NEXT ARRAY, so a
+       controlled caller can set state from it directly without reimplementing
+       the toggle. Clicking a selected segment removes it — a multi-select with
+       no way to deselect is a one-way door. */
+    const next = multiple
+      ? (selectedList.includes(childValue)
+          ? selectedList.filter(v => v !== childValue)
+          : [...selectedList, childValue])
+      : childValue;
+    if (!isControlled) setInternalValue(next);
+    onChange?.(next, e);
     childOnClick?.(e);
   };
 
@@ -117,7 +147,7 @@ export function ButtonGroup({
     const isFirst    = index === 0;
     const isLast     = index === count - 1;
     const childValue = child.props.value ?? index;
-    const isSelected = selectedValue === childValue;
+    const isSelected = isValueSelected(childValue);
 
     // ── Border radius in connected mode ───────────────────────────────────
     let borderRadius;
@@ -145,21 +175,36 @@ export function ButtonGroup({
     } : {};
 
     // ── Selected styles ───────────────────────────────────────────────────
-    // The selected segment is already "on" — it must NOT change on hover.
-    // Without this, it inherits the solid Button's &:hover (which paints
-    // var(--Buttons-{C}-Hover), a near-white scrim) and flips light on hover.
+    /* Selection escalates by ONE step, and where it lands depends on the group
+       style. An outlined (or light) group goes outline -> SOLID; a ghost group
+       goes ghost -> OUTLINE, not ghost -> solid. A ghost group is chosen when
+       the control should stay quiet, and filling a segment undoes exactly
+       that; an outline still reads clearly against two borderless neighbours.
+       (This used to fill on both: the variant stayed 'ghost' while the rules
+       below painted btnBg at !important, so a selected ghost segment rendered
+       as a solid fill with no border.)
+
+       Either way the segment is "on" and must NOT react to hover. Without the
+       freeze it inherits the Button's own &:hover — var(--Buttons-{C}-Hover),
+       a near-white scrim — and flips light on hover. Frozen across active and
+       focus for the same reason. The focus RING still shows: it is an
+       `outline`, which none of these three properties touch. */
+    const selectedPaint = isGhost
+      ? {
+          // The `-outline` variant's own paint, pinned so hover cannot move it.
+          backgroundColor: 'var(--Background) !important',
+          color:           'var(--Text) !important',
+          borderColor:     btnBorder + ' !important',
+        }
+      : {
+          backgroundColor: btnBg     + ' !important',
+          color:           btnText   + ' !important',
+          borderColor:     btnBorder + ' !important',
+        };
+
     const selectedSx = isSelected ? {
-      backgroundColor:  btnBg    + ' !important',
-      color:            btnText  + ' !important',
-      borderColor:      btnBorder + ' !important',
-      // The selected segment is "on" — freeze it across hover, active (press)
-      // AND focus so it never picks up the solid Button's hover/active scrim.
-      // Only unselected segments should react to :hover / :active.
-      '&:hover, &:active, &.Mui-focusVisible, &:focus-visible': {
-        backgroundColor: btnBg    + ' !important',
-        color:           btnText  + ' !important',
-        borderColor:     btnBorder + ' !important',
-      },
+      ...selectedPaint,
+      '&:hover, &:active, &.Mui-focusVisible, &:focus-visible': selectedPaint,
     } : {};
 
     // ── Unselected styles ─────────────────────────────────────────────────
@@ -173,15 +218,38 @@ export function ButtonGroup({
       },
       '&:active': {
         backgroundColor: 'var(--Pressed)',
-        color:           'var(--Buttons-Default-Text)',
+        /* --Text, not --Buttons-Default-Text. The pressed colour was pinned to
+           the DEFAULT palette's button text whatever colour the group was, so
+           pressing a segment in an error group painted it with the default
+           button's label colour — on --Pressed, which is a surface token, not
+           a button fill. The pair have to come from the same place, and the
+           surface is what is underneath. */
+        color:           'var(--Text)',
       },
     } : {};
 
-    // ── Ghost: no border on individual buttons ────────────────────────────
-    const ghostSx = isGhost ? {
+    /* Ghost: no border on individual buttons — UNSELECTED ones only.
+       This is spread AFTER selectedSx, so an unscoped `border: none` erased
+       the border that IS the selected ghost segment's whole treatment. */
+    const ghostSx = isGhost && !isSelected ? {
       border: 'none !important',
       '&:hover': { border: 'none !important' },
     } : {};
+
+    /* A segment must not LIFT on hover.
+     *
+     * Button raises itself 1px on hover — right for a standalone button, wrong
+     * for a segmented control, where the segments share edges. One segment
+     * rising breaks the shared border, shifts its own baseline against its
+     * neighbours, and reads as the group resizing rather than as a hover.
+     *
+     * Suppressed for every state, not just hover: :active restores
+     * translateY(0), which is a no-op here but would otherwise leave the two
+     * declarations disagreeing about who owns the transform. */
+    const noLiftSx = {
+      transform: 'none !important',
+      '&:hover, &:active, &:focus-visible': { transform: 'none !important' },
+    };
 
     const buttonSx = {
       // Grid items stretch to fill their 1fr cell via the default
@@ -192,6 +260,7 @@ export function ButtonGroup({
       // that negative margin OVERLAP the shared edge into a single border —
       // the same collapse the flex (hug/fill) modes already get.
       ...positionalSx,
+      ...noLiftSx,
       ...selectedSx,
       ...unselectedSx,
       ...ghostSx,
@@ -204,12 +273,13 @@ export function ButtonGroup({
     };
 
     const clonedButton = React.cloneElement(child, {
-      // Selected → filled (solidStyles applies the per-variant bevel).
-      // Unselected → outline (flat). Ghost group stays ghost on both.
-      // An explicit child.variant always wins.
+      /* One step of escalation from the group's own style:
+           outlined / light   unselected `-outline`  ->  selected SOLID
+           ghost              unselected `ghost`     ->  selected `-outline`
+         An explicit child.variant always wins. */
       variant: child.props.variant ?? (
         isGhost
-          ? 'ghost'
+          ? (isSelected ? color + '-outline' : 'ghost')
           : isSelected
             ? color
             : color + '-outline'
@@ -227,7 +297,7 @@ export function ButtonGroup({
         <Box
           key={index}
           data-theme={lightTheme}
-          data-surface="Surface"
+          data-surface={LIGHT_SURFACE}
           sx={{ display: 'contents' }}
         >
           {clonedButton}
@@ -293,8 +363,10 @@ export const SuccessOutlineButtonGroup   = (p) => <ButtonGroup variant="outlined
 export const WarningOutlineButtonGroup   = (p) => <ButtonGroup variant="outlined" color="warning"   {...p} />;
 export const ErrorOutlineButtonGroup     = (p) => <ButtonGroup variant="outlined" color="error"     {...p} />;
 
-// Light
-export const DefaultLightButtonGroup    = (p) => <ButtonGroup variant="light" color="default"   {...p} />;
+/* Light. No DefaultLight — "default" means inherit whatever palette is
+   around, and a lighter version of inherit names nothing to lighten. A group
+   that wants to be paler on the page's own palette asks for the surface, not
+   for a colour it does not have. */
 export const PrimaryLightButtonGroup    = (p) => <ButtonGroup variant="light" color="primary"   {...p} />;
 export const SecondaryLightButtonGroup  = (p) => <ButtonGroup variant="light" color="secondary" {...p} />;
 export const TertiaryLightButtonGroup   = (p) => <ButtonGroup variant="light" color="tertiary"  {...p} />;

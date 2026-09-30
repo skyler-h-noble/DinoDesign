@@ -18,7 +18,7 @@ const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 const COLOR_GROUPS = [
   { label: 'Default', colors: ['default'] },
   { label: 'Theme', colors: ['primary', 'secondary', 'tertiary'] },
-  { label: 'Core', colors: ['white', 'black'] },
+  
   { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
 ];
 

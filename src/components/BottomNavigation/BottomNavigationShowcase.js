@@ -163,8 +163,11 @@ export function BottomNavigationShowcase() {
 
   const [fixed, setFixed] = useState(true);
   const [showLabels, setShowLabels] = useState(true);
-  const [labelOrientation, setLabelOrientation] = useState('vertical');
-  const [backfill, setBackfill] = useState(true);
+  /* The design's two remaining axes. labelOrientation and backfill are gone:
+     the label is always under the icon, and the selected state is always a
+     filled circle — neither was ever a choice in the design. */
+  const [variant, setVariant] = useState('fixed');
+  const [orientation, setOrientation] = useState('horizontal');
   const [barColor, setBarColor] = useState('default');
 
   const [itemCount, setItemCount] = useState(4);
@@ -172,13 +175,6 @@ export function BottomNavigationShowcase() {
     DEFAULT_ITEMS.map((a) => ({ icon: a.icon, label: a.label }))
   );
 
-  const canHorizontal = itemCount <= 4;
-
-  useEffect(() => {
-    if (itemCount > 4 && labelOrientation === 'horizontal') {
-      setLabelOrientation('vertical');
-    }
-  }, [itemCount, labelOrientation]);
 
   useEffect(() => {
     setItemConfigs((prev) => {
@@ -226,8 +222,8 @@ export function BottomNavigationShowcase() {
     parts.push('items={items}');
     if (barColor !== 'default') parts.push('barColor="' + barColor + '"');
     if (!showLabels) parts.push('showLabels={false}');
-    if (showLabels && labelOrientation === 'horizontal' && canHorizontal) parts.push('labelOrientation="horizontal"');
-    if (!backfill) parts.push('backfill={false}');
+    if (variant !== 'fixed') parts.push('variant="' + variant + '"');
+    if (orientation !== 'horizontal') parts.push('orientation="' + orientation + '"');
     if (!fixed) parts.push('fixed={false}');
     lines.push('<BottomNavigation');
     parts.forEach((p) => lines.push('  ' + p));
@@ -256,21 +252,23 @@ export function BottomNavigationShowcase() {
               <Box sx={{ width: '100%', maxWidth: 500, overflow: 'hidden',
                 boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
                 <BottomNavigation
-                  key={'bn-' + itemCount + '-' + labelOrientation + '-' + backfill + '-' + showLabels + '-' + barColor}
+                  key={'bn-' + itemCount + '-' + variant + '-' + orientation + '-' + showLabels + '-' + barColor}
                   items={items}
                   value={activeNav}
                   onChange={setActiveNav}
                   showLabels={showLabels}
-                  labelOrientation={labelOrientation}
-                  backfill={backfill}
+                  variant={variant}
+                  orientation={orientation}
                   barColor={barColor}
                   fixed={false}
                 />
               </Box>
 
               <Caption style={{ color: 'var(--Text-Quiet)', textAlign: 'center' }}>
-                {itemCount} items · {showLabels ? (labelOrientation === 'horizontal' && canHorizontal ? 'Horizontal labels' : 'Vertical labels') : 'Icons only'}
-                {backfill ? ' · Backfill' : ''} · {(BAR_COLORS.find((c) => c.value === barColor) || BAR_COLORS[0]).label}
+                {itemCount} items · {showLabels ? 'Labels' : 'Icons only'}
+                {' · '}{variant === 'floating' ? 'Floating' : 'Fixed'}
+                {' · '}{orientation === 'vertical' ? 'Vertical' : 'Horizontal'}
+                {' · '}{(BAR_COLORS.find((c) => c.value === barColor) || BAR_COLORS[0]).label}
               </Caption>
             </Box>
 
@@ -307,30 +305,37 @@ export function BottomNavigationShowcase() {
                   caption="Position fixed to bottom of viewport." />
                 <CheckboxControl label="Labels" checked={showLabels} onChange={setShowLabels}
                   caption="Show text labels with icons." />
-                <CheckboxControl label="Selected Backfill" checked={backfill} onChange={setBackfill}
-                  caption="Pill on selected: bg var(--Buttons-Primary-Button), border var(--Buttons-Primary-Border), icon var(--Buttons-Primary-Text)." />
+                <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>
+                  Selected paints a filled circle in var(--Text) with the icon
+                  reversed out of it. Not a choice — the design has one selected
+                  state, so there is no switch for it.
+                </Caption>
               </Stack>
             </Box>
 
-            {/* Label orientation */}
-            {showLabels && (
-              <Box sx={{ mt: 3 }}>
-                <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>LABEL ORIENTATION</EyebrowSmall>
-                <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-                  <ControlButton label="Vertical" selected={labelOrientation === 'vertical'} onClick={() => setLabelOrientation('vertical')} />
-                  <ControlButton label="Horizontal" selected={labelOrientation === 'horizontal' && canHorizontal}
-                    onClick={() => { if (canHorizontal) setLabelOrientation('horizontal'); }}
-                    disabled={!canHorizontal} />
-                </Stack>
-                <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
-                  {!canHorizontal
-                    ? 'Horizontal is only available with 4 or fewer items. Reduce item count to enable.'
-                    : labelOrientation === 'vertical'
-                      ? 'Icon above label (default). Label below pill.'
-                      : 'Icon beside label. Label inside pill when backfill is on.'}
-                </Caption>
-              </Box>
-            )}
+            {/* Style and orientation — the design's own two axes */}
+            <Box sx={{ mt: 3 }}>
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</EyebrowSmall>
+              <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
+                <ControlButton label="Fixed" selected={variant === 'fixed'} onClick={() => setVariant('fixed')} />
+                <ControlButton label="Floating" selected={variant === 'floating'} onClick={() => setVariant('floating')} />
+              </Stack>
+              <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
+                {variant === 'floating'
+                  ? 'A pill, rounded to its own height so the ends stay semicircular at any length.'
+                  : 'A square band, edge to edge.'}
+              </Caption>
+
+              <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', margin: '16px 0 8px' }}>ORIENTATION</EyebrowSmall>
+              <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
+                <ControlButton label="Horizontal" selected={orientation === 'horizontal'} onClick={() => setOrientation('horizontal')} />
+                <ControlButton label="Vertical" selected={orientation === 'vertical'} onClick={() => setOrientation('vertical')} />
+              </Stack>
+              <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
+                The BAR's direction, not the label's — the label is always under
+                the icon. Vertical is a rail of actions down one side.
+              </Caption>
+            </Box>
 
             {/* Navigation Items */}
             <Box sx={{ mt: 3 }}>
@@ -367,8 +372,10 @@ export function BottomNavigationShowcase() {
         <Box sx={{ p: 4 }}>
           <H4>Accessibility Requirements</H4>
           <BodySmall color="quiet" style={{ marginBottom: 32 }}>
-            {itemCount} items · {showLabels ? 'Labels ' + labelOrientation : 'Icons only'}
-            {backfill ? ' · Backfill' : ''} · {(BAR_COLORS.find((c) => c.value === barColor) || BAR_COLORS[0]).label}
+            {itemCount} items · {showLabels ? 'Labels' : 'Icons only'}
+            {' · '}{variant === 'floating' ? 'Floating' : 'Fixed'}
+            {' · '}{orientation === 'vertical' ? 'Vertical' : 'Horizontal'}
+            {' · '}{(BAR_COLORS.find((c) => c.value === barColor) || BAR_COLORS[0]).label}
           </BodySmall>
 
           <Stack spacing={4}>
@@ -408,11 +415,11 @@ export function BottomNavigationShowcase() {
                   <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>var(--Text-Quiet)</Caption>
                 </Box>
                 <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                  <BodySmall>Selected (no backfill):</BodySmall>
+                  <BodySmall>Selected:</BodySmall>
                   <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>var(--Text)</Caption>
                 </Box>
                 <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                  <BodySmall>Selected backfill pill:</BodySmall>
+                  <BodySmall>Selected pill:</BodySmall>
                   <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>
                     bg: var(--Buttons-Primary-Button) · border: 1px solid var(--Buttons-Primary-Border) · icon/text: var(--Buttons-Primary-Text)
                   </Caption>

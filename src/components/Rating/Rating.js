@@ -46,7 +46,25 @@ const SIZE_MAP = {
   large:  { iconSize: 36, minHit: undefined, gap: 2, focusInset: 2, focusWidth: 2 },
 };
 
+/* ZONE PROPS — `theme` and `surface`.
+ *
+ * They become data-theme / data-surface on the root, which redefines
+ * --Background, --Text, --Border, --Quiet, --Hover and --Pressed for
+ * everything inside, so the component takes its colours from the zone it sits
+ * in rather than from a prop.
+ *
+ * Deliberately NOT derived from `color`. The two are different knobs: `color`
+ * chooses which PALETTE a filled part draws from, while `theme` moves the whole
+ * surface — including the parts that carry a contrast requirement and therefore
+ * have to stay on zone tokens. Folding one into the other would make a palette
+ * choice silently restyle the contrast-bearing parts too.
+ *
+ * Both undefined when not passed, so the component INHERITS its ancestor's
+ * zone. An empty string would match [data-theme] selectors and pin it to
+ * nothing, which is worse than absent. */
 export function Rating({
+  theme,
+  surface,
   value: controlledValue,
   defaultValue,
   onChange,
@@ -206,7 +224,7 @@ export function Rating({
           } : {},
           '&:disabled': {
             cursor: 'not-allowed',
-            opacity: 0.5,
+            opacity: 'var(--Disabled, 0.38)',
           },
         }}
       >
@@ -219,6 +237,8 @@ export function Rating({
     <Box
       role={isInteractive ? 'radiogroup' : 'img'}
       aria-label={'Rating' + (currentValue !== null ? ': ' + currentValue + ' of ' + max + ' stars' : ': ' + emptyLabel)}
+      data-theme={theme || undefined}
+      data-surface={surface || undefined}
       className={'rating rating-' + color + ' rating-' + size +
         (readOnly ? ' rating-readonly' : '') +
         (disabled ? ' rating-disabled' : '') +
@@ -226,7 +246,7 @@ export function Rating({
         (className ? ' ' + className : '')}
       sx={{
         display: 'inline-flex', alignItems: 'center', gap: s.gap + 'px',
-        opacity: disabled ? 0.5 : 1,
+        opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
         fontFamily: 'inherit',
         ...sx,
       }}

@@ -14,7 +14,8 @@ import { Box } from '@mui/material';
  * VARIANTS:
  *   solid  — data-theme="{Theme}" data-surface="Surface"
  *            bg: var(--Background), icon: var(--Text)
- *   light  — data-theme="{Theme}-Light" data-surface="Surface"
+ *   light  — data-theme="{Theme}" data-surface="Surface-Brightest"
+ *            (there is no "{Theme}-Light" theme; -light IS the brightest surface)
  *            bg: var(--Background), icon: var(--Text)
  *   dark   — data-theme="{Theme}" data-surface="Surface-Dimmest"
  *            bg: var(--Background), icon: var(--Text)
@@ -34,8 +35,14 @@ const THEME_MAP = {
   success: 'Success',
   warning: 'Warning',
   error: 'Error',
-  white: 'White',
-  black: 'Black',
+  /* No white / black. Neither is a Theme mode — they bound nothing and left
+     the badge on the page's palette, which for a badge whose entire job is to
+     be a colour is the one outcome that cannot be right.
+     
+     Both are already reachable and always were: white is
+     color="neutral" variant="light" and black is
+     color="neutral" variant="dark" — the same palette at the two ends of the
+     surface ladder, which is what black and white ARE here. */
 };
 
 const SIZE_MAP = {

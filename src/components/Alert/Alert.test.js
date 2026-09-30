@@ -47,9 +47,12 @@ describe('Standard variant', () => {
     expect(screen.getByRole('alert')).not.toHaveAttribute('data-surface');
   });
 
-  test('no alert-inner element', () => {
+  /* alert-inner exists for EVERY variant now — it is the layer that paints,
+     so it is where data-theme and data-surface live. It used to be rendered
+     only for `light`, which is why these asserted its absence. */
+  test('still has the inner painted layer', () => {
     const { container } = renderAlert({ variant: 'standard' });
-    expect(container.querySelector('.alert-inner')).not.toBeInTheDocument();
+    expect(container.querySelector('.alert-inner')).toBeInTheDocument();
   });
 });
 
@@ -70,9 +73,9 @@ describe('Outline variant', () => {
     expect(screen.getByRole('alert')).not.toHaveAttribute('data-surface');
   });
 
-  test('no alert-inner element', () => {
+  test('still has the inner painted layer', () => {
     const { container } = renderAlert({ variant: 'outline' });
-    expect(container.querySelector('.alert-inner')).not.toBeInTheDocument();
+    expect(container.querySelector('.alert-inner')).toBeInTheDocument();
   });
 
   test('has color class', () => {
@@ -93,9 +96,9 @@ describe('Light variant', () => {
     expect(container.querySelector('.alert-inner')).toBeInTheDocument();
   });
 
-  test('alert-inner has data-surface="Surface"', () => {
+  test('alert-inner has data-surface="Surface-Brightest"', () => {
     const { container } = renderAlert({ variant: 'light' });
-    expect(container.querySelector('.alert-inner')).toHaveAttribute('data-surface', 'Surface');
+    expect(container.querySelector('.alert-inner')).toHaveAttribute('data-surface', 'Surface-Brightest');
   });
 
   test('outer wrapper (role="alert") has NO data-theme', () => {
@@ -105,13 +108,13 @@ describe('Light variant', () => {
 
   test('alert-inner has data-theme for primary', () => {
     const { container } = renderAlert({ variant: 'light', color: 'primary' });
-    expect(container.querySelector('.alert-inner')).toHaveAttribute('data-theme', 'Primary-Light');
+    expect(container.querySelector('.alert-inner')).toHaveAttribute('data-theme', 'Primary');
   });
 
   const lightCases = [
-    ['primary', 'Primary-Light'], ['secondary', 'Secondary-Light'], ['tertiary', 'Tertiary-Light'],
-    ['neutral', 'Neutral-Light'], ['info', 'Info-Light'], ['success', 'Success-Light'],
-    ['warning', 'Warning-Light'], ['error', 'Error-Light'],
+    ['primary', 'Primary'], ['secondary', 'Secondary'], ['tertiary', 'Tertiary'],
+    ['neutral', 'Neutral'], ['info', 'Info'], ['success', 'Success'],
+    ['warning', 'Warning'], ['error', 'Error'],
   ];
   lightCases.forEach(([color, theme]) => {
     test('light ' + color + ' → data-theme="' + theme + '"', () => {
@@ -145,8 +148,8 @@ describe('Solid variant', () => {
 
   const solidCases = [
     ['primary', 'Primary'], ['secondary', 'Secondary'], ['tertiary', 'Tertiary'],
-    ['neutral', 'Neutral'], ['info', 'Info-Medium'], ['success', 'Success-Medium'],
-    ['warning', 'Warning-Medium'], ['error', 'Error-Medium'],
+    ['neutral', 'Neutral'], ['info', 'Info'], ['success', 'Success'],
+    ['warning', 'Warning'], ['error', 'Error'],
   ];
   solidCases.forEach(([color, theme]) => {
     test('solid ' + color + ' → data-theme="' + theme + '"', () => {
@@ -229,7 +232,7 @@ describe('Border structure for themed variants', () => {
     const outer = screen.getByRole('alert');
     const inner = container.querySelector('.alert-inner');
     expect(outer).not.toHaveAttribute('data-theme');
-    expect(inner).toHaveAttribute('data-theme', 'Info-Light');
+    expect(inner).toHaveAttribute('data-theme', 'Info');
   });
 
   test('solid: data-theme is on inner, not outer', () => {
@@ -237,15 +240,15 @@ describe('Border structure for themed variants', () => {
     const outer = screen.getByRole('alert');
     const inner = container.querySelector('.alert-inner');
     expect(outer).not.toHaveAttribute('data-theme');
-    expect(inner).toHaveAttribute('data-theme', 'Info-Medium');
+    expect(inner).toHaveAttribute('data-theme', 'Info');
   });
 });
 
 /* ─── Defaults ─── */
 describe('Defaults', () => {
-  test('default variant is standard', () => {
+  test('default variant is light', () => {
     const { container } = renderAlert();
-    expect(container.querySelector('.alert-standard')).toBeInTheDocument();
+    expect(container.querySelector('.alert-light')).toBeInTheDocument();
   });
 
   test('default size is medium', () => {

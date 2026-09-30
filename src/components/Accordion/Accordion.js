@@ -3,7 +3,10 @@ import React, { useState, createContext, useContext } from 'react';
 import { Box } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Icon } from '../Icon/Icon';
-import { EyebrowSmall, BodyLarge, Body, BodySmall } from '../Typography';
+import {
+  EyebrowSmall, BodyLarge, Body, BodySmall,
+  BodyLargeSemibold, BodySemibold, BodySmallSemibold,
+} from '../Typography';
 import { SHADOW_LEVEL_2 } from '../_shadows';
 
 /**
@@ -11,7 +14,7 @@ import { SHADOW_LEVEL_2 } from '../_shadows';
  *
  * VARIANTS (on AccordionGroup):
  *   solid     data-theme="{Theme}" data-surface="Surface"
- *   light     data-theme="{Theme}-Light" data-surface="Surface"
+ *   light     data-theme="{Theme}"       data-surface="Surface-Brightest"
  *   dark      data-theme="{Theme}" data-surface="Surface-Dimmest"
  *
  * COLORS: default | primary | secondary | tertiary | neutral | info | success | warning | error
@@ -24,12 +27,44 @@ import { SHADOW_LEVEL_2 } from '../_shadows';
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 const SIZE_MAP = {
-  // Padding is a CSS-shorthand string per size so each side can differ —
-  // useful when the chevron at the end needs less right padding than the
-  // start/text columns. `iconSize` drives the chevron <Icon size="…"> token.
-  small:  { summaryPadding: '8px 12px',         detailsPy: '8px',  detailsPx: '12px', fontSize: '13px', iconSize: 'small'  },
-  medium: { summaryPadding: '12px 8px 12px 16px', detailsPy: '12px', detailsPx: '16px', fontSize: '14px', iconSize: 'medium' },
-  large:  { summaryPadding: '16px 20px',        detailsPy: '16px', detailsPx: '20px', fontSize: '16px', iconSize: 'large'  },
+  /* Padding and gap in --Sizing-* tokens, not literal px.
+   *
+   * Medium matches the Figma ("Accordion Segments"): summary is Sizing-1 top
+   * and bottom, Sizing-1 right, Sizing-2 left — the left inset is larger
+   * because the text column starts there while the chevron sits tight to the
+   * right edge. Details is Sizing-2 on the sides and bottom, with no top
+   * padding since the summary already provides that separation.
+   *
+   * Small and large step the same shape one stop down and up the scale.
+   *
+   * These were hardcoded px ('12px 8px 12px 16px'), which disagreed with the
+   * design at medium on three counts — summary py 12 vs 8, gap 12 vs 8,
+   * details bottom 12 vs 16 — and could not follow a brand that rescales its
+   * spacing, because the numbers were not tokens.
+   *
+   * `gap` is the space between the text column and the chevron.
+   */
+  small: {
+    summaryPadding: 'var(--Sizing-Half) var(--Sizing-Half) var(--Sizing-Half) var(--Sizing-1-and-Half)',
+    gap: 'var(--Sizing-Half)',
+    detailsPy: 'var(--Sizing-1-and-Half)',
+    detailsPx: 'var(--Sizing-1-and-Half)',
+    iconSize: 'small',
+  },
+  medium: {
+    summaryPadding: 'var(--Sizing-1) var(--Sizing-1) var(--Sizing-1) var(--Sizing-2)',
+    gap: 'var(--Sizing-1)',
+    detailsPy: 'var(--Sizing-2)',
+    detailsPx: 'var(--Sizing-2)',
+    iconSize: 'medium',
+  },
+  large: {
+    summaryPadding: 'var(--Sizing-1-and-Half) var(--Sizing-1-and-Half) var(--Sizing-1-and-Half) var(--Sizing-2-and-Half)',
+    gap: 'var(--Sizing-1-and-Half)',
+    detailsPy: 'var(--Sizing-2-and-Half)',
+    detailsPx: 'var(--Sizing-2-and-Half)',
+    iconSize: 'large',
+  },
 };
 
 /* ─── Contexts ─── */
@@ -41,9 +76,19 @@ const AccordionContext = createContext({
 });
 
 /* ─── AccordionGroup ─── */
+/* The accordion's own corner.
+ *
+ * --Accordion-Radius is min(buttonRadius, buttonHeight/2): the design system
+ * emits it precisely so an accordion cannot saturate into a stadium the way a
+ * pill button can. It was generated and consumed by nothing — every rule here
+ * read --Button-Radius, which at a 100% button radius rounds an accordion into
+ * a pill. Falls back to --Button-Radius for a system that predates the token. */
+const RADIUS = 'var(--Accordion-Radius, var(--Button-Radius))';
+
 export function AccordionGroup({
   children,
   variant = 'solid',
+  surface,
   color = 'default',
   size = 'medium',
   spacing = 0,
@@ -60,36 +105,71 @@ export function AccordionGroup({
   // so `C + '-Light'` matched no rule and --Background resolved to nothing.
   const dataTheme = color === 'default' ? 'Default' : effectiveColor;
 
-  const dataSurface = variant === 'dark' ? 'Surface-Dimmest'
+  /* Explicit surface override — see the note on Alert. `variant` reaches only
+   * three of the five surface levels; this takes any of them and wins, with
+   * the variant mapping kept as the default so existing usage is untouched. */
+  const dataSurface = surface || (variant === 'dark' ? 'Surface-Dimmest'
     : variant === 'light' ? 'Surface-Brightest'
-    : 'Surface';
+    : 'Surface');
 
   if (isConnected) {
-    // Connected: single outer shell wrapping all items
+    /* Connected: the segments keep their OWN borders and overlap by one pixel,
+     * exactly as ButtonGroup does — first segment rounds its top corners, last
+     * rounds its bottom, the ones between stay square, and the -1px pulls
+     * adjacent borders onto each other so the seam reads as a single line.
+     *
+     * This used to be a single outer shell with overflow:hidden and a
+     * borderBottom divider per item. That looks similar but is a different
+     * object: the group owned the border and the items owned a divider, so an
+     * item could never be styled, reordered or conditionally rendered without
+     * the shell's corners and the dividers disagreeing. The design (Figma
+     * "Accordion Segments") models each segment as self-contained, which is
+     * also what lets the same segment be used standalone. */
     return (
-      <GroupContext.Provider value={{ variant, color, size, spacing }}>
+      <GroupContext.Provider value={{ variant, color, size, spacing, dataTheme, dataSurface }}>
         <Box
           role="presentation"
-          className={'accordion-group accordion-group-' + variant + ' ' + className}
+          className={'accordion-group accordion-group-connected accordion-group-' + variant + ' ' + className}
           sx={{
-            border: '1px solid var(--Border-Variant)',
-            borderRadius: 'var(--Button-Radius)',
-            overflow: 'hidden',
-            boxShadow: SHADOW_LEVEL_2,
+            display: 'flex',
+            flexDirection: 'column',
+            '& > .accordion-segment': {
+              borderRadius: 0,
+              marginBottom: '-1px',
+              boxShadow: 'none',
+            },
+            /* The summary follows its segment, or its focus ring is a square
+               inside a rounded corner. Set here rather than in JS because the
+               segment's own corners are applied by these descendant selectors,
+               which the component cannot read. */
+            '& > .accordion-segment .accordion-summary': {
+              borderRadius: 0,
+            },
+            '& > .accordion-segment:first-of-type': {
+              borderTopLeftRadius: RADIUS,
+              borderTopRightRadius: RADIUS,
+            },
+            '& > .accordion-segment:first-of-type .accordion-summary': {
+              borderTopLeftRadius: RADIUS,
+              borderTopRightRadius: RADIUS,
+            },
+            '& > .accordion-segment:last-of-type': {
+              borderBottomLeftRadius: RADIUS,
+              borderBottomRightRadius: RADIUS,
+              marginBottom: 0,
+            },
+            /* Only when it is also collapsed — an expanded last segment has
+               its details below the summary, so the summary is not the bottom
+               edge. */
+            '& > .accordion-segment:last-of-type .accordion-summary:not(.accordion-summary-expanded)': {
+              borderBottomLeftRadius: RADIUS,
+              borderBottomRightRadius: RADIUS,
+            },
             ...sx,
           }}
           {...props}
         >
-          <Box
-            data-theme={dataTheme}
-            data-surface={dataSurface}
-            sx={{
-              backgroundColor: 'var(--Background)',
-              borderRadius: 'calc(var(--Button-Radius) - 1px)',
-            }}
-          >
-            {children}
-          </Box>
+          {children}
         </Box>
       </GroupContext.Provider>
     );
@@ -104,6 +184,7 @@ export function AccordionGroup({
         sx={{
           display: 'flex',
           flexDirection: 'column',
+          /* Design default is Sizing-1 (8px) between segments. */
           gap: spacing === 0.5 ? 'var(--Sizing-Half)'
             : spacing === 1   ? 'var(--Sizing-1)'
             : spacing === 1.5 ? 'var(--Sizing-1-and-Half)'
@@ -133,8 +214,7 @@ export function Accordion({
   const [internalExpanded, setInternalExpanded] = useState(defaultExpanded);
   const isControlled = controlledExpanded !== undefined;
   const expanded = isControlled ? controlledExpanded : internalExpanded;
-  const { spacing, dataTheme, dataSurface } = useContext(GroupContext);
-  const isConnected = spacing === 0;
+  const { dataTheme, dataSurface } = useContext(GroupContext);
 
   const [accordionId] = useState(() => 'accordion-' + Math.random().toString(36).substring(2, 9));
 
@@ -145,16 +225,35 @@ export function Accordion({
     onChange?.(next);
   };
 
+  /* One shell for both modes — the segment is self-contained.
+   *
+   * It used to render bare inside a connected group (the group owned the
+   * border) and wrapped in its own shell when spaced, so the same component
+   * produced two different DOM shapes and could not be used on its own. Now it
+   * always carries its own border, background and theme; the GROUP only
+   * overrides the corners and the overlap. That is what makes an Accordion
+   * Segment usable standalone, which is how the design models it.
+   *
+   * The shadow is dropped in connected mode by the group's rule — a stack of
+   * overlapping segments each casting their own shadow reads as banding. */
   const content = (
     <AccordionContext.Provider value={{ expanded, toggle, disabled, accordionId }}>
       <Box
-        className={'accordion' + (expanded ? ' accordion-expanded' : '') + (disabled ? ' accordion-disabled' : '') + ' ' + className}
+        className={
+          'accordion-segment accordion'
+          + (expanded ? ' accordion-expanded' : '')
+          + (disabled ? ' accordion-disabled' : '')
+          + ' ' + className
+        }
+        data-theme={dataTheme}
+        data-surface={dataSurface}
         sx={{
-          ...(isConnected && {
-            borderBottom: '1px solid var(--Border-Variant)',
-            '&:last-child': { borderBottom: 'none' },
-          }),
-          opacity: disabled ? 0.5 : 1,
+          border: '1px solid var(--Border-Variant)',
+          borderRadius: RADIUS,
+          backgroundColor: 'var(--Background)',
+          overflow: 'hidden',
+          boxShadow: SHADOW_LEVEL_2,
+          opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
           ...sx,
         }}
         {...props}
@@ -164,29 +263,6 @@ export function Accordion({
     </AccordionContext.Provider>
   );
 
-  if (!isConnected) {
-    // Disconnected: wrap each accordion in its own themed shell
-    return (
-      <Box sx={{
-        border: '1px solid var(--Border-Variant)',
-        borderRadius: 'var(--Button-Radius)',
-        overflow: 'hidden',
-        boxShadow: SHADOW_LEVEL_2,
-      }}>
-        <Box
-          data-theme={dataTheme}
-          data-surface={dataSurface}
-          sx={{
-            backgroundColor: 'var(--Background)',
-            borderRadius: 'calc(var(--Button-Radius) - 1px)',
-          }}
-        >
-          {content}
-        </Box>
-      </Box>
-    );
-  }
-
   return content;
 }
 
@@ -195,7 +271,21 @@ export function Accordion({
 // BodySmall for compact rows, BodyLarge for spacious ones. Eyebrow and
 // secondary stay constant (EyebrowSmall + BodySmall) and only render when
 // the consumer passes them.
-const TITLE_COMPS = { small: BodySmall, medium: Body, large: BodyLarge };
+/* Title and body both step with the accordion's size, so "Accordion Title" and
+   "Accordion Body" render at the mode's scale rather than one fixed size.
+   Medium is the default, matching the design. */
+/* The title is the SEMIBOLD step, not Body with a weight painted on.
+ *
+ * It used to render Body and override fontWeight: 600 inline — which is the
+ * pattern Menu already removed, and for the reason that matters here: 600 is a
+ * literal, while the semibold style reads var(--Body-Medium-Semibold-Font-Weight).
+ * Figma binds that same token. So a brand whose semibold is 650 moved in the
+ * design file and stayed at 600 in the build, and nothing said so.
+ *
+ * Body ships standard and semibold only — there is no bold Body — so semibold
+ * is the step, not Subtitle, which is 700. */
+const TITLE_COMPS = { small: BodySmallSemibold, medium: BodySemibold, large: BodyLargeSemibold };
+const BODY_COMPS  = { small: BodySmall,         medium: Body,         large: BodyLarge };
 
 export function AccordionSummary({
   children,
@@ -244,27 +334,58 @@ export function AccordionSummary({
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
       className={'accordion-summary' + (expanded ? ' accordion-summary-expanded' : '') + ' ' + className}
       sx={{
-        // hstack, top-left aligned, Sizing-1-and-Half (12px) gap — matches
-        // the List item frame so a row of List slots inside the summary
-        // visually aligns with the rest of the design system.
+        // hstack, top-left aligned. The gap scales with size — it was pinned
+        // to Sizing-1-and-Half, which left medium 4px wider than the design.
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'flex-start',
         justifyContent: 'flex-start',
         width: '100%',
-        gap: 'var(--Sizing-1-and-Half)',
+        gap: s.gap,
         padding: s.summaryPadding,
         border: 'none',
         backgroundColor: 'transparent',
         color: expanded ? 'var(--Text)' : 'var(--Quiet)',
-        fontSize: s.fontSize,
+        /* No fontSize here. The summary is a shell; its title renders through
+           TITLE_COMPS (BodySmall / Body / BodyLarge), which already carries the
+           size for the mode. A literal fontSize on the button overrode the
+           typography component for any bare string passed as a child, so the
+           same title rendered at two different sizes depending on whether it
+           went through the slot or the children. */
         fontFamily: 'inherit',
         cursor: disabled ? 'not-allowed' : 'pointer',
         textAlign: 'left',
         transition: 'color 0.2s ease, background-color 0.15s ease',
-        borderRadius: 0,
+        /* The ring below is drawn with `outline`, and an outline takes its
+           corner radius from the element it sits on — so a square summary
+           inside a rounded segment produced a SQUARE ring whose corners were
+           then clipped by the segment's overflow:hidden. It read as a broken
+           rectangle rather than a focus indicator.
+
+           Matching the segment fixes it for free: the browser draws an
+           `outline` concentric with the border radius, so an inset ring inside
+           an 8px corner comes out at 5px without anyone computing it. That is
+           the same geometry Figma parameterises by hand as
+           Accordian-Inner-Focus-Radius (8 - 3 = 5) and Accordian-Focus-Radius
+           (8 + 3 = 11).
+
+           Only the TOP corners when expanded: the details panel sits directly
+           beneath, so rounding the bottom would curve the hover scrim inward
+           mid-panel. Collapsed, the summary IS the segment, so it takes all
+           four. A grouped segment overrides both — see the group rules. */
+        borderRadius: expanded ? RADIUS + ' ' + RADIUS + ' 0 0' : RADIUS,
         '&:hover': !disabled ? {
           color: 'var(--Text)',
+          backgroundColor: 'var(--Hover)',
+          '& .omni-icon': { color: 'var(--Text)' },
+        } : {},
+        /* The summary is a full-width button, so a scrim is the only pressed
+           feedback available — there is no fill to darken and no border to
+           move. Colour alone could not carry it: hover already takes the text
+           to --Text, which leaves pressed nowhere to go. */
+        '&:active': !disabled ? {
+          color: 'var(--Text)',
+          backgroundColor: 'var(--Pressed)',
           '& .omni-icon': { color: 'var(--Text)' },
         } : {},
         '&:focus-visible': {
@@ -300,7 +421,7 @@ export function AccordionSummary({
           </EyebrowSmall>
         )}
         {children !== undefined && children !== null && (
-          <TitleComp style={{ ...lineSx, color: 'inherit', fontWeight: 600 }}>
+          <TitleComp style={{ ...lineSx, color: 'inherit' }}>
             {children}
           </TitleComp>
         )}
@@ -348,6 +469,7 @@ export function AccordionDetails({
   const { expanded, accordionId } = useContext(AccordionContext);
   const { size } = useContext(GroupContext);
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
+  const BodyComp = BODY_COMPS[size] || BODY_COMPS.medium;
 
   if (!expanded) return null;
 
@@ -360,14 +482,21 @@ export function AccordionDetails({
       sx={{
         padding: '0 ' + s.detailsPx + ' ' + s.detailsPy + ' ' + s.detailsPx,
         color: 'var(--Text)',
-        fontSize: s.fontSize,
+        /* Body typography comes from BODY_COMPS, applied to bare text below —
+           not from a literal fontSize, which would override it. */
         fontFamily: 'inherit',
         lineHeight: 1.6,
         ...sx,
       }}
       {...props}
     >
-      {children}
+      {/* A bare string or number is the Accordion Body style, so it renders
+          through the size-matched typography component. Anything else is the
+          caller's own markup and is left exactly as passed — wrapping JSX
+          would nest a <p> around arbitrary content. */}
+      {(typeof children === 'string' || typeof children === 'number')
+        ? <BodyComp>{children}</BodyComp>
+        : children}
     </Box>
   );
 }

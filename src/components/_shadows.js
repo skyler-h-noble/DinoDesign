@@ -20,74 +20,82 @@
 // invalidates the entire box-shadow per CSS spec.
 const DS = 'var(--Dropshadow-Color, 20, 20, 20)';
 
-// ─── Layered shadow geometry (Shadow Palette model, as built in Figma) ───────
-// MUST stay identical to the studio generator at
-// dinodesign-studio/src/utils/dropshadow.ts (LEVEL_LAYERS) and the Figma effect
-// styles. Level N stacks N layers with growing offset (angled: offsetX =
-// offsetY/2, blur = offsetY, NO spread). Layer i uses --Dropshadow-Color-(i+1)
-// — tight contact = Color-1 (strongest), larger layers = higher/fainter tokens.
-// Each color falls back to the aggregate --Dropshadow-Color at that token's
-// alpha so the box-shadow stays valid outside a themed scope. Tuples are
-// [offsetX, offsetY, blur].
+// ─── Layered shadow geometry ────────────────────────────────────────────────
+//
+// A FALLBACK ONLY. The brand's own --Effect-Level-N wins wherever a design
+// system is loaded (see _token below); this table is what a consumer sees with
+// no design system at all.
+//
+// It used to say it "MUST stay identical" to the studio generator. That is no
+// longer possible and was already false: the studio's shadows are now
+// parameterised by the user's Shadow controls (intensity, crispy, resolution,
+// light position), so there is no single geometry to match. These values are
+// that generator at its DEFAULT settings, regenerated from it — a sensible
+// stand-in rather than a promise of equality.
+//
+// Tuples are [offsetX, offsetY, blur, spread, alpha]. Alpha ramps DOWN across
+// the layers, which is Comeau's shadow-palette model: one colour, the contact
+// layer strongest, each layer out fainter and wider.
 const _LEVEL_LAYERS = {
-  1: [[0.5, 1, 1]],
-  2: [[1, 2, 2], [2, 4, 4]],
-  3: [[1, 2, 2], [2, 4, 4], [4, 8, 8]],
-  4: [[1, 2, 2], [2, 4, 4], [4, 8, 8], [8, 16, 16]],
-  5: [[1, 2, 2], [2, 4, 4], [4, 8, 8], [8, 16, 16], [16, 32, 32]],
+  1: [[0.3, 0.5, 0.7, 0, 0.41], [1.3, 2.5, 3.4, -1.2, 0.205]],
+  2: [[0.3, 0.5, 0.7, 0, 0.41], [0.6, 1.2, 1.6, -1.2, 0.273], [3, 6, 8.1, -2.5, 0.137]],
+  3: [[0.3, 0.5, 0.7, 0, 0.41], [0.3, 0.7, 0.9, -0.6, 0.328], [1, 2, 2.7, -1.2, 0.246], [2.8, 5.6, 7.5, -1.9, 0.164], [6.3, 12.5, 16.9, -2.5, 0.082]],
+  4: [[0.3, 0.5, 0.7, 0, 0.41], [0.4, 0.7, 1, -0.5, 0.342], [1.2, 2.4, 3.2, -1, 0.273], [3.4, 6.9, 9.3, -1.5, 0.205], [7.8, 15.6, 21.1, -2, 0.137], [15, 30, 40.5, -2.5, 0.068]],
+  5: [[0.3, 0.5, 0.7, 0, 0.41], [0.4, 0.7, 1, -0.4, 0.359], [1.1, 2.2, 3, -0.7, 0.308], [3.1, 6.3, 8.5, -1.1, 0.256], [7.1, 14.2, 19.2, -1.4, 0.205], [13.6, 27.3, 36.8, -1.8, 0.154], [23.4, 46.8, 63.2, -2.1, 0.103], [37, 74, 99.9, -2.5, 0.051]],
 };
-/* One alpha for every layer — Comeau's stack uses a single opacity throughout.
-   Must match ALPHA in dinodesign-studio/src/utils/dropshadow.ts. */
-const _ALPHA = 0.10;
 
-/* Every layer of a level uses THAT LEVEL's colour token.
-   The token index is the ELEVATION, not the layer: Level-3 draws three layers,
-   all in --Dropshadow-Color-3. It used to take one token per layer, which made
-   the five tokens alpha steps of a single colour and a Level-3 shadow a
-   Level-1 shadow with extras. Depth now comes from layer COUNT and from the
-   colour deepening per level, which is what the design system publishes. */
+/* One colour, per-layer alpha — NOT one token per level.
+   This previously built `var(--Dropshadow-Color-${level}, …)`. Those five
+   per-level colour tokens no longer exist: the design system collapsed them to
+   a single --Dropshadow-Color plus per-layer opacity, so every reference
+   resolved to the neutral 20,20,20 fallback and every shadow in the library
+   came out grey. */
 function _buildShadow(level) {
   return _LEVEL_LAYERS[level]
-    .map(([x, y, blur]) => {
-      const color = `var(--Dropshadow-Color-${level}, rgba(${DS}, ${_ALPHA}))`;
-      return `${x}px ${y}px ${blur}px ${color}`;
+    .map(function (t) {
+      return t[0] + 'px ' + t[1] + 'px ' + t[2] + 'px ' + t[3] + 'px rgba(' + DS + ', ' + t[4] + ')';
     })
     .join(', ');
 }
 
-export const SHADOW_LEVEL_0 = 'none';
-export const SHADOW_LEVEL_1 = _buildShadow(1);
-export const SHADOW_LEVEL_2 = _buildShadow(2);
-export const SHADOW_LEVEL_3 = _buildShadow(3);
-export const SHADOW_LEVEL_4 = _buildShadow(4);
-export const SHADOW_LEVEL_5 = _buildShadow(5);
-
 /* Read the BRAND's recipe, fall back to the geometry above.
  *
- * The design system publishes --Effect-Level-0 through --Effect-Level-5, and
- * nothing consumed them: every elevation rendered the table in this file
- * instead. So a brand could author whatever shadow it liked, ship it in its
- * CSS, and see the library's own shadow on screen — with the level number
- * correct and the shape wrong at every level.
- *
- * The token comes FIRST so the brand wins. The literal stays as the fallback
- * for a consumer with no design system loaded, which is the one case a var()
- * fallback actually fires — and it keeps the geometry documented in one
- * readable place rather than only inside a generated stylesheet.
+ * The design system publishes --Effect-Level-0 through --Effect-Level-5. The
+ * token comes FIRST so the brand wins; the literal is what a consumer with no
+ * design system loaded sees, which is the one case a var() fallback fires.
  *
  * A var() fallback may contain commas, so a multi-layer recipe nests safely.
  */
 const _token = (level, literal) =>
   level === 0 ? 'none' : 'var(--Effect-Level-' + level + ', ' + literal + ')';
 
+/* The SHADOW_LEVEL_N exports are token-first too.
+ *
+ * They used to be the bare literal, and only the SHADOWS map below wrapped
+ * them in the token — but twelve components import SHADOW_LEVEL_N directly
+ * (Card, AppBar, Drawer, Alert, Accordion, Input, Snackbar, Toolbar, Fab,
+ * Slider, Autocomplete, and this file). Every one of them therefore rendered
+ * the library's own geometry and ignored the brand's --Effect-Level-N, which
+ * is exactly the bug the SHADOWS map was added to fix — the fix just never
+ * reached the components that needed it.
+ *
+ * Wrapping here fixes all twelve at once and keeps SHADOWS identical, so no
+ * consumer has to change. */
+export const SHADOW_LEVEL_0 = 'none';
+export const SHADOW_LEVEL_1 = _token(1, _buildShadow(1));
+export const SHADOW_LEVEL_2 = _token(2, _buildShadow(2));
+export const SHADOW_LEVEL_3 = _token(3, _buildShadow(3));
+export const SHADOW_LEVEL_4 = _token(4, _buildShadow(4));
+export const SHADOW_LEVEL_5 = _token(5, _buildShadow(5));
+
 // Keyed map for dynamic level lookup (e.g. SHADOWS[level])
 export const SHADOWS = {
   0: SHADOW_LEVEL_0,
-  1: _token(1, SHADOW_LEVEL_1),
-  2: _token(2, SHADOW_LEVEL_2),
-  3: _token(3, SHADOW_LEVEL_3),
-  4: _token(4, SHADOW_LEVEL_4),
-  5: _token(5, SHADOW_LEVEL_5),
+  1: SHADOW_LEVEL_1,
+  2: SHADOW_LEVEL_2,
+  3: SHADOW_LEVEL_3,
+  4: SHADOW_LEVEL_4,
+  5: SHADOW_LEVEL_5,
 };
 
 // ─── Bevel Shadow (chained inset shadows for Button-style highlight/lowlight)

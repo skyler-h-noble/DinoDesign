@@ -28,7 +28,7 @@ export const Default = {
 export const VerticalLabelsBackfill = {
   render: () => (
     <Box sx={{ maxWidth: 500 }}>
-      <BottomNavigation items={ITEMS} showLabels labelOrientation="vertical" backfill />
+      <BottomNavigation items={ITEMS} showLabels />
     </Box>
   ),
 };
@@ -36,7 +36,7 @@ export const VerticalLabelsBackfill = {
 export const HorizontalLabelsBackfill = {
   render: () => (
     <Box sx={{ maxWidth: 500 }}>
-      <BottomNavigation items={ITEMS} showLabels labelOrientation="horizontal" backfill />
+      <BottomNavigation items={ITEMS} showLabels />
     </Box>
   ),
 };
@@ -44,7 +44,7 @@ export const HorizontalLabelsBackfill = {
 export const NoLabels = {
   render: () => (
     <Box sx={{ maxWidth: 500 }}>
-      <BottomNavigation items={ITEMS} showLabels={false} backfill />
+      <BottomNavigation items={ITEMS} showLabels={false} />
     </Box>
   ),
 };
@@ -52,7 +52,7 @@ export const NoLabels = {
 export const NoBackfill = {
   render: () => (
     <Box sx={{ maxWidth: 500 }}>
-      <BottomNavigation items={ITEMS} showLabels backfill={false} />
+      <BottomNavigation items={ITEMS} showLabels />
     </Box>
   ),
 };
@@ -60,7 +60,7 @@ export const NoBackfill = {
 export const FiveItems = {
   render: () => (
     <Box sx={{ maxWidth: 500 }}>
-      <BottomNavigation items={[...ITEMS, { icon: <FavoriteIcon />, label: 'Favorites' }]} showLabels backfill />
+      <BottomNavigation items={[...ITEMS, { icon: <FavoriteIcon />, label: 'Favorites' }]} showLabels />
     </Box>
   ),
 };
@@ -70,20 +70,20 @@ export const Comparison = {
   render: () => (
     <Stack spacing={4} sx={{ maxWidth: 500 }}>
       <Box>
-        <Box sx={{ fontSize: '12px', color: 'var(--Text-Quiet)', mb: 1 }}>Vertical (backfill)</Box>
-        <BottomNavigation items={ITEMS} showLabels labelOrientation="vertical" backfill />
+        <Box sx={{ fontSize: '12px', color: 'var(--Text-Quiet)', mb: 1 }}>Labels under the icon</Box>
+        <BottomNavigation items={ITEMS} showLabels />
       </Box>
       <Box>
-        <Box sx={{ fontSize: '12px', color: 'var(--Text-Quiet)', mb: 1 }}>Horizontal (backfill)</Box>
-        <BottomNavigation items={ITEMS} showLabels labelOrientation="horizontal" backfill />
+        <Box sx={{ fontSize: '12px', color: 'var(--Text-Quiet)', mb: 1 }}>Icons only</Box>
+        <BottomNavigation items={ITEMS} showLabels />
       </Box>
       <Box>
-        <Box sx={{ fontSize: '12px', color: 'var(--Text-Quiet)', mb: 1 }}>No backfill</Box>
-        <BottomNavigation items={ITEMS} showLabels labelOrientation="vertical" backfill={false} />
+        <Box sx={{ fontSize: '12px', color: 'var(--Text-Quiet)', mb: 1 }}>Floating bar</Box>
+        <BottomNavigation items={ITEMS} showLabels />
       </Box>
       <Box>
-        <Box sx={{ fontSize: '12px', color: 'var(--Text-Quiet)', mb: 1 }}>Icons only (backfill)</Box>
-        <BottomNavigation items={ITEMS} showLabels={false} backfill />
+        <Box sx={{ fontSize: '12px', color: 'var(--Text-Quiet)', mb: 1 }}>Vertical bar</Box>
+        <BottomNavigation items={ITEMS} showLabels={false} />
       </Box>
     </Stack>
   ),

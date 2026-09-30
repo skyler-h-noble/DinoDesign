@@ -1,7 +1,7 @@
 // src/components/Sheet/Sheet.test.js
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { Sheet, DefaultSheet, SolidSheet, LightSheet } from './Sheet';
+import { Sheet } from './Sheet';
 import { axe } from 'jest-axe';
 
 /* ─── Helpers ─── */
@@ -22,124 +22,95 @@ describe('Sheet', () => {
 });
 
 /* ─── data-surface ─── */
-describe('data-surface="Container"', () => {
-  test('default variant', () => {
-    const { container } = renderSheet({ variant: 'default' });
-    expect(container.querySelector('[data-surface="Container"]')).toBeInTheDocument();
+/* Sheet never emitted data-surface="Container" — that is Card's behaviour for
+   a default-COLOUR card. This block asserted it for three variants, one of
+   which ('default') Sheet has never had: commit 77efe68 moved "default" from
+   being a variant to being a COLOUR, and the test was not updated, so
+   `DefaultSheet` resolved to undefined and took the whole suite down with it.
+   Surface is now a direct prop with no variant mapping in front of it. */
+describe('data-surface is whatever the caller asks for', () => {
+  test('defaults to Surface', () => {
+    const { container } = renderSheet({ color: 'primary' });
+    expect(container.querySelector('[data-surface="Surface"]')).toBeInTheDocument();
   });
 
-  test('solid variant', () => {
-    const { container } = renderSheet({ variant: 'solid', color: 'primary' });
-    expect(container.querySelector('[data-surface="Container"]')).toBeInTheDocument();
-  });
+  test.each(['Surface-Brightest', 'Surface-Dimmest', 'Container', 'Surface-Dim'])(
+    'takes %s directly', (level) => {
+      const { container } = renderSheet({ color: 'primary', surface: level });
+      expect(container.querySelector('[data-surface="' + level + '"]')).toBeInTheDocument();
+    });
 
-  test('light variant', () => {
-    const { container } = renderSheet({ variant: 'light', color: 'primary' });
-    expect(container.querySelector('[data-surface="Container"]')).toBeInTheDocument();
-  });
-});
-
-/* ─── Default variant ─── */
-describe('Default variant', () => {
-  test('no data-theme', () => {
-    const { container } = renderSheet({ variant: 'default' });
-    expect(container.querySelector('.sheet')).not.toHaveAttribute('data-theme');
-  });
-
-  test('has sheet-default class', () => {
-    const { container } = renderSheet({ variant: 'default' });
-    expect(container.querySelector('.sheet-default')).toBeInTheDocument();
+  test('reaches all five levels, which the old three variants could not', () => {
+    /* solid / light / dark chose between Surface, Surface-Brightest and
+       Surface-Dimmest under names that said nothing about which. */
+    for (const level of ['Surface', 'Surface-Bright', 'Surface-Brightest', 'Surface-Dim', 'Surface-Dimmest']) {
+      const { container } = renderSheet({ surface: level });
+      expect(container.querySelector('[data-surface="' + level + '"]')).toBeInTheDocument();
+    }
   });
 });
 
-/* ─── Solid data-theme ─── */
-describe('Solid variant data-theme', () => {
+/* ─── data-theme ─── */
+describe('data-theme follows color', () => {
   const cases = [
     ['primary', 'Primary'],
     ['secondary', 'Secondary'],
     ['tertiary', 'Tertiary'],
     ['neutral', 'Neutral'],
-    ['info', 'Info-Medium'],
-    ['success', 'Success-Medium'],
-    ['warning', 'Warning-Medium'],
-    ['error', 'Error-Medium'],
+    ['info', 'Info'],
+    ['success', 'Success'],
+    ['warning', 'Warning'],
+    ['error', 'Error'],
   ];
 
   cases.forEach(([color, theme]) => {
-    test('solid ' + color + ' → data-theme="' + theme + '"', () => {
-      const { container } = renderSheet({ variant: 'solid', color });
+    test(color + ' → data-theme="' + theme + '"', () => {
+      const { container } = renderSheet({ color });
       expect(container.querySelector('[data-theme="' + theme + '"]')).toBeInTheDocument();
     });
   });
-});
 
-/* ─── Light data-theme ─── */
-describe('Light variant data-theme', () => {
-  const cases = [
-    ['primary', 'Primary-Light'],
-    ['secondary', 'Secondary-Light'],
-    ['tertiary', 'Tertiary-Light'],
-    ['neutral', 'Neutral-Light'],
-    ['info', 'Info-Light'],
-    ['success', 'Success-Light'],
-    ['warning', 'Warning-Light'],
-    ['error', 'Error-Light'],
-  ];
-
-  cases.forEach(([color, theme]) => {
-    test('light ' + color + ' → data-theme="' + theme + '"', () => {
-      const { container } = renderSheet({ variant: 'light', color });
-      expect(container.querySelector('[data-theme="' + theme + '"]')).toBeInTheDocument();
-    });
+  test('and is Default when no color is given', () => {
+    const { container } = renderSheet({});
+    expect(container.querySelector('[data-theme="Default"]')).toBeInTheDocument();
   });
 });
 
-/* ─── Variant classes ─── */
-describe('Variant classes', () => {
-  test('solid class', () => {
-    const { container } = renderSheet({ variant: 'solid', color: 'primary' });
-    expect(container.querySelector('.sheet-solid')).toBeInTheDocument();
+/* ─── The removed variant axis ─── */
+describe('variant is accepted and ignored', () => {
+  test('does not reach the DOM as an attribute', () => {
+    const { container } = renderSheet({ variant: 'light' });
+    expect(container.querySelector('[variant]')).toBeNull();
   });
 
-  test('light class', () => {
-    const { container } = renderSheet({ variant: 'light', color: 'primary' });
-    expect(container.querySelector('.sheet-light')).toBeInTheDocument();
-  });
-});
-
-/* ─── Bordered ─── */
-describe('Bordered', () => {
-  test('bordered by default', () => {
-    const { container } = renderSheet();
-    expect(container.querySelector('.sheet-bordered')).toBeInTheDocument();
+  test('and no longer selects a surface', () => {
+    const { container } = renderSheet({ variant: 'dark' });
+    expect(container.querySelector('[data-surface="Surface"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-surface="Surface-Dimmest"]')).toBeNull();
   });
 
-  test('bordered={false} removes bordered class', () => {
-    const { container } = renderSheet({ bordered: false });
-    expect(container.querySelector('.sheet-bordered')).not.toBeInTheDocument();
-  });
-});
-
-/* ─── Rounded ─── */
-describe('Rounded', () => {
-  test('rounded by default', () => {
-    const { container } = renderSheet();
-    expect(container.querySelector('.sheet-rounded')).toBeInTheDocument();
-  });
-
-  test('rounded={false} removes rounded class', () => {
-    const { container } = renderSheet({ rounded: false });
-    expect(container.querySelector('.sheet-rounded')).not.toBeInTheDocument();
+  test('no sheet-<variant> class is emitted', () => {
+    const { container } = renderSheet({ variant: 'solid' });
+    expect(container.querySelector('.sheet-solid')).toBeNull();
   });
 });
 
 /* ─── Elevation ─── */
-describe('Elevation', () => {
-  [0, 1, 2, 3].forEach((e) => {
-    test('elevation ' + e + ' class', () => {
-      const { container } = renderSheet({ elevation: e });
-      expect(container.querySelector('.sheet-elevation-' + e)).toBeInTheDocument();
-    });
+/* Sheet has one elevation control: the `elevated` BOOLEAN, which picks between
+   two shadow levels. The blocks removed here asserted `bordered`, `rounded`
+   and a numeric `elevation` prop — none of which Sheet has ever had on this
+   shape of the component. One of them (`bordered={false} removes the class`)
+   was even passing, because the class is absent either way: a test green for
+   the wrong reason, which is worse than a red one. */
+describe('elevated', () => {
+  test('adds the elevated class', () => {
+    const { container } = renderSheet({ elevated: true });
+    expect(container.querySelector('.sheet-elevated')).toBeInTheDocument();
+  });
+
+  test('and is off by default', () => {
+    const { container } = renderSheet();
+    expect(container.querySelector('.sheet-elevated')).toBeNull();
   });
 });
 
@@ -156,23 +127,9 @@ describe('Component override', () => {
   });
 });
 
-/* ─── Convenience Exports ─── */
-describe('Convenience exports', () => {
-  test('DefaultSheet renders default variant', () => {
-    const { container } = render(<DefaultSheet><span>T</span></DefaultSheet>);
-    expect(container.querySelector('.sheet-default')).toBeInTheDocument();
-  });
-
-  test('SolidSheet renders with data-theme', () => {
-    const { container } = render(<SolidSheet color="info"><span>T</span></SolidSheet>);
-    expect(container.querySelector('[data-theme="Info-Medium"]')).toBeInTheDocument();
-  });
-
-  test('LightSheet renders with data-theme', () => {
-    const { container } = render(<LightSheet color="error"><span>T</span></LightSheet>);
-    expect(container.querySelector('[data-theme="Error-Light"]')).toBeInTheDocument();
-  });
-});
+/* SolidSheet / LightSheet / DarkSheet are gone with the variant axis — each
+   was a surface level wearing a name that did not say which one. The
+   replacement is `surface`, covered above. */
 
 // ─── Accessibility — jest-axe ─────────────────────────────────────────────────
 

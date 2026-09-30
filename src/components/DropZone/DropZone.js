@@ -130,7 +130,7 @@ export function DropZone({
         backgroundColor: isDragging ? 'var(--Hover)' : 'transparent',
         color: 'var(--Text)',
         cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.5 : 1,
+        opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
         outline: 'none',
         transition: 'background-color 0.2s ease, border-color 0.2s ease',
         textAlign: 'center',

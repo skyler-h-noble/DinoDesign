@@ -7,10 +7,21 @@ import CancelIcon from '@mui/icons-material/Cancel';
  * Chip Component
  * Compact element representing an input, attribute, or action
  *
- * VARIANTS:
- *   SOLID   variant="{color}"           filled chip, all 8 colors
- *   OUTLINE variant="{color}-outline"   bordered chip, all 8 colors
- *   LIGHT   variant="{color}-light"     filled + bordered chip, all 8 colors
+ * COLOUR:   variant="{color}"  — colour only, all 8. There is no shape axis.
+ *
+ * SELECTION is the only other axis, and it is a SURFACE level rather than a
+ * different fill. A chip is a small surface you can toggle, not a button:
+ *
+ *   unselected  data-surface="Surface-Brightest"
+ *   selected    data-surface="Surface-Dimmest"
+ *
+ * Both paint var(--Background) with a var(--Border) edge, so one data-theme
+ * drives both states and --Text, --Hover and --Pressed come along paired.
+ *
+ * The SOLID/OUTLINE shapes are gone — `-outline` was the unselected chip under
+ * another name, which let the component express four combinations against the
+ * design's two. `-light` went earlier for a related reason. Both still render
+ * and warn once; see normalizeChipVariant.
  *
  * SIZES: small (24px) | medium (32px) | large (40px)
  *   - All sizes maintain 24x24 minimum touch target (WCAG 2.2 AA)
@@ -30,49 +41,88 @@ import CancelIcon from '@mui/icons-material/Cancel';
 const COLORS = ['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
-// --- Variant Style Builders --------------------------------------------------
+// --- Painting ----------------------------------------------------------------
+//
+// ONE set of tokens for every chip, in both states.
+//
+// A chip is a small SURFACE you can toggle, not a button, so selection is a
+// surface level rather than a different fill: the element carries
+// data-theme="{color}" and data-surface="Surface-Brightest" unselected /
+// "Surface-Dimmest" selected, and every token below resolves from that zone.
+// Change the theme and both states follow, along with --Text, --Border,
+// --Hover and --Pressed, all paired for that surface.
+//
+// This replaces solid/outline style builders picked by `variant`. Those made
+// the component able to express four combinations — solid, outline, and each
+// of them selected — where the design has two. A converter reading a chip
+// could not know which to emit, which is what blocked Chip and Tag from
+// mapping deterministically.
+//
+// Hover and Pressed are the zone's own --Hover / --Pressed rather than the
+// button palette's, for the same reason: they must move with the surface, and
+// --Buttons-{C}-Hover is tuned against the button fill, not against
+// --Background.
+const CHIP_SURFACE = { selected: 'Surface-Dimmest', unselected: 'Surface-Brightest' };
 
-function solidStyles(color) {
-  const C = cap(color);
-  return {
-    bg:       'var(--Buttons-' + C + '-Button)',
-    text:     'var(--Buttons-' + C + '-Text)',
-    border:   'none',
-    hoverBg:  'var(--Buttons-' + C + '-Hover)',
-    activeBg: 'var(--Buttons-' + C + '-Pressed)',
-  };
-}
+const chipStyles = () => ({
+  bg:       'var(--Background)',
+  text:     'var(--Text)',
+  border:   '1px solid var(--Border)',
+  hoverBg:  'var(--Hover)',
+  activeBg: 'var(--Pressed)',
+});
 
-function outlineStyles(color) {
-  const C = cap(color);
-  return {
-    bg:       'var(--Background)',
-    text:     'var(--Text)',
-    border:   '1px solid var(--Buttons-' + C + '-Border)',
-    hoverBg:  'var(--Hover)',
-    activeBg: 'var(--Hover)',
-  };
-}
+// The `-light` shape is removed. It was solidStyles PLUS a border — the SAME
+// --Buttons-{C}-Button fill as the solid chip — so `success-light` painted the
+// solid button green, never the light surface its name promised. In this
+// system "light" is a SURFACE, not a shape: data-theme="{Color}" +
+// data-surface="Surface-Brightest" on a `-outline` chip, whose bg is
+// var(--Background) and text var(--Text), so both follow the zone.
+//
+// Not a hard delete. Chip resolves an unknown variant as
+// `variantMap[variant] || variantMap['primary']`, so deleting the entries
+// would have repainted every `success-light` chip as PRIMARY with no error.
+// Strip the suffix to the solid chip of the same name and say so once in dev.
+const LIGHT_SUFFIX = /-light$/;
+/* `-outline` goes the same way, and for a closer reason than -light did.
+ *
+ * It was never a second SHAPE — outlineStyles painted var(--Background) with a
+ * border, which is exactly what an UNSELECTED chip is. So the component could
+ * say the same thing two ways, and say contradictory things too: solid-and-
+ * selected, outline-and-selected. Four combinations against the design's two,
+ * and a converter reading a chip in Figma had no way to choose.
+ *
+ * Selection is the only axis now. `variant` means colour, as it does on every
+ * other component. */
+const OUTLINE_SUFFIX = /-outline$/;
+const warnedVariants = new Set();
 
-function lightStyles(color) {
-  const C = cap(color);
-  return {
-    bg:       'var(--Buttons-' + C + '-Button)',
-    text:     'var(--Buttons-' + C + '-Text)',
-    border:   '1px solid var(--Buttons-' + C + '-Border)',
-    hoverBg:  'var(--Buttons-' + C + '-Hover)',
-    activeBg: 'var(--Buttons-' + C + '-Pressed)',
-  };
-}
-
-function buildVariantMap() {
-  const map = {};
-  COLORS.forEach((color) => {
-    map[color]                = solidStyles(color);
-    map[color + '-outline']   = outlineStyles(color);
-    map[color + '-light']     = lightStyles(color);
-  });
-  return map;
+export function normalizeChipVariant(variant) {
+  const v = String(variant || 'primary');
+  if (OUTLINE_SUFFIX.test(v)) {
+    const base = v.replace(OUTLINE_SUFFIX, '');
+    if (process.env.NODE_ENV !== 'production' && !warnedVariants.has(v)) {
+      warnedVariants.add(v);
+      console.warn(
+        '[Chip] variant="' + v + '" — there is no outline shape. An outline ' +
+        'chip WAS the unselected chip: same var(--Background) fill, same ' +
+        'border. Rendering variant="' + base + '" unselected. Pass ' +
+        'selected={true} for the filled state.',
+      );
+    }
+    return base;
+  }
+  if (!LIGHT_SUFFIX.test(v)) return v;
+  const base = v.replace(LIGHT_SUFFIX, '');
+  if (process.env.NODE_ENV !== 'production' && !warnedVariants.has(v)) {
+    warnedVariants.add(v);
+    console.warn(
+      '[Chip] variant="' + v + '" — the -light shape was removed. Rendering ' +
+      'variant="' + base + '" (solid). For a light chip use variant="' + base +
+      '-outline" with data-theme + data-surface="Surface-Brightest".',
+    );
+  }
+  return base;
 }
 
 // --- Sizing ------------------------------------------------------------------
@@ -171,8 +221,13 @@ export function Chip({
   sx = {},
   ...props
 }) {
-  const variantMap = buildVariantMap();
-  const styles = variantMap[variant] || variantMap['primary'];
+  const chipColor = normalizeChipVariant(variant);
+  const styles = chipStyles();
+  /* `default` gets no data-theme and INHERITS, matching ButtonGroup. Naming a
+     Default theme would pin the chip to the brand's default palette even inside
+     a themed zone, which is the opposite of what inheriting means. */
+  const chipTheme = chipColor === 'default' ? undefined : cap(chipColor);
+  const chipSurface = selected ? CHIP_SURFACE.selected : CHIP_SURFACE.unselected;
 
   // Delete button requires large chip (24x24 delete icon needs space)
   const effectiveSize = onDelete ? 'large' : sizeProp;
@@ -191,11 +246,11 @@ export function Chip({
     selectionProps['aria-checked'] = selected;
   }
 
-  // Selected visual state
-  const selectedOutline = selected ? {
-    outline: '2px solid var(--Buttons-Primary-Button)',
-    outlineOffset: '1px',
-  } : {};
+  /* No selected ring. It used to draw `2px solid var(--Buttons-Primary-Button)`
+     — PRIMARY, hardcoded, so a selected Success chip wore a primary ring — and
+     it sat on top of whichever fill the variant chose. Selection is now the
+     surface level, which is both the design's model and a signal that cannot
+     be the wrong colour. */
 
   const displayLabel = label || children;
 
@@ -213,7 +268,6 @@ export function Chip({
     color: styles.text,
     border: styles.border,
 
-    ...selectedOutline,
 
     // 24x24 minimum touch target for small chips
     ...(effectiveSize === 'small' && {
@@ -343,7 +397,13 @@ export function Chip({
       clickable={isClickable && !disabled}
       disabled={disabled}
       onClick={isClickable ? onClick : undefined}
-      className={'chip-' + variant + ' ' + className}
+      className={'chip-' + chipColor + (selected ? ' chip-selected' : '') + ' ' + className}
+      /* The attributes are the paint. Every token in chipSx — --Background,
+         --Text, --Border, --Hover, --Pressed — resolves from this pair, so
+         without them the chip falls through to the page's own zone and a
+         Success chip renders in the page colour. */
+      data-theme={chipTheme}
+      data-surface={chipSurface}
       sx={chipSx}
       {...selectionProps}
       {...props}
@@ -363,7 +423,10 @@ export const SuccessChip    = (p) => <Chip variant="success"    {...p} />;
 export const WarningChip    = (p) => <Chip variant="warning"    {...p} />;
 export const ErrorChip      = (p) => <Chip variant="error"      {...p} />;
 
-// Outline
+/* The eight outline presets are kept and now render the plain chip unselected,
+   which is what they always drew. Deleting them would turn a stale import into
+   a build error in someone else's project; leaving them is one line each and
+   the shared warning fires once. */
 export const PrimaryOutlineChip    = (p) => <Chip variant="primary-outline"    {...p} />;
 export const SecondaryOutlineChip  = (p) => <Chip variant="secondary-outline"  {...p} />;
 export const TertiaryOutlineChip   = (p) => <Chip variant="tertiary-outline"   {...p} />;
@@ -374,13 +437,5 @@ export const WarningOutlineChip    = (p) => <Chip variant="warning-outline"    {
 export const ErrorOutlineChip      = (p) => <Chip variant="error-outline"      {...p} />;
 
 // Light
-export const PrimaryLightChip    = (p) => <Chip variant="primary-light"    {...p} />;
-export const SecondaryLightChip  = (p) => <Chip variant="secondary-light"  {...p} />;
-export const TertiaryLightChip   = (p) => <Chip variant="tertiary-light"   {...p} />;
-export const NeutralLightChip    = (p) => <Chip variant="neutral-light"    {...p} />;
-export const InfoLightChip       = (p) => <Chip variant="info-light"       {...p} />;
-export const SuccessLightChip    = (p) => <Chip variant="success-light"    {...p} />;
-export const WarningLightChip    = (p) => <Chip variant="warning-light"    {...p} />;
-export const ErrorLightChip      = (p) => <Chip variant="error-light"      {...p} />;
 
 export default Chip;

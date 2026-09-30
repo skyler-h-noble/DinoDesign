@@ -6,7 +6,6 @@ import {
   PrimaryChip,
   ErrorChip,
   PrimaryOutlineChip,
-  SuccessLightChip,
 } from './Chip';
 import { axe } from 'jest-axe';
 
@@ -39,15 +38,50 @@ describe('Chip Component', () => {
     expect(container.querySelector(`.chip-${color}`)).toBeInTheDocument();
   });
 
-  test.each([['primary-outline'], ['error-outline']])('applies %s variant class', (variant) => {
+  test.each([['primary-outline'], ['error-outline']])('%s renders as the plain colour, unselected', (variant) => {
+    /* There is no outline shape. `-outline` WAS the unselected chip — the same
+       var(--Background) fill and border — so it resolves to the colour and the
+       selection axis decides the rest. */
+    const base = variant.replace('-outline', '');
     const { container } = render(<Chip variant={variant} label="Test" />);
-    expect(container.querySelector(`.chip-${variant}`)).toBeInTheDocument();
+    expect(container.querySelector(`.chip-${base}`)).toBeInTheDocument();
+    expect(container.querySelector(`.chip-${variant}`)).toBeNull();
+    expect(container.querySelector(`.chip-${base}`).getAttribute('data-surface'))
+      .toBe('Surface-Brightest');
   });
 
-  test.each([['primary-light'], ['success-light']])('applies %s variant class', (variant) => {
-    const { container } = render(<Chip variant={variant} label="Test" />);
-    expect(container.querySelector(`.chip-${variant}`)).toBeInTheDocument();
+  test('selection is the surface level, not a different fill', () => {
+    /* The model the design uses: one theme, two surfaces. Both states paint
+       var(--Background); the zone decides what that resolves to. */
+    const un = render(<Chip variant="success" label="A" />).container
+      .querySelector('.chip-success');
+    expect(un.getAttribute('data-surface')).toBe('Surface-Brightest');
+    const sel = render(<Chip variant="success" selected label="B" />).container
+      .querySelector('.chip-success.chip-selected');
+    expect(sel.getAttribute('data-surface')).toBe('Surface-Dimmest');
+    expect(sel.getAttribute('data-theme')).toBe('Success');
   });
+
+  test('default INHERITS its theme rather than pinning one', () => {
+    /* Same rule as ButtonGroup: naming a Default theme would pin the chip to
+       the brand default even inside a themed zone. */
+    const { container } = render(<Chip variant="default" label="Test" />);
+    expect(container.querySelector('.chip-default').hasAttribute('data-theme')).toBe(false);
+  });
+
+  /* The -light shape was removed. Chip resolves an unknown variant as
+     `variantMap[variant] || variantMap['primary']`, so a hard delete would
+     have repainted success-light as PRIMARY silently; normalizeChipVariant
+     strips the suffix to the solid chip of the SAME colour instead, and the
+     class names what painted rather than what was asked for. */
+  test.each([['primary-light', 'chip-primary'], ['success-light', 'chip-success']])(
+    '%s renders as %s, with no -light class',
+    (variant, expected) => {
+      const { container } = render(<Chip variant={variant} label="Test" />);
+      expect(container.querySelector('.' + expected)).toBeInTheDocument();
+      expect(container.querySelector('[class*="-light"]')).not.toBeInTheDocument();
+    },
+  );
 
   test.each(['small', 'medium', 'large'])('renders %s size', (size) => {
     const { container } = render(<Chip size={size} label="Test" />);
@@ -120,14 +154,19 @@ describe('Convenience Exports', () => {
     expect(container.querySelector('.chip-error')).toBeInTheDocument();
   });
 
-  test('PrimaryOutlineChip renders', () => {
+  test('PrimaryOutlineChip still renders — a stale import is not a build error', () => {
     const { container } = render(<PrimaryOutlineChip label="Test" />);
-    expect(container.querySelector('.chip-primary-outline')).toBeInTheDocument();
+    expect(container.querySelector('.chip-primary')).toBeInTheDocument();
   });
 
-  test('SuccessLightChip renders', () => {
-    const { container } = render(<SuccessLightChip label="Test" />);
-    expect(container.querySelector('.chip-success-light')).toBeInTheDocument();
+  /* A "light" chip needs no special handling now — it is just an unselected
+     chip, which already sits in the palette's brightest zone. The shape that
+     used to be spelled `-light`, then `-outline`, is the default state. */
+  test('a light chip is simply an unselected chip', () => {
+    const { container } = render(<Chip variant="success" label="Test" />);
+    const chip = container.querySelector('.chip-success');
+    expect(chip.getAttribute('data-theme')).toBe('Success');
+    expect(chip.getAttribute('data-surface')).toBe('Surface-Brightest');
   });
 });
 

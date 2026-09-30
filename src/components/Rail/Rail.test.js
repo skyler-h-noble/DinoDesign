@@ -175,3 +175,94 @@ describe('Rail — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+/* --- The design's two Styles --- */
+describe('Label style', () => {
+  /* Not decoration: the Style decides WHERE the state paints. Contained wraps
+     the icon and the label together; outside paints a circle around the icon
+     alone and leaves the label plain beneath it. */
+  test('contained by default', () => {
+    const { container } = renderRail();
+    expect(container.querySelector('.rail-label-contained')).toBeInTheDocument();
+  });
+  test('outside when asked', () => {
+    const { container } = renderRail({ labelStyle: 'outside' });
+    expect(container.querySelector('.rail-label-outside')).toBeInTheDocument();
+  });
+});
+
+/* --- The slot takes an avatar --- */
+describe('Avatar in the slot', () => {
+  /* An account at the foot of a rail is the same item shape with a face in
+     it. The avatar is passed through UNWRAPPED — inside <Icon> it would take
+     the icon's colour and sizing, which is right for a glyph and wrong for a
+     picture. */
+  test('renders an avatar instead of an icon', () => {
+    render(<Rail items={[{ avatar: <img alt="" data-testid="face" src="a.png" />, label: 'Account' }]} />);
+    expect(screen.getByTestId('face')).toBeInTheDocument();
+  });
+  test('the item is still a tab with its label as the name', () => {
+    render(<Rail items={[{ avatar: <span data-testid="face" />, label: 'Account' }]} />);
+    expect(screen.getByRole('tab', { name: 'Account' })).toBeInTheDocument();
+  });
+});
+
+/* --- Disabled --- */
+describe('Disabled items', () => {
+  test('does not select on click', () => {
+    const onChange = jest.fn();
+    render(<Rail items={[
+      { icon: <HomeIcon />, label: 'Home' },
+      { icon: <InboxIcon />, label: 'Inbox', disabled: true },
+    ]} onChange={onChange} />);
+    fireEvent.click(screen.getByRole('tab', { name: 'Inbox' }));
+    expect(onChange).not.toHaveBeenCalled();
+  });
+});
+
+/* --- Label element --- */
+describe('Label typography', () => {
+  /* Caption renders a <p>, and a <p> inside a <button> is not phrasing
+     content — the browser was silently repairing the markup. The design's
+     style is Labels/Extra-Small, which the lib publishes, so it is both the
+     right type and valid nesting. */
+  test('the label is not a paragraph inside the button', () => {
+    const { container } = renderRail();
+    expect(container.querySelector('button p')).toBeNull();
+  });
+});
+
+/* --- Three sizes --- */
+describe('Size', () => {
+  /* Rail-Width is mode-scoped in Figma — 80 / 72 / 96 across medium / small /
+     large — so a rail holding one number could only ever be the medium one.
+     In CSS a mode is the Sm-/Lg- prefix, the same idiom Button and Tabs use. */
+  test('medium by default', () => {
+    const { container } = renderRail();
+    expect(container.querySelector('.rail-medium')).toBeInTheDocument();
+  });
+  test('small and large are selectable', () => {
+    expect(renderRail({ size: 'small' }).container.querySelector('.rail-small'))
+      .toBeInTheDocument();
+    expect(renderRail({ size: 'large' }).container.querySelector('.rail-large'))
+      .toBeInTheDocument();
+  });
+  test('an unknown size falls back to medium rather than to no width', () => {
+    // var(undefined) would collapse the rail to nothing, which reads as a
+    // rendering fault rather than as a bad prop.
+    const { container } = renderRail({ size: 'enormous' });
+    expect(container.querySelector('.rail-medium')).toBeInTheDocument();
+  });
+});
+
+describe('the items are centred in the rail', () => {
+  test('the list takes its padding out of the rail width, not in addition to it', () => {
+    /* 100% wide plus 8px a side is the rail's width plus 16px; the overflow
+       is clipped on the right and every "centred" item sits 8px right of
+       the rail's centre. Border-box is what makes 100% mean the rail. */
+    const { container } = render(<Rail items={[{ icon: <span />, label: 'Home' }]} />);
+    const list = container.querySelector('[role="tablist"]');
+    expect(getComputedStyle(list).boxSizing).toBe('border-box');
+    expect(getComputedStyle(list).width).toBe('100%');
+  });
+});

@@ -24,9 +24,12 @@ describe('Select', () => {
     renderSelect();
     expect(screen.getByRole('combobox')).toBeInTheDocument();
   });
-  test('has data-surface', () => {
+  /* No pinned surface: the trigger reads the closest data-theme/data-surface
+     from its ANCESTORS so the control matches wherever it is placed, rather
+     than forcing Container-Lowest on every one. */
+  test('does not pin its own surface', () => {
     const { container } = renderSelect();
-    expect(container.querySelector('[data-surface="Container-Lowest"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-surface="Container-Lowest"]')).toBeNull();
   });
 });
 
@@ -105,11 +108,54 @@ describe('Sizes', () => {
 
 /* --- Selection styles --- */
 describe('Selection styles', () => {
-  ['default', 'light', 'solid'].forEach((ss) => {
+  ['default', 'solid'].forEach((ss) => {
     test(ss + ' class', () => {
       const { container } = renderSelect({ selectionStyle: ss });
       expect(container.querySelector('.select-style-' + ss)).toBeInTheDocument();
     });
+  });
+
+  test('light is gone — it falls back to default and emits no light class', () => {
+    /* It named --Buttons-{C}-Light-{Button,Text,Border}, which no design
+       system publishes, with no fallbacks — so all three declarations were
+       invalid and a selected option had no fill, no text colour and no
+       border. The class assertion is the part that matters: a stale
+       select-style-light would keep a brand stylesheet styling a variant the
+       component no longer implements. */
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const { container } = renderSelect({ selectionStyle: 'light' });
+    expect(container.querySelector('.select-style-light')).not.toBeInTheDocument();
+    expect(container.querySelector('.select-style-default')).toBeInTheDocument();
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  test('variant="light" is gone too, and never did anything', () => {
+    // isLight was computed and read by no code path; the class was its only
+    // observable effect.
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const { container } = renderSelect({ variant: 'light' });
+    expect(container.querySelector('.select-variant-light')).not.toBeInTheDocument();
+    expect(container.querySelector('.select-variant-outline')).toBeInTheDocument();
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  test('no style or variant class names a removed shade', () => {
+    /* Scoped to the style/variant classes on purpose. A blanket
+       /-(light|medium|dark)/ over the whole className matches select-medium,
+       which is the SIZE — an assertion that fails on a correct render is worse
+       than none, because the fix is to loosen it until it stops meaning
+       anything. */
+    for (const ss of ['default', 'solid']) {
+      const { container } = renderSelect({ selectionStyle: ss });
+      const classes = container.querySelector('.select-wrapper').className.split(/\s+/);
+      const styleClasses = classes.filter((c) => /^select-(style|variant)-/.test(c));
+      expect(styleClasses.length).toBeGreaterThan(0);
+      for (const c of styleClasses) {
+        expect(c).not.toMatch(/-(light|medium|dark)$/);
+      }
+    }
   });
 });
 

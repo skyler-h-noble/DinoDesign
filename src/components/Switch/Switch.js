@@ -78,7 +78,12 @@ function outlineStyles(color) {
     type: 'outline',
     color: C,
     trackOff:       'var(--Background)',
-    trackOffBorder: 'var(--Border-Variant)',
+    /* --Border, not --Border-Variant. In the OFF state this edge is the only
+       thing drawing the control at all — the track is the page colour — so it
+       is the control's boundary and carries WCAG 1.4.11's 3:1. Border-Variant
+       is documented as DECORATIVE and guarantees no ratio, which is the same
+       mistake Slider's rail had before it was moved to --Border. */
+    trackOffBorder: 'var(--Border)',
     // ON is a FILLED track, same as the design's default. It used to be
     // transparent, which read as "nothing happened" next to the default
     // variant — only the border changed colour.
@@ -96,8 +101,12 @@ function lightStyles(color) {
   return {
     type: 'light',
     color: C,
+    /* Was --Border-Variant as the FILL with no edge — a decorative token doing
+       the whole job of showing an interactive control. The fill can stay quiet;
+       the EDGE is what has to be findable, so the pairing inverts: the track
+       keeps a soft fill and gains the 3:1 border the outline variant uses. */
     trackOff:       'var(--Border-Variant)',
-    trackOffBorder: 'transparent',
+    trackOffBorder: 'var(--Border)',
     // The light tone fills the track. There are no --Buttons-*-Light-* tokens
     // in the export, so this uses Color-11 — the same tone Button's light
     // variant fills with.
@@ -105,7 +114,10 @@ function lightStyles(color) {
     trackOnBorder:  'var(--Buttons-' + C + '-Border)',
     dotOff:         'var(--Quiet)',
     dotOn:          'var(--Buttons-' + C + '-Border)',
-    iconOff:        'var(--Border-Variant)',
+    /* The off icon sits ON the track, so it needs a ratio against it. Quiet is
+       the 4.5:1 token tuned per surface; Border-Variant guaranteed nothing and
+       put a decorative tone on a mark the user is meant to read. */
+    iconOff:        'var(--Quiet)',
     iconOn:         'var(--' + C + '-Color-11)',
     // Base theme + brightest surface; *-Light themes are not generated.
     dataTheme:      C,
@@ -199,7 +211,7 @@ export function Switch({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    transition: 'background-color 0.15s ease',
+    transition: 'background-color var(--Motion-Duration-Fast, 150ms) var(--Motion-Easing-Standard, cubic-bezier(0.2, 0, 0, 1))',
     '& > *': { width: sc.icon, height: sc.icon, display: 'block' },
   };
 
@@ -238,7 +250,11 @@ export function Switch({
       // and the root goes on the right.
       paddingRight: (rootW - sc.trackW + THUMB_INSET) + 'px',
       color: 'transparent',
-      transition: 'justify-content 0.15s ease',
+      // KNOWN DEFECT: justify-content is a discrete property, so this
+      // transition is inert and the thumb snaps between ends. Fixing it means
+      // moving the thumb with transform, which needs the switchBase geometry
+      // reworked — see the note in the motion standard.
+      transition: 'justify-content var(--Motion-Duration-Instant, 100ms) var(--Motion-Easing-Standard, cubic-bezier(0.2, 0, 0, 1))',
       transform: 'none',
 
       '& .MuiSwitch-input': { left: 0, top: 0, width: '100%', height: '100%', margin: 0 },
@@ -291,7 +307,7 @@ export function Switch({
       position: 'absolute',
       top: trackTop,
       left: 0,
-      transition: 'background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
+      transition: 'background-color var(--Motion-Duration-Fast, 150ms) var(--Motion-Easing-Standard, cubic-bezier(0.2, 0, 0, 1)), border-color var(--Motion-Duration-Fast, 150ms) var(--Motion-Easing-Standard, cubic-bezier(0.2, 0, 0, 1)), box-shadow var(--Motion-Duration-Fast, 150ms) var(--Motion-Easing-Standard, cubic-bezier(0.2, 0, 0, 1))',
     },
 
     ...sx,
@@ -348,7 +364,7 @@ export function Switch({
               color: disabled ? 'var(--Text-Quiet)' : 'var(--Text)',
               fontSize: size === 'small' ? '13px' : '15px',
               fontWeight: 500,
-              opacity: disabled ? 0.6 : 1,
+              opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
             }}
           >
             {label}

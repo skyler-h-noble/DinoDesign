@@ -1,10 +1,11 @@
 // src/components/Avatar/Avatar.js
 import React, { useState } from 'react';
 import { Box } from '@mui/material';
-import PersonIcon from '@mui/icons-material/Person';
+import { AvatarGlyph } from './AvatarGlyph';
 import { Icon } from '../Icon/Icon';
-import { Eyebrow, EyebrowSmall, EyebrowLarge, CAP_HEIGHT_TRIM } from '../Typography';
+import { NumberSmall, NumberMedium, NumberLarge, CAP_HEIGHT_TRIM } from '../Typography';
 import { DEFAULT_AVATAR_SRC } from './defaultAvatar';
+import { useGhost, ghostBlockSx } from '../_ghost';
 
 /**
  * Avatar Component
@@ -12,11 +13,17 @@ import { DEFAULT_AVATAR_SRC } from './defaultAvatar';
  * CONTENT (priority): real src → initials → explicit icon → DEFAULT PHOTO.
  *   The default avatar IS the photo: a bare <Avatar /> shows the built-in photo.
  *   The three Figma variants map to: bare <Avatar /> (photo), initials="…"
- *   (initials), icon={…} (icon). defaultPhoto={false} restores the Person-icon
+ *   (initials), icon={…} (icon). defaultPhoto={false} restores the brand glyph
  *   fallback for a bare avatar.
  *
  * SIZES (Figma-aligned):
- *   xxx-small  16   |  xx-small  24   |  x-small   32   |  small  40
+ *   xx-small   24   |  x-small   32   |  small     40
+ *
+ * There was an xxx-small at 16. It is gone: Figma has no 16px STANDALONE
+ * avatar, and the only thing that wanted one was Button's decorator — which
+ * has its own ramp (Button-Avatar 16/20/40) and now passes a pixel size
+ * directly. A named size that exists for one internal caller is a public API
+ * paying for a private need.
  *   medium     56   |  large     64   |  x-large   80   |  xx-large 160
  *   custom     — pass `customSize` (pixel diameter); icon ~50%.
  *
@@ -49,53 +56,108 @@ const COLOR_MAP = {
 // initials. Larger sizes use larger type tokens so initials scale with the
 // avatar. 'custom' falls back to whatever `customSize` is passed (a number
 // of pixels). Icon size scales as a rough 50% of the avatar diameter.
+/* ALIGNED TO FIGMA 2026-09-28 — and this MOVED THREE EXISTING NAMES.
+ *
+ * The two ladders held the same pixel values under names offset by two steps:
+ *
+ *   Figma  xxs 16 · xs 20 · small 24 · medium 32 · large 40 · xl 56 · xxl 72
+ *   was                     xx-small 24 · x-small 32 · small 40 · medium 56 …
+ *
+ * So a designer picking "medium" got 32 and a developer writing size="medium"
+ * got 56, with nothing to report it — both sides used one vocabulary for
+ * different rungs. The initials ramp confirmed the offset independently
+ * (Figma small -> 14 was the lib's xx-small -> 14).
+ *
+ * BREAKING, and it cannot be shimmed. `small`, `medium` and `large` exist in
+ * both ladders with different values, so there is no way to tell which one a
+ * call site meant — a runtime warning would have to fire on every usage,
+ * including the correct ones. The old x- and xx- spellings CAN be mapped,
+ * because they do not exist in the new ladder and their pixel values are
+ * unambiguous; see LEGACY_SIZE_ALIAS below.
+ *
+ *   size="small"   40 -> 24
+ *   size="medium"  56 -> 32
+ *   size="large"   64 -> 40
+ *
+ * x-large (80) and xx-large (160) are KEPT. Figma's ladder stops at 72, and
+ * dropping them would delete the only sizes an avatar-led layout has — a
+ * profile header is not a 72px avatar. They are lib-only extensions above the
+ * design's range, and that is recorded here rather than left to be rediscovered
+ * as a gap.
+ */
 const SIZE_MAP = {
-  'xxx-small': { size: 16,  iconSize: 10 },
-  'xx-small':  { size: 24,  iconSize: 14 },
-  'x-small':   { size: 32,  iconSize: 18 },
-  small:       { size: 40,  iconSize: 22 },
-  medium:      { size: 56,  iconSize: 28 },
-  large:       { size: 64,  iconSize: 32 },
+  xxs:         { size: 16,  iconSize: 9 },
+  xs:          { size: 20,  iconSize: 12 },
+  small:       { size: 24,  iconSize: 14 },
+  medium:      { size: 32,  iconSize: 18 },
+  large:       { size: 40,  iconSize: 22 },
+  xl:          { size: 56,  iconSize: 28 },
+  xxl:         { size: 72,  iconSize: 40 },
+  /* Above Figma's range — no mode exists for these. */
   'x-large':   { size: 80,  iconSize: 40 },
   'xx-large':  { size: 160, iconSize: 80 },
 };
 
-// Initials wear the EYEBROW style — same face, weight and tracking as an
-// eyebrow label. Which of the three eyebrow steps a size gets decides its
-// weight and tracking only; the size itself comes from INITIALS_FONT_SIZE
-// below, because an avatar ramp is eight steps wide and the eyebrow ramp is
-// three.
+/* The two spellings that CAN be carried over, because the new ladder has no
+   name colliding with them and the pixel value is unchanged. Warned once so a
+   consumer learns the new name rather than discovering it when the alias goes. */
+const LEGACY_SIZE_ALIAS = { 'xx-small': 'small', 'x-small': 'medium' };
+let warnedLegacySize = false;
+
+function resolveSizeName(size) {
+  const mapped = LEGACY_SIZE_ALIAS[size];
+  if (!mapped) return size;
+  if (process.env.NODE_ENV !== 'production' && !warnedLegacySize) {
+    warnedLegacySize = true;
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[Avatar] size="${size}" is the old ladder's name for ${SIZE_MAP[mapped].size}px. ` +
+      `Use size="${mapped}". The ladder was realigned to Figma on 2026-09-28; ` +
+      'note that small, medium and large also changed value.',
+    );
+  }
+  return mapped;
+}
+
+// Initials wear the NUMBER style — the design's "Avatar-Initials" text style is
+// Font(family: Typography/Number/Small/Font-Family, weight: …/Font-Weight,
+// lineHeight: …/Line-Height, letterSpacing: …/Character-Spacing). That face is
+// the Body face at 700 with ZERO tracking, which is why there is no
+// tracking-cancel hack here: the eyebrow face this used to borrow is tracked
+// out 0.04–0.06em, and centred initials had to be pulled back by half of it.
 //
-// `token` is the step's own token name, needed to cancel its tracking (see the
-// render): letter-spacing adds space AFTER the last letter too, which shifts
-// centred initials left by half the tracking.
-function getInitialsStyle(size) {
+// Which of the three Number steps a size gets decides face and weight only —
+// all three are the same face at 700, so in practice this is about line-height.
+function getInitialsComp(size) {
   switch (size) {
-    case 'xxx-small':
     case 'xx-small':
-    case 'x-small':   return { Comp: EyebrowSmall, token: 'Overline-Small' };
-    case 'small':
+    case 'x-small':
+    case 'small':     return NumberSmall;
     case 'medium':
-    case 'large':     return { Comp: Eyebrow,      token: 'Overline-Medium' };
+    case 'large':     return NumberMedium;
     case 'x-large':
-    case 'xx-large':  return { Comp: EyebrowLarge, token: 'Overline-Large' };
-    default:          return { Comp: Eyebrow,      token: 'Overline-Medium' };
+    case 'xx-large':  return NumberLarge;
+    default:          return NumberMedium;
   }
 }
 
-// Size per avatar step. These are the sizes the initials already rendered at —
-// the eyebrow switch changes the face, not the scale. Every value but the
-// smallest is a token; nothing in the type ramp goes down to 7px.
-const INITIALS_FONT_SIZE = {
-  'xxx-small': '7px',
-  'xx-small':  'var(--Legal-Font-Size)',
-  'x-small':   'var(--Number-Small-Font-Size)',
-  'small':     'var(--Number-Small-Font-Size)',
-  'medium':    'var(--Number-Medium-Font-Size)',
-  'large':     'var(--Number-Medium-Font-Size)',
-  'x-large':   'var(--Number-Large-Font-Size)',
-  'xx-large':  'var(--Number-Large-Font-Size)',
-};
+// Initials size is a function of the avatar's DIAMETER, not an independent type
+// step — a 160px avatar and a 24px one are the same glyphs at different scales.
+// The design anchors the ratio: a 24px avatar binds its initials to
+// --Button-Avatar-Text = 14px, i.e. 7/12 of the diameter. Every step is derived
+// from that one anchor, which also makes `customSize` scale correctly (it used
+// to silently borrow medium's fixed size).
+//
+// This is deliberately NOT read from --Number-{Step}-Font-Size. That ramp is
+// 16 / 28 / 36 and stops well short of the 160px avatar, so the largest steps
+// would render initials at under a quarter of the circle.
+const initialsFontSize = (diameter) => Math.round((diameter * 7) / 12) + 'px';
+
+// The design draws the avatar ring at 1px — the same hairline the system uses
+// for a button's border, so it tracks --Button-Border-Width rather than being
+// pinned. (That token is 1px and load-bearing for the Figma button heights; it
+// is only READ here.)
+const BORDER_WIDTH = 'var(--Button-Border-Width, 1px)';
 
 export function Avatar({
   src,
@@ -108,8 +170,9 @@ export function Avatar({
   initials,
   icon,
   color = 'default',
-  // Default size is x-small (XS, 32px) per the design spec's default avatar.
-  size = 'x-small',
+  /* 32px, which the realigned ladder calls `medium` — it was `x-small` under
+     the old names. The pixel value is unchanged; only the word moved. */
+  size = 'medium',
   customSize,
   clickable = false,
   onClick,
@@ -120,11 +183,12 @@ export function Avatar({
   sx = {},
   ...props
 }) {
+  const ghost = useGhost();
   const [imgError, setImgError] = useState(false);
   // Custom size — pixel diameter from `customSize` prop, icon ~50% of that.
   const s = size === 'custom' && customSize
     ? { size: customSize, iconSize: Math.round(customSize * 0.5) }
-    : (SIZE_MAP[size] || SIZE_MAP.medium);
+    : (SIZE_MAP[resolveSizeName(size)] || SIZE_MAP.medium);
   const C = COLOR_MAP[color] || COLOR_MAP.default;
 
   // Photo source: an explicit src wins; otherwise the built-in default photo —
@@ -150,6 +214,7 @@ export function Avatar({
       aria-label={alt || initials || 'Avatar'}
       tabIndex={isClickable ? 0 : undefined}
       onClick={isClickable ? onClick : undefined}
+      {...(ghost ? { 'data-ghost-block': 'true' } : {})}
       className={'avatar avatar-' + size + ' avatar-' + color +
         (isClickable ? ' avatar-clickable' : '') +
         (hasSrc ? ' avatar-image' : hasInitials ? ' avatar-initials' : ' avatar-fallback') +
@@ -160,12 +225,30 @@ export function Avatar({
         borderRadius: '50%',
         backgroundColor: bg,
         color: textColor,
+        /* Keeps the circle — a ghosting avatar is the avatar's own geometry
+           with the photo and initials gone, so the row does not reflow when
+           the real one loads. The 50% radius above already wins over the
+           block's default. */
+        ...(ghost ? ghostBlockSx({ radius: '50%', animate: ghost.animate }) : {}),
         fontFamily: 'inherit', fontWeight: 600,
         overflow: 'hidden',
         flexShrink: 0,
-        // Photo variant has NO border — the image is the visual. Initials/icon
-        // variants keep the 2px themed border for a visible boundary.
-        border: hasSrc ? 'none' : '2px solid ' + borderColor,
+        // Border per variant, from the design's three Avatar styles:
+        //   Photo    → 1px ring in the SURFACE border. A photo has no palette
+        //              (the image is the visual), so it takes --Border rather
+        //              than the colour prop's button border.
+        //   Initials → 1px ring in the palette's button border. At `default`
+        //              these two resolve to the same value; they diverge once
+        //              a colour prop is set, which is the generalisation the
+        //              design's single default-coloured instance implies.
+        //   Icon     → NO ring. The design's Default style is a filled glyph.
+        // This used to be exactly inverted: no ring on the photo, a 2px ring on
+        // the other two.
+        border: hasSrc
+          ? BORDER_WIDTH + ' solid var(--Border)'
+          : hasInitials
+            ? BORDER_WIDTH + ' solid ' + borderColor
+            : 'none',
         // Inside-button breathing room. Pure margin so the avatar's circular
         // silhouette doesn't get pushed into an ellipse by padding.
         ...(insideButton && { marginLeft: '2px', marginRight: '2px' }),
@@ -197,18 +280,15 @@ export function Avatar({
         />
       )}
       {hasInitials && (() => {
-        const { Comp: TextComp, token } = getInitialsStyle(size);
+        const TextComp = getInitialsComp(size);
         return (
           <TextComp
             sx={{
               color: 'inherit',
-              // No fontWeight override — the eyebrow step carries its own.
-              fontSize: INITIALS_FONT_SIZE[size] || INITIALS_FONT_SIZE.medium,
+              // No fontWeight override — the Number step carries its own (700).
+              fontSize: initialsFontSize(s.size),
               lineHeight: 1,
               textAlign: 'center',
-              // Cancel the trailing half of the eyebrow's tracking. Without
-              // this the initials sit visibly left of centre in the circle.
-              marginInlineEnd: `calc(-1 * var(--${token}-Letter-Spacing, 0px))`,
               // Trim to cap height / baseline — Figma's "cap height to
               // baseline" — so the initials centre on their own letterforms.
               ...CAP_HEIGHT_TRIM,
@@ -221,7 +301,7 @@ export function Avatar({
       })()}
       {isFallback && (
         <Icon size={size} sx={{ color: 'inherit' }}>
-          {icon || <PersonIcon />}
+          {icon || <AvatarGlyph />}
         </Icon>
       )}
     </Box>

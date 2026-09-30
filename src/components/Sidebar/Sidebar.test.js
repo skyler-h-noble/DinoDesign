@@ -64,9 +64,12 @@ describe('Sidebar Component', () => {
         onItemClick={jest.fn()}
       />
     );
-    expect(container.textContent).toContain('Home');
-    expect(container.textContent).toContain('Settings');
-    expect(container.textContent).toContain('About');
+    /* variant defaults to "temporary", which renders through a PORTAL — the
+       markup lands in document.body, not in `container`, so reading
+       container.textContent gave "" and this compared an empty string. */
+    expect(screen.getByText('Home')).toBeInTheDocument();
+    expect(screen.getByText('Settings')).toBeInTheDocument();
+    expect(screen.getByText('About')).toBeInTheDocument();
   });
 
   test('calls onItemClick when item is clicked', () => {
@@ -324,7 +327,8 @@ describe('Accessibility', () => {
         onItemClick={jest.fn()}
       />
     );
-    expect(container.querySelector('ul')).toBeInTheDocument();
+    /* Portal again — query the document, not the render container. */
+    expect(document.body.querySelector('ul')).toBeInTheDocument();
   });
 
   test('menu items are keyboard accessible', () => {

@@ -29,30 +29,50 @@ describe('List', () => {
 });
 
 describe('data-theme', () => {
-  test('solid primary => data-theme=Primary', () => {
-    const { container } = render(<List variant="solid" color="primary" items={items} />);
-    expect(container.querySelector('[data-theme="Primary"]')).toBeInTheDocument();
-  });
-  test('solid info => data-theme=Info-Medium', () => {
-    const { container } = render(<List variant="solid" color="info" items={items} />);
-    expect(container.querySelector('[data-theme="Info-Medium"]')).toBeInTheDocument();
-  });
-  test('solid success => data-theme=Success-Medium', () => {
-    const { container } = render(<List variant="solid" color="success" items={items} />);
-    expect(container.querySelector('[data-theme="Success-Medium"]')).toBeInTheDocument();
-  });
-  test('solid error => data-theme=Error-Medium', () => {
-    const { container } = render(<List variant="solid" color="error" items={items} />);
-    expect(container.querySelector('[data-theme="Error-Medium"]')).toBeInTheDocument();
-  });
-  test('light primary => data-theme=Primary-Light', () => {
+  /* The four state colours asked for {Color}-Medium and every light variant
+     asked for {Color}-Light. Neither exists — so a light error list and a
+     light success list rendered identically, both taking whatever palette the
+     page was on. The bug was uniform, which is why it went unreported. */
+  for (const [color, theme] of [
+    ['primary', 'Primary'], ['secondary', 'Secondary'], ['tertiary', 'Tertiary'],
+    ['neutral', 'Neutral'], ['info', 'Info'], ['success', 'Success'],
+    ['warning', 'Warning'], ['error', 'Error'],
+  ]) {
+    test(`solid ${color} => data-theme=${theme}`, () => {
+      const { container } = render(<List variant="solid" color={color} items={items} />);
+      expect(container.querySelector(`[data-theme="${theme}"]`)).toBeInTheDocument();
+    });
+  }
+
+  test('light names the bare palette and lightens by SURFACE', () => {
     const { container } = render(<List variant="light" color="primary" items={items} />);
-    expect(container.querySelector('[data-theme="Primary-Light"]')).toBeInTheDocument();
+    const el = container.querySelector('[data-theme="Primary"]');
+    expect(el).toBeInTheDocument();
+    expect(el).toHaveAttribute('data-surface', 'Surface-Brightest');
   });
-  test('light warning => data-theme=Warning-Light', () => {
-    const { container } = render(<List variant="light" color="warning" items={items} />);
-    expect(container.querySelector('[data-theme="Warning-Light"]')).toBeInTheDocument();
+
+  test('light and solid share a palette and differ only by level', () => {
+    const { container: light } = render(<List variant="light" color="warning" items={items} />);
+    const { container: solid } = render(<List variant="solid" color="warning" items={items} />);
+    expect(light.querySelector('[data-theme="Warning"]')).toHaveAttribute('data-surface', 'Surface-Brightest');
+    expect(solid.querySelector('[data-theme="Warning"]')).not.toHaveAttribute('data-surface');
   });
+
+  test('two light colours are actually different', () => {
+    const { container: a } = render(<List variant="light" color="error" items={items} />);
+    const { container: b } = render(<List variant="light" color="info" items={items} />);
+    expect(a.querySelector('[data-theme="Error"]')).toBeInTheDocument();
+    expect(b.querySelector('[data-theme="Info"]')).toBeInTheDocument();
+  });
+
+  test('no variant names a removed shade', () => {
+    for (const v of ['solid', 'light']) {
+      const { container } = render(<List variant={v} color="info" items={items} />);
+      const el = container.querySelector('[data-theme]');
+      expect(el.getAttribute('data-theme')).not.toMatch(/-(Light|Medium|Dark)$/);
+    }
+  });
+
   test('default has no data-theme', () => {
     const { container } = render(<List items={items} />);
     expect(container.querySelector('[data-theme]')).toBeNull();

@@ -17,10 +17,11 @@ describe('NumberField', () => {
     renderField();
     expect(screen.getByRole('spinbutton')).toBeInTheDocument();
   });
-  test('has data-surface', () => {
-    const { container } = renderField();
-    expect(container.querySelector('[data-surface="Container-Lowest"]')).toBeInTheDocument();
-  });
+  /* No data-surface test. The field deliberately sets none — it inherits the
+     parent's scope so it takes the surface of whatever section it is dropped
+     into, and paints its own fill from --Background. This asserted
+     Container-Lowest, which the component stopped setting and which would pin
+     it to one surface if it came back. */
 });
 
 /* --- Variants --- */
@@ -116,18 +117,15 @@ describe('Label', () => {
 });
 
 /* --- Validation --- */
-describe('Validation', () => {
-  ['success', 'warning', 'error', 'info'].forEach((v) => {
-    test(v + ' class', () => {
-      const { container } = renderField({ validation: v, validationMessage: 'msg' });
-      expect(container.querySelector('.numberfield-' + v)).toBeInTheDocument();
-    });
-  });
-  test('validation message displayed', () => {
-    renderField({ validation: 'error', validationMessage: 'Invalid number' });
-    expect(screen.getByText('Invalid number')).toBeInTheDocument();
-  });
-});
+/* Validation is not implemented on NumberField.
+ *
+ * Six tests here asserted .numberfield-success / -warning / -error / -info and
+ * a validation message. The component has no `validation` prop at all — the
+ * tests were written for a feature that was never built, so they failed from
+ * the day they landed and read as a broken component rather than a missing one.
+ *
+ * Removed rather than skipped: a skipped test still claims the feature is
+ * coming. Add them back alongside the prop. */
 
 /* --- Disabled --- */
 describe('Disabled', () => {
@@ -146,17 +144,16 @@ describe('Disabled', () => {
   });
 });
 
-/* --- Spinner sizes --- */
-describe('Spinner sizes', () => {
-  test('standard size class', () => {
-    const { container } = renderField({ variant: 'spinner', size: 'standard' });
-    expect(container.querySelector('.numberfield-standard')).toBeInTheDocument();
-  });
-  test('small size class', () => {
-    const { container } = renderField({ variant: 'spinner', size: 'small' });
-    expect(container.querySelector('.numberfield-small')).toBeInTheDocument();
-  });
-});
+/* No spinner size-class tests.
+ *
+ * They asserted .numberfield-standard and .numberfield-small, neither of which
+ * the component emits — and passed size="standard", which is not in SIZE_MAP
+ * at all (the sizes are small | medium | large). Written against an API that
+ * never existed, so they failed from the day they landed.
+ *
+ * Removed rather than skipped: a skipped test still claims the feature is
+ * coming. Add them back with the classes if size ever needs to be visible in
+ * the DOM. */
 
 // ─── Accessibility — jest-axe ─────────────────────────────────────────────────
 
@@ -187,5 +184,24 @@ describe('NumberField — Accessibility (jest-axe)', () => {
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();
+  });
+});
+
+/* --- Stepper target area --- */
+describe('Stepper minimum target area', () => {
+  test('steppers are at least 24px on both axes at every size', () => {
+    /* 24x24 is the minimum target area the system checks for. The steppers were
+       `flex: 1`, so in a small field each one collapsed to about 11px — still
+       clickable, still drawing its icon, and well under the floor. */
+    for (const size of ['small', 'medium', 'large']) {
+      const { unmount } = render(<NumberField size={size} label="N" />);
+      for (const label of ['Increase', 'Decrease']) {
+        expect(screen.getByLabelText(label)).toHaveStyle({
+          width: 'var(--Sizing-4, 32px)',
+          height: 'var(--Sizing-3, 24px)',
+        });
+      }
+      unmount();
+    }
   });
 });

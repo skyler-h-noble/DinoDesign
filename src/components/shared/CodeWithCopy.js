@@ -1,8 +1,12 @@
 // src/components/shared/CodeWithCopy.js
 import React, { useState } from 'react';
-import { Box, IconButton, Tooltip } from '@mui/material';
+import { Box, Tooltip } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
+import { IconButton } from '../Button/Button';
+/* The lib's own icon button — <Button iconOnly> — not MUI's, so hover,
+   pressed, focus-visible and disabled all come from Button rather than
+   being re-derived at each call site. */
 
 /**
  * CodeWithCopy Component
@@ -33,9 +37,6 @@ export function CodeWithCopy({ code, sx = {} }) {
           color: copied ? 'var(--Icons-Success)' : 'var(--Icon)',
           float: 'right',
           mt: -4,
-          '&:hover': {
-            backgroundColor: 'var(--Container)',
-          },
           ...sx,
         }}
       >

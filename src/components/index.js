@@ -181,7 +181,20 @@ export { Tooltip } from './Tooltip';
 
 // ========== APP STRUCTURE ==========
 export { AppBar, DesktopAppBar, MobileAppBar, AppBarShowcase } from './AppBar';
-export { Header } from './Header';
+/* `Header` was removed. It was a SECOND app bar — built on MUI's AppBar and
+   MUI's Typography rather than the library's, with four literal
+   rgba(0,0,0,0.1) shadows and three raw --Primary-Color-11 hovers, none of
+   which follow a brand. AppBar is the real one: it sets data-theme="App-Bar",
+   maps bar colours to theme + surface pairs, takes SHADOW_LEVEL_1, and
+   composes SearchField, Tabs, Drawer and Button.
+
+   Nothing imported it — verified across all thirteen projects depending on
+   this package, including both portfolio sites. The Omni design site had
+   written its OWN local Header rather than reach for this one, which is the
+   clearest evidence it was not serving a real need.
+
+   A marketing-site header is a legitimate thing to want and is NOT what this
+   was; if one is built it should sit on AppBar. Tracked on the backlog. */
 export { Footer, FooterShowcase } from './Footer';
 export { Copyright, CopyrightShowcase } from './Copyright';
 export { CurvedText, CurvedTextShowcase } from './CurvedText';
@@ -224,3 +237,23 @@ export { OmniTreeView as DynoTreeView } from './TreeView/TreeView';
 // data-theme="Neutral" + data-surface="Surface-Dimmest", not a literal colour,
 // so it follows the system's neutrals in both modes.
 export { CodeBlock, CopyButton } from './CodeBlock/CodeBlock';
+
+// ========== DATA VISUALISATION ==========
+// Single-series charts on the surface-paired tokens: --Icons-Primary for the
+// mark, --Border-Variant for tracks and gridlines, --Text / --Quiet for labels.
+// They re-theme with data-surface, which the --Chart-1..10 palette (for
+// MULTI-series charts) deliberately does not.
+//
+// `geometry` is exported too: it is pure math with no React or DOM, shared with
+// the Figma plugin so the two renderers cannot disagree about where a slice
+// ends or how a curve bends.
+export { BarChart, LineChart, PieChart, CHART_TOKENS, CHART_LABEL_TYPE } from './Charts';
+export * as chartGeometry from './Charts/geometry';
+
+/* What a region shows instead of data. A slot on Table and List rather than a
+   state variant on either — see StateMessage.js. */
+export { StateMessage } from './StateMessage';
+
+/* Loading placeholders — a state of the real components, not a separate
+   skeleton. See _ghost.js for why. */
+export { Ghost, useGhost, ghostBlockSx } from './_ghost';

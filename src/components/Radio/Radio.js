@@ -95,7 +95,25 @@ function RadioCircleIcon({ size, color, checked }) {
 
 // --- Radio Component ---------------------------------------------------------
 
+/* ZONE PROPS — `theme` and `surface`.
+ *
+ * They become data-theme / data-surface on the root, which redefines
+ * --Background, --Text, --Border, --Quiet, --Hover and --Pressed for
+ * everything inside, so the component takes its colours from the zone it sits
+ * in rather than from a prop.
+ *
+ * Deliberately NOT derived from `color`. The two are different knobs: `color`
+ * chooses which PALETTE a filled part draws from, while `theme` moves the whole
+ * surface — including the parts that carry a contrast requirement and therefore
+ * have to stay on zone tokens. Folding one into the other would make a palette
+ * choice silently restyle the contrast-bearing parts too.
+ *
+ * Both undefined when not passed, so the component INHERITS its ancestor's
+ * zone. An empty string would match [data-theme] selectors and pin it to
+ * nothing, which is worse than absent. */
 export function Radio({
+  theme,
+  surface,
   color = 'primary',
   size = 'medium',
   label,
@@ -142,6 +160,8 @@ export function Radio({
       value={value}
       icon={<RadioCircleIcon size={size} color={effectiveColor} checked={false} />}
       checkedIcon={<RadioCircleIcon size={size} color={effectiveColor} checked={true} />}
+      data-theme={theme || undefined}
+      data-surface={surface || undefined}
       className={'radio-' + effectiveColor + ' ' + className}
       inputProps={mergedInputProps}
       disableRipple
@@ -156,13 +176,19 @@ export function Radio({
         color: 'inherit',
         transition: 'background-color 0.15s ease-in-out',
         '&.Mui-checked': { color: 'inherit' },
+        /* Same as Checkbox: the ripple halo is suppressed and the ring takes
+           the state instead, so the dot stays the one thing that means
+           "selected". */
         '&:hover': { backgroundColor: 'transparent' },
+        '&:hover .radio-circle-icon': { borderColor: 'var(--Text)' },
+        '&:active .radio-circle-icon': { borderColor: 'var(--Text)', backgroundColor: 'var(--Pressed)' },
+        '&.Mui-disabled .radio-circle-icon': { opacity: 'var(--Disabled, 0.38)' },
         '&.Mui-focusVisible .radio-circle-icon': {
           outline: '2px solid var(--Focus-Visible)',
           outlineOffset: '2px',
         },
         '&.Mui-disabled': {
-          opacity: 0.6,
+          opacity: 'var(--Disabled, 0.38)',
           cursor: 'not-allowed',
           pointerEvents: 'none',
         },
@@ -247,7 +273,7 @@ export function RadioGroup({
             fontWeight: 500,
             mb: 1,
             '&.Mui-focused': { color: 'var(--Text)' },
-            '&.Mui-disabled': { color: 'var(--Text-Quiet)', opacity: 0.6 },
+            '&.Mui-disabled': { color: 'var(--Text-Quiet)', opacity: 'var(--Disabled, 0.38)' },
           }}
         >
           {label}

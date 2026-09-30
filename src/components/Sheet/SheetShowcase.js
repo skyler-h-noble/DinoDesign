@@ -73,14 +73,14 @@ function ColorSwatchButton({ color, selected, onClick }) {
 
 /* ── Main Showcase ── */
 export function SheetShowcase() {
-  const [variant, setVariant]     = useState('solid');
+  const [surfaceLevel, setSurfaceLevel] = useState('Surface');
   const [color, setColor]         = useState('default');
   const [elevated, setElevated]   = useState(false);
   const [bgTheme, setBgTheme]     = useState(null);
   const [bgSurface, setBgSurface] = useState('Surface');
 
   const generateCode = () => {
-    const parts = ['variant="' + variant + '"'];
+    const parts = ['surface="' + surfaceLevel + '"'];
     if (color !== 'default') parts.push('color="' + color + '"');
     if (elevated) parts.push('elevated');
     return (
@@ -102,7 +102,7 @@ export function SheetShowcase() {
 
           <PreviewSurface theme={bgTheme} surface={bgSurface}>
             <Box sx={{ width: '100%', maxWidth: 400 }}>
-              <Sheet variant={variant} color={color} elevated={elevated}>
+              <Sheet surface={surfaceLevel} color={color} elevated={elevated}>
                 <H5>Sheet Title</H5>
                 <Body style={{ color: 'var(--Quiet)' }}>
                   A themed surface container for grouping related content.
@@ -142,8 +142,8 @@ export function SheetShowcase() {
                   <Box>
                     <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</EyebrowSmall>
                     <Stack direction="row" spacing={1}>
-                      {['solid', 'light', 'dark'].map((v) => (
-                        <ControlButton key={v} label={cap(v)} selected={variant === v} onClick={() => setVariant(v)} />
+                      {['Surface-Brightest', 'Surface-Bright', 'Surface', 'Surface-Dim', 'Surface-Dimmest'].map((v) => (
+                        <ControlButton key={v} label={v.replace('Surface-', '') || 'Surface'} selected={surfaceLevel === v} onClick={() => setSurfaceLevel(v)} />
                       ))}
                     </Stack>
                   </Box>

@@ -22,13 +22,22 @@ describe('data-surface="Container"', () => {
     expect(container.querySelector('[data-surface="Container"]')).toBeInTheDocument();
   });
 
-  test('solid variant has data-surface="Container"', () => {
+  /* Container is for a DEFAULT-colour card, which respects the consumer's
+     card-coloring tokens. A themed card sits on a Surface level: solid ->
+     Surface, light -> Surface-Brightest, dark -> Surface-Dimmest. These two
+     asserted Container for themed cards, which is the one case it is not. */
+  test('a themed solid card sits on Surface', () => {
     const { container } = renderCard({ variant: 'solid', color: 'primary' });
-    expect(container.querySelector('[data-surface="Container"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-surface="Surface"]')).toBeInTheDocument();
   });
 
-  test('light variant has data-surface="Container"', () => {
+  test('a themed light card sits on Surface-Brightest', () => {
     const { container } = renderCard({ variant: 'light', color: 'primary' });
+    expect(container.querySelector('[data-surface="Surface-Brightest"]')).toBeInTheDocument();
+  });
+
+  test('and a default-colour card is the one that gets Container', () => {
+    const { container } = renderCard({});
     expect(container.querySelector('[data-surface="Container"]')).toBeInTheDocument();
   });
 });
@@ -67,10 +76,10 @@ describe('Solid variant data-theme', () => {
     ['secondary', 'Secondary'],
     ['tertiary', 'Tertiary'],
     ['neutral', 'Neutral'],
-    ['info', 'Info-Medium'],
-    ['success', 'Success-Medium'],
-    ['warning', 'Warning-Medium'],
-    ['error', 'Error-Medium'],
+    ['info', 'Info'],
+    ['success', 'Success'],
+    ['warning', 'Warning'],
+    ['error', 'Error'],
   ];
 
   cases.forEach(([color, theme]) => {
@@ -236,7 +245,7 @@ describe('Convenience exports', () => {
     const { container } = render(
       <SolidCard color="info"><CardContent>T</CardContent></SolidCard>
     );
-    expect(container.querySelector('[data-theme="Info-Medium"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-theme="Info"]')).toBeInTheDocument();
   });
 
   test('LightCard renders with data-theme', () => {

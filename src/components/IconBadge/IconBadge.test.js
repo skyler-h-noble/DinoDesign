@@ -28,11 +28,13 @@ describe('IconBadge', () => {
     expect(el).toHaveAttribute('data-surface', 'Surface');
   });
 
-  test('light variant sets data-theme="{Theme}-Light"', () => {
+  // -light is the base theme on the BRIGHTEST surface. There is no generated
+  // "{Theme}-Light" theme to point data-theme at.
+  test('light variant sets data-surface="Surface-Brightest" on the base theme', () => {
     const { container } = renderBadge({ color: 'primary', variant: 'light' });
     const el = container.querySelector('.icon-badge');
-    expect(el).toHaveAttribute('data-theme', 'Primary-Light');
-    expect(el).toHaveAttribute('data-surface', 'Surface');
+    expect(el).toHaveAttribute('data-theme', 'Primary');
+    expect(el).toHaveAttribute('data-surface', 'Surface-Brightest');
   });
 
   test('dark variant sets data-surface="Surface-Dimmest"', () => {

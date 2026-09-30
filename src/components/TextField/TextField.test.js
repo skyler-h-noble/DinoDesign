@@ -1,4 +1,5 @@
 // src/components/TextField/TextField.test.js
+import { useState } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
@@ -21,12 +22,29 @@ describe('TextField Component', () => {
   });
 
   test('updates value on input change', async () => {
-    const { getByRole } = render(
-      <TextField label="Test" value="" onChange={(e) => {}} />
-    );
-    const input = getByRole('textbox');
+    /* This has to hold state. The test used to pass `value=""` with a no-op
+       onChange, which is a controlled input pinned to empty — React writes the
+       prop back after every keystroke, so the value could never change and the
+       assertion could never pass. It was failing on the component's correct
+       behaviour.
+
+       Driving it through real state tests what the name says: onChange fires,
+       carries the typed value, and the field renders what it is given. */
+    function Harness() {
+      const [value, setValue] = useState('');
+      return <TextField label="Test" value={value} onChange={(e) => setValue(e.target.value)} />;
+    }
+    render(<Harness />);
+    const input = screen.getByRole('textbox');
     await userEvent.type(input, 'Hello');
     expect(input.value).toBe('Hello');
+  });
+
+  test('a controlled field with no onChange stays put', () => {
+    // The other half of the same contract, and the thing the old test was
+    // accidentally proving: pinning `value` really does hold the field.
+    render(<TextField label="Test" value="fixed" onChange={() => {}} />);
+    expect(screen.getByRole('textbox').value).toBe('fixed');
   });
 
   test('displays placeholder text', () => {
@@ -66,16 +84,23 @@ describe('TextField Component', () => {
   });
 
   test('handles focus and blur events', async () => {
-    const { getByRole } = render(
-      <TextField label="Test" />
-    );
-    const input = getByRole('textbox');
+    /* fireEvent.focus() dispatches a focus EVENT without moving the document's
+       focus, so toHaveFocus() could never pass — the old test asserted a state
+       its own trigger does not produce. A real click and a real tab move focus
+       for actual, and also prove the handlers fire, which is what the name
+       claims. */
+    const onFocus = jest.fn();
+    const onBlur = jest.fn();
+    render(<TextField label="Test" onFocus={onFocus} onBlur={onBlur} />);
+    const input = screen.getByRole('textbox');
 
-    fireEvent.focus(input);
+    await userEvent.click(input);
     expect(input).toHaveFocus();
+    expect(onFocus).toHaveBeenCalled();
 
-    fireEvent.blur(input);
+    await userEvent.tab();
     expect(input).not.toHaveFocus();
+    expect(onBlur).toHaveBeenCalled();
   });
 
   test('EmailTextField renders with email type', () => {

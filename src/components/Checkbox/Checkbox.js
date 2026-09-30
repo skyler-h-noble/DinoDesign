@@ -3,7 +3,7 @@ import React from 'react';
 import { Checkbox as MuiCheckbox, FormControlLabel, Box } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import RemoveIcon from '@mui/icons-material/Remove';
-import { Body, BodySmall } from '../Typography';
+import { Body, BodySmall, BodyLarge } from '../Typography';
 import { tokenSegment } from '../_shadows';
 
 /**
@@ -113,9 +113,18 @@ const SIZE_MAP = {
   // touchTarget = the checkbox's frame footprint = a constant 24×24 for ALL
   // sizes (the box is centered inside): small 16 (4px pad), medium 20 (2px pad),
   // large 24 (0 pad). Matches the Figma component frame.
-  small:  { box: 16, icon: 12, labelSize: '13px', gap: 6,  touchTarget: 24 },
-  medium: { box: 20, icon: 14, labelSize: '15px', gap: 8,  touchTarget: 24 },
-  large:  { box: 24, icon: 18, labelSize: '17px', gap: 10, touchTarget: 24 },
+  /* Matches Radio's table, which had all three of these right.
+     GAP was 6 / 8 / 10. Neither 6 nor 10 is on the Sizing scale — the rungs
+     are Quarter 2, Half 4, 1 = 8, 1-and-Half 12 — so both could only ever be
+     literals, and a checkbox sat beside a radio in the same form with a
+     different gap at small and large.
+     LABEL was a hardcoded 13 / 15 / 17px `fontSize` that OVERRODE the
+     typography component it was applied to, so the real Body sizes (14 / 16 /
+     18) never reached it and a brand re-picking its body scale moved every
+     label in the system except these. The component now carries the size. */
+  small:  { box: 16, icon: 12, gap: 4,  touchTarget: 24, LabelComp: BodySmall },
+  medium: { box: 20, icon: 14, gap: 8,  touchTarget: 24, LabelComp: Body },
+  large:  { box: 24, icon: 18, gap: 12, touchTarget: 24, LabelComp: BodyLarge },
 };
 
 // --- Custom Icons ------------------------------------------------------------
@@ -217,7 +226,10 @@ export function Checkbox({
 }) {
   const styles = stylesFor(variant);
   const sizeConfig = SIZE_MAP[size] || SIZE_MAP.medium;
-  const LabelComp = size === 'small' ? BodySmall : Body;
+  /* From the table, not a two-way ternary. `size === 'small' ? BodySmall :
+     Body` gave a LARGE checkbox the MEDIUM Body component — the third step
+     had no branch at all. */
+  const LabelComp = sizeConfig.LabelComp;
 
   // Pass aria attributes directly to the <input> element
   // This fixes: "aria-label attribute cannot be used on a span with no valid role"
@@ -251,13 +263,20 @@ export function Checkbox({
         color: 'inherit',
         transition: 'background-color 0.15s ease-in-out',
         '&.Mui-checked, &.MuiCheckbox-indeterminate': { color: 'inherit' },
+        /* Suppressing MUI's ripple halo is right — it is a circle of the wrong
+           colour around a square box — but nothing replaced it, so hovering a
+           checkbox did nothing at all. The border is the channel, as on Input:
+           the box interior carries the checked state and must stay readable. */
         '&:hover': { backgroundColor: 'transparent' },
+        '&:hover .chk-box-icon': { borderColor: 'var(--Text)' },
+        '&:active .chk-box-icon': { borderColor: 'var(--Text)', backgroundColor: 'var(--Pressed)' },
+        '&.Mui-disabled .chk-box-icon': { opacity: 'var(--Disabled, 0.38)' },
         '&.Mui-focusVisible .chk-box-icon': {
           outline: '2px solid var(--Focus-Visible)',
           outlineOffset: '2px',
         },
         '&.Mui-disabled': {
-          opacity: 0.6,
+          opacity: 'var(--Disabled, 0.38)',
           cursor: 'not-allowed',
           pointerEvents: 'none',
         },
@@ -276,7 +295,6 @@ export function Checkbox({
             component="span"
             sx={{
               color: disabled ? 'var(--Text-Quiet)' : 'var(--Text)',
-              fontSize: sizeConfig.labelSize,
               lineHeight: 1.4,
               userSelect: 'none',
             }}
@@ -328,7 +346,10 @@ export const BlackWhiteCheckbox  = (p) => <Checkbox variant="black-white" {...p}
 // produce. Remove these on the next major.
 export const DefaultSolidCheckbox       = DefaultCheckbox;
 export const DefaultOutlineCheckbox     = DefaultCheckbox;
-export const DefaultLightCheckbox       = DefaultCheckbox;
+/* No DefaultLightCheckbox. It aliased DefaultCheckbox, so it rendered fine
+   and taught a combination that does not exist — "default" is inherit, and
+   there is no palette under it to take a light tone from. An alias that
+   works is the worst kind of wrong name: nothing ever reports it. */
 export const PrimarySolidCheckbox       = PrimaryCheckbox;
 export const PrimaryOutlineCheckbox     = PrimaryCheckbox;
 export const PrimaryLightCheckbox       = PrimaryCheckbox;
