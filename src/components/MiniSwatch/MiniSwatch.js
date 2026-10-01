@@ -10,7 +10,7 @@
 // swatch, and marking it twice would say the same thing in two places.
 //
 //   Swatch       Button-Height (24/32/56)   circle      1px Border   7 states
-//   MiniSwatch   Menu-Swatch (20)           radius 4    no border    none
+//   MiniSwatch   Menu-Swatch (24)           radius 4    no border    none
 //
 // It has no gallery page: there is nothing to play with. It appears inside
 // Select and Menu, which is where it is documented.
@@ -30,8 +30,8 @@ export function MiniSwatch({
       // chip as well would read the same choice twice.
       aria-hidden="true"
       sx={{
-        width: 'var(--Menu-Swatch, 20px)',
-        height: 'var(--Menu-Swatch, 20px)',
+        width: 'var(--Menu-Swatch, 24px)',
+        height: 'var(--Menu-Swatch, 24px)',
         flexShrink: 0,
         // Sizing-Half, which is what Figma binds — not Input-Swatch-Radius.
         borderRadius: 'var(--Sizing-Half, 4px)',
