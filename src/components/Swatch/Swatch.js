@@ -85,7 +85,8 @@ export function Swatch({
      one too many.
  
      Radio has no `non-clickable`, which follows: a radio that cannot be chosen
-     is not a radio. */
+     is not a radio — so a swatch with no onClick renders none, even with
+     `radio` set. Figma simply does not draw that combination. */
   radio = false,
   onClick,
   className = '',
@@ -188,7 +189,7 @@ export function Swatch({
       {...props}
     >
       {chip}
-      {radio ? (
+      {radio && clickable ? (
         /* Presentational: the whole swatch is the control, so the radio must
            not be a second tab stop or a second thing to announce. */
         <Radio

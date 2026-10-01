@@ -110,7 +110,13 @@ export function ButtonGroupShowcase() {
   const [spacing, setSpacing]           = useState(0);
   const [disabled, setDisabled]         = useState(false);
   const [fullWidth, setFullWidth]       = useState(false);
+  const [multiple, setMultiple]         = useState(false);
+  const [separated, setSeparated]       = useState(false);
+  /* One value when single, an ARRAY when multiple — the group's own contract.
+     Kept as two pieces of state so toggling the mode does not hand `value` a
+     shape it cannot read. */
   const [selectedBtn, setSelectedBtn]   = useState('week');
+  const [selectedMany, setSelectedMany] = useState(['week']);
   const [bgTheme, setBgTheme]           = useState(null);
   const [bgSurface, setBgSurface] = useState('Surface');
 
@@ -139,6 +145,8 @@ export function ButtonGroupShowcase() {
     if (size !== 'medium')                gp.push('size="' + size + '"');
     if (orientation !== 'horizontal')     gp.push('orientation="' + orientation + '"');
     if (spacing > 0)                      gp.push('spacing={' + spacing + '}');
+    if (separated)                        gp.push('separated');
+    if (multiple)                         gp.push('multiple');
     if (disabled)                         gp.push('disabled');
     if (fullWidth)                        gp.push('fullWidth');
     gp.push('value={selected}');
@@ -172,11 +180,13 @@ export function ButtonGroupShowcase() {
                 color={color}
                 size={size}
                 orientation={orientation}
-                spacing={spacing}
+                separated={separated}
+                {...(spacing ? { spacing } : {})}
                 disabled={disabled}
                 fullWidth={fullWidth}
-                value={selectedBtn}
-                onChange={setSelectedBtn}
+                multiple={multiple}
+                value={multiple ? selectedMany : selectedBtn}
+                onChange={multiple ? setSelectedMany : setSelectedBtn}
                 aria-label="Time range selector"
               >
                 {BUTTON_ITEMS.map((item) => (
@@ -303,6 +313,30 @@ export function ButtonGroupShowcase() {
                       {['horizontal', 'vertical'].map((o) => (
                         <ControlButton key={o} label={cap(o)} selected={orientation === o} onClick={() => setOrientation(o)} />
                       ))}
+                    </Stack>
+                  </Box>
+
+                  {/* Style — Figma's Default | Separated */}
+                  <Box sx={{ mt: 3 }}>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</EyebrowSmall>
+                    <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+                      Joined overlaps the segments so the shared edge collapses to one border. Separated gaps them by --Platform-Spacer, which is wider on touch.
+                    </Caption>
+                    <Stack direction="row" spacing={1}>
+                      <ControlButton label="Joined" selected={!separated} onClick={() => setSeparated(false)} />
+                      <ControlButton label="Separated" selected={separated} onClick={() => setSeparated(true)} />
+                    </Stack>
+                  </Box>
+
+                  {/* Selection — one at a time, or several */}
+                  <Box sx={{ mt: 3 }}>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SELECTION</EyebrowSmall>
+                    <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+                      Multiple takes an ARRAY as its value, and clicking a selected segment deselects it.
+                    </Caption>
+                    <Stack direction="row" spacing={1}>
+                      <ControlButton label="Single" selected={!multiple} onClick={() => setMultiple(false)} />
+                      <ControlButton label="Multiple" selected={multiple} onClick={() => setMultiple(true)} />
                     </Stack>
                   </Box>
 

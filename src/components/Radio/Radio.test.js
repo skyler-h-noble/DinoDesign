@@ -390,3 +390,24 @@ describe('Radio colours', () => {
     expect(css + JSON.stringify(ring.className)).not.toMatch(/Black-white/);
   });
 });
+
+describe('the dot is centred because the numbers are whole', () => {
+  /* The dot was 9.5 at medium and large. A 9.5px dot in a 20px ring with a 2px
+     border centres at 3.25px — a subpixel offset the browser rounds per axis,
+     so it lands visibly off-centre. Figma draws Radio/Dot at 8 / 10 / 12 and
+     positions it at x=5, y=5 inside the 20px ring: whole pixels, 5 either side.
+     Asserting the arithmetic rather than the rendering, because jsdom computes
+     no layout. */
+  const RING = { small: 16, medium: 20, large: 24 };
+  const DOT  = { small: 8,  medium: 10, large: 12 };
+  const BORDER = 2;
+
+  for (const size of ['small', 'medium', 'large']) {
+    it(`${size}: the dot leaves a whole-pixel gap on every side`, () => {
+      const inner = RING[size] - BORDER * 2;
+      const gap = (inner - DOT[size]) / 2;
+      expect(Number.isInteger(gap)).toBe(true);
+      expect(gap).toBeGreaterThan(0);
+    });
+  }
+});

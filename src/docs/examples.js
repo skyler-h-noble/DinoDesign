@@ -228,11 +228,13 @@ export const PROP_EXAMPLES = {
       <Button>text</Button>
       <Button iconOnly aria-label="Delete item"><DeleteIcon /></Button>
       <Button letterNumber aria-label="3 unread">3</Button>
-      {/* Photo first: a bare Avatar IS the default. Children are not resized the
-          way a decorator is, so the size is explicit here. Initials are the
-          override, shown beside it. */}
-      <Button avatar aria-label="Jane Doe"><Avatar size="custom" customSize={20} /></Button>
-      <Button avatar aria-label="Jane Doe, initials">J</Button>
+      {/* FOUR buttons, one per value of the axis — no fifth.
+ 
+          A bare <Avatar /> and no size: Figma binds the Avatar inside an avatar
+          button to Button-Height, so it FILLS the button edge to edge. Passing
+          customSize here fought that and drew a small circle floating inside a
+          larger one. */}
+      <Button avatar aria-label="Jane Doe"><Avatar /></Button>
     </HStack>,
 
     /* Flat at rest, raised by one level when `elevated`. A button earns its

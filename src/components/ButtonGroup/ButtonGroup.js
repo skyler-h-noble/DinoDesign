@@ -55,13 +55,63 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
  * lightening. Nothing to map. */
 const LIGHT_SURFACE = 'Surface-Brightest';
 
+/* A segment is a NARROWER thing than a Button, and the design says so.
+ 
+   Figma keeps two segment sets, and neither offers everything Button does:
+ 
+     Button                    text · iconOnly · letterNumber · Avatar
+                               solid · outline · ghost
+     Button-Group-Segments     text · iconOnly · letterNumber   (no Avatar)
+                               outline · ghost                  (no solid)
+                               Position: left · center · right
+     Separated-Button-Segments outline · ghost, and no Type axis at all
+ 
+   The library builds all three from the same Button, so it can put an avatar in
+   a segment, or a solid one, and the design has no drawing for either. Warning
+   rather than refusing: the render is still reasonable, and a group that threw
+   would be worse than one that renders and complains. */
+const warnedSegments = new Set();
+
+function warnSegmentShape(props = {}, separated = false) {
+  if (process.env.NODE_ENV === 'production') return;
+  const bad = [];
+  if (props.avatar || props.contentType === 'avatar') {
+    bad.push('an Avatar segment — Button-Group-Segments has only text, iconOnly and letterNumber');
+  }
+  const v = String(props.variant || '');
+  if (v && !/-outline$/.test(v) && v !== 'ghost' && v !== 'text') {
+    bad.push(`a solid segment (variant="${v}") — segments are outline or ghost; the GROUP paints the selected one`);
+  }
+  if (separated && (props.iconOnly || props.letterNumber || props.contentType)) {
+    bad.push('a typed SEPARATED segment — Separated-Button-Segments has no Type axis');
+  }
+  for (const msg of bad) {
+    if (warnedSegments.has(msg)) continue;
+    warnedSegments.add(msg);
+    // eslint-disable-next-line no-console
+    console.warn('[ButtonGroup] ' + msg + '.');
+  }
+}
+
 export function ButtonGroup({
   variant = 'outlined',    // 'outlined' | 'light' | 'ghost'
   color = 'default',       // 'default' | 'primary' | 'secondary' | …
   size = 'medium',
   disabled = false,
   orientation = 'horizontal',
-  spacing = 0,
+  /* Figma's STYLE axis: Default (joined) | Separated.
+ 
+     It was inferred from `spacing === 0`, so the choice the design makes
+     explicitly was a side effect of a number here. Named `separated` rather
+     than `style`, which is the DOM attribute, and rather than `variant`, which
+     already carries outlined / light / ghost.
+ 
+     The gap is --Platform-Spacer, which Figma binds and which is platform-aware
+     (4px on desktop, 10px on touch) — not a fixed 4. Joined is -2: the segments
+     OVERLAP so the shared edge collapses to one border rather than two sitting
+     side by side. */
+  separated = false,
+  spacing,
   // fit — the group's WIDTH variant (in Figma, a "Width"/"Fit" variant property):
   //   'hug'   (default) each button sizes to its own content
   //   'fill'  group fills its container; buttons share the width equally
@@ -103,7 +153,11 @@ export function ButtonGroup({
   const isValueSelected = (v) => multiple ? selectedList.includes(v) : selectedValue === v;
 
   const isHorizontal = orientation === 'horizontal';
-  const isConnected  = spacing === 0;
+  /* An explicit `spacing` still wins, so existing callers are untouched. */
+  const effectiveSpacing = spacing !== undefined
+    ? spacing
+    : (separated ? 'var(--Platform-Spacer)' : 0);
+  const isConnected  = !separated && (effectiveSpacing === 0);
   const isLight      = variant === 'light';
   const isGhost      = variant === 'ghost';
 
@@ -252,6 +306,19 @@ export function ButtonGroup({
     };
 
     const buttonSx = {
+      /* Fill + horizontal: the SEGMENTS have to grow, not just the container.
+ 
+         `useGrid` is `isEqual && isHorizontal`, so fill takes the flex branch —
+         where the container got width:100% and the children got nothing. The
+         group stretched and the buttons stayed their natural width, bunched at
+         the start, which is not what Fit=Fill draws.
+ 
+         Only horizontal needs this. A vertical group is a column, and
+         alignItems:stretch already makes its segments full width; adding
+         flex-grow there would distribute HEIGHT instead, which Fit=Fill does
+         not mean. minWidth:0 so a long label shrinks rather than forcing the
+         group wider than its container. */
+      ...(isFill && isHorizontal && { flex: '1 1 0', minWidth: 0 }),
       // Grid items stretch to fill their 1fr cell via the default
       // justify-self:stretch — do NOT set width:100% here. An explicit
       // width:100% fixes each segment to exactly the cell width, so the
@@ -271,6 +338,8 @@ export function ButtonGroup({
       },
       ...child.props.sx,
     };
+
+    warnSegmentShape(child.props, separated);
 
     const clonedButton = React.cloneElement(child, {
       /* One step of escalation from the group's own style:
@@ -335,7 +404,7 @@ export function ButtonGroup({
               alignItems:     'stretch',
               width:          isFill ? '100%' : 'auto',
             }),
-        gap:            isConnected ? 0 : spacing,
+        gap:            isConnected ? 0 : effectiveSpacing,
         border:         containerBorder,
         borderRadius:   'var(--Style-Border-Radius)',
         // No overflow:hidden — would clip button borders, focus rings, and
