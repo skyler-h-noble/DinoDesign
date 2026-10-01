@@ -20,7 +20,8 @@ import { Box } from '@mui/material';
  *   dark   — data-theme="{Theme}" data-surface="Surface-Dimmest"
  *            bg: var(--Background), icon: var(--Text)
  *
- * SIZES: small (32px), medium (40px), large (48px)
+ * SIZE: one — 40px, with a 24px icon and an 8px radius, matching the single
+ *       Figma component. There is no `size` prop.
  */
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -45,22 +46,47 @@ const THEME_MAP = {
      surface ladder, which is what black and white ARE here. */
 };
 
-const SIZE_MAP = {
-  small:  { size: 32, iconSize: '16px', borderRadius: '8px' },
-  medium: { size: 40, iconSize: '20px', borderRadius: '10px' },
-  large:  { size: 48, iconSize: '24px', borderRadius: '12px' },
-};
+/* ONE size, measured off the Figma component (9189:26768), which is a single
+   40x40 component with no variants and no size axis: width and height bound to
+   `Sizing-5`, a radius of 8 bound to `Sizing-1`, and a 24px icon.
+
+   There used to be small/medium/large. None of them came from a design — the
+   component did not exist in Figma at all when they were written — and the
+   `medium` 40px badge was a DIFFERENT badge from the drawn one anyway: a 10px
+   radius against 8, and a 20px icon against 24. Every caller in the studio used
+   the default, so the two extra sizes only ever added surface to keep in parity
+   with nothing. Sizing in this system comes from the `Component-Size` modes
+   rather than a per-component ladder; Button carries no Size axis either. */
+const ICON_BADGE_SIZE = { size: 40, iconSize: '24px', borderRadius: '8px' };
+
+/* `size` is accepted and ignored — the same treatment Badge's removed `size`,
+   Chip's, and the removed `-light` shape get. Dropping the prop outright would
+   let it fall into ...props and reach the DOM. */
+const warnedSizes = new Set();
+
+function warnRemovedSize(size) {
+  if (size === undefined) return;
+  if (process.env.NODE_ENV === 'production' || warnedSizes.has(size)) return;
+  warnedSizes.add(size);
+  // eslint-disable-next-line no-console
+  console.warn(
+    '[IconBadge] size="' + size + '" — IconBadge has one size (40px) and the ' +
+    'prop was removed. Figma draws exactly one, and component sizing comes ' +
+    'from the Component-Size modes rather than a per-component ladder.',
+  );
+}
 
 export function IconBadge({
   children,
   color = 'primary',
   variant = 'solid',
-  size = 'medium',
+  size,
   className = '',
   sx = {},
   ...props
 }) {
-  const s = SIZE_MAP[size] || SIZE_MAP.medium;
+  warnRemovedSize(size);
+  const s = ICON_BADGE_SIZE;
   const theme = THEME_MAP[color] || THEME_MAP.primary;
 
   // Determine data-theme and data-surface based on variant
@@ -86,7 +112,9 @@ export function IconBadge({
     <Box
       data-theme={dataTheme}
       data-surface={dataSurface}
-      className={'icon-badge icon-badge-' + variant + ' icon-badge-' + size + ' icon-badge-' + color + ' ' + className}
+      /* No size class any more — there is one size, and emitting
+         `icon-badge-undefined` for it would be worse than emitting nothing. */
+      className={'icon-badge icon-badge-' + variant + ' icon-badge-' + color + ' ' + className}
       sx={{
         width: s.size,
         height: s.size,

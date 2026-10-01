@@ -19,9 +19,9 @@ export function SectionShowcase() {
 
       <H3 style={{ marginTop: 24, marginBottom: 12 }}>Theme + surface</H3>
       <BodySmall color="quiet" style={{ marginBottom: 16, display: 'block' }}>
-        Sets data-theme="Primary-Light" + data-surface="Surface", paints --Background.
+        Sets data-theme="Primary" + data-surface="Surface", paints --Background.
       </BodySmall>
-      <Section theme="Primary-Light" surface="Surface" padding="32px" style={{ borderRadius: 8 }}>
+      <Section theme="Primary" surface="Surface" padding="32px" style={{ borderRadius: 8 }}>
         <H3>Primary-Light surface</H3>
         <Body>Body text picks up --Text automatically.</Body>
         <BodySmall color="quiet">Quiet text picks up --Text-Quiet.</BodySmall>
@@ -40,8 +40,11 @@ export function SectionShowcase() {
       <BodySmall color="quiet" style={{ marginBottom: 16, display: 'block' }}>
         Pass <code>as="article"</code>, <code>as="footer"</code>, etc.
       </BodySmall>
-      <Section as="article" theme="Neutral-Dark" surface="Surface" padding="32px" style={{ borderRadius: 8 }}>
-        <H3>Neutral-Dark article</H3>
+      {/* Neutral at its dimmest surface — what theme="Neutral" used to mean.
+          The shade names were removed: a shade and a surface level were two ways
+          of saying one thing, and an unmatched [data-theme] paints nothing. */}
+      <Section as="article" theme="Neutral" surface="Surface-Dimmest" padding="32px" style={{ borderRadius: 8 }}>
+        <H3>Neutral / Surface-Dimmest article</H3>
         <Body>Renders as an &lt;article&gt; element.</Body>
       </Section>
     </div>

@@ -15,10 +15,10 @@ import { CheckboxShowcase } from '../components/Checkbox/CheckboxShowcase';
 import { RadioShowcase } from '../components/Radio/RadioShowcase';
 import { SliderShowcase } from '../components/Slider/SliderShowcase';
 import { SwitchShowcase } from '../components/Switch/SwitchShowcase';
-import { ToggleButtonGroupShowcase } from '../components/ToggleButtonGroup/ToggleButtonGroupShowcase';
 import { BadgeShowcase } from '../components/Badge/BadgeShowcase';
 import { ChipShowcase } from '../components/Chip/ChipShowcase';
 import { DividerShowcase } from '../components/Divider/DividerShowcase';
+import { CodeBlockShowcase } from '../components/CodeBlock/CodeBlockShowcase';
 import { TableShowcase } from '../components/Table/TableShowcase';
 import { ListShowcase } from '../components/List/ListShowcase';
 import { TooltipShowcase } from '../components/Tooltip/TooltipShowcase';
@@ -149,7 +149,12 @@ const NAV_ITEMS = [
       { id: 'buttons', label: 'Button' },
       { id: 'fab', label: 'FAB' },
       { id: 'buttongroup', label: 'Button Group' },
-      { id: 'togglebuttongroup', label: 'Toggle Button Group' },
+      /* ToggleButtonGroup is RETIRED — it is ButtonGroup built a second time,
+         and the file is now a shim that renders one. The export stays (a
+         missing export is a build error in someone else's project), but it is
+         not listed here: a gallery that offers a retired duplicate beside the
+         survivor is how people pick the wrong one, and its playground was
+         generating the retired API as example code. Use Button Group. */
       { id: 'input', label: 'Input' },
       { id: 'select', label: 'Select' },
       { id: 'autocomplete', label: 'Autocomplete' },
@@ -205,6 +210,7 @@ const NAV_ITEMS = [
       { id: 'chip', label: 'Chip' },
       { id: 'tag', label: 'Tag' },
       { id: 'divider', label: 'Divider' },
+      { id: 'codeblock', label: 'Code Block' },
       { id: 'list', label: 'List' },
       { id: 'table', label: 'Table' },
       { id: 'tooltip', label: 'Tooltip' },
@@ -397,7 +403,6 @@ function ShowcaseInner() {
             {activeSection === 'input' && <InputShowcase />}
             {activeSection === 'slider' && <SliderShowcase />}
             {activeSection === 'switch' && <SwitchShowcase />}
-            {activeSection === 'togglebuttongroup' && <ToggleButtonGroupShowcase />}
             {activeSection === 'rating' && <RatingShowcase />}
             {activeSection === 'numberfield' && <NumberFieldShowcase />}
             {activeSection === 'searchfield' && <SearchFieldShowcase />}
@@ -430,6 +435,7 @@ function ShowcaseInner() {
             {activeSection === 'chip' && <ChipShowcase />}
             {activeSection === 'tag' && <TagShowcase />}
             {activeSection === 'divider' && <DividerShowcase />}
+            {activeSection === 'codeblock' && <CodeBlockShowcase />}
             {activeSection === 'list' && <ListShowcase />}
             {activeSection === 'table' && <TableShowcase />}
             {activeSection === 'tooltip' && <TooltipShowcase />}

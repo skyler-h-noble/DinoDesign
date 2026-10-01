@@ -1,5 +1,6 @@
 // src/components/Card/CardShowcase.js
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
@@ -33,8 +34,8 @@ const SOLID_THEME_MAP = {
   info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
 };
 const LIGHT_THEME_MAP = {
-  default: 'Default', primary: 'Primary-Light', secondary: 'Secondary-Light', tertiary: 'Tertiary-Light', neutral: 'Neutral-Light',
-  info: 'Info-Light', success: 'Success-Light', warning: 'Warning-Light', error: 'Error-Light',
+  default: 'Default', primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
+  info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
 };
 // Dark uses same theme map as solid
 const DARK_THEME_MAP = SOLID_THEME_MAP;
@@ -183,7 +184,10 @@ export function CardShowcase() {
   const getSurfaceName = () => {
     
     if (variant === 'dark') return 'Surface-Dimmest';
-    if (variant === 'light') return 'Surface';
+    /* Brightest, not Surface: `X-Light` meant the palette at its brightest
+       surface, and the shade names were removed. Leaving this at 'Surface'
+       would silently drop the lightening the variant is named for. */
+    if (variant === 'light') return 'Surface-Brightest';
     return 'Surface';
   };
 
@@ -328,12 +332,18 @@ export function CardShowcase() {
 
             <Tabs defaultValue={0} variant="standard" color="primary">
               <TabList>
+                <Tab>Summary</Tab>
                 <Tab>Playground</Tab>
                 <Tab>Accessibility</Tab>
+                <Tab>Change Log</Tab>
               </TabList>
 
               {/* -- Playground -- */}
               <TabPanel value={0}>
+                <DocSummary component="Card" theme={bgTheme} surface={bgSurface} />
+              </TabPanel>
+
+              <TabPanel value={1}>
                 <Box sx={{ p: 3 }}>
 
                   {/* Background */}
@@ -451,7 +461,7 @@ export function CardShowcase() {
               </TabPanel>
 
               {/* -- Accessibility -- */}
-              <TabPanel value={1}>
+              <TabPanel value={2}>
                 <Box sx={{ p: 3 }}>
                   <BodySmall color="quiet" style={{ marginBottom: 24 }}>
                     {variant} / {color} / {size} / {orientation}
@@ -590,6 +600,10 @@ export function CardShowcase() {
 
                   </Stack>
                 </Box>
+              </TabPanel>
+
+              <TabPanel value={3}>
+                <DocChanges component="Card" />
               </TabPanel>
             </Tabs>
           </Box>

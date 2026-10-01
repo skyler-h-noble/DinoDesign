@@ -1,5 +1,6 @@
 // src/components/CurvedText/CurvedTextShowcase.js
 import React, { useState, useRef, useEffect } from 'react';
+import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack } from '@mui/material';
 import { CurvedText } from './CurvedText';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
@@ -173,12 +174,18 @@ export function CurvedTextShowcase() {
           <Box sx={{ backgroundColor: 'var(--Background)', overflow: 'hidden' }}>
             <Tabs defaultValue={0} variant="standard" color="primary">
         <TabList>
-          <Tab>Playground</Tab>
+          <Tab>Summary</Tab>
+                <Tab>Playground</Tab>
           <Tab>Accessibility</Tab>
+                <Tab>Change Log</Tab>
         </TabList>
 
         {/* Playground */}
         <TabPanel value={0}>
+                <DocSummary component="CurvedText" />
+              </TabPanel>
+
+              <TabPanel value={1}>
           <Stack spacing={3} sx={{ p: 3, maxWidth: 720 }}>
             <Input
               label="Text"
@@ -430,7 +437,7 @@ export function CurvedTextShowcase() {
         </TabPanel>
 
         {/* Accessibility */}
-        <TabPanel value={1}>
+        <TabPanel value={2}>
           <Stack spacing={2} sx={{ p: 3, maxWidth: 560 }}>
             <Caption style={{ color: 'var(--Text-Quiet)' }}>
               Live WCAG 2.1 contrast against the painted background. Decorative
@@ -452,6 +459,10 @@ export function CurvedTextShowcase() {
             </BodySmall>
           </Stack>
         </TabPanel>
+
+              <TabPanel value={3}>
+                <DocChanges component="CurvedText" />
+              </TabPanel>
             </Tabs>
           </Box>
         </Box>

@@ -279,6 +279,22 @@ export function normalizeButtonVariant(variant) {
   return base;
 }
 
+const warnedUnknown = new Set();
+
+function warnUnknownVariant(variant, map) {
+  if (process.env.NODE_ENV !== 'production' && !warnedUnknown.has(variant)) {
+    warnedUnknown.add(variant);
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[Button] variant="' + variant + '" is not a variant. Rendering the ' +
+      'default. Shape is solid / {color}-outline / ghost / text — ghost and ' +
+      'text take NO colour prefix, because a ghost takes its colour from the ' +
+      'text role (--Hotlink for text, --Quiet for icon-only), not a palette.',
+    );
+  }
+  return map.default;
+}
+
 function buildVariantMap(isTextContent, elevated = false, selected = false, size = 'medium') {
   const map = {};
   COLORS.forEach((color) => {
@@ -412,6 +428,11 @@ export function Button({
   badge = false,
   badgeContent,
   badgeVariant = 'error',
+  // Badge has ONE size as of 0.9.0. This is forwarded as the caller gave it —
+  // undefined when they said nothing — so Badge's own warning fires only when
+  // someone actually passes the removed prop. Button used to DERIVE a size from
+  // its own, which meant every `<Button badge>` tripped that warning for a
+  // value the caller never wrote.
   badgeSize,
   badgeDot = false,
   badgeMax = 99,
@@ -483,7 +504,13 @@ export function Button({
   );
 
   const variantMap     = buildVariantMap(isTextContent, elevated, selected, size);
-  const variantStyles  = variantMap[effectiveVariant] || variantMap.default;
+  /* An unknown variant used to fall through to solid default SILENTLY, which
+     is how `primary-ghost` — never a real variant — rendered as a filled pink
+     button in the gallery's own example and nobody noticed. Ghost and text are
+     deliberately colour-agnostic (see ghostStyles: a text ghost reads as a link,
+     an icon ghost as --Quiet), so there is no {color}-ghost to look up. Warn
+     rather than paint something plausible. */
+  const variantStyles  = variantMap[effectiveVariant] || warnUnknownVariant(effectiveVariant, variantMap);
   const sizingStyles   = getSizingStyles({ size, iconOnly: isIconOnly, letterNumber, avatar });
 
   const TypographyComp = size === 'small' ? ButtonSmallTypography : ButtonTypography;
@@ -574,12 +601,6 @@ export function Button({
   const resolvedEndDecorator = endDecorator !== undefined
     ? resolveDecorator(endDecorator, size)
     : undefined;
-
-  // Default the badge size to match the button size when not explicitly set.
-  // Badge only ships small/medium/large; "medium" is a safe fallback for any
-  // future button sizes that don't have a 1:1 badge mapping.
-  const resolvedBadgeSize = badgeSize
-    || (size === 'small' ? 'small' : size === 'large' ? 'large' : 'medium');
 
   const out = (
     <>
@@ -779,7 +800,7 @@ export function Button({
     return (
       <DDBadge
         variant={badgeVariant}
-        size={resolvedBadgeSize}
+        size={badgeSize}
         badgeContent={badgeContent}
         dot={badgeDot}
         max={badgeMax}

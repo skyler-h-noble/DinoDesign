@@ -1,5 +1,6 @@
 // src/components/ToggleButtonGroup/ToggleButtonGroupShowcase.js
 import React, { useState, useEffect, useRef } from 'react';
+import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import {
   Box, Stack, Grid,
   Tooltip, IconButton as MuiIconButton,
@@ -238,9 +239,20 @@ export function ToggleButtonGroupShowcase() {
   useEffect(() => {
     // Deferred, not requestAnimationFrame: rAF never fires in a background
     // tab, which left the panel reading "--" permanently.
-    const t = setTimeout(() => {
+    let tries = 0;
+    let t;
+    const run = () => {
       const el = surfaceRef.current;
-      if (!el) return;
+      /* The preview can mount LATER than this effect: in some layouts it lives
+         inside the Playground tab, and the landing tab is Summary, so on first
+         paint there is nothing to measure. Returning here used to end it — the
+         deps never change afterwards, so the panel read "--" permanently and the
+         live check looked lost. Retry briefly, then stop, so a component with no
+         preview at all does not poll forever. */
+      if (!el) {
+        if (tries < 40) { tries += 1; t = setTimeout(run, 50); }
+        return;
+      }
       const v = (name) => getCssVarFrom(el, name);
       const C = seg(color);
 
@@ -254,7 +266,8 @@ export function ToggleButtonGroupShowcase() {
         background: v('--Background'),
         focusVisible: v('--Focus-Visible'),
       });
-    });
+    };
+    t = setTimeout(run);
     return () => clearTimeout(t);
   }, [color, bgTheme, bgSurface]);
 
@@ -271,12 +284,18 @@ export function ToggleButtonGroupShowcase() {
 
       <Tabs>
         <TabList>
-          <Tab>Playground</Tab>
+          <Tab>Summary</Tab>
+                <Tab>Playground</Tab>
           <Tab>Accessibility</Tab>
+                <Tab>Change Log</Tab>
         </TabList>
 
       {/* PLAYGROUND TAB */}
       <TabPanel value={0}>
+                <DocSummary component="ToggleButtonGroup" theme={bgTheme} surface={bgSurface} />
+              </TabPanel>
+
+              <TabPanel value={1}>
         <Grid container sx={{ minHeight: 400 }}>
           {/* LEFT: Preview + Code */}
           <Grid item sx={{
@@ -459,7 +478,7 @@ export function ToggleButtonGroupShowcase() {
       </TabPanel>
 
       {/* ACCESSIBILITY TAB */}
-      <TabPanel value={1}>
+      <TabPanel value={2}>
         <Box sx={{ p: 4 }}>
           <H4>Accessibility Requirements</H4>
           <BodySmall color="quiet" style={{ marginBottom: 32 }}>
@@ -550,6 +569,10 @@ export function ToggleButtonGroupShowcase() {
           </Stack>
         </Box>
       </TabPanel>
+
+              <TabPanel value={3}>
+                <DocChanges component="ToggleButtonGroup" />
+              </TabPanel>
       </Tabs>
     </Box>
   );

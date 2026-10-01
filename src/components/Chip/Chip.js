@@ -23,15 +23,16 @@ import CancelIcon from '@mui/icons-material/Cancel';
  * design's two. `-light` went earlier for a related reason. Both still render
  * and warn once; see normalizeChipVariant.
  *
- * SIZES: small (24px) | medium (32px) | large (40px)
- *   - All sizes maintain 24x24 minimum touch target (WCAG 2.2 AA)
- *   - Small chips use ::after pseudo-element for touch area
- *   - Delete button is always 24x24, so deletable chips are forced to large
+ * SIZE: one — 24px, matching the Figma set, which has no size axis. There is
+ *       no `size` prop; one passed anyway is ignored and warns once.
+ *   - The 24x24 minimum touch target (WCAG 2.5.8) is carried by an ::after
+ *     pseudo-element, so the TARGET meets the minimum without the chip growing.
  *
  * FEATURES:
  *   clickable:       onClick handler, cursor pointer, hover/active states
  *   disabled:        reduced opacity, no interactions
- *   onDelete:        shows delete icon, forces large size (24x24 delete target)
+ *   onDelete:        shows a 16px delete glyph; its 24x24 target is the
+ *                    pseudo-element, not the chip's height
  *   startDecorator:  icon or avatar before label
  *   endDecorator:    icon or avatar after label (before delete if present)
  *   selectionMode:   'radio' | 'checkbox' -- adds aria role, visual selected state
@@ -127,16 +128,48 @@ export function normalizeChipVariant(variant) {
 
 // --- Sizing ------------------------------------------------------------------
 
-const SIZE_MAP = {
-  small:  { height: 24, fontSize: '12px', iconSize: 16, padding: '0 8px',  deleteSize: 16, gap: 4 },
-  medium: { height: 32, fontSize: '13px', iconSize: 18, padding: '0 12px', deleteSize: 18, gap: 6 },
-  large:  { height: 40, fontSize: '14px', iconSize: 20, padding: '0 16px', deleteSize: 24, gap: 8 },
+/* ONE size, measured off the Figma Chip set (8927:15447), which has no size
+   axis at all: a 24px body, `Sizing-Half` (4px) padding either side of the body
+   plus 4px on the label holder — 8px in total — `Sizing-3` for the radius, and
+   `Sizing-4` (32px) as the minimum width. Icons and avatars inside it pin the
+   `Icons & Avatars` mode to `xxs`, which is 16px.
+
+   There used to be small/medium/large, with `medium` the default. Figma has
+   never drawn a 32px or 40px chip, so the DEFAULT chip was the one size that did
+   not exist in the design — the other two were extrapolated from the 24px one.
+   Sizes in this system come from the `Component-Size` collection's modes anyway,
+   not from a per-component ladder; Button carries no Size axis either. */
+const CHIP_SIZE = {
+  height: 24, fontSize: '12px', iconSize: 16, padding: '0 8px', deleteSize: 16, gap: 4,
+  minWidth: 32,
 };
+
+/* `size` is accepted and ignored, the same treatment Badge's removed `size` and
+   the removed `-light` shape get: dropping the prop outright would let it fall
+   into ...props and reach MuiChip, which forwards unknown props to the DOM. */
+const warnedSizes = new Set();
+
+function warnRemovedSize(size) {
+  if (size === undefined) return;
+  if (process.env.NODE_ENV === 'production' || warnedSizes.has(size)) return;
+  warnedSizes.add(size);
+  // eslint-disable-next-line no-console
+  console.warn(
+    '[Chip] size="' + size + '" — Chip has one size (24px) and the prop was ' +
+    'removed. Figma draws no other, and component sizing comes from the ' +
+    'Component-Size modes rather than a per-component ladder.',
+  );
+}
 
 // --- Delete Icon Button ------------------------------------------------------
 
-const ChipDeleteButton = forwardRef(function ChipDeleteButton({ size, onClick, ...props }, ref) {
-  const deleteSize = size === 'large' ? 24 : size === 'medium' ? 18 : 16;
+const ChipDeleteButton = forwardRef(function ChipDeleteButton({ onClick, ...props }, ref) {
+  /* 16px glyph, 24x24 touch area (the `deleteSize < 24` branch below). This was
+     a ladder off the chip's size; there is one chip size now, so the glyph is
+     fixed and the TARGET is what carries the WCAG 2.5.8 minimum — the two are
+     different things, and conflating them is what pushed a deletable chip to
+     40px to fit a 24px icon. */
+  const deleteSize = 16;
   return (
     <Box
       ref={ref}
@@ -206,7 +239,7 @@ const ChipDeleteButton = forwardRef(function ChipDeleteButton({ size, onClick, .
 
 export function Chip({
   variant = 'primary',
-  size: sizeProp = 'medium',
+  size: sizeProp,
   label,
   clickable = false,
   disabled = false,
@@ -229,9 +262,12 @@ export function Chip({
   const chipTheme = chipColor === 'default' ? undefined : cap(chipColor);
   const chipSurface = selected ? CHIP_SURFACE.selected : CHIP_SURFACE.unselected;
 
-  // Delete button requires large chip (24x24 delete icon needs space)
-  const effectiveSize = onDelete ? 'large' : sizeProp;
-  const sc = SIZE_MAP[effectiveSize] || SIZE_MAP.medium;
+  warnRemovedSize(sizeProp);
+  /* No size switch any more, and so no `onDelete` forcing one. The delete
+     control used to push the chip to `large` to fit a 24x24 target; it is 16px
+     now and the ::after below carries the 24x24 touch area, which is what the
+     target has to be — not the glyph. */
+  const sc = CHIP_SIZE;
 
   // Clickable if onClick, selectionMode, or explicit clickable
   const isClickable = clickable || !!onClick || !!selectionMode;
@@ -261,6 +297,8 @@ export function Chip({
     fontFamily: 'inherit',
     borderRadius: (sc.height / 2) + 'px',
     padding: sc.padding,
+    // `Sizing-4` on the Figma variant — a chip never narrower than 32px.
+    minWidth: sc.minWidth,
     boxSizing: 'border-box',
     position: 'relative',
 
@@ -269,8 +307,8 @@ export function Chip({
     border: styles.border,
 
 
-    // 24x24 minimum touch target for small chips
-    ...(effectiveSize === 'small' && {
+    // 24x24 minimum touch target (WCAG 2.5.8) — always, there being one size.
+    ...{
       '&::after': {
         content: '""',
         position: 'absolute',
@@ -282,7 +320,7 @@ export function Chip({
         width: '100%',
         height: '100%',
       },
-    }),
+    },
 
     ...(isClickable && !disabled ? {
       cursor: 'pointer',
@@ -383,10 +421,7 @@ export function Chip({
         </Box>
       )}
       {onDelete && (
-        <ChipDeleteButton
-          size={effectiveSize}
-          onClick={onDelete}
-        />
+        <ChipDeleteButton onClick={onDelete} />
       )}
     </Box>
   );

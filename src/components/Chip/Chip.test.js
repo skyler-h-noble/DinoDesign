@@ -83,9 +83,35 @@ describe('Chip Component', () => {
     },
   );
 
-  test.each(['small', 'medium', 'large'])('renders %s size', (size) => {
-    const { container } = render(<Chip size={size} label="Test" />);
-    expect(container).toBeInTheDocument();
+  /* Chip has ONE size, matching the Figma set, which carries no size axis.
+     This block used to be `test.each(['small','medium','large'])` asserting
+     `expect(container).toBeInTheDocument()` — true of any render, including one
+     that drew nothing, so it went on passing while the sizes were removed. */
+  describe('one size', () => {
+    let warn;
+    beforeEach(() => { warn = jest.spyOn(console, 'warn').mockImplementation(() => {}); });
+    afterEach(() => { warn.mockRestore(); });
+
+    const chipWarnings = () =>
+      warn.mock.calls.filter(([first]) => String(first).startsWith('[Chip] size='));
+
+    test('a chip with no size prop warns nothing', () => {
+      render(<Chip label="Test" />);
+      expect(chipWarnings()).toHaveLength(0);
+    });
+
+    test.each(['small', 'medium', 'large'])('size="%s" warns once and still renders', (size) => {
+      render(<Chip size={size} label={'Test ' + size} />);
+      expect(screen.getByText('Test ' + size)).toBeInTheDocument();
+      expect(chipWarnings()).toHaveLength(1);
+      expect(chipWarnings()[0][0]).toMatch(/Chip has one size \(24px\)/);
+    });
+
+    test('a deletable chip is not pushed to a bigger size', () => {
+      render(<Chip label="Deletable" onDelete={() => {}} />);
+      expect(screen.getByText('Deletable')).toBeInTheDocument();
+      expect(chipWarnings()).toHaveLength(0);
+    });
   });
 
   test('fires onClick when clickable', () => {

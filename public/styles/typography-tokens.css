@@ -1,10 +1,7 @@
-/* ============================================================================
- * typography-tokens.css — STATIC: lib-owned, do not regenerate per design system.
- * Platform-scaled type sizes (Desktop / IOS-Mobile / etc.) — does NOT
- * reference any brand value, so the same file works for every design system.
- * The "Auto-generated" note below refers to the template itself being
- * auto-generated upstream, not per-design-system regeneration.
- * ============================================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:GRAD,ROND,opsz,slnt,wdth,wght@0..100,0..100,6..144,-10..0,25..151,1..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@640&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
 /* typography-tokens.css
  * Auto-generated — do not edit by hand.
@@ -12,199 +9,344 @@
  */
 
 [data-platform="Desktop"] {
+  /* Faces */
+  --Font-Family-Display: var(--Set-Font-Family-Display, var(--Platform-Font-Families-Decorative, var(--Set-Font-Family-Decorative)));
+  --Font-Family-Header: var(--Platform-Font-Families-Header, var(--Set-Font-Family-Header));
+  --Font-Family-Eyebrow: var(--Set-Font-Family-Eyebrow, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+  --Font-Family-Body: var(--Platform-Font-Families-Body, var(--Set-Font-Family-Body));
 
-  /* Display */
-  --Font-Family-Display: var(--Platform-Font-Families-Header);
-  --Display-Small-Font-Size:     42px;
-  --Display-Small-Font-Weight:   600;
-  --Display-Small-Line-Height:   42px;
-  --Display-Small-Letter-Spacing: 0px;
-  --Font-Family-Display: var(--Platform-Font-Families-Header);
-  --Display-Medium-Font-Size:     45px;
-  --Display-Medium-Font-Weight:   600;
-  --Display-Medium-Line-Height:   45px;
-  --Display-Medium-Letter-Spacing: 0px;
-  --Font-Family-Display: var(--Platform-Font-Families-Header);
-  --Display-Large-Font-Size:     48px;
-  --Display-Large-Font-Weight:   600;
-  --Display-Large-Line-Height:   48px;
-  --Display-Large-Letter-Spacing: 0px;
+  /* Face weights */
+  --Font-Weight-Display: 400;
+  --Font-Weight-Header: 640;
+  --Font-Weight-Eyebrow: 400;
+  --Font-Weight-Body: 400;
+  --Header-Clamped-Weight: 640;
 
-  /* Headers */
-  --Font-Family-Header: var(--Platform-Font-Families-Header);
-  --H1-Font-Size:     32px;
-  --H1-Font-Weight:   600;
-  --H1-Line-Height:   32px;
-  --H1-Letter-Spacing: 1.25px;
-  --Font-Family-Header: var(--Platform-Font-Families-Header);
-  --H2-Font-Size:     28px;
-  --H2-Font-Weight:   600;
-  --H2-Line-Height:   28px;
-  --H2-Letter-Spacing: 1.25px;
-  --Font-Family-Header: var(--Platform-Font-Families-Header);
-  --H3-Font-Size:     24px;
-  --H3-Font-Weight:   600;
-  --H3-Line-Height:   24px;
-  --H3-Letter-Spacing: 0px;
-  --Font-Family-Header: var(--Platform-Font-Families-Header);
-  --H4-Font-Size:     20px;
-  --H4-Font-Weight:   600;
-  --H4-Line-Height:   20px;
-  --H4-Letter-Spacing: 0px;
-  --Font-Family-Header: var(--Platform-Font-Families-Header);
-  --H5-Font-Size:     18px;
-  --H5-Font-Weight:   600;
-  --H5-Line-Height:   18px;
-  --H5-Letter-Spacing: 0px;
-  --Font-Family-Header: var(--Platform-Font-Families-Header);
-  --H6-Font-Size:     16px;
-  --H6-Font-Weight:   600;
-  --H6-Line-Height:   16px;
-  --H6-Letter-Spacing: 0px;
+  /* Variable-font axes */
+  --Font-Grade-Header: 50;
+  --Font-Slant-Header: 0;
+  --Font-Roundness-Header: 0;
+  --Font-Optical-Size-Header: 96;
+  --Font-Width-Header: 72;
+  --Font-Variation-Header: "GRAD" var(--Font-Grade-Header), "slnt" var(--Font-Slant-Header), "ROND" var(--Font-Roundness-Header), "opsz" var(--Font-Optical-Size-Header), "wdth" var(--Font-Width-Header);
+
+  /* Display — Large and Medium belong in Header or Hero areas. Small is the one sized to sit inside a component — a card title, a stat, a pull quote. */
+  --Display-Large-Font-Family:   var(--Font-Family-Display);
+  --Display-Large-Font-Size:     72px;
+  --Display-Large-Font-Weight:   var(--Font-Weight-Display);
+  --Display-Large-Line-Height:   88px;
+  --Display-Large-Letter-Spacing: 0em;
+  --Display-Large-Text-Transform: none;
+  --Display-Medium-Font-Family:   var(--Font-Family-Display);
+  --Display-Medium-Font-Size:     60px;
+  --Display-Medium-Font-Weight:   var(--Font-Weight-Display);
+  --Display-Medium-Line-Height:   76px;
+  --Display-Medium-Letter-Spacing: 0em;
+  --Display-Medium-Text-Transform: none;
+  --Display-Small-Font-Family:   var(--Font-Family-Display);
+  --Display-Small-Font-Size:     48px;
+  --Display-Small-Font-Weight:   var(--Font-Weight-Display);
+  --Display-Small-Line-Height:   60px;
+  --Display-Small-Letter-Spacing: 0em;
+  --Display-Small-Text-Transform: none;
+  --Alt-Display-Large-Font-Family:   var(--Font-Family-Display);
+  --Alt-Display-Large-Font-Size:     72px;
+  --Alt-Display-Large-Font-Weight:   900;
+  --Alt-Display-Large-Line-Height:   88px;
+  --Alt-Display-Large-Letter-Spacing: 0em;
+  --Alt-Display-Large-Text-Transform: none;
+  --Alt-Display-Medium-Font-Family:   var(--Font-Family-Display);
+  --Alt-Display-Medium-Font-Size:     60px;
+  --Alt-Display-Medium-Font-Weight:   900;
+  --Alt-Display-Medium-Line-Height:   76px;
+  --Alt-Display-Medium-Letter-Spacing: 0em;
+  --Alt-Display-Medium-Text-Transform: none;
+  --Alt-Display-Small-Font-Family:   var(--Font-Family-Display);
+  --Alt-Display-Small-Font-Size:     48px;
+  --Alt-Display-Small-Font-Weight:   900;
+  --Alt-Display-Small-Line-Height:   60px;
+  --Alt-Display-Small-Letter-Spacing: 0em;
+  --Alt-Display-Small-Text-Transform: none;
+
+  /* Header */
+  --H1-Font-Family:   var(--Font-Family-Header);
+  --H1-Font-Size:     48px;
+  --H1-Font-Weight:   var(--Font-Weight-Header);
+  --H1-Line-Height:   56px;
+  --H1-Letter-Spacing: -0.0217em;
+  --H1-Text-Transform: none;
+  --H2-Font-Family:   var(--Font-Family-Header);
+  --H2-Font-Size:     40px;
+  --H2-Font-Weight:   var(--Font-Weight-Header);
+  --H2-Line-Height:   48px;
+  --H2-Letter-Spacing: -0.0163em;
+  --H2-Text-Transform: none;
+  --H3-Font-Family:   var(--Font-Family-Header);
+  --H3-Font-Size:     32px;
+  --H3-Font-Weight:   var(--Font-Weight-Header);
+  --H3-Line-Height:   40px;
+  --H3-Letter-Spacing: -0.011em;
+  --H3-Text-Transform: none;
+  --H4-Font-Family:   var(--Font-Family-Header);
+  --H4-Font-Size:     24px;
+  --H4-Font-Weight:   var(--Header-Clamped-Weight);
+  --H4-Line-Height:   32px;
+  --H4-Letter-Spacing: -0.0057em;
+  --H4-Text-Transform: none;
+  --H5-Font-Family:   var(--Font-Family-Header);
+  --H5-Font-Size:     20px;
+  --H5-Font-Weight:   var(--Header-Clamped-Weight);
+  --H5-Line-Height:   28px;
+  --H5-Letter-Spacing: -0.003em;
+  --H5-Text-Transform: none;
+  --H6-Font-Family:   var(--Font-Family-Header);
+  --H6-Font-Size:     18px;
+  --H6-Font-Weight:   var(--Header-Clamped-Weight);
+  --H6-Line-Height:   24px;
+  --H6-Letter-Spacing: -0.0017em;
+  --H6-Text-Transform: none;
 
   /* Subtitle */
-  --Font-Family-Subtitle: var(--Platform-Font-Families-Body);
-  --Subtitle-Small-Font-Size:     16px;
+  --Subtitle-Small-Font-Family:   var(--Font-Family-Body);
+  --Subtitle-Small-Font-Size:     14px;
   --Subtitle-Small-Font-Weight:   700;
-  --Subtitle-Small-Line-Height:   24px;
-  --Subtitle-Small-Letter-Spacing: 0px;
-  --Font-Family-Subtitle: var(--Platform-Font-Families-Body);
+  --Subtitle-Small-Line-Height:   21px;
+  --Subtitle-Small-Letter-Spacing: 0em;
+  --Subtitle-Small-Text-Transform: none;
+  --Subtitle-Medium-Font-Family:   var(--Font-Family-Body);
+  --Subtitle-Medium-Font-Size:     16px;
+  --Subtitle-Medium-Font-Weight:   700;
+  --Subtitle-Medium-Line-Height:   24px;
+  --Subtitle-Medium-Letter-Spacing: 0em;
+  --Subtitle-Medium-Text-Transform: none;
+  --Subtitle-Large-Font-Family:   var(--Font-Family-Body);
   --Subtitle-Large-Font-Size:     18px;
   --Subtitle-Large-Font-Weight:   700;
-  --Subtitle-Large-Line-Height:   32px;
-  --Subtitle-Large-Letter-Spacing: 0px;
+  --Subtitle-Large-Line-Height:   27px;
+  --Subtitle-Large-Letter-Spacing: 0em;
+  --Subtitle-Large-Text-Transform: none;
 
   /* Body */
-  --Font-Family-Body: var(--Platform-Font-Families-Body);
+  --Body-Small-Font-Family:   var(--Font-Family-Body);
   --Body-Small-Font-Size:     14px;
-  --Body-Small-Font-Weight:   500;
+  --Body-Small-Font-Weight:   var(--Font-Weight-Body);
   --Body-Small-Line-Height:   21px;
-  --Body-Small-Letter-Spacing: 0px;
+  --Body-Small-Letter-Spacing: 0em;
+  --Body-Small-Text-Transform: none;
   --Body-Small-Semibold-Font-Weight: 600;
-  --Body-Small-Bold-Font-Weight: 700;
-  --Font-Family-Body: var(--Platform-Font-Families-Body);
+  --Body-Medium-Font-Family:   var(--Font-Family-Body);
   --Body-Medium-Font-Size:     16px;
-  --Body-Medium-Font-Weight:   500;
+  --Body-Medium-Font-Weight:   var(--Font-Weight-Body);
   --Body-Medium-Line-Height:   24px;
-  --Body-Medium-Letter-Spacing: 0px;
+  --Body-Medium-Letter-Spacing: 0em;
+  --Body-Medium-Text-Transform: none;
   --Body-Medium-Semibold-Font-Weight: 600;
-  --Body-Medium-Bold-Font-Weight: 700;
-  --Font-Family-Body: var(--Platform-Font-Families-Body);
+  --Body-Large-Font-Family:   var(--Font-Family-Body);
   --Body-Large-Font-Size:     18px;
-  --Body-Large-Font-Weight:   500;
+  --Body-Large-Font-Weight:   var(--Font-Weight-Body);
   --Body-Large-Line-Height:   27px;
-  --Body-Large-Letter-Spacing: 0px;
+  --Body-Large-Letter-Spacing: 0em;
+  --Body-Large-Text-Transform: none;
   --Body-Large-Semibold-Font-Weight: 600;
-  --Body-Large-Bold-Font-Weight: 700;
 
   /* Caption */
-  --Font-Family-Body: var(--Platform-Font-Families-Body);
+  --Caption-Small-Font-Family:   var(--Font-Family-Body);
+  --Caption-Small-Font-Size:     12px;
+  --Caption-Small-Font-Weight:   500;
+  --Caption-Small-Line-Height:   18px;
+  --Caption-Small-Letter-Spacing: 0.0083em;
+  --Caption-Small-Text-Transform: none;
+  --Caption-Small-Bold-Font-Weight: 700;
+  --Caption-Small-Paragraph-Spacing: 24px;
+  --Caption-Font-Family:   var(--Font-Family-Body);
   --Caption-Font-Size:     14px;
   --Caption-Font-Weight:   500;
   --Caption-Line-Height:   21px;
-  --Caption-Letter-Spacing: 0px;
+  --Caption-Letter-Spacing: 0.0071em;
+  --Caption-Text-Transform: none;
   --Caption-Bold-Font-Weight: 700;
+  --Caption-Paragraph-Spacing: 28px;
+  --Caption-Large-Font-Family:   var(--Font-Family-Body);
+  --Caption-Large-Font-Size:     16px;
+  --Caption-Large-Font-Weight:   500;
+  --Caption-Large-Line-Height:   24px;
+  --Caption-Large-Letter-Spacing: 0.0063em;
+  --Caption-Large-Text-Transform: none;
+  --Caption-Large-Bold-Font-Weight: 700;
+  --Caption-Large-Paragraph-Spacing: 32px;
 
   /* Label */
-  --Font-Family-Label: var(--Platform-Font-Families-Body);
+  --Label-ExtraSmall-Font-Family:   var(--Font-Family-Body);
   --Label-ExtraSmall-Font-Size:     11px;
   --Label-ExtraSmall-Font-Weight:   600;
   --Label-ExtraSmall-Line-Height:   16.5px;
-  --Label-ExtraSmall-Letter-Spacing: 0px;
-  --Font-Family-Label: var(--Platform-Font-Families-Body);
+  --Label-ExtraSmall-Letter-Spacing: 0.0455em;
+  --Label-ExtraSmall-Text-Transform: none;
+  --Label-Small-Font-Family:   var(--Font-Family-Body);
   --Label-Small-Font-Size:     12.5px;
   --Label-Small-Font-Weight:   600;
   --Label-Small-Line-Height:   18.75px;
-  --Label-Small-Letter-Spacing: 0px;
-  --Font-Family-Label: var(--Platform-Font-Families-Body);
+  --Label-Small-Letter-Spacing: 0.02em;
+  --Label-Small-Text-Transform: none;
+  --Label-Small-All-Caps-Font-Family:   var(--Font-Family-Body);
+  --Label-Small-All-Caps-Font-Size:     12.5px;
+  --Label-Small-All-Caps-Font-Weight:   600;
+  --Label-Small-All-Caps-Line-Height:   18.75px;
+  --Label-Small-All-Caps-Letter-Spacing: 0.02em;
+  --Label-Small-All-Caps-Text-Transform: uppercase;
+  --Label-Medium-Font-Family:   var(--Font-Family-Body);
   --Label-Medium-Font-Size:     16px;
   --Label-Medium-Font-Weight:   600;
   --Label-Medium-Line-Height:   24px;
-  --Label-Medium-Letter-Spacing: 0px;
-  --Font-Family-Label: var(--Platform-Font-Families-Body);
+  --Label-Medium-Letter-Spacing: 0em;
+  --Label-Medium-Text-Transform: none;
+  --Label-Medium-All-Caps-Font-Family:   var(--Font-Family-Body);
+  --Label-Medium-All-Caps-Font-Size:     16px;
+  --Label-Medium-All-Caps-Font-Weight:   600;
+  --Label-Medium-All-Caps-Line-Height:   24px;
+  --Label-Medium-All-Caps-Letter-Spacing: 0em;
+  --Label-Medium-All-Caps-Text-Transform: uppercase;
+  --Label-Large-Font-Family:   var(--Font-Family-Body);
   --Label-Large-Font-Size:     18px;
   --Label-Large-Font-Weight:   600;
   --Label-Large-Line-Height:   27px;
-  --Label-Large-Letter-Spacing: 0px;
+  --Label-Large-Letter-Spacing: 0em;
+  --Label-Large-Text-Transform: none;
+  --Label-Large-All-Caps-Font-Family:   var(--Font-Family-Body);
+  --Label-Large-All-Caps-Font-Size:     18px;
+  --Label-Large-All-Caps-Font-Weight:   600;
+  --Label-Large-All-Caps-Line-Height:   27px;
+  --Label-Large-All-Caps-Letter-Spacing: 0em;
+  --Label-Large-All-Caps-Text-Transform: uppercase;
+
+  /* Mobile-Nav-Label */
+  --Mobile-Nav-Label-Font-Family:   var(--Font-Family-Body);
+  --Mobile-Nav-Label-Font-Size:     11px;
+  --Mobile-Nav-Label-Font-Weight:   600;
+  --Mobile-Nav-Label-Line-Height:   16.5px;
+  --Mobile-Nav-Label-Letter-Spacing: 0.0455em;
+  --Mobile-Nav-Label-Text-Transform: none;
 
   /* Legal */
-  --Font-Family-Body: var(--Platform-Font-Families-Body);
+  --Legal-Font-Family:   var(--Font-Family-Body);
   --Legal-Font-Size:     10px;
   --Legal-Font-Weight:   400;
   --Legal-Line-Height:   15px;
-  --Legal-Letter-Spacing: 0px;
+  --Legal-Letter-Spacing: 0em;
+  --Legal-Text-Transform: none;
   --Legal-Semibold-Font-Weight: 600;
+  --Legal-Paragraph-Spacing: 20px;
 
-  /* Overline */
-  --Font-Family-Overline: var(--Platform-Font-Families-Decorative);
-  --Overline-Small-Font-Size:     14px;
-  --Overline-Small-Font-Weight:   500;
-  --Overline-Small-Line-Height:   21px;
-  --Overline-Small-Letter-Spacing: 0px;
-  --Font-Family-Overline: var(--Platform-Font-Families-Decorative);
-  --Overline-Medium-Font-Size:     16px;
-  --Overline-Medium-Font-Weight:   600;
-  --Overline-Medium-Line-Height:   24px;
-  --Overline-Medium-Letter-Spacing: 0px;
-  --Font-Family-Overline: var(--Platform-Font-Families-Decorative);
-  --Overline-Large-Font-Size:     18px;
-  --Overline-Large-Font-Weight:   600;
-  --Overline-Large-Line-Height:   27px;
-  --Overline-Large-Letter-Spacing: 0px;
+  /* Eyebrow — Eyebrow label — uppercase and tracked. Sits above a heading. */
+  --Eyebrow-Small-Font-Size:     12px;
+  --Eyebrow-Small-Font-Weight:   600;
+  --Eyebrow-Small-Line-Height:   18px;
+  --Eyebrow-Small-Letter-Spacing: 0.06em;
+  --Eyebrow-Small-Text-Transform: uppercase;
+  --Overline-Small-Font-Size: var(--Eyebrow-Small-Font-Size);
+  --Overline-Small-Font-Weight: var(--Eyebrow-Small-Font-Weight);
+  --Overline-Small-Line-Height: var(--Eyebrow-Small-Line-Height);
+  --Overline-Small-Letter-Spacing: var(--Eyebrow-Small-Letter-Spacing);
+  --Overline-Small-Text-Transform: var(--Eyebrow-Small-Text-Transform);
+  --Eyebrow-Medium-Font-Size:     16px;
+  --Eyebrow-Medium-Font-Weight:   600;
+  --Eyebrow-Medium-Line-Height:   24px;
+  --Eyebrow-Medium-Letter-Spacing: 0.05em;
+  --Eyebrow-Medium-Text-Transform: uppercase;
+  --Overline-Medium-Font-Size: var(--Eyebrow-Medium-Font-Size);
+  --Overline-Medium-Font-Weight: var(--Eyebrow-Medium-Font-Weight);
+  --Overline-Medium-Line-Height: var(--Eyebrow-Medium-Line-Height);
+  --Overline-Medium-Letter-Spacing: var(--Eyebrow-Medium-Letter-Spacing);
+  --Overline-Medium-Text-Transform: var(--Eyebrow-Medium-Text-Transform);
+  --Eyebrow-Large-Font-Size:     18px;
+  --Eyebrow-Large-Font-Weight:   600;
+  --Eyebrow-Large-Line-Height:   27px;
+  --Eyebrow-Large-Letter-Spacing: 0.04em;
+  --Eyebrow-Large-Text-Transform: uppercase;
+  --Overline-Large-Font-Size: var(--Eyebrow-Large-Font-Size);
+  --Overline-Large-Font-Weight: var(--Eyebrow-Large-Font-Weight);
+  --Overline-Large-Line-Height: var(--Eyebrow-Large-Line-Height);
+  --Overline-Large-Letter-Spacing: var(--Eyebrow-Large-Letter-Spacing);
+  --Overline-Large-Text-Transform: var(--Eyebrow-Large-Text-Transform);
 
   /* Number */
-  --Font-Family-Number: var(--Platform-Font-Families-Body);
+  --Number-Small-Font-Family:   var(--Font-Family-Body);
   --Number-Small-Font-Size:     16px;
   --Number-Small-Font-Weight:   700;
   --Number-Small-Line-Height:   16px;
-  --Number-Small-Letter-Spacing: 0px;
-  --Font-Family-Number: var(--Platform-Font-Families-Body);
+  --Number-Small-Letter-Spacing: 0em;
+  --Number-Small-Text-Transform: none;
+  --Number-Medium-Font-Family:   var(--Font-Family-Body);
   --Number-Medium-Font-Size:     28px;
   --Number-Medium-Font-Weight:   700;
   --Number-Medium-Line-Height:   28px;
-  --Number-Medium-Letter-Spacing: 0px;
-  --Font-Family-Number: var(--Platform-Font-Families-Body);
+  --Number-Medium-Letter-Spacing: 0em;
+  --Number-Medium-Text-Transform: none;
+  --Number-Large-Font-Family:   var(--Font-Family-Body);
   --Number-Large-Font-Size:     36px;
   --Number-Large-Font-Weight:   700;
   --Number-Large-Line-Height:   36px;
-  --Number-Large-Letter-Spacing: 0px;
+  --Number-Large-Letter-Spacing: 0em;
+  --Number-Large-Text-Transform: none;
 
   /* Button */
-  --Font-Family-Button: var(--Platform-Font-Families-Body);
+  --Button-ExtraSmall-Font-Family:   var(--Font-Family-Body);
   --Button-ExtraSmall-Font-Size:     11px;
   --Button-ExtraSmall-Font-Weight:   600;
   --Button-ExtraSmall-Line-Height:   11px;
-  --Button-ExtraSmall-Letter-Spacing: 0px;
-  --Font-Family-Button: var(--Platform-Font-Families-Body);
+  --Button-ExtraSmall-Letter-Spacing: 0em;
+  --Button-ExtraSmall-Text-Transform: none;
+  --Button-Small-Font-Family:   var(--Font-Family-Body);
   --Button-Small-Font-Size:     14px;
   --Button-Small-Font-Weight:   600;
   --Button-Small-Line-Height:   14px;
-  --Button-Small-Letter-Spacing: 0px;
-  --Font-Family-Button: var(--Platform-Font-Families-Body);
-  --Button-Standard-Font-Size:     16px;
-  --Button-Standard-Font-Weight:   600;
-  --Button-Standard-Line-Height:   16px;
-  --Button-Standard-Letter-Spacing: 0px;
+  --Button-Small-Letter-Spacing: 0em;
+  --Button-Small-Text-Transform: none;
+  --Button-Medium-Font-Family:   var(--Font-Family-Body);
+  --Button-Medium-Font-Size:     16px;
+  --Button-Medium-Font-Weight:   600;
+  --Button-Medium-Line-Height:   16px;
+  --Button-Medium-Letter-Spacing: 0em;
+  --Button-Medium-Text-Transform: none;
+  --Button-Standard-Font-Size: var(--Button-Medium-Font-Size);
+  --Button-Standard-Font-Weight: var(--Button-Medium-Font-Weight);
+  --Button-Standard-Line-Height: var(--Button-Medium-Line-Height);
+  --Button-Standard-Letter-Spacing: var(--Button-Medium-Letter-Spacing);
+  --Button-Large-Font-Family:   var(--Font-Family-Body);
+  --Button-Large-Font-Size:     24px;
+  --Button-Large-Font-Weight:   600;
+  --Button-Large-Line-Height:   24px;
+  --Button-Large-Letter-Spacing: 0em;
+  --Button-Large-Text-Transform: none;
 
+  /* Badge */
+  --Badge-Font-Family:   var(--Font-Family-Body);
+  --Badge-Font-Size:     11px;
+  --Badge-Font-Weight:   600;
+  --Badge-Line-Height:   12px;
+  --Badge-Letter-Spacing: 0em;
+  --Badge-Text-Transform: none;
 }
 
 [data-platform="IOS-Mobile"] {
 
+
+
   /* Display */
-  --Font-Family-Display: var(--Platform-Font-Families-Decorative);
-  --Display-Small-Font-Size:     28px;
+  --Font-Family-Display: var(--Set-Font-Family-Display, var(--Platform-Font-Families-Decorative, var(--Set-Font-Family-Decorative)));
+  --Display-Small-Font-Size:     34px;
   --Display-Small-Font-Weight:   600;
-  --Display-Small-Line-Height:   28px;
+  --Display-Small-Line-Height:   41px;
   --Display-Small-Letter-Spacing: 0px;
-  --Font-Family-Display: var(--Platform-Font-Families-Header);
-  --Display-Medium-Font-Size:     28px;
+  --Font-Family-Display: var(--Set-Font-Family-Display, var(--Platform-Font-Families-Decorative, var(--Set-Font-Family-Decorative)));
+  --Display-Medium-Font-Size:     40px;
   --Display-Medium-Font-Weight:   600;
-  --Display-Medium-Line-Height:   28px;
+  --Display-Medium-Line-Height:   48px;
   --Display-Medium-Letter-Spacing: 0px;
-  --Font-Family-Display: var(--Platform-Font-Families-Decorative);
-  --Display-Large-Font-Size:     28px;
+  --Font-Family-Display: var(--Set-Font-Family-Display, var(--Platform-Font-Families-Decorative, var(--Set-Font-Family-Decorative)));
+  --Display-Large-Font-Size:     48px;
   --Display-Large-Font-Weight:   600;
-  --Display-Large-Line-Height:   28px;
+  --Display-Large-Line-Height:   58px;
   --Display-Large-Letter-Spacing: 0px;
 
   /* Headers */
@@ -276,11 +418,42 @@
 
   /* Caption */
   --Font-Family-Body: var(--Platform-Font-Families-Body);
+  /* Leading here is the PLATFORM's, not the brand's 1.5 — Apple's Dynamic Type's own
+     table at 12 / 14 / 16. The Figma payload computes these same numbers for
+     every non-Desktop device (typographyPlatform.ts, "LINE HEIGHT is COMPUTED,
+     not read"), while this block declared a flat 21 at every size, so one
+     caption read 19 in the file and 21 in the stylesheet and nothing could
+     see it. Declared rather than left to compute so the two sides state the
+     same value instead of arriving at it separately.
+
+     EVERY property is restated, tracking included, because the payload's
+     device-floor merge replaces a style WHOLE — `{...desktopStyles, ...own}`
+     keys on the STYLE, not on the property — so a step this block declares
+     partially loses whatever it leaves out instead of inheriting it from
+     Desktop. That variable then exists on Desktop and nowhere else, and one
+     missing on six of seven devices resolves to nothing there, silently. The
+     CSS cascade would have carried it; the payload does not, and the payload
+     is the half that fails without a sound.
+
+     The 0px is this block's existing answer for Caption, extended to the two
+     new steps rather than importing Desktop's 0.1px nudge — which would leave
+     the ramp reading 0.0996 / 0 / 0.1008, three steps of one style disagreeing
+     about whether the brand tracks captions at all. Whether mobile SHOULD zero
+     it is a brand decision and still open; this only stops the ramp from
+     contradicting itself. */
+  --Caption-Small-Font-Size:     12px;
+  --Caption-Small-Font-Weight:   500;
+  --Caption-Small-Letter-Spacing: 0px;
+  --Caption-Small-Line-Height:   16px;
   --Caption-Font-Size:     14px;
   --Caption-Font-Weight:   500;
-  --Caption-Line-Height:   21px;
+  --Caption-Line-Height:   19px;
   --Caption-Letter-Spacing: 0px;
   --Caption-Bold-Font-Weight: 700;
+  --Caption-Large-Font-Size:     16px;
+  --Caption-Large-Font-Weight:   500;
+  --Caption-Large-Letter-Spacing: 0px;
+  --Caption-Large-Line-Height:   21px;
 
   /* Label */
   --Font-Family-Label: var(--Platform-Font-Families-Body);
@@ -303,6 +476,14 @@
   --Label-Large-Font-Weight:   600;
   --Label-Large-Line-Height:   27px;
   --Label-Large-Letter-Spacing: 0px;
+
+
+  /* Mobile Nav Label — Apple's tab-bar label: 10pt, untracked. */
+  --Font-Family-Mobile-Nav-Label: var(--Platform-Font-Families-Body);
+  --Mobile-Nav-Label-Font-Size:     10px;
+  --Mobile-Nav-Label-Font-Weight:   600;
+  --Mobile-Nav-Label-Line-Height:   10px;
+  --Mobile-Nav-Label-Letter-Spacing: 0px;
 
   /* Legal */
   --Font-Family-Body: var(--Platform-Font-Families-Body);
@@ -358,30 +539,53 @@
   --Button-Small-Line-Height:   14px;
   --Button-Small-Letter-Spacing: 0px;
   --Font-Family-Button: var(--Platform-Font-Families-Body);
-  --Button-Standard-Font-Size:     16px;
-  --Button-Standard-Font-Weight:   600;
-  --Button-Standard-Line-Height:   16px;
-  --Button-Standard-Letter-Spacing: 0px;
+  --Button-Medium-Font-Size:     16px;
+  --Button-Medium-Font-Weight:   600;
+  --Button-Medium-Line-Height:   16px;
+  --Button-Medium-Letter-Spacing: 0px;
+  /* was Button-Standard — kept so frozen stylesheets keep resolving. */
+  --Button-Standard-Font-Size:     var(--Button-Medium-Font-Size);
+  --Button-Standard-Font-Weight:   var(--Button-Medium-Font-Weight);
+  --Button-Standard-Line-Height:   var(--Button-Medium-Line-Height);
+  --Button-Standard-Letter-Spacing: var(--Button-Medium-Letter-Spacing);
+
+  /* Alt Display — mirrors Display step for step. The pairing sets one word
+     on one baseline ("Omni" + "Design"), so the two must not diverge in
+     size or leading; colour is what separates them. */
+  --Alt-Display-Small-Font-Size:     34px;
+  --Alt-Display-Small-Font-Weight:   900;
+  --Alt-Display-Small-Line-Height:   41px;
+  --Alt-Display-Small-Letter-Spacing: 0px;
+  --Alt-Display-Medium-Font-Size:     40px;
+  --Alt-Display-Medium-Font-Weight:   900;
+  --Alt-Display-Medium-Line-Height:   48px;
+  --Alt-Display-Medium-Letter-Spacing: 0px;
+  --Alt-Display-Large-Font-Size:     48px;
+  --Alt-Display-Large-Font-Weight:   900;
+  --Alt-Display-Large-Line-Height:   58px;
+  --Alt-Display-Large-Letter-Spacing: 0px;
 
 }
 
 [data-platform="IOS-Tablet"] {
 
+
+
   /* Display */
-  --Font-Family-Display: var(--Platform-Font-Families-Decorative);
-  --Display-Small-Font-Size:     28px;
+  --Font-Family-Display: var(--Set-Font-Family-Display, var(--Platform-Font-Families-Decorative, var(--Set-Font-Family-Decorative)));
+  --Display-Small-Font-Size:     34px;
   --Display-Small-Font-Weight:   600;
-  --Display-Small-Line-Height:   28px;
+  --Display-Small-Line-Height:   41px;
   --Display-Small-Letter-Spacing: 0px;
-  --Font-Family-Display: var(--Platform-Font-Families-Header);
-  --Display-Medium-Font-Size:     28px;
+  --Font-Family-Display: var(--Set-Font-Family-Display, var(--Platform-Font-Families-Decorative, var(--Set-Font-Family-Decorative)));
+  --Display-Medium-Font-Size:     40px;
   --Display-Medium-Font-Weight:   600;
-  --Display-Medium-Line-Height:   28px;
+  --Display-Medium-Line-Height:   48px;
   --Display-Medium-Letter-Spacing: 0px;
-  --Font-Family-Display: var(--Platform-Font-Families-Decorative);
-  --Display-Large-Font-Size:     28px;
+  --Font-Family-Display: var(--Set-Font-Family-Display, var(--Platform-Font-Families-Decorative, var(--Set-Font-Family-Decorative)));
+  --Display-Large-Font-Size:     48px;
   --Display-Large-Font-Weight:   600;
-  --Display-Large-Line-Height:   28px;
+  --Display-Large-Line-Height:   58px;
   --Display-Large-Letter-Spacing: 0px;
 
   /* Headers */
@@ -453,11 +657,42 @@
 
   /* Caption */
   --Font-Family-Body: var(--Platform-Font-Families-Body);
+  /* Leading here is the PLATFORM's, not the brand's 1.5 — Apple's Dynamic Type's own
+     table at 12 / 14 / 16. The Figma payload computes these same numbers for
+     every non-Desktop device (typographyPlatform.ts, "LINE HEIGHT is COMPUTED,
+     not read"), while this block declared a flat 21 at every size, so one
+     caption read 19 in the file and 21 in the stylesheet and nothing could
+     see it. Declared rather than left to compute so the two sides state the
+     same value instead of arriving at it separately.
+
+     EVERY property is restated, tracking included, because the payload's
+     device-floor merge replaces a style WHOLE — `{...desktopStyles, ...own}`
+     keys on the STYLE, not on the property — so a step this block declares
+     partially loses whatever it leaves out instead of inheriting it from
+     Desktop. That variable then exists on Desktop and nowhere else, and one
+     missing on six of seven devices resolves to nothing there, silently. The
+     CSS cascade would have carried it; the payload does not, and the payload
+     is the half that fails without a sound.
+
+     The 0px is this block's existing answer for Caption, extended to the two
+     new steps rather than importing Desktop's 0.1px nudge — which would leave
+     the ramp reading 0.0996 / 0 / 0.1008, three steps of one style disagreeing
+     about whether the brand tracks captions at all. Whether mobile SHOULD zero
+     it is a brand decision and still open; this only stops the ramp from
+     contradicting itself. */
+  --Caption-Small-Font-Size:     12px;
+  --Caption-Small-Font-Weight:   500;
+  --Caption-Small-Letter-Spacing: 0px;
+  --Caption-Small-Line-Height:   16px;
   --Caption-Font-Size:     14px;
   --Caption-Font-Weight:   500;
-  --Caption-Line-Height:   21px;
+  --Caption-Line-Height:   19px;
   --Caption-Letter-Spacing: 0px;
   --Caption-Bold-Font-Weight: 700;
+  --Caption-Large-Font-Size:     16px;
+  --Caption-Large-Font-Weight:   500;
+  --Caption-Large-Letter-Spacing: 0px;
+  --Caption-Large-Line-Height:   21px;
 
   /* Label */
   --Font-Family-Label: var(--Platform-Font-Families-Body);
@@ -480,6 +715,14 @@
   --Label-Large-Font-Weight:   600;
   --Label-Large-Line-Height:   27px;
   --Label-Large-Letter-Spacing: 0px;
+
+
+  /* Mobile Nav Label — same as iPhone; the tab bar does not resize. */
+  --Font-Family-Mobile-Nav-Label: var(--Platform-Font-Families-Body);
+  --Mobile-Nav-Label-Font-Size:     10px;
+  --Mobile-Nav-Label-Font-Weight:   600;
+  --Mobile-Nav-Label-Line-Height:   10px;
+  --Mobile-Nav-Label-Letter-Spacing: 0px;
 
   /* Legal */
   --Font-Family-Body: var(--Platform-Font-Families-Body);
@@ -535,30 +778,53 @@
   --Button-Small-Line-Height:   16px;
   --Button-Small-Letter-Spacing: 0px;
   --Font-Family-Button: var(--Platform-Font-Families-Body);
-  --Button-Standard-Font-Size:     16px;
-  --Button-Standard-Font-Weight:   600;
-  --Button-Standard-Line-Height:   16px;
-  --Button-Standard-Letter-Spacing: 0px;
+  --Button-Medium-Font-Size:     16px;
+  --Button-Medium-Font-Weight:   600;
+  --Button-Medium-Line-Height:   16px;
+  --Button-Medium-Letter-Spacing: 0px;
+  /* was Button-Standard — kept so frozen stylesheets keep resolving. */
+  --Button-Standard-Font-Size:     var(--Button-Medium-Font-Size);
+  --Button-Standard-Font-Weight:   var(--Button-Medium-Font-Weight);
+  --Button-Standard-Line-Height:   var(--Button-Medium-Line-Height);
+  --Button-Standard-Letter-Spacing: var(--Button-Medium-Letter-Spacing);
+
+  /* Alt Display — mirrors Display step for step. The pairing sets one word
+     on one baseline ("Omni" + "Design"), so the two must not diverge in
+     size or leading; colour is what separates them. */
+  --Alt-Display-Small-Font-Size:     34px;
+  --Alt-Display-Small-Font-Weight:   900;
+  --Alt-Display-Small-Line-Height:   41px;
+  --Alt-Display-Small-Letter-Spacing: 0px;
+  --Alt-Display-Medium-Font-Size:     40px;
+  --Alt-Display-Medium-Font-Weight:   900;
+  --Alt-Display-Medium-Line-Height:   48px;
+  --Alt-Display-Medium-Letter-Spacing: 0px;
+  --Alt-Display-Large-Font-Size:     48px;
+  --Alt-Display-Large-Font-Weight:   900;
+  --Alt-Display-Large-Line-Height:   58px;
+  --Alt-Display-Large-Letter-Spacing: 0px;
 
 }
 
 [data-platform="Android"] {
 
+
+
   /* Display */
-  --Font-Family-Display: var(--Platform-Font-Families-Decorative);
-  --Display-Small-Font-Size:     28px;
+  --Font-Family-Display: var(--Set-Font-Family-Display, var(--Platform-Font-Families-Decorative, var(--Set-Font-Family-Decorative)));
+  --Display-Small-Font-Size:     36px;
   --Display-Small-Font-Weight:   600;
-  --Display-Small-Line-Height:   28px;
+  --Display-Small-Line-Height:   44px;
   --Display-Small-Letter-Spacing: 0px;
-  --Font-Family-Display: var(--Platform-Font-Families-Header);
-  --Display-Medium-Font-Size:     28px;
+  --Font-Family-Display: var(--Set-Font-Family-Display, var(--Platform-Font-Families-Decorative, var(--Set-Font-Family-Decorative)));
+  --Display-Medium-Font-Size:     45px;
   --Display-Medium-Font-Weight:   600;
-  --Display-Medium-Line-Height:   28px;
+  --Display-Medium-Line-Height:   52px;
   --Display-Medium-Letter-Spacing: 0px;
-  --Font-Family-Display: var(--Platform-Font-Families-Decorative);
-  --Display-Large-Font-Size:     28px;
+  --Font-Family-Display: var(--Set-Font-Family-Display, var(--Platform-Font-Families-Decorative, var(--Set-Font-Family-Decorative)));
+  --Display-Large-Font-Size:     57px;
   --Display-Large-Font-Weight:   600;
-  --Display-Large-Line-Height:   28px;
+  --Display-Large-Line-Height:   64px;
   --Display-Large-Letter-Spacing: 0px;
 
   /* Headers */
@@ -630,11 +896,42 @@
 
   /* Caption */
   --Font-Family-Body: var(--Platform-Font-Families-Body);
+  /* Leading here is the PLATFORM's, not the brand's 1.5 — Material 3's own
+     table at 12 / 14 / 16. The Figma payload computes these same numbers for
+     every non-Desktop device (typographyPlatform.ts, "LINE HEIGHT is COMPUTED,
+     not read"), while this block declared a flat 21 at every size, so one
+     caption read 20 in the file and 21 in the stylesheet and nothing could
+     see it. Declared rather than left to compute so the two sides state the
+     same value instead of arriving at it separately.
+
+     EVERY property is restated, tracking included, because the payload's
+     device-floor merge replaces a style WHOLE — `{...desktopStyles, ...own}`
+     keys on the STYLE, not on the property — so a step this block declares
+     partially loses whatever it leaves out instead of inheriting it from
+     Desktop. That variable then exists on Desktop and nowhere else, and one
+     missing on six of seven devices resolves to nothing there, silently. The
+     CSS cascade would have carried it; the payload does not, and the payload
+     is the half that fails without a sound.
+
+     The 0px is this block's existing answer for Caption, extended to the two
+     new steps rather than importing Desktop's 0.1px nudge — which would leave
+     the ramp reading 0.0996 / 0 / 0.1008, three steps of one style disagreeing
+     about whether the brand tracks captions at all. Whether mobile SHOULD zero
+     it is a brand decision and still open; this only stops the ramp from
+     contradicting itself. */
+  --Caption-Small-Font-Size:     12px;
+  --Caption-Small-Font-Weight:   500;
+  --Caption-Small-Letter-Spacing: 0px;
+  --Caption-Small-Line-Height:   16px;
   --Caption-Font-Size:     14px;
   --Caption-Font-Weight:   500;
-  --Caption-Line-Height:   21px;
+  --Caption-Line-Height:   20px;
   --Caption-Letter-Spacing: 0px;
   --Caption-Bold-Font-Weight: 700;
+  --Caption-Large-Font-Size:     16px;
+  --Caption-Large-Font-Weight:   500;
+  --Caption-Large-Letter-Spacing: 0px;
+  --Caption-Large-Line-Height:   24px;
 
   /* Label */
   --Font-Family-Label: var(--Platform-Font-Families-Body);
@@ -657,6 +954,14 @@
   --Label-Large-Font-Weight:   600;
   --Label-Large-Line-Height:   27px;
   --Label-Large-Letter-Spacing: 0px;
+
+
+  /* Mobile Nav Label — Material's navigation label: 12sp on 16, 0.5 tracking. */
+  --Font-Family-Mobile-Nav-Label: var(--Platform-Font-Families-Body);
+  --Mobile-Nav-Label-Font-Size:     12px;
+  --Mobile-Nav-Label-Font-Weight:   600;
+  --Mobile-Nav-Label-Line-Height:   16px;
+  --Mobile-Nav-Label-Letter-Spacing: 0.5px;
 
   /* Legal */
   --Font-Family-Body: var(--Platform-Font-Families-Body);
@@ -712,9 +1017,232 @@
   --Button-Small-Line-Height:   16px;
   --Button-Small-Letter-Spacing: 0px;
   --Font-Family-Button: var(--Platform-Font-Families-Body);
-  --Button-Standard-Font-Size:     16px;
-  --Button-Standard-Font-Weight:   600;
-  --Button-Standard-Line-Height:   16px;
-  --Button-Standard-Letter-Spacing: 0px;
+  --Button-Medium-Font-Size:     16px;
+  --Button-Medium-Font-Weight:   600;
+  --Button-Medium-Line-Height:   16px;
+  --Button-Medium-Letter-Spacing: 0px;
+  /* was Button-Standard — kept so frozen stylesheets keep resolving. */
+  --Button-Standard-Font-Size:     var(--Button-Medium-Font-Size);
+  --Button-Standard-Font-Weight:   var(--Button-Medium-Font-Weight);
+  --Button-Standard-Line-Height:   var(--Button-Medium-Line-Height);
+  --Button-Standard-Letter-Spacing: var(--Button-Medium-Letter-Spacing);
 
+  /* Alt Display — mirrors Display step for step. The pairing sets one word
+     on one baseline ("Omni" + "Design"), so the two must not diverge in
+     size or leading; colour is what separates them. */
+  --Alt-Display-Small-Font-Size:     36px;
+  --Alt-Display-Small-Font-Weight:   900;
+  --Alt-Display-Small-Line-Height:   44px;
+  --Alt-Display-Small-Letter-Spacing: 0px;
+  --Alt-Display-Medium-Font-Size:     45px;
+  --Alt-Display-Medium-Font-Weight:   900;
+  --Alt-Display-Medium-Line-Height:   52px;
+  --Alt-Display-Medium-Letter-Spacing: 0px;
+  --Alt-Display-Large-Font-Size:     57px;
+  --Alt-Display-Large-Font-Weight:   900;
+  --Alt-Display-Large-Line-Height:   64px;
+  --Alt-Display-Large-Letter-Spacing: 0px;
+
+}
+
+/* ── Platform button metrics ──────────────────────────────────────────────
+ *
+ * Apple's and Google's button sizes, overriding the brand's own on the touch
+ * platforms. Desktop is absent on purpose: there the brand's heights ARE the
+ * answer, and base.css already states them.
+ *
+ * :root[data-platform="…"], not the bare [data-platform="…"] the type ramps
+ * above use, and the difference is load-bearing. --Button-Height is declared
+ * at :root in base.css, which the provider injects at slot 5 — AFTER this file
+ * at slot 3. A bare attribute selector ties with :root at (0,1,0), so the later
+ * file would win and these overrides would do nothing, with no error anywhere.
+ * :root[data-platform] scores (0,2,0) and wins on specificity instead, which
+ * does not depend on anyone preserving the load order.
+ *
+ * The type ramps above can stay as they are: their :root counterpart is in
+ * core.css at slot 2, so they already load later and win.
+ *
+ * --Small-/--Large-Button-Height are NOT restated. base.css declares them as
+ * var(--Sm-Button-Height) / var(--Lg-Button-Height), and a var() in a custom
+ * property resolves against the element it lands on — so the back-compat
+ * spellings follow these overrides on their own.
+ */
+
+:root[data-platform="IOS-Mobile"] {
+  --Button-Height: 44px;
+  --Sm-Button-Height: 32px;
+  --Lg-Button-Height: 50px;
+  --Button-Icon: 20px;
+  --Sm-Button-Icon: 16px;
+  --Lg-Button-Icon: 24px;
+}
+
+:root[data-platform="IOS-Tablet"] {
+  --Button-Height: 44px;
+  --Sm-Button-Height: 32px;
+  --Lg-Button-Height: 50px;
+  --Button-Icon: 20px;
+  --Sm-Button-Icon: 16px;
+  --Lg-Button-Icon: 24px;
+}
+
+:root[data-platform="Android"] {
+  --Button-Height: 48px;
+  --Sm-Button-Height: 32px;
+  --Lg-Button-Height: 56px;
+  --Button-Icon: 18px;
+  --Sm-Button-Icon: 18px;
+  --Lg-Button-Icon: 24px;
+}
+
+
+/* ---------------------------------------------------------------------------
+   Face re-mapping
+   Display renders in the Display face (it used to follow Header, which left the
+   expressive face with nowhere to appear at size). Overline is the eyebrow spec
+   now, on the Eyebrow face. The lib hard-codes both families, so they are
+   corrected here rather than through a token.
+
+   Both read the face token, which is what keeps decorative mode working:
+   core.css re-points --Font-Family-Eyebrow at the Display face inside
+   [data-decorative], on a higher-specificity selector.
+--------------------------------------------------------------------------- */
+.typography.typography-display-large,
+.typography.typography-display-medium,
+.typography.typography-display-small {
+  font-family: var(--Font-Family-Display);
+}
+
+.typography.typography-overline,
+.typography.typography-overline-small,
+.typography.typography-overline-medium,
+.typography.typography-overline-large {
+  font-family: var(--Font-Family-Eyebrow);
+}
+
+/* ---------------------------------------------------------------------------
+   Prose lists — opt in with .typography-list on the <ul> or <ol>.
+
+   The marker takes --Eyebrow: the accent that is already ROTATED off the
+   surface's palette (Primary->Secondary, Secondary->Tertiary, and so on), so a
+   list picks up the same accent as the eyebrow above it instead of the page
+   inventing one. The list TEXT is untouched and stays on --Text; only the
+   bullet or number is accented.
+
+   Opt-in, not a bare li::marker rule, for the same reason nothing else here
+   styles bare elements: importing the CSS must not repaint lists in a
+   consumer's app that never asked for it.
+
+   ::marker only honours a short list of properties. color is one of them;
+   background, padding and size are not, so a bullet that needs a custom size
+   still needs the ::before technique.
+--------------------------------------------------------------------------- */
+.typography-list > li::marker {
+  color: var(--Eyebrow);
+}
+
+/* ---------------------------------------------------------------------------
+   Alt Display colour — three variants, one pair of stops
+
+   Set data-alt-display on the element or any ancestor:
+     default   (or unset)  the Alt reads as a heading
+     colored               a flat Alt colour
+     gradient              the two stops the theme publishes
+
+   The stops are re-published per theme and surface, so every variant follows
+   data-surface without being restated.
+--------------------------------------------------------------------------- */
+:root,
+[data-alt-display="default"] {
+  --Alt-Display-Color-Stop-1: var(--Header);
+  --Alt-Display-Color-Stop-2: var(--Header);
+}
+
+[data-alt-display="colored"] {
+  --Alt-Display-Color-Stop-1: var(--Alt-Display-Color, var(--Header));
+  --Alt-Display-Color-Stop-2: var(--Alt-Display-Color, var(--Header));
+}
+
+[data-alt-display="gradient"] {
+  --Alt-Display-Color-Stop-1: var(--Alt-Color-Gradient-Stop-1, var(--Alt-Display-Color, var(--Header)));
+  --Alt-Display-Color-Stop-2: var(--Alt-Color-Gradient-Stop-2, var(--Alt-Display-Color, var(--Header)));
+}
+
+.typography-alt-display-large,
+.typography-alt-display-medium,
+.typography-alt-display-small {
+  /* Stop 1 alone: in the flat variants the two agree, and a plain colour keeps
+     the selection highlight, print, and forced-colors working. */
+  color: var(--Alt-Display-Color-Stop-1);
+}
+
+.typography-alt-display-large[data-alt-display="gradient"],
+[data-alt-display="gradient"] .typography-alt-display-large,
+.typography-alt-display-medium[data-alt-display="gradient"],
+[data-alt-display="gradient"] .typography-alt-display-medium,
+.typography-alt-display-small[data-alt-display="gradient"],
+[data-alt-display="gradient"] .typography-alt-display-small {
+  background-image: linear-gradient(
+    90deg,
+    var(--Alt-Display-Color-Stop-1),
+    var(--Alt-Display-Color-Stop-2)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  /* The box carries the paint, not the glyphs, so keep it to the text's own
+     box or a wrapped headline stretches the ramp across empty trailing space. */
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+@media (forced-colors: active) {
+.typography-alt-display-large[data-alt-display="gradient"],
+[data-alt-display="gradient"] .typography-alt-display-large,
+.typography-alt-display-medium[data-alt-display="gradient"],
+[data-alt-display="gradient"] .typography-alt-display-medium,
+.typography-alt-display-small[data-alt-display="gradient"],
+[data-alt-display="gradient"] .typography-alt-display-small {
+    /* The UA drops background-image here, and transparent text would leave
+       nothing on screen. Hand the glyphs back to the system colour. */
+    background-image: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    color: CanvasText;
+    forced-color-adjust: auto;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Paragraph spacing — space only where one paragraph follows another, which is
+   what the Figma token means.
+--------------------------------------------------------------------------- */
+.typography-caption-small + .typography-caption-small {
+  margin-block-start: var(--Caption-Small-Paragraph-Spacing);
+}
+
+.typography-caption + .typography-caption {
+  margin-block-start: var(--Caption-Paragraph-Spacing);
+}
+
+.typography-caption-large + .typography-caption-large {
+  margin-block-start: var(--Caption-Large-Paragraph-Spacing);
+}
+
+.typography-legal + .typography-legal {
+  margin-block-start: var(--Legal-Paragraph-Spacing);
+}
+
+/* ---------------------------------------------------------------------------
+   Variable-font axes
+   wght is deliberately absent — font-weight already carries it, and declaring
+   it in both places lets the two disagree.
+--------------------------------------------------------------------------- */
+.typography-h1,
+.typography-h2,
+.typography-h3,
+.typography-h4,
+.typography-h5,
+.typography-h6 {
+  font-variation-settings: var(--Font-Variation-Header);
 }

@@ -1,38 +1,7 @@
-/* ============================================================================
- * core.css — STATIC: lib-owned, do not regenerate per design system.
- * Platform-aware font overrides referencing brand tokens via var().
- * Edit by hand; do NOT overwrite from studio exports.
- * ============================================================================ */
-
-/* Any region that carries data-surface paints from the surface tokens it
-   exposes. This is the "data-surface is the only way to change a region's
-   background" contract — a consumer just sets data-surface="…" and the
-   region paints itself. No more inline `background: var(--Background)` on
-   every section wrapper. */
-[data-surface] {
-  background: var(--Background);
-  color: var(--Text);
-}
-
-/* NO bare-element appearance rule here, deliberately.
- *
- * This previously read `body, section { background; color }` so the app root
- * would paint without a wrapper. Two problems:
- *
- *   1. `section` matches at ANY depth, so every <section> in a consumer's app
- *      got painted whether or not they opted in — including sections they had
- *      styled themselves, and sections inside a region whose surface they had
- *      already chosen.
- *   2. Painting <body> on import is the exact thing the design system contract
- *      forbids: loading the CSS into an existing app silently changed its
- *      background and text colour.
- *
- * The opt-in already exists and is one attribute. The [data-surface] rule above
- * covers it, so a consumer writes:
- *
- *     <body data-surface="Surface">
- *
- * and gets the same paint, by asking for it. See "Page setup" in CLAUDE.md. */
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:GRAD,ROND,opsz,slnt,wdth,wght@0..100,0..100,6..144,-10..0,25..151,1..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@640&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
 :root {
   --Body-Font-Family: var(--Set-Font-Family-Body);
@@ -40,16 +9,17 @@
   --Header-Font-Family: var(--Set-Font-Family-Header);
   --Font-Family-Header: var(--Set-Font-Family-Header);
   --Header-Font-Weight: var(--Set-Font-Family-Header-Weight);
+  --Header-Text-Transform: var(--Set-Header-Text-Transform, none);
+  --Header-Letter-Spacing: var(--Set-Header-Letter-Spacing, 0em);
   --Decorative-Font-Family: var(--Set-Font-Family-Decorative);
   --Decorative-Font-Weight: var(--Set-Font-Family-Decorative-Weight);
+  --Decorative-Text-Transform: var(--Set-Decorative-Text-Transform, none);
+  --Decorative-Letter-Spacing: var(--Set-Decorative-Letter-Spacing, 0em);
   --Body-Font-Weight: var(--Set-Font-Family-Body-Weight);
   --Body-Semibold-Font-Weight: var(--Set-Font-Family-Body-Semibold-Weight);
   --Body-Bold-Font-Weight: var(--Set-Font-Family-Body-Bold-Weight);
   --Cognitive-Multiplier: 1;
-  --Dropshadow-Color: 20, 20, 20;  /* fallback */
-  /* Effect-Level-0 through Effect-Level-5 now live in base.css alongside
-     the other component tokens. --Dropshadow-Color is still overridden
-     per-theme in Light/Dark-Mode.css. */
+  --Dropshadow-Color: 20, 20, 20;  /* fallback; overridden per-theme in Light/Dark-Mode.css */
 }
 
 /* Platform Font Overrides */
@@ -121,99 +91,395 @@
   --Platform-Label: "Desktop";
   --Button-Height: 32px;
   --Min-Button-Width: 80px;
-  --Set-Font-Family-Header: 'Prata', serif;
-  --Set-Font-Family-Header-Weight: 200;
-  --Set-Font-Family-Decorative: 'Permanent Marker', sans-serif;
-  --Set-Font-Family-Body: 'Roboto', sans-serif;
+  --Set-Font-Family-Header: 'Google Sans Flex', sans-serif;
+  --Set-Font-Family-Header-Weight: 640;
+  --Set-Header-Text-Transform: none;
+  --Set-Header-Letter-Spacing: -0.01em;
+  /* The four faces. Display is the expressive pick, Eyebrow is the OS UI stack
+     unless a design overrides it, Header is always the Flex face. */
+  --Set-Font-Family-Display: 'Raleway', sans-serif;
+  --Set-Font-Family-Eyebrow: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Kept so designs saved before the four faces still resolve. */
+  --Set-Font-Family-Decorative: 'Raleway', sans-serif;
+  --Set-Font-Family-Decorative-Weight: 400;
+  --Set-Decorative-Text-Transform: none;
+  --Set-Decorative-Letter-Spacing: 0em;
+  --Set-Font-Family-Body: 'Poppins', sans-serif;
   --Set-Font-Family-Body-Weight: 400;
   --Set-Font-Family-Body-Semibold-Weight: 600;
   --Set-Font-Family-Body-Bold-Weight: 700;
-
-  /* ── The four faces ───────────────────────────────────────────────────────
-     Display is the expressive face, Header the heading face, Eyebrow the
-     eyebrow/overline face, Body everything else. A studio export overrides
-     the --Set-* inputs; the --Font-Family-* tokens below are what components
-     read. The defaults here keep this design system rendering exactly as it
-     did before the faces existed: Display followed Header, Eyebrow followed
-     Decorative. A design system generated by the studio ships its own values
-     — its Eyebrow default is the OS UI stack, not Decorative. */
-  --Set-Font-Family-Display: var(--Set-Font-Family-Decorative);
-  --Set-Font-Family-Eyebrow: var(--Set-Font-Family-Decorative);
-
-  --Font-Family-Display: var(--Set-Font-Family-Display, var(--Set-Font-Family-Header));
-  --Font-Family-Eyebrow: var(--Set-Font-Family-Eyebrow, var(--Decorative-Font-Family));
-
-  /* Face weights */
-  --Font-Weight-Display: var(--Set-Font-Family-Decorative-Weight, 400);
-  --Font-Weight-Header: var(--Set-Font-Family-Header-Weight);
-  --Font-Weight-Eyebrow: 600;
-  --Font-Weight-Body: var(--Set-Font-Family-Body-Weight);
-
-  /* ── Variable-font axes — Header face only ────────────────────────────────
-     Neutral defaults: this design system's header face is static, so the
-     composed value is `normal` and nothing is applied. A design system on a
-     variable face (Google Sans Flex and friends) overrides BOTH the axis
-     tokens and the composed value — the studio always emits the pair.
-     wght is deliberately absent: font-weight already carries it, and
-     declaring it twice lets the two disagree. */
-  --Font-Width-Header: 100;
-  --Font-Optical-Size-Header: 16;
-  --Font-Slant-Header: 0;
-  --Font-Grade-Header: 0;
-  --Font-Roundness-Header: 0;
-  --Font-Variation-Header: normal;
-
-  /* ── Display ramp ─────────────────────────────────────────────────────────
-     Large and Medium belong in a header or hero area; Small is the step sized
-     to sit inside a component. Mirrors the Desktop ramp in
-     typography-tokens.css so display styles resolve without data-platform. */
-  --Display-Large-Font-Size: 48px;
-  --Display-Large-Font-Weight: 600;
-  --Display-Large-Line-Height: 48px;
-  --Display-Large-Letter-Spacing: 0px;
-  --Display-Medium-Font-Size: 45px;
-  --Display-Medium-Font-Weight: 600;
-  --Display-Medium-Line-Height: 45px;
-  --Display-Medium-Letter-Spacing: 0px;
-  --Display-Small-Font-Size: 42px;
-  --Display-Small-Font-Weight: 600;
-  --Display-Small-Line-Height: 42px;
-  --Display-Small-Letter-Spacing: 0px;
-
   --Body-Font-Size: 16px;
   --Body-Letter-Spacing: 0;
   --Body-Line-Height: 24px;
   --Body-Paragraph-Spacing: 16px;
-  --H1-Font-Size: 40px;
-  --H1-Line-Height: 40px;
-  --H1-Letter-Spacing: -1px;
-  --H1-Paragraph-Spacing: 32px;
-  --H2-Font-Size: 32px;
-  --H2-Line-Height: 40px;
-  --H2-Letter-Spacing: -1px;
-  --H2-Paragraph-Spacing: 24px;
-  --H3-Font-Size: 28px;
-  --H3-Line-Height: 36px;
-  --H3-Letter-Spacing: -.5px;
-  --H3-Paragraph-Spacing: 20px;
-  --H4-Font-Size: 24px;
-  --H4-Line-Height: 32px;
-  --H4-Letter-Spacing: -.5px;
-  --H4-Paragraph-Spacing: 16px;
-  --H5-Font-Size: 20px;
-  --H5-Line-Height: 28px;
-  --H5-Letter-Spacing: 0px;
-  --H5-Paragraph-Spacing: 12px;
-  --H6-Font-Size: 18px;
-  --H6-Line-Height: 26px;
-  --H6-Letter-Spacing: 0px;
-  --H6-Paragraph-Spacing: 12px;
+  /* Per-style ramp — generated from the same type scale that produces
+     typography-tokens.css, so a consumer that never sets data-platform gets
+     the identical Desktop values. Editing sizes here is wrong; edit
+     src/utils/typeScale.ts. */
+  /* Faces */
+  --Font-Family-Display: var(--Set-Font-Family-Display, var(--Platform-Font-Families-Decorative, var(--Set-Font-Family-Decorative)));
+  --Font-Family-Header: var(--Platform-Font-Families-Header, var(--Set-Font-Family-Header));
+  --Font-Family-Eyebrow: var(--Set-Font-Family-Eyebrow, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+  --Font-Family-Body: var(--Platform-Font-Families-Body, var(--Set-Font-Family-Body));
+
+  /* Face weights */
+  --Font-Weight-Display: 400;
+  --Font-Weight-Header: 640;
+  --Font-Weight-Eyebrow: 400;
+  --Font-Weight-Body: 400;
+  --Header-Clamped-Weight: 640;
+
+  /* Variable-font axes */
+  --Font-Grade-Header: 50;
+  --Font-Slant-Header: 0;
+  --Font-Roundness-Header: 0;
+  --Font-Optical-Size-Header: 96;
+  --Font-Width-Header: 72;
+  --Font-Variation-Header: "GRAD" var(--Font-Grade-Header), "slnt" var(--Font-Slant-Header), "ROND" var(--Font-Roundness-Header), "opsz" var(--Font-Optical-Size-Header), "wdth" var(--Font-Width-Header);
+
+  /* Display — Large and Medium belong in Header or Hero areas. Small is the one sized to sit inside a component — a card title, a stat, a pull quote. */
+  --Display-Large-Font-Family:   var(--Font-Family-Display);
+  --Display-Large-Font-Size:     72px;
+  --Display-Large-Font-Weight:   var(--Font-Weight-Display);
+  --Display-Large-Line-Height:   88px;
+  --Display-Large-Letter-Spacing: 0em;
+  --Display-Large-Text-Transform: none;
+  --Display-Medium-Font-Family:   var(--Font-Family-Display);
+  --Display-Medium-Font-Size:     60px;
+  --Display-Medium-Font-Weight:   var(--Font-Weight-Display);
+  --Display-Medium-Line-Height:   76px;
+  --Display-Medium-Letter-Spacing: 0em;
+  --Display-Medium-Text-Transform: none;
+  --Display-Small-Font-Family:   var(--Font-Family-Display);
+  --Display-Small-Font-Size:     48px;
+  --Display-Small-Font-Weight:   var(--Font-Weight-Display);
+  --Display-Small-Line-Height:   60px;
+  --Display-Small-Letter-Spacing: 0em;
+  --Display-Small-Text-Transform: none;
+  --Alt-Display-Large-Font-Family:   var(--Font-Family-Display);
+  --Alt-Display-Large-Font-Size:     72px;
+  --Alt-Display-Large-Font-Weight:   900;
+  --Alt-Display-Large-Line-Height:   88px;
+  --Alt-Display-Large-Letter-Spacing: 0em;
+  --Alt-Display-Large-Text-Transform: none;
+  --Alt-Display-Medium-Font-Family:   var(--Font-Family-Display);
+  --Alt-Display-Medium-Font-Size:     60px;
+  --Alt-Display-Medium-Font-Weight:   900;
+  --Alt-Display-Medium-Line-Height:   76px;
+  --Alt-Display-Medium-Letter-Spacing: 0em;
+  --Alt-Display-Medium-Text-Transform: none;
+  --Alt-Display-Small-Font-Family:   var(--Font-Family-Display);
+  --Alt-Display-Small-Font-Size:     48px;
+  --Alt-Display-Small-Font-Weight:   900;
+  --Alt-Display-Small-Line-Height:   60px;
+  --Alt-Display-Small-Letter-Spacing: 0em;
+  --Alt-Display-Small-Text-Transform: none;
+
+  /* Header */
+  --H1-Font-Family:   var(--Font-Family-Header);
+  --H1-Font-Size:     48px;
+  --H1-Font-Weight:   var(--Font-Weight-Header);
+  --H1-Line-Height:   56px;
+  --H1-Letter-Spacing: -0.0217em;
+  --H1-Text-Transform: none;
+  --H2-Font-Family:   var(--Font-Family-Header);
+  --H2-Font-Size:     40px;
+  --H2-Font-Weight:   var(--Font-Weight-Header);
+  --H2-Line-Height:   48px;
+  --H2-Letter-Spacing: -0.0163em;
+  --H2-Text-Transform: none;
+  --H3-Font-Family:   var(--Font-Family-Header);
+  --H3-Font-Size:     32px;
+  --H3-Font-Weight:   var(--Font-Weight-Header);
+  --H3-Line-Height:   40px;
+  --H3-Letter-Spacing: -0.011em;
+  --H3-Text-Transform: none;
+  --H4-Font-Family:   var(--Font-Family-Header);
+  --H4-Font-Size:     24px;
+  --H4-Font-Weight:   var(--Header-Clamped-Weight);
+  --H4-Line-Height:   32px;
+  --H4-Letter-Spacing: -0.0057em;
+  --H4-Text-Transform: none;
+  --H5-Font-Family:   var(--Font-Family-Header);
+  --H5-Font-Size:     20px;
+  --H5-Font-Weight:   var(--Header-Clamped-Weight);
+  --H5-Line-Height:   28px;
+  --H5-Letter-Spacing: -0.003em;
+  --H5-Text-Transform: none;
+  --H6-Font-Family:   var(--Font-Family-Header);
+  --H6-Font-Size:     18px;
+  --H6-Font-Weight:   var(--Header-Clamped-Weight);
+  --H6-Line-Height:   24px;
+  --H6-Letter-Spacing: -0.0017em;
+  --H6-Text-Transform: none;
+
+  /* Subtitle */
+  --Subtitle-Small-Font-Family:   var(--Font-Family-Body);
+  --Subtitle-Small-Font-Size:     14px;
+  --Subtitle-Small-Font-Weight:   700;
+  --Subtitle-Small-Line-Height:   21px;
+  --Subtitle-Small-Letter-Spacing: 0em;
+  --Subtitle-Small-Text-Transform: none;
+  --Subtitle-Medium-Font-Family:   var(--Font-Family-Body);
+  --Subtitle-Medium-Font-Size:     16px;
+  --Subtitle-Medium-Font-Weight:   700;
+  --Subtitle-Medium-Line-Height:   24px;
+  --Subtitle-Medium-Letter-Spacing: 0em;
+  --Subtitle-Medium-Text-Transform: none;
+  --Subtitle-Large-Font-Family:   var(--Font-Family-Body);
+  --Subtitle-Large-Font-Size:     18px;
+  --Subtitle-Large-Font-Weight:   700;
+  --Subtitle-Large-Line-Height:   27px;
+  --Subtitle-Large-Letter-Spacing: 0em;
+  --Subtitle-Large-Text-Transform: none;
+
+  /* Body */
+  --Body-Small-Font-Family:   var(--Font-Family-Body);
+  --Body-Small-Font-Size:     14px;
+  --Body-Small-Font-Weight:   var(--Font-Weight-Body);
+  --Body-Small-Line-Height:   21px;
+  --Body-Small-Letter-Spacing: 0em;
+  --Body-Small-Text-Transform: none;
+  --Body-Small-Semibold-Font-Weight: 600;
+  --Body-Medium-Font-Family:   var(--Font-Family-Body);
+  --Body-Medium-Font-Size:     16px;
+  --Body-Medium-Font-Weight:   var(--Font-Weight-Body);
+  --Body-Medium-Line-Height:   24px;
+  --Body-Medium-Letter-Spacing: 0em;
+  --Body-Medium-Text-Transform: none;
+  --Body-Medium-Semibold-Font-Weight: 600;
+  --Body-Large-Font-Family:   var(--Font-Family-Body);
+  --Body-Large-Font-Size:     18px;
+  --Body-Large-Font-Weight:   var(--Font-Weight-Body);
+  --Body-Large-Line-Height:   27px;
+  --Body-Large-Letter-Spacing: 0em;
+  --Body-Large-Text-Transform: none;
+  --Body-Large-Semibold-Font-Weight: 600;
+
+  /* Caption */
+  --Caption-Small-Font-Family:   var(--Font-Family-Body);
+  --Caption-Small-Font-Size:     12px;
+  --Caption-Small-Font-Weight:   500;
+  --Caption-Small-Line-Height:   18px;
+  --Caption-Small-Letter-Spacing: 0.0083em;
+  --Caption-Small-Text-Transform: none;
+  --Caption-Small-Bold-Font-Weight: 700;
+  --Caption-Small-Paragraph-Spacing: 24px;
+  --Caption-Font-Family:   var(--Font-Family-Body);
+  --Caption-Font-Size:     14px;
+  --Caption-Font-Weight:   500;
+  --Caption-Line-Height:   21px;
+  --Caption-Letter-Spacing: 0.0071em;
+  --Caption-Text-Transform: none;
+  --Caption-Bold-Font-Weight: 700;
+  --Caption-Paragraph-Spacing: 28px;
+  --Caption-Large-Font-Family:   var(--Font-Family-Body);
+  --Caption-Large-Font-Size:     16px;
+  --Caption-Large-Font-Weight:   500;
+  --Caption-Large-Line-Height:   24px;
+  --Caption-Large-Letter-Spacing: 0.0063em;
+  --Caption-Large-Text-Transform: none;
+  --Caption-Large-Bold-Font-Weight: 700;
+  --Caption-Large-Paragraph-Spacing: 32px;
+
+  /* Label */
+  --Label-ExtraSmall-Font-Family:   var(--Font-Family-Body);
+  --Label-ExtraSmall-Font-Size:     11px;
+  --Label-ExtraSmall-Font-Weight:   600;
+  --Label-ExtraSmall-Line-Height:   16.5px;
+  --Label-ExtraSmall-Letter-Spacing: 0.0455em;
+  --Label-ExtraSmall-Text-Transform: none;
+  --Label-Small-Font-Family:   var(--Font-Family-Body);
+  --Label-Small-Font-Size:     12.5px;
+  --Label-Small-Font-Weight:   600;
+  --Label-Small-Line-Height:   18.75px;
+  --Label-Small-Letter-Spacing: 0.02em;
+  --Label-Small-Text-Transform: none;
+  --Label-Small-All-Caps-Font-Family:   var(--Font-Family-Body);
+  --Label-Small-All-Caps-Font-Size:     12.5px;
+  --Label-Small-All-Caps-Font-Weight:   600;
+  --Label-Small-All-Caps-Line-Height:   18.75px;
+  --Label-Small-All-Caps-Letter-Spacing: 0.02em;
+  --Label-Small-All-Caps-Text-Transform: uppercase;
+  --Label-Medium-Font-Family:   var(--Font-Family-Body);
+  --Label-Medium-Font-Size:     16px;
+  --Label-Medium-Font-Weight:   600;
+  --Label-Medium-Line-Height:   24px;
+  --Label-Medium-Letter-Spacing: 0em;
+  --Label-Medium-Text-Transform: none;
+  --Label-Medium-All-Caps-Font-Family:   var(--Font-Family-Body);
+  --Label-Medium-All-Caps-Font-Size:     16px;
+  --Label-Medium-All-Caps-Font-Weight:   600;
+  --Label-Medium-All-Caps-Line-Height:   24px;
+  --Label-Medium-All-Caps-Letter-Spacing: 0em;
+  --Label-Medium-All-Caps-Text-Transform: uppercase;
+  --Label-Large-Font-Family:   var(--Font-Family-Body);
+  --Label-Large-Font-Size:     18px;
+  --Label-Large-Font-Weight:   600;
+  --Label-Large-Line-Height:   27px;
+  --Label-Large-Letter-Spacing: 0em;
+  --Label-Large-Text-Transform: none;
+  --Label-Large-All-Caps-Font-Family:   var(--Font-Family-Body);
+  --Label-Large-All-Caps-Font-Size:     18px;
+  --Label-Large-All-Caps-Font-Weight:   600;
+  --Label-Large-All-Caps-Line-Height:   27px;
+  --Label-Large-All-Caps-Letter-Spacing: 0em;
+  --Label-Large-All-Caps-Text-Transform: uppercase;
+
+  /* Mobile-Nav-Label */
+  --Mobile-Nav-Label-Font-Family:   var(--Font-Family-Body);
+  --Mobile-Nav-Label-Font-Size:     11px;
+  --Mobile-Nav-Label-Font-Weight:   600;
+  --Mobile-Nav-Label-Line-Height:   16.5px;
+  --Mobile-Nav-Label-Letter-Spacing: 0.0455em;
+  --Mobile-Nav-Label-Text-Transform: none;
+
+  /* Legal */
+  --Legal-Font-Family:   var(--Font-Family-Body);
+  --Legal-Font-Size:     10px;
+  --Legal-Font-Weight:   400;
+  --Legal-Line-Height:   15px;
+  --Legal-Letter-Spacing: 0em;
+  --Legal-Text-Transform: none;
+  --Legal-Semibold-Font-Weight: 600;
+  --Legal-Paragraph-Spacing: 20px;
+
+  /* Eyebrow — Eyebrow label — uppercase and tracked. Sits above a heading. */
+  --Eyebrow-Small-Font-Size:     12px;
+  --Eyebrow-Small-Font-Weight:   600;
+  --Eyebrow-Small-Line-Height:   18px;
+  --Eyebrow-Small-Letter-Spacing: 0.06em;
+  --Eyebrow-Small-Text-Transform: uppercase;
+  --Overline-Small-Font-Size: var(--Eyebrow-Small-Font-Size);
+  --Overline-Small-Font-Weight: var(--Eyebrow-Small-Font-Weight);
+  --Overline-Small-Line-Height: var(--Eyebrow-Small-Line-Height);
+  --Overline-Small-Letter-Spacing: var(--Eyebrow-Small-Letter-Spacing);
+  --Overline-Small-Text-Transform: var(--Eyebrow-Small-Text-Transform);
+  --Eyebrow-Medium-Font-Size:     16px;
+  --Eyebrow-Medium-Font-Weight:   600;
+  --Eyebrow-Medium-Line-Height:   24px;
+  --Eyebrow-Medium-Letter-Spacing: 0.05em;
+  --Eyebrow-Medium-Text-Transform: uppercase;
+  --Overline-Medium-Font-Size: var(--Eyebrow-Medium-Font-Size);
+  --Overline-Medium-Font-Weight: var(--Eyebrow-Medium-Font-Weight);
+  --Overline-Medium-Line-Height: var(--Eyebrow-Medium-Line-Height);
+  --Overline-Medium-Letter-Spacing: var(--Eyebrow-Medium-Letter-Spacing);
+  --Overline-Medium-Text-Transform: var(--Eyebrow-Medium-Text-Transform);
+  --Eyebrow-Large-Font-Size:     18px;
+  --Eyebrow-Large-Font-Weight:   600;
+  --Eyebrow-Large-Line-Height:   27px;
+  --Eyebrow-Large-Letter-Spacing: 0.04em;
+  --Eyebrow-Large-Text-Transform: uppercase;
+  --Overline-Large-Font-Size: var(--Eyebrow-Large-Font-Size);
+  --Overline-Large-Font-Weight: var(--Eyebrow-Large-Font-Weight);
+  --Overline-Large-Line-Height: var(--Eyebrow-Large-Line-Height);
+  --Overline-Large-Letter-Spacing: var(--Eyebrow-Large-Letter-Spacing);
+  --Overline-Large-Text-Transform: var(--Eyebrow-Large-Text-Transform);
+
+  /* Number */
+  --Number-Small-Font-Family:   var(--Font-Family-Body);
+  --Number-Small-Font-Size:     16px;
+  --Number-Small-Font-Weight:   700;
+  --Number-Small-Line-Height:   16px;
+  --Number-Small-Letter-Spacing: 0em;
+  --Number-Small-Text-Transform: none;
+  --Number-Medium-Font-Family:   var(--Font-Family-Body);
+  --Number-Medium-Font-Size:     28px;
+  --Number-Medium-Font-Weight:   700;
+  --Number-Medium-Line-Height:   28px;
+  --Number-Medium-Letter-Spacing: 0em;
+  --Number-Medium-Text-Transform: none;
+  --Number-Large-Font-Family:   var(--Font-Family-Body);
+  --Number-Large-Font-Size:     36px;
+  --Number-Large-Font-Weight:   700;
+  --Number-Large-Line-Height:   36px;
+  --Number-Large-Letter-Spacing: 0em;
+  --Number-Large-Text-Transform: none;
+
+  /* Button */
+  --Button-ExtraSmall-Font-Family:   var(--Font-Family-Body);
+  --Button-ExtraSmall-Font-Size:     11px;
+  --Button-ExtraSmall-Font-Weight:   600;
+  --Button-ExtraSmall-Line-Height:   11px;
+  --Button-ExtraSmall-Letter-Spacing: 0em;
+  --Button-ExtraSmall-Text-Transform: none;
+  --Button-Small-Font-Family:   var(--Font-Family-Body);
+  --Button-Small-Font-Size:     14px;
+  --Button-Small-Font-Weight:   600;
+  --Button-Small-Line-Height:   14px;
+  --Button-Small-Letter-Spacing: 0em;
+  --Button-Small-Text-Transform: none;
+  --Button-Medium-Font-Family:   var(--Font-Family-Body);
+  --Button-Medium-Font-Size:     16px;
+  --Button-Medium-Font-Weight:   600;
+  --Button-Medium-Line-Height:   16px;
+  --Button-Medium-Letter-Spacing: 0em;
+  --Button-Medium-Text-Transform: none;
+  --Button-Standard-Font-Size: var(--Button-Medium-Font-Size);
+  --Button-Standard-Font-Weight: var(--Button-Medium-Font-Weight);
+  --Button-Standard-Line-Height: var(--Button-Medium-Line-Height);
+  --Button-Standard-Letter-Spacing: var(--Button-Medium-Letter-Spacing);
+  --Button-Large-Font-Family:   var(--Font-Family-Body);
+  --Button-Large-Font-Size:     24px;
+  --Button-Large-Font-Weight:   600;
+  --Button-Large-Line-Height:   24px;
+  --Button-Large-Letter-Spacing: 0em;
+  --Button-Large-Text-Transform: none;
+
+  /* Badge */
+  --Badge-Font-Family:   var(--Font-Family-Body);
+  --Badge-Font-Size:     11px;
+  --Badge-Font-Weight:   600;
+  --Badge-Line-Height:   12px;
+  --Badge-Letter-Spacing: 0em;
+  --Badge-Text-Transform: none;
   --Label-Font-Size: 14px;
   --Label-Line-Height: 20px;
   --Label-Letter-Spacing: 0px;
   --Label-Paragraph-Spacing: 4px;
   --Button-Font-Size: 16px;
   --Button-Line-Height: 20px;
+  /* Bevel geometry for ALL THREE sizes — derived from THIS platform's button
+     heights, which is why it lives beside them rather than in foundation.css.
+     Each [data-platform] block below re-emits all three for its own heights.
+     It used to re-emit the MEDIUM set only, so a small or large button wore
+     Desktop's bevel on every platform. */
+  --Button-Highlight-Offset-x: 0px;
+  --Button-Highlight-Offset-y: 0px;
+  --Button-Highlight-Blur-Radius: 0px;
+  --Button-Highlight-Spread: 0px;
+  --Button-Lowlight-Offset-x: 0px;
+  --Button-Lowlight-Offset-y: 0px;
+  --Button-Lowlight-Blur-Radius: 0px;
+  --Button-Lowlight-Spread: 0px;
+  --Sm-Button-Highlight-Offset-x: 0px;
+  --Sm-Button-Highlight-Offset-y: 0px;
+  --Sm-Button-Highlight-Blur-Radius: 0px;
+  --Sm-Button-Highlight-Spread: 0px;
+  --Sm-Button-Lowlight-Offset-x: 0px;
+  --Sm-Button-Lowlight-Offset-y: 0px;
+  --Sm-Button-Lowlight-Blur-Radius: 0px;
+  --Sm-Button-Lowlight-Spread: 0px;
+  --Lg-Button-Highlight-Offset-x: 0px;
+  --Lg-Button-Highlight-Offset-y: 0px;
+  --Lg-Button-Highlight-Blur-Radius: 0px;
+  --Lg-Button-Highlight-Spread: 0px;
+  --Lg-Button-Lowlight-Offset-x: 0px;
+  --Lg-Button-Lowlight-Offset-y: 0px;
+  --Lg-Button-Lowlight-Blur-Radius: 0px;
+  --Lg-Button-Lowlight-Spread: 0px;
+  /* Hit target. The SMALL button keeps its visual size on every platform; the
+     lib wraps it in a box that grows to --Target using --Platform-Spacer, so
+     the button looks identical while the tappable area meets the platform
+     minimum. */
+  --Target: 24px;
+  --Platform-Spacer: 4px;
+  /* Floating overlays. Desktop reserves no system chrome, so these are the
+     clearance alone — stated rather than left to fall back, because an unset
+     custom property paints nothing and reports nothing. */
+  --SnackBar-Top: 24px;
+  --SnackBar-Bottom: 24px;
+  --Overlay-Clearance: 24px;
 }
 
 /* iOS Mobile */
@@ -222,6 +488,36 @@
   --Platform-Label: "IOS-Mobile";
   --Button-Height: 44px;
   --Min-Stack-Gap: 10px;
+  --Button-Highlight-Offset-x: 0px;
+  --Button-Highlight-Offset-y: 0px;
+  --Button-Highlight-Blur-Radius: 0px;
+  --Button-Highlight-Spread: 0px;
+  --Button-Lowlight-Offset-x: 0px;
+  --Button-Lowlight-Offset-y: 0px;
+  --Button-Lowlight-Blur-Radius: 0px;
+  --Button-Lowlight-Spread: 0px;
+  --Sm-Button-Highlight-Offset-x: 0px;
+  --Sm-Button-Highlight-Offset-y: 0px;
+  --Sm-Button-Highlight-Blur-Radius: 0px;
+  --Sm-Button-Highlight-Spread: 0px;
+  --Sm-Button-Lowlight-Offset-x: 0px;
+  --Sm-Button-Lowlight-Offset-y: 0px;
+  --Sm-Button-Lowlight-Blur-Radius: 0px;
+  --Sm-Button-Lowlight-Spread: 0px;
+  --Lg-Button-Highlight-Offset-x: 0px;
+  --Lg-Button-Highlight-Offset-y: 0px;
+  --Lg-Button-Highlight-Blur-Radius: 0px;
+  --Lg-Button-Highlight-Spread: 0px;
+  --Lg-Button-Lowlight-Offset-x: 0px;
+  --Lg-Button-Lowlight-Offset-y: 0px;
+  --Lg-Button-Lowlight-Blur-Radius: 0px;
+  --Lg-Button-Lowlight-Spread: 0px;
+  --Target: 44px;
+  --Platform-Spacer: 10px;
+  /* Floating overlays — the platform's chrome plus room for a shadow */
+  --SnackBar-Top: 98px;
+  --SnackBar-Bottom: 58px;
+  --Overlay-Clearance: 24px;
   --Body-Font-Size: 16px;
   --Body-Letter-Spacing: -.5px;
   --Body-Line-Height: 24px;
@@ -262,8 +558,38 @@
 [data-platform="IOS-Tablet"] {
   --Container-Padding: var(--Sizing-3);
   --Platform-Label: "IOS-Tablet";
-  --Button-Height: 48px;
+  --Button-Height: 44px;
   --Min-Stack-Gap: 10px;
+  --Button-Highlight-Offset-x: 0px;
+  --Button-Highlight-Offset-y: 0px;
+  --Button-Highlight-Blur-Radius: 0px;
+  --Button-Highlight-Spread: 0px;
+  --Button-Lowlight-Offset-x: 0px;
+  --Button-Lowlight-Offset-y: 0px;
+  --Button-Lowlight-Blur-Radius: 0px;
+  --Button-Lowlight-Spread: 0px;
+  --Sm-Button-Highlight-Offset-x: 0px;
+  --Sm-Button-Highlight-Offset-y: 0px;
+  --Sm-Button-Highlight-Blur-Radius: 0px;
+  --Sm-Button-Highlight-Spread: 0px;
+  --Sm-Button-Lowlight-Offset-x: 0px;
+  --Sm-Button-Lowlight-Offset-y: 0px;
+  --Sm-Button-Lowlight-Blur-Radius: 0px;
+  --Sm-Button-Lowlight-Spread: 0px;
+  --Lg-Button-Highlight-Offset-x: 0px;
+  --Lg-Button-Highlight-Offset-y: 0px;
+  --Lg-Button-Highlight-Blur-Radius: 0px;
+  --Lg-Button-Highlight-Spread: 0px;
+  --Lg-Button-Lowlight-Offset-x: 0px;
+  --Lg-Button-Lowlight-Offset-y: 0px;
+  --Lg-Button-Lowlight-Blur-Radius: 0px;
+  --Lg-Button-Lowlight-Spread: 0px;
+  --Target: 44px;
+  --Platform-Spacer: 10px;
+  /* Floating overlays — the platform's chrome plus room for a shadow */
+  --SnackBar-Top: 98px;
+  --SnackBar-Bottom: 44px;
+  --Overlay-Clearance: 24px;
   --Body-Font-Size: 17px;
   --Body-Letter-Spacing: -.5px;
   --Body-Line-Height: 25.5px;
@@ -306,6 +632,36 @@
   --Platform-Label: "Android";
   --Button-Height: 48px;
   --Min-Stack-Gap: 12px;
+  --Button-Highlight-Offset-x: 0px;
+  --Button-Highlight-Offset-y: 0px;
+  --Button-Highlight-Blur-Radius: 0px;
+  --Button-Highlight-Spread: 0px;
+  --Button-Lowlight-Offset-x: 0px;
+  --Button-Lowlight-Offset-y: 0px;
+  --Button-Lowlight-Blur-Radius: 0px;
+  --Button-Lowlight-Spread: 0px;
+  --Sm-Button-Highlight-Offset-x: 0px;
+  --Sm-Button-Highlight-Offset-y: 0px;
+  --Sm-Button-Highlight-Blur-Radius: 0px;
+  --Sm-Button-Highlight-Spread: 0px;
+  --Sm-Button-Lowlight-Offset-x: 0px;
+  --Sm-Button-Lowlight-Offset-y: 0px;
+  --Sm-Button-Lowlight-Blur-Radius: 0px;
+  --Sm-Button-Lowlight-Spread: 0px;
+  --Lg-Button-Highlight-Offset-x: 0px;
+  --Lg-Button-Highlight-Offset-y: 0px;
+  --Lg-Button-Highlight-Blur-Radius: 0px;
+  --Lg-Button-Highlight-Spread: 0px;
+  --Lg-Button-Lowlight-Offset-x: 0px;
+  --Lg-Button-Lowlight-Offset-y: 0px;
+  --Lg-Button-Lowlight-Blur-Radius: 0px;
+  --Lg-Button-Lowlight-Spread: 0px;
+  --Target: 48px;
+  --Platform-Spacer: 12px;
+  /* Floating overlays — the platform's chrome plus room for a shadow */
+  --SnackBar-Top: 112px;
+  --SnackBar-Bottom: 48px;
+  --Overlay-Clearance: 24px;
   --Body-Font-Size: 16px;
   --Body-Line-Height: 24px;
   --Body-Letter-Spacing: .5px;
@@ -343,25 +699,26 @@
 }
 
 /* Decorative Font Application */
-/* Typography variants: Header uses body font by default, Decorative Header uses decorative font */
+/* In decorative mode, eyebrows swap onto the Display face. Re-pointing the
+   face token is all it takes — every style wearing that face follows, because
+   each one's --<style>-Font-Family is relative to it. */
 
 [data-surface="Surface"] [data-decorative],
 [data-surface="Surface-Dim"] [data-decorative],
 [data-surface="Surface-Dimmest"] [data-decorative],
-[data-surface="Surface-Bright"] [data-decorative],
-[data-surface="Surface-Brightest"] [data-decorative] {
+[data-surface="Surface-Bright"] [data-decorative] {
   --Font-Family-Header: var(--Set-Font-Family-Header);
   --Font-Family-Header-Weight: var(--Set-Font-Family-Header-Weight);
-  --Font-Family-Overline: var(--Set-Font-Family-Decorative);
+  --Font-Family-Eyebrow: var(--Font-Family-Display);
 }
 
 /* Explicit decorative variants — always available regardless of mode */
 [data-typography="decorative-header"] {
-  font-family: var(--Set-Font-Family-Header);
+  font-family: var(--Font-Family-Header);
   font-weight: var(--Set-Font-Family-Header-Weight);
 }
 [data-typography="decorative-overline"] {
-  font-family: var(--Set-Font-Family-Decorative);
+  font-family: var(--Font-Family-Display);
 }
 
 /* Cognitive Accessibility Overrides */

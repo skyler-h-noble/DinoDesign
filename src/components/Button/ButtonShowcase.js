@@ -1,9 +1,11 @@
 // src/components/Button/ButtonShowcase.js
 import React, { useState, useEffect, useRef } from 'react';
+import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import * as MuiIcons from '@mui/icons-material';
+import { tokenSegment } from '../_shadows';
 import { Button } from './Button';
 import { Icon } from '../Icon/Icon';
 import { Avatar } from '../Avatar/Avatar';
@@ -21,10 +23,14 @@ import {
 } from '../Typography';
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
-const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'black-white', 'info', 'success', 'warning', 'error'];
 const COLOR_GROUPS = [
   { label: 'Default', colors: ['default'] },
-  { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
+  /* `black-white` is a palette like the other four — the system emits
+     --Buttons-BlackWhite-* — so it belongs in Theme rather than in a case of
+     its own. Button already built `black-white` and `black-white-outline`;
+     only the picker was missing it. */
+  { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral', 'black-white'] },
   { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
 ];
 const STYLES = ['solid', 'outline', 'ghost'];
@@ -108,7 +114,9 @@ function ControlButton({ label, selected, onClick, disabled: isDisabled }) {
 }
 
 function ColorSwatchButton({ color, selected, disabled: isDisabled, onClick, isOutlineMode }) {
-  const C = cap(color);
+  /* tokenSegment, not cap(): `black-white` capitalises to `Black-white`,
+     which is not a token. The system emits --Buttons-BlackWhite-*. */
+  const C = tokenSegment(color);
   return (
     <Box
       component="button"
@@ -316,9 +324,20 @@ export function ButtonShowcase() {
     // the tab was focused. Timers still fire when hidden (throttled), and
     // getComputedStyle forces the style recalculation by itself, so the
     // deferral is all that was ever needed.
-    const t = setTimeout(() => {
+    let tries = 0;
+    let t;
+    const run = () => {
       const el = surfaceRef.current;
-      if (!el) return;
+      /* The preview can mount LATER than this effect: in some layouts it lives
+         inside the Playground tab, and the landing tab is Summary, so on first
+         paint there is nothing to measure. Returning here used to end it — the
+         deps never change afterwards, so the panel read "--" permanently and the
+         live check looked lost. Retry briefly, then stop, so a component with no
+         preview at all does not poll forever. */
+      if (!el) {
+        if (tries < 40) { tries += 1; t = setTimeout(run, 50); }
+        return;
+      }
       const v = (name) => getCssVarFrom(el, name);
       const C = cap(effectiveColor);
       const data = {};
@@ -354,7 +373,8 @@ export function ButtonShowcase() {
         data.activeBase   = data.background;
       }
       setContrastData(data);
-    });
+    };
+    t = setTimeout(run);
     return () => clearTimeout(t);
   }, [style, effectiveColor, bgTheme, bgSurface, cssStatus]);
 
@@ -365,35 +385,56 @@ export function ButtonShowcase() {
         <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
       </Box>
 
-      <Grid container sx={{ mt: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      {/* The surface the Accessibility tab MEASURES, mounted here rather than in
+          a tab panel.
 
-        {/* ── LEFT: Preview + Code ── */}
-        <Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, pr: { md: 3 } }}>
+          It used to be the visible preview. Once the preview moved inside
+          Playground (layout A) it no longer existed while you were reading the
+          Accessibility tab, so every ratio read "--". Measuring a hidden element
+          that carries the same data-theme + data-surface gives the same computed
+          values and does not depend on which tab is open.
 
-          <PreviewSurface ref={surfaceRef} theme={bgTheme} surface={bgSurface}>
-            <Button {...getButtonProps()} />
-          </PreviewSurface>
+          visibility:hidden, not display:none — a hidden element is still in the
+          layout tree, so getComputedStyle resolves custom properties on it. */}
+      <PreviewSurface
+        ref={surfaceRef}
+        theme={bgTheme}
+        surface={bgSurface}
+        minHeight={0}
+        sx={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden', visibility: 'hidden' }}
+        aria-hidden="true"
+      />
 
-          <CodeBlock
-            code={generateCode()}
-            language="JSX"
-            wrap
-            sx={{ mt: 2 }}
-          />
-        </Grid>
-
-        {/* ── RIGHT: Tabs ── */}
-        <Grid item sx={{ width: { xs: '100%', md: '45%' }, flexShrink: 0, alignSelf: 'flex-start', minWidth: 0, overflow: 'hidden' }}>
-          <Box sx={{ backgroundColor: 'var(--Background)', overflow: 'hidden' }}>
+      {/* Layout A: the tab bar spans the page, so Summary, Accessibility and
+          Change Log get the full width to read. The preview/controls split now
+          lives INSIDE Playground, which is the only tab that needs it. */}
+      <Box sx={{ mt: 2, backgroundColor: 'var(--Background)', overflow: 'hidden' }}>
 
             <Tabs defaultValue={0} variant="standard" color="primary">
               <TabList>
+                <Tab>Summary</Tab>
                 <Tab>Playground</Tab>
                 <Tab>Accessibility</Tab>
+                <Tab>Change Log</Tab>
               </TabList>
 
               {/* ── Playground ── */}
               <TabPanel value={0}>
+                <DocSummary component="Button" theme={bgTheme} surface={bgSurface} />
+              </TabPanel>
+
+              <TabPanel value={1}>
+                <Grid container sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                  {/* ── Preview + code ── */}
+                  <Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, pr: { md: 3 }, p: 3 }}>
+                    <PreviewSurface theme={bgTheme} surface={bgSurface}>
+                      <Button {...getButtonProps()} />
+                    </PreviewSurface>
+                    <CodeBlock code={generateCode()} language="JSX" wrap sx={{ mt: 2 }} />
+                  </Grid>
+
+                  {/* ── Controls ── */}
+                  <Grid item sx={{ width: { xs: '100%', md: '45%' }, flexShrink: 0, minWidth: 0 }}>
                 <Box sx={{ p: 3 }}>
 
                   {/* Style */}
@@ -661,10 +702,11 @@ export function ButtonShowcase() {
                   )}
 
                 </Box>
+                  </Grid>
+                </Grid>
               </TabPanel>
 
-              {/* ── Accessibility ── */}
-              <TabPanel value={1}>
+              <TabPanel value={2}>
                 <Box sx={{ p: 3 }}>
                   <BodySmall color="quiet" style={{ marginBottom: 24 }}>
                     {cap(style)} / {cap(effectiveColor)} / {cap(size)} / {cap(contentType)}
@@ -824,10 +866,12 @@ export function ButtonShowcase() {
                   </Stack>
                 </Box>
               </TabPanel>
+
+              <TabPanel value={3}>
+                <DocChanges component="Button" />
+              </TabPanel>
             </Tabs>
-          </Box>
-        </Grid>
-      </Grid>
+      </Box>
     </Box>
   );
 }

@@ -289,3 +289,23 @@ export { StateMessage } from './StateMessage';
 /* Loading placeholders — a state of the real components, not a separate
    skeleton. See _ghost.js for why. */
 export { Ghost, useGhost, ghostBlockSx } from './_ghost';
+/* ── Component reference ──────────────────────────────────────────────────────
+   The written docs for each component — props, theming, tokens, states,
+   composition, accessibility and the gotchas each one invites. Shipped rather
+   than kept in the studio so a consumer's agent can READ what a component
+   expects instead of inferring it from prop names, which is where most wrong
+   output starts. The gallery renders the same data. */
+export {
+  COMPONENT_DOCS,
+  FOUNDATIONS,
+  renderFoundations,
+  renderColourSystem,
+  renderComponentDoc,
+  COLOUR_COLLECTIONS,
+  docsSlug,
+  componentDocsUrl,
+  componentDocsIndexUrl,
+  DOCS_ORIGIN,
+  EXAMPLES,
+  hasExample,
+} from '../docs';
