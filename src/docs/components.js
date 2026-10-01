@@ -145,8 +145,14 @@ export const BUTTON_DOC = {
   }],
   composition: ['Icons go in `startIcon` / `endIcon`, not as children.', 'A `Badge` anchors to the corner when `badge` is set — do not wrap the button yourself.'],
   accessibility: ['An icon-only button needs `aria-label`; a text button must **not** have one, or it is announced twice.', 'Name the ACTION, not the glyph: `aria-label="Delete item"`, never `aria-label="trash"`.', 'A name that says nothing — `"button"`, `"JD"`, `"3"` — is an error, not a pass. It satisfies every automated checker and silences the dev warning.'],
-  gotchas: ['There is no `-light` shape. It was removed in 0.9.0; `variant="{color}-light"` still renders the solid variant and warns once in development, but never write a new one.', '`--Button-Border-Width` is 1px and load-bearing: Figma computes seven other tokens from it as `outer - (border x 2)`.'],
+  gotchas: ['`--Button-Border-Width` is 1px and load-bearing: Figma computes seven other tokens from it as `outer - (border x 2)`.'],
   changes: [
+    {
+      version: '0.12.0',
+      change: '`swatch` and `swatchColor` are retired — use the Swatch component. A swatch uses neither of Button\'s axes: its colour is arbitrary data from a picker rather than a palette, and it has no solid / outline / ghost shape. Figma draws Swatch as its own component, so Button/Button-Swatch has no component left to serve.',
+      migrate: 'Use <Swatch color={hex} /> — and it fixes the corner, which read --Button-Icon-Radius and so stayed square when a brand set a large radius.',
+      silent: true,
+    },
     {
       version: '0.12.0',
       change: 'A badged Button no longer derives a badge size from its own. It used to synthesise one, so every <Button badge> tripped Badge\'s removed-prop warning for a value the caller never wrote.',

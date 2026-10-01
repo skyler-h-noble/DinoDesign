@@ -263,7 +263,11 @@ export function MenuItem({ children, onClick, selected = false, disabled = false
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } }}
       className={'menu-item' + (selected ? ' menu-item-selected' : '') + ' ' + className}
       sx={{
-        display: 'flex', alignItems: 'center', gap: 'var(--Sizing-1)',
+        /* Sizing-Half, not Sizing-1. Figma's Menu Item sets `itemSpacing` to
+           Sizing-Half on BOTH the row and the slot inside it, so the gap
+           between a leading icon, a swatch, a checkbox and the label is 4px.
+           This had 8 and so ran wider than the drawing at every size. */
+        display: 'flex', alignItems: 'center', gap: 'var(--Sizing-Half)',
         padding: s.itemPy + ' ' + s.itemPx,
         // No fontSize here: TextComp below owns it. Setting both is how the
         // Accordion ended up rendering bare strings at a different size from
@@ -284,7 +288,25 @@ export function MenuItem({ children, onClick, selected = false, disabled = false
       }}
       {...props}
     >
-      <TextComp color="standard" style={{ color: 'inherit' }}>{children}</TextComp>
+      {/* The slot's own padding. Figma nests the icon and the label inside a
+          `Menu Slot` that carries Sizing-Half left and right, INSIDE the row's
+          padding — so the label sits 4px in from whatever precedes it rather
+          than hard against it. The lib's row is flat, so the slot is this
+          wrapper. */}
+      <Box
+        className="menu-item-slot"
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 'var(--Sizing-Half)',
+          paddingLeft: 'var(--Sizing-Half)',
+          paddingRight: 'var(--Sizing-Half)',
+          minWidth: 0,
+          flex: 1,
+        }}
+      >
+        <TextComp color="standard" style={{ color: 'inherit' }}>{children}</TextComp>
+      </Box>
     </Box>
   );
 }

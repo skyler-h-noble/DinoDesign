@@ -19,6 +19,7 @@ import { BadgeShowcase } from '../components/Badge/BadgeShowcase';
 import { ChipShowcase } from '../components/Chip/ChipShowcase';
 import { DividerShowcase } from '../components/Divider/DividerShowcase';
 import { CodeBlockShowcase } from '../components/CodeBlock/CodeBlockShowcase';
+import { SwatchShowcase } from '../components/Swatch/SwatchShowcase';
 import { TableShowcase } from '../components/Table/TableShowcase';
 import { ListShowcase } from '../components/List/ListShowcase';
 import { TooltipShowcase } from '../components/Tooltip/TooltipShowcase';
@@ -164,6 +165,7 @@ const NAV_ITEMS = [
       { id: 'slider', label: 'Slider' },
       { id: 'numberfield', label: 'Number Field' },
       { id: 'rating', label: 'Rating' },
+      { id: 'swatch', label: 'Swatch' },
       { id: 'searchfield', label: 'Search Field' },
       { id: 'transferlist', label: 'Transfer List' },
     ],
@@ -436,6 +438,7 @@ function ShowcaseInner() {
             {activeSection === 'tag' && <TagShowcase />}
             {activeSection === 'divider' && <DividerShowcase />}
             {activeSection === 'codeblock' && <CodeBlockShowcase />}
+            {activeSection === 'swatch' && <SwatchShowcase />}
             {activeSection === 'list' && <ListShowcase />}
             {activeSection === 'table' && <TableShowcase />}
             {activeSection === 'tooltip' && <TooltipShowcase />}

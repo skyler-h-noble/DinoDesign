@@ -712,4 +712,68 @@ export const INPUT_DOC = {
   accessibility: ['Every input needs a `label`. A placeholder is not one.', '`validation="error"` sets `aria-invalid` and ties the message with `aria-describedby`, so the error is announced rather than only drawn.', 'Write the message as what to change, not what went wrong: "Enter a date after today", not "Invalid date".'],
   gotchas: ['The focus ring is drawn as an `outline`, not a border. A border would change the box size on focus and shift the layout.']
 };
-export const FORM_DOCS = [CHECKBOX_DOC, RADIO_DOC, SWITCH_DOC, CHIP_DOC, ALERT_DOC, BADGE_DOC, AVATAR_DOC, INPUT_DOC];
+
+/** @type {import('./componentDoc').ComponentDoc} */
+export const SWATCH_DOC = {
+  name: 'Swatch',
+  summary: 'A colour chip, optionally labelled, optionally clickable — one value out of a palette a person is choosing from.',
+  insteadUse: [
+    { when: 'It triggers an action rather than carrying a colour', use: 'Button' },
+    { when: 'It is a status or category label', use: 'Tag' },
+    { when: 'It is one of a set of mutually exclusive options with text', use: 'ButtonGroup' },
+  ],
+  props: [
+    { name: 'color', type: 'string', default: 'undefined', note: 'Any CSS colour. Arbitrary DATA from a picker, not a palette choice — which is why Swatch is not a Button variant.' },
+    { name: 'label', type: 'string', default: 'undefined', note: 'Optional caption below the chip, in the Legal type style. Figma models it as the `Label` boolean.' },
+    { name: 'size', type: 'string', values: ['small', 'medium', 'large'], default: 'medium', note: 'Follows the BUTTON height ramp, so a swatch lines up with the controls beside it and inherits the device chain.' },
+    { name: 'selected', type: 'boolean', default: 'false', note: 'Draws the inner ring. Sets aria-pressed when clickable.' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'radio', type: 'boolean', default: 'false', note: 'Figma\'s Style axis (No-Radio | Radio). With a radio, EVERY state is delegated to it — Figma pins State=Hover, State=Focus-Visible and Status=selected on the nested instance — so the chip shows no check. Two marks for one state would be one too many. The radio is presentational: aria-hidden and out of the tab order, because the swatch is the control.' },
+    { name: 'onClick', type: 'function', default: 'undefined', note: 'Its PRESENCE is what makes a swatch clickable — there is no separate prop. Figma says the same thing by putting `non-clickable` on the state axis, and the Radio style has no such value: a radio that cannot be chosen is not a radio.' },
+  ],
+  states: [
+    { state: 'Hover', setBy: 'interaction', note: 'Elevation 0 to 1, plus the --Hover scrim over the colour.' },
+    { state: 'Pressed', setBy: 'interaction', note: 'Back to elevation 0, with the --Pressed scrim.' },
+    { state: 'Focus-visible', setBy: 'interaction', note: '2px --Focus-Visible ring, 3px OUTSIDE the chip.' },
+    { state: 'Selected', setBy: 'prop', note: 'A check on its own --Background disc, so the mark never sits on the arbitrary swatch colour and its contrast can be known. With `radio`, the radio carries it instead.' },
+    { state: 'Disabled', setBy: 'prop', note: '0.38 opacity.' },
+  ],
+  theming: [
+    { collection: 'Theme',
+      inCode: 'The chip takes no theme — its fill is the `color` prop. The border, scrims and focus ring resolve from whatever zone it sits in.',
+      inFigma: 'The Swatch set binds width, height AND radius to Button/Button-Height, so size follows the Component-Size mode rather than a Size axis.' },
+  ],
+  themingNotes: [
+    'The radius is the full height, so a swatch is a CIRCLE at every size.',
+  ],
+  tokens: [
+    { name: '--Button-Height', sets: 'the chip diameter', variesWith: 'size and data-platform', figma: 'Button/Button-Height' },
+    { name: '--Border', sets: 'the chip edge', variesWith: 'surface', figma: 'Border' },
+    { name: '--Hover / --Pressed', sets: 'the interaction scrim', variesWith: 'surface', figma: 'the Hover and Pressed overlays' },
+    { name: '--Focus-Visible', sets: 'the focus ring', variesWith: 'surface', figma: 'Focus-Visible' },
+    { name: '--Legal-*', sets: 'the label type', variesWith: 'platform', figma: 'Legal/*' },
+  ],
+  composition: [
+    'A chip and an optional label, nothing else. Put swatches in a row yourself; there is no SwatchGroup.',
+  ],
+  accessibility: [
+    'A colour is not a name. Without a visible label, pass `aria-label` — the colour value is the fallback, and it is a poor one.',
+    'Selection is announced with aria-pressed, and only when the swatch is clickable.',
+    'The chip keeps a --Border edge so a pale colour stays visible on a pale surface.',
+  ],
+  gotchas: [
+    'It used to be `<Button swatch swatchColor={hex}>`. That never fitted: Button\'s axes are STYLE and COLOUR, and a swatch uses neither — "outline swatch" means nothing, and its colour is data rather than a palette.',
+    'Clickability is the presence of `onClick`, not a `clickable` prop.',
+  ],
+  changes: [
+    {
+      version: '0.12.0',
+      change: 'Added. Replaces `<Button swatch swatchColor={hex}>`, which read --Button-Icon-Radius and so stayed square when a brand set a large corner.',
+      migrate: 'Use <Swatch color={hex} /> with onClick where it is pickable.',
+    },
+  ],
+};
+
+/* Declared last: every doc it names must already exist, and a `const` is in
+   the temporal dead zone until its own line runs. */
+export const FORM_DOCS = [CHECKBOX_DOC, RADIO_DOC, SWITCH_DOC, CHIP_DOC, ALERT_DOC, BADGE_DOC, AVATAR_DOC, INPUT_DOC, SWATCH_DOC];

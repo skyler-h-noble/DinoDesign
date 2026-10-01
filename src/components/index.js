@@ -61,6 +61,10 @@ export {
 export { Colors } from './Colors';
 export { Spacing } from './Spacing';
 export { Icon, IconShowcase } from './Icon';
+export { Swatch } from './Swatch';
+/* No showcase: MiniSwatch has nothing to play with on its own. It is the chip
+   inside a menu row, documented where it appears — Select and Menu. */
+export { MiniSwatch } from './MiniSwatch';
 export { IconBadge } from './IconBadge';
 export { IconBadgeShowcase } from './IconBadge/IconBadgeShowcase';
 

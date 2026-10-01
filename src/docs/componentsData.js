@@ -548,4 +548,6 @@ export const RATIO_DOC = {
   accessibility: ['It is layout. An image inside still needs its own `alt`.'],
   gotchas: ['Two Figma sets, Horizontal and Vertical, at 21 variants each — they correspond to `fit`, not to `ratio`.']
 };
+
+
 export const DATA_DOCS = [STEPPER_DOC, SLIDER_DOC, RATING_DOC, LOADER_DOC, LINK_DOC, TAG_DOC, DIVIDER_DOC, RATIO_DOC];

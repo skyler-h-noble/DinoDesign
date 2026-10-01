@@ -34,7 +34,23 @@ const COLOR_GROUPS = [
   { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
 ];
 const STYLES = ['solid', 'outline', 'ghost'];
-const CONTENT_TYPES = ['text', 'number', 'letter', 'icon', 'swatch'];
+/* Figma's TYPE axis, in its own vocabulary: text | iconOnly | letterNumber |
+   Avatar. This listed `number` and `letter` SEPARATELY — letterNumber is ONE
+   value, a single character, not two kinds of button — and omitted `avatar`
+   entirely, so the avatar type was unreachable from the picker even though the
+   code below already handled it.
+
+   `swatch` is last and marked, because it is the one option with no counterpart
+   in the design: a colour chip, code-only. */
+/* Exactly Figma's Type axis. `swatch` was a fifth option here and is gone: a
+   swatch is its own component now, so Button has no swatch type to offer. */
+const CONTENT_TYPES = ['text', 'iconOnly', 'letterNumber', 'avatar'];
+const CONTENT_TYPE_LABELS = {
+  text: 'Text',
+  iconOnly: 'Icon only',
+  letterNumber: 'Letter / Number',
+  avatar: 'Avatar',
+};
 
 /* ── Contrast helpers ── */
 
@@ -251,7 +267,7 @@ export function ButtonShowcase() {
       const asNum = Number(badgeContent);
       p.badgeContent = badgeContent !== '' && !Number.isNaN(asNum) ? asNum : badgeContent;
     }
-    if (contentType === 'icon') {
+    if (contentType === 'iconOnly') {
       p.iconOnly = true;
       p.children = getIconComponent();
       return p;
@@ -268,9 +284,10 @@ export function ButtonShowcase() {
       if (swatchColor) p.swatchColor = swatchColor;
       return p;
     }
-    if (contentType === 'letter' || contentType === 'number') {
+    if (contentType === 'letterNumber') {
       p.letterNumber = true;
-      p.children = buttonText || (contentType === 'letter' ? 'A' : '1');
+      /* One value, one sample: a single character, letter or digit alike. */
+      p.children = buttonText || 'A';
       return p;
     }
     p.children = loading ? 'Loading...' : (buttonText || 'Button');
@@ -473,23 +490,22 @@ export function ButtonShowcase() {
                   <Box sx={{ mt: 3 }}>
                     <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>CONTENT TYPE</EyebrowSmall>
                     <Select
-                      options={CONTENT_TYPES.map((ct) => ({ value: ct, label: cap(ct) }))}
+                      options={CONTENT_TYPES.map((ct) => ({ value: ct, label: CONTENT_TYPE_LABELS[ct] || cap(ct) }))}
                       value={contentType}
                       onChange={(ct) => {
                         setContentType(ct);
-                        if (ct === 'number') setButtonText('1');
-                        else if (ct === 'letter') setButtonText('A');
+                        if (ct === 'letterNumber') setButtonText('A');
                         else if (ct === 'text') setButtonText('Button');
                         if ((ct === 'avatar' || ct === 'swatch') && style === 'ghost') setStyle('solid');
-                        if (['icon', 'letter', 'number', 'avatar', 'swatch'].includes(ct)) setFullWidth(false);
+                        if (['iconOnly', 'letterNumber', 'avatar', 'swatch'].includes(ct)) setFullWidth(false);
                       }}
                       labelPosition="none"
                       size="small"
                     />
                     <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
-                      {contentType === 'icon'    ? 'Icon only — requires aria-label.' :
-                       contentType === 'avatar'  ? 'Circular with initial letter.' :
-                       contentType === 'letter' || contentType === 'number' ? 'Single character in square button.' :
+                      {contentType === 'iconOnly' ? 'Icon only — requires aria-label.' :
+                       contentType === 'avatar'  ? 'A circle the size of the button; an Avatar child fills it.' :
+                       contentType === 'letterNumber' ? 'A single character — letter or digit — in a square button. Requires aria-label.' :
                        contentType === 'swatch'  ? '' :
                        'Text label with optional icon.'}
                     </Caption>
@@ -508,13 +524,13 @@ export function ButtonShowcase() {
                   )}
 
                   {/* Button text input */}
-                  {['text', 'letter', 'number', 'avatar'].includes(contentType) && (
+                  {['text', 'letterNumber', 'avatar'].includes(contentType) && (
                     <Box sx={{ mt: 2 }}>
                       <TextInput
                         label={contentType === 'text' ? 'Button Text' : contentType === 'avatar' ? 'Initial' : cap(contentType)}
                         value={buttonText}
                         onChange={setButtonText}
-                        placeholder={contentType === 'text' ? 'Button' : contentType === 'letter' ? 'A' : '1'}
+                        placeholder={contentType === 'text' ? 'Button' : 'A'}
                       />
                     </Box>
                   )}
@@ -666,14 +682,14 @@ export function ButtonShowcase() {
                   </Box>
 
                   <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    opacity: ['icon', 'letter', 'number', 'avatar', 'swatch'].includes(contentType) ? 0.4 : 1 }}>
+                    opacity: ['iconOnly', 'letterNumber', 'avatar', 'swatch'].includes(contentType) ? 0.4 : 1 }}>
                     <Box>
                       <Label>Full Width</Label>
                       <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Stretches to container width</Caption>
                     </Box>
                     <Switch checked={fullWidth} onChange={(e) => setFullWidth(e.target.checked)}
                       size="small" aria-label="Full width"
-                      disabled={['icon', 'letter', 'number', 'avatar', 'swatch'].includes(contentType)} />
+                      disabled={['iconOnly', 'letterNumber', 'avatar', 'swatch'].includes(contentType)} />
                   </Box>
 
                   <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

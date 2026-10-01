@@ -17,8 +17,11 @@ import HomeIcon from '@mui/icons-material/Home';
  * why a name could not express the mapping.
  */
 
+/* Button-Avatar and Button-Icon, read from Figma's Component-Size collection at
+   the Desktop device. Both chain Component-Size -> Devices-Type, so the CSS also
+   carries iOS and Android values and `data-platform` picks between them. */
 const EXPECTED = {
-  small:  { avatar: 16, icon: 20 },
+  small:  { avatar: 16, icon: 16 },
   medium: { avatar: 20, icon: 20 },
   large:  { avatar: 40, icon: 32 },
 };
@@ -56,12 +59,15 @@ describe('icon decorators follow Button-Icon', () => {
     });
   }
 
-  it('small and medium share 20px deliberately', () => {
-    /* Not a copy-paste. The small button is 24px tall and a 16px icon left it
-       underfilled beside a 20px avatar, so the design holds both at 20. A test
-       that allowed them to differ would let a "tidy-up" reintroduce a ramp the
-       design does not have. */
-    expect(EXPECTED.small.icon).toBe(EXPECTED.medium.icon);
+  it('the small decorator icon matches its avatar, as the design has them', () => {
+    /* This asserted small and medium both being 20, on the reasoning that a 16px
+       icon looked "underfilled beside a 20px avatar". Checked against the
+       variables, neither half held: Button-Icon is 16 at small, and the small
+       decorator avatar is 16 too — so the icon was never beside a 20px one.
+       Figma is the source here, and it says 16 / 20 / 32. */
+    expect(EXPECTED.small.icon).toBe(16);
+    expect(EXPECTED.small.icon).toBe(EXPECTED.small.avatar);
+    expect(EXPECTED.small.icon).not.toBe(EXPECTED.medium.icon);
   });
 });
 
