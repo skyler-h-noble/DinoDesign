@@ -16,7 +16,6 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
  *                               Off: --Background track, --Quiet border + dot.
  *                               `default-outline` and `outline` are the same.
  *   variant="{color}-outline"   bordered track + coloured dot, all 8 colours
- *   variant="{color}-light"     tinted track, all 8 colours
  *
  * SIZES (track, straight from the design):
  *   small  20×12, 8px dot     medium 30×16, 12px dot     large 48×24, 20px dot
@@ -48,31 +47,39 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 //
 // iconOff/iconOn are the track's own fill, so a glyph inside the dot reads as a
 // knockout rather than a second colour.
-function themedStyles() {
+export function themedStyles() {
   return {
     type: 'themed',
     trackOff:       'var(--Background)',
     trackOffBorder: 'var(--Quiet)',
-    // ON is a FILLED track with a knockout dot. The design file names --Border
-    // for the fill and --Text for the dot, which works in the theme it was
-    // drawn in (a dark green track, a near-white dot) but does not survive a
-    // theme change: on Popsicles' Default surface those two resolve to #784284
-    // and #593462 — a 1.39:1 dot, effectively invisible.
+    // ON is a FILLED track with a knockout dot, painted from the ICONS
+    // collection — Figma binds Switch-Body's fill AND stroke to Icons::Icon and
+    // the Dot's fill to Icons::On-Icon (verified on the Switch set, all three
+    // On variants). Icons is a mode collection like Buttons, so a mode there
+    // flattens into the name: mode Default x var Icon -> --Icons-Default.
     //
-    // --Buttons-*-Button / -Text is the pair the system publishes FOR fill +
-    // mark-on-that-fill, and it holds 8:1 or better in every family, so it
-    // keeps the design's intent (a solid track, a legible dot) wherever the
-    // switch is themed.
-    trackOn:        'var(--Buttons-Default-Button)',
-    trackOnBorder:  'var(--Buttons-Default-Border)',
+    // This replaced --Buttons-*-Button / -Text. That pair was chosen to escape
+    // the design file's original --Border / --Text, which resolved to #784284
+    // on #593462 on Popsicles' Default surface — a 1.39:1 dot. Icon / On-Icon
+    // is the pair the system now publishes for exactly this shape (a fill and
+    // a mark ON that fill), and the generator picks On-Icon by resolving the
+    // icon's rendered tone and indexing the Text table at it, so the 4.5:1 is
+    // structural rather than a second contrast pass.
+    //
+    // The track's border is the SAME token as its fill. Figma binds both to
+    // Icon; there is no separate edge colour in the On state.
+    trackOn:        'var(--Icons-Default)',
+    trackOnBorder:  'var(--Icons-Default)',
     dotOff:         'var(--Quiet)',
-    dotOn:          'var(--Buttons-Default-Text)',
+    dotOn:          'var(--Icons-On-Default)',
     iconOff:        'var(--Background)',
-    iconOn:         'var(--Buttons-Default-Button)',
+    // An icon inside the dot sits ON On-Icon, so it returns to Icon — the same
+    // alternation the collection is built around.
+    iconOn:         'var(--Icons-Default)',
   };
 }
 
-function outlineStyles(color) {
+export function outlineStyles(color) {
   const C = cap(color);
   return {
     type: 'outline',
@@ -86,57 +93,56 @@ function outlineStyles(color) {
     trackOffBorder: 'var(--Border)',
     // ON is a FILLED track, same as the design's default. It used to be
     // transparent, which read as "nothing happened" next to the default
-    // variant — only the border changed colour.
-    trackOn:        'var(--Buttons-' + C + '-Button)',
-    trackOnBorder:  'var(--Buttons-' + C + '-Border)',
+    // variant — only the border changed colour. Fill, edge and dot come from
+    // the Icons collection; see themedStyles above for why.
+    trackOn:        'var(--Icons-' + C + ')',
+    trackOnBorder:  'var(--Icons-' + C + ')',
     dotOff:         'var(--Quiet)',
-    dotOn:          'var(--Buttons-' + C + '-Text)',
+    dotOn:          'var(--Icons-On-' + C + ')',
     iconOff:        'var(--Background)',
-    iconOn:         'var(--Buttons-' + C + '-Button)',
+    iconOn:         'var(--Icons-' + C + ')',
   };
 }
 
-function lightStyles(color) {
-  const C = cap(color);
-  return {
-    type: 'light',
-    color: C,
-    /* Was --Border-Variant as the FILL with no edge — a decorative token doing
-       the whole job of showing an interactive control. The fill can stay quiet;
-       the EDGE is what has to be findable, so the pairing inverts: the track
-       keeps a soft fill and gains the 3:1 border the outline variant uses. */
-    trackOff:       'var(--Border-Variant)',
-    trackOffBorder: 'var(--Border)',
-    // The light tone fills the track. There are no --Buttons-*-Light-* tokens
-    // in the export, so this uses Color-11 — the same tone Button's light
-    // variant fills with.
-    trackOn:        'var(--' + C + '-Color-11)',
-    trackOnBorder:  'var(--Buttons-' + C + '-Border)',
-    dotOff:         'var(--Quiet)',
-    dotOn:          'var(--Buttons-' + C + '-Border)',
-    /* The off icon sits ON the track, so it needs a ratio against it. Quiet is
-       the 4.5:1 token tuned per surface; Border-Variant guaranteed nothing and
-       put a decorative tone on a mark the user is meant to read. */
-    iconOff:        'var(--Quiet)',
-    iconOn:         'var(--' + C + '-Color-11)',
-    // Base theme + brightest surface; *-Light themes are not generated.
-    dataTheme:      C,
-    dataSurface:    'Surface-Brightest',
-  };
+// The `-light` shape is removed here too. It filled the track with
+// --<C>-Color-11 and drew the dot in --Buttons-<C>-Border — a tinted fill that
+// is not a shape in the Figma component. The Switch set has exactly two axes,
+// State and Status, so there was never a variant to check it against; the ON
+// state's colour now arrives from the Icons collection instead.
+//
+// A hard delete would have been silent: an unknown variant falls through to
+// `variantMap.default`, so every existing `X-light` call site would have
+// repainted as the brand-default switch with no error. Strip the suffix to the
+// colour of the same name and say so once in development — the same treatment
+// Button, Chip and Badge got in 0.9.0.
+const LIGHT_SUFFIX = /-light$/;
+const warnedVariants = new Set();
+
+export function normalizeSwitchVariant(variant) {
+  const v = String(variant || 'default');
+  if (v !== 'light' && !LIGHT_SUFFIX.test(v)) return v;
+  const base = v === 'light' ? 'primary' : v.replace(LIGHT_SUFFIX, '');
+  if (process.env.NODE_ENV !== 'production' && !warnedVariants.has(v)) {
+    warnedVariants.add(v);
+    console.warn(
+      '[Switch] variant="' + v + '" — the -light shape was removed. Rendering ' +
+      'variant="' + base + '". The on state takes its colour from the Icons ' +
+      'collection (--Icons-<Color> / --Icons-On-<Color>).',
+    );
+  }
+  return base;
 }
 
 function buildVariantMap() {
   const map = {};
   COLORS.forEach((color) => {
     map[color + '-outline'] = outlineStyles(color);
-    map[color + '-light']   = lightStyles(color);
   });
   // `default` in every spelling is the design-file switch.
   map['default']         = themedStyles();
   map['default-outline'] = themedStyles();
   map['outline']         = themedStyles();
   map['primary']         = outlineStyles('primary');
-  map['light']           = lightStyles('primary');
   return map;
 }
 
@@ -193,7 +199,8 @@ export function Switch({
   ...props
 }) {
   const variantMap = buildVariantMap();
-  const styles = variantMap[variant] || variantMap['default'];
+  const resolvedVariant = normalizeSwitchVariant(variant);
+  const styles = variantMap[resolvedVariant] || variantMap['default'];
   const sc = SIZE_MAP[size] || SIZE_MAP.medium;
   const LabelComp = size === 'small' ? BodySmall : Body;
 
@@ -313,8 +320,6 @@ export function Switch({
     ...sx,
   };
 
-  const isLight = variant.includes('-light') || variant === 'light';
-
   // MUI renders the thumb from its icon / checkedIcon props. Supplying our own
   // span keeps the .MuiSwitch-thumb class — and therefore every style above —
   // while giving the glyph somewhere to live.
@@ -342,13 +347,9 @@ export function Switch({
           ...(ariaLabelledby ? { 'aria-labelledby': ariaLabelledby } : {}),
         },
       }}
-      className={'switch-' + variant + ' ' + className}
+      className={'switch-' + resolvedVariant + ' ' + className}
       sx={switchSx}
       disableRipple
-      {...(isLight && styles.dataTheme ? {
-        'data-theme': styles.dataTheme,
-        'data-surface': styles.dataSurface || 'Surface-Dim',
-      } : {})}
       {...props}
     />
   );
@@ -401,15 +402,6 @@ export const SuccessOutlineSwitch         = (p) => <Switch variant="success-outl
 export const WarningOutlineSwitch         = (p) => <Switch variant="warning-outline"      {...p} />;
 export const ErrorOutlineSwitch           = (p) => <Switch variant="error-outline"        {...p} />;
 
-// Light
-export const PrimaryLightSwitch           = (p) => <Switch variant="primary-light"        {...p} />;
-export const SecondaryLightSwitch         = (p) => <Switch variant="secondary-light"      {...p} />;
-export const TertiaryLightSwitch          = (p) => <Switch variant="tertiary-light"       {...p} />;
-export const NeutralLightSwitch           = (p) => <Switch variant="neutral-light"        {...p} />;
-export const InfoLightSwitch              = (p) => <Switch variant="info-light"           {...p} />;
-export const SuccessLightSwitch           = (p) => <Switch variant="success-light"        {...p} />;
-export const WarningLightSwitch           = (p) => <Switch variant="warning-light"        {...p} />;
-export const ErrorLightSwitch             = (p) => <Switch variant="error-light"          {...p} />;
 
 // Legacy alias
 export const SwitchInput = Switch;

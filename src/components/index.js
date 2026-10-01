@@ -121,6 +121,24 @@ export { SearchField, SearchFieldShowcase } from './SearchField';
 
 // ========== CHIPS & TAGS ==========
 export { Chip } from './Chip';
+/* Tag was absent from this index entirely — not renamed, not deprecated, just
+   never exported, while src/components/Tag/ carried the component, its tests,
+   its stories and a showcase. Nothing consuming the package could reach it, and
+   the section heading above said "TAGS" the whole time. */
+export {
+  Tag,
+  TAG_COLORS,
+  TAG_COLOR_TOKEN_MAP,
+  PrimaryTag,
+  SecondaryTag,
+  TertiaryTag,
+  NeutralTag,
+  InfoTag,
+  SuccessTag,
+  WarningTag,
+  ErrorTag,
+  TagShowcase,
+} from './Tag';
 
 // ========== LAYOUT ==========
 export {
@@ -170,6 +188,20 @@ export { Alert, AlertShowcase } from './Alert';
 export { Snackbar, SnackbarShowcase } from './Snackbar';
 export { CircularProgress, CircularProgressShowcase } from './CircularProgress';
 export { LinearProgress, LinearProgressShowcase } from './LinearProgress';
+/* Loader, same story as Tag — present in the tree with tests, missing from the
+   index. It is NOT a duplicate of the two Progress components above: those are
+   a determinate bar and ring, while Loader covers the skeleton and overlay
+   shapes (SkeletonLoader, SkeletonCard, DotsLoader, PageLoader, OverlayLoader)
+   that nothing else in the package provides. */
+export {
+  Loader,
+  LinearLoader,
+  SkeletonLoader,
+  DotsLoader,
+  PageLoader,
+  SkeletonCard,
+  OverlayLoader,
+} from './Loader';
 
 // ========== DATA DISPLAY ==========
 export { Avatar, AvatarGroup, AvatarShowcase, DEFAULT_AVATAR_SRC } from './Avatar';

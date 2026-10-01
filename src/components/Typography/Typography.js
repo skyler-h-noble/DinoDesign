@@ -70,13 +70,18 @@ import { useGhost, ghostBlockSx } from '../_ghost';
 const ff  = (token) => `var(--${token}-Font-Family)`;
 
 // The four faces. A design system publishes --Font-Family-{Display,Header,
-// Eyebrow,Body}; each fallback below is what systems generated before the
-// four faces existed resolved to, so their rendering does not shift.
+// Eyebrow,Body}; Display's fallback is what systems generated before the four
+// faces existed resolved to, so their rendering does not shift.
 //
-//   Display  used to follow Header — fall back to Header, not Decorative.
-//   Eyebrow  used to follow Decorative — fall back to Decorative.
+//   Display  used to follow Header — fall back to Header.
+//   Eyebrow  has no fallback. It used to follow a Decorative face, which is
+//            retired: the role is gone from the system, so falling back to it
+//            would name a variable nothing defines. A var() fallback only
+//            fires when the variable is UNDEFINED, and every generator emits
+//            --Font-Family-Eyebrow, so the Decorative arm was unreachable on
+//            any current system anyway.
 const FACE_DISPLAY = 'var(--Font-Family-Display, var(--Font-Family-Header, var(--Header-Font-Family)))';
-const FACE_EYEBROW = 'var(--Font-Family-Eyebrow, var(--Decorative-Font-Family))';
+const FACE_EYEBROW = 'var(--Font-Family-Eyebrow)';
 
 // Per-style family with the face as the fallback — the generator publishes
 // --Display-Large-Font-Family and friends, older systems do not.
