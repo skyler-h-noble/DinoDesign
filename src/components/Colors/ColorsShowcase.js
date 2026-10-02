@@ -28,7 +28,11 @@ export function ColorsShowcase() {
         sx={{
           width: small ? '60px' : '80px',
           height: small ? '60px' : '80px',
-          backgroundColor: `var(${cssVar})`,
+          /* A var() that resolves to nothing paints NOTHING, and an empty
+             swatch with a border looks exactly like a legitimately white one.
+             That is how --Buttons-*-Active survived here after the token was
+             renamed to -Pressed. The fallback makes a dead token look dead. */
+          backgroundColor: `var(${cssVar}, repeating-linear-gradient(45deg, var(--Border-Variant) 0 6px, transparent 6px 12px))`,
           borderRadius: '8px',
           border: '1px solid var(--Border)',
           mb: 1,
@@ -127,7 +131,11 @@ export function ColorsShowcase() {
     { name: 'Button BG', suffix: 'Button' },
     { name: 'Button Text', suffix: 'Text' },
     { name: 'Button Hover', suffix: 'Hover' },
-    { name: 'Button Active', suffix: 'Active' },
+    /* Pressed, not Active. The token is --Buttons-<Palette>-Pressed;
+       -Active does not exist, so every one of these swatches rendered an
+       unresolved var() — a transparent box with a border, which reads as
+       "this colour is white" rather than "this token is not a thing". */
+    { name: 'Button Pressed', suffix: 'Pressed' },
   ];
 
   return (
@@ -418,13 +426,12 @@ export function ColorsShowcase() {
                     small
                   />
                 </Grid>
-                <Grid item>
-                  <ColorSwatch 
-                    name="Active" 
-                    cssVar="--Buttons-Primary-Outline-Active" 
-                    small
-                  />
-                </Grid>
+                {/* No outline "Active" swatch. The outline variant publishes
+                    --Buttons-<Palette>-Outline-Text and nothing else; an
+                    Outline-Active was never generated, so this rendered an
+                    empty box beside a real one and read as a colour. An
+                    outline button's pressed state comes from the palette's own
+                    --Buttons-<Palette>-Pressed, which is already shown above. */}
               </Grid>
             </Box>
 

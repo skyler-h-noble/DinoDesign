@@ -342,7 +342,7 @@ import { Tooltip } from '@mui/material';
 --Buttons-{Color}-Border      Border color (all variants)
 --Buttons-{Color}-Text        Text / icon color (solid)
 --Buttons-{Color}-Hover       Hover background (solid)
---Buttons-{Color}-Active      Active background (solid)
+--Buttons-{Color}-Pressed     Pressed background (solid)
 
 --{Color}-Color-11             Light variant background
 --Text-{Color}-Color-11        Light variant text color
