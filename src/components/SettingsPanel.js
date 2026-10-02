@@ -1,8 +1,8 @@
 // src/components/SettingsPanel.js
 import React, { useState, useEffect } from 'react';
+import { useOmniDesign } from '../OmniDesignProvider';
 import { Box, Stack, Divider } from '@mui/material';
 import { Settings as SettingsIcon, Close as CloseIcon } from '@mui/icons-material';
-import { useThemeMode } from '../theme/useThemeMode';
 import { Button } from './Button/Button';
 import { Drawer } from './Drawer/Drawer';
 import { H5, BodySmall, Caption, EyebrowSmall } from './Typography';
@@ -14,15 +14,43 @@ const PLATFORMS = [
   { value: 'android',    label: 'Android',    note: '48px touch targets (M3)' },
 ];
 
-const PLATFORM_BUTTON_HEIGHT = {
-  'desktop':    '32px',
-  'ios-mobile': '44px',
-  'ios-tablet': '44px',
-  'android':    '48px',
+/* The panel's value -> the [data-platform] scope the generated CSS emits.
+ *
+ * This used to be PLATFORM_BUTTON_HEIGHT, a hardcoded map of four pixel
+ * values, and changing platform set exactly ONE token inline on <html>:
+ * --Button-Height. Everything else the platform governs — the whole
+ * typography ramp, 354 variables' worth — never moved, because nothing ever
+ * set data-platform. The attribute is the entire mechanism and the panel
+ * was not using it.
+ *
+ * The four names below are what the CSS actually contains. Figma has SEVEN
+ * modes: it distinguishes tablet orientation (IOS-Tablet-Vertical from
+ * -Horizontal, and the Android pair) and splits Android-Mobile from the
+ * Android tablets. The generator collapses those, so there is nothing here
+ * to select — that gap is in exportToCSS, not in this panel. */
+const PLATFORM_SCOPE = {
+  'desktop':    'Desktop',
+  'ios-mobile': 'IOS-Mobile',
+  'ios-tablet': 'IOS-Tablet',
+  'android':    'Android',
 };
 
+function applyPlatform(value) {
+  document.documentElement.setAttribute('data-platform', PLATFORM_SCOPE[value] || 'Desktop');
+}
+
 export function SettingsPanel() {
-  const { mode, switchMode } = useThemeMode('light');
+  /* The provider owns the mode sheet. useThemeMode injected a SECOND full set
+     of stylesheets (css-foundation, css-mode, ...) alongside the provider's
+     omni-* ones, and switchMode flipped only its own #css-mode. The provider's
+     #omni-mode sits later in <head> and still pointed at Light-Mode.css, so it
+     won the cascade and the toggle changed a sheet nothing was reading. */
+  const { isDark, toggleDarkMode } = useOmniDesign();
+  const mode = isDark ? 'dark' : 'light';
+  const switchMode = (next) => {
+    if ((next === 'dark') !== isDark) toggleDarkMode();
+    try { localStorage.setItem('themeMode', next); } catch { /* private mode */ }
+  };
   const [panelOpen, setPanelOpen] = useState(false);
   const [platform, setPlatform]   = useState('desktop');
 
@@ -30,14 +58,14 @@ export function SettingsPanel() {
     const savedPlatform = localStorage.getItem('dino-platform') || 'desktop';
     const savedTheme    = localStorage.getItem('themeMode')     || 'light';
     setPlatform(savedPlatform);
-    document.documentElement.style.setProperty('--Button-Height', PLATFORM_BUTTON_HEIGHT[savedPlatform] || '32px');
+    applyPlatform(savedPlatform);
     if (savedTheme === 'dark') switchMode('dark');
   }, []);
 
   const handlePlatformChange = (value) => {
     setPlatform(value);
     localStorage.setItem('dino-platform', value);
-    document.documentElement.style.setProperty('--Button-Height', PLATFORM_BUTTON_HEIGHT[value] || '32px');
+    applyPlatform(value);
   };
 
   const handleReset = () => {

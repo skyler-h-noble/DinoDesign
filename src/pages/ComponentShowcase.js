@@ -108,7 +108,6 @@ import {
 import { OmniDesignProvider, useOmniDesign } from '../OmniDesignProvider';
 import { NotificationProvider } from '../components/NotificationProvider';
 import { NotificationBell } from '../components/NotificationBell';
-import { useThemeMode } from '../theme/useThemeMode';
 
 // Firebase Storage public-read URL for a design system's theme.json. The
 // studio (dinodesign-studio) uploads each generated file to
@@ -249,7 +248,12 @@ const NAV_ITEMS = [
 ];
 
 function ShowcaseInner() {
-  const { mode, switchMode } = useThemeMode('light');
+  /* useThemeMode('light') was called here and its result never used. The call
+     was not harmless: the hook injects a SECOND full set of stylesheets
+     (css-foundation, css-core, css-mode, css-base, css-typography-tokens)
+     beside the Provider's omni-* ones. That is what broke the dark-mode
+     toggle — SettingsPanel flipped #css-mode while the Provider's #omni-mode
+     sat later in <head> still pointing at Light-Mode.css and won. */
   const [activeSection, setActiveSection] = useState('buttons');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
