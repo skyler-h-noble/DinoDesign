@@ -40,7 +40,7 @@ const COLOR_MAP = {
 const SIZE_MAP = {
   small:  { size: 32, iconSize: 16, fontSize: '13px', px: 12, gap: 6 },
   medium: { size: 48, iconSize: 24, fontSize: '14px', px: 16, gap: 8 },
-  large:  { size: 56, iconSize: 36, fontSize: '15px', px: 20, gap: 10 },
+  large:  { size: 56, iconSize: 32, fontSize: '15px', px: 20, gap: 10 },
 };
 
 function getTokens(color) {
@@ -67,7 +67,12 @@ export function Fab({
   icon,
   label,
   variant = 'solid',
-  color = 'primary',
+  /* `default`, not `primary`. Figma binds the FAB's fill to
+     Buttons/Default/Button and its stroke to Buttons/Default/Border, so the
+     colour it ships with is the brand's default button — the same rule every
+     other control in the system follows. Reach for `primary` only where a
+     design marks it. */
+  color = 'default',
   size = 'medium',
   extended = false,
   animate = false,

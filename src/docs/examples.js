@@ -53,7 +53,9 @@ import { Alert } from '../components/Alert';
 import { Card } from '../components/Card';
 import { Avatar } from '../components/Avatar';
 import { Icon } from '../components/Icon';
+import { Fab } from '../components/Fab';
 import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Link } from '../components/Link';
@@ -82,6 +84,10 @@ export const EXAMPLES = {
      the prop that controls them (PROP_EXAMPLES), so a sample sits where the
      reader is already asking the question rather than all at the top. */
   Button: () => <Button>Button</Button>,
+  /* The default instance: medium, default colour, icon only. Not extended
+     and not animated, because a sample that moves on a page of prose draws
+     the eye away from the prose. */
+  Fab: () => <Fab icon={<Icon size="medium"><AddIcon /></Icon>} ariaLabel="Add" />,
   ButtonGroup: () => <ButtonGroup value="a" onChange={() => {}} size="small">
       <Button value="a" size="small">Day</Button>
       <Button value="b" size="small">Week</Button>
@@ -175,6 +181,54 @@ export function hasExample(component) {
  * is there for the samples that must name a theme explicitly.
  */
 export const PROP_EXAMPLES = {
+  Fab: {
+    /* Figma carries FAB size in the Component-Size collection
+       (FAB/FAB-Width 32 / 48 / 56) rather than on a variant axis, so there is
+       no Size dropdown on the component — you switch the mode on the frame.
+       The icon rides the same collection: FAB/FAB-Icon is 16 / 24 / 32. */
+    size: () => <HStack gap="var(--Sizing-2)" style={{ alignItems: 'center' }}>
+      <Fab size="small"  icon={<Icon size="small"><AddIcon /></Icon>}  ariaLabel="Add, small" />
+      <Fab size="medium" icon={<Icon size="medium"><AddIcon /></Icon>} ariaLabel="Add, medium" />
+      <Fab size="large"  icon={<Icon size="large"><AddIcon /></Icon>}  ariaLabel="Add, large" />
+    </HStack>,
+
+    /* Colour is the Buttons collection, which has ten modes — default,
+       primary, secondary, tertiary, neutral, info, success, warning, error and
+       black-white. In Figma the FAB's fill is bound to Buttons/<mode>/Button
+       and its stroke to Buttons/<mode>/Border, so you change colour by setting
+       the Buttons MODE on the frame, not by picking a variant. In code it is
+       the `color` prop, and the names are the same list. */
+    color: () => <HStack gap="var(--Sizing-1)" style={{ flexWrap: 'wrap' }}>
+      {['default', 'primary', 'secondary', 'tertiary', 'success', 'error'].map(c => (
+        <Fab key={c} color={c} size="small"
+             icon={<Icon size="small"><AddIcon /></Icon>} ariaLabel={'Add, ' + c} />
+      ))}
+    </HStack>,
+
+    /* Extended is a BOOLEAN in Figma (Extended#9244:80, default false), not a
+       size or a shape — the same FAB widened to carry a label beside the icon.
+       Shown next to the plain one, because the point is the difference. */
+    extended: () => <HStack gap="var(--Sizing-2)" style={{ alignItems: 'center' }}>
+      <Fab icon={<Icon size="medium"><EditIcon /></Icon>} ariaLabel="Edit" />
+      <Fab icon={<Icon size="medium"><EditIcon /></Icon>} extended label="Edit" />
+    </HStack>,
+
+    /* animate is CODE-ONLY — Figma has no such property, so there is nothing
+       to bind it to and nothing to check it against. It is a mount transition,
+       which a static design file cannot express. Shown as the resting state,
+       with the behaviour described rather than looped. */
+    animate: () => <HStack gap="var(--Sizing-2)" style={{ alignItems: 'center' }}>
+      <Fab icon={<Icon size="medium"><AddIcon /></Icon>} ariaLabel="Add" />
+      <Fab icon={<Icon size="medium"><AddIcon /></Icon>} animate ariaLabel="Add, animated" />
+    </HStack>,
+
+    /* Disabled is a STATE on Figma's State axis (Default / Hover / Pressed /
+       Disabled / Focus-Visible), not a separate component. */
+    disabled: () => <HStack gap="var(--Sizing-2)" style={{ alignItems: 'center' }}>
+      <Fab icon={<Icon size="medium"><AddIcon /></Icon>} ariaLabel="Add" />
+      <Fab icon={<Icon size="medium"><AddIcon /></Icon>} disabled ariaLabel="Add, disabled" />
+    </HStack>,
+  },
   Button: {
     /* SHAPE only, all in the default colour — the three values of Figma's Style
        axis: solid, outline, ghost. Colour is a SEPARATE axis and is shown where
