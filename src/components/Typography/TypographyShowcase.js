@@ -1,5 +1,6 @@
 // src/components/Typography/TypographyShowcase.js
 import React, { useState, useEffect } from 'react';
+import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
@@ -97,10 +98,10 @@ const HEADER_SWATCH_THEME = {
   secondary: 'Secondary',
   tertiary:  'Tertiary',
   neutral:   'Neutral',
-  info:      'Info-Medium',
-  success:   'Success-Medium',
-  warning:   'Warning-Medium',
-  error:     'Error-Medium',
+  info:      'Info',
+  success:   'Success',
+  warning:   'Warning',
+  error:     'Error',
 };
 
 // Text color → data-theme for swatch buttons
@@ -111,10 +112,10 @@ const TEXT_SWATCH_THEME = {
   secondary: 'Secondary',
   tertiary:  'Tertiary',
   neutral:   'Neutral',
-  info:      'Info-Medium',
-  success:   'Success-Medium',
-  warning:   'Warning-Medium',
-  error:     'Error-Medium',
+  info:      'Info',
+  success:   'Success',
+  warning:   'Warning',
+  error:     'Error',
 };
 
 // Header color → CSS token
@@ -332,12 +333,18 @@ export function TypographyShowcase() {
 
             <Tabs defaultValue={0} variant="standard" color="primary">
               <TabList>
+                <Tab>Summary</Tab>
                 <Tab>Playground</Tab>
                 <Tab>Accessibility</Tab>
+                <Tab>Change Log</Tab>
               </TabList>
 
               {/* ── Playground ── */}
               <TabPanel value={0}>
+                <DocSummary component="Typography" theme={bgTheme} surface={bgSurface} />
+              </TabPanel>
+
+              <TabPanel value={1}>
                 <Box sx={{ p: 3 }}>
 
                   {/* Style — single grouped dropdown */}
@@ -434,7 +441,7 @@ export function TypographyShowcase() {
               </TabPanel>
 
               {/* ── Accessibility ── */}
-              <TabPanel value={1}>
+              <TabPanel value={2}>
                 <Box sx={{ p: 3 }}>
                   <BodySmall color="quiet" style={{ marginBottom: 24 }}>
                     {STYLE_LABELS[textStyle]} / {cap(resolvedColor)} / {cap(resolvedWidth)}
@@ -518,6 +525,10 @@ export function TypographyShowcase() {
 
                   </Stack>
                 </Box>
+              </TabPanel>
+
+              <TabPanel value={3}>
+                <DocChanges component="Typography" />
               </TabPanel>
             </Tabs>
           </Box>

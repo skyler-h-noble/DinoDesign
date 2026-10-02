@@ -1,5 +1,6 @@
 // src/components/BevelText/BevelTextShowcase.js
 import React, { useState } from 'react';
+import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack } from '@mui/material';
 import { BevelText } from './BevelText';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
@@ -185,12 +186,18 @@ export function BevelTextShowcase() {
           <Box sx={{ backgroundColor: 'var(--Background)', overflow: 'hidden' }}>
             <Tabs defaultValue={0} variant="standard" color="primary">
               <TabList>
+                <Tab>Summary</Tab>
                 <Tab>Playground</Tab>
                 <Tab>Accessibility</Tab>
+                <Tab>Change Log</Tab>
               </TabList>
 
               {/* Playground */}
               <TabPanel value={0}>
+                <DocSummary component="BevelText" />
+              </TabPanel>
+
+              <TabPanel value={1}>
                 <Stack spacing={3} sx={{ p: 3, maxWidth: 720 }}>
                   <Input
                     label="Text"
@@ -378,7 +385,7 @@ export function BevelTextShowcase() {
               </TabPanel>
 
               {/* Accessibility */}
-              <TabPanel value={1}>
+              <TabPanel value={2}>
                 <Stack spacing={2} sx={{ p: 3, maxWidth: 560 }}>
                   <Caption style={{ color: 'var(--Text-Quiet)' }}>
                     BevelText uses the same Highlight / Lowlight token pair as
@@ -395,6 +402,10 @@ export function BevelTextShowcase() {
                     contrast no longer feels comfortable.
                   </BodySmall>
                 </Stack>
+              </TabPanel>
+
+              <TabPanel value={3}>
+                <DocChanges component="BevelText" />
               </TabPanel>
             </Tabs>
           </Box>

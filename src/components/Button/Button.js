@@ -45,8 +45,17 @@ const avatarTextFor = (size) =>
  *
  * 20 is not a named size in either component, which is precisely why the
  * mapping could not be expressed as a name. Both take a pixel size instead. */
+/* Button-Avatar and Button-Icon from Figma's Component-Size collection, at the
+   Desktop device. Both chain Component-Size -> Devices-Type, so the published
+   CSS carries the iOS and Android values too and `data-platform` picks between
+   them; these numbers are the decorator FALLBACK, not the whole story.
+ 
+   Small icon was 20 here, with a note saying it matched Button-Icon and that a
+   16px icon "looked underfilled beside a 20px avatar". Neither held: Button-Icon
+   is 16 at small, and the small decorator avatar is 16 too — so the icon was
+   never beside a 20px avatar. */
 const DECORATOR_SIZE_MAP = {
-  small:  { avatar: 16, icon: 20 },
+  small:  { avatar: 16, icon: 16 },
   medium: { avatar: 20, icon: 20 },
   large:  { avatar: 40, icon: 32 },
 };
@@ -68,9 +77,8 @@ function resolveDecorator(node, buttonSize) {
     });
   }
   if (node.type === DDIcon) {
-    // 20 / 20 / 32, matching Button-Icon. Small and medium share 20 — that is
-    // the design, not a copy-paste: the small button is 24px tall and a 16px
-    // icon left it looking underfilled beside a 20px avatar.
+    // 16 / 20 / 32 — Button-Icon, the decorator ramp. Not Button-Icon-Only,
+    // which is the icon-only TYPE and a different set of numbers.
     return React.cloneElement(node, { size: 'custom', fontSize: mapping.icon });
   }
   return node;
@@ -279,6 +287,87 @@ export function normalizeButtonVariant(variant) {
   return base;
 }
 
+export const BUTTON_CONTENT_TYPES = ['text', 'iconOnly', 'letterNumber', 'avatar'];
+
+const warnedContentType = new Set();
+
+function warnContentTypeOnce(key, message) {
+  if (process.env.NODE_ENV === 'production' || warnedContentType.has(key)) return;
+  warnedContentType.add(key);
+  // eslint-disable-next-line no-console
+  console.warn('[Button] ' + message);
+}
+
+/**
+ * One axis out of three booleans.
+ *
+ * Figma models TYPE as a single dropdown — text | iconOnly | letterNumber |
+ * Avatar — so exactly one is true at a time. Three independent booleans can
+ * say things the design cannot, and `iconOnly` with `avatar` is not a third
+ * kind of button; it is a mistake that renders anyway.
+ */
+function resolveContentType(contentType, flags) {
+  if (contentType !== undefined) {
+    const v = String(contentType);
+    if (!BUTTON_CONTENT_TYPES.includes(v)) {
+      warnContentTypeOnce('bad:' + v,
+        'contentType="' + v + '" is not a type. Use one of ' +
+        BUTTON_CONTENT_TYPES.join(' | ') + '. Rendering text.');
+      return { iconOnly: false, letterNumber: false, avatar: false };
+    }
+    return {
+      iconOnly: v === 'iconOnly',
+      letterNumber: v === 'letterNumber',
+      avatar: v === 'avatar',
+    };
+  }
+
+  const on = BUTTON_CONTENT_TYPES.filter(k => k !== 'text' && flags[k]);
+  if (on.length > 1) {
+    warnContentTypeOnce('multi:' + on.join(','),
+      on.join(' and ') + ' are both set. Type is ONE axis in the design — ' +
+      'text | iconOnly | letterNumber | avatar — so there is no drawing for ' +
+      'the combination. Using ' + on[0] + '. Prefer contentType="' + on[0] + '".');
+    return {
+      iconOnly: on[0] === 'iconOnly',
+      letterNumber: on[0] === 'letterNumber',
+      avatar: on[0] === 'avatar',
+    };
+  }
+  return flags;
+}
+
+let warnedSwatch = false;
+
+function warnSwatchOnce() {
+  if (process.env.NODE_ENV === 'production' || warnedSwatch) return;
+  warnedSwatch = true;
+  // eslint-disable-next-line no-console
+  console.warn(
+    '[Button] `swatch` is retired — use the Swatch component. A swatch uses ' +
+    'neither of Button\'s axes: its colour is data from a picker rather than a ' +
+    'palette, and it has no solid / outline / ghost shape. Swatch also fixes ' +
+    'the corner: this read --Button-Icon-Radius, which is why swatches stayed ' +
+    'square when a brand set a large radius.',
+  );
+}
+
+const warnedUnknown = new Set();
+
+function warnUnknownVariant(variant, map) {
+  if (process.env.NODE_ENV !== 'production' && !warnedUnknown.has(variant)) {
+    warnedUnknown.add(variant);
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[Button] variant="' + variant + '" is not a variant. Rendering the ' +
+      'default. Shape is solid / {color}-outline / ghost / text — ghost and ' +
+      'text take NO colour prefix, because a ghost takes its colour from the ' +
+      'text role (--Hotlink for text, --Quiet for icon-only), not a palette.',
+    );
+  }
+  return map.default;
+}
+
 function buildVariantMap(isTextContent, elevated = false, selected = false, size = 'medium') {
   const map = {};
   COLORS.forEach((color) => {
@@ -332,7 +421,7 @@ const SIZE_BASE = {
   },
 };
 
-function getSizingStyles({ size, iconOnly, letterNumber, avatar }) {
+function getSizingStyles({ size, iconOnly, letterNumber, avatar, swatch }) {
   const base       = SIZE_BASE[size] || SIZE_BASE.medium;
   const squareSize = SIZE_HEIGHT[size] || SIZE_HEIGHT.medium;
 
@@ -349,6 +438,21 @@ function getSizingStyles({ size, iconOnly, letterNumber, avatar }) {
       fontSize,
       padding: '0',
       '--_height': squareSize,
+      /* Figma keeps TWO icon ramps and they are not the same thing:
+         Button-Icon is a decorator sitting inside a button (16 / 20 / 32), and
+         Button-Icon-Only is the icon-only TYPE (16 / 24 / 40). They differ at
+         medium and large. This used the decorator ramp for both, so every
+         icon-only button was undersized by 4px at medium and 8px at large.
+         The token already existed and already carried the right numbers. */
+      ...(!avatar && !swatch && {
+        '& .MuiSvgIcon-root, & > *': {
+          fontSize: size === 'small'
+            ? 'var(--Sm-Button-Icon-Only, var(--Button-Icon-Only))'
+            : size === 'large'
+              ? 'var(--Lg-Button-Icon-Only, var(--Button-Icon-Only))'
+              : 'var(--Button-Icon-Only)',
+        },
+      }),
     };
   }
 
@@ -397,9 +501,30 @@ export function Button({
   selected = false,
   fullWidth = false,
   disabled = false,
+  /* Figma's TYPE axis — one dropdown, four exclusive values.
+ 
+     Named `contentType` and not `type` because `type` is the HTML button
+     attribute: it is undeclared here, so it falls through to the DOM, and a
+     form's `type="submit"` must keep working. The doc records the mapping.
+ 
+     The three booleans below are what this replaces. They are independent, so
+     the code could express combinations the design has no drawing for —
+     `iconOnly` and `avatar` together is undefined, not a third thing. They are
+     still accepted, so nothing breaks, and warn once. */
+  contentType,
   iconOnly = false,
   letterNumber = false,
   avatar = false,
+  /* RETIRED — use the Swatch component.
+ 
+     A swatch was never a kind of button. Button's two axes are STYLE (solid /
+     outline / ghost) and COLOUR (the nine palettes), and a swatch uses neither:
+     "outline swatch" means nothing, and its colour is arbitrary data from a
+     picker rather than a palette choice. It is a circle with a colour in it.
+ 
+     Figma now draws Swatch as its own component, so Button/Button-Swatch has no
+     component left to serve. These props still render — the studio's colour
+     picker uses them and a missing prop is a broken page — and warn once. */
   swatch = false,
   swatchColor,
   startIcon,
@@ -412,6 +537,11 @@ export function Button({
   badge = false,
   badgeContent,
   badgeVariant = 'error',
+  // Badge has ONE size as of 0.9.0. This is forwarded as the caller gave it —
+  // undefined when they said nothing — so Badge's own warning fires only when
+  // someone actually passes the removed prop. Button used to DERIVE a size from
+  // its own, which meant every `<Button badge>` tripped that warning for a
+  // value the caller never wrote.
   badgeSize,
   badgeDot = false,
   badgeMax = 99,
@@ -421,6 +551,13 @@ export function Button({
   sx = {},
   ...props
 }) {
+  /* contentType wins when given; otherwise the booleans are read as before. */
+  if (swatch) warnSwatchOnce();
+  const t = resolveContentType(contentType, { iconOnly, letterNumber, avatar });
+  iconOnly     = t.iconOnly;
+  letterNumber = t.letterNumber;
+  avatar       = t.avatar;
+
   const isIconOnly     = iconOnly || avatar || swatch;
 
   /* Types that render NO readable text, and therefore need an accessible name.
@@ -475,20 +612,48 @@ export function Button({
   const isTextContent  = !isIconOnly;
   const effectiveFullWidth = fullWidth && !isIconOnly && !letterNumber;
 
-  // Ghost avatars/swatches fallback to primary
-  const effectiveVariant = normalizeButtonVariant(
-    ((avatar || swatch) && (variant === 'ghost' || variant === 'text'))
-      ? 'primary'
-      : variant,
-  );
+  /* No fallback. Figma draws every TYPE against every STYLE — 4 x 3, all 75
+     variants — including Type=Avatar, Style=ghost, which is an avatar you can
+     press with no button chrome around it. This forced ghost and text avatars
+     to `primary`, so the design had a shape the code could not render and the
+     substitution was silent: you asked for ghost and got a solid fill.
+ 
+     The `swatch` half of the condition went with the prop; a swatch is its own
+     component now. */
+  const effectiveVariant = normalizeButtonVariant(variant);
 
   const variantMap     = buildVariantMap(isTextContent, elevated, selected, size);
-  const variantStyles  = variantMap[effectiveVariant] || variantMap.default;
-  const sizingStyles   = getSizingStyles({ size, iconOnly: isIconOnly, letterNumber, avatar });
+  /* An unknown variant used to fall through to solid default SILENTLY, which
+     is how `primary-ghost` — never a real variant — rendered as a filled pink
+     button in the gallery's own example and nobody noticed. Ghost and text are
+     deliberately colour-agnostic (see ghostStyles: a text ghost reads as a link,
+     an icon ghost as --Quiet), so there is no {color}-ghost to look up. Warn
+     rather than paint something plausible. */
+  const variantStyles  = variantMap[effectiveVariant] || warnUnknownVariant(effectiveVariant, variantMap);
+  const sizingStyles   = getSizingStyles({ size, iconOnly: isIconOnly, letterNumber, avatar, swatch });
 
   const TypographyComp = size === 'small' ? ButtonSmallTypography : ButtonTypography;
 
   const renderChildren = () => {
+    /* In Figma a Type=Avatar button IS an avatar: the Avatar instance is bound
+       to Button-Height, so it fills the button edge to edge. An Avatar passed
+       here was left at its own default size instead, which drew a small circle
+       floating inside a larger one. Decorator avatars are sized by
+       resolveDecorator; this is the type, so it takes the whole square. */
+    if (avatar) {
+      /* 100%, not a pixel size: SIZE_HEIGHT holds CSS custom properties
+         (`var(--Button-Height)`), so there is no number to pass as customSize —
+         the height is whatever the brand's token resolves to. Filling the
+         button gets the same result and keeps following the token. */
+      return React.Children.map(children, (node) => (
+        React.isValidElement(node) && node.type === DDAvatar
+          ? React.cloneElement(node, {
+              sx: { ...(node.props.sx || {}), width: '100%', height: '100%' },
+            })
+          : node
+      ));
+    }
+
     if (isIconOnly) return children;
 
     if (letterNumber) {
@@ -575,12 +740,6 @@ export function Button({
     ? resolveDecorator(endDecorator, size)
     : undefined;
 
-  // Default the badge size to match the button size when not explicitly set.
-  // Badge only ships small/medium/large; "medium" is a safe fallback for any
-  // future button sizes that don't have a 1:1 badge mapping.
-  const resolvedBadgeSize = badgeSize
-    || (size === 'small' ? 'small' : size === 'large' ? 'large' : 'medium');
-
   const out = (
     <>
       <GlobalStyles styles={{
@@ -633,8 +792,18 @@ export function Button({
         // Size-aware radius — pulls the Sm/Lg variant so each button size
         // gets the percent-of-its-own-height pixel value. Falls back to the
         // medium token if the size variants aren't defined.
+        /* An avatar button is a circle the size of the button, so the radius is
+           the button's OWN height — which is what Figma binds (Button-Container
+           radius -> Button/Button-Height). This read --Large-Button-Height at
+           every size: still a circle, because any radius past half the height
+           rounds fully, but wrong by a token, and wrong in the direction that
+           stops the two sides being comparable. */
         borderRadius: avatar
-          ? 'var(--Large-Button-Height)'
+          ? (size === 'small'
+              ? 'var(--Small-Button-Height, var(--Button-Height))'
+              : size === 'large'
+                ? 'var(--Large-Button-Height, var(--Button-Height))'
+                : 'var(--Button-Height)')
           : (iconOnly || swatch)
             ? (size === 'small'
                 ? 'var(--Sm-Button-Icon-Radius, var(--Button-Icon-Radius))'
@@ -779,7 +948,7 @@ export function Button({
     return (
       <DDBadge
         variant={badgeVariant}
-        size={resolvedBadgeSize}
+        size={badgeSize}
         badgeContent={badgeContent}
         dot={badgeDot}
         max={badgeMax}

@@ -21,6 +21,6 @@ How to format the answer:
 
 After the listing, end with a single short sentence suggesting the next step:
 either "Lib looks complete." (when empty) or "Consider lifting these into
-`@dynodesign/components`." (when there are matches).
+`@omni-design/components`." (when there are matches).
 
 Do not edit files. Do not look for related issues. Just grep and report.

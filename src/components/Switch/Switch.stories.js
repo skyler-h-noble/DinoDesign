@@ -13,8 +13,6 @@ export default {
         'info', 'success', 'warning', 'error',
         'primary-outline', 'secondary-outline', 'tertiary-outline', 'neutral-outline',
         'info-outline', 'success-outline', 'warning-outline', 'error-outline',
-        'primary-light', 'secondary-light', 'tertiary-light', 'neutral-light',
-        'info-light', 'success-light', 'warning-light', 'error-light',
       ],
     },
     size: { control: 'select', options: ['small', 'medium', 'large'] },
@@ -87,19 +85,6 @@ export const OutlineColors = {
   ),
 };
 
-// ─── Light — All Colors ──────────────────────────────────────────────────────
-
-export const LightColors = {
-  name: 'Light — All Colors',
-  render: () => (
-    <Stack spacing={2} sx={{ p: 2 }}>
-      {['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'].map((c) => (
-        <Switch key={c} variant={`${c}-light`} defaultChecked label={`${c.charAt(0).toUpperCase() + c.slice(1)} Light`} />
-      ))}
-    </Stack>
-  ),
-};
-
 // ─── Label Placement ─────────────────────────────────────────────────────────
 
 export const LabelPlacement = {
@@ -127,12 +112,11 @@ export const WithoutLabel = {
 // ─── Style Comparison ────────────────────────────────────────────────────────
 
 export const StyleComparison = {
-  name: 'Side-by-Side: Solid vs Outline vs Light',
+  name: 'Side-by-Side: Solid vs Outline',
   render: () => (
     <Stack spacing={3} sx={{ p: 2 }}>
       <Switch variant="primary" defaultChecked label="Solid" />
       <Switch variant="primary-outline" defaultChecked label="Outline" />
-      <Switch variant="primary-light" defaultChecked label="Light" />
     </Stack>
   ),
 };

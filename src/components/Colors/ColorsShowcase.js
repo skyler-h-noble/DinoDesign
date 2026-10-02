@@ -95,10 +95,13 @@ export function ColorsShowcase() {
   // Button color sets
   const buttonColorSets = [
     { name: 'Primary', prefix: 'Buttons-Primary' },
-    { name: 'Primary Light', prefix: 'Buttons-Primary-Light' },
+    /* `Buttons-Primary-Light-*` was removed with the -light shape in 0.9.0 and
+       the CSS no longer emits it, so this group rendered empty swatches.
+       BlackWhite is a real family and was missing from this list. */
     { name: 'Secondary', prefix: 'Buttons-Secondary' },
     { name: 'Tertiary', prefix: 'Buttons-Tertiary' },
     { name: 'Neutral', prefix: 'Buttons-Neutral' },
+    { name: 'Black / White', prefix: 'Buttons-BlackWhite' },
     { name: 'Info', prefix: 'Buttons-Info' },
     { name: 'Success', prefix: 'Buttons-Success' },
     { name: 'Warning', prefix: 'Buttons-Warning' },
@@ -344,23 +347,9 @@ export function ColorsShowcase() {
               </Grid>
             </Box>
 
-            {/* Primary Light */}
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, fontSize: '14px', color: 'var(--Header)' }}>
-                Primary Light
-              </Typography>
-              <Grid container spacing={2}>
-                {buttonColorTypes.map((type) => (
-                  <Grid item key={type.suffix}>
-                    <ColorSwatch 
-                      name={type.name} 
-                      cssVar={`--Buttons-Primary-Light-${type.suffix}`} 
-                      small
-                    />
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
+            {/* The `Buttons-Primary-Light-*` swatch block was removed with the -light
+              shape in 0.9.0: the CSS no longer emits that family, so every swatch
+              here read as unresolved. */}
 
             {/* Primary Outline */}
             <Box sx={{ mb: 4 }}>

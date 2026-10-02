@@ -1,5 +1,6 @@
 // src/components/ButtonGroup/ButtonGroupShowcase.js
 import React, { useState } from 'react';
+import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
@@ -109,7 +110,13 @@ export function ButtonGroupShowcase() {
   const [spacing, setSpacing]           = useState(0);
   const [disabled, setDisabled]         = useState(false);
   const [fullWidth, setFullWidth]       = useState(false);
+  const [multiple, setMultiple]         = useState(false);
+  const [separated, setSeparated]       = useState(false);
+  /* One value when single, an ARRAY when multiple — the group's own contract.
+     Kept as two pieces of state so toggling the mode does not hand `value` a
+     shape it cannot read. */
   const [selectedBtn, setSelectedBtn]   = useState('week');
+  const [selectedMany, setSelectedMany] = useState(['week']);
   const [bgTheme, setBgTheme]           = useState(null);
   const [bgSurface, setBgSurface] = useState('Surface');
 
@@ -138,6 +145,8 @@ export function ButtonGroupShowcase() {
     if (size !== 'medium')                gp.push('size="' + size + '"');
     if (orientation !== 'horizontal')     gp.push('orientation="' + orientation + '"');
     if (spacing > 0)                      gp.push('spacing={' + spacing + '}');
+    if (separated)                        gp.push('separated');
+    if (multiple)                         gp.push('multiple');
     if (disabled)                         gp.push('disabled');
     if (fullWidth)                        gp.push('fullWidth');
     gp.push('value={selected}');
@@ -171,11 +180,13 @@ export function ButtonGroupShowcase() {
                 color={color}
                 size={size}
                 orientation={orientation}
-                spacing={spacing}
+                separated={separated}
+                {...(spacing ? { spacing } : {})}
                 disabled={disabled}
                 fullWidth={fullWidth}
-                value={selectedBtn}
-                onChange={setSelectedBtn}
+                multiple={multiple}
+                value={multiple ? selectedMany : selectedBtn}
+                onChange={multiple ? setSelectedMany : setSelectedBtn}
                 aria-label="Time range selector"
               >
                 {BUTTON_ITEMS.map((item) => (
@@ -197,20 +208,29 @@ export function ButtonGroupShowcase() {
         <Grid item sx={{ width: { xs: '100%', md: '45%' }, flexShrink: 0, alignSelf: 'flex-start', minWidth: 0, overflow: 'hidden' }}>
           <Box sx={{ backgroundColor: 'var(--Background)', overflow: 'hidden' }}>
 
+            {/* Theme + surface live ABOVE the tabs: the Summary example, the
+                Playground preview and the live contrast numbers all answer to
+                them, so a control inside one tab would hide the input driving
+                what you read in another. */}
+            <Box sx={{ mb: 2 }}>
+              <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+            </Box>
             <Tabs defaultValue={0} variant="standard" color="primary">
               <TabList>
+                <Tab>Summary</Tab>
                 <Tab>Playground</Tab>
                 <Tab>Accessibility</Tab>
+                <Tab>Change Log</Tab>
               </TabList>
 
               {/* ── Playground ── */}
               <TabPanel value={0}>
+                <DocSummary component="ButtonGroup" theme={bgTheme} surface={bgSurface} />
+              </TabPanel>
+
+              <TabPanel value={1}>
                 <Box sx={{ p: 3 }}>
 
-                  {/* Background */}
-                  <Box sx={{ mb: 3 }}>
-                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
-                  </Box>
 
                   {/* Style */}
                   <Box>
@@ -296,6 +316,30 @@ export function ButtonGroupShowcase() {
                     </Stack>
                   </Box>
 
+                  {/* Style — Figma's Default | Separated */}
+                  <Box sx={{ mt: 3 }}>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</EyebrowSmall>
+                    <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+                      Joined overlaps the segments so the shared edge collapses to one border. Separated gaps them by --Platform-Spacer, which is wider on touch.
+                    </Caption>
+                    <Stack direction="row" spacing={1}>
+                      <ControlButton label="Joined" selected={!separated} onClick={() => setSeparated(false)} />
+                      <ControlButton label="Separated" selected={separated} onClick={() => setSeparated(true)} />
+                    </Stack>
+                  </Box>
+
+                  {/* Selection — one at a time, or several */}
+                  <Box sx={{ mt: 3 }}>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SELECTION</EyebrowSmall>
+                    <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+                      Multiple takes an ARRAY as its value, and clicking a selected segment deselects it.
+                    </Caption>
+                    <Stack direction="row" spacing={1}>
+                      <ControlButton label="Single" selected={!multiple} onClick={() => setMultiple(false)} />
+                      <ControlButton label="Multiple" selected={multiple} onClick={() => setMultiple(true)} />
+                    </Stack>
+                  </Box>
+
                   {/* Spacing */}
                   <Box sx={{ mt: 3 }}>
                     <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
@@ -341,7 +385,7 @@ export function ButtonGroupShowcase() {
               </TabPanel>
 
               {/* ── Accessibility ── */}
-              <TabPanel value={1}>
+              <TabPanel value={2}>
                 <Box sx={{ p: 3 }}>
                   <Stack spacing={3}>
 
@@ -366,6 +410,10 @@ export function ButtonGroupShowcase() {
 
                   </Stack>
                 </Box>
+              </TabPanel>
+
+              <TabPanel value={3}>
+                <DocChanges component="ButtonGroup" />
               </TabPanel>
             </Tabs>
           </Box>

@@ -113,12 +113,17 @@ describe('the removed -light shape does not reach the DOM', () => {
     expect(libClasses).not.toContain('btn-primary-light');
   });
 
-  it('names the paint on a ghost avatar button, which normalises to primary', () => {
+  it('a ghost avatar button stays ghost — Figma draws that variant', () => {
+    /* This asserted the opposite: that ghost avatars "normalise to primary".
+       They did, and it was wrong. Figma draws every TYPE against every STYLE —
+       Type=Avatar, Style=ghost exists — so the code was substituting a solid
+       fill for a shape the design has, silently. You asked for ghost and got
+       primary. */
     const { container } = render(<Button variant="ghost" avatar aria-label="Account" />);
     const libClasses = container.querySelector('button').className
       .split(/\s+/)
       .filter((c) => c.startsWith('btn-'));
-    expect(libClasses).toContain('btn-primary');
-    expect(libClasses).not.toContain('btn-ghost');
+    expect(libClasses).toContain('btn-ghost');
+    expect(libClasses).not.toContain('btn-primary');
   });
 });

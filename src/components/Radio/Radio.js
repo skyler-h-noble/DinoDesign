@@ -42,9 +42,17 @@ const seg = tokenSegment;
 // inner filled circle when checked. Padding between target and ring is derived.
 
 const SIZE_MAP = {
-  small:  { touchTarget: 24, box: 16, dot: 8,   gap: 4,  LabelComp: BodySmall },
-  medium: { touchTarget: 24, box: 20, dot: 9.5, gap: 8,  LabelComp: Body },
-  large:  { touchTarget: 24, box: 24, dot: 9.5, gap: 12, LabelComp: BodyLarge },
+/* Radio/Radio and Radio/Dot from Figma's Component-Size collection. The dot was
+   9.5 at medium and large, where the design says 10 and 12.
+ 
+   9.5 is also why it looked off-centre rather than merely small: the ring is
+   20px with a 2px border, so a 9.5px dot centres at 3.25px — a subpixel offset
+   the browser rounds per axis, and it lands visibly off. 10 in 20 is 5 either
+   side, which is what Figma draws (Dot at x=5, y=5). Whole pixels centre; halves
+   do not. Large was wrong by 2.5px on top of that. */
+  small:  { touchTarget: 24, box: 16, dot: 8,  gap: 4,  LabelComp: BodySmall },
+  medium: { touchTarget: 24, box: 20, dot: 10, gap: 8,  LabelComp: Body },
+  large:  { touchTarget: 24, box: 24, dot: 12, gap: 12, LabelComp: BodyLarge },
 };
 
 // --- Custom Radio Icons ------------------------------------------------------

@@ -9,9 +9,9 @@ import {
   ErrorSwitch,
   PrimaryOutlineSwitch,
   SecondaryOutlineSwitch,
-  PrimaryLightSwitch,
-  SuccessLightSwitch,
-  ErrorLightSwitch,
+  themedStyles,
+  outlineStyles,
+  normalizeSwitchVariant,
 } from './Switch';
 import { axe } from 'jest-axe';
 
@@ -106,13 +106,6 @@ describe('Switch Component', () => {
     expect(container.querySelector(`.switch-${variant}`)).toBeInTheDocument();
   });
 
-  test.each([
-    ['primary-light'], ['success-light'], ['error-light'],
-  ])('applies %s variant class', (variant) => {
-    const { container } = render(<Switch variant={variant} aria-label="Test" />);
-    expect(container.querySelector(`.switch-${variant}`)).toBeInTheDocument();
-  });
-
   // --- Sizes ---
 
   test.each(['small', 'medium', 'large'])('renders %s size', (size) => {
@@ -177,15 +170,6 @@ describe('Convenience Exports', () => {
     expect(container.querySelector(`.switch-${variant}`)).toBeInTheDocument();
   });
 
-  // Light
-  test.each([
-    ['PrimaryLightSwitch',   PrimaryLightSwitch,   'primary-light'],
-    ['SuccessLightSwitch',   SuccessLightSwitch,   'success-light'],
-    ['ErrorLightSwitch',     ErrorLightSwitch,     'error-light'],
-  ])('%s renders with correct variant', (name, Component, variant) => {
-    const { container } = render(<Component aria-label="Test" />);
-    expect(container.querySelector(`.switch-${variant}`)).toBeInTheDocument();
-  });
 
   // Legacy alias
   test('SwitchInput is an alias for Switch', () => {
@@ -254,5 +238,130 @@ describe('Switch — Accessibility (jest-axe)', () => {
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();
+  });
+});
+
+/**
+ * Which TOKENS the on state paints with.
+ *
+ * Asserted on the style objects, not the DOM: jsdom drops a `var()` it cannot
+ * resolve, so `toHaveStyle({ background: 'var(--Icons-Primary)' })` reduces the
+ * expectation to empty and passes against literally any value. The 51 tests
+ * above all passed while these tokens were still --Buttons-*, which is exactly
+ * that failure.
+ *
+ * The mapping is Figma's, read off the Switch set (10 variants):
+ *   Status=On  Switch-Body  fill AND stroke -> Icons::Icon
+ *   Status=On  Dot          fill            -> Icons::On-Icon
+ *   Status=Off Switch-Body  stroke          -> Quiet
+ *   Status=Off Dot          fill            -> Quiet
+ * No variant pins an explicit Icons mode, so the mode is inherited — in CSS
+ * that is the flattened name the `variant` prop selects.
+ */
+describe('Switch — on-state tokens follow the Icons collection', () => {
+  it('the default variant reads Icon / On-Icon', () => {
+    const s = themedStyles();
+    expect(s.trackOn).toBe('var(--Icons-Default)');
+    expect(s.dotOn).toBe('var(--Icons-On-Default)');
+  });
+
+  it('the on track edge is the SAME token as its fill', () => {
+    // Figma binds Switch-Body's fill and stroke to Icon. A separate border
+    // token here would be a colour the design does not have.
+    expect(themedStyles().trackOnBorder).toBe(themedStyles().trackOn);
+    for (const c of ['primary', 'error']) {
+      const s = outlineStyles(c);
+      expect(s.trackOnBorder).toBe(s.trackOn);
+    }
+  });
+
+  it('an icon in the knob returns to Icon, because the knob is On-Icon', () => {
+    expect(themedStyles().iconOn).toBe('var(--Icons-Default)');
+    expect(outlineStyles('primary').iconOn).toBe('var(--Icons-Primary)');
+  });
+
+  it.each(['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'])(
+    '%s maps to --Icons-{Color} / --Icons-On-{Color}', (color) => {
+      const C = color.charAt(0).toUpperCase() + color.slice(1);
+      const s = outlineStyles(color);
+      expect(s.trackOn).toBe(`var(--Icons-${C})`);
+      expect(s.dotOn).toBe(`var(--Icons-On-${C})`);
+    });
+
+  it('no on-state slot still reads a --Buttons-* token', () => {
+    const slots = [themedStyles(), outlineStyles('primary')];
+    for (const s of slots) {
+      for (const key of ['trackOn', 'trackOnBorder', 'dotOn', 'iconOn']) {
+        expect(s[key]).not.toMatch(/--Buttons-/);
+      }
+    }
+  });
+
+  it('the OFF state stays on the surface tokens Figma binds', () => {
+    const s = themedStyles();
+    expect(s.dotOff).toBe('var(--Quiet)');
+    expect(outlineStyles('primary').trackOffBorder).toBe('var(--Border)');
+  });
+});
+
+/**
+ * The -light shape is gone.
+ *
+ * It filled the track with --<C>-Color-11 and drew the dot in
+ * --Buttons-<C>-Border. The Figma Switch set has two axes, State and Status —
+ * there was never a variant to check it against, and the on state's colour now
+ * comes from the Icons collection.
+ *
+ * Deleting the convenience exports is the point: a stale
+ * `import { PrimaryLightSwitch }` now fails at BUILD, which is better than a
+ * named export rendering something other than its name. The variant STRING is
+ * kept working, because an unknown variant falls through to `default` and would
+ * have silently repainted every call site as the brand-default switch.
+ */
+describe('Switch — the -light shape is removed', () => {
+  const warn = () => jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+  it('normalizes {color}-light to the solid colour', () => {
+    const spy = warn();
+    expect(normalizeSwitchVariant('primary-light')).toBe('primary');
+    expect(normalizeSwitchVariant('error-light')).toBe('error');
+    spy.mockRestore();
+  });
+
+  it('normalizes the bare "light" to primary', () => {
+    const spy = warn();
+    expect(normalizeSwitchVariant('light')).toBe('primary');
+    spy.mockRestore();
+  });
+
+  it('leaves every other variant alone', () => {
+    for (const v of ['default', 'primary', 'primary-outline', 'error-outline']) {
+      expect(normalizeSwitchVariant(v)).toBe(v);
+    }
+  });
+
+  it('renders the normalized class, not the -light one', () => {
+    const spy = warn();
+    const { container } = render(<Switch variant="primary-light" aria-label="t" />);
+    expect(container.querySelector('.switch-primary')).toBeInTheDocument();
+    expect(container.querySelector('.switch-primary-light')).not.toBeInTheDocument();
+    spy.mockRestore();
+  });
+
+  it('warns once per variant in development', () => {
+    const spy = warn();
+    normalizeSwitchVariant('warning-light');
+    normalizeSwitchVariant('warning-light');
+    expect(spy.mock.calls.filter((c) => String(c[0]).includes('warning-light'))).toHaveLength(1);
+    spy.mockRestore();
+  });
+
+  it('no longer exports the eight Light convenience components', () => {
+    // eslint-disable-next-line global-require
+    const mod = require('./Switch');
+    for (const c of ['Primary', 'Secondary', 'Tertiary', 'Neutral',
+                     'Info', 'Success', 'Warning', 'Error']) {
+      expect(mod[`${c}LightSwitch`]).toBeUndefined();
+    }
   });
 });

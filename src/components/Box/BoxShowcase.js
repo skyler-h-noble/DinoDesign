@@ -20,11 +20,11 @@ const SURFACES = [
 
 const THEMES = [
   'Default',
-  'Primary', 'Primary-Light',
-  'Secondary', 'Secondary-Light',
-  'Tertiary', 'Tertiary-Light',
-  'Neutral', 'Neutral-Light',
-  'Info-Light', 'Success-Light', 'Warning-Light', 'Error-Light',
+  'Primary', 'Primary',
+  'Secondary', 'Secondary',
+  'Tertiary', 'Tertiary',
+  'Neutral', 'Neutral',
+  'Info', 'Success', 'Warning', 'Error',
 ];
 
 function CopyButton({ code }) {

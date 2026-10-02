@@ -31,7 +31,7 @@ export const AllTonesOneFamily = {
   name: 'Primary — All Tones',
   render: () => (
     <Stack spacing={2}>
-      {['Primary', 'Primary-Light', 'Primary-Medium', 'Primary-Dark'].map((c) => (
+      {['Primary', 'Primary', 'Primary', 'Primary'].map((c) => (
         <Box key={c} color={c} border padding="sm">
           {c}
         </Box>
@@ -44,7 +44,7 @@ export const Elevations = {
   render: () => (
     <Stack spacing={3} sx={{ p: 2 }}>
       {[0, 1, 2, 3, 4].map((e) => (
-        <Box key={e} color="Neutral-Light" elevation={e} padding="md">
+        <Box key={e} color="Neutral" elevation={e} padding="md">
           Elevation {e}
         </Box>
       ))}
@@ -66,9 +66,9 @@ export const BorderRadii = {
 
 export const Nested = {
   render: () => (
-    <Box color="Primary-Light" padding="lg" border>
+    <Box color="Primary" padding="lg" border>
       <MuiBox sx={{ mb: 2, fontWeight: 600 }}>Outer: Primary-Light</MuiBox>
-      <Box color="Primary-Dark" padding="md" border>
+      <Box color="Primary" padding="md" border>
         <MuiBox sx={{ fontWeight: 600 }}>Inner: Primary-Dark</MuiBox>
         <MuiBox sx={{ fontSize: '14px', opacity: 0.8, mt: 1 }}>
           Inner box overrides theme. Text automatically adjusts.
@@ -81,13 +81,13 @@ export const Nested = {
 export const SemanticHTML = {
   render: () => (
     <Stack spacing={2}>
-      <Box color="Success-Light" component="section" border padding="md">
+      <Box color="Success" component="section" border padding="md">
         component="section"
       </Box>
-      <Box color="Warning-Light" component="aside" border padding="md">
+      <Box color="Warning" component="aside" border padding="md">
         component="aside"
       </Box>
-      <Box color="Error-Light" component="article" border padding="md">
+      <Box color="Error" component="article" border padding="md">
         component="article"
       </Box>
     </Stack>

@@ -45,11 +45,11 @@ const COLOR_GROUPS = [
 
 const SOLID_THEME_MAP = {
   primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
-  info: 'Info-Medium', success: 'Success-Medium', warning: 'Warning-Medium', error: 'Error-Medium',
+  info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
 };
 const LIGHT_THEME_MAP = {
-  primary: 'Primary-Light', secondary: 'Secondary-Light', tertiary: 'Tertiary-Light', neutral: 'Neutral-Light',
-  info: 'Info-Light', success: 'Success-Light', warning: 'Warning-Light', error: 'Error-Light',
+  primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
+  info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
 };
 
 const ICON_REGISTRY = {

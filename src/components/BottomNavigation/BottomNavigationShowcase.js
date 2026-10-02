@@ -52,9 +52,9 @@ const DEFAULT_ITEMS = [
 const BAR_COLORS = [
   { value: 'default', label: 'Default', desc: 'data-theme="Nav-Bar"' },
   { value: 'primary', label: 'Primary', desc: 'data-theme="Primary"' },
-  { value: 'primary-light', label: 'Primary Light', desc: 'data-theme="Primary-Light"' },
-  { value: 'primary-medium', label: 'Primary Medium', desc: 'data-theme="Primary-Medium"' },
-  { value: 'primary-dark', label: 'Primary Dark', desc: 'data-theme="Primary-Dark"' },
+  { value: 'primary-light', label: 'Primary Light', desc: 'data-theme="Primary"' },
+  { value: 'primary-medium', label: 'Primary Medium', desc: 'data-theme="Primary"' },
+  { value: 'primary-dark', label: 'Primary Dark', desc: 'data-theme="Primary"' },
   { value: 'white', label: 'White', desc: 'data-theme="White"' },
   { value: 'black', label: 'Black', desc: 'data-theme="Black"' },
 ];

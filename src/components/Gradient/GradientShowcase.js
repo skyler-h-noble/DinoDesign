@@ -1,5 +1,6 @@
 // src/components/Gradient/GradientShowcase.js
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import ReactDOM from 'react-dom';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -546,12 +547,18 @@ export function GradientShowcase() {
           <Box sx={{ backgroundColor: 'var(--Background)', overflow: 'hidden' }}>
             <Tabs defaultValue={0} variant="standard" color="primary">
               <TabList>
+                <Tab>Summary</Tab>
                 <Tab>Playground</Tab>
                 <Tab>Accessibility</Tab>
+                <Tab>Change Log</Tab>
               </TabList>
 
               {/* ── Playground ── */}
               <TabPanel value={0}>
+                <DocSummary component="Gradient" />
+              </TabPanel>
+
+              <TabPanel value={1}>
                 <Box sx={{ p: 3 }}>
 
                   {/* Variant */}
@@ -679,7 +686,7 @@ export function GradientShowcase() {
               </TabPanel>
 
               {/* ── Accessibility ── */}
-              <TabPanel value={1}>
+              <TabPanel value={2}>
                 <Box sx={{ p: 3 }}>
                   <Stack spacing={3}>
 
@@ -746,6 +753,10 @@ export function GradientShowcase() {
                     )}
                   </Stack>
                 </Box>
+              </TabPanel>
+
+              <TabPanel value={3}>
+                <DocChanges component="Gradient" />
               </TabPanel>
             </Tabs>
           </Box>

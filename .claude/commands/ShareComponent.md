@@ -27,7 +27,7 @@ Workflow:
      needed to make it self-contained (imports, tightly-coupled helpers).
 
 4. **Read installed lib version.** From the consumer project's `package.json`,
-   look up `dependencies["@dynodesign/components"]` (or `devDependencies`).
+   look up `dependencies["@omni-design/components"]` (or `devDependencies`).
 
 5. **Show a preview.** Print a summary to the user:
 

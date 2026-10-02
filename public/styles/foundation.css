@@ -1,72 +1,143 @@
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:GRAD,ROND,opsz,slnt,wdth,wght@0..100,0..100,6..144,-10..0,25..151,1..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@640&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
 :root {
 
   /* Button */
-  --Button-Radius: 4px;
-  --Button-Icon-Radius: 4px;
-  --Button-Height: 36px;
+  --Button-Radius: 2px;
+  --Sm-Button-Radius: 2px;
+  --Lg-Button-Radius: 2px;
+  --Button-Inner-Focus-Radius: 1px;
+  --Sm-Button-Inner-Focus-Radius: 1px;
+  --Lg-Button-Inner-Focus-Radius: 1px;
+  --Button-Focus-Radius: 5px;
+  --Sm-Button-Focus-Radius: 5px;
+  --Lg-Button-Focus-Radius: 5px;
+  --Button-Icon-Radius: 32px;
+  --Sm-Button-Icon-Radius: 12px;
+  --Lg-Button-Icon-Radius: 28px;
+  --Button-Icon-Inner-Radius: 31px;
+  --Sm-Button-Icon-Inner-Radius: 11px;
+  --Lg-Button-Icon-Inner-Radius: 27px;
+  --Button-Icon-Focus-Radius: 35px;
+  --Sm-Button-Icon-Focus-Radius: 15px;
+  --Lg-Button-Icon-Focus-Radius: 31px;
+  --Button-Height: 32px;
   --Small-Button-Height: 24px;
   --Large-Button-Height: 56px;
   --Button-Min-Width: 60px;
+  --Lg-Button-Min-Width: 100px;
   --Button-Bevel: 0;
   --Button-Bevel-Px: 0px;
   --Button-Bevel-Opacity: 0.5;
-  --Button-Bevel-Shadow: none;
+  /* Bevel geometry — the literal box-shadow numbers, same values the Figma
+     Platform/Components collections carry (there as bare numbers, here as px).
+     Small and large don't vary by platform, so they live here; medium's live
+     in core.css beside the platform button heights they're derived from. */
+  --Sm-Button-Highlight-Offset-x: 0px;
+  --Sm-Button-Highlight-Offset-y: 0px;
+  --Sm-Button-Highlight-Blur-Radius: 0px;
+  --Sm-Button-Highlight-Spread: 0px;
+  --Sm-Button-Lowlight-Offset-x: 0px;
+  --Sm-Button-Lowlight-Offset-y: 0px;
+  --Sm-Button-Lowlight-Blur-Radius: 0px;
+  --Sm-Button-Lowlight-Spread: 0px;
+  --Lg-Button-Highlight-Offset-x: 0px;
+  --Lg-Button-Highlight-Offset-y: 0px;
+  --Lg-Button-Highlight-Blur-Radius: 0px;
+  --Lg-Button-Highlight-Spread: 0px;
+  --Lg-Button-Lowlight-Offset-x: 0px;
+  --Lg-Button-Lowlight-Offset-y: 0px;
+  --Lg-Button-Lowlight-Blur-Radius: 0px;
+  --Lg-Button-Lowlight-Spread: 0px;
   --Style-Border-Radius: var(--Button-Radius);
 
   /* Card */
-  --Card-Radius: 8px;
-  --Card-Focus-Radius: 11px;
-
-  /* Input — used by TextField, Select, ListItem (when clickable),
-     and any element whose chrome reads as a tappable input row.
-     --Input-Inner-Focus-Visible is the corner radius for the inset
-     focus ring; it's the input radius minus 1 so the inset 3px-thick
-     focus indicator visually matches the chrome's outer corners. */
-  --Input-Radius: 4px;
-  --Input-Inner-Focus-Visible: calc(var(--Input-Radius) - 1px);
+  --Accordion-Radius: 2px;
+  --Card-Radius: 18px;
+  --Sm-Card-Radius: 14px;
+  --Lg-Card-Radius: 23px;
+  --Card-Inner-Radius: 17px;
+  --Sm-Card-Inner-Radius: 13px;
+  --Lg-Card-Inner-Radius: 22px;
+  --Card-Focus-Radius: 21px;
+  --List-Item-Radius: 2px;
+  --List-Item-Focus-Radius: 0px;
+  --List-Item-Padding: 12px;
+  --List-Item-Gap: 12px;
+  --Sm-List-Item-Padding: 8px;
+  --Lg-List-Item-Padding: 16px;
+  --Sm-List-Item-Gap: 8px;
+  --Lg-List-Item-Gap: 16px;
+  --Sm-List-Item-Radius: 2px;
+  --Lg-List-Item-Radius: 2px;
+  --Sm-List-Item-Focus-Radius: 0px;
+  --Lg-List-Item-Focus-Radius: 0px;
+  --List-Item-Image-Radius: 1px;
+  --List-Item-Default-Image-Width: 64px;
+  --Sm-List-Item-Default-Image-Width: 48px;
+  --Lg-List-Item-Default-Image-Width: 80px;
+  --Sm-Card-Focus-Radius: 17px;
+  --Lg-Card-Focus-Radius: 26px;
   --Card-Padding: 16px;
+  --Sm-Card-Padding: 12px;
+  --Lg-Card-Padding: 20px;
+
+  /* Modal */
+  --Modal-Padding: 24px;
+  --Modal-Radius: 18px;
+  --Dropdown-Frame-Radius: 2px;
+  --Menu-Item-Radius: 0px;
+  --Menu-Focus-Radius: 0px;
+  --Modal-Inner-Radius: 17px;
+  --Modal-Focus-Radius: 21px;
+
+  /* Input */
+  --Input-Radius: 2px;
+  --Sm-Input-Radius: 1px;
+  --Lg-Input-Radius: 3px;
+  --Input-Inner-Focus-Radius: 1px;
+  --Input-Focus-Radius: 5px;
+  --Input-Swatch-Radius: 2px;
+  --Sm-Input-Swatch-Radius: 1px;
+  --Lg-Input-Swatch-Radius: 3px;
+
+  /* Checkbox — per-size corner radius = 20% of the box (16/20/24px).
+     Border is 2px (set in the lib component). */
+  --Sm-Checkbox-Radius: 3.2px;
+  --Checkbox-Radius: 4px;
+  --Lg-Checkbox-Radius: 4.8px;
   --Style-Gradient-Color-1: var(--Buttons-Primary-Button);
   --Style-Gradient-Color-2: var(--Buttons-Primary-Button);
   --Style-Gradient-Angle: 0;
 
-  /* Positive sizing scale. The whole-number sequence steps by 8px
-     through 16 (covering common spacing + element-sizing needs), then
-     jumps to 20 (=160px) and 30 (=240px) for layout-level sizes. The
-     fractional tokens (Quarter, Half, 1-and-Half, 2-and-Half) plug the
-     2/4/12/20px gaps used by lab-spacing and inset-positioning rules. */
-  --Sizing-Quarter:      2px;
-  --Sizing-Half:         4px;
-  --Sizing-1:            8px;
-  --Sizing-1-and-Half:  12px;
-  --Sizing-2:           16px;
-  --Sizing-2-and-Half:  20px;
-  --Sizing-3:           24px;
-  --Sizing-4:           32px;
-  --Sizing-5:           40px;
-  --Sizing-6:           48px;
-  --Sizing-7:           56px;
-  --Sizing-8:           64px;
-  --Sizing-9:           72px;
-  --Sizing-10:          80px;
-  --Sizing-11:          88px;
-  --Sizing-12:          96px;
-  --Sizing-13:         104px;
-  --Sizing-14:         112px;
-  --Sizing-15:         120px;
-  --Sizing-16:         128px;
-  --Sizing-20:         160px;
-  --Sizing-30:         240px;
-
-  /* Negative sizing scale. Used by overlap/inset/negative-margin rules
-     (e.g. pulling a card edge into a stage's padding, hanging a label
-     into a gutter). Sizing-Negative-Quarter (-2px) is kept for the
-     hairline-overlap case even though it's not in the Figma variable
-     set — removing it would break consumers; adding it to Figma later
-     is a no-op. */
-  --Sizing-Negative-Quarter:    -2px;
-  --Sizing-Negative-Half:       -4px;
-  --Sizing-Negative-1:          -8px;
-  --Sizing-Negative-1-and-Half:-12px;
-  --Sizing-Negative-2:         -16px;
+  --Sizing-Quarter: 2px;
+  --Sizing-Half: 4px;
+  --Sizing-1: 8px;
+  --Sizing-1-and-Half: 12px;
+  --Sizing-2: 16px;
+  --Sizing-2-and-Half: 20px;
+  --Sizing-3: 24px;
+  --Sizing-4: 32px;
+  --Sizing-5: 40px;
+  --Sizing-6: 48px;
+  --Sizing-7: 56px;
+  --Sizing-8: 64px;
+  --Sizing-9: 72px;
+  --Sizing-10: 80px;
+  --Sizing-11: 88px;
+  --Sizing-12: 96px;
+  --Sizing-13: 104px;
+  --Sizing-14: 112px;
+  --Sizing-15: 120px;
+  --Sizing-16: 128px;
+  --Sizing-20: 160px;
+  --Sizing-30: 240px;
+  --Sizing-Negative-Quarter: -2px;
+  --Sizing-Negative-Half: -4px;
+  --Sizing-Negative-1: -8px;
+  --Sizing-Negative-1-and-Half: -12px;
   --Min-Stack-Gap: 0px;
 }

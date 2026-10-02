@@ -592,9 +592,11 @@ import {
 // mode. A '{color}-light' call site still renders — normalizeButtonVariant
 // strips the suffix to the solid button of the same colour and warns once in
 // development — so nothing breaks silently, but do not write new ones.
-// (Switch and ButtonGroup DO still have a light variant; they are different
-// things. Switch's is a tinted track; ButtonGroup's changes the SURFACE of
-// the unselected segments, not the theme.)
+// Switch's tinted track went the same way: its ON colour now comes from the
+// Icons collection, and the Figma Switch set has only State and Status axes,
+// so there was never a variant to check a light shape against.
+// (ButtonGroup DOES still have one, and it is a different thing: it changes
+// the SURFACE of the unselected segments, not the theme.)
 // size: 'small' | 'medium' | 'large'
 <Button variant="primary" size="medium" startIcon={<AddIcon />}>
   Save Changes

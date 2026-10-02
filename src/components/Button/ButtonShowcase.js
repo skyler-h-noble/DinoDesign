@@ -1,9 +1,11 @@
 // src/components/Button/ButtonShowcase.js
 import React, { useState, useEffect, useRef } from 'react';
+import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import * as MuiIcons from '@mui/icons-material';
+import { tokenSegment } from '../_shadows';
 import { Button } from './Button';
 import { Icon } from '../Icon/Icon';
 import { Avatar } from '../Avatar/Avatar';
@@ -21,14 +23,34 @@ import {
 } from '../Typography';
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
-const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'black-white', 'info', 'success', 'warning', 'error'];
 const COLOR_GROUPS = [
   { label: 'Default', colors: ['default'] },
-  { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
+  /* `black-white` is a palette like the other four — the system emits
+     --Buttons-BlackWhite-* — so it belongs in Theme rather than in a case of
+     its own. Button already built `black-white` and `black-white-outline`;
+     only the picker was missing it. */
+  { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral', 'black-white'] },
   { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
 ];
 const STYLES = ['solid', 'outline', 'ghost'];
-const CONTENT_TYPES = ['text', 'number', 'letter', 'icon', 'swatch'];
+/* Figma's TYPE axis, in its own vocabulary: text | iconOnly | letterNumber |
+   Avatar. This listed `number` and `letter` SEPARATELY — letterNumber is ONE
+   value, a single character, not two kinds of button — and omitted `avatar`
+   entirely, so the avatar type was unreachable from the picker even though the
+   code below already handled it.
+
+   `swatch` is last and marked, because it is the one option with no counterpart
+   in the design: a colour chip, code-only. */
+/* Exactly Figma's Type axis. `swatch` was a fifth option here and is gone: a
+   swatch is its own component now, so Button has no swatch type to offer. */
+const CONTENT_TYPES = ['text', 'iconOnly', 'letterNumber', 'avatar'];
+const CONTENT_TYPE_LABELS = {
+  text: 'Text',
+  iconOnly: 'Icon only',
+  letterNumber: 'Letter / Number',
+  avatar: 'Avatar',
+};
 
 /* ── Contrast helpers ── */
 
@@ -108,7 +130,9 @@ function ControlButton({ label, selected, onClick, disabled: isDisabled }) {
 }
 
 function ColorSwatchButton({ color, selected, disabled: isDisabled, onClick, isOutlineMode }) {
-  const C = cap(color);
+  /* tokenSegment, not cap(): `black-white` capitalises to `Black-white`,
+     which is not a token. The system emits --Buttons-BlackWhite-*. */
+  const C = tokenSegment(color);
   return (
     <Box
       component="button"
@@ -243,7 +267,7 @@ export function ButtonShowcase() {
       const asNum = Number(badgeContent);
       p.badgeContent = badgeContent !== '' && !Number.isNaN(asNum) ? asNum : badgeContent;
     }
-    if (contentType === 'icon') {
+    if (contentType === 'iconOnly') {
       p.iconOnly = true;
       p.children = getIconComponent();
       return p;
@@ -260,9 +284,10 @@ export function ButtonShowcase() {
       if (swatchColor) p.swatchColor = swatchColor;
       return p;
     }
-    if (contentType === 'letter' || contentType === 'number') {
+    if (contentType === 'letterNumber') {
       p.letterNumber = true;
-      p.children = buttonText || (contentType === 'letter' ? 'A' : '1');
+      /* One value, one sample: a single character, letter or digit alike. */
+      p.children = buttonText || 'A';
       return p;
     }
     p.children = loading ? 'Loading...' : (buttonText || 'Button');
@@ -316,9 +341,20 @@ export function ButtonShowcase() {
     // the tab was focused. Timers still fire when hidden (throttled), and
     // getComputedStyle forces the style recalculation by itself, so the
     // deferral is all that was ever needed.
-    const t = setTimeout(() => {
+    let tries = 0;
+    let t;
+    const run = () => {
       const el = surfaceRef.current;
-      if (!el) return;
+      /* The preview can mount LATER than this effect: in some layouts it lives
+         inside the Playground tab, and the landing tab is Summary, so on first
+         paint there is nothing to measure. Returning here used to end it — the
+         deps never change afterwards, so the panel read "--" permanently and the
+         live check looked lost. Retry briefly, then stop, so a component with no
+         preview at all does not poll forever. */
+      if (!el) {
+        if (tries < 40) { tries += 1; t = setTimeout(run, 50); }
+        return;
+      }
       const v = (name) => getCssVarFrom(el, name);
       const C = cap(effectiveColor);
       const data = {};
@@ -354,7 +390,8 @@ export function ButtonShowcase() {
         data.activeBase   = data.background;
       }
       setContrastData(data);
-    });
+    };
+    t = setTimeout(run);
     return () => clearTimeout(t);
   }, [style, effectiveColor, bgTheme, bgSurface, cssStatus]);
 
@@ -365,35 +402,56 @@ export function ButtonShowcase() {
         <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
       </Box>
 
-      <Grid container sx={{ mt: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      {/* The surface the Accessibility tab MEASURES, mounted here rather than in
+          a tab panel.
 
-        {/* ── LEFT: Preview + Code ── */}
-        <Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, pr: { md: 3 } }}>
+          It used to be the visible preview. Once the preview moved inside
+          Playground (layout A) it no longer existed while you were reading the
+          Accessibility tab, so every ratio read "--". Measuring a hidden element
+          that carries the same data-theme + data-surface gives the same computed
+          values and does not depend on which tab is open.
 
-          <PreviewSurface ref={surfaceRef} theme={bgTheme} surface={bgSurface}>
-            <Button {...getButtonProps()} />
-          </PreviewSurface>
+          visibility:hidden, not display:none — a hidden element is still in the
+          layout tree, so getComputedStyle resolves custom properties on it. */}
+      <PreviewSurface
+        ref={surfaceRef}
+        theme={bgTheme}
+        surface={bgSurface}
+        minHeight={0}
+        sx={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden', visibility: 'hidden' }}
+        aria-hidden="true"
+      />
 
-          <CodeBlock
-            code={generateCode()}
-            language="JSX"
-            wrap
-            sx={{ mt: 2 }}
-          />
-        </Grid>
-
-        {/* ── RIGHT: Tabs ── */}
-        <Grid item sx={{ width: { xs: '100%', md: '45%' }, flexShrink: 0, alignSelf: 'flex-start', minWidth: 0, overflow: 'hidden' }}>
-          <Box sx={{ backgroundColor: 'var(--Background)', overflow: 'hidden' }}>
+      {/* Layout A: the tab bar spans the page, so Summary, Accessibility and
+          Change Log get the full width to read. The preview/controls split now
+          lives INSIDE Playground, which is the only tab that needs it. */}
+      <Box sx={{ mt: 2, backgroundColor: 'var(--Background)', overflow: 'hidden' }}>
 
             <Tabs defaultValue={0} variant="standard" color="primary">
               <TabList>
+                <Tab>Summary</Tab>
                 <Tab>Playground</Tab>
                 <Tab>Accessibility</Tab>
+                <Tab>Change Log</Tab>
               </TabList>
 
               {/* ── Playground ── */}
               <TabPanel value={0}>
+                <DocSummary component="Button" theme={bgTheme} surface={bgSurface} />
+              </TabPanel>
+
+              <TabPanel value={1}>
+                <Grid container sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                  {/* ── Preview + code ── */}
+                  <Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, pr: { md: 3 }, p: 3 }}>
+                    <PreviewSurface theme={bgTheme} surface={bgSurface}>
+                      <Button {...getButtonProps()} />
+                    </PreviewSurface>
+                    <CodeBlock code={generateCode()} language="JSX" wrap sx={{ mt: 2 }} />
+                  </Grid>
+
+                  {/* ── Controls ── */}
+                  <Grid item sx={{ width: { xs: '100%', md: '45%' }, flexShrink: 0, minWidth: 0 }}>
                 <Box sx={{ p: 3 }}>
 
                   {/* Style */}
@@ -432,23 +490,22 @@ export function ButtonShowcase() {
                   <Box sx={{ mt: 3 }}>
                     <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>CONTENT TYPE</EyebrowSmall>
                     <Select
-                      options={CONTENT_TYPES.map((ct) => ({ value: ct, label: cap(ct) }))}
+                      options={CONTENT_TYPES.map((ct) => ({ value: ct, label: CONTENT_TYPE_LABELS[ct] || cap(ct) }))}
                       value={contentType}
                       onChange={(ct) => {
                         setContentType(ct);
-                        if (ct === 'number') setButtonText('1');
-                        else if (ct === 'letter') setButtonText('A');
+                        if (ct === 'letterNumber') setButtonText('A');
                         else if (ct === 'text') setButtonText('Button');
                         if ((ct === 'avatar' || ct === 'swatch') && style === 'ghost') setStyle('solid');
-                        if (['icon', 'letter', 'number', 'avatar', 'swatch'].includes(ct)) setFullWidth(false);
+                        if (['iconOnly', 'letterNumber', 'avatar', 'swatch'].includes(ct)) setFullWidth(false);
                       }}
                       labelPosition="none"
                       size="small"
                     />
                     <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
-                      {contentType === 'icon'    ? 'Icon only — requires aria-label.' :
-                       contentType === 'avatar'  ? 'Circular with initial letter.' :
-                       contentType === 'letter' || contentType === 'number' ? 'Single character in square button.' :
+                      {contentType === 'iconOnly' ? 'Icon only — requires aria-label.' :
+                       contentType === 'avatar'  ? 'A circle the size of the button; an Avatar child fills it.' :
+                       contentType === 'letterNumber' ? 'A single character — letter or digit — in a square button. Requires aria-label.' :
                        contentType === 'swatch'  ? '' :
                        'Text label with optional icon.'}
                     </Caption>
@@ -467,13 +524,13 @@ export function ButtonShowcase() {
                   )}
 
                   {/* Button text input */}
-                  {['text', 'letter', 'number', 'avatar'].includes(contentType) && (
+                  {['text', 'letterNumber', 'avatar'].includes(contentType) && (
                     <Box sx={{ mt: 2 }}>
                       <TextInput
                         label={contentType === 'text' ? 'Button Text' : contentType === 'avatar' ? 'Initial' : cap(contentType)}
                         value={buttonText}
                         onChange={setButtonText}
-                        placeholder={contentType === 'text' ? 'Button' : contentType === 'letter' ? 'A' : '1'}
+                        placeholder={contentType === 'text' ? 'Button' : 'A'}
                       />
                     </Box>
                   )}
@@ -625,14 +682,14 @@ export function ButtonShowcase() {
                   </Box>
 
                   <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    opacity: ['icon', 'letter', 'number', 'avatar', 'swatch'].includes(contentType) ? 0.4 : 1 }}>
+                    opacity: ['iconOnly', 'letterNumber', 'avatar', 'swatch'].includes(contentType) ? 0.4 : 1 }}>
                     <Box>
                       <Label>Full Width</Label>
                       <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Stretches to container width</Caption>
                     </Box>
                     <Switch checked={fullWidth} onChange={(e) => setFullWidth(e.target.checked)}
                       size="small" aria-label="Full width"
-                      disabled={['icon', 'letter', 'number', 'avatar', 'swatch'].includes(contentType)} />
+                      disabled={['iconOnly', 'letterNumber', 'avatar', 'swatch'].includes(contentType)} />
                   </Box>
 
                   <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -661,10 +718,11 @@ export function ButtonShowcase() {
                   )}
 
                 </Box>
+                  </Grid>
+                </Grid>
               </TabPanel>
 
-              {/* ── Accessibility ── */}
-              <TabPanel value={1}>
+              <TabPanel value={2}>
                 <Box sx={{ p: 3 }}>
                   <BodySmall color="quiet" style={{ marginBottom: 24 }}>
                     {cap(style)} / {cap(effectiveColor)} / {cap(size)} / {cap(contentType)}
@@ -824,10 +882,12 @@ export function ButtonShowcase() {
                   </Stack>
                 </Box>
               </TabPanel>
+
+              <TabPanel value={3}>
+                <DocChanges component="Button" />
+              </TabPanel>
             </Tabs>
-          </Box>
-        </Grid>
-      </Grid>
+      </Box>
     </Box>
   );
 }

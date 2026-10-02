@@ -1,5 +1,6 @@
 // src/components/Sheet/SheetShowcase.js
 import React, { useState } from 'react';
+import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
@@ -123,20 +124,29 @@ export function SheetShowcase() {
         <Grid item sx={{ width: { xs: '100%', md: '45%' }, flexShrink: 0 }}>
           <Box sx={{ backgroundColor: 'var(--Background)', overflow: 'hidden' }}>
 
+            {/* Theme + surface live ABOVE the tabs: the Summary example, the
+                Playground preview and the live contrast numbers all answer to
+                them, so a control inside one tab would hide the input driving
+                what you read in another. */}
+            <Box sx={{ mb: 2 }}>
+              <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+            </Box>
             <Tabs defaultValue={0} variant="standard" color="primary">
               <TabList>
+                <Tab>Summary</Tab>
                 <Tab>Playground</Tab>
                 <Tab>Accessibility</Tab>
+                <Tab>Change Log</Tab>
               </TabList>
 
               {/* ── Playground ── */}
               <TabPanel value={0}>
+                <DocSummary component="Sheet" theme={bgTheme} surface={bgSurface} />
+              </TabPanel>
+
+              <TabPanel value={1}>
                 <Box sx={{ p: 3 }}>
 
-                  {/* Background */}
-                  <Box sx={{ mb: 3 }}>
-                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
-                  </Box>
 
                   {/* Style */}
                   <Box>
@@ -179,7 +189,7 @@ export function SheetShowcase() {
               </TabPanel>
 
               {/* ── Accessibility ── */}
-              <TabPanel value={1}>
+              <TabPanel value={2}>
                 <Box sx={{ p: 3 }}>
                   <Stack spacing={3}>
 
@@ -203,6 +213,10 @@ export function SheetShowcase() {
 
                   </Stack>
                 </Box>
+              </TabPanel>
+
+              <TabPanel value={3}>
+                <DocChanges component="Sheet" />
               </TabPanel>
             </Tabs>
           </Box>

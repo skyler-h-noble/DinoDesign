@@ -33,7 +33,7 @@ special chromeless variant for low-emphasis actions.
 ### Import
 
 ```jsx
-import { Button } from '@dyno/components';
+import { Button } from '@omni-design/components';
 ```
 
 ### Props
@@ -108,7 +108,7 @@ spaced and connected (border-collapsing) layouts.
 ### Import
 
 ```jsx
-import { ButtonGroup, Button } from '@dyno/components';
+import { ButtonGroup, Button } from '@omni-design/components';
 ```
 
 ### Props
@@ -176,7 +176,7 @@ import {
   CheckboxGroup,
   CheckboxWithDescription,
   IndeterminateCheckbox,
-} from '@dyno/components';
+} from '@omni-design/components';
 ```
 
 ### Checkbox Props
@@ -300,7 +300,7 @@ label positions, three sizes, and validation states.
 ### Import
 
 ```jsx
-import { Input } from '@dyno/components';
+import { Input } from '@omni-design/components';
 ```
 
 ### Props
@@ -395,83 +395,99 @@ variable resolves correctly.
 
 ## Chip
 
-Non-interactive tags and interactive action chips. Solid and outline styles for
-both. Excludes Plain and Ghost variants (fail WCAG 1.4.11).
+A small surface you can toggle — a filter, a choice, a tag on an input. If it
+only labels something and cannot be clicked, use **Tag** instead.
 
 ### Import
 
 ```jsx
-import { Chip } from '@dyno/components';
+import { Chip } from '@omni-design/components';
 ```
+
+### Colour and selection are different axes
+
+This is the part worth reading. **There is no solid/outline shape axis**, and
+there is no `color` prop.
+
+- **Colour** comes from `variant`, which sets `data-theme` on the chip.
+- **Selection** is a SURFACE LEVEL, not a different fill:
+
+  | | `data-surface` |
+  | --- | --- |
+  | unselected | `Surface-Brightest` |
+  | selected | `Surface-Dimmest` |
+
+Both levels paint `var(--Background)` with a `var(--Border)` edge, so one
+`data-theme` drives both states and `--Text`, `--Hover` and `--Pressed` come
+along paired. Change the theme and both states move together.
+
+`variant="default"` sets no `data-theme` at all and INHERITS, so a chip inside a
+themed region takes that region's colour.
+
+`-outline` and `-light` still render and warn once in development. Do not write
+new ones: `-outline` was the unselected chip under another name, which let the
+component express four combinations against the design's two.
 
 ### Props
 
-| Prop | Type | Default | Options |
+| Prop | Type | Default | Notes |
 |---|---|---|---|
-| `label` | string | — | — |
-| `color` | string | `'primary'` | Same as Button |
-| `variant` | string | `'solid'` | `solid` `outline` |
-| `size` | string | `'medium'` | `small` `medium` `large` |
+| `variant` | string | `'primary'` | The COLOUR: `default` + the 8 palettes |
+| `label` | node | — | Also accepts `children` |
+| `selected` | boolean | `false` | Switches the surface level, not the fill |
+| `selectionMode` | string | — | `radio` or `checkbox` — adds the ARIA role |
 | `clickable` | boolean | `false` | — |
-| `deletable` | boolean | `false` | — |
-| `onDelete` | function | — | Called when delete icon clicked |
-| `onClick` | function | — | Required when `clickable={true}` |
-| `icon` | node | — | Leading icon |
-| `selected` | boolean | `false` | Visual selected state for clickable chips |
+| `onClick` | function | — | Implies `clickable` |
+| `onDelete` | function | — | Adds the dismiss affordance |
+| `startDecorator` / `endDecorator` | node | — | Icon or avatar |
 | `disabled` | boolean | `false` | — |
 
-### CSS variables consumed
+**There is no `size` prop.** Chip has ONE size, 24px, matching the Figma set,
+which carries no size axis. Component sizing in this system comes from the
+`Component-Size` modes rather than a per-component ladder. A `size` passed
+anyway is ignored and warns once.
 
-**Non-clickable solid:** `--Tags-{Color}-BG`, `--Tags-{Color}-Text`
+### Tokens consumed
 
-**Non-clickable outline:** `--Tags-{Color}-BG` (border), `--Text`
-
-**Clickable solid:** `--Buttons-{Color}-Button`, `--Buttons-{Color}-Text`,
-`--Buttons-{Color}-Hover`, `--Buttons-{Color}-Active`
-
-**Clickable outline:** `--Buttons-{Color}-Border`, `--Text`,
-`--Buttons-{Color}-Outline-Hover`, `--Buttons-{Color}-Outline-Active`
+All of them resolve from the chip's own `data-theme` + `data-surface` zone:
+`--Background` (the body), `--Text` (the label), `--Border` (the outline), plus
+`--Hover` and `--Pressed`.
 
 ### Examples
 
 ```jsx
-// Non-clickable tag — status indicator
-<Chip label="Active" color="success" />
-<Chip label="Pending" color="warning" variant="outline" />
-<Chip label="Archived" color="neutral" />
+// Colour comes from variant
+<Chip variant="success">Active</Chip>
+<Chip variant="warning">Pending</Chip>
 
-// Clickable — filter chip
+// Inherits the surrounding theme
+<Chip variant="default">Neutral</Chip>
+
+// Selectable — selection changes the SURFACE, not the colour
 <Chip
-  label="Design"
-  color="primary"
-  clickable
+  variant="primary"
+  selectionMode="checkbox"
   selected={selected}
   onClick={() => setSelected(!selected)}
-/>
+>
+  Design
+</Chip>
 
-// Deletable
-<Chip
-  label="React"
-  color="info"
-  deletable
-  onDelete={() => removeTag('react')}
-/>
-
-// With icon
-<Chip label="Verified" color="success" icon={<CheckIcon />} />
-
-// Sizes
-<Chip label="Small" size="small" color="primary" />
-<Chip label="Large" size="large" color="secondary" />
+// Dismissible, with a leading icon
+<Chip variant="info" startDecorator={<TagIcon />} onDelete={() => remove('react')}>
+  React
+</Chip>
 ```
 
 ### Accessibility notes
 
-- Non-clickable chips have `role="status"` by default.
-- Clickable chips use `role="button"` and are keyboard operable (Enter / Space).
-- Delete button within a chip has `aria-label="Remove {label}"`.
+- A dismissible chip's X is labelled with what it removes, not "close".
+- A selectable chip announces its own selected state — do not add `aria-pressed`.
+- The 24x24 minimum touch target (WCAG 2.5.8) is carried by a pseudo-element,
+  so the chip stays 24px tall without the target shrinking.
 
 ---
+
 
 ## Stack
 
@@ -494,7 +510,7 @@ import {
   InsetStack,
   ScrollStack,
   WrapStack,
-} from '@dyno/components';
+} from '@omni-design/components';
 ```
 
 ### Stack Props
@@ -576,7 +592,7 @@ as Button.
 ### Import
 
 ```jsx
-import { Tabs, TabPanel } from '@dyno/components';
+import { Tabs, TabPanel } from '@omni-design/components';
 ```
 
 ### Tabs Props
@@ -686,7 +702,7 @@ all child components automatically inherit the correct color context.
 ### Import
 
 ```jsx
-import { Card } from '@dyno/components';
+import { Card } from '@omni-design/components';
 ```
 
 ### Props

@@ -21,14 +21,6 @@ export {
   WarningOutlineSwitch,
   ErrorOutlineSwitch,
   // Light
-  PrimaryLightSwitch,
-  SecondaryLightSwitch,
-  TertiaryLightSwitch,
-  NeutralLightSwitch,
-  InfoLightSwitch,
-  SuccessLightSwitch,
-  WarningLightSwitch,
-  ErrorLightSwitch,
 } from './Switch';
 
 export { SwitchShowcase } from './SwitchShowcase';

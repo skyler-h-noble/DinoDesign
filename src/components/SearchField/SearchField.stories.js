@@ -52,7 +52,7 @@ export const Disabled = {
 export const InDarkContext = {
   name: 'In Dark Theme Context',
   render: () => (
-    <Box data-theme="Neutral-Dark" data-surface="Surface-Dim"
+    <Box data-theme="Neutral" data-surface="Surface-Dimmest"
       sx={{ p: 4, maxWidth: 400, backgroundColor: 'var(--Background)', borderRadius: '8px' }}>
       <SearchField placeholder="Search in dark context…" />
     </Box>

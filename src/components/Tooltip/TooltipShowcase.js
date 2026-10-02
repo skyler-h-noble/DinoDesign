@@ -12,12 +12,21 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import InfoIcon from '@mui/icons-material/Info';
 import { Tooltip } from './Tooltip';
+import { tokenSegment } from '../_shadows';
 import {
   H3, H4, H5, Body, BodySmall, Caption, Label, EyebrowSmall
 } from '../Typography';
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
-const COLORS = ['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+/* Grouped the way every other showcase groups colour, with `black-white` as a
+   fifth THEME swatch rather than a special case: the design system emits
+   --Buttons-BlackWhite-* like any other palette. Tooltip has no `default`
+   colour, so there is no Default group — black-white is simply its default
+   VALUE, which is the mode Figma pins on Button-Theme-Tooltip. */
+const COLOR_GROUPS = [
+  { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral', 'black-white'] },
+  { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
+];
 const PLACEMENTS = [
   'top-start', 'top', 'top-end',
   'left-start', 'left', 'left-end',
@@ -27,11 +36,11 @@ const PLACEMENTS = [
 
 const SOLID_THEME_MAP = {
   primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
-  info: 'Info-Medium', success: 'Success-Medium', warning: 'Warning-Medium', error: 'Error-Medium',
+  info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
 };
 const LIGHT_THEME_MAP = {
-  primary: 'Primary-Light', secondary: 'Secondary-Light', tertiary: 'Tertiary-Light', neutral: 'Neutral-Light',
-  info: 'Info-Light', success: 'Success-Light', warning: 'Warning-Light', error: 'Error-Light',
+  primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
+  info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
 };
 
 function ContrastBadge({ ratio, threshold }) {
@@ -76,10 +85,13 @@ function CopyButton({ code }) {
   );
 }
 function ColorSwatchButton({ color, selected, onClick }) {
-  const C = cap(color);
+  /* tokenSegment, not cap(): `black-white` would capitalise to `Black-white`,
+     which is not a token. The system emits --Buttons-BlackWhite-*. */
+  const C = tokenSegment(color);
+  const label = color === 'black-white' ? 'Black / White' : cap(color);
   return (
-    <MuiTooltipBase title={C} arrow>
-      <Box onClick={() => onClick(color)} role="button" aria-label={'Select ' + C} aria-pressed={selected}
+    <MuiTooltipBase title={label} arrow>
+      <Box onClick={() => onClick(color)} role="button" aria-label={'Select ' + label} aria-pressed={selected}
         sx={{ width: 'var(--Button-Height)', height: 'var(--Button-Height)', borderRadius: '4px',
           backgroundColor: 'var(--Buttons-' + C + '-Button)',
           border: selected ? '2px solid var(--Text)' : '1px solid var(--Border)',
@@ -142,7 +154,7 @@ function PlacementGrid({ placement, onSelect }) {
 export function TooltipShowcase() {
   const [mainTab, setMainTab] = useState(0);
   const [variant, setVariant] = useState('solid');
-  const [color, setColor] = useState('primary');
+  const [color, setColor] = useState('black-white');
   const [size, setSize] = useState('medium');
   const [placement, setPlacement] = useState('bottom');
   const [showArrow, setShowArrow] = useState(false);
@@ -269,9 +281,16 @@ export function TooltipShowcase() {
             {/* Color */}
             <Box sx={{ mt: 3 }}>
               <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</EyebrowSmall>
-              <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-                {COLORS.map((c) => (
-                  <ColorSwatchButton key={c} color={c} selected={color === c} onClick={setColor} />
+              <Stack spacing={1.5}>
+                {COLOR_GROUPS.map((group) => (
+                  <Box key={group.label}>
+                    <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 4, fontWeight: 600 }}>{group.label}</Caption>
+                    <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
+                      {group.colors.map((c) => (
+                        <ColorSwatchButton key={c} color={c} selected={color === c} onClick={setColor} />
+                      ))}
+                    </Stack>
+                  </Box>
                 ))}
               </Stack>
             </Box>
