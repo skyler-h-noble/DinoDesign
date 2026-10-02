@@ -1,5 +1,6 @@
 // src/components/IconBadge/IconBadgeShowcase.js
 import React, { useState } from 'react';
+import { Box } from '@mui/material';
 import { ShowcaseHeader } from '../ShowcaseHeader';
 import { BackgroundPicker } from '../BackgroundPicker';
 import { IconBadge } from './IconBadge';

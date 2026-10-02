@@ -265,6 +265,11 @@ function Playground() {
 // ─── Main Showcase ────────────────────────────────────────────────────────────
 
 export function StackShowcase() {
+  /* Its own state. The inner Playground() has a pair of the same name for
+     its own preview; these belong to the page header, and reading the
+     inner ones from here is how the Icons page crashed. */
+  const [bgTheme, setBgTheme] = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
   return (
     <Box sx={{ pb: 8 }}>
       <ShowcaseHeader title="Stack" component="Stack" />

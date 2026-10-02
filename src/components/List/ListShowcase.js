@@ -207,6 +207,15 @@ export function ListShowcase() {
   const variant     = 'default';
   const color       = 'default';
   const size        = 'medium';
+  /* `color` is pinned to 'default' above, so these are constant — but the
+     Accessibility panel referenced both and NEITHER was ever defined. It never
+     threw because that panel used to sit behind `{mainTab === 1 && ...}` and
+     nothing rendered it: no test opened the tab, so a plain ReferenceError sat
+     in the file until Layout A made the panel mount. Defined here rather than
+     deleted from the copy, so the panel keeps reading correctly if List later
+     gains a colour control. */
+  const isDefault = color === 'default';
+  const getThemeName = () => color.charAt(0).toUpperCase() + color.slice(1);
   const [orientation, setOrientation] = useState('vertical');
   const [showAdvanced, setShowAdvanced] = useState(false);
   // Per-row visibility booleans. Defaults: 1st and 2nd rows ON, 3rd row OFF
