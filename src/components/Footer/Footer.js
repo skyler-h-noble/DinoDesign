@@ -46,10 +46,28 @@ import { BrandIcon } from '../BrandIcon/BrandIcon';
  *
  *   className, style, ...rest — forwarded to the <footer> element.
  */
+/* Theme + surface, not palette tones.
+ *
+ * `default` is what Figma's Footer (9250:8298) actually pins: Theme=Primary,
+ * Surface=Surface-Dimmest, with the fill bound to Background. Its Copyright
+ * child pins Theme=Neutral at the SAME surface level, so the two-tone effect
+ * comes from a change of THEME, not from reaching into two tone indices.
+ *
+ * This read `bg: var(--Primary-Color-2)` with `fg: var(--Primary-Color-12)`,
+ * which broke the system's first rule twice over — painting a background
+ * directly instead of declaring a surface, and naming a specific tone rather
+ * than a role. It also left --Quiet, --Border, --Hotlink and the button
+ * overrides resolving against the PARENT's surface while the box was painted
+ * from a different one, which is the exact failure data-surface exists to
+ * prevent.
+ *
+ * `white` and `black` keep their literals: they are escape hatches for a
+ * footer that must sit on a fixed colour regardless of brand, which is a real
+ * requirement and not expressible as a surface. */
 const COLOR_PRESETS = {
-  default:        { bg: 'var(--Primary-Color-2)', fg: 'var(--Primary-Color-12)' },
-  primary:        { theme: 'Primary',      surface: 'Surface' },
-  'primary-dark': { theme: 'Primary',      surface: 'Surface-Dimmest' },
+  default:        { theme: 'Primary', surface: 'Surface-Dimmest' },
+  primary:        { theme: 'Primary', surface: 'Surface' },
+  'primary-dark': { theme: 'Primary', surface: 'Surface-Dimmest' },
   white:          { bg: 'var(--Neutral-Color-12)', fg: 'var(--Neutral-Color-2)' },
   black:          { bg: 'var(--Neutral-Color-1)',  fg: 'var(--Neutral-Color-12)' },
 };

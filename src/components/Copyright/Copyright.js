@@ -20,10 +20,20 @@ import { BodySmall } from '../Typography';
  */
 // Color presets mirror Footer's. Each maps to a (bg, fg) pair OR a
 // data-theme/data-surface combo that lets the cascade resolve the tone.
+/* Theme + surface, matching Figma. The Copyright instance inside the Footer
+ * (9250:8302) pins Theme=Neutral, Surface=Surface-Dimmest and binds its fill
+ * to Background — the same surface LEVEL as the Footer around it, differing by
+ * theme. That is where the two-tone comes from.
+ *
+ * This used to paint `var(--Primary-Color-1)` against the Footer's
+ * `--Primary-Color-2`: a tone-index pair chosen to look one step darker. It
+ * worked, which is why it survived, but it painted the box without declaring a
+ * surface — so the text, borders and links inside kept resolving against
+ * whatever surface the parent had. */
 const COLOR_PRESETS = {
-  default:        { bg: 'var(--Primary-Color-1)',  fg: 'var(--Primary-Color-12)' },
-  primary:        { theme: 'Primary',      surface: 'Surface-Dim' },
-  'primary-dark': { bg: 'var(--Primary-Color-1)',  fg: 'var(--Primary-Color-12)' },
+  default:        { theme: 'Neutral', surface: 'Surface-Dimmest' },
+  primary:        { theme: 'Primary', surface: 'Surface-Dim' },
+  'primary-dark': { theme: 'Primary', surface: 'Surface-Dimmest' },
   white:          { bg: 'var(--Neutral-Color-11)', fg: 'var(--Neutral-Color-3)' },
   black:          { bg: 'var(--Neutral-Color-1)',  fg: 'var(--Neutral-Color-12)' },
 };
@@ -55,7 +65,10 @@ export function Copyright({
       {...themeAttrs}
       className={['dino-copyright', className].filter(Boolean).join(' ')}
       style={{
-        padding: '14px 24px',
+        /* Sizing-2 vertically, as Figma binds it. The horizontal padding is
+           bound to `Margin` there, which the CSS generator does not emit at
+           all — so 24px stands in until it does. */
+        padding: 'var(--Sizing-2, 16px) 24px',
         textAlign: 'center',
         ...paintStyle,
         ...style,
