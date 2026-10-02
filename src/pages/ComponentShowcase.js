@@ -160,7 +160,7 @@ const NAV_ITEMS = [
       { id: 'foundation-elevation',  label: 'Elevation' },
       { id: 'colors',                label: 'Colors' },
       { id: 'icons',                 label: 'Icons' },
-      { id: 'foundation-static',     label: 'Static Colours' },
+      { id: 'foundation-static',     label: 'Static Colors' },
       { id: 'foundation-states',     label: 'States' },
     ],
   },

@@ -31,8 +31,17 @@ const Missing = ({ component, what }) => (
   </Box>
 );
 
+/* The section is where a rule earns its place.
+   One line per section tells you where you are; one line per ROW tells you
+   nothing you could not see from the spacing, and eight of them turn a token
+   list into a grid. Border-Variant rather than Border: this is decorative,
+   and Border carries a 3:1 requirement because it outlines clickable things. */
 const Section = ({ title, children }) => (
-  <Box>
+  <Box sx={{
+    pt: 3, mt: 3,
+    borderTop: '1px solid var(--Border-Variant)',
+    '&:first-of-type': { borderTop: 'none', pt: 0, mt: 0 },
+  }}>
     <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
       {title.toUpperCase()}
     </EyebrowSmall>
@@ -40,10 +49,15 @@ const Section = ({ title, children }) => (
   </Box>
 );
 
+/* No rule between rows.
+   Every row used to draw a borderBottom, so a token list of eight became
+   eight horizontal lines and the page read as a grid rather than as prose.
+   Rows are separated by space; a RULE now means a section boundary, which is
+   the only distinction worth drawing a line for. */
 const Rows = ({ items }) => (
   <Stack spacing={0}>
     {items.map((it, i) => (
-      <Box key={i} sx={{ py: 1.25, borderBottom: '1px solid var(--Border)' }}>
+      <Box key={i} sx={{ py: 0.75 }}>
         <BodySmall>{it.head}</BodySmall>
         {it.sub ? (
           <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>{it.sub}</Caption>
@@ -113,7 +127,7 @@ export function DocSummary({ component, theme = null, surface = 'Surface' }) {
                              pr.default ? `default: ${pr.default}` : null,
                              pr.note].filter(Boolean).join('  ·  ');
                 return (
-                  <Box key={i} sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
+                  <Box key={i} sx={{ py: 1 }}>
                     <BodySmall>{pr.name} — {pr.type}</BodySmall>
                     {sub ? (
                       <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>{sub}</Caption>
@@ -198,7 +212,7 @@ export function DocChanges({ component }) {
         ) : (
           <Stack spacing={0}>
             {changes.map((c, i) => (
-              <Box key={i} sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
+              <Box key={i} sx={{ py: 1 }}>
                 {/* useFlexGap: Stack's default spacing is margin-left on every
                     child after the first, and that margin SURVIVES the wrap —
                     so the SILENT badge dropped to its own line and kept the

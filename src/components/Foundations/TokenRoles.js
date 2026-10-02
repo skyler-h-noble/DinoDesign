@@ -49,6 +49,10 @@ export function RoleSwatches({ title, note, roles, tokenFor }) {
   );
 }
 
+/* Rows are separated by space, not by rules. Only the header keeps its line,
+   because that one marks the boundary between the labels and the data —
+   everything below it is one list and did not need slicing into strips.
+
 /**
  * Every style, rendered in itself, with the variables it reads.
  *
@@ -72,7 +76,7 @@ export function StyleTable({ styles, tokensFor, defaultColorFor, render }) {
       <tbody>
         {styles.map((name) => (
           <tr key={name}>
-            <Box component="td" sx={{ py: 1, pr: 2, borderBottom: '1px solid var(--Border-Variant)', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+            <Box component="td" sx={{ py: 1, pr: 2, verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
               <Caption style={{ fontFamily: 'ui-monospace, Menlo, monospace' }}>{name}</Caption>
             </Box>
             {/* The sample is CAPPED.
@@ -83,7 +87,7 @@ export function StyleTable({ styles, tokensFor, defaultColorFor, render }) {
                 still the real thing — only the scale is clamped, and the true
                 size is right there in the Variables column. */}
             <Box component="td" sx={{
-              py: 1, pr: 2, borderBottom: '1px solid var(--Border-Variant)',
+              py: 1, pr: 2,
               verticalAlign: 'middle', minWidth: 160, maxWidth: 320,
             }}>
               <Box sx={{
@@ -99,14 +103,14 @@ export function StyleTable({ styles, tokensFor, defaultColorFor, render }) {
                 {render(name)}
               </Box>
             </Box>
-            <Box component="td" sx={{ py: 1, pr: 2, borderBottom: '1px solid var(--Border-Variant)', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+            <Box component="td" sx={{ py: 1, pr: 2, verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
               <Caption color="quiet">
                 {defaultColorFor(name) === 'header' ? '--Header-*' : '--Text-*'}
               </Caption>
             </Box>
             {/* Inline and wrapping, not one per line. Eight tokens stacked made
                 the row taller than everything else in it. */}
-            <Box component="td" sx={{ py: 1, borderBottom: '1px solid var(--Border-Variant)', verticalAlign: 'middle' }}>
+            <Box component="td" sx={{ py: 1, verticalAlign: 'middle' }}>
               <Caption color="quiet" style={{
                 fontFamily: 'ui-monospace, Menlo, monospace', fontSize: 10, lineHeight: 1.5,
               }}>

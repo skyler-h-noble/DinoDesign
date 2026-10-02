@@ -70,7 +70,7 @@ export function FoundationTopic({ topic }) {
             {topic.table.rows.map((row, r) => (
               <tr key={r}>
                 {row.map((cell, c) => (
-                  <Box key={c} component="td" sx={{ py: 1.25, pr: 2, borderBottom: '1px solid var(--Border-Variant)', verticalAlign: 'top' }}>
+                  <Box key={c} component="td" sx={{ py: 1.25, pr: 2, verticalAlign: 'top' }}>
                     <BodySmall><Inline text={cell} /></BodySmall>
                   </Box>
                 ))}

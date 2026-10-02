@@ -170,6 +170,8 @@ body { margin: 0; }
  * ======================================== */
 
 /* Theme: Default - Surfaces */
+:root,
+[data-surface="Surface"],
 [data-theme="Default"],
 [data-theme="Default"][data-surface="Surface"] {
   --Background: var(--Neutral-Color-12);
@@ -347,6 +349,7 @@ body { margin: 0; }
 }
 
 /* Theme: Default - Surfaces-Dim */
+[data-surface="Surface-Dim"],
 [data-theme="Default"] [data-surface="Surface-Dim"],
 [data-theme="Default"][data-surface="Surface-Dim"] {
   --Background: var(--Neutral-Color-11);
@@ -524,6 +527,7 @@ body { margin: 0; }
 }
 
 /* Theme: Default - Surfaces-Dimmest */
+[data-surface="Surface-Dimmest"],
 [data-theme="Default"] [data-surface="Surface-Dimmest"],
 [data-theme="Default"][data-surface="Surface-Dimmest"] {
   --Background: var(--Neutral-Color-3);
@@ -701,6 +705,7 @@ body { margin: 0; }
 }
 
 /* Theme: Default - Surfaces-Bright */
+[data-surface="Surface-Bright"],
 [data-theme="Default"] [data-surface="Surface-Bright"],
 [data-theme="Default"][data-surface="Surface-Bright"] {
   --Background: var(--Neutral-Color-12);
@@ -878,6 +883,7 @@ body { margin: 0; }
 }
 
 /* Theme: Default - Surfaces-Brightest */
+[data-surface="Surface-Brightest"],
 [data-theme="Default"] [data-surface="Surface-Brightest"],
 [data-theme="Default"][data-surface="Surface-Brightest"] {
   --Background: var(--Neutral-Color-12);

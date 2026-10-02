@@ -24,7 +24,7 @@ export const FOUNDATION_TOPICS = [
   { id: 'foundation-compsize',   title: 'Component size' },
   { id: 'foundation-elevation',  title: 'Elevation' },
   { id: 'foundation-altdisplay', title: 'The Alt Display' },
-  { id: 'foundation-static',     title: 'Static colours' },
+  { id: 'foundation-static',     title: 'Static colors' },
   { id: 'foundation-states',     title: 'States are generated, not chosen' },
 ];
 

@@ -295,6 +295,9 @@
   --Dropdown-Frame-Radius: 2px;
   --Menu-Item-Radius: 0px;
   --Menu-Focus-Radius: 0px;
+  --Sm-Menu-Swatch: 16px;
+  --Menu-Swatch: 24px;
+  --Lg-Menu-Swatch: 32px;
   --Disabled: 0.38;
   --Rail-Width: 80px;
   --Sm-Rail-Width: 72px;
@@ -426,7 +429,15 @@
   --Background: var(--Container);
 }
 
+[data-theme][data-surface="Container"] {
+  --Background: var(--Container);
+}
+
 [data-surface="Container-Low"] {
+  --Background: var(--Container-Low);
+}
+
+[data-theme][data-surface="Container-Low"] {
   --Background: var(--Container-Low);
 }
 
@@ -434,30 +445,20 @@
   --Background: var(--Container-Lowest);
 }
 
+[data-theme][data-surface="Container-Lowest"] {
+  --Background: var(--Container-Lowest);
+}
+
 [data-surface="Container-High"] {
+  --Background: var(--Container-High);
+}
+
+[data-theme][data-surface="Container-High"] {
   --Background: var(--Container-High);
 }
 
 [data-surface="Container-Highest"] {
   --Background: var(--Container-Highest);
-}
-
-/* Raised specificity so the mode sheet's bare [data-theme] rule, which loads
-   later, cannot overwrite the container background. */
-[data-theme][data-surface="Container"] {
-  --Background: var(--Container);
-}
-
-[data-theme][data-surface="Container-Low"] {
-  --Background: var(--Container-Low);
-}
-
-[data-theme][data-surface="Container-Lowest"] {
-  --Background: var(--Container-Lowest);
-}
-
-[data-theme][data-surface="Container-High"] {
-  --Background: var(--Container-High);
 }
 
 [data-theme][data-surface="Container-Highest"] {

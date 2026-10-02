@@ -206,9 +206,51 @@ export function StatesDemo() {
   );
 }
 
+/* The ramps, shown on the page that explains the restriction.
+   Deliberately NOT on the Colors page: there they would read as a palette to
+   pick from, which is the thing this topic exists to warn against. Here they
+   sit directly under "for graphics and SVGs — never for a background", so the
+   picture and the rule arrive together.
+
+   Four palettes rather than all nine. Primary, Secondary, Tertiary and Neutral
+   are the ones a brand sets; the state palettes are fixed and showing them
+   would pad the page without adding a decision. */
+const RAMP_PALETTES = ['Primary', 'Secondary', 'Tertiary', 'Neutral'];
+
+export function StaticColorsDemo() {
+  return (
+    <VStack gap="var(--Sizing-2)">
+      <H5>The ramps</H5>
+      <BodySmall color="quiet">
+        Twelve tones per palette. Fixed colours: the same whatever surface they sit on
+        and whichever mode is active — which is what makes them right for illustration
+        and wrong for a background.
+      </BodySmall>
+      {RAMP_PALETTES.map((palette) => (
+        <Box key={palette}>
+          <Caption style={{ display: 'block', marginBottom: 4 }}>{palette}</Caption>
+          <Box sx={{ display: 'flex', flexWrap: 'nowrap', overflowX: 'auto' }}>
+            {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
+              <Box key={n} sx={{ flex: '0 0 auto', width: 48, textAlign: 'center' }}>
+                <Box sx={{
+                  height: 40,
+                  backgroundColor: `var(--${palette}-Color-${n})`,
+                  border: '1px solid var(--Border-Variant)',
+                }} />
+                <Caption color="quiet" style={{ fontSize: 10 }}>{n}</Caption>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      ))}
+    </VStack>
+  );
+}
+
 /** Topic title -> demo. A topic with no entry renders prose only. */
 export const FOUNDATION_DEMOS = {
   'Elevation': ElevationDemo,
   'Surfaces': SurfacesDemo,
+  'Static colors': StaticColorsDemo,
   'States are generated, not chosen': StatesDemo,
 };
