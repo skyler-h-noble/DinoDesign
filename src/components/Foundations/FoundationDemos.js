@@ -1,0 +1,190 @@
+// src/components/Foundations/FoundationDemos.js
+//
+// Live demos for the foundation topics that have something to show.
+//
+// Keyed by topic title rather than passed in, so a topic without a demo simply
+// renders its prose and nothing has to know which is which.
+import React from 'react';
+import { Box } from '@mui/material';
+import { H5, BodySmall, Caption, EyebrowSmall } from '../Typography';
+import { VStack, HStack } from '../Stack/Stack';
+
+/* The five levels, painted from --Effect-Level-N.
+   Rendered as the real variable rather than a copy, so a brand that changes
+   its shadow totals changes these — and so a level that fails to resolve shows
+   as a flat box here rather than silently nowhere. */
+const ELEVATIONS = [
+  { level: 0, use: 'Flat. A Button at rest, and anything that earns its shadow by being hovered.' },
+  { level: 1, use: 'Button on hover; Handle and Accordion at rest; Card and Bottom Sheet at rest.' },
+  { level: 2, use: 'Card and Bottom Sheet on hover; AppBar, Toolbar and Menu at rest.' },
+  { level: 3, use: 'AppBar on hover; FAB at rest.' },
+  { level: 4, use: 'FAB on hover.' },
+  { level: 5, use: 'Dialog and Modal. The top of the stack — an `elevated` prop on one does nothing.' },
+];
+
+export function ElevationDemo() {
+  return (
+    <VStack gap="var(--Sizing-2)">
+      <H5>The levels</H5>
+      <HStack gap="var(--Sizing-3)" style={{ flexWrap: 'wrap', alignItems: 'flex-start' }}>
+        {ELEVATIONS.map(({ level, use }) => (
+          <VStack key={level} gap="var(--Sizing-1)" style={{ width: 150 }}>
+            <Box data-surface="Surface-Brightest" sx={{
+              height: 72, borderRadius: 'var(--Card-Radius, var(--Style-Border-Radius))',
+              backgroundColor: 'var(--Background)',
+              boxShadow: level === 0 ? 'none' : `var(--Effect-Level-${level})`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <Caption>Level {level}</Caption>
+            </Box>
+            <Caption color="quiet">{use}</Caption>
+          </VStack>
+        ))}
+      </HStack>
+    </VStack>
+  );
+}
+
+/* Ten surfaces, each painted by setting the attribute — not by reading the
+   token and applying it, which would prove nothing. The "used by" column is
+   OBSERVED: it lists the components in this library that actually set the
+   level, rather than guidance invented for the page. Where it is empty, the
+   level is published and nothing in the library uses it yet. */
+const SURFACES = [
+  ['Surface',           'Accordion · Alert · Card · Footer · Menu · Sheet · Table · Tabs · Tooltip'],
+  ['Surface-Dim',       'Autocomplete · BottomNavigation · Drawer · NumberField · Rail · TreeView'],
+  ['Surface-Dimmest',   'AppBar · Chip · CodeBlock · Footer · Sheet · Tabs · Toolbar'],
+  ['Surface-Bright',    'Input'],
+  ['Surface-Brightest', 'Button surfaces · Card · Modal · Select · Snackbar · Section · Tooltip'],
+];
+const CONTAINERS = [
+  ['Container',           'Card · NumberField · SearchField · TransferList'],
+  ['Container-Low',       '—'],
+  ['Container-Lowest',    '—'],
+  ['Container-High',      'Modal'],
+  ['Container-Highest',   'Paper'],
+];
+
+function SurfaceRow({ name, usedBy }) {
+  return (
+    <HStack gap="var(--Sizing-2)" style={{ alignItems: 'center' }}>
+      <Box data-surface={name} sx={{
+        width: 104, height: 56, flexShrink: 0,
+        borderRadius: 'var(--Style-Border-Radius, 4px)',
+        backgroundColor: 'var(--Background)', color: 'var(--Text)',
+        border: '1px solid var(--Border-Variant)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <Caption>Aa</Caption>
+      </Box>
+      <VStack gap="2px">
+        <Caption style={{ fontFamily: 'ui-monospace, Menlo, monospace' }}>{name}</Caption>
+        <Caption color="quiet">{usedBy}</Caption>
+      </VStack>
+    </HStack>
+  );
+}
+
+export function SurfacesDemo() {
+  return (
+    <VStack gap="var(--Sizing-3)">
+      <VStack gap="var(--Sizing-1)">
+        <H5>The ten levels</H5>
+        <BodySmall color="quiet">
+          Each swatch sets <code>data-surface</code> and paints <code>--Background</code> —
+          the mechanism itself, not a copy of its value. The “used by” line is OBSERVED:
+          it lists the components in this library that actually set the level, rather than
+          guidance written for this page. Two container levels are published and unused.
+        </BodySmall>
+      </VStack>
+      <VStack gap="var(--Sizing-2)">
+        <EyebrowSmall>Surface — the page and the things sitting directly on it</EyebrowSmall>
+        {SURFACES.map(([n, u]) => <SurfaceRow key={n} name={n} usedBy={u} />)}
+      </VStack>
+      <VStack gap="var(--Sizing-2)">
+        <EyebrowSmall>Container — the things sitting ON a surface</EyebrowSmall>
+        {CONTAINERS.map(([n, u]) => <SurfaceRow key={n} name={n} usedBy={u} />)}
+      </VStack>
+    </VStack>
+  );
+}
+
+/* States, shown as the colours each one resolves to.
+   A pseudo-class cannot be forced from JavaScript, so hovering every sample
+   would need fake classes that drift from the real rules. Painting the TOKEN
+   is both honest and more useful: these are the values the states resolve to
+   on the surface you have selected, which is the thing you would otherwise
+   have to open devtools to read. The Button is live, so its own hover and
+   press are real — try it. */
+const STATE_TOKENS = [
+  { group: 'Background', rows: [
+    ['--Background', 'the resting surface'],
+    ['--Hover',      'overlay on hover — a tone picked to move AWAY from the text on it'],
+    ['--Pressed',    'overlay while held'],
+  ]},
+  { group: 'Text', rows: [
+    ['--Text',       'body copy, held to 4.5:1'],
+    ['--Text-Quiet', 'secondary copy, still 4.5:1'],
+    ['--Eyebrow',    'a ROTATION off the surface palette, not a muted --Text'],
+  ]},
+  { group: 'Headers', rows: [
+    ['--Header',     'Display and H1–H3, held to 3:1'],
+  ]},
+  { group: 'Focus', rows: [
+    ['--Focus-Visible', 'the ring, 3:1 against the background behind it'],
+  ]},
+  { group: 'Icons', rows: [
+    ['--Icons-Default', 'the resting glyph'],
+    ['--Icons-Primary', 'a branded glyph'],
+  ]},
+];
+
+export function StatesDemo() {
+  return (
+    <VStack gap="var(--Sizing-3)">
+      <VStack gap="var(--Sizing-1)">
+        <H5>What each state resolves to</H5>
+        <BodySmall color="quiet">
+          On the theme and surface selected above. Hover and pressed are overlays rather
+          than replacements, so they read as a tint of the surface beneath them.
+        </BodySmall>
+      </VStack>
+
+      {STATE_TOKENS.map(({ group, rows }) => (
+        <VStack key={group} gap="var(--Sizing-1)">
+          <EyebrowSmall>{group}</EyebrowSmall>
+          {rows.map(([token, note]) => (
+            <HStack key={token} gap="var(--Sizing-2)" style={{ alignItems: 'center' }}>
+              <Box sx={{
+                width: 72, height: 36, flexShrink: 0,
+                borderRadius: 'var(--Style-Border-Radius, 4px)',
+                backgroundColor: `var(${token})`,
+                border: '1px solid var(--Border-Variant)',
+              }} />
+              <VStack gap="2px">
+                <Caption style={{ fontFamily: 'ui-monospace, Menlo, monospace' }}>{token}</Caption>
+                <Caption color="quiet">{note}</Caption>
+              </VStack>
+            </HStack>
+          ))}
+        </VStack>
+      ))}
+
+      <VStack gap="var(--Sizing-1)">
+        <EyebrowSmall>Buttons — live, so hover and press are the real rules</EyebrowSmall>
+        <BodySmall color="quiet">
+          Every clickable thing needs all four states. They come from curated per-surface
+          tables tuned to WCAG, so they are accessible by construction — a hover tone is
+          picked to move away from the text sitting on it, not by stepping a tone index.
+        </BodySmall>
+      </VStack>
+    </VStack>
+  );
+}
+
+/** Topic title -> demo. A topic with no entry renders prose only. */
+export const FOUNDATION_DEMOS = {
+  'Elevation': ElevationDemo,
+  'Surfaces': SurfacesDemo,
+  'States are generated, not chosen': StatesDemo,
+};

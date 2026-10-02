@@ -704,6 +704,31 @@ function resolveColor(textStyle, color, defaultColor) {
 
 export const TYPOGRAPHY_STYLES = Object.keys(STYLE_MAP);
 
+/**
+ * Every CSS variable each style reads, derived from the style's own config.
+ *
+ * Generated rather than listed, because a hand-kept table is a second source
+ * of truth that drifts the first time someone adds a style — and the docs in
+ * this repo have been wrong about bindings often enough today to make that a
+ * real cost rather than a theoretical one. The config strings already contain
+ * the token names; this just reads them back out.
+ */
+export const STYLE_TOKENS = Object.fromEntries(
+  Object.entries(STYLE_MAP).map(([name, cfg]) => {
+    const text = [
+      cfg.fontFamily, cfg.fontSize, cfg.fontWeight,
+      cfg.lineHeight, cfg.letterSpacing, cfg.fontVariationSettings,
+      cfg.textTransform,
+    ].filter(Boolean).join(' ');
+    return [name, [...new Set(text.match(/--[A-Za-z0-9-]+/g) || [])]];
+  })
+);
+
+/** 'header' or 'standard' — which colour role a style takes by default. */
+export const STYLE_DEFAULT_COLOR = Object.fromEntries(
+  Object.entries(STYLE_MAP).map(([name, cfg]) => [name, cfg.defaultColor || 'standard'])
+);
+
 export const HEADER_COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
 export const TEXT_COLORS   = ['default', 'quiet', 'eyebrow', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
 

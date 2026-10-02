@@ -12,6 +12,7 @@ import { Box } from '@mui/material';
 import { ShowcaseHeader } from '../ShowcaseHeader';
 import { BackgroundPicker } from '../BackgroundPicker';
 import { FoundationTopic } from './FoundationTopic';
+import { FOUNDATION_DEMOS } from './FoundationDemos';
 import { FOUNDATIONS } from '../../docs/foundations';
 
 /** Nav id -> the topic's title in FOUNDATIONS. Ids are stable; titles are prose. */
@@ -22,6 +23,7 @@ export const FOUNDATION_TOPICS = [
   { id: 'foundation-spacing',    title: 'Spacing' },
   { id: 'foundation-elevation',  title: 'Elevation' },
   { id: 'foundation-altdisplay', title: 'The Alt Display' },
+  { id: 'foundation-static',     title: 'Static colours' },
   { id: 'foundation-states',     title: 'States are generated, not chosen' },
 ];
 
@@ -55,6 +57,10 @@ export function FoundationsShowcase({ topic: topicId }) {
               borderRadius: 'var(--Card-Radius, var(--Style-Border-Radius))' }}
       >
         <FoundationTopic topic={topic} />
+        {(() => {
+          const Demo = FOUNDATION_DEMOS[entry.title];
+          return Demo ? <Box sx={{ mt: 4 }}><Demo /></Box> : null;
+        })()}
       </Box>
     </Box>
   );

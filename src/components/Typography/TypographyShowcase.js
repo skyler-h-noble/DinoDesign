@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { ShowcaseHeader } from '../ShowcaseHeader';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
+import { TypographySummary } from '../Foundations/TypographySummary';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
@@ -314,6 +315,9 @@ export function TypographyShowcase() {
               </TabList>
 <TabPanel value={0}>
                 <DocSummary component="Typography" theme={bgTheme} surface={bgSurface} />
+                <Box sx={{ p: 3 }}>
+                  <TypographySummary />
+                </Box>
               </TabPanel>
 <TabPanel value={1}>
         <Grid container sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>

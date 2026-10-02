@@ -1,7 +1,11 @@
 // src/components/Typography/index.js
 export {
+  TEXT_COLORS,
+  HEADER_COLORS,
   Typography,
   TYPOGRAPHY_STYLES,
+  STYLE_TOKENS,
+  STYLE_DEFAULT_COLOR,
   CAP_HEIGHT_TRIM,
   // Headings
   H1, H2, H3, H4, H5, H6, Heading,
