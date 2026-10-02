@@ -219,8 +219,18 @@ function TreeNode({
           component="ul"
           role="group"
           sx={{
-            margin: 0, padding: 0, paddingLeft: '8px', marginLeft: '12px',
-            borderLeft: '1px solid var(--Border)',
+            /* Indent only — NO guide line. Figma's TreeView (6911:36658) stacks
+               plain Menu Item instances at gap 0 with no strokes anywhere in
+               the set; the structure is read from the indent and the chevrons.
+
+               There was a `borderLeft: 1px solid var(--Border)` here, which
+               invented a rule the design does not have. It was also the wrong
+               token even for a line that did exist: --Border carries a 3:1
+               contrast requirement because it outlines clickable things, and a
+               decorative tree guide is --Border-Variant's job. The 1px it
+               occupied is folded back into the padding so the indent is
+               unchanged. */
+            margin: 0, padding: 0, paddingLeft: '9px', marginLeft: '12px',
             listStyle: 'none',
             animation: ANIMATION_MAP[animation],
           }}

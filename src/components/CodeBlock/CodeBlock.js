@@ -44,7 +44,13 @@ function CopyButton({ code, label = 'Copy code' }) {
   return (
     <Tooltip title={copied ? 'Copied!' : label}>
       {/* aria-label rather than a visible name: the icon is the whole control. */}
+      {/* ghost, explicitly. Button's default variant is `default` — the brand's
+          own colour as a SOLID fill — so leaving it off put a filled brand-
+          coloured disc in the header of every code block. It is the right
+          default for a button that means something; it is wrong for chrome
+          sitting on a panel that already declares its own theme. */}
       <IconButton
+        variant="ghost"
         size="small"
         onClick={handleCopy}
         aria-label={copied ? 'Copied' : label}
