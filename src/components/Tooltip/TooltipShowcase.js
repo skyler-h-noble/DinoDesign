@@ -3,9 +3,11 @@ import { CodeBlock } from '../CodeBlock/CodeBlock';
 import { getContrast, getCssVar } from '../contrast';
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Stack, Grid, Tabs, Tab, Tooltip as MuiTooltipBase, IconButton as MuiIconButton,
+  Box, Stack, Grid, Tooltip as MuiTooltipBase, IconButton as MuiIconButton,
   Switch, Button as MuiButton, Select, MenuItem, FormControl, InputLabel,
 } from '@mui/material';
+import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
+import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -152,7 +154,6 @@ function PlacementGrid({ placement, onSelect }) {
 }
 
 export function TooltipShowcase() {
-  const [mainTab, setMainTab] = useState(0);
   const [variant, setVariant] = useState('solid');
   const [color, setColor] = useState('black-white');
   const [size, setSize] = useState('medium');
@@ -210,15 +211,26 @@ export function TooltipShowcase() {
   return (
     <Box sx={{ pb: 8 }}>
       <H3>Tooltip</H3>
-      <Tabs value={mainTab} onChange={(e, v) => setMainTab(v)}
-        sx={{ mt: 3, mb: 0, borderBottom: '1px solid var(--Border)',
-          '& .MuiTabs-indicator': { backgroundColor: 'var(--Buttons-Primary-Button)', height: 3 },
-          '& .MuiTab-root': { color: 'var(--Text-Quiet)', textTransform: 'none', fontWeight: 500, '&.Mui-selected': { color: 'var(--Text)' } } }}>
-        <Tab label="Playground" />
-        <Tab label="Accessibility" />
-      </Tabs>
+      {/* Layout A: the tab bar spans the page, so Summary, Accessibility and
+          Change Log get the full width to read. The preview/controls split
+          stays INSIDE Playground, the only tab that needs it.
 
-      {mainTab === 0 && (
+          The lib's own Tabs, not MUI's — the bar used to be a MUI <Tabs> hand-
+          styled with --Buttons-Primary-Button and a 3px indicator, which is the
+          gallery demonstrating something the library does not ship. */}
+      <Tabs defaultValue={0} variant="standard" color="primary">
+        <TabList>
+          <Tab>Summary</Tab>
+          <Tab>Playground</Tab>
+          <Tab>Accessibility</Tab>
+          <Tab>Change Log</Tab>
+        </TabList>
+
+      <TabPanel value={0}>
+        <DocSummary component="Tooltip" />
+      </TabPanel>
+
+      <TabPanel value={1}>
         <Grid container sx={{ minHeight: 400 }}>
           {/* Preview */}
           <Grid item sx={{ width: { xs: '100%', md: 'calc((100vw - 432px) / 2)' }, flexShrink: 0 }}>
@@ -335,10 +347,10 @@ export function TooltipShowcase() {
             </Box>
           </Grid>
         </Grid>
-      )}
+      </TabPanel>
 
       {/* == ACCESSIBILITY == */}
-      {mainTab === 1 && (
+      <TabPanel value={2}>
         <Box sx={{ p: 4 }}>
           <H4>Accessibility Requirements</H4>
           <BodySmall color="quiet" style={{ marginBottom: 32 }}>
@@ -444,7 +456,12 @@ export function TooltipShowcase() {
             </Box>
           </Stack>
         </Box>
-      )}
+      </TabPanel>
+
+      <TabPanel value={3}>
+        <DocChanges component="Tooltip" />
+      </TabPanel>
+      </Tabs>
     </Box>
   );
 }
