@@ -259,9 +259,13 @@ export function StaticColorsDemo() {
    instance, find none, and conclude the component has one size. Ten seconds of
    video answers it; three paragraphs do not.
 
-   The file is H.264 in an .mp4 container, which every current browser plays.
-   It was recorded as .mov and rewrapped rather than re-encoded, so it is the
-   original frames at the original size.
+   H.264 in an .mp4 container, which every current browser plays. The .mov it
+   was recorded as is reliably played only by Safari.
+
+   398KB for ten seconds at 2178x1534. A straight rewrap of the original came
+   out at 2.8MB — same frames, same container cost — so this is re-encoded
+   instead. Seven times smaller for a screen recording of flat UI, which
+   compresses extremely well because almost nothing moves between frames.
 
    No autoplay and no loop: this sits inside a reference page people read, and
    motion starting on its own pulls the eye off the text beside it. `preload`
