@@ -348,7 +348,18 @@ export function OmniDesignProvider({
 
   // Dark mode
   defaultDarkMode = false,
-  darkTheme:      darkThemeProp = 'Neutral',
+  /* null, not 'Neutral'.
+     This defaulted to 'Neutral' and activeTheme applied it unconditionally in
+     dark mode, so the whole app became data-theme="Neutral" the moment dark
+     was switched on — and Neutral is the ONE palette that is light in dark
+     mode. Figma: Neutral/Dark-Mode/Surface is #cccccc. That is the grey.
+     It also discarded the chosen theme: pick Primary, switch to dark, get
+     Neutral. The architecture doc says the opposite — "the theme carries over,
+     the tone does not" — because the MODE is carried by the stylesheet
+     (Light-Mode.css vs Dark-Mode.css), not by swapping palettes.
+     The prop stays as an opt-in escape hatch for a brand that genuinely wants
+     a different palette in dark; it simply no longer fires by default. */
+  darkTheme:      darkThemeProp = null,
 
   // Controlled dark mode
   darkMode: controlledDarkMode,
@@ -438,9 +449,7 @@ export function OmniDesignProvider({
     : (manifestThemeConfig.defaultSurface ?? defaultSurfaceProp);
 
   const resolvedDefaultStyle = manifestThemeConfig.defaultStyle ?? defaultStyleProp;
-  const resolvedDarkTheme    = darkThemeProp !== 'Neutral'
-    ? darkThemeProp
-    : (manifestThemeConfig.darkTheme ?? darkThemeProp);
+  const resolvedDarkTheme    = darkThemeProp ?? manifestThemeConfig.darkTheme ?? null;
 
   const [theme,        setThemeState]   = useState(resolvedDefaultTheme);
   const [styleVariant, setStyleVariant] = useState(resolvedDefaultStyle);
@@ -545,7 +554,11 @@ export function OmniDesignProvider({
   useEffect(() => { return () => removeStyleTag(TAG.mode); }, []);
 
   // ── Public API ─────────────────────────────────────────────────────────────
-  const activeTheme = isDark ? resolvedDarkTheme : theme;
+  /* The chosen theme, in both modes. A dark theme applies only when one was
+     explicitly asked for — otherwise dark mode is the same theme read from the
+     dark stylesheet, which is what makes Primary stay Primary when you flip
+     the switch. */
+  const activeTheme = (isDark && resolvedDarkTheme) ? resolvedDarkTheme : theme;
 
   const toggleDarkMode = useCallback(() => {
     if (isControlled) onDarkModeChange?.(!isDark);
