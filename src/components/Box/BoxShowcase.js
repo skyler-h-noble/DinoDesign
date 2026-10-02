@@ -1,5 +1,6 @@
 // src/components/Box/BoxShowcase.js
 import React, { useState } from 'react';
+import { ShowcaseHeader } from '../ShowcaseHeader';
 import { Grid, Stack } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
@@ -71,7 +72,10 @@ export function BoxShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H3>Box</H3>
+      <ShowcaseHeader title="Box" component="Box" />
+      <Box sx={{ mt: 1 }}>
+        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
       <Body color="quiet" style={{ marginTop: 8, marginBottom: 24, maxWidth: 720 }}>
         Bare layout primitive — a slot that participates in the design-system
         cascade (<code>data-theme</code> / <code>data-surface</code>) without
@@ -90,7 +94,7 @@ export function BoxShowcase() {
                 <Tab>Change Log</Tab>
               </TabList>
 <TabPanel value={0}>
-                <DocSummary component="Box" />
+                <DocSummary component="Box" theme={bgTheme} surface={bgSurface} />
               </TabPanel>
 <TabPanel value={1}>
         <Grid container sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
@@ -127,7 +131,6 @@ export function BoxShowcase() {
                 <Box sx={{ p: 3 }}>
 
                   <Box sx={{ mb: 3 }}>
-                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
                   </Box>
 
                   {/* Theme override */}

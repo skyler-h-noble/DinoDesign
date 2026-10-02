@@ -1,5 +1,6 @@
 // src/components/Input/InputShowcase.js
 import React, { useState } from 'react';
+import { ShowcaseHeader } from '../ShowcaseHeader';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -165,7 +166,10 @@ export function InputShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H3>Input</H3>
+      <ShowcaseHeader title="Input" component="Input" />
+      <Box sx={{ mt: 1 }}>
+        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
 
       {/* Layout A: the tab bar spans the page, so Summary, Accessibility and
           Change Log get the full width to read. The preview/controls split

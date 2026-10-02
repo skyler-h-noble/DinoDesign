@@ -1,5 +1,6 @@
 // src/components/ToggleButtonGroup/ToggleButtonGroupShowcase.js
 import React, { useState, useEffect, useRef } from 'react';
+import { ShowcaseHeader } from '../ShowcaseHeader';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import {
   Box, Stack, Grid,
@@ -273,7 +274,7 @@ export function ToggleButtonGroupShowcase() {
 
   return (
     <Box sx={{ width: '100%' }}>
-      <H3 style={{ marginBottom: 8 }}>ToggleButtonGroup</H3>
+      <ShowcaseHeader title="ToggleButtonGroup" component="ToggleButtonGroup" />
       <Body color="quiet" style={{ marginBottom: 8 }}>
         Segmented control for choosing between two, three or four mutually
         exclusive options — or several at once.

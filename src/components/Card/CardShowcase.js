@@ -1,5 +1,6 @@
 // src/components/Card/CardShowcase.js
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { ShowcaseHeader } from '../ShowcaseHeader';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -254,7 +255,10 @@ export function CardShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H3>Card</H3>
+      <ShowcaseHeader title="Card" component="Card" />
+      <Box sx={{ mt: 1 }}>
+        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
 
       {/* Layout A: the tab bar spans the page, so Summary, Accessibility and
           Change Log get the full width to read. The preview/controls split
@@ -342,12 +346,6 @@ export function CardShowcase() {
 
                   {/* Background */}
                   <Box sx={{ mb: 3 }}>
-                    <BackgroundPicker
-                      theme={bgTheme}
-                      onThemeChange={setBgTheme}
-                      surface={bgSurface}
-                      onSurfaceChange={setBgSurface}
-                    />
                   </Box>
 
                   {/* Style */}

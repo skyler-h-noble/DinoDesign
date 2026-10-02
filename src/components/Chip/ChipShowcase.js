@@ -1,5 +1,7 @@
 // src/components/Chip/ChipShowcase.js
 import { getContrast, getCssVar } from '../contrast';
+import { ShowcaseHeader } from '../ShowcaseHeader';
+import { BackgroundPicker } from '../BackgroundPicker';
 import React, { useState, useEffect } from 'react';
 import {
   Box, Stack, Grid, TextField, Divider,
@@ -101,6 +103,8 @@ function TouchTargetRow({ label, value, passes, note }) {
 // --- Copy Button -------------------------------------------------------------
 
 function CopyButton({ code }) {
+  const [bgTheme, setBgTheme] = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
   const [copied, setCopied] = useState(false);
   const handleCopy = async () => {
     try {
@@ -320,7 +324,10 @@ export function ChipShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H3>Chips</H3>
+      <ShowcaseHeader title="Chips" component="Chip" />
+      <Box sx={{ mt: 1 }}>
+        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
       {/* Layout A: the tab bar spans the page, so Summary, Accessibility and
           Change Log get the full width to read. The preview/controls split
           stays INSIDE Playground, the only tab that needs it.
@@ -338,7 +345,7 @@ export function ChipShowcase() {
         </TabList>
 
       <TabPanel value={0}>
-        <DocSummary component="Chip" />
+        <DocSummary component="Chip" theme={bgTheme} surface={bgSurface} />
       </TabPanel>
 
       {/* == PLAYGROUND TAB == */}

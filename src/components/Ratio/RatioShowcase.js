@@ -1,5 +1,6 @@
 // src/components/Ratio/RatioShowcase.js
 import React, { useState } from 'react';
+import { ShowcaseHeader } from '../ShowcaseHeader';
 import { Grid, Stack } from '@mui/material';
 import { Box } from '../Box/Box';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -99,7 +100,10 @@ export function RatioShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H3>Ratio</H3>
+      <ShowcaseHeader title="Ratio" component="Ratio" />
+      <Box sx={{ mt: 1 }}>
+        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
 
       {/* Layout A: the tab bar spans the page, so Summary, Accessibility and
           Change Log get the full width to read. The preview/controls split
@@ -112,7 +116,7 @@ export function RatioShowcase() {
                 <Tab>Change Log</Tab>
               </TabList>
 <TabPanel value={0}>
-                <DocSummary component="Ratio" />
+                <DocSummary component="Ratio" theme={bgTheme} surface={bgSurface} />
               </TabPanel>
 <TabPanel value={1}>
         <Grid container sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
@@ -142,7 +146,6 @@ export function RatioShowcase() {
                 <Box sx={{ p: 3 }}>
 
                   <Box sx={{ mb: 3 }}>
-                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
                   </Box>
 
                   {/* Variant */}

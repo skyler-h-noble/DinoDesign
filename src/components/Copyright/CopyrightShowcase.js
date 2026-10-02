@@ -1,5 +1,7 @@
 // src/components/Copyright/CopyrightShowcase.js
 import React, { useState, useRef, useEffect } from 'react';
+import { BackgroundPicker } from '../BackgroundPicker';
+import { ShowcaseHeader } from '../ShowcaseHeader';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack } from '@mui/material';
 import { Copyright } from './Copyright';
@@ -27,6 +29,8 @@ function ControlButton({ label, selected, onClick }) {
 }
 
 export function CopyrightShowcase() {
+  const [bgTheme, setBgTheme] = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
   const [companyName, setCompanyName] = useState('DinoDesign');
   const [year, setYear] = useState(new Date().getFullYear());
   const [rights, setRights] = useState('All rights reserved');
@@ -43,7 +47,10 @@ export function CopyrightShowcase() {
 
   return (
     <Box>
-      <H3 style={{ marginBottom: 12 }}>Copyright</H3>
+      <ShowcaseHeader title="Copyright" component="Copyright" />
+      <Box sx={{ mt: 1 }}>
+        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
       <Body color="quiet" style={{ marginBottom: 24, maxWidth: 720 }}>
         Standalone copyright strip used at the bottom of pages. Defaults to{' '}
         <code>© {'{year}'} {'{companyName}'}. {'{rights}'}.</code> Pass{' '}
@@ -75,7 +82,7 @@ export function CopyrightShowcase() {
 
         {/* Playground */}
         <TabPanel value={0}>
-                <DocSummary component="Copyright" />
+                <DocSummary component="Copyright" theme={bgTheme} surface={bgSurface} />
               </TabPanel>
 
               <TabPanel value={1}>

@@ -15,7 +15,6 @@ import { PreviewSurface } from '../components/PreviewSurface';
 import { docsSlug } from './docsLink';
 import { H5, Body, BodySmall, Caption, EyebrowSmall } from '../components/Typography';
 import { Link } from '../components/Link/Link';
-import { figmaUrlFor } from './figmaLinks';
 
 const ISSUE_BASE = 'https://github.com/lwnoble/DinoDesign/issues/new';
 
@@ -78,7 +77,6 @@ export function DocSummary({ component, theme = null, surface = 'Surface' }) {
      and reachable only by reading it. Null for a component with no design,
      which is a real answer — figmaUrlFor returns null rather than pointing at
      the file root and leaving someone to hunt. */
-  const figma = figmaUrlFor(doc.name);
 
   return (
     <Box sx={{ p: 3 }}>
@@ -93,13 +91,6 @@ export function DocSummary({ component, theme = null, surface = 'Surface' }) {
 
         <Body>{doc.summary}</Body>
 
-        {figma && (
-          <Box>
-            <Link href={figma} target="_blank" rel="noopener noreferrer">
-              Open {doc.name} in Figma
-            </Link>
-          </Box>
-        )}
 
         {doc.insteadUse.length > 0 && (
           <Section title="Reach for something else when">

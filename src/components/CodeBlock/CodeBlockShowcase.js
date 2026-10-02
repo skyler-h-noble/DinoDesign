@@ -10,6 +10,7 @@
 // brand's own neutrals and stays legible in both modes. The background picker
 // below changes the surface AROUND the block to show that it holds up anywhere.
 import React, { useState } from 'react';
+import { ShowcaseHeader } from '../ShowcaseHeader';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack, Grid } from '@mui/material';
 import { CodeBlock } from './CodeBlock';
@@ -61,13 +62,15 @@ export function CodeBlockShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H3>CodeBlock</H3>
+      <ShowcaseHeader title="CodeBlock" component="CodeBlock" />
+      <Box sx={{ mt: 1 }}>
+        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
       <BodySmall style={{ color: 'var(--Text-Quiet)' }}>
         Any block of code, a shell command, or a copyable URL. It brings its own copy button,
         confirmation and timer, so the surrounding component should not keep a `copied` flag.
       </BodySmall>
       <Box sx={{ mt: 1 }}>
-        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
       </Box>
 
       {/* Layout A: the tab bar spans the page, so Summary, Accessibility and

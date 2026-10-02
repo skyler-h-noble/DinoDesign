@@ -1,5 +1,6 @@
 // src/components/Breadcrumbs/BreadcrumbsShowcase.js
 import React, { useState } from 'react';
+import { ShowcaseHeader } from '../ShowcaseHeader';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -66,7 +67,10 @@ export function BreadcrumbsShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H3>Breadcrumbs</H3>
+      <ShowcaseHeader title="Breadcrumbs" component="Breadcrumbs" />
+      <Box sx={{ mt: 1 }}>
+        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
 
       {/* Layout A: the tab bar spans the page, so Summary, Accessibility and
           Change Log get the full width to read. The preview/controls split

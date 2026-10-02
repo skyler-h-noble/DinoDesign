@@ -1,5 +1,6 @@
 // src/components/Fab/FabShowcase.js
 import React, { useState } from 'react';
+import { ShowcaseHeader } from '../ShowcaseHeader';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
@@ -132,7 +133,10 @@ export function FabShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H3>Floating Action Button</H3>
+      <ShowcaseHeader title="Floating Action Button" component="Fab" />
+      <Box sx={{ mt: 1 }}>
+        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
 
       {/* Layout A: the tab bar spans the page, so Summary, Accessibility and
           Change Log get the full width to read. The preview/controls split
@@ -145,7 +149,7 @@ export function FabShowcase() {
                 <Tab>Change Log</Tab>
               </TabList>
 <TabPanel value={0}>
-                <DocSummary component="Fab" />
+                <DocSummary component="Fab" theme={bgTheme} surface={bgSurface} />
               </TabPanel>
 <TabPanel value={1}>
         <Grid container sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
@@ -176,7 +180,6 @@ export function FabShowcase() {
 
                   {/* Background */}
                   <Box sx={{ mb: 3 }}>
-                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
                   </Box>
 
                   {/* Color */}

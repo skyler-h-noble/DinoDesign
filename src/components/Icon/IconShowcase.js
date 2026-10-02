@@ -1,5 +1,7 @@
 // src/components/Icon/IconShowcase.js
 import React, { useState, useEffect } from 'react';
+import { ShowcaseHeader } from '../ShowcaseHeader';
+import { BackgroundPicker } from '../BackgroundPicker';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -134,6 +136,8 @@ function A11yRow({ label, ratio, threshold, note }) {
   );
 }
 function CopyButton({ code }) {
+  const [bgTheme, setBgTheme] = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
   const [copied, setCopied] = useState(false);
   const handleCopy = async () => {
     try { await navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 2000); }
@@ -201,7 +205,10 @@ export function IconShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H3>Icon</H3>
+      <ShowcaseHeader title="Icon" component="Icon" />
+      <Box sx={{ mt: 1 }}>
+        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
       {/* Layout A: the tab bar spans the page, so Summary, Accessibility and
           Change Log get the full width to read. The preview/controls split
           lives INSIDE Playground, the only tab that needs it. */}
@@ -213,7 +220,7 @@ export function IconShowcase() {
                 <Tab>Change Log</Tab>
               </TabList>
 <TabPanel value={0}>
-                <DocSummary component="Icon" />
+                <DocSummary component="Icon" theme={bgTheme} surface={bgSurface} />
               </TabPanel>
 <TabPanel value={1}>
         <Grid container sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>

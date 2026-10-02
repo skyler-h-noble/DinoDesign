@@ -1,5 +1,6 @@
 // src/components/Typography/TypographyShowcase.js
 import React, { useState, useEffect } from 'react';
+import { ShowcaseHeader } from '../ShowcaseHeader';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -294,9 +295,11 @@ export function TypographyShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H3>Typography</H3>
+      <ShowcaseHeader title="Typography" component="Typography" />
       <Box sx={{ mt: 1 }}>
         <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
+      <Box sx={{ mt: 1 }}>
       </Box>
 
       {/* Layout A: the tab bar spans the page, so Summary, Accessibility and

@@ -1,5 +1,6 @@
 // src/components/Stack/StackShowcase.js
 import React, { useState } from 'react';
+import { ShowcaseHeader } from '../ShowcaseHeader';
 import { Box, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
@@ -205,7 +206,6 @@ function Playground() {
       <Grid item xs={12} md={5}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
 
-          <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
 
           <Box>
             <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>CHILDREN</EyebrowSmall>
@@ -267,7 +267,10 @@ function Playground() {
 export function StackShowcase() {
   return (
     <Box sx={{ pb: 8 }}>
-      <H3>Stack</H3>
+      <ShowcaseHeader title="Stack" component="Stack" />
+      <Box sx={{ mt: 1 }}>
+        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
       <Body style={{ color: 'var(--Text-Quiet)', marginTop: 8, marginBottom: 32, maxWidth: 640 }}>
         OmniStack is a layout primitive built on MUI Stack with one intelligent addition:
         it automatically enforces a minimum gap between children when it detects small (24px)
@@ -285,7 +288,7 @@ export function StackShowcase() {
 
         {/* ── Why it matters ── */}
         <TabPanel value={0}>
-          <DocSummary component="Stack" />
+          <DocSummary component="Stack" theme={bgTheme} surface={bgSurface} />
         </TabPanel>
 
         <TabPanel value={1}>

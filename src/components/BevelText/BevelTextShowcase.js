@@ -1,5 +1,7 @@
 // src/components/BevelText/BevelTextShowcase.js
 import React, { useState } from 'react';
+import { BackgroundPicker } from '../BackgroundPicker';
+import { ShowcaseHeader } from '../ShowcaseHeader';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack } from '@mui/material';
 import { BevelText } from './BevelText';
@@ -80,6 +82,8 @@ function PresetCard({ option, active, onClick }) {
 }
 
 export function BevelTextShowcase() {
+  const [bgTheme, setBgTheme] = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
   const [text, setText] = useState('DinoDesign');
   const [theme, setTheme] = useState('Primary');
   const [preset, setPreset] = useState('Classic');
@@ -135,7 +139,10 @@ export function BevelTextShowcase() {
 
   return (
     <Box>
-      <H3 style={{ marginBottom: 12 }}>Bevel Display Text</H3>
+      <ShowcaseHeader title="Bevel Display Text" component="BevelText" />
+      <Box sx={{ mt: 1 }}>
+        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
       <Body color="quiet" style={{ marginBottom: 24, maxWidth: 720 }}>
         Straight-line display text with an SVG inset-bevel and optional drop
         shadow. Colors are locked to the active button-palette tokens
@@ -194,7 +201,7 @@ export function BevelTextShowcase() {
 
               {/* Playground */}
               <TabPanel value={0}>
-                <DocSummary component="BevelText" />
+                <DocSummary component="BevelText" theme={bgTheme} surface={bgSurface} />
               </TabPanel>
 
               <TabPanel value={1}>

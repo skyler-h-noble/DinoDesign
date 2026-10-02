@@ -1,5 +1,6 @@
 // src/components/Button/ButtonShowcase.js
 import React, { useState, useEffect, useRef } from 'react';
+import { ShowcaseHeader } from '../ShowcaseHeader';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -397,7 +398,7 @@ export function ButtonShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H3>Buttons</H3>
+      <ShowcaseHeader title="Buttons" component="Button" />
       <Box sx={{ mt: 1 }}>
         <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
       </Box>

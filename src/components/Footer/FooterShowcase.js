@@ -1,5 +1,7 @@
 // src/components/Footer/FooterShowcase.js
 import React, { useState, useRef, useEffect } from 'react';
+import { BackgroundPicker } from '../BackgroundPicker';
+import { ShowcaseHeader } from '../ShowcaseHeader';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack } from '@mui/material';
 import TwitterIcon from '@mui/icons-material/Twitter';
@@ -69,6 +71,8 @@ function ControlButton({ label, selected, onClick }) {
 }
 
 export function FooterShowcase() {
+  const [bgTheme, setBgTheme] = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
   const [columnCount, setColumnCount] = useState(4);
   const [showSocial, setShowSocial] = useState(true);
   const [showSubscribe, setShowSubscribe] = useState(true);
@@ -100,7 +104,10 @@ export function FooterShowcase() {
 
   return (
     <Box>
-      <H3 style={{ marginBottom: 12 }}>Footer</H3>
+      <ShowcaseHeader title="Footer" component="Footer" />
+      <Box sx={{ mt: 1 }}>
+        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
       <Body color="quiet" style={{ marginBottom: 24, maxWidth: 720 }}>
         Configurable 1–4 column footer. The first column is always the
         company address / contact. Optional <code>socialLinks</code> and{' '}
@@ -130,7 +137,7 @@ export function FooterShowcase() {
 
         {/* Playground */}
         <TabPanel value={0}>
-                <DocSummary component="Footer" />
+                <DocSummary component="Footer" theme={bgTheme} surface={bgSurface} />
               </TabPanel>
 
               <TabPanel value={1}>

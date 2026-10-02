@@ -1,5 +1,6 @@
 // src/components/Section/SectionShowcase.js
 import React from 'react';
+import { ShowcaseHeader } from '../ShowcaseHeader';
 import { Section } from './Section';
 import { H3, Body, BodySmall } from '../Typography';
 import { Button } from '../Button/Button';
@@ -22,7 +23,7 @@ export function SectionShowcase() {
         Sets data-theme="Primary" + data-surface="Surface", paints --Background.
       </BodySmall>
       <Section theme="Primary" surface="Surface" padding="32px" style={{ borderRadius: 8 }}>
-        <H3>Primary-Light surface</H3>
+        <ShowcaseHeader title="Primary-Light surface" component="Section" />
         <Body>Body text picks up --Text automatically.</Body>
         <BodySmall color="quiet">Quiet text picks up --Text-Quiet.</BodySmall>
         <div style={{ marginTop: 12 }}>

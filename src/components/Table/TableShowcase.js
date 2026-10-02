@@ -1,5 +1,7 @@
 // src/components/Table/TableShowcase.js
 import { CodeBlock } from '../CodeBlock/CodeBlock';
+import { ShowcaseHeader } from '../ShowcaseHeader';
+import { BackgroundPicker } from '../BackgroundPicker';
 import { getContrast, getCssVar } from '../contrast';
 import React, { useState, useEffect } from 'react';
 import {
@@ -63,6 +65,8 @@ function A11yRow({ label, ratio, threshold, note }) {
   );
 }
 function CopyButton({ code }) {
+  const [bgTheme, setBgTheme] = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
   const [copied, setCopied] = useState(false);
   const handleCopy = async () => {
     try { await navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 2000); }
@@ -175,7 +179,10 @@ export function TableShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H3>Table</H3>
+      <ShowcaseHeader title="Table" component="Table" />
+      <Box sx={{ mt: 1 }}>
+        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
       {/* Layout A: the tab bar spans the page, so Summary, Accessibility and
           Change Log get the full width to read. The preview/controls split
           stays INSIDE Playground, the only tab that needs it.
@@ -193,7 +200,7 @@ export function TableShowcase() {
         </TabList>
 
       <TabPanel value={0}>
-        <DocSummary component="Table" />
+        <DocSummary component="Table" theme={bgTheme} surface={bgSurface} />
       </TabPanel>
 
       <TabPanel value={1}>

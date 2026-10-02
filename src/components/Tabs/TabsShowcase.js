@@ -1,5 +1,6 @@
 // src/components/Tabs/TabsShowcase.js
 import React, { useState } from 'react';
+import { ShowcaseHeader } from '../ShowcaseHeader';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
@@ -116,7 +117,10 @@ export function TabsShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H3>Tabs</H3>
+      <ShowcaseHeader title="Tabs" component="Tabs" />
+      <Box sx={{ mt: 1 }}>
+        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
 
       <Grid container sx={{ mt: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
@@ -176,7 +180,6 @@ export function TabsShowcase() {
                 <Box sx={{ p: 3 }}>
 
                   <Box sx={{ mb: 3 }}>
-                    <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
                   </Box>
 
                   {/* Style */}

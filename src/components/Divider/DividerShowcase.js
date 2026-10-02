@@ -1,5 +1,6 @@
 // src/components/Divider/DividerShowcase.js
 import React, { useState } from 'react';
+import { ShowcaseHeader } from '../ShowcaseHeader';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -124,9 +125,11 @@ export function DividerShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H3>Divider</H3>
+      <ShowcaseHeader title="Divider" component="Divider" />
       <Box sx={{ mt: 1 }}>
         <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
+      <Box sx={{ mt: 1 }}>
       </Box>
 
       {/* Layout A: the tab bar spans the page, so Summary, Accessibility and

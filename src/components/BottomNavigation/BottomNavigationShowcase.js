@@ -1,5 +1,7 @@
 // src/components/BottomNavigation/BottomNavigationShowcase.js
 import { CodeBlock } from '../CodeBlock/CodeBlock';
+import { ShowcaseHeader } from '../ShowcaseHeader';
+import { BackgroundPicker } from '../BackgroundPicker';
 import React, { useState, useEffect } from 'react';
 import {
   Box, Stack, Grid, Tooltip, IconButton as MuiIconButton,
@@ -63,6 +65,8 @@ const BAR_COLORS = [
 
 /* --- Helpers --- */
 function CopyButton({ code }) {
+  const [bgTheme, setBgTheme] = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
   const [copied, setCopied] = useState(false);
   const handleCopy = async () => {
     try { await navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 2000); }
@@ -234,7 +238,10 @@ export function BottomNavigationShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H3>Bottom Navigation</H3>
+      <ShowcaseHeader title="Bottom Navigation" component="BottomNavigation" />
+      <Box sx={{ mt: 1 }}>
+        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
       {/* Layout A: the tab bar spans the page, so Summary, Accessibility and
           Change Log get the full width to read. The preview/controls split
           stays INSIDE Playground, the only tab that needs it.
@@ -252,7 +259,7 @@ export function BottomNavigationShowcase() {
         </TabList>
 
       <TabPanel value={0}>
-        <DocSummary component="BottomNavigation" />
+        <DocSummary component="BottomNavigation" theme={bgTheme} surface={bgSurface} />
       </TabPanel>
 
       <TabPanel value={1}>

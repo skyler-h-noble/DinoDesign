@@ -1,5 +1,7 @@
 // src/components/Badge/BadgeShowcase.js
 import { CodeBlock } from '../CodeBlock/CodeBlock';
+import { BackgroundPicker } from '../BackgroundPicker';
+import { ShowcaseHeader } from '../ShowcaseHeader';
 import { getContrast, getCssVar } from '../contrast';
 import React, { useState, useEffect } from 'react';
 import {
@@ -66,6 +68,8 @@ function A11yRow({ label, ratio, threshold, note }) {
 // --- Copy Button -------------------------------------------------------------
 
 function CopyButton({ code }) {
+  const [bgTheme, setBgTheme] = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
   const [copied, setCopied] = useState(false);
   const handleCopy = async () => {
     try {
@@ -206,7 +210,10 @@ if (style === 'solid') {
 
   return (
     <Box sx={{ width: '100%' }}>
-      <H3 style={{ marginBottom: 8 }}>Badge</H3>
+      <ShowcaseHeader title="Badge" component="Badge" />
+      <Box sx={{ mt: 1 }}>
+        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
       <Body color="quiet" style={{ marginBottom: 24 }}>
         Small label attached to an element showing status or count.
         Solid and outline variants across all 8 colors.
@@ -228,7 +235,7 @@ if (style === 'solid') {
         </TabList>
 
       <TabPanel value={0}>
-        <DocSummary component="Badge" />
+        <DocSummary component="Badge" theme={bgTheme} surface={bgSurface} />
       </TabPanel>
 
       {/* PLAYGROUND TAB */}

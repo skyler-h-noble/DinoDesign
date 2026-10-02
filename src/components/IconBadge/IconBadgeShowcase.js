@@ -1,5 +1,7 @@
 // src/components/IconBadge/IconBadgeShowcase.js
 import React, { useState } from 'react';
+import { ShowcaseHeader } from '../ShowcaseHeader';
+import { BackgroundPicker } from '../BackgroundPicker';
 import { IconBadge } from './IconBadge';
 import { Button } from '../Button/Button';
 import { ButtonGroup } from '../ButtonGroup/ButtonGroup';
@@ -25,6 +27,8 @@ const COLOR_GROUPS = [
 const ICONS = [HomeIcon, CodeIcon, CheckCircleOutlineIcon, StarIcon, GridViewIcon, ComputerIcon];
 
 export function IconBadgeShowcase() {
+  const [bgTheme, setBgTheme] = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
   const [color, setColor] = useState('primary');
   const [variant, setVariant] = useState('solid');
   const [size, setSize] = useState('medium');
@@ -33,7 +37,10 @@ export function IconBadgeShowcase() {
 
   return (
     <VStack spacing={4} style={{ paddingBottom: 64 }}>
-      <H3>Icon Badge</H3>
+      <ShowcaseHeader title="Icon Badge" component="IconBadge" />
+      <Box sx={{ mt: 1 }}>
+        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
         {/* Preview */}

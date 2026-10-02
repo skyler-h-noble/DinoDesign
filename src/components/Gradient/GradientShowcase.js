@@ -1,5 +1,7 @@
 // src/components/Gradient/GradientShowcase.js
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { ShowcaseHeader } from '../ShowcaseHeader';
+import { BackgroundPicker } from '../BackgroundPicker';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import ReactDOM from 'react-dom';
 import { Box, Stack, Grid } from '@mui/material';
@@ -54,6 +56,8 @@ const CARD_COLOR_OPTIONS = ['default', 'primary', 'secondary', 'tertiary', 'neut
 /* ── Helpers ── */
 
 function CopyButton({ code }) {
+  const [bgTheme, setBgTheme] = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
   const [copied, setCopied] = useState(false);
   const handleCopy = async () => {
     try { await navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 2000); }
@@ -507,7 +511,10 @@ export function GradientShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H3>Gradient</H3>
+      <ShowcaseHeader title="Gradient" component="Gradient" />
+      <Box sx={{ mt: 1 }}>
+        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
 
       {/* Layout A: the tab bar spans the page, so Summary, Accessibility and
           Change Log get the full width to read. The preview/controls split
@@ -520,7 +527,7 @@ export function GradientShowcase() {
                 <Tab>Change Log</Tab>
               </TabList>
 <TabPanel value={0}>
-                <DocSummary component="Gradient" />
+                <DocSummary component="Gradient" theme={bgTheme} surface={bgSurface} />
               </TabPanel>
 <TabPanel value={1}>
         <Grid container sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>

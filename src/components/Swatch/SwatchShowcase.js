@@ -1,5 +1,6 @@
 // src/components/Swatch/SwatchShowcase.js
 import React, { useState } from 'react';
+import { ShowcaseHeader } from '../ShowcaseHeader';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack, Grid } from '@mui/material';
 import { Swatch } from './Swatch';
@@ -39,12 +40,14 @@ export function SwatchShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <H3>Swatch</H3>
+      <ShowcaseHeader title="Swatch" component="Swatch" />
+      <Box sx={{ mt: 1 }}>
+        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
       <BodySmall color="quiet">
         A colour chip, optionally labelled, optionally clickable.
       </BodySmall>
       <Box sx={{ mt: 1 }}>
-        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
       </Box>
 
       <Box sx={{ mt: 2, backgroundColor: 'var(--Background)', overflow: 'hidden' }}>

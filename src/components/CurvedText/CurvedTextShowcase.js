@@ -1,5 +1,7 @@
 // src/components/CurvedText/CurvedTextShowcase.js
 import React, { useState, useRef, useEffect } from 'react';
+import { BackgroundPicker } from '../BackgroundPicker';
+import { ShowcaseHeader } from '../ShowcaseHeader';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack } from '@mui/material';
 import { CurvedText } from './CurvedText';
@@ -42,6 +44,8 @@ function defaultCurve(direction) {
 }
 
 export function CurvedTextShowcase() {
+  const [bgTheme, setBgTheme] = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
   const [text, setText] = useState('Your Brand. Perfected.');
   const [textStyle, setTextStyle] = useState('display-large');
   const [colorKey, setColorKey] = useState('primary');
@@ -115,7 +119,10 @@ export function CurvedTextShowcase() {
 
   return (
     <Box>
-      <H3 style={{ marginBottom: 12 }}>Curved Display Text</H3>
+      <ShowcaseHeader title="Curved Display Text" component="CurvedText" />
+      <Box sx={{ mt: 1 }}>
+        <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
+      </Box>
       <Body color="quiet" style={{ marginBottom: 24, maxWidth: 720 }}>
         Decorative text laid along an SVG arc. Chain multiple arcs to build a
         wave — each curve gets its own radius, arc sweep, and direction. Uses
@@ -182,7 +189,7 @@ export function CurvedTextShowcase() {
 
         {/* Playground */}
         <TabPanel value={0}>
-                <DocSummary component="CurvedText" />
+                <DocSummary component="CurvedText" theme={bgTheme} surface={bgSurface} />
               </TabPanel>
 
               <TabPanel value={1}>
