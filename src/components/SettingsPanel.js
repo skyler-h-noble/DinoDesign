@@ -55,11 +55,15 @@ export function SettingsPanel() {
   const [platform, setPlatform]   = useState('desktop');
 
   useEffect(() => {
+    /* Platform only. The mode is restored by the Provider, which takes the
+       saved value as defaultDarkMode and seeds its state with it.
+       Restoring it HERE meant calling toggleDarkMode() in a mount effect, and
+       React.StrictMode double-invokes those in development: the toggle ran
+       twice, netted to nothing, and left the panel showing Dark over a Light
+       stylesheet. Setting an attribute is idempotent; toggling is not. */
     const savedPlatform = localStorage.getItem('dino-platform') || 'desktop';
-    const savedTheme    = localStorage.getItem('themeMode')     || 'light';
     setPlatform(savedPlatform);
     applyPlatform(savedPlatform);
-    if (savedTheme === 'dark') switchMode('dark');
   }, []);
 
   const handlePlatformChange = (value) => {

@@ -280,6 +280,17 @@ function ShowcaseInner() {
   // Theme URL from ?user= param (auth removed — themes load by URL param only)
   const params = new URLSearchParams(window.location.search);
   const userParam = params.get('user');
+  /* Seeded, not toggled.
+     SettingsPanel used to restore dark mode in a mount effect by calling
+     toggleDarkMode(). React.StrictMode double-invokes effects in development,
+     so the toggle fired twice and netted back to light — the panel showed Dark
+     while the stylesheet stayed Light, which is exactly what "dark mode is
+     grey" looked like. A seed is read once by useState and cannot be
+     double-applied. */
+  const savedDarkMode = (() => {
+    try { return localStorage.getItem('themeMode') === 'dark'; } catch { return false; }
+  })();
+
   const themeURL = userParam ? themeManifestUrl(userParam) : undefined;
   const typographyCSS = userParam ? themeTypographyUrl(userParam) : undefined;
 
@@ -335,6 +346,7 @@ function ShowcaseInner() {
 
   return (
     <OmniDesignProvider
+      defaultDarkMode={savedDarkMode}
       themeURL={themeURL}
       typographyCSS={typographyCSS}
       lightModeCSS={localLightModeCSS}
