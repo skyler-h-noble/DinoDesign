@@ -9,6 +9,8 @@ import {
 
 import * as MuiIcons from '@mui/icons-material';
 import { ButtonShowcase } from '../components/Button/ButtonShowcase';
+import { FoundationsShowcase, FOUNDATION_TOPICS } from '../components/Foundations/FoundationsShowcase';
+import { ColorsShowcase } from '../components/Colors/ColorsShowcase';
 import { ButtonGroupShowcase } from '../components/ButtonGroup/ButtonGroupShowcase';
 import { InputShowcase } from '../components/Input/InputShowcase';
 import { CheckboxShowcase } from '../components/Checkbox/CheckboxShowcase';
@@ -137,9 +139,29 @@ const NAV_ITEMS = [
   {
     id: 'foundations',
     label: 'Foundations',
+    /* The seven FOUNDATIONS topics each get an entry, plus Colors, Typography
+       and Icons which have real showcases.
+
+       They were not listed before, so docs/foundations.js was authored and
+       unreachable — the facts that are not about any one component had no page
+       in the gallery at all. Colors was worse: ColorsShowcase is 485 lines,
+       built and imported, with no nav entry pointing at it.
+
+       Ordered as the system is learned rather than alphabetically: what a
+       platform is, then how surfaces paint, then the scales (type, spacing,
+       elevation), then colour, then the two topics that are rules rather than
+       scales. */
     children: [
-      { id: 'typography', label: 'Typography' },
-      { id: 'icons', label: 'Icons' },
+      { id: 'foundation-platforms',  label: 'Platforms' },
+      { id: 'foundation-surfaces',   label: 'Surfaces' },
+      { id: 'typography',            label: 'Typography' },
+      { id: 'foundation-typography', label: 'Static & Dynamic Type' },
+      { id: 'foundation-spacing',    label: 'Spacing' },
+      { id: 'foundation-elevation',  label: 'Elevation' },
+      { id: 'colors',                label: 'Colors' },
+      { id: 'icons',                 label: 'Icons' },
+      { id: 'foundation-altdisplay', label: 'Alt Display' },
+      { id: 'foundation-states',     label: 'States' },
     ],
   },
   {
@@ -407,6 +429,10 @@ function ShowcaseInner() {
           <Box sx={{ maxWidth: '100%' }}>
 
             {/* ============ FOUNDATIONS ============ */}
+            {FOUNDATION_TOPICS.some(t => t.id === activeSection) && (
+              <FoundationsShowcase topic={activeSection} />
+            )}
+            {activeSection === 'colors' && <ColorsShowcase />}
             {activeSection === 'typography' && <TypographyShowcase />}
             {activeSection === 'icons' && <IconShowcase />}
 

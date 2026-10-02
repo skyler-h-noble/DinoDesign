@@ -42,7 +42,6 @@ import { CheckboxShowcase } from '../components/Checkbox/CheckboxShowcase';
 import { ChipShowcase } from '../components/Chip/ChipShowcase';
 import { CircularProgressShowcase } from '../components/CircularProgress/CircularProgressShowcase';
 import { CodeBlockShowcase } from '../components/CodeBlock/CodeBlockShowcase';
-import { ColorsShowcase } from '../components/Colors/ColorsShowcase';
 import { CopyrightShowcase } from '../components/Copyright/CopyrightShowcase';
 import { CurvedTextShowcase } from '../components/CurvedText/CurvedTextShowcase';
 import { DialogShowcase } from '../components/Dialog/DialogShowcase';
@@ -85,6 +84,8 @@ import { TooltipShowcase } from '../components/Tooltip/TooltipShowcase';
 import { TransferListShowcase } from '../components/TransferList/TransferListShowcase';
 import { TreeViewShowcase } from '../components/TreeView/TreeViewShowcase';
 import { TypographyShowcase } from '../components/Typography/TypographyShowcase';
+import { FoundationsShowcase, FOUNDATION_TOPICS } from '../components/Foundations/FoundationsShowcase';
+import { ColorsShowcase } from '../components/Colors/ColorsShowcase';
 
 describe('every showcase renders', () => {
   test('Accordion', () => { render(<OmniDesignProvider><AccordionShowcase /></OmniDesignProvider>); });
@@ -147,4 +148,16 @@ describe('every showcase renders', () => {
   test('TransferList', () => { render(<OmniDesignProvider><TransferListShowcase /></OmniDesignProvider>); });
   test('TreeView', () => { render(<OmniDesignProvider><TreeViewShowcase /></OmniDesignProvider>); });
   test('Typography', () => { render(<OmniDesignProvider><TypographyShowcase /></OmniDesignProvider>); });
+});
+
+/* The Foundations pages render too. These were authored in docs/foundations.js
+   and had no page at all until now, so there was nothing to break — which is
+   exactly when a guard is cheapest to add. */
+describe('foundations render', () => {
+  test.each(FOUNDATION_TOPICS.map(t => t.id))('%s', (id) => {
+    render(<OmniDesignProvider><FoundationsShowcase topic={id} /></OmniDesignProvider>);
+  });
+  test('Colors', () => {
+    render(<OmniDesignProvider><ColorsShowcase /></OmniDesignProvider>);
+  });
 });
