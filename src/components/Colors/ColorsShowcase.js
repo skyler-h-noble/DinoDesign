@@ -82,11 +82,6 @@ export function ColorsShowcase() {
     { name: 'Tertiary', var: '--Tertiary-Color-Vibrant' },
   ];
 
-  /* The full ramp per palette, so the core colour has its context. Twelve
-     tones is what the generator publishes; Vibrant is one of them (Color-8)
-     rather than a thirteenth. */
-  const RAMP_PALETTES = ['Primary', 'Secondary', 'Tertiary', 'Neutral'];
-  const RAMP_TONES = Array.from({ length: 12 }, (_, i) => i + 1);
 
   // Static background colors
   const backgroundColors = [
@@ -180,47 +175,62 @@ export function ColorsShowcase() {
               ))}
             </Grid>
 
-            {/* The full ramp, so the core colour has its context. Twelve tones
-                per palette, with Color-8 marked — Vibrant resolves to it rather
-                than being a thirteenth tone, which is easy to assume otherwise.
-
-                Flat rows of fixed-width cells rather than a Grid: the tones are
-                a SEQUENCE, and a wrapping grid breaks the one thing a ramp has
-                to show, which is that each step is adjacent to the next. */}
-            <Box sx={{ mt: 4 }}>
-              <Typography variant="body2" sx={{ mb: 2, color: 'var(--Text-Quiet)' }}>
-                The full ramp. Color-8 is the core colour — <code>Color-Vibrant</code> resolves
-                to it, rather than being a thirteenth tone.
-              </Typography>
-              {RAMP_PALETTES.map((palette) => (
-                <Box key={palette} sx={{ mb: 2 }}>
-                  <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: 'var(--Text)' }}>
-                    {palette}
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexWrap: 'nowrap', overflowX: 'auto' }}>
-                    {RAMP_TONES.map((n) => (
-                      <Box key={n} sx={{ textAlign: 'center', flex: '0 0 auto', width: 56 }}>
-                        <Box sx={{
-                          height: 44,
-                          backgroundColor: `var(--${palette}-Color-${n})`,
-                          border: n === 8 ? '2px solid var(--Focus-Visible)' : '1px solid var(--Border-Variant)',
-                          borderRadius: n === 8 ? 'var(--Style-Border-Radius, 4px)' : 0,
-                        }} />
-                        <Typography variant="caption" sx={{
-                          fontSize: 10, color: 'var(--Text-Quiet)',
-                          fontWeight: n === 8 ? 700 : 400,
-                        }}>
-                          {n}
-                        </Typography>
-                      </Box>
-                    ))}
-                  </Box>
-                </Box>
-              ))}
-            </Box>
           </Box>
 
           {/* Background/Surface Colors */}
+          {/* Text and header ROLES.
+              These are the tokens a component actually asks for — Typography's
+              `color` prop maps straight onto them — and they were missing from
+              this page entirely while the raw palette ramps were shown in full.
+              That is backwards: the ramp is generator internals an agent should
+              not reach for, and these are the names it should.
+
+              Header and Text are separate because their REQUIREMENTS differ.
+              Header carries display-sized type and is held to 3:1; Text is body
+              copy at 4.5:1. One token used for both would have to meet the
+              stricter of the two everywhere, which would flatten the hierarchy
+              the header role exists to create. */}
+          <Box sx={{ mb: 6 }}>
+            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'var(--Header)' }}>
+              Header Colors
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 3, color: 'var(--Text-Quiet)' }}>
+              Display and H1–H3. Held to 3:1 — large type needs less contrast to stay legible,
+              and a distinct tone is what reads as hierarchy.
+            </Typography>
+            <Grid container spacing={2}>
+              {['', 'Primary', 'Secondary', 'Tertiary', 'Neutral', 'Info', 'Success', 'Warning', 'Error'].map((role) => (
+                <Grid item key={role || 'base'}>
+                  <ColorSwatch
+                    name={role || 'Header'}
+                    cssVar={role ? `--Header-${role}` : '--Header'}
+                    small
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+
+          <Box sx={{ mb: 6 }}>
+            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'var(--Header)' }}>
+              Text Colors
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 3, color: 'var(--Text-Quiet)' }}>
+              H4–H6, body, labels, captions — everything that is not display type. Held to 4.5:1.
+            </Typography>
+            <Grid container spacing={2}>
+              {['', 'Quiet', 'Primary', 'Secondary', 'Tertiary', 'Neutral', 'Info', 'Success', 'Warning', 'Error', 'BW'].map((role) => (
+                <Grid item key={role || 'base'}>
+                  <ColorSwatch
+                    name={role || 'Text'}
+                    cssVar={role ? `--Text-${role}` : '--Text'}
+                    small
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+
           <Box sx={{ mb: 6 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'var(--Header)' }}>
               Background Colors
@@ -328,7 +338,7 @@ export function ColorsShowcase() {
             </Typography>
             <Grid container spacing={2}>
               <Grid item>
-                <ColorSwatch name="Icon" cssVar="--Icon-Default" />
+                <ColorSwatch name="Icon" cssVar="--Icons-Default" />
               </Grid>
              <Grid item>
                 <ColorSwatch name="Icon-Primary" cssVar="--Icons-Primary" />
@@ -376,14 +386,14 @@ export function ColorsShowcase() {
                     <Grid item>
                       <ColorSwatch 
                         name="Background" 
-                        cssVar={`--Tags-${variant}-BG`} 
+                        cssVar={`--Tag-${variant}-BG`} 
                         small
                       />
                     </Grid>
                     <Grid item>
                       <ColorSwatch 
                         name="Text" 
-                        cssVar={`--Tags-${variant}-Text`} 
+                        cssVar={`--Tag-${variant}-Text`} 
                         small
                       />
                     </Grid>
@@ -430,12 +440,13 @@ export function ColorsShowcase() {
                 Primary Outline
               </Typography>
               <Grid container spacing={2}>
+                {/* Outline publishes --Buttons-<Palette>-Outline-Text and nothing
+                    else. Outline-Hover and Outline-Active were both referenced
+                    here and neither is generated, so this pair rendered two empty
+                    boxes. An outline button's hover and pressed come from the
+                    palette's own -Hover and -Pressed, which the rows above show. */}
                 <Grid item>
-                  <ColorSwatch 
-                    name="Hover" 
-                    cssVar="--Buttons-Primary-Outline-Hover" 
-                    small
-                  />
+                  <ColorSwatch name="Outline Text" cssVar="--Buttons-Primary-Outline-Text" small />
                 </Grid>
                 {/* No outline "Active" swatch. The outline variant publishes
                     --Buttons-<Palette>-Outline-Text and nothing else; an
