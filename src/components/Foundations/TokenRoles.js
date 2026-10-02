@@ -63,10 +63,14 @@ export function RoleSwatches({ title, note, roles, tokenFor }) {
  */
 export function StyleTable({ styles, tokensFor, defaultColorFor, render }) {
   return (
-    <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+    <Box component="table" sx={{
+      width: '100%', borderCollapse: 'collapse', textAlign: 'left',
+      '& tr.style-row + tr.style-row td': { borderTop: '1px solid var(--Border-Variant)' },
+      '& tr.style-row td': { paddingTop: 2.5, paddingBottom: 2.5 },
+    }}>
       <thead>
         <tr>
-          {['Style', 'Sample', 'Colour role', 'Variables'].map((h) => (
+          {['Style', 'Sample', 'Role', 'Variables'].map((h) => (
             <Box key={h} component="th" sx={{ py: 1, pr: 2, borderBottom: '1px solid var(--Border)', verticalAlign: 'bottom' }}>
               <EyebrowSmall>{h}</EyebrowSmall>
             </Box>
@@ -74,8 +78,13 @@ export function StyleTable({ styles, tokensFor, defaultColorFor, render }) {
         </tr>
       </thead>
       <tbody>
+        {/* A rule between styles, and more room around each.
+            This is the one list where a per-row line earns its place: each row
+            renders its style in ITSELF, so without a separator two adjacent
+            samples read as one block of mixed type rather than as two entries.
+            Elsewhere the rows are uniform and spacing is enough. */}
         {styles.map((name) => (
-          <tr key={name}>
+          <tr key={name} className="style-row">
             <Box component="td" sx={{ py: 1, pr: 2, verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
               <Caption style={{ fontFamily: 'ui-monospace, Menlo, monospace' }}>{name}</Caption>
             </Box>
