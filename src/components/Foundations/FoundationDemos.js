@@ -101,9 +101,15 @@ function SurfaceRow({ name, usedBy }) {
           each description belonging to the NEXT row.
           The smart gap is right for a stack of controls and wrong for two
           lines of a label, so this opts out by not being a stack. */}
-      <Box sx={{ minWidth: 0 }}>
-        <Caption style={{ fontFamily: 'ui-monospace, Menlo, monospace', display: 'block', lineHeight: 1.4 }}>{name}</Caption>
-        <Caption color="quiet" style={{ display: 'block', lineHeight: 1.4 }}>{usedBy}</Caption>
+      {/* The leading is set on the WRAPPER.
+          Typography writes lineHeight into its own sx, so a `style` prop on the
+          component does not reliably win — which is why setting it there left
+          the two lines as far apart as before, the name floating above the
+          swatch and its description below. `& > *` reaches the rendered element
+          and does. */}
+      <Box sx={{ minWidth: 0, '& > *': { display: 'block', lineHeight: 1.45 } }}>
+        <Caption style={{ fontFamily: 'ui-monospace, Menlo, monospace' }}>{name}</Caption>
+        <Caption color="quiet">{usedBy}</Caption>
       </Box>
     </HStack>
   );

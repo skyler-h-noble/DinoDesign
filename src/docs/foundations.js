@@ -13,12 +13,13 @@
 export const FOUNDATIONS = [{
   title: 'Platforms, not breakpoints',
   lede: 'There are no media queries in this system. Not one.',
-  body: ['Responsive behaviour comes from a `data-platform` attribute on the root element, not from viewport width. Set it and every metric changes at once — the type ramp, button heights, icon sizes, touch targets, bar heights.', 'The reason is that these are not width decisions. A 28px Android button and a 44px iOS one are the two vendors\' published minimums, not two points on a curve; a media query would have to invent a width at which one becomes the other.'],
+  body: ['Responsive behaviour comes from a `data-device` attribute on the root element, not from viewport width. Set it and every metric changes at once — the type ramp, button heights, icon sizes, touch targets, bar heights.', 'The reason is that these are not width decisions. A 28px Android button and a 44px iOS one are the two vendors\' published minimums, not two points on a curve; a media query would have to invent a width at which one becomes the other.'],
   table: {
     head: ['Attribute', 'Covers'],
-    rows: [['`[data-platform="Desktop"]`', 'desktop, and the default'], ['`[data-platform="IOS-Mobile"]`', 'iPhone'], ['`[data-platform="IOS-Tablet"]`', 'iPad, both orientations'], ['`[data-platform="Android"]`', 'Android phone and tablet']]
+    rows: [['`[data-device="Desktop"]`', 'desktop, and the default'], ['`[data-device="IOS-Mobile"]`', 'iPhone'], ['`[data-device="IOS-Tablet"]`', 'iPad, both orientations'], ['`[data-device="Android-Tablet"]`', 'Android tablet, both orientations'], ['`[data-device="Android-Mobile"]`', 'Android phone']]
   },
-  trap: 'Do not write `@media (min-width: …)` against these tokens. A breakpoint cannot change them — they are attribute-scoped — so the rule will appear to do nothing, and adding your own values fights the attribute rather than extending it.'
+  body2: [],
+  trap: 'The attribute was `data-platform` until the device modes were split; a system generated before that still selects on the old name, so the library sets BOTH until every system in Storage has been regenerated. Do not write `@media (min-width: …)` against these tokens. A breakpoint cannot change them — they are attribute-scoped — so the rule will appear to do nothing, and adding your own values fights the attribute rather than extending it.'
 }, {
   title: 'Surfaces',
   lede: 'Ten levels, and `data-theme` + `data-surface` is how you paint anything.',

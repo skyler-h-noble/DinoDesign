@@ -108,14 +108,24 @@ export function StyleTable({ styles, tokensFor, defaultColorFor, render }) {
                 {defaultColorFor(name) === 'header' ? '--Header-*' : '--Text-*'}
               </Caption>
             </Box>
-            {/* Inline and wrapping, not one per line. Eight tokens stacked made
-                the row taller than everything else in it. */}
-            <Box component="td" sx={{ py: 1, verticalAlign: 'middle' }}>
-              <Caption color="quiet" style={{
-                fontFamily: 'ui-monospace, Menlo, monospace', fontSize: 10, lineHeight: 1.5,
-              }}>
-                {tokensFor(name).map(t => t.replace(/^--/, '')).join(' · ')}
-              </Caption>
+            {/* One per line, which is how a token list is read — scanning for a
+                name in a run of middots is harder than scanning a column.
+
+                The height problem was never the stacking, it was the LINE
+                HEIGHT: Caption inherits the brand's body leading, which is
+                generous for prose and enormous for a ten-pixel monospace list.
+                Set on the wrapper via `& > *` rather than on each Caption,
+                because Typography writes lineHeight into its own sx and a
+                `style` prop on the component does not reliably win. */}
+            <Box component="td" sx={{
+              py: 1, verticalAlign: 'middle',
+              '& > *': { display: 'block', lineHeight: 1.45 },
+            }}>
+              {tokensFor(name).map((t) => (
+                <Caption key={t} color="quiet" style={{
+                  fontFamily: 'ui-monospace, Menlo, monospace', fontSize: 10,
+                }}>{t}</Caption>
+              ))}
             </Box>
           </tr>
         ))}
