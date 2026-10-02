@@ -136,6 +136,17 @@ export function ColorsShowcase() {
        unresolved var() — a transparent box with a border, which reads as
        "this colour is white" rather than "this token is not a thing". */
     { name: 'Button Pressed', suffix: 'Pressed' },
+    /* The BORDER is the one that keeps a button accessible.
+       A fill can sit at any contrast against the page — it is a surface, not
+       text — so what guarantees the control is findable is its edge, held to
+       3:1 as non-text contrast (WCAG 1.4.11). It is the token most likely to
+       be dismissed as decoration and the only one doing that job, which is
+       why it belongs in this row rather than in a footnote.
+       It is also load-bearing in the geometry: --Button-Border-Width is 1px
+       and Figma computes Button-Height, Sm/Lg-Button-Height and the three
+       Button-Swatch tokens as outer minus (border x 2). */
+    { name: 'Button Border', suffix: 'Border' },
+    { name: 'Button Quiet', suffix: 'Quiet' },
   ];
 
   return (
