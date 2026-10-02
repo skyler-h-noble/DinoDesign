@@ -158,9 +158,9 @@ describe('Defaults', () => {
      component while the GALLERY quietly remapped it to tertiary — the
      intended colour lived in the showcase, not the component, and the suite
      locked in the version nobody saw. */
-  test('default color is tertiary', () => {
+  test('default color is default', () => {
     const { container } = renderFab();
-    expect(container.querySelector('.fab-tertiary')).toBeInTheDocument();
+    expect(container.querySelector('.fab-default')).toBeInTheDocument();
     expect(container.querySelector('.fab-primary')).not.toBeInTheDocument();
   });
 

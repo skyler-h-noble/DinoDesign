@@ -73,6 +73,7 @@ import { ButtonGroup } from '../components/ButtonGroup';
 import { Accordion } from '../components/Accordion';
 import { Body, H3 } from '../components/Typography';
 import { VStack, HStack } from '../components/Stack';
+import { Caption } from '../components/Typography';
 // Relative, not the package name: this file now lives INSIDE the library, and
 // importing the package from within it would resolve to the installed copy
 // rather than this source — a second React tree and a stale component set.
@@ -198,12 +199,32 @@ export const PROP_EXAMPLES = {
        and its stroke to Buttons/<mode>/Border, so you change colour by setting
        the Buttons MODE on the frame, not by picking a variant. In code it is
        the `color` prop, and the names are the same list. */
-    color: () => <HStack gap="var(--Sizing-1)" style={{ flexWrap: 'wrap' }}>
-      {['default', 'primary', 'secondary', 'tertiary', 'success', 'error'].map(c => (
-        <Fab key={c} color={c} size="small"
-             icon={<Icon size="small"><AddIcon /></Icon>} ariaLabel={'Add, ' + c} />
-      ))}
-    </HStack>,
+    color: () => {
+      /* The DEFAULT sits on its own at the left, labelled, with a rule between
+         it and the rest — otherwise it is just one swatch among ten and the
+         thing a reader most needs ("what do I get if I pass nothing?") is the
+         hardest to find.
+
+         All ten of the Buttons collection's modes are here. An earlier version
+         showed six and silently dropped neutral, info and warning, which reads
+         as those colours not existing rather than as the sample being partial. */
+      const swatch = (c, isDefault) => (
+        <VStack key={c} gap="var(--Sizing-Half)" style={{ alignItems: 'center' }}>
+          <Fab color={c} size="small"
+               icon={<Icon size="small"><AddIcon /></Icon>}
+               ariaLabel={'Add, ' + c} />
+          <Caption color={isDefault ? 'standard' : 'quiet'}>{c}</Caption>
+        </VStack>
+      );
+      return (
+        <HStack gap="var(--Sizing-2)" style={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
+          {swatch('default', true)}
+          <Divider orientation="vertical" flexItem />
+          {['primary', 'secondary', 'tertiary', 'neutral', 'info',
+            'success', 'warning', 'error', 'black-white'].map(c => swatch(c, false))}
+        </HStack>
+      );
+    },
 
     /* Extended is a BOOLEAN in Figma (Extended#9244:80, default false), not a
        size or a shape — the same FAB widened to carry a label beside the icon.

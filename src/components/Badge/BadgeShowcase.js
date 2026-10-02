@@ -68,8 +68,6 @@ function A11yRow({ label, ratio, threshold, note }) {
 // --- Copy Button -------------------------------------------------------------
 
 function CopyButton({ code }) {
-  const [bgTheme, setBgTheme] = useState(null);
-  const [bgSurface, setBgSurface] = useState('Surface');
   const [copied, setCopied] = useState(false);
   const handleCopy = async () => {
     try {
@@ -143,6 +141,8 @@ function ControlButton({ label, selected, onClick }) {
 // --- Main Showcase -----------------------------------------------------------
 
 export function BadgeShowcase() {
+  const [bgTheme, setBgTheme] = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
 
   // Playground state
   const [style, setStyle] = useState('solid');

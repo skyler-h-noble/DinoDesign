@@ -2,7 +2,7 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { SHADOW_LEVEL_3, SHADOW_LEVEL_4, bevelShadow } from '../_shadows';
+import { SHADOW_LEVEL_3, SHADOW_LEVEL_4, bevelShadow, tokenSegment } from '../_shadows';
 
 /**
  * Fab (Floating Action Button) Component
@@ -32,10 +32,12 @@ import { SHADOW_LEVEL_3, SHADOW_LEVEL_4, bevelShadow } from '../_shadows';
  * Accessibility: role="button", aria-label, focus-visible ring
  */
 
-const COLOR_MAP = {
-  primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', neutral: 'Neutral',
-  info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
-};
+/* No local colour map. The one that was here listed eight names and omitted
+   both `default` and `black-white`, while falling back to `|| 'Primary'` — so
+   those two rendered as primary and looked like a brand whose default and
+   black-white simply matched it. tokenSegment is what Button already uses, and
+   it knows `black-white` becomes `BlackWhite` rather than `Black-white`,
+   which is not a token. */
 
 const SIZE_MAP = {
   small:  { size: 32, iconSize: 16, fontSize: '13px', px: 12, gap: 6 },
@@ -44,7 +46,7 @@ const SIZE_MAP = {
 };
 
 function getTokens(color) {
-  const C = COLOR_MAP[color] || 'Primary';
+  const C = tokenSegment(color);
   return {
     bg: 'var(--Buttons-' + C + '-Button)',
     text: 'var(--Buttons-' + C + '-Text)',
@@ -86,18 +88,14 @@ export function Fab({
   icon,
   label,
   variant = 'solid',
-  /* Tertiary.
-     A FAB is the one primary action floating over the content, and it is
-     deliberately NOT the primary palette: it sits above everything, so it
-     reads loudly at any colour, and taking primary would leave the actual
-     primary buttons underneath competing with it.
-     The showcase already applied this as `color === 'default' ? 'tertiary'`,
-     which meant the intended colour lived in the gallery rather than in the
-     component — anyone importing Fab got something else.
-     Figma does not pin this: a FAB's colour comes from the Buttons MODE set on
-     its frame, and that collection's ten modes are the same list this prop
-     takes. */
-  color = 'tertiary',
+  /* `default` — the brand's own default button colour, same as every other
+     control in the system. Figma does not pin this: a FAB's colour comes from
+     the Buttons MODE set on its frame, and that collection's ten modes are the
+     same list this prop takes.
+     It used to be `primary`, with FabShowcase quietly remapping `default` to
+     tertiary — so the gallery showed one colour and anyone importing Fab got
+     another. */
+  color = 'default',
   size = 'medium',
   extended = false,
   animate = false,

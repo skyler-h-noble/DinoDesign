@@ -136,8 +136,6 @@ function A11yRow({ label, ratio, threshold, note }) {
   );
 }
 function CopyButton({ code }) {
-  const [bgTheme, setBgTheme] = useState(null);
-  const [bgSurface, setBgSurface] = useState('Surface');
   const [copied, setCopied] = useState(false);
   const handleCopy = async () => {
     try { await navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 2000); }
@@ -155,6 +153,8 @@ function ControlButton({ label, selected, onClick }) {
 }
 
 export function IconShowcase() {
+  const [bgTheme, setBgTheme] = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
   const [style, setStyle]           = useState('filled');
   const [color, setColor]           = useState('default');
   const [size, setSize]             = useState('medium');

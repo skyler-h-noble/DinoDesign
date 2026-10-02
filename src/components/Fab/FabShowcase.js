@@ -1,5 +1,5 @@
 // src/components/Fab/FabShowcase.js
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { ShowcaseHeader } from '../ShowcaseHeader';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -14,6 +14,7 @@ import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import { CodeBlock } from '../CodeBlock/CodeBlock';
+import { A11yRow, A11yCheckRow, useMeasuredTokens, getContrast } from '../a11yPanel';
 import {
   H3, H5, BodySmall, Caption, Label, EyebrowSmall
 } from '../Typography';
@@ -115,6 +116,27 @@ export function FabShowcase() {
      component — so the showcase looked right and anyone importing Fab got
      something else. Fab now defaults to tertiary itself. */
   const effectiveColor = color;
+
+  /* The surface the Accessibility tab MEASURES. Mounted here rather than inside
+     a tab panel: the panel only renders when its tab is open, so measuring from
+     there would read nothing until someone clicked Accessibility, and the first
+     render would always be blank. */
+  const surfaceRef = useRef(null);
+
+  const SIZE_PX = { small: 32, medium: 48, large: 56 };
+  const a11y = useMeasuredTokens(surfaceRef, (v) => {
+    const C = color.charAt(0).toUpperCase() + color.slice(1).replace(/-([a-z])/g, (m, c) => c.toUpperCase());
+    return {
+      background: v('--Background'),
+      focusVisible: v('--Focus-Visible'),
+      fabBg: v('--Buttons-' + C + '-Button'),
+      fabIcon: v('--Buttons-' + C + '-Text'),
+      fabBorder: v('--Buttons-' + C + '-Border'),
+      hover: v('--Buttons-' + C + '-Hover'),
+      pressed: v('--Buttons-' + C + '-Pressed'),
+    };
+  }, [color, bgTheme, bgSurface]);
+
   const getIconEl = () => {
     const IconComp = MuiIcons[iconName] || MuiIcons['Add'];
     return <Icon size="medium"><IconComp /></Icon>;
@@ -141,6 +163,15 @@ export function FabShowcase() {
       <Box sx={{ mt: 1 }}>
         <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
       </Box>
+
+      {/* Invisible, zero-height, but carrying the chosen theme and surface so
+          getComputedStyle resolves the same tokens the preview paints with. */}
+      <Box ref={surfaceRef}
+        {...(bgTheme ? { 'data-theme': bgTheme } : {})}
+        data-surface={bgSurface}
+        sx={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}
+        aria-hidden="true"
+      />
 
       {/* Layout A: the tab bar spans the page, so Summary, Accessibility and
           Change Log get the full width to read. The preview/controls split
@@ -263,6 +294,39 @@ export function FabShowcase() {
 <TabPanel value={2}>
                 <Box sx={{ p: 3 }}>
                   <Stack spacing={3}>
+
+                    {/* Measured live against the theme and surface chosen above,
+                        not described in prose. Everything here reads the tokens
+                        the preview actually resolves, so changing the surface
+                        changes these numbers. */}
+                    <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
+                      <H5>Contrast — {color} on {bgSurface}{bgTheme ? ' / ' + bgTheme : ''}</H5>
+                      <Stack spacing={0}>
+                        <A11yRow
+                          label="FAB fill vs. page background"
+                          note="Non-text contrast, 3:1 — the FAB has to be findable against what it floats over."
+                          ratio={getContrast(a11y.fabBg, a11y.background)} threshold={3.0} />
+                        <A11yRow
+                          label="Icon vs. FAB fill — resting"
+                          note="The glyph carries the meaning, so it is held to text contrast."
+                          ratio={getContrast(a11y.fabIcon, a11y.fabBg)} threshold={4.5} />
+                        <A11yRow
+                          label="Icon vs. FAB fill — hover"
+                          ratio={getContrast(a11y.fabIcon, a11y.hover, a11y.fabBg)} threshold={4.5} />
+                        <A11yRow
+                          label="Icon vs. FAB fill — pressed"
+                          ratio={getContrast(a11y.fabIcon, a11y.pressed, a11y.fabBg)} threshold={4.5} />
+                        <A11yRow
+                          label="Focus ring vs. page background"
+                          note="3:1. The ring sits outside the FAB, so it is measured against what is behind it, not against the fill."
+                          ratio={getContrast(a11y.focusVisible, a11y.background)} threshold={3.0} />
+                        <A11yCheckRow
+                          label="Target size"
+                          note="WCAG 2.5.8 asks 24x24 CSS px minimum; 44x44 is the AAA / platform figure."
+                          pass={SIZE_PX[size] >= 44}
+                          detail={SIZE_PX[size] + 'px'} />
+                      </Stack>
+                    </Box>
 
                     <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
                       <H5>ARIA and Semantics</H5>

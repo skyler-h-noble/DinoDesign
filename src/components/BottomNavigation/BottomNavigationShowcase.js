@@ -65,8 +65,6 @@ const BAR_COLORS = [
 
 /* --- Helpers --- */
 function CopyButton({ code }) {
-  const [bgTheme, setBgTheme] = useState(null);
-  const [bgSurface, setBgSurface] = useState('Surface');
   const [copied, setCopied] = useState(false);
   const handleCopy = async () => {
     try { await navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 2000); }
@@ -164,6 +162,8 @@ function CheckboxControl({ label, checked, onChange, caption, disabled }) {
 }
 
 export function BottomNavigationShowcase() {
+  const [bgTheme, setBgTheme] = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
   const [activeNav, setActiveNav] = useState(0);
 
   const [fixed, setFixed] = useState(true);

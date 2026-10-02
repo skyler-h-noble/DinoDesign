@@ -56,8 +56,6 @@ const CARD_COLOR_OPTIONS = ['default', 'primary', 'secondary', 'tertiary', 'neut
 /* ── Helpers ── */
 
 function CopyButton({ code }) {
-  const [bgTheme, setBgTheme] = useState(null);
-  const [bgSurface, setBgSurface] = useState('Surface');
   const [copied, setCopied] = useState(false);
   const handleCopy = async () => {
     try { await navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 2000); }
@@ -387,6 +385,8 @@ function CodeBlock({ code }) {
 /* ── Main Showcase ── */
 
 export function GradientShowcase() {
+  const [bgTheme, setBgTheme] = useState(null);
+  const [bgSurface, setBgSurface] = useState('Surface');
   const [variant, setVariant] = useState('linear');
   const [color, setColor] = useState('primary');
   const [angle, setAngle] = useState(135);

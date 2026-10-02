@@ -114,13 +114,12 @@ export const FAB_DOC = {
     type: 'string',
     values: ['default', 'primary', 'secondary', 'tertiary', 'neutral',
              'info', 'success', 'warning', 'error', 'black-white'],
-    default: 'tertiary',
+    default: 'default',
     note: 'The ten modes of Figma\'s Buttons collection. A FAB has no Color '
       + 'variant axis — in FIGMA you change its colour by setting the Buttons '
       + 'MODE on the frame, and in CODE it is this prop, taking the same ten '
-      + 'names. Defaults to `tertiary`: a FAB floats above everything, so it '
-      + 'reads loudly at any colour, and taking `primary` would leave the real '
-      + 'primary buttons underneath competing with it.'
+      + 'names. Defaults to `default`, the brand\'s own button colour — '
+      + 'the same rule every other control in the system follows.'
   }, {
     name: 'size',
     type: 'string',
