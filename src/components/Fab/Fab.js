@@ -162,7 +162,19 @@ export function Fab({
           '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px' },
           // Animation
           ...(animate && !disabled && {
-            animation: 'fab-pulse 2s infinite',
+            animation: 'fab-pulse 2s var(--Motion-Easing-Standard, ease) infinite',
+            /* The design system zeroes --Motion-Duration-* under
+               prefers-reduced-motion, and this loop ignored that entirely: a
+               hardcoded `2s infinite` kept pulsing for a viewer who has asked
+               the OS to stop moving things. WCAG 2.2.2 is about exactly this —
+               content that moves indefinitely and cannot be stopped.
+
+               The duration tokens cannot carry the loop (they are 100-300ms
+               and this is a 2s breath), so the honest fix is to stop the
+               animation outright rather than shorten it. */
+            '@media (prefers-reduced-motion: reduce)': {
+              animation: 'none',
+            },
           }),
           ...sx,
         }}
