@@ -7,6 +7,7 @@ export {
   H1, H2, H3, H4, H5, H6, Heading,
   // Display
   DisplayLarge, DisplayMedium, DisplaySmall,
+  AltDisplayLarge, AltDisplayMedium, AltDisplaySmall,
   // Subtitle
   Subtitle, SubtitleSmall, SubtitleMedium, SubtitleLarge, Subtitle1, Subtitle2,
   // Body

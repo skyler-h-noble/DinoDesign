@@ -15,6 +15,7 @@ export const FIGMA_FILE_NAME = 'Omni-Designs-Aug12';
 
 /** Component doc name → Figma page id. */
 export const FIGMA_PAGES = {
+  Typography: '2892:1220',
   Accordion: '3156:824',
   Alert: '8832:27566',
   AppBar: '7446:33121',

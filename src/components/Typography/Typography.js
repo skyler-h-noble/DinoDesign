@@ -114,6 +114,59 @@ export const STYLE_MAP = {
   // ── Display ──────────────────────────────────────────────────────────────
   // Large and Medium belong in a header or hero area. Small is the one sized
   // to sit inside a component — a card title, a stat, a pull quote.
+  /* ── Alt Display ──────────────────────────────────────────────────────────
+     The decorative display face, and the only text in the system that is
+     PAINTED rather than coloured.
+
+     Figma's Alt-Display collection holds two variables, Color-Stop-1 and
+     Color-Stop-2, across three modes:
+
+       Default    both stops -> Header
+       Colored    both stops -> Alt-Display-Color
+       Gradient   stops -> Alt-Color-Gradient-Stop-1 / -2
+
+     So it is ALWAYS a two-stop gradient; the mode decides whether the stops
+     differ. Default and Colored render solid because both ends are the same
+     colour, which is why there is no `gradient` prop here — the mode is set on
+     an ancestor and this just paints what the tokens resolve to.
+
+     --Alt-Display-Color-Stop-1 and -2 have shipped in every brand's CSS since
+     the Alt Display was added and NOTHING read them. The gradient existed as
+     tokens, in Figma, and in the architecture doc, and could not appear on a
+     page because no component applied it. */
+  'alt-display-large': {
+    component: 'h1',
+    fontFamily: ffs('Alt-Display-Large', FACE_DISPLAY),
+    fontSize: fs('Alt-Display-Large'),
+    fontWeight: fw('Alt-Display-Large'),
+    lineHeight: lh('Alt-Display-Large'),
+    letterSpacing: ls('Alt-Display-Large'),
+    defaultColor: 'header',
+    defaultWidth: 'fill',
+    altDisplay: true,
+  },
+  'alt-display-medium': {
+    component: 'h1',
+    fontFamily: ffs('Alt-Display-Medium', FACE_DISPLAY),
+    fontSize: fs('Alt-Display-Medium'),
+    fontWeight: fw('Alt-Display-Medium'),
+    lineHeight: lh('Alt-Display-Medium'),
+    letterSpacing: ls('Alt-Display-Medium'),
+    defaultColor: 'header',
+    defaultWidth: 'fill',
+    altDisplay: true,
+  },
+  'alt-display-small': {
+    component: 'h1',
+    fontFamily: ffs('Alt-Display-Small', FACE_DISPLAY),
+    fontSize: fs('Alt-Display-Small'),
+    fontWeight: fw('Alt-Display-Small'),
+    lineHeight: lh('Alt-Display-Small'),
+    letterSpacing: ls('Alt-Display-Small'),
+    defaultColor: 'header',
+    defaultWidth: 'fill',
+    altDisplay: true,
+  },
   'display-large': {
     component: 'h1',
     fontFamily: ffs('Display-Large', FACE_DISPLAY),
@@ -636,6 +689,7 @@ const TEXT_COLOR_MAP = {
 const HEADING_STYLES = new Set([
   'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
   'display-large', 'display-medium', 'display-small',
+  'alt-display-large', 'alt-display-medium', 'alt-display-small',
   'subtitle-large', 'subtitle', 'subtitle-small',
 ]);
 
@@ -659,6 +713,8 @@ export function Typography({
   children,
   textStyle = 'body',
   color,
+  /** 'default' | 'colored' | 'gradient' — Alt Display only. */
+  altMode,
   width,
   component,
   noWrap = false,
@@ -695,9 +751,20 @@ export function Typography({
   const resolvedComponent = component || config.component;
   const colorKey = color || config.defaultColor;
 
+  /* The Alt Display mode, as an attribute the CSS already understands.
+     typography-tokens.css emits [data-alt-display="default"|"colored"|
+     "gradient"] and the three set Color-Stop-1/-2 differently — so swapping
+     mode needs nothing but the attribute. No new token, no new rule, and the
+     same three names Figma's Alt-Display collection uses.
+     Unset by default, so it INHERITS: a brand picks its mode once on a wrapper
+     and every Alt Display under it follows, which is how the Figma mode
+     behaves too. */
+  const altModeAttr = altMode ? { 'data-alt-display': altMode } : {};
+
   return (
     <Box
       component={resolvedComponent}
+      {...altModeAttr}
       className={
         'typography typography-' + style +
         (LEGACY_CLASS[style] ? ' typography-' + LEGACY_CLASS[style] : '') +
@@ -716,6 +783,27 @@ export function Typography({
         textTransform:     textTransformValue,
         fontVariantNumeric: config.fontVariantNumeric || 'normal',
         color:             colorValue,
+        /* Alt Display is PAINTED, not coloured.
+           A two-stop gradient clipped to the glyphs. Both stops resolve from
+           Figma's Alt-Display collection, so Default and Colored come out
+           solid (their stops are equal) and only Gradient actually ramps —
+           which is why there is no `gradient` prop: the mode decides, and this
+           paints whatever the tokens say.
+
+           `color: transparent` is what reveals the clipped background, so it
+           has to come AFTER the colour above. The fallback chain in the CSS
+           ends at --Header, so a brand with no alt colour set still paints a
+           visible, correctly-themed heading rather than an invisible one. */
+        ...(config.altDisplay ? {
+          backgroundImage:
+            'linear-gradient(90deg, var(--Alt-Display-Color-Stop-1, var(--Header)),'
+            + ' var(--Alt-Display-Color-Stop-2, var(--Header)))',
+          WebkitBackgroundClip: 'text',
+          backgroundClip: 'text',
+          color: 'transparent',
+          /* Without this a descender can be clipped by the painted box. */
+          paddingBottom: '0.08em',
+        } : {}),
         display:           isFill ? 'block' : 'inline',
         width:             isFill ? '100%' : 'auto',
         margin:            0,
@@ -768,6 +856,9 @@ export const CAP_HEIGHT_TRIM = {
 export const DisplayLarge  = (p) => <Typography textStyle="display-large"  {...p} />;
 export const DisplayMedium = (p) => <Typography textStyle="display-medium" {...p} />;
 export const DisplaySmall  = (p) => <Typography textStyle="display-small"  {...p} />;
+export const AltDisplayLarge  = (p) => <Typography textStyle="alt-display-large"  {...p} />;
+export const AltDisplayMedium = (p) => <Typography textStyle="alt-display-medium" {...p} />;
+export const AltDisplaySmall  = (p) => <Typography textStyle="alt-display-small"  {...p} />;
 
 // Headers
 export const H1 = (p) => <Typography textStyle="h1" {...p} />;
