@@ -30,7 +30,7 @@ import GridViewIcon from '@mui/icons-material/GridView';
      - hover painted --Container-High, a CONTAINER level, where the rest of the
        lib uses the surface scrim --Hover / --Pressed for a control with no
        fill of its own;
-     - selected hover repainted --Buttons-Primary-Button, the resting colour,
+     - selected hover repainted --Buttons-Primary-Button, the resting color,
        so a selected segment gave no feedback at all;
      - selected text was the literal '#fff', which is wrong on any brand whose
        primary is light enough to need dark text. */

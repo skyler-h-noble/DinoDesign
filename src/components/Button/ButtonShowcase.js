@@ -42,7 +42,7 @@ const STYLES = ['solid', 'outline', 'ghost'];
    code below already handled it.
 
    `swatch` is last and marked, because it is the one option with no counterpart
-   in the design: a colour chip, code-only. */
+   in the design: a color chip, code-only. */
 /* Exactly Figma's Type axis. `swatch` was a fifth option here and is gone: a
    swatch is its own component now, so Button has no swatch type to offer. */
 const CONTENT_TYPES = ['text', 'iconOnly', 'letterNumber', 'avatar'];
@@ -82,7 +82,7 @@ function A11yRow({ label, ratio, threshold, note }) {
 }
 
 // `pass` is three-valued on purpose. null means the ratio could not be
-// measured — a token that did not resolve, or a colour format the parser does
+// measured — a token that did not resolve, or a color format the parser does
 // not read — and that is NOT a failure. Rendering it as one invents
 // accessibility bugs that aren't there, which is worse than reporting nothing,
 // because someone then goes looking for a contrast problem that does not exist.

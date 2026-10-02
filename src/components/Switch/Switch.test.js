@@ -79,7 +79,7 @@ describe('Switch Component', () => {
 
   // --- Variants ---
 
-  // The design file has no colour axis — its switch takes its colour from the
+  // The design file has no color axis — its switch takes its color from the
   // surrounding theme — so a bare <Switch /> is the `default` variant.
   test('defaults to the default (theme-driven) variant', () => {
     const { container } = render(<Switch aria-label="Test" />);
@@ -267,7 +267,7 @@ describe('Switch — on-state tokens follow the Icons collection', () => {
 
   it('the on track edge is the SAME token as its fill', () => {
     // Figma binds Switch-Body's fill and stroke to Icon. A separate border
-    // token here would be a colour the design does not have.
+    // token here would be a color the design does not have.
     expect(themedStyles().trackOnBorder).toBe(themedStyles().trackOn);
     for (const c of ['primary', 'error']) {
       const s = outlineStyles(c);
@@ -309,7 +309,7 @@ describe('Switch — on-state tokens follow the Icons collection', () => {
  *
  * It filled the track with --<C>-Color-11 and drew the dot in
  * --Buttons-<C>-Border. The Figma Switch set has two axes, State and Status —
- * there was never a variant to check it against, and the on state's colour now
+ * there was never a variant to check it against, and the on state's color now
  * comes from the Icons collection.
  *
  * Deleting the convenience exports is the point: a stale
@@ -321,7 +321,7 @@ describe('Switch — on-state tokens follow the Icons collection', () => {
 describe('Switch — the -light shape is removed', () => {
   const warn = () => jest.spyOn(console, 'warn').mockImplementation(() => {});
 
-  it('normalizes {color}-light to the solid colour', () => {
+  it('normalizes {color}-light to the solid color', () => {
     const spy = warn();
     expect(normalizeSwitchVariant('primary-light')).toBe('primary');
     expect(normalizeSwitchVariant('error-light')).toBe('error');

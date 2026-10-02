@@ -63,7 +63,7 @@ import { VStack, HStack } from '../Stack/Stack';
  * prevent.
  *
  * `white` and `black` keep their literals: they are escape hatches for a
- * footer that must sit on a fixed colour regardless of brand, which is a real
+ * footer that must sit on a fixed color regardless of brand, which is a real
  * requirement and not expressible as a surface. */
 const COLOR_PRESETS = {
   default:        { theme: 'Primary', surface: 'Surface-Dimmest' },
@@ -353,7 +353,7 @@ function SubscribeArea({
           fullWidth
           aria-label="Email address"
         />
-        {/* No variant. Controls take the brand's `default` colour unless a
+        {/* No variant. Controls take the brand's `default` color unless a
             design explicitly marks them primary — this one was marked primary
             by nobody, and a footer's newsletter signup is not the primary
             action on the page it sits at the bottom of. */}

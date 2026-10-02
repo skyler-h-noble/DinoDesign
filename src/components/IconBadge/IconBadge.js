@@ -38,7 +38,7 @@ const THEME_MAP = {
   error: 'Error',
   /* No white / black. Neither is a Theme mode — they bound nothing and left
      the badge on the page's palette, which for a badge whose entire job is to
-     be a colour is the one outcome that cannot be right.
+     be a color is the one outcome that cannot be right.
      
      Both are already reachable and always were: white is
      color="neutral" variant="light" and black is

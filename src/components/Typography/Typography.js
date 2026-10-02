@@ -116,7 +116,7 @@ export const STYLE_MAP = {
   // to sit inside a component — a card title, a stat, a pull quote.
   /* ── Alt Display ──────────────────────────────────────────────────────────
      The decorative display face, and the only text in the system that is
-     PAINTED rather than coloured.
+     PAINTED rather than colored.
 
      Figma's Alt-Display collection holds two variables, Color-Stop-1 and
      Color-Stop-2, across three modes:
@@ -127,7 +127,7 @@ export const STYLE_MAP = {
 
      So it is ALWAYS a two-stop gradient; the mode decides whether the stops
      differ. Default and Colored render solid because both ends are the same
-     colour, which is why there is no `gradient` prop here — the mode is set on
+     color, which is why there is no `gradient` prop here — the mode is set on
      an ancestor and this just paints what the tokens resolve to.
 
      --Alt-Display-Color-Stop-1 and -2 have shipped in every brand's CSS since
@@ -232,7 +232,7 @@ export const STYLE_MAP = {
     defaultColor: 'header',
     defaultWidth: 'fill',
   },
-  // H4-H6 take --Text, not --Header. The header colour is a display role: it
+  // H4-H6 take --Text, not --Header. The header color is a display role: it
   // carries the page's larger type, where a distinct tone reads as hierarchy.
   // At H4 and below the type is body-sized and usually sits inline with body
   // copy, so a second tone reads as an inconsistency rather than a level.
@@ -487,7 +487,7 @@ export const STYLE_MAP = {
   },
 
   // ── Eyebrow ───────────────────────────────────────────────────────────────
-  // Eyebrow all the way down now: the face (--Font-Family-Eyebrow), the colour
+  // Eyebrow all the way down now: the face (--Font-Family-Eyebrow), the color
   // role (--Eyebrow) and the sizes (--Eyebrow-{Small,Medium,Large}-*). The
   // sizes used to be published as --Overline-*, so `eb()` reads the current
   // name and falls back to the old one — a design system generated before the
@@ -672,7 +672,7 @@ const TEXT_COLOR_MAP = {
   //
   // The --Quiet fallback is for design systems generated before --Eyebrow
   // existed: their CSS has no such token, and without it every overline in
-  // those systems would fall back to inherited colour. It resolves to another
+  // those systems would fall back to inherited color. It resolves to another
   // BRAND token rather than a hardcoded value, so the lib still defines
   // nothing the brand CSS owns.
   eyebrow:   'var(--Eyebrow, var(--Quiet))',
@@ -724,7 +724,7 @@ export const STYLE_TOKENS = Object.fromEntries(
   })
 );
 
-/** 'header' or 'standard' — which colour role a style takes by default. */
+/** 'header' or 'standard' — which color role a style takes by default. */
 export const STYLE_DEFAULT_COLOR = Object.fromEntries(
   Object.entries(STYLE_MAP).map(([name, cfg]) => [name, cfg.defaultColor || 'standard'])
 );
@@ -808,7 +808,7 @@ export function Typography({
         textTransform:     textTransformValue,
         fontVariantNumeric: config.fontVariantNumeric || 'normal',
         color:             colorValue,
-        /* Alt Display is PAINTED, not coloured.
+        /* Alt Display is PAINTED, not colored.
            A two-stop gradient clipped to the glyphs. Both stops resolve from
            Figma's Alt-Display collection, so Default and Colored come out
            solid (their stops are equal) and only Gradient actually ramps —
@@ -816,8 +816,8 @@ export function Typography({
            paints whatever the tokens say.
 
            `color: transparent` is what reveals the clipped background, so it
-           has to come AFTER the colour above. The fallback chain in the CSS
-           ends at --Header, so a brand with no alt colour set still paints a
+           has to come AFTER the color above. The fallback chain in the CSS
+           ends at --Header, so a brand with no alt color set still paints a
            visible, correctly-themed heading rather than an invisible one. */
         ...(config.altDisplay ? {
           backgroundImage:

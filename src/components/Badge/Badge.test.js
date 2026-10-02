@@ -106,7 +106,7 @@ describe('Badge Component', () => {
   /* The -light shape was removed. Badge resolves an unknown variant as
      `variantMap[variant] || variantMap['primary']`, so a hard delete would
      have repainted success-light as PRIMARY silently; normalizeBadgeVariant
-     strips the suffix to the solid badge of the SAME colour, and the class
+     strips the suffix to the solid badge of the SAME color, and the class
      names what painted rather than what was asked for. */
   test.each([
     ['primary-light', 'badge-primary'], ['success-light', 'badge-success'],
@@ -177,13 +177,13 @@ describe('Convenience Exports', () => {
     expect(container.querySelector('.badge-primary-outline')).toBeInTheDocument();
   });
 
-  /* Colour comes from the ICONS palette, matching the design's
+  /* Color comes from the ICONS palette, matching the design's
      Icons/<palette> + Icons/On-<palette> binding — not the Buttons palette,
      whose fill token carries no 3:1 contract for a non-text element. */
   test('a solid badge paints from the Icons pair, not Buttons', () => {
     render(<Badge variant="error" badgeContent={1}><span>Child</span></Badge>);
     /* Read the rule emotion injected. jsdom will not resolve a var() to a
-       colour, but the DECLARATION is what this is about: which token family
+       color, but the DECLARATION is what this is about: which token family
        the badge asks for. */
     /* emotion runs in speedy mode, inserting through CSSOM — so the <style>
        nodes are EMPTY and only cssRules has the text. Reading textContent

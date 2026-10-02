@@ -50,7 +50,7 @@ const SIZE_MAP = {
  *
  * They become data-theme / data-surface on the root, which redefines
  * --Background, --Text, --Border, --Quiet, --Hover and --Pressed for
- * everything inside, so the component takes its colours from the zone it sits
+ * everything inside, so the component takes its colors from the zone it sits
  * in rather than from a prop.
  *
  * Deliberately NOT derived from `color`. The two are different knobs: `color`

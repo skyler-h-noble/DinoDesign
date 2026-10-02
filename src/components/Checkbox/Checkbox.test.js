@@ -241,14 +241,14 @@ describe('Checkbox — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
-// ─── Variant = colour ─────────────────────────────────────────────────────────
+// ─── Variant = color ─────────────────────────────────────────────────────────
 //
 // The -outline / -light shapes were removed. The risk in removing them was
 // never a crash: an unknown variant falls through to the map's default entry,
 // so a hard delete would have silently repainted every existing call site.
 // These tests pin the loud behaviour instead.
 
-describe('Checkbox variant is colour only', () => {
+describe('Checkbox variant is color only', () => {
   const originalEnv = process.env.NODE_ENV;
   let warn;
 
@@ -261,13 +261,13 @@ describe('Checkbox variant is colour only', () => {
     warn.mockRestore();
   });
 
-  test('normalizes a legacy shape suffix to its colour', () => {
+  test('normalizes a legacy shape suffix to its color', () => {
     expect(normalizeCheckboxVariant('secondary-outline')).toBe('secondary');
     expect(normalizeCheckboxVariant('error-light')).toBe('error');
     expect(normalizeCheckboxVariant('primary-solid')).toBe('primary');
   });
 
-  test('leaves a plain colour untouched', () => {
+  test('leaves a plain color untouched', () => {
     for (const c of ['default', 'primary', 'black-white']) {
       expect(normalizeCheckboxVariant(c)).toBe(c);
     }
@@ -279,18 +279,18 @@ describe('Checkbox variant is colour only', () => {
     normalizeCheckboxVariant('tertiary-outline');
     expect(warn).toHaveBeenCalledTimes(1);
     expect(warn.mock.calls[0][0]).toMatch(/variant="tertiary-outline"/);
-    expect(warn.mock.calls[0][0]).toMatch(/colour only/);
+    expect(warn.mock.calls[0][0]).toMatch(/color only/);
   });
 
   test('an unknown variant falls back to default, never primary', () => {
-    // primary is a DIFFERENT colour from the brand default; falling back to it
+    // primary is a DIFFERENT color from the brand default; falling back to it
     // presents an unmarked control as a deliberate one.
     expect(normalizeCheckboxVariant('nonsense')).toBe('nonsense');
     const { container } = render(<Checkbox variant="nonsense" />);
     expect(container.querySelector('.chk-box-icon')).not.toBeNull();
   });
 
-  test('renders every colour, including black-white', () => {
+  test('renders every color, including black-white', () => {
     for (const c of ['default', 'primary', 'secondary', 'tertiary', 'neutral',
                      'info', 'success', 'warning', 'error', 'black-white']) {
       const { container } = render(<Checkbox variant={c} />);

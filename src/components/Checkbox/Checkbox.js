@@ -10,14 +10,14 @@ import { tokenSegment } from '../_shadows';
  * Checkbox Component
  * Full-featured checkbox with complete design system integration
  *
- * VARIANT = COLOUR. There is one look: transparent box, coloured border, glyph
- * on check. `variant` names the colour and nothing else:
+ * VARIANT = COLOUR. There is one look: transparent box, colored border, glyph
+ * on check. `variant` names the color and nothing else:
  *   default (--Quiet box) | primary | secondary | tertiary | neutral |
  *   info | success | warning | error | black-white
  *
- * The `{color}-outline` and `{color}-light` shapes were REMOVED — colour now
+ * The `{color}-outline` and `{color}-light` shapes were REMOVED — color now
  * arrives from the design as a Buttons mode, and shape was never an axis of the
- * Figma component. Those names still resolve to their colour and warn once in
+ * Figma component. Those names still resolve to their color and warn once in
  * development; see normalizeCheckboxVariant.
  *
  * SIZES: small (16px box) | medium (20px box) | large (24px box)
@@ -39,24 +39,24 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // --- Variant Style Builders --------------------------------------------------
 
-// The DEFAULT colour draws its box in --Quiet, not in a button border token.
+// The DEFAULT color draws its box in --Quiet, not in a button border token.
 // An unchecked checkbox is a quiet affordance, not a call to action: on a brand
-// whose default button is a saturated colour, --Buttons-Default-Border painted
-// every empty box in that colour and a list of them read as a row of buttons.
+// whose default button is a saturated color, --Buttons-Default-Border painted
+// every empty box in that color and a list of them read as a row of buttons.
 // --Quiet is also the safer token for the job — it is tuned to 4.5:1 against
 // its surface, comfortably past the 3:1 a control outline needs.
 //
 // Only the box moves. The check glyph keeps the button token so that ticking
-// one is what introduces the brand colour.
+// one is what introduces the brand color.
 const defaultBorder = (C) =>
   C === 'Default' ? 'var(--Quiet)' : 'var(--Buttons-' + C + '-Border)';
 
 // A Checkbox has ONE look. `variant` selects its COLOUR and nothing else.
 //
 // There used to be two shapes, `{color}-outline` and `{color}-light`. They are
-// gone: colour now arrives as a Buttons MODE from the design, and shape was
+// gone: color now arrives as a Buttons MODE from the design, and shape was
 // never an axis of the Figma component. What survives is the outline look —
-// transparent box, coloured border, glyph on check — which is what the design
+// transparent box, colored border, glyph on check — which is what the design
 // has always drawn.
 function colorStyles(color) {
   const C = tokenSegment(color);
@@ -73,14 +73,14 @@ function buildVariantMap() {
   return map;
 }
 
-// Legacy shape suffixes resolve to the colour alone.
+// Legacy shape suffixes resolve to the color alone.
 //
 // They are NOT quietly accepted: an unknown variant falls through to the map's
 // default entry, so hard-deleting these names would have silently repainted
-// every existing call site in the default colour with no error anywhere — the
+// every existing call site in the default color with no error anywhere — the
 // exact failure this component has already shipped twice (`X-Light` themes no
 // sheet defined, and a Ratio that named a scope instead of inheriting one).
-// Strip the suffix, keep the colour, and say so once in development.
+// Strip the suffix, keep the color, and say so once in development.
 const SHAPE_SUFFIX = /-(outline|light|solid)$/;
 const warned = new Set();
 
@@ -92,7 +92,7 @@ export function normalizeCheckboxVariant(variant) {
     warned.add(v);
     console.warn(
       '[Checkbox] variant="' + v + '" — the -outline/-light/-solid shapes were ' +
-      'removed; a Checkbox has one look and `variant` selects colour only. ' +
+      'removed; a Checkbox has one look and `variant` selects color only. ' +
       'Rendering variant="' + base + '". Update the call site.',
     );
   }
@@ -100,7 +100,7 @@ export function normalizeCheckboxVariant(variant) {
 }
 
 // Resolve a variant to its styles. Unknown names fall back to `default`, the
-// brand colour — never to `primary`, which is a different colour and would
+// brand color — never to `primary`, which is a different color and would
 // misrepresent an unmarked control as a deliberate one.
 function stylesFor(variant) {
   const map = buildVariantMap();
@@ -264,7 +264,7 @@ export function Checkbox({
         transition: 'background-color 0.15s ease-in-out',
         '&.Mui-checked, &.MuiCheckbox-indeterminate': { color: 'inherit' },
         /* Suppressing MUI's ripple halo is right — it is a circle of the wrong
-           colour around a square box — but nothing replaced it, so hovering a
+           color around a square box — but nothing replaced it, so hovering a
            checkbox did nothing at all. The border is the channel, as on Input:
            the box interior carries the checked state and must stay readable. */
         '&:hover': { backgroundColor: 'transparent' },
@@ -340,7 +340,7 @@ export const BlackWhiteCheckbox  = (p) => <Checkbox variant="black-white" {...p}
 // COLOUR. They are kept because they are part of the published package surface
 // and deleting them breaks an import at build time rather than at review time.
 //
-// They delegate to the colour components directly, NOT to variant="X-outline",
+// They delegate to the color components directly, NOT to variant="X-outline",
 // so using one does not fire the deprecation warning — the warning is meant for
 // hand-written variant strings, which are the ones a design hand-off can still
 // produce. Remove these on the next major.

@@ -195,7 +195,7 @@ describe('Label style', () => {
 describe('Avatar in the slot', () => {
   /* An account at the foot of a rail is the same item shape with a face in
      it. The avatar is passed through UNWRAPPED — inside <Icon> it would take
-     the icon's colour and sizing, which is right for a glyph and wrong for a
+     the icon's color and sizing, which is right for a glyph and wrong for a
      picture. */
   test('renders an avatar instead of an icon', () => {
     render(<Rail items={[{ avatar: <img alt="" data-testid="face" src="a.png" />, label: 'Account' }]} />);

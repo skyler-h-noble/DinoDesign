@@ -5,7 +5,7 @@
 // invisible to anyone browsing the library — which is how four such panels
 // ended up in the studio alone.
 //
-// The dark region is NOT a hardcoded colour: the wrapper declares
+// The dark region is NOT a hardcoded color: the wrapper declares
 // data-theme="Neutral" + data-surface="Surface-Dimmest", so it follows the
 // brand's own neutrals and stays legible in both modes. The background picker
 // below changes the surface AROUND the block to show that it holds up anywhere.
@@ -162,7 +162,7 @@ export function CodeBlockShowcase() {
                           { label: 'Copy button', value: showCopy ? 'IconButton with aria-label="Copy code", becoming "Copied" on success' : 'Not rendered' },
                           { label: 'Naming', value: 'The icon is the whole control, so it is named rather than labelled visibly' },
                           { label: 'Contrast', value: 'Text on the block meets 4.5:1 — it reads --Text inside a Neutral / Surface-Dimmest zone' },
-                          { label: 'Colour', value: 'Never a hardcoded #1e1e1e. The dark region follows the brand neutrals in both modes' },
+                          { label: 'Color', value: 'Never a hardcoded #1e1e1e. The dark region follows the brand neutrals in both modes' },
                           { label: 'Scrolling', value: capped ? 'Capped at 120px — the region scrolls and is keyboard reachable' : 'Uncapped, so nothing scrolls' },
                         ].map(({ label, value }) => (
                           <Box key={label} sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>

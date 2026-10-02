@@ -53,7 +53,7 @@ describe('TextArea is Input, multiline', () => {
      drifted: no borderRadius (so it inherited MUI's corner instead of
      --Input-Radius, which the STUDIO ships a CSS override to paper over),
      error/errorMessage where Input says validation, and no size, variant,
-     colour, adornments or floating label. */
+     color, adornments or floating label. */
   test('renders a textarea with the requested rows', () => {
     render(<TextArea label="Message" rows={4} />);
     const ta = screen.getByLabelText('Message');

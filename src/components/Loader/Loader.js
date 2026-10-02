@@ -13,7 +13,7 @@ import {
  * It renders the comet-trail gradient arc the design specifies — a stroke
  * fading from 0 to full alpha as it sweeps — and it reads the brand's own
  * --Buttons-{Color}-Border and --Border-Variant. MUI's has neither, which is
- * why this file used to hardcode a colour to compensate. */
+ * why this file used to hardcode a color to compensate. */
 import { CircularProgress } from '../CircularProgress';
 
 /**
@@ -34,7 +34,7 @@ import { CircularProgress } from '../CircularProgress';
 const LOADER_SIZE_MAP = { small: 16, medium: 24, large: 32 };
 
 /* ZONE PROPS — `theme` and `surface`. They become data-theme / data-surface on
- * the root, so the loader takes its colours from the zone it sits in rather
+ * the root, so the loader takes its colors from the zone it sits in rather
  * than from a prop. Undefined when not passed, so it INHERITS its ancestor's
  * zone; an empty string would match [data-theme] and pin it to nothing.
  *

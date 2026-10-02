@@ -308,7 +308,7 @@ describe('The FAB is in the bar', () => {
        filled circles in one bar say two things are current. */
     const { container } = renderNav({ items: ITEMS_4, fabAction: fab });
     const holder = container.querySelector('.bottom-nav-fab > div');
-    /* jsdom drops a var() from a computed border colour, so read the
+    /* jsdom drops a var() from a computed border color, so read the
        injected rule rather than the computed style. */
     const rule = [...document.styleSheets]
       .flatMap((sheet) => { try { return [...sheet.cssRules]; } catch { return []; } })

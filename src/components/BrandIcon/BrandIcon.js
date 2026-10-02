@@ -4,7 +4,7 @@
 //
 // SEPARATE from <Icon>, and the distinction is not cosmetic. Icon renders
 // Material Symbols, which are a design system's own vocabulary: they take the
-// brand's icon colour, scale on its ramp, and mean what the system says they
+// brand's icon color, scale on its ramp, and mean what the system says they
 // mean. A brand mark is somebody else's artwork. It cannot be derived, it is
 // not ours to restyle, and it carries a trademark — so it gets its own
 // component rather than a `brand` prop on Icon that would quietly inherit
@@ -27,21 +27,21 @@
 // CHANGING THE COLOUR
 //
 //   in code    the `color` prop, or leave it and it inherits. The default is
-//              `currentColor`, so it takes the colour of the text around it —
-//              a footer link's colour, usually, which is what you want when it
-//              sits beside a label. Pass any CSS colour or a token:
+//              `currentColor`, so it takes the color of the text around it —
+//              a footer link's color, usually, which is what you want when it
+//              sits beside a label. Pass any CSS color or a token:
 //              <BrandIcon name="github" color="var(--Icons-Primary)" />
 //
-//   in Figma   it is a TEXT layer in a ligature font, so its colour is the
+//   in Figma   it is a TEXT layer in a ligature font, so its color is the
 //              layer's FILL. Bind that to a variable the way any other text
 //              fill is bound — Icons/Icons-Primary, Text, or whatever the
-//              surface calls for. There is no colour variant on the component,
-//              and there should not be: 610 glyphs times a colour axis is a
+//              surface calls for. There is no color variant on the component,
+//              and there should not be: 610 glyphs times a color axis is a
 //              variant set nobody can load.
 //
 // Monochrome is the convention for brand marks in a themed UI, which is why
-// there is no "official brand colour" mode here. A row of six logos in their
-// own corporate colours reads as a ransom note and cannot meet a contrast
+// there is no "official brand color" mode here. A row of six logos in their
+// own corporate colors reads as a ransom note and cannot meet a contrast
 // requirement, since each one is a fixed hex that knows nothing about the
 // surface behind it.
 import React from 'react';
@@ -64,7 +64,7 @@ function iconForName(name) {
  * @param icon   a Font Awesome icon object, if you would rather import it
  *               yourself. Takes precedence over `name`.
  * @param size   any CSS length. Defaults to 1em so it rides the text beside it.
- * @param color  any CSS colour or token. Defaults to currentColor.
+ * @param color  any CSS color or token. Defaults to currentColor.
  * @param title  accessible name. Omit for decoration beside a visible label —
  *               the icon is then aria-hidden, which is the common case in a
  *               footer where the link text already says "GitHub".

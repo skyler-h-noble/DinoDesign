@@ -24,7 +24,7 @@ import { SHADOW_LEVEL_2 } from '../_shadows';
  * ORIENTATION: horizontal | vertical
  */
 
-// Theme plus, where the colour implies a lightness, a surface — lightness is
+// Theme plus, where the color implies a lightness, a surface — lightness is
 // the surface axis now, and White / Black / *-Light are no longer themes.
 const THEME_MAP = {
   default:         { theme: 'Default' },

@@ -112,7 +112,7 @@ export function FabShowcase() {
   const [bgSurface, setBgSurface] = useState('Surface');
 
   /* No remap. This used to read `color === 'default' ? 'tertiary' : color`,
-     which put the intended default colour in the GALLERY instead of the
+     which put the intended default color in the GALLERY instead of the
      component — so the showcase looked right and anyone importing Fab got
      something else. Fab now defaults to tertiary itself. */
   const effectiveColor = color;

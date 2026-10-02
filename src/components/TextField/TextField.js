@@ -54,7 +54,7 @@ export function TextField({
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledby,
   /* Held out of ...props so the spread cannot overwrite the composed handlers
-     below — the field tracks its own focus for the border colour. */
+     below — the field tracks its own focus for the border color. */
   onFocus: onFocusProp,
   onBlur: onBlurProp,
   ...props
@@ -107,7 +107,7 @@ export function TextField({
             // paired --Text / --Border come with it, instead of naming a surface
             // token directly and leaving the foregrounds on the parent's tone.
             //
-            // Disabled is a different SURFACE, not a different colour: saying
+            // Disabled is a different SURFACE, not a different color: saying
             // Container-Low here brings its foregrounds too, where an sx
             // override of backgroundColor would have left --Text where it was.
             'data-surface': disabled ? 'Container-Low' : 'Container',
@@ -338,7 +338,7 @@ export function URLTextField({
  *   - error / errorMessage where Input has validation / validationMessage, so
  *     the same state was spelled two ways depending on which control you
  *     reached for.
- *   - No size, no variant, no colour, no adornments, no floating label.
+ *   - No size, no variant, no color, no adornments, no floating label.
  *
  * Input already takes multiline / rows / maxRows and renders a <textarea>, so
  * there was never a second thing to build — only a second thing to maintain.

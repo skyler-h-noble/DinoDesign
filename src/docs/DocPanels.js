@@ -83,6 +83,45 @@ const Rows = ({ items }) => (
  * Snackbar) have no example, and simply lead with the summary instead of
  * rendering a half-working one.
  */
+/* One reading order for every component's Props list.
+ *
+ * The order used to be whatever each doc happened to declare, so the same
+ * question was answered in a different place on every page — colour third on
+ * one component and eighth on the next. That is a cost paid by the reader on
+ * every visit, to save the writer a decision once.
+ *
+ * The sequence is the order the questions actually arrive: what KIND is it,
+ * how big, what colour, what state is it in, what is inside it, how does it
+ * sit in the layout. Anything unlisted keeps its declared position at the end,
+ * so adding a prop to a doc never needs a change here.
+ */
+const PROP_ORDER = [
+  'variant', 'style', 'shape', 'type', 'contentType',
+  'size',
+  'color', 'variantColor',
+  'selected', 'checked', 'open', 'loading', 'disabled', 'elevated',
+  'label', 'children', 'icon', 'iconOnly', 'letterNumber', 'avatar',
+  'startDecorator', 'endDecorator',
+  'fullWidth', 'fit', 'orientation', 'placement',
+];
+
+/* The key a prop's sample and how-to are filed under. A prop may carry two
+   independent axes — Button's `variant` is shape AND colour — so the doc can
+   split it into two rows that share a name and differ by `sample`. */
+const keyOf = (pr) => pr.sample || pr.name;
+
+const rankOf = (pr) => {
+  const i = PROP_ORDER.indexOf(keyOf(pr));
+  return i === -1 ? PROP_ORDER.length : i;
+};
+
+const inReadingOrder = (props) => props
+  .map((pr, i) => ({ pr, i }))
+  /* Stable: equal ranks keep their declared order, which is what makes an
+     unlisted prop harmless rather than randomly placed. */
+  .sort((a, b) => (rankOf(a.pr) - rankOf(b.pr)) || (a.i - b.i))
+  .map(({ pr }) => pr);
+
 export function DocSummary({ component, theme = null, surface = 'Surface' }) {
   const doc = docFor(component);
   if (!doc) return <Missing component={component} what="reference" />;
@@ -110,20 +149,6 @@ export function DocSummary({ component, theme = null, surface = 'Surface' }) {
 
         <Body>{doc.summary}</Body>
 
-        {howTo && (
-          <Section title={howTo.title}>
-            <Stack spacing={2}>
-              <BodySmall>{howTo.body}</BodySmall>
-              <HowToSlot title={howTo.shot} />
-              {howTo.caveat ? (
-                <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>
-                  {howTo.caveat}
-                </Caption>
-              ) : null}
-            </Stack>
-          </Section>
-        )}
-
 
         {doc.insteadUse.length > 0 && (
           <Section title="Reach for something else when">
@@ -138,16 +163,22 @@ export function DocSummary({ component, theme = null, surface = 'Surface' }) {
                 already asking the question. Props whose meaning is plain from
                 their values simply have none. */}
             <Stack spacing={0}>
-              {doc.props.map((pr, i) => {
-                const sample = hasPropExample(doc.name, pr.name)
-                  ? PROP_EXAMPLES[doc.name][pr.name]
+              {inReadingOrder(doc.props).map((pr, i) => {
+                const key = keyOf(pr);
+                const sample = hasPropExample(doc.name, key)
+                  ? PROP_EXAMPLES[doc.name][key]
                   : null;
+                /* Directly beneath the sample it explains, so it reads in the
+                   order the question arrives: here are the colours, here is
+                   how you get them. Up by the summary it was an instruction
+                   for something the reader had not seen yet. */
+                const how = howTo && howTo.after === key ? howTo : null;
                 const sub = [pr.values && pr.values.length ? pr.values.join(' | ') : null,
                              pr.default ? `default: ${pr.default}` : null,
                              pr.note].filter(Boolean).join('  ·  ');
                 return (
                   <Box key={i} sx={{ py: 1 }}>
-                    <BodySmall>{pr.name} — {pr.type}</BodySmall>
+                    <BodySmall>{pr.label || pr.name} — {pr.type}</BodySmall>
                     {sub ? (
                       <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>{sub}</Caption>
                     ) : null}
@@ -156,6 +187,20 @@ export function DocSummary({ component, theme = null, surface = 'Surface' }) {
                         <PreviewSurface theme={theme} surface={surface} minHeight={0}>
                           <Box sx={{ p: 2 }}>{sample({ theme, surface })}</Box>
                         </PreviewSurface>
+                      </Box>
+                    ) : null}
+                    {how ? (
+                      <Box sx={{ mt: 2 }}>
+                        <Stack spacing={1.5}>
+                          <EyebrowSmall>{how.title}</EyebrowSmall>
+                          <BodySmall>{how.body}</BodySmall>
+                          <HowToSlot title={how.shot} />
+                          {how.caveat ? (
+                            <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>
+                              {how.caveat}
+                            </Caption>
+                          ) : null}
+                        </Stack>
                       </Box>
                     ) : null}
                   </Box>

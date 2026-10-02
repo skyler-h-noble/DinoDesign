@@ -20,7 +20,7 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
  * named: --Buttons-{C}-Light-{Button,Text,Border} are published by no design
  * system and none of the three carried a fallback, so all three declarations
  * were invalid at computed-value time and a selected option rendered
- * unstyled — no fill, no text colour, no border. For a lighter selected row,
+ * unstyled — no fill, no text color, no border. For a lighter selected row,
  * put the dropdown on data-surface="Surface-Brightest" and keep the style.
  *
  * NOTE: `default` and `solid` currently return identical styles. They are kept
@@ -103,7 +103,7 @@ export function Select({
   const effectiveColor = color === 'default' ? 'primary' : color;
   const C = cap(effectiveColor);
   /* There was an `isLight = variant === 'light'` here, read by nothing. So
-     variant="light" never changed a colour, a token or a style — its ONLY
+     variant="light" never changed a color, a token or a style — its ONLY
      effect was the class name below, which is why it looked supported. */
   const borderToken = 'var(--Buttons-' + C + '-Border)';
 
@@ -126,7 +126,7 @@ export function Select({
         '[Select] selectionStyle="light" was removed with the -Light button '
         + 'shades. It named --Buttons-{C}-Light-{Button,Text,Border}, which no '
         + 'design system publishes, and carried no fallbacks — a selected '
-        + 'option rendered with no fill, no text colour and no border. '
+        + 'option rendered with no fill, no text color and no border. '
         + 'Rendering default.',
       );
     }

@@ -86,7 +86,7 @@ export const EXAMPLES = {
      the prop that controls them (PROP_EXAMPLES), so a sample sits where the
      reader is already asking the question rather than all at the top. */
   Button: () => <Button>Button</Button>,
-  /* The default instance: medium, default colour, icon only. Not extended
+  /* The default instance: medium, default color, icon only. Not extended
      and not animated, because a sample that moves on a page of prose draws
      the eye away from the prose. */
   BrandIcon: () => <HStack gap="var(--Sizing-2)" style={{ alignItems: 'center' }}>
@@ -128,7 +128,7 @@ export const EXAMPLES = {
       <Icon color="success"><span>✓</span></Icon>
       <Icon color="error"><span>✕</span></Icon>
     </HStack>,
-  Link: () => <Link href="#example">A link, which thickens rather than recolours on hover</Link>,
+  Link: () => <Link href="#example">A link, which thickens rather than recolors on hover</Link>,
   Divider: () => <Divider indicatorText="OR" />,
   Checkbox: () => <VStack gap="var(--Sizing-Half)">
       <Checkbox label="Unchecked" />
@@ -199,20 +199,20 @@ export const PROP_EXAMPLES = {
       <Fab size="large"  icon={<Icon size="large"><AddIcon /></Icon>}  ariaLabel="Add, large" />
     </HStack>,
 
-    /* Colour, and this entry used to get it wrong in a way worth recording.
+    /* Color, and this entry used to get it wrong in a way worth recording.
        It said "set the Buttons MODE on the frame". Verified against the real
        file (FAB, 6778:14825): the FAB's fill is bound to Buttons/Default/Button
        and its stroke to Buttons/Default/Border — PINNED to Default, so the
        Buttons mode is not the axis and setting it on the frame does nothing.
 
-       What varies the colour is a THEME mode on an inner frame named
+       What varies the color is a THEME mode on an inner frame named
        Theme-Container, shipped at Tertiary. The Theme changes what
        Buttons/Default/* resolves to, which is why the fill can stay pinned.
 
        That lands in the same trap as component size and the Alt Display: the
        control is a variable mode on a frame INSIDE the instance, so there is
        nothing to find on the instance itself and the component looks like it
-       has one colour. Hence the screenshot slot on the showcase.
+       has one color. Hence the screenshot slot on the showcase.
 
        The two sides agree on the default — Figma ships Theme-Container at
        Tertiary and getTokens() maps `default` to tertiary — but they reach it
@@ -225,7 +225,7 @@ export const PROP_EXAMPLES = {
        black-white is therefore reachable from code and NOT from Figma. It is
        shown below because it renders and someone will pass it, but it has no
        counterpart in the design file — a FAB built in Figma cannot be that
-       colour. Flagged rather than removed: the gap is in the Theme collection,
+       color. Flagged rather than removed: the gap is in the Theme collection,
        not in this sample. */
     color: () => {
       /* The DEFAULT sits on its own at the left, labelled, with a rule between
@@ -235,7 +235,7 @@ export const PROP_EXAMPLES = {
 
          All ten of the Buttons collection's modes are here. An earlier version
          showed six and silently dropped neutral, info and warning, which reads
-         as those colours not existing rather than as the sample being partial. */
+         as those colors not existing rather than as the sample being partial. */
       const swatch = (c, isDefault) => (
         <VStack key={c} gap="var(--Sizing-Half)" style={{ alignItems: 'center' }}>
           <Fab color={c} size="small"
@@ -279,13 +279,13 @@ export const PROP_EXAMPLES = {
     </HStack>,
   },
   Button: {
-    /* SHAPE only, all in the default colour — the three values of Figma's Style
-       axis: solid, outline, ghost. Colour is a SEPARATE axis and is shown where
-       colour is discussed, so this sample does not mix the two.
+    /* SHAPE only, all in the default color — the three values of Figma's Style
+       axis: solid, outline, ghost. Color is a SEPARATE axis and is shown where
+       color is discussed, so this sample does not mix the two.
 
        `text` is an ALIAS of ghost, not a fourth shape, so it is not shown:
        placing them side by side implies a difference that does not exist.
-       Ghost takes no colour prefix at all — it reads from the text role
+       Ghost takes no color prefix at all — it reads from the text role
        (--Hotlink for text, --Quiet for icon-only) rather than a palette. */
     variant: () => <HStack gap="var(--Sizing-1)" style={{ flexWrap: 'wrap' }}>
       <Button>solid</Button>
@@ -297,6 +297,41 @@ export const PROP_EXAMPLES = {
       <Button size="medium">medium</Button>
       <Button size="large">large</Button>
     </HStack>,
+
+    /* All ten Buttons modes, laid out like the FAB's: the DEFAULT on its own at
+       the left behind a rule, then the rest. Otherwise it is one swatch among
+       ten and the thing a reader most needs — "what do I get if I pass
+       nothing?" — is the hardest thing on the page to find.
+
+       Solid and outline on one row each, because they are the same colour in
+       two shapes and showing only solid implies outline is a tenth colour
+       rather than a shape. Ghost is absent on purpose: it takes no colour
+       prefix at all. */
+    variantColor: () => {
+      const COLORS = ['primary', 'secondary', 'tertiary', 'neutral', 'info',
+                      'success', 'warning', 'error', 'black-white'];
+      const row = (suffix) => (
+        <HStack gap="var(--Sizing-1)" style={{ alignItems: 'center', flexWrap: 'wrap' }}>
+          <Button variant={suffix ? 'default' + suffix : 'default'} size="small">default</Button>
+          <Divider orientation="vertical" flexItem />
+          {COLORS.map(c => (
+            <Button key={c} variant={suffix ? c + suffix : c} size="small">{c}</Button>
+          ))}
+        </HStack>
+      );
+      return (
+        <VStack gap="var(--Sizing-2)">
+          <VStack gap="var(--Sizing-Half)">
+            <Caption color="quiet">solid</Caption>
+            {row('')}
+          </VStack>
+          <VStack gap="var(--Sizing-Half)">
+            <Caption color="quiet">outline</Caption>
+            {row('-outline')}
+          </VStack>
+        </VStack>
+      );
+    },
     disabled: () => <HStack gap="var(--Sizing-1)">
       <Button>enabled</Button>
       <Button disabled>disabled</Button>

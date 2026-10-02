@@ -287,7 +287,7 @@ export function Rail({
  * design. They are different roles: one is the label ON a default button, the
  * other is the surface's own text. The item is not a button with a default
  * fill, so the button role was the wrong one and would flip to the wrong
- * colour on any palette where the two diverge.
+ * color on any palette where the two diverge.
  *
  * ── Where each Style paints ───────────────────────────────────────────────
  * Contained wraps the whole 44px item, icon and label together. Outside
@@ -378,7 +378,7 @@ function RailItem({ item, selected, expanded, labelStyle, onClick }) {
         {/* The slot. An avatar goes in it as readily as an icon — an account
             at the foot of a rail is the same item shape with a face in it —
             so an avatar is passed through UNWRAPPED. Wrapping it in <Icon>
-            would hand it the icon's colour and sizing rules, which is right
+            would hand it the icon's color and sizing rules, which is right
             for a glyph and wrong for a picture. */}
         {avatar
           ? <Box sx={{ display: 'flex', width: ICON_SIZE, height: ICON_SIZE }}>{avatar}</Box>

@@ -196,9 +196,9 @@ describe('Defaults', () => {
     expect(container.querySelector('.speed-dial-solid')).toBeInTheDocument();
   });
 
-  /* The default colour is 'default', not 'primary' — the lib-wide default
+  /* The default color is 'default', not 'primary' — the lib-wide default
      (see feedback on Buttons: default is the brand green, primary is a
-     different colour and is only used when a design marks it). */
+     different color and is only used when a design marks it). */
   test('default color is default', () => {
     const { container } = renderDial();
     expect(container.querySelector('.speed-dial-default')).toBeInTheDocument();

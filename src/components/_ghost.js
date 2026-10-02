@@ -27,7 +27,7 @@ import React from 'react';
  * WHY --Border-Variant
  * It is the only token in the system whose PERCEIVED weight is held constant
  * across every theme and surface: an adaptive alpha, floor 0.20, rising toward
- * 0.41 as the colour approaches its background. A flat tint measured a 27x
+ * 0.41 as the color approaches its background. A flat tint measured a 27x
  * spread over the 324 theme x surface contexts, invisible on some brands. A
  * placeholder has to read as quietly present everywhere, which is the same
  * requirement. Variants are also exempt from contrast rules by contract, and a

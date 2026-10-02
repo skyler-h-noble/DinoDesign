@@ -3,9 +3,9 @@
 // RETIRED. ToggleButtonGroup is ButtonGroup, built a second time.
 //
 // The two were the same component under different prop names: a row of
-// segments where the selected one fills with the palette colour and the rest
+// segments where the selected one fills with the palette color and the rest
 // carry a --Quiet label. Single vs multiple selection was `exclusive` here and
-// `multiple` there — the same model, inverted. Same nine colours (this one
+// `multiple` there — the same model, inverted. Same nine colors (this one
 // also had black-white). Same removed `{color}-light` variant, documented in
 // both files as reading tokens no design system publishes.
 //
@@ -39,7 +39,7 @@
 //             selection that never updates.
 //
 // The segment is now `<Button value="…">`. Button already has `swatch` and
-// `swatchColor`, so the colour-chip segment this file used to provide is not
+// `swatchColor`, so the color-chip segment this file used to provide is not
 // lost; nothing outside this directory ever used it.
 import React from 'react';
 import { ButtonGroup } from '../ButtonGroup/ButtonGroup';
@@ -83,7 +83,7 @@ export function ToggleButton(props) {
   return <Button {...props} />;
 }
 
-/* The ten colour presets. Kept for the same reason as the components: they are
+/* The ten color presets. Kept for the same reason as the components: they are
    public names, and a stale import should not be a build error. Each is one
    line, so the cost of keeping them is lower than the cost of breaking someone. */
 const preset = (color) => {

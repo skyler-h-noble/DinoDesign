@@ -66,11 +66,11 @@ export function ColorsShowcase() {
     </Box>
   );
 
-  /* The brand's CORE colours — the three hexes chosen in the studio, now
+  /* The brand's CORE colors — the three hexes chosen in the studio, now
      published as --Primary-Core / --Secondary-Core / --Tertiary-Core.
 
      No TONE can stand for these. The pick is written into the tone nearest its
-     lightness, so its index differs per colour, and Color-Vibrant is hardcoded
+     lightness, so its index differs per color, and Color-Vibrant is hardcoded
      to Color-8 rather than being the pick. This page read Color-11 and then
      Color-Vibrant and was wrong both times — not a bad swatch, but information
      that the stylesheet did not contain until the generator was changed to
@@ -131,7 +131,7 @@ export function ColorsShowcase() {
     /* Pressed, not Active. The token is --Buttons-<Palette>-Pressed;
        -Active does not exist, so every one of these swatches rendered an
        unresolved var() — a transparent box with a border, which reads as
-       "this colour is white" rather than "this token is not a thing". */
+       "this color is white" rather than "this token is not a thing". */
     { name: 'Button Pressed', suffix: 'Pressed' },
     /* The BORDER is the one that keeps a button accessible.
        A fill can sit at any contrast against the page — it is a surface, not
@@ -181,7 +181,7 @@ export function ColorsShowcase() {
 
           {/* The "Background Colors" section is gone.
               It showed --Surface, --Surface-Dim and --Surface-Bright as
-              swatches, and all three rendered empty: those are not colours a
+              swatches, and all three rendered empty: those are not colors a
               consumer reads. They exist so the system can COMPUTE --Background,
               which is what data-surface resolves to — the page was teaching the
               exact pattern CLAUDE.md forbids ("never background: var(--Surface)")
@@ -445,7 +445,7 @@ export function ColorsShowcase() {
                 {/* No outline "Active" swatch. The outline variant publishes
                     --Buttons-<Palette>-Outline-Text and nothing else; an
                     Outline-Active was never generated, so this rendered an
-                    empty box beside a real one and read as a colour. An
+                    empty box beside a real one and read as a color. An
                     outline button's pressed state comes from the palette's own
                     --Buttons-<Palette>-Pressed, which is already shown above. */}
               </Grid>

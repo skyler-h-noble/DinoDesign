@@ -86,7 +86,7 @@ export const useStepperContext = () => useContext(StepperContext);
  *
  * They become data-theme / data-surface on the root, which redefines
  * --Background, --Text, --Border, --Quiet, --Hover and --Pressed for
- * everything inside, so the component takes its colours from the zone it sits
+ * everything inside, so the component takes its colors from the zone it sits
  * in rather than from a prop.
  *
  * Deliberately NOT derived from `color`. The two are different knobs: `color`
@@ -190,7 +190,7 @@ export function Step({
    * (`isActive || isCompleted`), leaving those two a single pixel of border
    * apart while incomplete was the only one that looked different — so the
    * step you are ON was the hardest to pick out, which is backwards. It also
-   * painted incomplete's ring in the brand colour; the design uses Quiet, so a
+   * painted incomplete's ring in the brand color; the design uses Quiet, so a
    * column of unreached steps reads as quiet rather than as a row of buttons.
    * (Same reasoning as Checkbox's default box, which draws in --Quiet for
    * exactly that.)
@@ -198,7 +198,7 @@ export function Step({
    * The number on a FILLED indicator takes --Buttons-<C>-Text, the token
    * paired with that fill, rather than --Text. The design binds --Text there,
    * which resolves legibly on the current theme but is the surface's text
-   * colour, not the fill's: per invariant 3 the label is derived from the
+   * color, not the fill's: per invariant 3 the label is derived from the
    * fill, so a palette whose button is light would put light text on it. */
   const borderToken = isIncomplete ? 'var(--Quiet)' : 'var(--Buttons-' + C + '-Border)';
   const bgToken     = isActive ? 'var(--Buttons-' + C + '-Button)' : 'transparent';

@@ -112,7 +112,7 @@ function resolveDecorator(node, buttonSize) {
  * GHOST   — variant="ghost"  (alias: "text")
  *
  * The LIGHT shape was removed — see normalizeButtonVariant. "{color}-light"
- * still resolves, to the SOLID button of that colour, and warns once in dev.
+ * still resolves, to the SOLID button of that color, and warns once in dev.
  *
  * ─── SIZES ───────────────────────────────────────────────────────────────────
  *   small:  var(--Small-Button-Height)
@@ -276,13 +276,13 @@ function ghostStyles(isTextContent, selected = false) {
 
 // The `-light` shape is removed. It painted --<C>-Color-11 with
 // --Text-<C>-Color-11, a tinted fill that was never a shape in the Figma
-// component; shape there is solid / outline / ghost / text, and colour now
+// component; shape there is solid / outline / ghost / text, and color now
 // arrives as a Buttons MODE.
 //
 // A hard delete would have been silent: an unknown variant falls through to
 // `variantMap.default`, so every existing `X-light` call site would have
 // repainted as a solid brand-default button with no error. Strip the suffix to
-// the SOLID colour of the same name and say so once in development.
+// the SOLID color of the same name and say so once in development.
 const LIGHT_SUFFIX = /-light$/;
 const warnedVariants = new Set();
 
@@ -294,7 +294,7 @@ export function normalizeButtonVariant(variant) {
     warnedVariants.add(v);
     console.warn(
       '[Button] variant="' + v + '" — the -light shape was removed. Rendering ' +
-      'variant="' + base + '" (solid). Use a Buttons mode for colour and ' +
+      'variant="' + base + '" (solid). Use a Buttons mode for color and ' +
       'solid / -outline / ghost / text for shape.',
     );
   }
@@ -359,7 +359,7 @@ function warnSwatchOnce() {
   // eslint-disable-next-line no-console
   console.warn(
     '[Button] `swatch` is retired — use the Swatch component. A swatch uses ' +
-    'neither of Button\'s axes: its colour is data from a picker rather than a ' +
+    'neither of Button\'s axes: its color is data from a picker rather than a ' +
     'palette, and it has no solid / outline / ghost shape. Swatch also fixes ' +
     'the corner: this read --Button-Icon-Radius, which is why swatches stayed ' +
     'square when a brand set a large radius.',
@@ -375,7 +375,7 @@ function warnUnknownVariant(variant, map) {
     console.warn(
       '[Button] variant="' + variant + '" is not a variant. Rendering the ' +
       'default. Shape is solid / {color}-outline / ghost / text — ghost and ' +
-      'text take NO colour prefix, because a ghost takes its colour from the ' +
+      'text take NO color prefix, because a ghost takes its color from the ' +
       'text role (--Hotlink for text, --Quiet for icon-only), not a palette.',
     );
   }
@@ -533,11 +533,11 @@ export function Button({
  
      A swatch was never a kind of button. Button's two axes are STYLE (solid /
      outline / ghost) and COLOUR (the nine palettes), and a swatch uses neither:
-     "outline swatch" means nothing, and its colour is arbitrary data from a
-     picker rather than a palette choice. It is a circle with a colour in it.
+     "outline swatch" means nothing, and its color is arbitrary data from a
+     picker rather than a palette choice. It is a circle with a color in it.
  
      Figma now draws Swatch as its own component, so Button/Button-Swatch has no
-     component left to serve. These props still render — the studio's colour
+     component left to serve. These props still render — the studio's color
      picker uses them and a missing prop is a broken page — and warn once. */
   swatch = false,
   swatchColor,
@@ -640,7 +640,7 @@ export function Button({
   /* An unknown variant used to fall through to solid default SILENTLY, which
      is how `primary-ghost` — never a real variant — rendered as a filled pink
      button in the gallery's own example and nobody noticed. Ghost and text are
-     deliberately colour-agnostic (see ghostStyles: a text ghost reads as a link,
+     deliberately color-agnostic (see ghostStyles: a text ghost reads as a link,
      an icon ghost as --Quiet), so there is no {color}-ghost to look up. Warn
      rather than paint something plausible. */
   const variantStyles  = variantMap[effectiveVariant] || warnUnknownVariant(effectiveVariant, variantMap);
@@ -1003,7 +1003,7 @@ export const SuccessOutlineButton   = (p) => <Button variant="success-outline"  
 export const WarningOutlineButton   = (p) => <Button variant="warning-outline"    {...p} />;
 export const ErrorOutlineButton     = (p) => <Button variant="error-outline"      {...p} />;
 
-// Deprecated: the Light shape is gone. Each renders its SOLID colour.
+// Deprecated: the Light shape is gone. Each renders its SOLID color.
 // Kept because deleting a published export breaks an import at build time; they
 // point at the solid variant directly so they do not fire the dev warning,
 // which is aimed at hand-written variant strings. Remove on the next major.

@@ -43,10 +43,10 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
  *   thumb   --Border fill with a 1px --Background border. The border is not
  *           decoration: it separates the handle from the fill it sits on AND
  *           from the focus ring outside it, so both comparisons are against a
- *           known colour instead of against whatever the handle overlaps.
+ *           known color instead of against whatever the handle overlaps.
  *
  *   label   --Text ground with --Background text — the surface's own pair,
- *           inverted. Legible on any surface by definition, which a colour from
+ *           inverted. Legible on any surface by definition, which a color from
  *           the button palette is not guaranteed to be.
  *
  * A named `color` still routes the FILL through the button palette, so
@@ -94,9 +94,9 @@ const SIZE_MAP = {
  *
  * They become data-theme / data-surface on the root, which redefines
  * --Background, --Text, --Border, --Quiet, --Hover and --Pressed for
- * everything inside. That is how a slider takes its colours from the zone it
+ * everything inside. That is how a slider takes its colors from the zone it
  * sits in rather than from a prop, and it is why the thumb follows for free:
- * the thumb is var(--Border) with a var(--Background) edge, so it recolours
+ * the thumb is var(--Border) with a var(--Background) edge, so it recolors
  * with the zone without this file knowing anything about themes.
  *
  * Deliberately NOT derived from `variant`. The two are different knobs, and
@@ -238,7 +238,7 @@ export function Slider({
          * It was `outline: 2px --Focus-Visible` with `outline-offset: 2px`,
          * and the 2px gap is the problem: it shows whatever is BEHIND the
          * thumb — the rail, the fill, or the page — so the focus indicator's
-         * 3:1 was measured against an unknown colour that changes as the thumb
+         * 3:1 was measured against an unknown color that changes as the thumb
          * moves along the track.
          *
          * The --Background ring is what makes it measurable. It is already the

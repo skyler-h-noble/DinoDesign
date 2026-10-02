@@ -13,7 +13,7 @@
  *      tint on one surface and as nothing at all on the next.
  *   2. A literal rgba(0,0,0,0.04) scrim, which is invisible on a dark surface
  *      and ignores the brand.
- *   3. Selected-hover repainting the RESTING colour, so the one state users
+ *   3. Selected-hover repainting the RESTING color, so the one state users
  *      check most — "did my click land?" — gave no feedback.
  *
  * --Hover and --Pressed are emitted per theme AND per surface level, so a
@@ -42,7 +42,7 @@ export const DISABLED_STATE = {
  *
  * @param {object}  [opts]
  * @param {string}  [opts.selectedBg]    resting fill when selected
- * @param {string}  [opts.selectedText]  text colour when selected
+ * @param {string}  [opts.selectedText]  text color when selected
  * @param {string}  [opts.selectedHover] fill on hover while selected
  * @param {string}  [opts.selectedPressed] fill on press while selected
  * @param {string}  [opts.muiPrefix]     'Mui' to use MUI's class-based
@@ -76,7 +76,7 @@ export function scrimStates(opts = {}) {
     '&.Mui-selected': {
       backgroundColor: selectedBg,
       ...(selectedText ? { color: selectedText } : {}),
-      // Never the resting colour — see note 3 above.
+      // Never the resting color — see note 3 above.
       '&:hover':  { backgroundColor: selectedHover || 'var(--Hover)' },
       '&:active': { backgroundColor: selectedPressed || 'var(--Pressed)' },
     },

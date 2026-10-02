@@ -1,12 +1,12 @@
 // src/components/MiniSwatch/MiniSwatch.js
 //
-// The colour chip that sits inside a menu row — a Select in colour mode, a menu
+// The color chip that sits inside a menu row — a Select in color mode, a menu
 // item with the `Swatch` boolean on.
 //
 // Deliberately NOT the standalone Swatch, and the differences are the whole
 // point. Swatch is a circle the size of a button that carries its own seven
 // states; this is a 20px rounded square with none, because the ROW owns the
-// state. A selected colour option is a selected menu item, not a selected
+// state. A selected color option is a selected menu item, not a selected
 // swatch, and marking it twice would say the same thing in two places.
 //
 //   Swatch       Button-Height (24/32/56)   circle      1px Border   7 states
@@ -37,7 +37,7 @@ export function MiniSwatch({
         borderRadius: 'var(--Sizing-Half, 4px)',
         backgroundColor: color,
         // No border by design. Selection is shown by the ROW, so the chip has
-        // no edge to recolour — and nothing to mistake for one.
+        // no edge to recolor — and nothing to mistake for one.
         ...sx,
       }}
       {...props}

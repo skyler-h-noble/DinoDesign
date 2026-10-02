@@ -17,7 +17,7 @@ import { Box } from '@mui/material';
  *   standard   var(--Text)              — blends with body text
  *   quiet      var(--Text-Quiet)        — subdued links
  *
- * STATES: hover → underline thickens, colour unchanged. visited →
+ * STATES: hover → underline thickens, color unchanged. visited →
  *   var(--Link-Visited, --Hotlink-Visited). The design system emits the
  *   --Hotlink spelling; see the note above COLOR_MAP for why the mapping lives
  *   here and not in CSS.
@@ -93,7 +93,7 @@ const STYLE_MAP = {
  * Nothing has ever defined them: the design system emits --Hotlink and
  * --Hotlink-Visited, and no lib stylesheet declares the --Link spelling. So
  * every link resolved to an empty value and simply inherited its parent's
- * colour — no error, no fallback, just a link that is not link-coloured.
+ * color — no error, no fallback, just a link that is not link-colored.
  *
  * Mapped here rather than in CSS on purpose. The studio's export overwrites
  * every stylesheet in the cascade (foundation, core, typography, the mode
@@ -106,8 +106,8 @@ const STYLE_MAP = {
  * variable is UNDEFINED, and --Link truly is. (Contrast --Font-Family-Display,
  * which IS defined and therefore never reaches its fallback.)
  *
- * --Link-Hover is intentionally absent. Links do not change colour on hover;
- * the underline thickens instead. Do not add a hover colour here — the design
+ * --Link-Hover is intentionally absent. Links do not change color on hover;
+ * the underline thickens instead. Do not add a hover color here — the design
  * system emits no hover tone for links, so any value would be invented rather
  * than derived, and it would land on text that carries a 4.5:1 requirement.
  */
@@ -189,11 +189,11 @@ export function Link({
 
         // ── States ───────────────────────────────────────────────
         ...(!disabled && {
-          // No colour change on hover — deliberate. The design system emits no
+          // No color change on hover — deliberate. The design system emits no
           // hover tone for links, and inventing one would put an unverified
-          // colour on text that has a contrast requirement. The underline
-          // thickening carries the affordance instead, which is a non-colour
-          // cue and so does not rely on colour perception either.
+          // color on text that has a contrast requirement. The underline
+          // thickening carries the affordance instead, which is a non-color
+          // cue and so does not rely on color perception either.
           '&:hover': {
             textDecorationThickness: '2px',
           },

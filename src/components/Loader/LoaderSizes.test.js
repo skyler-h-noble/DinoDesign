@@ -18,7 +18,7 @@ describe('Loader sizes follow the icon scale', () => {
     expect(container.querySelector('svg')).toHaveAttribute('width', '48');
   });
 
-  test('colour comes from a token, never a raw tone', () => {
+  test('color comes from a token, never a raw tone', () => {
     const { container } = render(<Loader color="success" message="" />);
     expect(container.innerHTML).toContain('--Buttons-Success-Border');
     expect(container.innerHTML).not.toContain('--Primary-Color-11');

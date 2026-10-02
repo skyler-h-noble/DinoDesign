@@ -157,7 +157,7 @@ function ControlButton({ label, selected, onClick }) {
 export function ToggleButtonGroupShowcase() {
 
   // Playground state
-  // Kept: the contrast panel below reports against a colour ramp.
+  // Kept: the contrast panel below reports against a color ramp.
   const [color, setColor] = useState('default');
   const [size, setSize] = useState('medium');
   const [isDisabled, setIsDisabled] = useState(false);
@@ -194,7 +194,7 @@ export function ToggleButtonGroupShowcase() {
   const activeSegments = (exclusive ? EXCLUSIVE_SEGMENTS : MULTIPLE_SEGMENTS).slice(0, segments);
 
 
-  // fill is the bare colour name; outline and ghost suffix it.
+  // fill is the bare color name; outline and ghost suffix it.
   const getVariant = () => (style === 'fill' ? color : color + '-' + style);
 
   // The label a segment shows, per content type.
@@ -401,7 +401,7 @@ export function ToggleButtonGroupShowcase() {
               </Stack>
             </Box>
 
-            {/* Colour — Default, Theme, State */}
+            {/* Color — Default, Theme, State */}
             <Box sx={{ mt: 3 }}>
               <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</EyebrowSmall>
               {COLOR_GROUPS.map((grp) => (
@@ -433,7 +433,7 @@ export function ToggleButtonGroupShowcase() {
                 {contentType === 'icon'   ? 'Icon only — each segment needs an aria-label.' :
                  contentType === 'letter' ? 'Single letter per segment.' :
                  contentType === 'number' ? 'Single digit per segment.' :
-                 contentType === 'swatch' ? 'Colour chip per segment, sized from --*-Input-Swatch-Radius.' :
+                 contentType === 'swatch' ? 'Color chip per segment, sized from --*-Input-Swatch-Radius.' :
                  'Text label, with optional start and end decorators.'}
               </Caption>
             </Box>

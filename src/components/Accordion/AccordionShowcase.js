@@ -53,7 +53,7 @@ function ColorSwatchButton({ color, selected, onClick }) {
   const C = cap(color);
   // Default isn't a button-palette family — it means "Default theme on the
   // Surface", which renders the page-surface background. Show the surface
-  // colour in the swatch so the picker matches what users actually see.
+  // color in the swatch so the picker matches what users actually see.
   const isDefault = color === 'default';
   const bg = isDefault ? 'var(--Surface)' : 'var(--Buttons-' + C + '-Button)';
   const checkColor = isDefault ? 'var(--Text)' : 'var(--Buttons-' + C + '-Text)';

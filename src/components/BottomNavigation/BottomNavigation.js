@@ -43,7 +43,7 @@ import { LabelExtraSmall, LabelSmall } from '../Typography';
  * ── The FAB is IN the bar ────────────────────────────────────────────────
  * `fabAction` renders an action among the items, the way Rail's does: a
  * ring the size of an item's icon holder, outlined rather than filled, with
- * the icon in the outline's colour. It takes an item's place in the row —
+ * the icon in the outline's color. It takes an item's place in the row —
  * at the end, or in the middle with the items split either side — so it
  * lands where a thumb already goes rather than floating over the content
  * beside the bar. Outlined, because a solid FAB in the bar reads as a
@@ -357,8 +357,8 @@ const DIAL_RING = 32;
 /** The action ring. The same column as an item — same width, same holder
  *  size, the same gap to a label below — so it sits on the items' baseline
  *  and takes exactly one item's place. What differs is the holder: an
- *  OUTLINE in the default button's border colour, with the glyph in that
- *  colour too, on no fill.
+ *  OUTLINE in the default button's border color, with the glyph in that
+ *  color too, on no fill.
  *
  *  Given `actions`, it opens a speed dial instead of acting — see the note
  *  at the top. */
@@ -396,7 +396,7 @@ function BottomNavFab({ icon, label, onClick, showLabel, actions, position = 'en
     borderRadius: HOLDER_RADIUS,
     /* The outline button's border, which the system holds at 3:1
        against its surface — the ring is a clickable edge and that is the
-       non-text floor. The glyph takes the same colour so ring and plus
+       non-text floor. The glyph takes the same color so ring and plus
        read as one control rather than a plus inside a decoration. */
     borderWidth: 'var(--Button-Border-Width, 1px)',
     borderStyle: 'solid',

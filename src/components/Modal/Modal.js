@@ -12,7 +12,7 @@ import { useOmniDesign } from '../../OmniDesignProvider';
  *   solid    data-theme={Color}, data-surface="Container-High"
  *   soft     data-theme={Color}, data-surface="Surface-Brightest"
  *
- * The two coloured variants now differ by SURFACE rather than by theme name.
+ * The two colored variants now differ by SURFACE rather than by theme name.
  * soft used to ask for {Color}-Light, and there is no such theme — the shades
  * were removed and a level does that job. It bound nothing, so a soft modal
  * silently inherited whatever palette the page was on: soft error and soft

@@ -6,10 +6,10 @@ import SearchIcon from '@mui/icons-material/Search';
 
 /**
  * A ghost button has no fill and no border, so the ONLY thing separating its
- * label from surrounding body text is colour — which is WCAG 1.4.1. The fix is
+ * label from surrounding body text is color — which is WCAG 1.4.1. The fix is
  * the same one Link uses: underline it, and the requirement stops applying.
  *
- * An icon-only ghost is exempt, and not as an oversight. 1.4.1 is about colour
+ * An icon-only ghost is exempt, and not as an oversight. 1.4.1 is about color
  * being the sole distinguisher of TEXT; a glyph is already a distinct shape, so
  * there is nothing to disambiguate. Underlining one would just look wrong.
  *
@@ -99,7 +99,7 @@ describe('a filled button is not underlined', () => {
 
 describe('the removed -light shape does not reach the DOM', () => {
   /* `-light` was removed from the lib: normalizeButtonVariant strips the
-     suffix and renders the SOLID button of the same colour. The class name
+     suffix and renders the SOLID button of the same color. The class name
      used to be built from the RAW variant, so a `primary-light` call site
      still wrote `btn-primary-light` onto a button that had painted solid —
      a hook for a shape that no longer exists. Consumer CSS (the studio's

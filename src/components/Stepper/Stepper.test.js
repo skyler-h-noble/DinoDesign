@@ -362,7 +362,7 @@ describe('Stepper — Accessibility (jest-axe)', () => {
  * This used to fill complete AND current (`isActive || isCompleted`), leaving
  * the two one pixel of border apart while incomplete was the only one that
  * looked different — so the step you are ON was the hardest to pick out.
- * Incomplete also drew its ring in the brand colour; Quiet is what stops a
+ * Incomplete also drew its ring in the brand color; Quiet is what stops a
  * column of unreached steps reading as a row of buttons.
  */
 describe('the status ladder', () => {

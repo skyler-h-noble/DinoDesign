@@ -53,10 +53,10 @@ const inner = (container) => container.querySelector('[data-surface]');
  * per-variant default (light -> Surface-Brightest, anything else -> Surface).
  * As of 2026-09-28 `variant` no longer selects a surface at all.
  *
- * Why one: a toast carries semantic colour, so on a solid fill that colour is
+ * Why one: a toast carries semantic color, so on a solid fill that color is
  * also the background its label must survive on — the label then flips per
  * theme AND per mode, 18 combinations to verify instead of 9. On
- * Surface-Brightest the colour lives in the border and icon while the text
+ * Surface-Brightest the color lives in the border and icon while the text
  * sits on a reliable background. Alert is already single-surface, and a toast
  * is a floating alert.
  *
@@ -124,7 +124,7 @@ describe('Solid variant data-theme', () => {
 
   test('solid resolves to the light surface, not its own', () => {
     /* The point of the retirement. A solid fill would make the label carry the
-       semantic colour as its own background — 18 contrast combinations to
+       semantic color as its own background — 18 contrast combinations to
        verify instead of 9. */
     const { container } = renderSnackbar({ variant: 'solid', color: 'error' });
     expect(container.querySelector('[data-surface="Surface-Brightest"]')).toBeInTheDocument();

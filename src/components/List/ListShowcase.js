@@ -213,7 +213,7 @@ export function ListShowcase() {
      nothing rendered it: no test opened the tab, so a plain ReferenceError sat
      in the file until Layout A made the panel mount. Defined here rather than
      deleted from the copy, so the panel keeps reading correctly if List later
-     gains a colour control. */
+     gains a color control. */
   const isDefault = color === 'default';
   const getThemeName = () => color.charAt(0).toUpperCase() + color.slice(1);
   const [orientation, setOrientation] = useState('vertical');

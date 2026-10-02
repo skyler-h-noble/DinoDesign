@@ -80,7 +80,7 @@ function buildVariantMap() {
    tint its name promised.
    Not a hard delete: the lookup below falls back to variantMap['primary'], so
    deleting the entries would have repainted every error-light badge as PRIMARY
-   with no error. Strip the suffix to the solid badge of the SAME colour. */
+   with no error. Strip the suffix to the solid badge of the SAME color. */
 const LIGHT_SUFFIX = /-light$/;
 const warnedVariants = new Set();
 

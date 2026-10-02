@@ -80,7 +80,7 @@ export const APPBAR_DOC = {
     figma: 'Other/App-Bar-Height'
   }],
   composition: ['Brand, nav and account are props. `centerSlot` and `endSlot` take anything else — do not nest a second bar.'],
-  accessibility: ['It is a `<header>` with a `<nav>` inside, not a row of buttons.', 'The current page link needs `aria-current="page"`; colour alone does not say which one you are on.'],
+  accessibility: ['It is a `<header>` with a `<nav>` inside, not a row of buttons.', 'The current page link needs `aria-current="page"`; color alone does not say which one you are on.'],
   gotchas: ['`Other/App-Bar-Height` was `App-Bar Height` with a space until 2026-09-30. Its sibling `Nav-Bar Height` still has one, because the rule is "use the file’s name", not "hyphenate".']
 };
 export const RAIL_DOC = {

@@ -331,7 +331,7 @@ describe('Tooltip — elevation is a token', () => {
 });
 
 /**
- * Colour comes from the BUTTONS collection, and the arrow is on by default.
+ * Color comes from the BUTTONS collection, and the arrow is on by default.
  *
  * Figma's Tooltip (4 Location variants) puts one `Buttons: black-white` pin on
  * an inner `Button-Theme-Tooltip` frame; the bubble and the arrow read
@@ -340,7 +340,7 @@ describe('Tooltip — elevation is a token', () => {
  * the tooltip's own pin.
  *
  * The lib read --Background / --Text instead — the SURFACE. That painted the
- * bubble the colour of whatever it floated over, and left no way to recolour a
+ * bubble the color of whatever it floated over, and left no way to recolor a
  * tooltip at all, since re-pinning a Buttons mode is precisely what the design
  * says you do. Three of those assignments were ternaries whose branches were
  * identical, so `isOutline` chose between two copies of one value.
@@ -348,7 +348,7 @@ describe('Tooltip — elevation is a token', () => {
  * Source assertions, not rendered ones: jsdom discards a `var()` it cannot
  * resolve, so toHaveStyle on any of these passes against any value.
  */
-describe('Tooltip — colour source and arrow default', () => {
+describe('Tooltip — color source and arrow default', () => {
   const source = require('fs').readFileSync(require.resolve('./Tooltip.js'), 'utf8');
 
   it('paints the bubble and label from the Buttons collection', () => {

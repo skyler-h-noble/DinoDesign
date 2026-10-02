@@ -1,7 +1,7 @@
 // src/components/Avatar/AvatarGlyph.js
 //
 // The brand's own "no image" avatar — a person silhouette filling the whole
-// disc, rather than a glyph floating inside a coloured circle.
+// disc, rather than a glyph floating inside a colored circle.
 //
 // It replaces @mui/icons-material/Person as the placeholder. Two reasons:
 //
@@ -16,7 +16,7 @@
 //
 // FILL IS `currentColor`, NOT the #8A4043 the export carried. The source SVG
 // was exported at one brand's Primary, and hardcoding it would put that brand's
-// maroon in every other brand's avatar. `currentColor` inherits the colour the
+// maroon in every other brand's avatar. `currentColor` inherits the color the
 // Avatar already sets from --Buttons-{C}-Text, so the glyph follows the palette
 // and both modes for free.
 import React from 'react';

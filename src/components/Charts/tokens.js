@@ -34,7 +34,7 @@ export const CHART_TOKENS = {
  *
  * Brand accents lead, because a category has no inherent meaning and should
  * not borrow one — a green wedge next to a red one reads as pass/fail whether
- * or not that is what the data says. The state colours are still available for
+ * or not that is what the data says. The state colors are still available for
  * charts with more categories than accents, and a caller can pass its own
  * subset (or reorder it) via the `colors` prop when the categories DO carry
  * semantics: `colors={['Success', 'Warning', 'Error']}`.
@@ -47,7 +47,7 @@ export const CHART_PALETTES = [
   'Info', 'Success', 'Warning', 'Error',
 ];
 
-/** Fill and matching label colour for one wedge. */
+/** Fill and matching label color for one wedge. */
 export const paletteTokens = (name) => ({
   fill: `var(--Icons-${name})`,
   onFill: `var(--Icons-On-${name})`,

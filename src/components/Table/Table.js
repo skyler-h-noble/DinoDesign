@@ -27,9 +27,9 @@ import { Ghost, ghostBlockSx } from '../_ghost';
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
-/* Theme modes, by the colour prop. Same table as List, and deliberately a
+/* Theme modes, by the color prop. Same table as List, and deliberately a
    LOOKUP rather than cap(color): the nine modes are a closed set, so an
-   unrecognised colour has to emit no data-theme at all rather than a name the
+   unrecognised color has to emit no data-theme at all rather than a name the
    cascade will not match. cap('black-white') would produce "Black-white",
    which binds to nothing and paints the parent's palette — the same silent
    failure this fixes. */
@@ -88,7 +88,7 @@ export function Table({
      This was C + '-Medium'. The Theme collection is nine BARE modes — there is
      no Primary-Medium — so the attribute matched no rule, --Background never
      resolved, and the solid table painted whatever palette its parent had.
-     It reads as the colour prop being ignored rather than as a missing token,
+     It reads as the color prop being ignored rather than as a missing token,
      which is why it survived the shade removal. */
   const wrapperDataAttrs = {};
   if (isSolid && THEME_MAP[color]) {

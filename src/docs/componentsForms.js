@@ -216,7 +216,7 @@ export const SWITCH_DOC = {
     name: 'variant',
     type: 'string',
     default: 'default',
-    note: 'Picks which Icons colour the on state paints with: `primary` resolves the track to `--Icons-Primary`. Also takes `{color}-outline`.'
+    note: 'Picks which Icons color the on state paints with: `primary` resolves the track to `--Icons-Primary`. Also takes `{color}-outline`.'
   }, {
     name: 'size',
     type: 'string',
@@ -268,7 +268,7 @@ export const SWITCH_DOC = {
   }, {
     collection: 'Icons',
     inCode: '`variant` — `<SwitchInput variant="primary">` resolves the on track to `--Icons-Primary`.',
-    inFigma: 'The ON variants bind Switch-Body\'s fill AND stroke to `Icon`, and the Dot to `On-Icon`, and pin nothing — so they inherit. Set the Icons mode on the switch or an ancestor; that is what recolours an on switch.'
+    inFigma: 'The ON variants bind Switch-Body\'s fill AND stroke to `Icon`, and the Dot to `On-Icon`, and pin nothing — so they inherit. Set the Icons mode on the switch or an ancestor; that is what recolors an on switch.'
   }],
   tokens: [{
     name: '--Icons-{Color}',
@@ -398,7 +398,7 @@ export const CHIP_DOC = {
     {
       version: '0.9.0',
       change: 'The solid/outline shape axis and the `-light` shape were removed. `-outline` was the unselected chip under another name, which let the component express four combinations against the design\'s two.',
-      migrate: 'Colour comes from `variant`; selection is a SURFACE level — unselected is Surface-Brightest, selected is Surface-Dimmest.',
+      migrate: 'Color comes from `variant`; selection is a SURFACE level — unselected is Surface-Brightest, selected is Surface-Dimmest.',
       silent: true,
     },
   ],
@@ -442,16 +442,16 @@ export const ALERT_DOC = {
   states: [{
     state: 'None',
     setBy: 'prop',
-    note: 'An alert is not interactive; its colour is the message.'
+    note: 'An alert is not interactive; its color is the message.'
   }],
   theming: [{
     collection: 'Theme',
-    inCode: '`color` picks the semantic palette. `data-theme` on an ancestor is rarely wanted — an error alert should stay an error colour.',
+    inCode: '`color` picks the semantic palette. `data-theme` on an ancestor is rarely wanted — an error alert should stay an error color.',
     inFigma: '`Alert Container` pins both Theme (Error / Warning) and `Surface=Surface-Brightest`. That container is the node to change.'
   }],
   tokens: [surfaceToken('--Background', 'the alert fill'), surfaceToken('--Text', 'the message'), surfaceToken('--Border', 'the outline')],
   composition: ['The icon goes in `startDecorator`, a dismiss or action in `endDecorator`.'],
-  accessibility: ['An error or warning that appears in response to something needs `role="alert"` so it is announced.', 'Colour alone is not the message — an error alert needs an icon or a word that says so.'],
+  accessibility: ['An error or warning that appears in response to something needs `role="alert"` so it is announced.', 'Color alone is not the message — an error alert needs an icon or a word that says so.'],
   gotchas: ['It defaults to `variant="light"`, which is a surface treatment here and not the removed `-light` shape.']
 };
 export const BADGE_DOC = {
@@ -508,8 +508,8 @@ export const BADGE_DOC = {
   }],
   theming: [{
     collection: 'Icons',
-    inCode: '`data-theme` on an ancestor; the fill follows the Icons colour.',
-    inFigma: 'Badge Counter binds `Icon` and `On-Icon` from the Icons collection and pins nothing. Set the Icons mode on it or an ancestor — that is what recolours a badge.'
+    inCode: '`data-theme` on an ancestor; the fill follows the Icons color.',
+    inFigma: 'Badge Counter binds `Icon` and `On-Icon` from the Icons collection and pins nothing. Set the Icons mode on it or an ancestor — that is what recolors a badge.'
   }],
   tokens: [{
     name: '--Buttons-{Color}-Button',
@@ -595,7 +595,7 @@ export const AVATAR_DOC = {
   theming: [{
     collection: 'Buttons',
     inCode: '`data-theme` on an ancestor.',
-    inFigma: 'The `Button-Theme-Avatar` and `Button-Theme-Initials` layers mark where the Buttons mode goes. Both are unpinned, so an avatar inherits. The Style variant chooses Photo / Initials / Default, which is content, not colour.'
+    inFigma: 'The `Button-Theme-Avatar` and `Button-Theme-Initials` layers mark where the Buttons mode goes. Both are unpinned, so an avatar inherits. The Style variant chooses Photo / Initials / Default, which is content, not color.'
   }],
   tokens: [{
     name: '--Buttons-{Color}-Button',
@@ -716,14 +716,14 @@ export const INPUT_DOC = {
 /** @type {import('./componentDoc').ComponentDoc} */
 export const SWATCH_DOC = {
   name: 'Swatch',
-  summary: 'A colour chip, optionally labelled, optionally clickable — one value out of a palette a person is choosing from.',
+  summary: 'A color chip, optionally labelled, optionally clickable — one value out of a palette a person is choosing from.',
   insteadUse: [
-    { when: 'It triggers an action rather than carrying a colour', use: 'Button' },
+    { when: 'It triggers an action rather than carrying a color', use: 'Button' },
     { when: 'It is a status or category label', use: 'Tag' },
     { when: 'It is one of a set of mutually exclusive options with text', use: 'ButtonGroup' },
   ],
   props: [
-    { name: 'color', type: 'string', default: 'undefined', note: 'Any CSS colour. Arbitrary DATA from a picker, not a palette choice — which is why Swatch is not a Button variant.' },
+    { name: 'color', type: 'string', default: 'undefined', note: 'Any CSS color. Arbitrary DATA from a picker, not a palette choice — which is why Swatch is not a Button variant.' },
     { name: 'label', type: 'string', default: 'undefined', note: 'Optional caption below the chip, in the Legal type style. Figma models it as the `Label` boolean.' },
     { name: 'size', type: 'string', values: ['small', 'medium', 'large'], default: 'medium', note: 'Follows the BUTTON height ramp, so a swatch lines up with the controls beside it and inherits the device chain.' },
     { name: 'selected', type: 'boolean', default: 'false', note: 'Draws the inner ring. Sets aria-pressed when clickable.' },
@@ -732,10 +732,10 @@ export const SWATCH_DOC = {
     { name: 'onClick', type: 'function', default: 'undefined', note: 'Its PRESENCE is what makes a swatch clickable — there is no separate prop. Figma says the same thing by putting `non-clickable` on the state axis, and the Radio style has no such value: a radio that cannot be chosen is not a radio.' },
   ],
   states: [
-    { state: 'Hover', setBy: 'interaction', note: 'Elevation 0 to 1, plus the --Hover scrim over the colour.' },
+    { state: 'Hover', setBy: 'interaction', note: 'Elevation 0 to 1, plus the --Hover scrim over the color.' },
     { state: 'Pressed', setBy: 'interaction', note: 'Back to elevation 0, with the --Pressed scrim.' },
     { state: 'Focus-visible', setBy: 'interaction', note: '2px --Focus-Visible ring, 3px OUTSIDE the chip.' },
-    { state: 'Selected', setBy: 'prop', note: 'A check on its own --Background disc, so the mark never sits on the arbitrary swatch colour and its contrast can be known. With `radio`, the radio carries it instead.' },
+    { state: 'Selected', setBy: 'prop', note: 'A check on its own --Background disc, so the mark never sits on the arbitrary swatch color and its contrast can be known. With `radio`, the radio carries it instead.' },
     { state: 'Disabled', setBy: 'prop', note: '0.38 opacity.' },
   ],
   theming: [
@@ -766,12 +766,12 @@ export const SWATCH_DOC = {
     'A chip and an optional label, nothing else. Put swatches in a row yourself; there is no SwatchGroup.',
   ],
   accessibility: [
-    'A colour is not a name. Without a visible label, pass `aria-label` — the colour value is the fallback, and it is a poor one.',
+    'A color is not a name. Without a visible label, pass `aria-label` — the color value is the fallback, and it is a poor one.',
     'Selection is announced with aria-pressed, and only when the swatch is clickable.',
-    'The chip keeps a --Border edge so a pale colour stays visible on a pale surface.',
+    'The chip keeps a --Border edge so a pale color stays visible on a pale surface.',
   ],
   gotchas: [
-    'It used to be `<Button swatch swatchColor={hex}>`. That never fitted: Button\'s axes are STYLE and COLOUR, and a swatch uses neither — "outline swatch" means nothing, and its colour is data rather than a palette.',
+    'It used to be `<Button swatch swatchColor={hex}>`. That never fitted: Button\'s axes are STYLE and COLOUR, and a swatch uses neither — "outline swatch" means nothing, and its color is data rather than a palette.',
     'Clickability is the presence of `onClick`, not a `clickable` prop.',
   ],
   changes: [

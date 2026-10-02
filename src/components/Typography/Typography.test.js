@@ -145,7 +145,7 @@ describe('Color', () => {
     expect(screen.getByText('Note')).toHaveClass('typography-color-quiet');
   });
 
-  // Eyebrow has its own colour role — a rotation off the surface's palette,
+  // Eyebrow has its own color role — a rotation off the surface's palette,
   // not a muted Text. Rendering it as --Quiet threw that rotation away.
   test('eyebrow defaults to the eyebrow color', () => {
     render(<Typography textStyle="eyebrow">SECTION</Typography>);

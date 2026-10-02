@@ -144,7 +144,7 @@ export function SurfacesDemo() {
   );
 }
 
-/* States, shown as the colours each one resolves to.
+/* States, shown as the colors each one resolves to.
    A pseudo-class cannot be forced from JavaScript, so hovering every sample
    would need fake classes that drift from the real rules. Painting the TOKEN
    is both honest and more useful: these are the values the states resolve to
@@ -237,7 +237,7 @@ export function StaticColorsDemo() {
     <VStack gap="var(--Sizing-2)">
       <H5>The ramps</H5>
       <BodySmall color="quiet">
-        Twelve tones per palette. Fixed colours: the same whatever surface they sit on
+        Twelve tones per palette. Fixed colors: the same whatever surface they sit on
         and whichever mode is active — which is what makes them right for illustration
         and wrong for a background.
       </BodySmall>

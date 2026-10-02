@@ -32,7 +32,7 @@ import { SHADOW_LEVEL_3, SHADOW_LEVEL_4, bevelShadow, tokenSegment } from '../_s
  * Accessibility: role="button", aria-label, focus-visible ring
  */
 
-/* No local colour map. The one that was here listed eight names and omitted
+/* No local color map. The one that was here listed eight names and omitted
    both `default` and `black-white`, while falling back to `|| 'Primary'` — so
    those two rendered as primary and looked like a brand whose default and
    black-white simply matched it. tokenSegment is what Button already uses, and
@@ -48,11 +48,11 @@ const SIZE_MAP = {
 function getTokens(color) {
   /* `default` on a FAB means TERTIARY, deliberately.
      A FAB is not tied to the button palette: it floats above the content as
-     the one primary action, so its resting colour is a different palette from
+     the one primary action, so its resting color is a different palette from
      whatever the default Button is — otherwise it reads as just another button
      that happens to be round.
      This lived in FabShowcase as `color === 'default' ? 'tertiary' : color`,
-     which meant the gallery showed the real colour and anyone importing Fab
+     which meant the gallery showed the real color and anyone importing Fab
      got --Buttons-Default-*. Every other value passes through untouched. */
   const C = tokenSegment(color === 'default' ? 'tertiary' : color);
   return {
@@ -77,11 +77,11 @@ function getTokens(color) {
  * to 0 — a different motion from the one designed, at a different size, at 0.4
  * rather than 0.5.
  *
- * The colour is the bigger fix. Figma binds the ring's stroke to the `Button`
+ * The color is the bigger fix. Figma binds the ring's stroke to the `Button`
  * variable, i.e. the FAB's own fill. This read --pulse-rgb, which NOTHING in
  * the component ever set, so every pulse fell through to the 0,0,0 fallback
- * and rang black regardless of the button's colour. --Buttons-<C>-Button is
- * set per colour already, so the ring now follows the button it surrounds.
+ * and rang black regardless of the button's color. --Buttons-<C>-Button is
+ * set per color already, so the ring now follows the button it surrounds.
  */
 const pulseKeyframes = `
 @keyframes fab-pulse {
@@ -97,7 +97,7 @@ export function Fab({
   label,
   variant = 'solid',
   /* `default`, which for a FAB resolves to the TERTIARY palette — see
-     getTokens. Figma does not pin the colour: it comes from the Buttons MODE
+     getTokens. Figma does not pin the color: it comes from the Buttons MODE
      set on the frame, and that collection's ten modes are the list this prop
      takes. */
   color = 'default',
@@ -190,8 +190,8 @@ export function Fab({
           '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px' },
           // Animation
           ...(animate && !disabled && {
-            /* 50% of the button's own colour — Figma's Start and Middle both
-               sit at opacity 0.5, and colour-mix gets that from the same token
+            /* 50% of the button's own color — Figma's Start and Middle both
+               sit at opacity 0.5, and color-mix gets that from the same token
                the fill uses rather than needing a second variable. */
             '--fab-pulse-color': `color-mix(in srgb, ${tokens.bg} 50%, transparent)`,
             animation: 'fab-pulse 2s var(--Motion-Easing-Standard, ease) infinite',

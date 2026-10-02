@@ -30,7 +30,7 @@ describe('BrandIcon resolves the names Figma uses', () => {
     expect(container.querySelector('svg')).toHaveAttribute('role', 'img');
   });
 
-  test('colour is currentColor unless asked otherwise', () => {
+  test('color is currentColor unless asked otherwise', () => {
     const { container, rerender } = render(<BrandIcon name="github" />);
     expect(container.querySelector('svg')).toHaveAttribute('fill', 'currentColor');
     rerender(<BrandIcon name="github" color="var(--Icons-Primary)" />);

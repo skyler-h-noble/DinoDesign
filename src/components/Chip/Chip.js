@@ -7,7 +7,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
  * Chip Component
  * Compact element representing an input, attribute, or action
  *
- * COLOUR:   variant="{color}"  — colour only, all 8. There is no shape axis.
+ * COLOUR:   variant="{color}"  — color only, all 8. There is no shape axis.
  *
  * SELECTION is the only other axis, and it is a SURFACE level rather than a
  * different fill. A chip is a small surface you can toggle, not a button:
@@ -93,7 +93,7 @@ const LIGHT_SUFFIX = /-light$/;
  * selected, outline-and-selected. Four combinations against the design's two,
  * and a converter reading a chip in Figma had no way to choose.
  *
- * Selection is the only axis now. `variant` means colour, as it does on every
+ * Selection is the only axis now. `variant` means color, as it does on every
  * other component. */
 const OUTLINE_SUFFIX = /-outline$/;
 const warnedVariants = new Set();
@@ -286,7 +286,7 @@ export function Chip({
      — PRIMARY, hardcoded, so a selected Success chip wore a primary ring — and
      it sat on top of whichever fill the variant chose. Selection is now the
      surface level, which is both the design's model and a signal that cannot
-     be the wrong colour. */
+     be the wrong color. */
 
   const displayLabel = label || children;
 
@@ -436,7 +436,7 @@ export function Chip({
       /* The attributes are the paint. Every token in chipSx — --Background,
          --Text, --Border, --Hover, --Pressed — resolves from this pair, so
          without them the chip falls through to the page's own zone and a
-         Success chip renders in the page colour. */
+         Success chip renders in the page color. */
       data-theme={chipTheme}
       data-surface={chipSurface}
       sx={chipSx}

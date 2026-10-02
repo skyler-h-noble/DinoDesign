@@ -150,7 +150,7 @@ describe('Ellipsis', () => {
 });
 
 /* Pagination has no `variant` prop — only `color` and `size`. The page
-   buttons take their appearance from the colour: selected renders the solid
+   buttons take their appearance from the color: selected renders the solid
    Button variant, unselected the -outline one. */
 
 /* ─── Color classes ─── */
@@ -210,7 +210,7 @@ describe('Controlled mode', () => {
 
 /* ─── Defaults ─── */
 describe('Defaults', () => {
-  /* Default colour is `default`, not primary — the lib-wide rule. And there is
+  /* Default color is `default`, not primary — the lib-wide rule. And there is
      no variant axis to have a default for. */
   test('default color is default', () => {
     const { container } = renderPagination();

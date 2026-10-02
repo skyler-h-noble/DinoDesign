@@ -138,7 +138,7 @@ describe('Colors Component', () => {
      no inline style attribute to match, so the old selector returned 0 and the
      assertion was really "0 > 10". Each swatch also prints its CSS variable
      name, so counting those counts the swatches without depending on how the
-     colour is applied. */
+     color is applied. */
   test('renders multiple color swatches', () => {
     const { container } = render(<Colors />);
     const varNames = Array.from(container.querySelectorAll('*'))

@@ -91,12 +91,12 @@ export function NumberField({
   const borderToken = color === 'default'
     ? 'var(--Border)'
     : 'var(--Buttons-' + C + '-Border)';
-  /* Both arms are --Background. The coloured arm used to read
+  /* Both arms are --Background. The colored arm used to read
      var(--Buttons-{C}-Light-Button, var(--Background)), and since no design
      system publishes that token the fallback always fired — so the `color`
      prop has never changed this fill, only the border and text. Writing it as
      the value it actually resolves to, rather than leaving a token that reads
-     as though colour reaches the fill. */
+     as though color reaches the fill. */
   const fieldBg = 'var(--Background)';
   const activeTextColor = color === 'default' ? 'var(--Text)' : 'var(--Text-' + C + ')';
 
@@ -239,7 +239,7 @@ export function NumberField({
   /* Stepper button.
    *
    * TRANSPARENT AT REST, so the field's own fill shows through — the design has
-   * no separate button colour, only the hover and pressed states appearing on
+   * no separate button color, only the hover and pressed states appearing on
    * top of it. It previously painted --Buttons-{C}-Light-Button at rest, which
    * put a visible block in the corner of every field.
    *
@@ -335,7 +335,7 @@ export function NumberField({
              * invisible as a bug because the icons still drew. */
             minHeight: 'max(' + sc.height + ', calc(var(--Sizing-3, 24px) * 2 + 1px))',
             /* --Background, not --Hover. The field was painting its own HOVER
-               colour at rest, which left nothing for hover to move to and made
+               color at rest, which left nothing for hover to move to and made
                every field read as already-interacted-with. */
             backgroundColor: fieldBg,
           }}>

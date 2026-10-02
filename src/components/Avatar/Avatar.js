@@ -233,22 +233,26 @@ export function Avatar({
         fontFamily: 'inherit', fontWeight: 600,
         overflow: 'hidden',
         flexShrink: 0,
-        // Border per variant, from the design's three Avatar styles:
-        //   Photo    → 1px ring in the SURFACE border. A photo has no palette
-        //              (the image is the visual), so it takes --Border rather
-        //              than the colour prop's button border.
-        //   Initials → 1px ring in the palette's button border. At `default`
-        //              these two resolve to the same value; they diverge once
-        //              a colour prop is set, which is the generalisation the
-        //              design's single default-coloured instance implies.
-        //   Icon     → NO ring. The design's Default style is a filled glyph.
-        // This used to be exactly inverted: no ring on the photo, a 2px ring on
-        // the other two.
-        border: hasSrc
-          ? BORDER_WIDTH + ' solid var(--Border)'
-          : hasInitials
-            ? BORDER_WIDTH + ' solid ' + borderColor
-            : 'none',
+        /* One ring, one token, all three styles.
+           Checked against the Avatar set (3156:2682), whose Style axis is
+           Initials | Default | Photo. Every one of them binds its stroke to
+           Buttons::Border at 1px — `Photo`, `Button-Theme-Initials` and
+           `Button-Theme-Avatar` alike.
+
+           This read differently for each, and was reasoned from the picture
+           rather than from the file: --Border for a photo, on the argument that
+           "a photo has no palette"; nothing at all for the icon, on the
+           argument that "the design's Default style is a filled glyph". The
+           file says otherwise in both cases, and the icon one matters most —
+           an avatar BUTTON with no ring has no outline to carry the 3:1
+           non-text contrast a clickable boundary needs, so the affordance
+           disappears against a surface close to the avatar's own fill.
+
+           --Border was not a harmless substitute either: it is tuned against
+           the SURFACE, while --Buttons-{C}-Border is the button's own outline.
+           They agree at `default` and diverge the moment a color is set, which
+           is exactly when the ring is doing work. */
+        border: BORDER_WIDTH + ' solid ' + borderColor,
         // Inside-button breathing room. Pure margin so the avatar's circular
         // silhouette doesn't get pushed into an ellipse by padding.
         ...(insideButton && { marginLeft: '2px', marginRight: '2px' }),

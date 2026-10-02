@@ -26,8 +26,8 @@ const topic = (title) => FOUNDATIONS.find(t => t.title === title);
    ends that differ. Side by side is the only way that reads as one mechanism
    rather than three treatments. */
 const ALT_MODES = [
-  { mode: 'default',  note: 'both stops → --Header. Solid, and the fallback when a brand sets no alt colour.' },
-  { mode: 'colored',  note: 'both stops → --Alt-Display-Color. Solid, in the brand’s alt colour.' },
+  { mode: 'default',  note: 'both stops → --Header. Solid, and the fallback when a brand sets no alt color.' },
+  { mode: 'colored',  note: 'both stops → --Alt-Display-Color. Solid, in the brand’s alt color.' },
   { mode: 'gradient', note: 'stops → --Alt-Color-Gradient-Stop-1 / -2. The only mode whose ends differ.' },
 ];
 
@@ -55,11 +55,11 @@ export function TypographySummary() {
         </VStack>
       </VStack>
 
-      {/* Colour roles, as swatches rather than a list of names — the same way
+      {/* Color roles, as swatches rather than a list of names — the same way
           Button answers "what can I pass to color". */}
       <VStack gap="var(--Sizing-3)">
         <VStack gap="var(--Sizing-Half)">
-          <H4>Colour</H4>
+          <H4>Color</H4>
           <Body>
             Display and H1–H3 take <strong>--Header-*</strong>; everything else takes
             <strong> --Text-*</strong>. The header role is a display one: it carries the
@@ -98,7 +98,7 @@ export function TypographySummary() {
           <BodySmall color="quiet">
             To change a style, set its variables in the design system rather than
             overriding the component — the token names below are exactly what the
-            generator publishes. To change a colour, pass <code>color</code> and
+            generator publishes. To change a color, pass <code>color</code> and
             pick from the roles above; never <code>style=&#123;&#123; color &#125;&#125;</code>,
             which bypasses the role and its contrast requirement.
           </BodySmall>

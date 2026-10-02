@@ -118,7 +118,7 @@ describe('Selection styles', () => {
   test('light is gone — it falls back to default and emits no light class', () => {
     /* It named --Buttons-{C}-Light-{Button,Text,Border}, which no design
        system publishes, with no fallbacks — so all three declarations were
-       invalid and a selected option had no fill, no text colour and no
+       invalid and a selected option had no fill, no text color and no
        border. The class assertion is the part that matters: a stale
        select-style-light would keep a brand stylesheet styling a variant the
        component no longer implements. */

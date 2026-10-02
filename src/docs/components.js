@@ -23,16 +23,36 @@ export const BUTTON_DOC = {
     use: 'SwitchInput'
   }],
   props: [{
+    /* One prop, two axes, so two rows.
+       Figma models them separately — Style is a variant axis (solid / outline /
+       ghost) and colour is a Buttons MODE — and the note has said they are
+       separate axes all along while the page showed them as one list. Reading
+       `primary-outline` off a single row, it is not obvious which half is
+       which, or that `ghost` takes no colour at all. */
     name: 'variant',
+    label: 'variant — shape',
+    sample: 'variant',
     type: 'string',
     default: 'default',
-    values: ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'],
-    note: 'Colour and SHAPE are separate axes, and only `-outline` is a suffix. Every colour takes `{color}` and `{color}-outline`; `ghost` is written BARE, with no colour prefix, because it reads from the text role (`--Hotlink` for text, `--Quiet` for icon-only) rather than a palette. `text` is an ALIAS of `ghost`, not a fourth shape — Figma\'s Style axis is solid / outline / ghost. There is no `primary-ghost`: an unknown variant warns and renders the default. **The default is `default`, not `primary`** — use `primary` only where the design explicitly marks it.'
+    values: ['solid (bare)', '{color}-outline', 'ghost'],
+    note: 'Color and SHAPE are separate axes, and only `-outline` is a suffix. Every color takes `{color}` and `{color}-outline`; `ghost` is written BARE, with no color prefix, because it reads from the text role (`--Hotlink` for text, `--Quiet` for icon-only) rather than a palette. `text` is an ALIAS of `ghost`, not a fourth shape — Figma\'s Style axis is solid / outline / ghost. There is no `primary-ghost`: an unknown variant warns and renders the default. **The default is `default`, not `primary`** — use `primary` only where the design explicitly marks it.'
   }, {
     name: 'size',
     type: 'string',
     values: ['small', 'medium', 'large'],
     default: 'medium'
+  }, {
+    /* The colour half of the same prop. Ten values, matching the Buttons
+       collection exactly — black-white included, which the FAB cannot reach.
+       It was previously listed with nine: black-white is added outside the
+       COLORS loop in Button.js and the doc copied the loop. */
+    name: 'variant',
+    label: 'variant — color',
+    sample: 'variantColor',
+    type: 'string',
+    default: 'default',
+    values: ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error', 'black-white'],
+    note: 'The same prop as the shape above — a color on its own is the solid button, and `{color}-outline` is that color as an outline. **The default is `default`, not `primary`.** `ghost` takes no color prefix, so there is no `primary-ghost`.'
   }, {
     name: 'iconOnly',
     type: 'boolean — one value of Figma\'s Type axis',
@@ -77,7 +97,7 @@ export const BUTTON_DOC = {
     name: 'swatch',
     type: 'boolean',
     default: 'false',
-    note: 'A colour chip, filled from `swatchColor`. Not in the Figma Type axis.'
+    note: 'A color chip, filled from `swatchColor`. Not in the Figma Type axis.'
   }],
   states: [{
     state: 'Hover',
@@ -104,9 +124,9 @@ export const BUTTON_DOC = {
   }, {
     collection: 'Buttons',
     inCode: '`variant` picks the palette — `variant="success"`.',
-    inFigma: 'Set the Buttons mode. Colour is not a variant axis in Figma either — it arrives as a mode.'
+    inFigma: 'Set the Buttons mode. Color is not a variant axis in Figma either — it arrives as a mode.'
   }],
-  themingNotes: ['Colour and theme are different things. `variant="success"` picks a palette; a theme moves the whole surface, including the text and border tones that have to stay readable on it.', 'A button carries no shadow at rest, so theming it is safe. Components that DO — Fab, Chip, AppBar — pin the theme on an inner node instead, so the shadow keeps reading the page.'],
+  themingNotes: ['Color and theme are different things. `variant="success"` picks a palette; a theme moves the whole surface, including the text and border tones that have to stay readable on it.', 'A button carries no shadow at rest, so theming it is safe. Components that DO — Fab, Chip, AppBar — pin the theme on an inner node instead, so the shadow keeps reading the page.'],
   tokens: [{
     name: '--Buttons-{Color}-Button',
     sets: 'the fill',
@@ -149,7 +169,7 @@ export const BUTTON_DOC = {
   changes: [
     {
       version: '0.12.0',
-      change: '`swatch` and `swatchColor` are retired — use the Swatch component. A swatch uses neither of Button\'s axes: its colour is arbitrary data from a picker rather than a palette, and it has no solid / outline / ghost shape. Figma draws Swatch as its own component, so Button/Button-Swatch has no component left to serve.',
+      change: '`swatch` and `swatchColor` are retired — use the Swatch component. A swatch uses neither of Button\'s axes: its color is arbitrary data from a picker rather than a palette, and it has no solid / outline / ghost shape. Figma draws Swatch as its own component, so Button/Button-Swatch has no component left to serve.',
       migrate: 'Use <Swatch color={hex} /> — and it fixes the corner, which read --Button-Icon-Radius and so stayed square when a brand set a large radius.',
       silent: true,
     },
@@ -160,8 +180,8 @@ export const BUTTON_DOC = {
     },
     {
       version: '0.9.0',
-      change: 'The `-light` shape was removed. It painted --<C>-Color-11, a tinted fill that was never a shape in the design — shape is solid / outline / ghost / text, and colour arrives as a Buttons mode.',
-      migrate: 'Use the solid variant of that colour, or an outline on a brighter surface.',
+      change: 'The `-light` shape was removed. It painted --<C>-Color-11, a tinted fill that was never a shape in the design — shape is solid / outline / ghost / text, and color arrives as a Buttons mode.',
+      migrate: 'Use the solid variant of that color, or an outline on a brighter surface.',
       silent: true,
     },
   ],

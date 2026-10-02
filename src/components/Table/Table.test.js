@@ -65,7 +65,7 @@ describe('Table', () => {
     }
   });
 
-  test('an unrecognised colour emits no data-theme at all', () => {
+  test('an unrecognised color emits no data-theme at all', () => {
     // Better than a name the cascade cannot match: no attribute means the
     // table inherits, which is a defensible result rather than a broken one.
     const { container } = render(

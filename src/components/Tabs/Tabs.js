@@ -131,7 +131,7 @@ export const isHorizontalOrientation = (orientation) => orientation === 'horizon
  * directly.
  *
  * Not an aesthetic preference: jsdom cannot parse a border shorthand whose
- * colour is a var(), so `toHaveStyle('border-bottom: 1px solid var(--X)')`
+ * color is a var(), so `toHaveStyle('border-bottom: 1px solid var(--X)')`
  * reduces to an empty expectation and PASSES against anything. A DOM test of
  * these two would be green whatever the component drew. */
 export function baselineStyle(orientation, baseline = true) {
@@ -142,14 +142,14 @@ export function baselineStyle(orientation, baseline = true) {
 /* Hover previews the indicator at half strength.
  *
  * It uses the SAME token as the selector, not --Border-Variant. The baseline is
- * already --Border-Variant, so a hover mark in that colour would land a 2px
+ * already --Border-Variant, so a hover mark in that color would land a 2px
  * line on top of the 1px rule in the same tone — reading as "the baseline got
  * thicker" rather than "this tab is hovered". And on a vertical list, where
  * there is no baseline behind the tab, it would be a neutral grey unrelated to
- * the brand-coloured selector it is previewing.
+ * the brand-colored selector it is previewing.
  *
  * color-mix, not opacity: Figma dims the Hover LAYER to 50%, which in CSS is a
- * half-transparent border colour. `opacity: 0.5` on the tab would fade the
+ * half-transparent border color. `opacity: 0.5` on the tab would fade the
  * label and icon too.
  *
  * A selected tab gets nothing — it already draws the indicator at full

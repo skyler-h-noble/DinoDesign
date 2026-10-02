@@ -38,9 +38,9 @@ describe('Chip Component', () => {
     expect(container.querySelector(`.chip-${color}`)).toBeInTheDocument();
   });
 
-  test.each([['primary-outline'], ['error-outline']])('%s renders as the plain colour, unselected', (variant) => {
+  test.each([['primary-outline'], ['error-outline']])('%s renders as the plain color, unselected', (variant) => {
     /* There is no outline shape. `-outline` WAS the unselected chip — the same
-       var(--Background) fill and border — so it resolves to the colour and the
+       var(--Background) fill and border — so it resolves to the color and the
        selection axis decides the rest. */
     const base = variant.replace('-outline', '');
     const { container } = render(<Chip variant={variant} label="Test" />);
@@ -72,7 +72,7 @@ describe('Chip Component', () => {
   /* The -light shape was removed. Chip resolves an unknown variant as
      `variantMap[variant] || variantMap['primary']`, so a hard delete would
      have repainted success-light as PRIMARY silently; normalizeChipVariant
-     strips the suffix to the solid chip of the SAME colour instead, and the
+     strips the suffix to the solid chip of the SAME color instead, and the
      class names what painted rather than what was asked for. */
   test.each([['primary-light', 'chip-primary'], ['success-light', 'chip-success']])(
     '%s renders as %s, with no -light class',

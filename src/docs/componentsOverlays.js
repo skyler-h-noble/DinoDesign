@@ -242,7 +242,7 @@ export const TOOLTIP_DOC = {
     name: 'color',
     type: 'string',
     default: 'black-white',
-    note: 'Which Buttons mode paints the bubble. The default matches the mode Figma pins on `Button-Theme-Tooltip`; pass another palette to recolour.'
+    note: 'Which Buttons mode paints the bubble. The default matches the mode Figma pins on `Button-Theme-Tooltip`; pass another palette to recolor.'
   }, {
     name: 'arrow',
     type: 'boolean',
@@ -273,11 +273,11 @@ export const TOOLTIP_DOC = {
   theming: [{
     collection: 'Buttons',
     inCode: '`color` — `<Tooltip color="primary">` resolves the bubble to `--Buttons-Primary-Button`. Defaults to `black-white`.',
-    inFigma: 'One pin, on the inner `Button-Theme-Tooltip` frame: `Buttons = black-white`. The bubble, the arrow, the label and the icon all inherit it, so that frame is the only place to change a tooltip\'s colour.'
+    inFigma: 'One pin, on the inner `Button-Theme-Tooltip` frame: `Buttons = black-white`. The bubble, the arrow, the label and the icon all inherit it, so that frame is the only place to change a tooltip\'s color.'
   }, {
     collection: 'Theme',
     inCode: '`data-theme` on an ancestor.',
-    inFigma: 'Pins nothing and inherits — deliberately. The drop shadow sits on the component ROOT, one level above the themed frame, so it reads the ambient surface rather than the tooltip\'s own colour.'
+    inFigma: 'Pins nothing and inherits — deliberately. The drop shadow sits on the component ROOT, one level above the themed frame, so it reads the ambient surface rather than the tooltip\'s own color.'
   }],
   tokens: [{
     name: '--Buttons-{Color}-Button',
@@ -302,7 +302,7 @@ export const TOOLTIP_DOC = {
   }],
   composition: ['It wraps the element it describes. The child must be able to hold a ref and take focus.'],
   accessibility: ['Never put the only copy of something important in a tooltip — touch users get no hover.', '`describeChild` is the difference between replacing a control\'s name and adding to it. Naming a button "Save" that already says "Save" announces it twice.'],
-  gotchas: ['A tooltip on a `disabled` control never shows: a disabled element fires no pointer events. Wrap it in a span if the explanation matters.', 'The bubble is a Buttons colour, not a surface colour. It used to read `--Background`, which painted it the colour of whatever it floated over and left no way to recolour it. `variant="light"` still works, because the Buttons tokens are surface-aware and light moves the SURFACE rather than tinting the fill.'],
+  gotchas: ['A tooltip on a `disabled` control never shows: a disabled element fires no pointer events. Wrap it in a span if the explanation matters.', 'The bubble is a Buttons color, not a surface color. It used to read `--Background`, which painted it the color of whatever it floated over and left no way to recolor it. `variant="light"` still works, because the Buttons tokens are surface-aware and light moves the SURFACE rather than tinting the fill.'],
   changes: [
     {
       version: '0.12.0',
@@ -311,7 +311,7 @@ export const TOOLTIP_DOC = {
     },
     {
       version: '0.12.0',
-      change: 'Colour defaults to `black-white`, the mode Figma pins on Button-Theme-Tooltip. The arrow now takes its width and height separately so a sideways tooltip is not drawn with a square arrow.',
+      change: 'Color defaults to `black-white`, the mode Figma pins on Button-Theme-Tooltip. The arrow now takes its width and height separately so a sideways tooltip is not drawn with a square arrow.',
       silent: true,
     },
   ],

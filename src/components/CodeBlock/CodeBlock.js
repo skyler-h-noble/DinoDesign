@@ -3,7 +3,7 @@
 // A block of code on its own dark region, with an optional label and a copy
 // button.
 //
-// The dark is NOT a hardcoded colour. The wrapper declares
+// The dark is NOT a hardcoded color. The wrapper declares
 // data-theme="Neutral" + data-surface="Surface-Dimmest", which is the system's
 // way of spelling "the black region": that pair resolves --Background to the
 // darkest neutral and --Text to white, and every nested token — --Quiet for the
@@ -45,8 +45,8 @@ function CopyButton({ code, label = 'Copy code' }) {
     <Tooltip title={copied ? 'Copied!' : label}>
       {/* aria-label rather than a visible name: the icon is the whole control. */}
       {/* ghost, explicitly. Button's default variant is `default` — the brand's
-          own colour as a SOLID fill — so leaving it off put a filled brand-
-          coloured disc in the header of every code block. It is the right
+          own color as a SOLID fill — so leaving it off put a filled brand-
+          colored disc in the header of every code block. It is the right
           default for a button that means something; it is wrong for chrome
           sitting on a panel that already declares its own theme. */}
       <IconButton
@@ -85,7 +85,7 @@ export function CodeBlock({
 }) {
   return (
     <Box
-      // The pair that makes this region dark. Never a literal colour.
+      // The pair that makes this region dark. Never a literal color.
       data-theme="Neutral"
       data-surface="Surface-Dimmest"
       sx={{

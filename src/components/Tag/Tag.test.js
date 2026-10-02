@@ -85,7 +85,7 @@ describe('Convenience exports', () => {
     [WarningTag,   'tag-warning'],
     [ErrorTag,     'tag-error'],
     /* No BlackTag / WhiteTag. Tag's COLORS are default + the eight palettes;
-       BlackWhite is a BUTTON palette and was never a Tag colour, so these two
+       BlackWhite is a BUTTON palette and was never a Tag color, so these two
        imports resolved to undefined and took the suite down with them. */
   ];
 

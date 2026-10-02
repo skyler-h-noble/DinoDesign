@@ -77,7 +77,7 @@ describe('Solid variant data-theme', () => {
      removed from the Theme collection: it is nine modes now, Default plus the
      eight palettes. A data-theme naming a mode that is not generated binds to
      nothing and paints the parent's palette, which reads as the component
-     ignoring its colour prop rather than as a missing token. */
+     ignoring its color prop rather than as a missing token. */
   const cases = [
     ['primary',   'Primary'],
     ['secondary', 'Secondary'],

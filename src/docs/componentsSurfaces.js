@@ -14,7 +14,7 @@ const surfaceToken = (name, sets) => ({
 });
 export const ICON_DOC = {
   name: 'Icon',
-  summary: 'Wraps an icon glyph so it takes a system colour and size. Decorative unless you name it.',
+  summary: 'Wraps an icon glyph so it takes a system color and size. Decorative unless you name it.',
   insteadUse: [{
     when: 'It is clickable',
     use: 'Button with iconOnly'
@@ -30,7 +30,7 @@ export const ICON_DOC = {
     type: 'string',
     default: 'default',
     values: ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error', 'quiet'],
-    note: 'Picks the Icons mode. This is the only way to recolour an icon — do not pass `style={{ color }}`.'
+    note: 'Picks the Icons mode. This is the only way to recolor an icon — do not pass `style={{ color }}`.'
   }, {
     name: 'size',
     type: 'string',
@@ -40,7 +40,7 @@ export const ICON_DOC = {
     name: 'twoTone',
     type: 'boolean',
     default: 'false',
-    note: 'Draws the glyph in the icon colour with its secondary shapes at the variant alpha.'
+    note: 'Draws the glyph in the icon color with its secondary shapes at the variant alpha.'
   }, {
     name: 'disabled',
     type: 'boolean',
@@ -56,7 +56,7 @@ export const ICON_DOC = {
     inCode: '`color` — `<Icon color="primary">`. It resolves to `--Icons-Primary`.',
     inFigma: 'The Icon component binds `Vector → Icon` from the Icons collection and pins nothing, so it inherits. Set the Icons mode on it or an ancestor.'
   }],
-  themingNotes: ['The Icons collection is 3 variables across 10 modes, the same shape as Buttons. Before it existed each colour was its own variable in Surface, so a component had to bind to ONE — which is why Badge could only ever be an error badge in Figma.', 'In CSS there are no modes: the generator flattens each one into a name, so `--Icons-Primary` is what a consumer writes and always has been.'],
+  themingNotes: ['The Icons collection is 3 variables across 10 modes, the same shape as Buttons. Before it existed each color was its own variable in Surface, so a component had to bind to ONE — which is why Badge could only ever be an error badge in Figma.', 'In CSS there are no modes: the generator flattens each one into a name, so `--Icons-Primary` is what a consumer writes and always has been.'],
   tokens: [{
     name: '--Icons-{Color}',
     sets: 'the glyph',
@@ -69,7 +69,7 @@ export const ICON_DOC = {
     figma: 'Icons → Icon-Variant'
   }, {
     name: '--Icons-On-{Color}',
-    sets: 'a glyph sitting ON that colour',
+    sets: 'a glyph sitting ON that color',
     variesWith: 'theme + surface',
     figma: 'Icons → On-Icon'
   }, {
@@ -78,9 +78,9 @@ export const ICON_DOC = {
     variesWith: 'size mode',
     figma: 'Icons & Avatars → Icon-Size'
   }],
-  composition: ['Pass a MUI icon as the child — `<Icon color="primary"><CheckIcon/></Icon>`. The wrapper is what makes it take a system colour.'],
+  composition: ['Pass a MUI icon as the child — `<Icon color="primary"><CheckIcon/></Icon>`. The wrapper is what makes it take a system color.'],
   accessibility: ['Icons are `aria-hidden` by default. That is correct: an icon beside a label is decoration, and announcing it repeats the label.', 'An icon carrying meaning on its own needs an `aria-label` — but if it is also clickable, the name belongs on the Button, not the Icon, or it is announced twice.'],
-  gotchas: ['`Icons & Avatars` sounds like a colour collection and is not — it holds Icon-Size and Avatar-Size, and its modes (`in-button`, `in-check`, `xxs`…) are SIZES. A containing component pins it automatically; you never choose it.', 'The variant alpha is one flat number across every theme and surface (`Colors/Icon-Variant-Opacity`, 50). It was adaptive once; flattening it is what let Figma express it as alias-plus-opacity instead of 192 baked colours.']
+  gotchas: ['`Icons & Avatars` sounds like a color collection and is not — it holds Icon-Size and Avatar-Size, and its modes (`in-button`, `in-check`, `xxs`…) are SIZES. A containing component pins it automatically; you never choose it.', 'The variant alpha is one flat number across every theme and surface (`Colors/Icon-Variant-Opacity`, 50). It was adaptive once; flattening it is what let Figma express it as alias-plus-opacity instead of 192 baked colors.']
 };
 export const FAB_DOC = {
   name: 'Fab',
@@ -116,11 +116,11 @@ export const FAB_DOC = {
              'info', 'success', 'warning', 'error', 'black-white'],
     default: 'default',
     note: 'The ten modes of Figma\'s Buttons collection. A FAB has no Color '
-      + 'variant axis — in FIGMA you change its colour by setting the Buttons '
+      + 'variant axis — in FIGMA you change its color by setting the Buttons '
       + 'MODE on the frame, and in CODE it is this prop, taking the same ten '
       + 'names. Defaults to `default`, which on a FAB resolves to the '
       + 'TERTIARY palette: a FAB floats above the content as the one primary '
-      + 'action, so it is deliberately not the colour of a default Button — '
+      + 'action, so it is deliberately not the color of a default Button — '
       + 'otherwise it reads as just another button that happens to be round.'
   }, {
     name: 'size',
@@ -143,7 +143,7 @@ export const FAB_DOC = {
       + 'Figma draws it as the FAB-Animation set (Start / Middle / End): the '
       + 'ring grows from a 0 to an 8px stroke at 50% opacity, then holds that '
       + 'width and fades to 0 — it does NOT grow and fade at the same time. '
-      + 'The ring takes the button\'s own colour. It stops entirely under '
+      + 'The ring takes the button\'s own color. It stops entirely under '
       + 'prefers-reduced-motion, since an indefinite animation with no way to '
       + 'stop it is what WCAG 2.2.2 is about.'
   }, {
@@ -257,8 +257,8 @@ export const SNACKBAR_DOC = {
   }],
   theming: [{
     collection: 'Theme',
-    inCode: '`color` picks the semantic palette. A snackbar rarely wants `data-theme` — the colour is the message.',
-    inFigma: 'Set the Theme mode on `Theme-Container`. All eight colours are pinned there, one per variant, alongside `Surface-Brightest`.'
+    inCode: '`color` picks the semantic palette. A snackbar rarely wants `data-theme` — the color is the message.',
+    inFigma: 'Set the Theme mode on `Theme-Container`. All eight colors are pinned there, one per variant, alongside `Surface-Brightest`.'
   }],
   tokens: [surfaceToken('--Background', 'the bar'), surfaceToken('--Text', 'the message'), {
     name: '--SnackBar-Top / --SnackBar-Bottom',
@@ -335,7 +335,7 @@ export const ACCORDION_DOC = {
   theming: [{
     collection: 'Theme',
     inCode: '`data-theme` on the accordion or an ancestor.',
-    inFigma: 'Set the Theme mode on `Theme-Container`. It is UNPINNED, so an accordion inherits until you choose otherwise — the layer marks the place, it does not fix a colour.'
+    inFigma: 'Set the Theme mode on `Theme-Container`. It is UNPINNED, so an accordion inherits until you choose otherwise — the layer marks the place, it does not fix a color.'
   }],
   themingNotes: ['Its structure is the model for the shadow rule: `Vertical Container` carries four drop shadows, `Theme-Container` inside it carries the fill and stroke. Theme the inner one and the shadow keeps reading the page.'],
   tokens: [surfaceToken('--Background', 'the segment fill'), surfaceToken('--Border', 'the outline'), {
@@ -384,13 +384,13 @@ export const BRANDICON_DOC = {
     name: 'color',
     type: 'string',
     default: 'currentColor',
-    note: 'HOW TO CHANGE THE COLOUR. In CODE, pass any CSS colour or token — '
+    note: 'HOW TO CHANGE THE COLOUR. In CODE, pass any CSS color or token — '
       + '`color="var(--Icons-Primary)"`. Left alone it is `currentColor`, so it '
-      + 'takes the colour of the text around it, which is what you want beside '
-      + 'a label. In FIGMA it is a TEXT layer in a ligature font, so its colour '
+      + 'takes the color of the text around it, which is what you want beside '
+      + 'a label. In FIGMA it is a TEXT layer in a ligature font, so its color '
       + 'is the layer\'s FILL: bind that to a variable the way any text fill is '
-      + 'bound. There is no colour variant on the component and there should '
-      + 'not be — 610 glyphs times a colour axis is a set nobody can load.'
+      + 'bound. There is no color variant on the component and there should '
+      + 'not be — 610 glyphs times a color axis is a set nobody can load.'
   }, {
     name: 'size',
     type: 'string',
@@ -420,12 +420,12 @@ export const BRANDICON_DOC = {
       + 'Icons/* or Text like any other.'
   }],
   themingNotes: [
-    'Monochrome, deliberately. There is no "official brand colour" mode: a row '
-      + 'of logos in their own corporate colours cannot meet a contrast '
+    'Monochrome, deliberately. There is no "official brand color" mode: a row '
+      + 'of logos in their own corporate colors cannot meet a contrast '
       + 'requirement, because each one is a fixed hex that knows nothing about '
       + 'the surface behind it.',
     'Separate from Icon on purpose. Icon renders the design system\'s own '
-      + 'vocabulary and takes the brand\'s icon colour and ramp. A brand mark '
+      + 'vocabulary and takes the brand\'s icon color and ramp. A brand mark '
       + 'cannot be derived, is not ours to restyle, and carries a trademark.',
   ],
   tokens: [

@@ -163,7 +163,7 @@ export function ListItem({
            Figma draws it (7022:49393, Selected#9250:94) as a sibling frame 2px
            larger than the row — 454x142 against 452x140 — with strokes bound to
            Border and the corner at Menu/Menu-Item-Radius. So: a 1px Border-
-           coloured outline sitting just outside the row.
+           colored outline sitting just outside the row.
 
            It used to paint `backgroundColor: var(--Hover)`, which conflated two
            different things: hovering a selected row then looked identical to

@@ -51,7 +51,7 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
  * success group rendered identically. Default-Light was never a theme even
  * before the shades went.
  *
- * The palette is just the group's own colour now, and the level does the
+ * The palette is just the group's own color now, and the level does the
  * lightening. Nothing to map. */
 const LIGHT_SURFACE = 'Surface-Brightest';
 
@@ -272,10 +272,10 @@ export function ButtonGroup({
       },
       '&:active': {
         backgroundColor: 'var(--Pressed)',
-        /* --Text, not --Buttons-Default-Text. The pressed colour was pinned to
-           the DEFAULT palette's button text whatever colour the group was, so
+        /* --Text, not --Buttons-Default-Text. The pressed color was pinned to
+           the DEFAULT palette's button text whatever color the group was, so
            pressing a segment in an error group painted it with the default
-           button's label colour — on --Pressed, which is a surface token, not
+           button's label color — on --Pressed, which is a surface token, not
            a button fill. The pair have to come from the same place, and the
            surface is what is underneath. */
         color:           'var(--Text)',
@@ -435,7 +435,7 @@ export const ErrorOutlineButtonGroup     = (p) => <ButtonGroup variant="outlined
 /* Light. No DefaultLight — "default" means inherit whatever palette is
    around, and a lighter version of inherit names nothing to lighten. A group
    that wants to be paler on the page's own palette asks for the surface, not
-   for a colour it does not have. */
+   for a color it does not have. */
 export const PrimaryLightButtonGroup    = (p) => <ButtonGroup variant="light" color="primary"   {...p} />;
 export const SecondaryLightButtonGroup  = (p) => <ButtonGroup variant="light" color="secondary" {...p} />;
 export const TertiaryLightButtonGroup   = (p) => <ButtonGroup variant="light" color="tertiary"  {...p} />;

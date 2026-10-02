@@ -17,10 +17,10 @@ import { SHADOW_LEVEL_3 } from '../_shadows';
  *   warns once in development, the same shim the -light button variants got —
  *   but do not write new ones and the converter must never emit one.
  *
- *   Why: a toast carries semantic colour, so on a solid fill that colour is
+ *   Why: a toast carries semantic color, so on a solid fill that color is
  *   also the background its label must survive on. The label then has to flip
  *   per theme AND per mode, which is 18 combinations to verify instead of 9.
- *   On Surface-Brightest the colour lives in the border and icon while the
+ *   On Surface-Brightest the color lives in the border and icon while the
  *   text sits on a reliable background — the same reasoning that keeps a
  *   Carousel dot's 3:1 in its border rather than its fill. Alert is already
  *   single-surface, and a toast is a floating alert, so the two now agree.
@@ -94,7 +94,7 @@ export function Snackbar({
     // eslint-disable-next-line no-console
     console.warn(
       '[Snackbar] variant="solid" is retired and now renders as "light". ' +
-      'A solid fill makes the label carry the semantic colour as its own ' +
+      'A solid fill makes the label carry the semantic color as its own ' +
       'background, doubling the contrast combinations to verify. ' +
       'Use the default, or pass `surface` to reach a specific level.',
     );

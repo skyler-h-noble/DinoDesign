@@ -336,9 +336,9 @@ describe('Light variant', () => {
     expect(wrapper).toHaveAttribute('data-surface', 'Surface-Brightest');
   });
 
-  test('two colours are actually different', () => {
+  test('two colors are actually different', () => {
     // The failure this replaces was invisible precisely because it was
-    // uniform: every colour produced the same unthemed result.
+    // uniform: every color produced the same unthemed result.
     const { container: a } = renderLight('error');
     const { container: b } = renderLight('info');
     expect(a.querySelector('[data-theme="Error"]')).toBeInTheDocument();
@@ -355,7 +355,7 @@ describe('Light variant', () => {
   });
 
   test('only the UNSELECTED segments are lightened', () => {
-    // The selected one fills with the palette's button colour; lightening it
+    // The selected one fills with the palette's button color; lightening it
     // would erase the thing that marks it as selected.
     const { container } = renderLight('primary');
     expect(container.querySelectorAll('[data-surface="Surface-Brightest"]')).toHaveLength(1);

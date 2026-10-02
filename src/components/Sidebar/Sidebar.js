@@ -638,7 +638,7 @@ export function MinimalSidebar({
         <Tooltip key={index} title={item.label} placement="right">
           /* The fill, the text and every state come from the VARIANT now.
              This used to paint them by hand, which cost it a pressed state, a
-             hover that repainted the resting colour when selected, and a
+             hover that repainted the resting color when selected, and a
              --Container-High tint that does not move with the surface. */
           <IconButton
             variant={selectedItem === index ? 'primary' : 'ghost'}

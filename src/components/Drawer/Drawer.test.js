@@ -42,12 +42,12 @@ describe('Drawer', () => {
    content it holds (TreeView, nav items) does its own theming, and the drawer
    inherits the provider's theme and sits on Surface-Dim, matching Sidebar.
    The three describes removed here asserted variant="standard|solid|light",
-   a drawer-standard class and a per-colour data-theme ladder, none of which
+   a drawer-standard class and a per-color data-theme ladder, none of which
    this component has. */
 describe('inherits rather than choosing a theme', () => {
   /* It DOES set data-theme — from the PROVIDER, not from a prop — paired with
      a fixed data-surface="Surface-Dim", matching Sidebar. What it has no way
-     to do is take a per-drawer colour. */
+     to do is take a per-drawer color. */
   test('takes data-theme from the provider, at a fixed Surface-Dim', () => {
     const { container } = renderDrawer();
     const drawer = container.querySelector('.drawer');

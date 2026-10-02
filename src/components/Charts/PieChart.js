@@ -58,7 +58,7 @@ export function PieChart({
   const outerR = size / 2 - 1;                    // room for the hairline
   const innerR = donut ? outerR * donutRatio : 0;
 
-  // Cycle the palette. With more slices than palettes the colours repeat —
+  // Cycle the palette. With more slices than palettes the colors repeat —
   // a pie with nine categories is already past the point of being readable,
   // and the hidden table still carries every exact value.
   const paletteFor = (i) => paletteTokens(colors[i % colors.length]);
@@ -77,7 +77,7 @@ export function PieChart({
       >
         {slices.map((s, i) => {
           // Nudge the hovered wedge outward along its own mid-angle — the
-          // clearest way to single out one wedge without recolouring it, which
+          // clearest way to single out one wedge without recoloring it, which
           // would break the single-accent scheme.
           const mid = (s.start + s.end) / 2;
           const lift = interactive && active === i ? 4 : 0;

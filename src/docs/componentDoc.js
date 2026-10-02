@@ -49,19 +49,19 @@
  */
 
 /**
- * The three mode collections that carry colour, and what each one moves.
+ * The three mode collections that carry color, and what each one moves.
  *
  * This is the fact a component doc cannot carry on its own, because getting it
  * wrong sends an agent to the right node in the wrong collection — and the
  * change appears to do nothing rather than erroring.
  *
- * `Icons` is new: its colours lived as ~27 flat variables inside Surface, so a
+ * `Icons` is new: its colors lived as ~27 flat variables inside Surface, so a
  * component had to bind to ONE of them. Badge bound to `Icons/Error` and could
  * therefore only ever be an error badge in Figma, while the library offered
- * nine colours. Collapsing them into 3 variables × 10 modes fixed that the same
+ * nine colors. Collapsing them into 3 variables × 10 modes fixed that the same
  * way Buttons already had.
  */
-export const COLOUR_COLLECTIONS = [{
+export const COLOR_COLLECTIONS = [{
   name: 'Theme',
   moves: 'the whole surface — background, text, border, quiet, hover, pressed',
   inCode: '`data-theme` on the element or any ancestor',
@@ -73,18 +73,18 @@ export const COLOUR_COLLECTIONS = [{
   inFigma: 'set the Buttons mode on a `Button-Theme-*` layer'
 }, {
   name: 'Icons',
-  moves: 'an icon or badge colour, plus its variant and on-colour',
+  moves: 'an icon or badge color, plus its variant and on-color',
   inCode: 'the `color` prop on `Icon` — `<Icon color="primary">`',
   inFigma: 'set the Icons mode on an `Icon-Theme-*` layer'
 }];
-export function renderColourSystem() {
-  const out = ['## How colour works', '', 'Three mode collections carry colour, and they are not interchangeable.', 'Changing the right node in the wrong collection appears to do nothing —', 'it does not error.', ''];
+export function renderColorSystem() {
+  const out = ['## How color works', '', 'Three mode collections carry color, and they are not interchangeable.', 'Changing the right node in the wrong collection appears to do nothing —', 'it does not error.', ''];
   out.push('| Collection | What it moves | In code | In Figma |');
   out.push('| --- | --- | --- | --- |');
-  for (const c of COLOUR_COLLECTIONS) {
+  for (const c of COLOR_COLLECTIONS) {
     out.push(`| **${c.name}** | ${c.moves} | ${c.inCode} | ${c.inFigma} |`);
   }
-  out.push('', 'A `Theme-*`, `Button-Theme-*` or `Icon-Theme-*` layer marks **where** a', 'mode goes. Most are unpinned, which means the component inherits — set the', 'mode on the frame around it. A pinned one is a deliberate choice: Alert', 'pins Error and Warning because there the colour *is* the message.', '', 'A component with no such layer has nothing of its own to recolour.', '');
+  out.push('', 'A `Theme-*`, `Button-Theme-*` or `Icon-Theme-*` layer marks **where** a', 'mode goes. Most are unpinned, which means the component inherits — set the', 'mode on the frame around it. A pinned one is a deliberate choice: Alert', 'pins Error and Warning because there the color *is* the message.', '', 'A component with no such layer has nothing of its own to recolor.', '');
   return out.join('\n');
 }
 

@@ -20,7 +20,7 @@ const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 
 const BAR_COLORS = ['default', 'primary', 'primary-light', 'white', 'black'];
 const SURFACES = ['Surface', 'Surface-Bright', 'Surface-Dim', 'Surface-Dimmest'];
-// Mirrors AppBar's own map — theme plus a surface where the colour implies a
+// Mirrors AppBar's own map — theme plus a surface where the color implies a
 // lightness. White / Black / *-Light are no longer themes.
 const THEME_MAP = {
   'default':        { theme: 'App-Bar' },
@@ -115,7 +115,7 @@ export function AppBarShowcase() {
   const isDesktop = mode === 'desktop';
   const bar = THEME_MAP[barColor] || THEME_MAP.default;
   const dataTheme = bar.theme;
-  // A bar colour that implies a lightness overrides the surface picker, so the
+  // A bar color that implies a lightness overrides the surface picker, so the
   // markup shown to the user has to report the surface that actually applies.
   const effectiveSurface = bar.surface || surface;
 

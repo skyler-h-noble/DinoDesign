@@ -149,14 +149,14 @@ describe('Defaults', () => {
 
   /* `default`, not `primary`. Figma binds the FAB's fill to
      Buttons/Default/Button and its stroke to Buttons/Default/Border, so the
-     colour it ships with is the brand's default button — the same rule every
+     color it ships with is the brand's default button — the same rule every
      other control follows. This test asserted `primary` and so locked in the
      mismatch: the component was wrong and the suite agreed with it. */
   /* Tertiary. A FAB floats above the content, so it reads loudly at any
-     colour; taking `primary` would leave the real primary buttons underneath
+     color; taking `primary` would leave the real primary buttons underneath
      competing with it. This test asserted `primary` and so agreed with the
      component while the GALLERY quietly remapped it to tertiary — the
-     intended colour lived in the showcase, not the component, and the suite
+     intended color lived in the showcase, not the component, and the suite
      locked in the version nobody saw. */
   test('default color is default', () => {
     const { container } = renderFab();

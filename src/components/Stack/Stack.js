@@ -135,7 +135,7 @@ export function OmniStack({
          * It painted var(--Background) unconditionally, on the reasoning that
          * with no surface set it resolves to the inherited value and is
          * therefore a no-op. It is a no-op only while the parent is painting
-         * that same flat colour. The moment the parent paints anything else —
+         * that same flat color. The moment the parent paints anything else —
          * a hero image, a gradient, a Card at a Container level — an
          * unsurfaced Stack punches an opaque rectangle through it, which is
          * how a row of buttons ends up with a visible slab behind it.

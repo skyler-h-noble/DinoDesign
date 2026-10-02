@@ -229,7 +229,7 @@ export const CODE_BLOCK_DOC = {
   tokens: [surfaceToken('--Background', 'the dark code region — via Surface-Dimmest'), surfaceToken('--Text', 'the code'), surfaceToken('--Border', 'the edge and the header rule')],
   composition: ['It brings its own copy button, confirmation and timer, so the surrounding component should NOT keep a `copied` flag of its own.'],
   accessibility: ['The copy control is a button with a name, not an icon alone — "Copy code", not "copy".', 'Copying is announced; a purely visual tick tells a screen-reader user nothing.'],
-  gotchas: ['Its dark region is NOT a hardcoded colour. The wrapper declares `data-theme="Neutral"` + `data-surface="Surface-Dimmest"`, so it follows the brand\'s neutrals and stays legible in both modes. Do not override its background — that is the one change that breaks dark mode for it.', 'Any block of code, shell command or copyable URL uses this. Hand-rolling a `<pre>`/`<code>` panel with its own copy button is what it replaces, and the studio still has ten of those.']
+  gotchas: ['Its dark region is NOT a hardcoded color. The wrapper declares `data-theme="Neutral"` + `data-surface="Surface-Dimmest"`, so it follows the brand\'s neutrals and stays legible in both modes. Do not override its background — that is the one change that breaks dark mode for it.', 'Any block of code, shell command or copyable URL uses this. Hand-rolling a `<pre>`/`<code>` panel with its own copy button is what it replaces, and the studio still has ten of those.']
 };
 export const REST_DOCS = [SELECT_DOC, MENU_DOC, CODE_BLOCK_DOC, undesigned('Autocomplete', 'A text field whose list narrows as the user types.', [{
   when: 'The list is short and fixed',
@@ -538,7 +538,7 @@ export const REST_DOCS = [SELECT_DOC, MENU_DOC, CODE_BLOCK_DOC, undesigned('Auto
   sets: 'the dark region',
   variesWith: 'theme + surface',
   figma: 'Modes → Theme → Surface'
-}], ['Code goes in `code`, not as children. The copy button is built in — do not add one.'], ['The copy button needs a name and its confirmation must be announced, not only drawn.'], ['Its dark region is NOT a hardcoded colour: it declares `data-theme="Neutral"` + `data-surface="Surface-Dimmest"`, so it follows the brand’s own neutrals and stays legible in both modes. Do not override its background.', 'It brings its own copy state and timer, so the surrounding component must not keep a `copied` flag.']), undesigned('IconBadge', 'An icon with a badge already positioned on it.', [{
+}], ['Code goes in `code`, not as children. The copy button is built in — do not add one.'], ['The copy button needs a name and its confirmation must be announced, not only drawn.'], ['Its dark region is NOT a hardcoded color: it declares `data-theme="Neutral"` + `data-surface="Surface-Dimmest"`, so it follows the brand’s own neutrals and stays legible in both modes. Do not override its background.', 'It brings its own copy state and timer, so the surrounding component must not keep a `copied` flag.']), undesigned('IconBadge', 'An icon with a badge already positioned on it.', [{
   when: 'You are badging something else',
   use: 'Badge around it'
 }, {

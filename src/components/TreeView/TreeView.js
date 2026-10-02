@@ -396,7 +396,7 @@ export function OmniTreeView({
   const colorToken = cap(color);
   /* The BARE theme name, always.
    *
-   * This briefly emitted `Info-Medium` for a solid state colour and
+   * This briefly emitted `Info-Medium` for a solid state color and
    * `{Color}-Light` for the light variant, because the tests asked for them
    * and they were the only thing in the file that said anything. They were
    * asking for themes that no longer exist: the Theme collection is nine
@@ -405,7 +405,7 @@ export function OmniTreeView({
    *
    * A data-theme naming a mode that is not generated binds to nothing and
    * paints the parent's palette, which reads as "this component ignores its
-   * colour prop" rather than as a missing token. The shipped code had a
+   * color prop" rather than as a missing token. The shipped code had a
    * comment saying exactly this and I overrode it on the strength of failing
    * tests; the comment was right.
    *

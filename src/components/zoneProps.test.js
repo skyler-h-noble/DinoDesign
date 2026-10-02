@@ -1,10 +1,10 @@
 /**
- * Every component that offers colours accepts a ZONE.
+ * Every component that offers colors accepts a ZONE.
  *
- * The rule: a component people can colour must also take `theme` / `surface`,
+ * The rule: a component people can color must also take `theme` / `surface`,
  * so it can draw from the zone it sits in rather than only from a prop. The
  * attributes redefine --Background, --Text, --Border, --Quiet, --Hover and
- * --Pressed for everything inside, which is how a Slider's thumb recolours
+ * --Pressed for everything inside, which is how a Slider's thumb recolors
  * without Slider.js knowing anything about themes.
  *
  * Asserted across components rather than inside each one, because the failure

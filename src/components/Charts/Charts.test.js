@@ -312,7 +312,7 @@ describe('PieChart', () => {
 });
 
 // ─── interaction & accessibility ─────────────────────────────────────────────
-// The colour system makes a chart legible; none of it makes the chart READABLE
+// The color system makes a chart legible; none of it makes the chart READABLE
 // to a screen reader. These cover the text equivalent and the keyboard path.
 
 describe('accessibility', () => {
@@ -438,7 +438,7 @@ describe('hover', () => {
     expect(readout).toBeTruthy();
   });
 
-  test('the readout label sits on --Icons-On-Primary, not a guessed colour', () => {
+  test('the readout label sits on --Icons-On-Primary, not a guessed color', () => {
     const { container } = render(<BarChart data={[{ value: 42, label: 'Mon' }]} />);
     fireEvent.focus(screen.getByRole('button', { name: 'Mon: 42' }));
     const readout = [...container.querySelectorAll('text')]

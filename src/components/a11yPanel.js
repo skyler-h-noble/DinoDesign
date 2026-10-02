@@ -14,7 +14,7 @@ import { BodySmall, Caption } from './Typography';
 import { getContrast, getCssVarFrom } from './contrast';
 
 /* Three-valued on purpose. null means the ratio could not be MEASURED — a
-   token that did not resolve, or a colour format the parser does not read —
+   token that did not resolve, or a color format the parser does not read —
    and that is not a failure. Rendering it as one invents accessibility bugs
    that are not there, which is worse than reporting nothing: someone then goes
    hunting for a contrast problem that does not exist. */

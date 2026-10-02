@@ -49,9 +49,9 @@ describe('Ratio scope inheritance', () => {
 
   test('renders the placeholder icon when the slot is empty', () => {
     // The visible symptom of the old bug was a blank square: the fill and the
-    // icon both resolved in the wrong scope and landed the same colour, so the
+    // icon both resolved in the wrong scope and landed the same color, so the
     // glyph was present in the DOM but invisible. Assert it is drawn — the
-    // colour pairing itself (fill --Border / icon --Background) is a style
+    // color pairing itself (fill --Border / icon --Background) is a style
     // contract jsdom cannot resolve, and is covered by the source comment.
     const { container } = render(<Ratio />);
     expect(container.querySelector('svg')).not.toBeNull();

@@ -142,7 +142,7 @@ export function Icon({
         // Two-tone: set CSS variable for the secondary fill
         ...(twoTone && { '--twotone-variant': variantToken }),
         /* A ghosting icon is a square of its own size — the glyph is hidden by
-           the block's transparent colour, and width/height come from fontSize
+           the block's transparent color, and width/height come from fontSize
            above, so it occupies exactly the space the real icon will. */
         ...(ghost ? {
           ...ghostBlockSx({ animate: ghost.animate }),

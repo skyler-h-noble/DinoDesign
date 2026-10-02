@@ -51,7 +51,9 @@ export interface ChangeDoc {
 }
 
 /** Which mode collection a theming row is about. */
-export type ColourCollection = string;
+export type ColorCollection = string;
+/** @deprecated British spelling, kept so published imports keep resolving. */
+export type ColourCollection = ColorCollection;
 
 export interface ComponentDoc {
   name: string;
@@ -67,7 +69,7 @@ export interface ComponentDoc {
    * one specific node — and an agent asked to theme a component in Figma
    * cannot derive the node from the CSS.
    */
-  theming: Array<{ collection: ColourCollection; inCode: string; inFigma: string }>;
+  theming: Array<{ collection: ColorCollection; inCode: string; inFigma: string }>;
   themingNotes?: string[];
   tokens: TokenDoc[];
   composition: string[];
@@ -87,10 +89,12 @@ export interface FoundationSection {
   trap?: string;
 }
 
-export declare const COLOUR_COLLECTIONS: ReadonlyArray<{ name: string; [k: string]: unknown }>;
+export declare const COLOR_COLLECTIONS: ReadonlyArray<{ name: string; [k: string]: unknown }>;
 export declare const COMPONENT_DOCS: ComponentDoc[];
 export declare const FOUNDATIONS: FoundationSection[];
 export declare function renderComponentDoc(doc: ComponentDoc, figmaSection?: string): string;
 export declare function renderFoundations(): string;
+export declare function renderColorSystem(): string;
+/** @deprecated British spelling, kept so published imports keep resolving. */
 export declare function renderColourSystem(): string;
 export declare function docsSlug(component: string): string;

@@ -10,7 +10,7 @@
 // parser rejected. It returned null, the panel printed "--", and a row with no
 // measurement was drawn identically to a row that had failed. The version kept
 // here is the one from the Button page, which parses #rgb / #rrggbb / #rrggbbaa
-// and rgb()/rgba(), and alpha-composites a translucent colour over the surface
+// and rgb()/rgba(), and alpha-composites a translucent color over the surface
 // behind it before measuring.
 //
 // getContrast returns null when it genuinely cannot measure. Callers must treat

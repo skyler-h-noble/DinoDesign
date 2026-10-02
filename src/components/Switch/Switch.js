@@ -7,15 +7,15 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
 /**
  * Switch Component
  *
- * Geometry, colour roles and states follow the Figma component
+ * Geometry, color roles and states follow the Figma component
  * (Omni-Designs, node 6779:2252).
  *
  * VARIANTS:
  *   variant="default"           the design-file switch — theme-driven, no
- *                               colour ramp. On: --Border track, --Text dot.
+ *                               color ramp. On: --Border track, --Text dot.
  *                               Off: --Background track, --Quiet border + dot.
  *                               `default-outline` and `outline` are the same.
- *   variant="{color}-outline"   bordered track + coloured dot, all 8 colours
+ *   variant="{color}-outline"   bordered track + colored dot, all 8 colors
  *
  * SIZES (track, straight from the design):
  *   small  20×12, 8px dot     medium 30×16, 12px dot     large 48×24, 20px dot
@@ -39,14 +39,14 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 // --- Variant Style Builders --------------------------------------------------
 
 // The Figma component is THEME-DRIVEN: it reads the surface tokens of whatever
-// data-theme / data-surface it is placed in, rather than a per-colour Buttons-*
+// data-theme / data-surface it is placed in, rather than a per-color Buttons-*
 // ramp. On is the surface's --Border with a --Text dot; off is --Background
 // with a --Quiet border and dot. That is what `default` renders, and it is the
-// only model the design file has — the colour variants below are the lib's own
+// only model the design file has — the color variants below are the lib's own
 // addition and keep working on the same geometry.
 //
 // iconOff/iconOn are the track's own fill, so a glyph inside the dot reads as a
-// knockout rather than a second colour.
+// knockout rather than a second color.
 export function themedStyles() {
   return {
     type: 'themed',
@@ -67,7 +67,7 @@ export function themedStyles() {
     // structural rather than a second contrast pass.
     //
     // The track's border is the SAME token as its fill. Figma binds both to
-    // Icon; there is no separate edge colour in the On state.
+    // Icon; there is no separate edge color in the On state.
     trackOn:        'var(--Icons-Default)',
     trackOnBorder:  'var(--Icons-Default)',
     dotOff:         'var(--Quiet)',
@@ -86,14 +86,14 @@ export function outlineStyles(color) {
     color: C,
     trackOff:       'var(--Background)',
     /* --Border, not --Border-Variant. In the OFF state this edge is the only
-       thing drawing the control at all — the track is the page colour — so it
+       thing drawing the control at all — the track is the page color — so it
        is the control's boundary and carries WCAG 1.4.11's 3:1. Border-Variant
        is documented as DECORATIVE and guarantees no ratio, which is the same
        mistake Slider's rail had before it was moved to --Border. */
     trackOffBorder: 'var(--Border)',
     // ON is a FILLED track, same as the design's default. It used to be
     // transparent, which read as "nothing happened" next to the default
-    // variant — only the border changed colour. Fill, edge and dot come from
+    // variant — only the border changed color. Fill, edge and dot come from
     // the Icons collection; see themedStyles above for why.
     trackOn:        'var(--Icons-' + C + ')',
     trackOnBorder:  'var(--Icons-' + C + ')',
@@ -108,12 +108,12 @@ export function outlineStyles(color) {
 // --<C>-Color-11 and drew the dot in --Buttons-<C>-Border — a tinted fill that
 // is not a shape in the Figma component. The Switch set has exactly two axes,
 // State and Status, so there was never a variant to check it against; the ON
-// state's colour now arrives from the Icons collection instead.
+// state's color now arrives from the Icons collection instead.
 //
 // A hard delete would have been silent: an unknown variant falls through to
 // `variantMap.default`, so every existing `X-light` call site would have
 // repainted as the brand-default switch with no error. Strip the suffix to the
-// colour of the same name and say so once in development — the same treatment
+// color of the same name and say so once in development — the same treatment
 // Button, Chip and Badge got in 0.9.0.
 const LIGHT_SUFFIX = /-light$/;
 const warnedVariants = new Set();
@@ -126,7 +126,7 @@ export function normalizeSwitchVariant(variant) {
     warnedVariants.add(v);
     console.warn(
       '[Switch] variant="' + v + '" — the -light shape was removed. Rendering ' +
-      'variant="' + base + '". The on state takes its colour from the Icons ' +
+      'variant="' + base + '". The on state takes its color from the Icons ' +
       'collection (--Icons-<Color> / --Icons-On-<Color>).',
     );
   }

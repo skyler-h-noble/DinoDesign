@@ -17,7 +17,7 @@ import { Subtitle, Body, BodySmall } from '../Typography';
  * actions. Anything that requires copy is content, not a state.
  *
  * It is also why this is a SLOT on Table rather than a variant: Table is
- * already 288 variant combinations (4 styles x 8 colours x 3 sizes x 3
+ * already 288 variant combinations (4 styles x 8 colors x 3 sizes x 3
  * stripes). A five-value state property would make it 1,440, and an empty
  * table does not look different in Primary and in Error.
  *

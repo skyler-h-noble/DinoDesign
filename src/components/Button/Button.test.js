@@ -235,7 +235,7 @@ describe('Button variant -light removal', () => {
     warn.mockRestore();
   });
 
-  test('normalizes {color}-light to the solid colour', () => {
+  test('normalizes {color}-light to the solid color', () => {
     expect(normalizeButtonVariant('primary-light')).toBe('primary');
     expect(normalizeButtonVariant('error-light')).toBe('error');
   });

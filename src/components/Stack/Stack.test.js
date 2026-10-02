@@ -211,7 +211,7 @@ describe('Stack — Accessibility (jest-axe)', () => {
 describe('Background', () => {
   /* It painted var(--Background) unconditionally, on the reasoning that with
      no surface set it resolves to the inherited value and is a no-op. That
-     holds only while the parent is painting the same flat colour. Over a hero
+     holds only while the parent is painting the same flat color. Over a hero
      image, a gradient, or a Card at a Container level, an unsurfaced Stack
      punches an opaque rectangle through it — which is how a row of buttons
      ends up with a visible slab behind it. */

@@ -54,7 +54,7 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // --- Variant Style Builders --------------------------------------------------
 
-/* There was a `light` variant — eight colours plus a bare alias, and five
+/* There was a `light` variant — eight colors plus a bare alias, and five
    convenience exports. It is gone.
 
    Its only difference from `outline` was the background:

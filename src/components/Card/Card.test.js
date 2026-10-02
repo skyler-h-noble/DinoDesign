@@ -22,7 +22,7 @@ describe('data-surface="Container"', () => {
     expect(container.querySelector('[data-surface="Container"]')).toBeInTheDocument();
   });
 
-  /* Container is for a DEFAULT-colour card, which respects the consumer's
+  /* Container is for a DEFAULT-color card, which respects the consumer's
      card-coloring tokens. A themed card sits on a Surface level: solid ->
      Surface, light -> Surface-Brightest, dark -> Surface-Dimmest. These two
      asserted Container for themed cards, which is the one case it is not. */
@@ -36,7 +36,7 @@ describe('data-surface="Container"', () => {
     expect(container.querySelector('[data-surface="Surface-Brightest"]')).toBeInTheDocument();
   });
 
-  test('and a default-colour card is the one that gets Container', () => {
+  test('and a default-color card is the one that gets Container', () => {
     const { container } = renderCard({});
     expect(container.querySelector('[data-surface="Container"]')).toBeInTheDocument();
   });

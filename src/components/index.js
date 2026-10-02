@@ -66,7 +66,7 @@ export { Spacing } from './Spacing';
 export { Icon, IconShowcase } from './Icon';
 /* Brand marks — GitHub, LinkedIn, Figma. Separate from Icon on purpose: Icon
    renders the design system's OWN vocabulary (Material Symbols, taking the
-   brand's icon colour and ramp), while a brand mark is somebody else's
+   brand's icon color and ramp), while a brand mark is somebody else's
    artwork, cannot be derived, and carries a trademark. Path data is imported
    by name at the call site from @fortawesome/free-brands-svg-icons, so a
    bundler ships only the marks used rather than all 610. */
@@ -231,7 +231,7 @@ export { AppBar, DesktopAppBar, MobileAppBar, AppBarShowcase } from './AppBar';
    MUI's Typography rather than the library's, with four literal
    rgba(0,0,0,0.1) shadows and three raw --Primary-Color-11 hovers, none of
    which follow a brand. AppBar is the real one: it sets data-theme="App-Bar",
-   maps bar colours to theme + surface pairs, takes SHADOW_LEVEL_1, and
+   maps bar colors to theme + surface pairs, takes SHADOW_LEVEL_1, and
    composes SearchField, Tabs, Drawer and Button.
 
    Nothing imported it — verified across all thirteen projects depending on
@@ -280,7 +280,7 @@ export { OmniStack as DynoStack } from './Stack/Stack';
 export { OmniTreeView as DynoTreeView } from './TreeView/TreeView';
 
 // A code block on its own dark region. The dark comes from
-// data-theme="Neutral" + data-surface="Surface-Dimmest", not a literal colour,
+// data-theme="Neutral" + data-surface="Surface-Dimmest", not a literal color,
 // so it follows the system's neutrals in both modes.
 export { CodeBlock, CopyButton } from './CodeBlock/CodeBlock';
 
@@ -313,9 +313,15 @@ export {
   COMPONENT_DOCS,
   FOUNDATIONS,
   renderFoundations,
-  renderColourSystem,
+  renderColorSystem,
+  /* The British spellings were the published names, so they stay exported as
+     aliases. Renaming them outright would break an import for a cosmetic win,
+     and a package that moves a public symbol to fix its own spelling teaches
+     consumers that the export list is not a promise. */
+  renderColorSystem as renderColourSystem,
   renderComponentDoc,
-  COLOUR_COLLECTIONS,
+  COLOR_COLLECTIONS,
+  COLOR_COLLECTIONS as COLOUR_COLLECTIONS,
   docsSlug,
   componentDocsUrl,
   componentDocsIndexUrl,

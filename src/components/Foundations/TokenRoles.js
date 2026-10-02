@@ -1,12 +1,12 @@
 // src/components/Foundations/TokenRoles.js
 //
-// Swatch grids for the colour ROLES a foundation offers, and a table of the
+// Swatch grids for the color ROLES a foundation offers, and a table of the
 // variables a style reads.
 //
 // Shared by Typography and Icon because the question is the same on both
 // pages — "what can I pass to `color`, and what does each one resolve to?" —
 // and Button already answers it with swatches. Prose cannot: a role list is
-// nine names that mean nothing without the colour beside them.
+// nine names that mean nothing without the color beside them.
 import React from 'react';
 import { Box } from '@mui/material';
 import { H5, BodySmall, Caption, EyebrowSmall } from '../Typography';
@@ -17,7 +17,7 @@ import { VStack, HStack } from '../Stack/Stack';
  *
  * The chip renders the REAL variable rather than a copy of its value, so it
  * re-resolves with the theme and surface pickers above — which is the only way
- * to show that these are roles and not colours.
+ * to show that these are roles and not colors.
  */
 export function RoleSwatches({ title, note, roles, tokenFor }) {
   return (

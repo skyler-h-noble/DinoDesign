@@ -29,7 +29,7 @@ describe('List', () => {
 });
 
 describe('data-theme', () => {
-  /* The four state colours asked for {Color}-Medium and every light variant
+  /* The four state colors asked for {Color}-Medium and every light variant
      asked for {Color}-Light. Neither exists — so a light error list and a
      light success list rendered identically, both taking whatever palette the
      page was on. The bug was uniform, which is why it went unreported. */
@@ -58,7 +58,7 @@ describe('data-theme', () => {
     expect(solid.querySelector('[data-theme="Warning"]')).not.toHaveAttribute('data-surface');
   });
 
-  test('two light colours are actually different', () => {
+  test('two light colors are actually different', () => {
     const { container: a } = render(<List variant="light" color="error" items={items} />);
     const { container: b } = render(<List variant="light" color="info" items={items} />);
     expect(a.querySelector('[data-theme="Error"]')).toBeInTheDocument();

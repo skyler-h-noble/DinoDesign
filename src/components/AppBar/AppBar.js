@@ -29,7 +29,7 @@ import { SHADOW_LEVEL_1 } from '../_shadows';
  * MOBILE: search, small, medium, large
  */
 
-// Each bar colour is a THEME plus, where the colour implies a lightness, a
+// Each bar color is a THEME plus, where the color implies a lightness, a
 // SURFACE. Lightness stopped being a theme: White, Black and the *-Light
 // themes no longer exist in any design system, so `barColor="black"` used to
 // set a data-theme with no matching CSS and the bar rendered unthemed.

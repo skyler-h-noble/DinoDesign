@@ -82,7 +82,7 @@ describe('ToggleButtonGroup (retired shim)', () => {
     expect(screen.getByText('Grid').closest('button')).toHaveAttribute('aria-pressed', 'true');
   });
 
-  it('keeps the colour presets working', () => {
+  it('keeps the color presets working', () => {
     /* They ship publicly, so a stale import must not become a build error —
        the same reason variant="{color}-light" still renders after 0.9.0. */
     render(

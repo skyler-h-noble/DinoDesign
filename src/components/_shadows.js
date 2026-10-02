@@ -34,7 +34,7 @@ const DS = 'var(--Dropshadow-Color, 20, 20, 20)';
 // stand-in rather than a promise of equality.
 //
 // Tuples are [offsetX, offsetY, blur, spread, alpha]. Alpha ramps DOWN across
-// the layers, which is Comeau's shadow-palette model: one colour, the contact
+// the layers, which is Comeau's shadow-palette model: one color, the contact
 // layer strongest, each layer out fainter and wider.
 const _LEVEL_LAYERS = {
   1: [[0.3, 0.5, 0.7, 0, 0.41], [1.3, 2.5, 3.4, -1.2, 0.205]],
@@ -44,9 +44,9 @@ const _LEVEL_LAYERS = {
   5: [[0.3, 0.5, 0.7, 0, 0.41], [0.4, 0.7, 1, -0.4, 0.359], [1.1, 2.2, 3, -0.7, 0.308], [3.1, 6.3, 8.5, -1.1, 0.256], [7.1, 14.2, 19.2, -1.4, 0.205], [13.6, 27.3, 36.8, -1.8, 0.154], [23.4, 46.8, 63.2, -2.1, 0.103], [37, 74, 99.9, -2.5, 0.051]],
 };
 
-/* One colour, per-layer alpha — NOT one token per level.
+/* One color, per-layer alpha — NOT one token per level.
    This previously built `var(--Dropshadow-Color-${level}, …)`. Those five
-   per-level colour tokens no longer exist: the design system collapsed them to
+   per-level color tokens no longer exist: the design system collapsed them to
    a single --Dropshadow-Color plus per-layer opacity, so every reference
    resolved to the neutral 20,20,20 fallback and every shadow in the library
    came out grey. */
@@ -117,7 +117,7 @@ export const SHADOWS = {
 // handle size, applied to .MuiSlider-thumb::before).
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
-// Colour names whose TOKEN segment is not just the capitalised prop.
+// Color names whose TOKEN segment is not just the capitalised prop.
 // `black-white` would capitalise to `Black-white` and point at a token that
 // does not exist; the design system emits --Buttons-BlackWhite-*.
 export const TOKEN_SEGMENT = { 'black-white': 'BlackWhite' };

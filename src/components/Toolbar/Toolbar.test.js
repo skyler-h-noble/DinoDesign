@@ -58,10 +58,10 @@ describe('Theme', () => {
     });
   });
 
-  /* primary-medium and primary-dark were colours once. They are not in
+  /* primary-medium and primary-dark were colors once. They are not in
      THEME_MAP now, so they fall through to default rather than silently
      painting a shade that no longer exists. */
-  test.each(['primary-medium', 'primary-dark'])('%s is not a colour and falls back', (color) => {
+  test.each(['primary-medium', 'primary-dark'])('%s is not a color and falls back', (color) => {
     const { container } = renderToolbar({ color });
     expect(container.querySelector('.toolbar')).toHaveAttribute('data-theme', 'Default');
   });
@@ -141,7 +141,7 @@ describe('FAB', () => {
 });
 
 /* The old "Bar colors" block is folded into Theme above — it asserted the
-   same table through the same wrong prop name, plus two colours that no
+   same table through the same wrong prop name, plus two colors that no
    longer exist. */
 
 // ─── Accessibility — jest-axe ─────────────────────────────────────────────────

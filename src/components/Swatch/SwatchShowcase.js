@@ -45,7 +45,7 @@ export function SwatchShowcase() {
         <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
       </Box>
       <BodySmall color="quiet">
-        A colour chip, optionally labelled, optionally clickable.
+        A color chip, optionally labelled, optionally clickable.
       </BodySmall>
       <Box sx={{ mt: 1 }}>
       </Box>
@@ -136,12 +136,12 @@ export function SwatchShowcase() {
                   <Stack spacing={0}>
                     {[
                       { label: 'Element', value: clickable ? '<button type="button">' : '<div> — nothing to press' },
-                      { label: 'Name', value: label ? `From the visible label: "${label}"` : `No label, so the colour value: "${color}"` },
+                      { label: 'Name', value: label ? `From the visible label: "${label}"` : `No label, so the color value: "${color}"` },
                       { label: 'Selected', value: clickable ? `aria-pressed="${selected}"` : 'Not announced — a non-clickable swatch has no pressed state' },
                       { label: 'Radio', value: radio ? 'Presentational only — aria-hidden and out of the tab order, so the swatch is one control, not two' : 'Not shown' },
-                      { label: 'Colour alone', value: 'A colour is not a name. A swatch with no label needs one from the caller (WCAG 1.4.1)' },
+                      { label: 'Color alone', value: 'A color is not a name. A swatch with no label needs one from the caller (WCAG 1.4.1)' },
                       { label: 'Focus', value: clickable ? '2px --Focus-Visible ring, 3px outside the chip' : 'Not focusable' },
-                      { label: 'Contrast', value: 'The chip carries a --Border edge so a pale colour stays visible on a pale surface (1.4.11)' },
+                      { label: 'Contrast', value: 'The chip carries a --Border edge so a pale color stays visible on a pale surface (1.4.11)' },
                     ].map(({ label: l, value }) => (
                       <Box key={l} sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
                         <BodySmall>{l}:</BodySmall>

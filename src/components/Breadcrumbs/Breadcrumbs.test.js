@@ -298,11 +298,11 @@ describe('the separator gap does not scale with size', () => {
   });
 });
 
-/* The current page is marked by WEIGHT, not colour alone.
+/* The current page is marked by WEIGHT, not color alone.
  *
  * The design sets `Type=current` in SemiBold and `Type=default` in Regular.
- * Weight survives greyscale and colour-blindness, so it carries the meaning
- * even where the colour difference does not — and it is the one signal that
+ * Weight survives greyscale and color-blindness, so it carries the meaning
+ * even where the color difference does not — and it is the one signal that
  * still reads once the underline is the only other cue.
  *
  * From the token, not a literal 600: a brand that re-picks its semibold has
@@ -328,12 +328,12 @@ describe('the current crumb is semibold', () => {
     expect(cssFor(current)).toContain('--Body-Medium-Semibold-Font-Weight');
   });
 
-  /* Colour splits the two roles as well as weight: the crumbs that ARE links
+  /* Color splits the two roles as well as weight: the crumbs that ARE links
      take the link role, the current page takes --Text. It used to paint the
      links --Quiet, the muted-TEXT role — legible, but not announcing itself as
      a link. The current page keeps --Text rather than the design's Hotlink: it
      is not a link, and in a system where every hotlink is underlined, a
-     hotlink-coloured item with no underline is a colour with nothing behind
+     hotlink-colored item with no underline is a color with nothing behind
      it. */
   test('links take the link role, the current page takes --Text', () => {
     const { container } = render(

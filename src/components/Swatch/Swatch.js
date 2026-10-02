@@ -1,11 +1,11 @@
 // src/components/Swatch/Swatch.js
 //
-// A colour chip, optionally labelled, optionally clickable.
+// A color chip, optionally labelled, optionally clickable.
 //
 // Built from the Figma Swatch set (9212:6816) rather than from the Button it
 // used to be. It was `<Button swatch swatchColor={hex}>`, which never fitted:
 // Button's two main axes are STYLE (solid / outline / ghost) and COLOUR (the
-// nine palettes), and a swatch uses neither. Its colour is arbitrary data from
+// nine palettes), and a swatch uses neither. Its color is arbitrary data from
 // a picker, not a palette choice, and "outline swatch" means nothing.
 //
 // Sizing follows the button ramp on purpose — the Figma swatch binds its width,
@@ -42,15 +42,15 @@ const SIZE_HEIGHT = {
 /* Selection is a CHECK ON ITS OWN DISC, not a ring.
  
    A ring was the first attempt and it did not work: the chip's own 1px Border
-   and a 1px ring inset by 1px are adjacent and the same colour, so selected
+   and a 1px ring inset by 1px are adjacent and the same color, so selected
    read as a 2px edge rather than a mark — and at 24px that is close to
    invisible.
  
    The disc is the part that matters. A check drawn straight onto the swatch
-   would sit on an arbitrary colour, so its contrast could not be known in
+   would sit on an arbitrary color, so its contrast could not be known in
    advance; the system has met this before on the Slider handle, where a known
    --Background ring is what makes the focus indicator measurable. Here the disc
-   plays that role: the glyph is always on --Background, never on the colour, so
+   plays that role: the glyph is always on --Background, never on the color, so
    no luminance has to be computed and the mark holds on any swatch.
  
    --Background and --Icon rather than white and a fixed grey: both follow the
@@ -96,7 +96,7 @@ export function Swatch({
      inconsistency. Without a radio, the chip itself carries the state and
      selection is the check on its disc. WITH one, every state is delegated to
      the radio — Figma pins State=Hover, State=Focus-Visible and
-     Status=selected on the nested instance — so the chip stays a plain colour
+     Status=selected on the nested instance — so the chip stays a plain color
      and the control says what is happening. Two marks for one state would be
      one too many.
  
@@ -116,8 +116,8 @@ export function Swatch({
   const clickable = Boolean(onClick) && !disabled;
   const dim = SIZE_HEIGHT[size] || SIZE_HEIGHT.medium;
 
-  /* A colour alone is not a name. Where there is no visible label and the
-     caller gave no aria-label, the colour value is a poor but honest last
+  /* A color alone is not a name. Where there is no visible label and the
+     caller gave no aria-label, the color value is a poor but honest last
      resort — better than announcing "button". */
   const accessibleName = ariaLabel || label || color;
 
@@ -141,7 +141,7 @@ export function Swatch({
 
         ...(clickable && {
           cursor: 'pointer',
-          /* The scrim is composited over the colour as a background LAYER, so
+          /* The scrim is composited over the color as a background LAYER, so
              it needs no extra element and cannot escape the chip.
 
              Figma draws it as an overlay at radius 0 filled with hardcoded

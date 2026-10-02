@@ -22,10 +22,10 @@ import {
 } from '../Typography';
 
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
-/* Grouped the way every other showcase groups colour, with `black-white` as a
+/* Grouped the way every other showcase groups color, with `black-white` as a
    fifth THEME swatch rather than a special case: the design system emits
    --Buttons-BlackWhite-* like any other palette. Tooltip has no `default`
-   colour, so there is no Default group — black-white is simply its default
+   color, so there is no Default group — black-white is simply its default
    VALUE, which is the mode Figma pins on Button-Theme-Tooltip. */
 const COLOR_GROUPS = [
   { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral', 'black-white'] },

@@ -149,7 +149,7 @@ const NAV_ITEMS = [
 
        Ordered as the system is learned rather than alphabetically: what a
        platform is, then how surfaces paint, then the scales (type, spacing,
-       elevation), then colour, then the two topics that are rules rather than
+       elevation), then color, then the two topics that are rules rather than
        scales. */
     children: [
       { id: 'foundation-platforms',  label: 'Platforms' },
@@ -322,7 +322,7 @@ function ShowcaseInner() {
   // index.html already <link>s foundation / base / core / typography-tokens /
   // styles, but NOT the mode sheets: those swap on the dark-mode toggle, so
   // they have to go through the Provider's mode slot. Without this the local
-  // folder rendered with no palette at all — every colour token unresolved.
+  // folder rendered with no palette at all — every color token unresolved.
   const localLightModeCSS = userParam ? undefined : '/styles/Light-Mode.css';
   const localDarkModeCSS  = userParam ? undefined : '/styles/Dark-Mode.css';
 

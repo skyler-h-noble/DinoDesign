@@ -59,10 +59,10 @@ const SIZE_MAP = {
 
 function RadioCircleIcon({ size, color, checked }) {
   const C = seg(color);
-  // Matches Checkbox: the DEFAULT colour draws its ring in --Quiet so an
+  // Matches Checkbox: the DEFAULT color draws its ring in --Quiet so an
   // unselected radio reads as a quiet affordance rather than a button. The dot
   // keeps the button token, so selecting one is what brings in the brand
-  // colour. --Quiet is tuned to 4.5:1 on its surface, past the 3:1 a control
+  // color. --Quiet is tuned to 4.5:1 on its surface, past the 3:1 a control
   // outline requires.
   const ringColor = C === 'Default' ? 'var(--Quiet)' : 'var(--Buttons-' + C + '-Border)';
   const dotColor = 'var(--Buttons-' + C + '-Border)';
@@ -107,7 +107,7 @@ function RadioCircleIcon({ size, color, checked }) {
  *
  * They become data-theme / data-surface on the root, which redefines
  * --Background, --Text, --Border, --Quiet, --Hover and --Pressed for
- * everything inside, so the component takes its colours from the zone it sits
+ * everything inside, so the component takes its colors from the zone it sits
  * in rather than from a prop.
  *
  * Deliberately NOT derived from `color`. The two are different knobs: `color`

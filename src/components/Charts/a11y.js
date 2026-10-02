@@ -5,8 +5,8 @@ import { Box } from '@mui/material';
 /**
  * The text equivalent of a chart.
  *
- * A design system's colours can make a chart LEGIBLE — contrast against the
- * surface, a fill that is distinguishable from its track. What no colour can do
+ * A design system's colors can make a chart LEGIBLE — contrast against the
+ * surface, a fill that is distinguishable from its track. What no color can do
  * is make it READABLE to a screen reader: an <svg> full of <path> is a picture,
  * and a picture of a number is not a number.
  *

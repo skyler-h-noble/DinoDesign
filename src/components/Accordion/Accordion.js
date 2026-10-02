@@ -381,7 +381,7 @@ export function AccordionSummary({
         } : {},
         /* The summary is a full-width button, so a scrim is the only pressed
            feedback available — there is no fill to darken and no border to
-           move. Colour alone could not carry it: hover already takes the text
+           move. Color alone could not carry it: hover already takes the text
            to --Text, which leaves pressed nowhere to go. */
         '&:active': !disabled ? {
           color: 'var(--Text)',

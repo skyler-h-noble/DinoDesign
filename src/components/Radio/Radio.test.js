@@ -370,9 +370,9 @@ describe('Radio — Accessibility (jest-axe)', () => {
   });
 });
 
-// ─── Colour coverage ──────────────────────────────────────────────────────────
-describe('Radio colours', () => {
-  test('renders every colour, including black-white', () => {
+// ─── Color coverage ──────────────────────────────────────────────────────────
+describe('Radio colors', () => {
+  test('renders every color, including black-white', () => {
     for (const c of ['default', 'primary', 'secondary', 'tertiary', 'neutral',
                      'info', 'success', 'warning', 'error', 'black-white']) {
       const { container } = render(<Radio color={c} value={c} />);

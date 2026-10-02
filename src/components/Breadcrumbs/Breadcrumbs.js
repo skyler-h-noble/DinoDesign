@@ -123,7 +123,7 @@ export function Breadcrumbs({
           /* Semibold, from the token rather than a literal 600. The design
              sets the current crumb in SemiBold and the links in Regular, so
              the page you are on is marked by WEIGHT — a signal that survives
-             greyscale and does not depend on colour alone. A hardcoded 600
+             greyscale and does not depend on color alone. A hardcoded 600
              would not move with a brand that re-picks its semibold. */
           ...(isLast && {
             color: 'var(--Text)',
@@ -245,7 +245,7 @@ export function BreadcrumbItem({ children, href, className = '', sx = {}, ...pro
              hover tone for them and the underline carries the state instead.
              This read `color: var(--Link-Hover)`, a variable nothing defines,
              and with no fallback the whole declaration is invalid at computed-
-             value time: the colour fell back to `inherit`, so hovering a
+             value time: the color fell back to `inherit`, so hovering a
              breadcrumb link made it stop looking like a link. */
           '&:hover': { textDecorationThickness: '2px' },
           '&:active': { textDecorationThickness: '3px' },

@@ -14,7 +14,7 @@ describe('the focus indicator is measurable', () => {
   test('the thumb carries a 1px --Background border', () => {
     /* Not decoration. It separates the handle from the fill it sits on AND
        from the focus ring outside it, so both comparisons are against a known
-       colour rather than against whatever the handle happens to overlap. */
+       color rather than against whatever the handle happens to overlap. */
     render(<Slider defaultValue={40} />);
     expect(css().replace(/\s+/g, '')).toContain('1pxsolidvar(--Background)');
   });
@@ -45,7 +45,7 @@ describe('surface tokens, not the button palette', () => {
 
   test('the label inverts the surface pair', () => {
     // --Text ground with --Background text: legible on any surface by
-    // definition, which a colour from the button palette is not.
+    // definition, which a color from the button palette is not.
     render(<Slider defaultValue={40} valueLabelDisplay="on" />);
     const c = css().replace(/\s+/g, '');
     expect(c).toContain('background-color:var(--Text)');
@@ -69,14 +69,14 @@ describe('surface tokens, not the button palette', () => {
   });
 });
 
-describe('a named colour moves the fill only', () => {
+describe('a named color moves the fill only', () => {
   test('color="success" themes the fill', () => {
     render(<Slider defaultValue={40} variant="success" />);
     expect(css()).toContain('--Buttons-Success-Button');
   });
 
   test('...but the thumb and focus stay on surface tokens', () => {
-    /* Everything carrying a contrast requirement must not move with the colour
+    /* Everything carrying a contrast requirement must not move with the color
        prop, or the guarantee becomes per-palette rather than structural. */
     render(<Slider defaultValue={40} variant="success" />);
     const c = css().replace(/\s+/g, '');

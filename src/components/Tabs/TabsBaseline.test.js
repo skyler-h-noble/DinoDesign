@@ -52,7 +52,7 @@ describe('which edge each orientation uses', () => {
 
 describe('the baseline', () => {
   /* Asserted against baselineStyle rather than the DOM: jsdom cannot parse a
-     border shorthand whose colour is a var(), so toHaveStyle reduces such an
+     border shorthand whose color is a var(), so toHaveStyle reduces such an
      expectation to empty and passes against ANY rendered value. A DOM test
      here would be green no matter what the component drew. */
   const BASE = '1px solid var(--Border-Variant)';
@@ -157,7 +157,7 @@ describe('the hover mark', () => {
 
   it('uses color-mix, not opacity', () => {
     /* Figma dims the Hover LAYER to 50%. The CSS equivalent is a
-       half-transparent border colour — `opacity: 0.5` on the tab would fade the
+       half-transparent border color — `opacity: 0.5` on the tab would fade the
        label and the icon with it. */
     const st = hoverIndicatorStyle('horizontal', false, '2px', COLOR);
     expect(st).not.toHaveProperty('opacity');

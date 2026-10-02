@@ -17,7 +17,7 @@ import { tokenSegment } from '../_shadows';
  *   outline  No data-theme. border: 1px solid var(--Buttons-{C}-Border)
  *
  * COLOR defaults to `black-white`, which is the mode Figma pins on
- * `Button-Theme-Tooltip`. Pass another palette to recolour — that is the code
+ * `Button-Theme-Tooltip`. Pass another palette to recolor — that is the code
  * equivalent of re-pinning the Buttons mode on that frame.
  *
  * SIZES: small | medium | large
@@ -143,7 +143,7 @@ export function Tooltip({
      default) and every fill under it reads Buttons::Button, with the label and
      icon on Buttons::Text.
      These were --Background / --Text — the SURFACE. That painted a tooltip the
-     colour of the page it floated over and gave the consumer no way to recolour
+     color of the page it floated over and gave the consumer no way to recolor
      it, because re-pinning a Buttons mode is exactly what the design says you
      do. The three assignments below were also ternaries with identical
      branches, so `isOutline` selected between two copies of the same value.
