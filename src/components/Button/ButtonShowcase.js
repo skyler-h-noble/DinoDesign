@@ -657,7 +657,7 @@ export function ButtonShowcase() {
                     opacity: isGhost ? 0.4 : 1 }}>
                     <Box>
                       <Label>Elevated</Label>
-                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Higher shadow levels (Level 2/3)</Caption>
+                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Rests at Level 1 instead of none; hover goes to Level 2</Caption>
                     </Box>
                     <Switch checked={elevated} onChange={(e) => setElevated(e.target.checked)}
                       size="small" aria-label="Elevated" disabled={isGhost} />

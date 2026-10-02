@@ -132,8 +132,22 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const seg = tokenSegment;
 
 // ─── Effect Levels (from base.css) ──────────────────────────────────────────
-// Normal buttons:   Level 1 resting, Level 2 hover
-// Elevated buttons: Level 2 resting, Level 3 hover
+// Verified against Figma's Component-Elevations collection, which carries a
+// Standard and an Elevated mode per component:
+//
+//   Standard  resting  none      (Figma sets every layer's Drop-Color to a:0)
+//   Standard  hover    Level 1
+//   Elevated  resting  Level 1
+//   Elevated  hover    Level 2
+//
+// This block previously claimed Level 1/2 for standard and Level 2/3 for
+// elevated — one level too high on all four, and wrong against both the code
+// below and the Figma file. The code was right; only the comment was not.
+//
+// A standard button therefore has NO resting shadow, and an elevated one rests
+// at Level 1, which is deliberately slight: 0.3/0.5/0.5/0 plus 1/2/2.1/-3.7 at
+// roughly 0.31 alpha. Standard and Elevated are meant to separate on HOVER, not
+// at rest, so the two looking near-identical sitting still is the design.
 
 // ─── Variant Style Builders ───────────────────────────────────────────────────
 // bevelShadow lives in src/components/_shadows.js so both Button and Slider
