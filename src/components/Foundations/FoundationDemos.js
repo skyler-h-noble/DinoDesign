@@ -9,35 +9,51 @@ import { Box } from '@mui/material';
 import { H5, BodySmall, Caption, EyebrowSmall } from '../Typography';
 import { VStack, HStack } from '../Stack/Stack';
 
-/* The five levels, painted from --Effect-Level-N.
-   Rendered as the real variable rather than a copy, so a brand that changes
-   its shadow totals changes these — and so a level that fails to resolve shows
-   as a flat box here rather than silently nowhere. */
+/* Elevation is a CONTAINER LEVEL plus a shadow, not a shadow alone.
+   The tone carries most of it, and the direction FLIPS with the mode — a
+   raised thing moves AWAY from the surface it sits on, which is darker in
+   light mode and lighter in dark. Measured on the Default theme:
+
+     Container-Lowest    light #f5f5f5   dark #181818
+     Container           light #f3f3f3   dark #1c1c1c
+     Container-Highest   light #f1f1f1   dark #1f1f1f
+
+   This demo used data-surface="Surface-Brightest" with a box-shadow and
+   nothing else. In dark mode Surface-Brightest is #d4d4d4 — a light grey —
+   so every sample rendered as a pale panel on a dark page and the ramp ran
+   the wrong way. Using the container levels makes it correct in both modes
+   without branching on the mode at all, which is the point of the levels. */
 const ELEVATIONS = [
-  { level: 0, use: 'Flat. A Button at rest, and anything that earns its shadow by being hovered.' },
-  { level: 1, use: 'Button on hover; Handle and Accordion at rest; Card and Bottom Sheet at rest.' },
-  { level: 2, use: 'Card and Bottom Sheet on hover; AppBar, Toolbar and Menu at rest.' },
-  { level: 3, use: 'AppBar on hover; FAB at rest.' },
-  { level: 4, use: 'FAB on hover.' },
-  { level: 5, use: 'Dialog and Modal. The top of the stack — an `elevated` prop on one does nothing.' },
+  { level: 0, surface: 'Container-Lowest',  use: 'Flat. A Button at rest, and anything that earns its shadow on hover.' },
+  { level: 1, surface: 'Container-Low',     use: 'Button on hover; Handle and Accordion at rest; Card and Bottom Sheet at rest.' },
+  { level: 2, surface: 'Container',         use: 'Card and Bottom Sheet on hover; AppBar, Toolbar and Menu at rest.' },
+  { level: 3, surface: 'Container-High',    use: 'AppBar on hover; FAB at rest.' },
+  { level: 4, surface: 'Container-High',    use: 'FAB on hover.' },
+  { level: 5, surface: 'Container-Highest', use: 'Dialog and Modal. The top of the stack — `elevated` on one does nothing.' },
 ];
 
 export function ElevationDemo() {
   return (
     <VStack gap="var(--Sizing-2)">
       <H5>The levels</H5>
+      <BodySmall color="quiet">
+        Each sample sets its container level AND its shadow. The tone does most of the
+        work and reverses with the mode — higher moves away from the surface, so darker
+        in light and lighter in dark.
+      </BodySmall>
       <HStack gap="var(--Sizing-3)" style={{ flexWrap: 'wrap', alignItems: 'flex-start' }}>
-        {ELEVATIONS.map(({ level, use }) => (
+        {ELEVATIONS.map(({ level, surface, use }) => (
           <VStack key={level} gap="var(--Sizing-1)" style={{ width: 150 }}>
-            <Box data-surface="Surface-Brightest" sx={{
+            <Box data-surface={surface} sx={{
               height: 72, borderRadius: 'var(--Card-Radius, var(--Style-Border-Radius))',
-              backgroundColor: 'var(--Background)',
+              backgroundColor: 'var(--Background)', color: 'var(--Text)',
               boxShadow: level === 0 ? 'none' : `var(--Effect-Level-${level})`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               <Caption>Level {level}</Caption>
             </Box>
-            <Caption color="quiet">{use}</Caption>
+            <Caption color="quiet" style={{ display: 'block', lineHeight: 1.4 }}>{surface}</Caption>
+            <Caption color="quiet" style={{ display: 'block', lineHeight: 1.4 }}>{use}</Caption>
           </VStack>
         ))}
       </HStack>

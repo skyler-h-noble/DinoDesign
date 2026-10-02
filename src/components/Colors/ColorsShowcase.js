@@ -66,10 +66,19 @@ export function ColorsShowcase() {
     </Box>
   );
 
-  /* The brand's CORE colours — the ones chosen in the studio.
-     Color-Vibrant is where the picked colour lands (the generator resolves
-     Color-Vibrant to Color-8), so it is the token that answers "what colour is
-     this brand".
+  /* The brand's CORE colours — the three hexes chosen in the studio, now
+     published as --Primary-Core / --Secondary-Core / --Tertiary-Core.
+
+     No TONE can stand for these. The pick is written into the tone nearest its
+     lightness, so its index differs per colour, and Color-Vibrant is hardcoded
+     to Color-8 rather than being the pick. This page read Color-11 and then
+     Color-Vibrant and was wrong both times — not a bad swatch, but information
+     that the stylesheet did not contain until the generator was changed to
+     emit it.
+
+     A system generated BEFORE that change has no --*-Core, so these fall back
+     to the hatch like any other dead token — visibly absent rather than
+     silently white. Regenerate to populate them.
 
      These read --Primary-Color-11 and friends, which is the second-lightest
      step of the ramp: on this system that is #f9faef against the real
@@ -77,18 +86,11 @@ export function ColorsShowcase() {
      washed out and nothing said why, because an 11 is a perfectly valid tone
      and the swatch rendered exactly what it was asked for. */
   const brandColors = [
-    { name: 'Primary', var: '--Primary-Color-Vibrant' },
-    { name: 'Secondary', var: '--Secondary-Color-Vibrant' },
-    { name: 'Tertiary', var: '--Tertiary-Color-Vibrant' },
+    { name: 'Primary', var: '--Primary-Core' },
+    { name: 'Secondary', var: '--Secondary-Core' },
+    { name: 'Tertiary', var: '--Tertiary-Core' },
   ];
 
-
-  // Static background colors
-  const backgroundColors = [
-    { name: 'Surface', var: '--Surface' },
-    { name: 'Surface Dim', var: '--Surface-Dim' },
-    { name: 'Surface Bright', var: '--Surface-Bright' },
-  ];
 
   // Layout colors (dynamic)
   const layoutColors = [
@@ -177,7 +179,15 @@ export function ColorsShowcase() {
 
           </Box>
 
-          {/* Background/Surface Colors */}
+          {/* The "Background Colors" section is gone.
+              It showed --Surface, --Surface-Dim and --Surface-Bright as
+              swatches, and all three rendered empty: those are not colours a
+              consumer reads. They exist so the system can COMPUTE --Background,
+              which is what data-surface resolves to — the page was teaching the
+              exact pattern CLAUDE.md forbids ("never background: var(--Surface)")
+              while demonstrating it did not work.
+              Live surfaces are shown on the Foundations > Surfaces page, by
+              setting the attribute rather than naming a token. */}
           {/* Text and header ROLES.
               These are the tokens a component actually asks for — Typography's
               `color` prop maps straight onto them — and they were missing from
@@ -226,22 +236,6 @@ export function ColorsShowcase() {
                     cssVar={role ? `--Text-${role}` : '--Text'}
                     small
                   />
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-
-          <Box sx={{ mb: 6 }}>
-            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'var(--Header)' }}>
-              Background Colors
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 3, color: 'var(--Text-Quiet)' }}>
-              Static surface colors for light and dark modes
-            </Typography>
-            <Grid container spacing={2}>
-              {backgroundColors.map((color) => (
-                <Grid item key={color.var}>
-                  <ColorSwatch name={color.name} cssVar={color.var} />
                 </Grid>
               ))}
             </Grid>
