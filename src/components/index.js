@@ -61,6 +61,13 @@ export {
 export { Colors } from './Colors';
 export { Spacing } from './Spacing';
 export { Icon, IconShowcase } from './Icon';
+/* Brand marks — GitHub, LinkedIn, Figma. Separate from Icon on purpose: Icon
+   renders the design system's OWN vocabulary (Material Symbols, taking the
+   brand's icon colour and ramp), while a brand mark is somebody else's
+   artwork, cannot be derived, and carries a trademark. Path data is imported
+   by name at the call site from @fortawesome/free-brands-svg-icons, so a
+   bundler ships only the marks used rather than all 610. */
+export { BrandIcon } from './BrandIcon';
 export { Swatch } from './Swatch';
 /* No showcase: MiniSwatch has nothing to play with on its own. It is the chip
    inside a menu row, documented where it appears — Select and Menu. */

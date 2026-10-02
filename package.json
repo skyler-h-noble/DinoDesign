@@ -107,7 +107,9 @@
     "type": "git",
     "url": "https://github.com/lwnoble/omni-design"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@fortawesome/free-brands-svg-icons": "^7.3.1"
+  },
   "homepage": "/",
   "browserslist": {
     "production": [

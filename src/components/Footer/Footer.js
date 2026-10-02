@@ -3,8 +3,14 @@ import React, { useState } from 'react';
 import { H4, BodySmall } from '../Typography';
 import { Link } from '../Link/Link';
 import { Button } from '../Button/Button';
-import { TextField } from '../TextField/TextField';
+/* TextInput, not TextField. The lib's own export list marks TextField
+ * DEPRECATED — "new code should use TextInput" — because TextField is a
+ * thin wrapper around MUI's, while TextInput is the design system's own
+ * input with its variants, validation and surface awareness. A footer
+ * shipping the deprecated one is the library declining to use itself. */
+import { Input as TextInput } from '../Input/Input';
 import { Copyright } from '../Copyright/Copyright';
+import { BrandIcon } from '../BrandIcon/BrandIcon';
 
 /**
  * Footer Component
@@ -108,7 +114,7 @@ export function Footer({
             style={{
               marginTop: 48,
               paddingTop: 32,
-              borderTop: '1px solid rgba(255, 255, 255, 0.10)',
+              borderTop: '1px solid var(--Border-Variant)',
               display: 'flex',
               flexWrap: 'wrap',
               gap: 32,
@@ -194,32 +200,53 @@ function LinksColumn({ title, links = [] }) {
 function SocialRow({ links }) {
   return (
     <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-      {links.map((s, i) => (
-        <a
-          key={i}
-          href={s.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={s.label || 'Social link'}
-          style={{
-            color: 'inherit',
-            opacity: 0.85,
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 36,
-            height: 36,
-            borderRadius: '50%',
-            border: '1px solid rgba(255, 255, 255, 0.18)',
-            textDecoration: 'none',
-            transition: 'opacity 150ms ease, border-color 150ms ease',
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.85'; }}
-        >
-          {s.icon}
-        </a>
-      ))}
+      {links.map((s, i) => {
+        /* A name that exists but says nothing passes every automated checker
+           AND silences the warnings — `aria-label="Social link"` on six links
+           in a row announces six identical controls. The default is gone; a
+           missing name now warns in development, because a MISSING name at
+           least trips something while a meaningless one does not. */
+        const name = s.label || s.name;
+        if (process.env.NODE_ENV !== 'production' && !name) {
+          console.warn(
+            '[Footer] a socialLinks entry has no `label`. Each one needs the '
+            + 'service it points at ("GitHub", "LinkedIn") — the icon carries no '
+            + 'text, so without it a screen reader announces only "link".',
+          );
+        }
+        return (
+          <a
+            key={i}
+            href={s.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={name}
+            className="footer-social-link"
+            style={{
+              color: 'inherit',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 36,
+              height: 36,
+              borderRadius: '50%',
+              /* --Border-Variant, not a hardcoded white at 18%. The literal
+                 assumed a dark footer: on a light surface it painted an
+                 invisible border, and it could not follow a theme at all.
+                 Border-Variant is the decorative tier, which is right here —
+                 this ring outlines a link but carries no meaning of its own. */
+              border: '1px solid var(--Border-Variant)',
+              textDecoration: 'none',
+              transition: 'opacity var(--Motion-Duration-Fast, 150ms) var(--Motion-Easing-Standard, ease)',
+            }}
+          >
+            {/* `brand` takes a Font Awesome brand icon and renders the real
+                mark; `icon` stays supported for anything already passing its
+                own node. */}
+            {s.brand ? <BrandIcon icon={s.brand} size="18px" /> : s.icon}
+          </a>
+        );
+      })}
     </div>
   );
 }
@@ -265,7 +292,7 @@ function SubscribeArea({
         </BodySmall>
       )}
       <div style={{ display: 'flex', gap: 8 }}>
-        <TextField
+        <TextInput
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -274,9 +301,12 @@ function SubscribeArea({
           fullWidth
           aria-label="Email address"
         />
+        {/* No variant. Controls take the brand's `default` colour unless a
+            design explicitly marks them primary — this one was marked primary
+            by nobody, and a footer's newsletter signup is not the primary
+            action on the page it sits at the bottom of. */}
         <Button
           type="submit"
-          variant="primary"
           size="small"
           disabled={submitting || !email}
         >
