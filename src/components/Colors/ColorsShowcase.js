@@ -62,12 +62,27 @@ export function ColorsShowcase() {
     </Box>
   );
 
-  // Static brand colors (never change)
+  /* The brand's CORE colours — the ones chosen in the studio.
+     Color-Vibrant is where the picked colour lands (the generator resolves
+     Color-Vibrant to Color-8), so it is the token that answers "what colour is
+     this brand".
+
+     These read --Primary-Color-11 and friends, which is the second-lightest
+     step of the ramp: on this system that is #f9faef against the real
+     #c7cda7 — a near-white tint labelled "Primary". Every palette looked
+     washed out and nothing said why, because an 11 is a perfectly valid tone
+     and the swatch rendered exactly what it was asked for. */
   const brandColors = [
-    { name: 'Primary', var: '--Primary-Color-11' },
-    { name: 'Secondary', var: '--Secondary-Color-11' },
-    { name: 'Tertiary', var: '--Tertiary-Color-11' },
+    { name: 'Primary', var: '--Primary-Color-Vibrant' },
+    { name: 'Secondary', var: '--Secondary-Color-Vibrant' },
+    { name: 'Tertiary', var: '--Tertiary-Color-Vibrant' },
   ];
+
+  /* The full ramp per palette, so the core colour has its context. Twelve
+     tones is what the generator publishes; Vibrant is one of them (Color-8)
+     rather than a thirteenth. */
+  const RAMP_PALETTES = ['Primary', 'Secondary', 'Tertiary', 'Neutral'];
+  const RAMP_TONES = Array.from({ length: 12 }, (_, i) => i + 1);
 
   // Static background colors
   const backgroundColors = [
@@ -145,6 +160,45 @@ export function ColorsShowcase() {
                 </Grid>
               ))}
             </Grid>
+
+            {/* The full ramp, so the core colour has its context. Twelve tones
+                per palette, with Color-8 marked — Vibrant resolves to it rather
+                than being a thirteenth tone, which is easy to assume otherwise.
+
+                Flat rows of fixed-width cells rather than a Grid: the tones are
+                a SEQUENCE, and a wrapping grid breaks the one thing a ramp has
+                to show, which is that each step is adjacent to the next. */}
+            <Box sx={{ mt: 4 }}>
+              <Typography variant="body2" sx={{ mb: 2, color: 'var(--Text-Quiet)' }}>
+                The full ramp. Color-8 is the core colour — <code>Color-Vibrant</code> resolves
+                to it, rather than being a thirteenth tone.
+              </Typography>
+              {RAMP_PALETTES.map((palette) => (
+                <Box key={palette} sx={{ mb: 2 }}>
+                  <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: 'var(--Text)' }}>
+                    {palette}
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'nowrap', overflowX: 'auto' }}>
+                    {RAMP_TONES.map((n) => (
+                      <Box key={n} sx={{ textAlign: 'center', flex: '0 0 auto', width: 56 }}>
+                        <Box sx={{
+                          height: 44,
+                          backgroundColor: `var(--${palette}-Color-${n})`,
+                          border: n === 8 ? '2px solid var(--Focus-Visible)' : '1px solid var(--Border-Variant)',
+                          borderRadius: n === 8 ? 'var(--Style-Border-Radius, 4px)' : 0,
+                        }} />
+                        <Typography variant="caption" sx={{
+                          fontSize: 10, color: 'var(--Text-Quiet)',
+                          fontWeight: n === 8 ? 700 : 400,
+                        }}>
+                          {n}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              ))}
+            </Box>
           </Box>
 
           {/* Background/Surface Colors */}
