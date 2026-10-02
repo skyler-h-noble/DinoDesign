@@ -9,6 +9,7 @@ import { Button } from '../Button/Button';
 import { Icon } from '../Icon/Icon';
 import { Switch } from '../Switch/Switch';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
+import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import { CodeBlock } from '../CodeBlock/CodeBlock';
@@ -133,10 +134,22 @@ export function FabShowcase() {
     <Box sx={{ pb: 8 }}>
       <H3>Floating Action Button</H3>
 
-      <Grid container sx={{ mt: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-
-        {/* ── LEFT: Preview + Code ── */}
-        <Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, pr: { md: 3 } }}>
+      {/* Layout A: the tab bar spans the page, so Summary, Accessibility and
+          Change Log get the full width to read. The preview/controls split
+          lives INSIDE Playground, the only tab that needs it. */}
+      <Tabs defaultValue={0} variant="standard" color="primary">
+        <TabList>
+                <Tab>Summary</Tab>
+                <Tab>Playground</Tab>
+                <Tab>Accessibility</Tab>
+                <Tab>Change Log</Tab>
+              </TabList>
+<TabPanel value={0}>
+                <DocSummary component="Fab" />
+              </TabPanel>
+<TabPanel value={1}>
+        <Grid container sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
+<Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, pr: { md: 3 } }}>
 
           <PreviewSurface theme={bgTheme}>
             <Fab
@@ -158,19 +171,7 @@ export function FabShowcase() {
             sx={{ mt: 2 }}
           />
         </Grid>
-
-        {/* ── RIGHT: Tabs ── */}
-        <Grid item sx={{ width: { xs: '100%', md: '45%' }, flexShrink: 0, alignSelf: 'flex-start', minWidth: 0, overflow: 'hidden' }}>
-          <Box sx={{ backgroundColor: 'var(--Background)', overflow: 'hidden' }}>
-
-            <Tabs defaultValue={0} variant="standard" color="primary">
-              <TabList>
-                <Tab>Playground</Tab>
-                <Tab>Accessibility</Tab>
-              </TabList>
-
-              {/* ── Playground ── */}
-              <TabPanel value={0}>
+          <Grid item sx={{ width: { xs: '100%', md: '45%' }, flexShrink: 0, minWidth: 0 }}>
                 <Box sx={{ p: 3 }}>
 
                   {/* Background */}
@@ -249,10 +250,10 @@ export function FabShowcase() {
                   </Box>
 
                 </Box>
-              </TabPanel>
-
-              {/* ── Accessibility ── */}
-              <TabPanel value={1}>
+              </Grid>
+        </Grid>
+      </TabPanel>
+<TabPanel value={2}>
                 <Box sx={{ p: 3 }}>
                   <Stack spacing={3}>
 
@@ -305,10 +306,11 @@ export function FabShowcase() {
                   </Stack>
                 </Box>
               </TabPanel>
-            </Tabs>
-          </Box>
-        </Grid>
-      </Grid>
+<TabPanel value={3}>
+                <DocChanges component="Fab" />
+              </TabPanel>
+      </Tabs>
+
     </Box>
   );
 }

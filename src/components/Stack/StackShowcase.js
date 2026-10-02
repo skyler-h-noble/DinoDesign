@@ -11,6 +11,7 @@ import { Switch } from '../Switch/Switch';
 import { Chip } from '../Chip/Chip';
 import { Link } from '../Link/Link';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
+import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import { CodeBlock as LibCodeBlock } from '../CodeBlock/CodeBlock';
@@ -275,13 +276,19 @@ export function StackShowcase() {
 
       <Tabs defaultValue={0} variant="standard" color="primary">
         <TabList>
+          <Tab>Summary</Tab>
           <Tab>Why it matters</Tab>
           <Tab>Playground</Tab>
           <Tab>API</Tab>
+          <Tab>Change Log</Tab>
         </TabList>
 
         {/* ── Why it matters ── */}
         <TabPanel value={0}>
+          <DocSummary component="Stack" />
+        </TabPanel>
+
+        <TabPanel value={1}>
           <Box sx={{ pt: 3, display: 'flex', flexDirection: 'column', gap: 4 }}>
 
             {/* Problem */}
@@ -429,12 +436,12 @@ gap: var(--min-stack-gap, 8px);
         </TabPanel>
 
         {/* ── Playground ── */}
-        <TabPanel value={1}>
+        <TabPanel value={2}>
           <Playground />
         </TabPanel>
 
         {/* ── API ── */}
-        <TabPanel value={2}>
+        <TabPanel value={3}>
           <Box sx={{ pt: 3 }}>
 
             <H3>OmniStack props</H3>
@@ -505,6 +512,10 @@ data-min-gap-enforced="true"
 container.querySelector('[data-min-gap-enforced="true"]')`} />
 
           </Box>
+        </TabPanel>
+
+        <TabPanel value={4}>
+          <DocChanges component="Stack" />
         </TabPanel>
       </Tabs>
     </Box>

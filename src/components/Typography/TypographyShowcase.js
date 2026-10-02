@@ -299,10 +299,22 @@ export function TypographyShowcase() {
         <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
       </Box>
 
-      <Grid container sx={{ mt: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-
-        {/* ── LEFT: Preview + Code ── */}
-        <Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, pr: { md: 3 } }}>
+      {/* Layout A: the tab bar spans the page, so Summary, Accessibility and
+          Change Log get the full width to read. The preview/controls split
+          lives INSIDE Playground, the only tab that needs it. */}
+      <Tabs defaultValue={0} variant="standard" color="primary">
+        <TabList>
+                <Tab>Summary</Tab>
+                <Tab>Playground</Tab>
+                <Tab>Accessibility</Tab>
+                <Tab>Change Log</Tab>
+              </TabList>
+<TabPanel value={0}>
+                <DocSummary component="Typography" theme={bgTheme} surface={bgSurface} />
+              </TabPanel>
+<TabPanel value={1}>
+        <Grid container sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
+<Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, pr: { md: 3 } }}>
 
           {/* Preview */}
           <PreviewSurface theme={bgTheme} surface={bgSurface}>
@@ -326,25 +338,7 @@ export function TypographyShowcase() {
             sx={{ mt: 2 }}
           />
         </Grid>
-
-        {/* ── RIGHT: Tabs ── */}
-        <Grid item sx={{ width: { xs: '100%', md: '45%' }, flexShrink: 0, alignSelf: 'flex-start', minWidth: 0, overflow: 'hidden' }}>
-          <Box sx={{ backgroundColor: 'var(--Background)', overflow: 'hidden' }}>
-
-            <Tabs defaultValue={0} variant="standard" color="primary">
-              <TabList>
-                <Tab>Summary</Tab>
-                <Tab>Playground</Tab>
-                <Tab>Accessibility</Tab>
-                <Tab>Change Log</Tab>
-              </TabList>
-
-              {/* ── Playground ── */}
-              <TabPanel value={0}>
-                <DocSummary component="Typography" theme={bgTheme} surface={bgSurface} />
-              </TabPanel>
-
-              <TabPanel value={1}>
+          <Grid item sx={{ width: { xs: '100%', md: '45%' }, flexShrink: 0, minWidth: 0 }}>
                 <Box sx={{ p: 3 }}>
 
                   {/* Style — single grouped dropdown */}
@@ -438,10 +432,10 @@ export function TypographyShowcase() {
                     />
                   </Box>
                 </Box>
-              </TabPanel>
-
-              {/* ── Accessibility ── */}
-              <TabPanel value={2}>
+              </Grid>
+        </Grid>
+      </TabPanel>
+<TabPanel value={2}>
                 <Box sx={{ p: 3 }}>
                   <BodySmall color="quiet" style={{ marginBottom: 24 }}>
                     {STYLE_LABELS[textStyle]} / {cap(resolvedColor)} / {cap(resolvedWidth)}
@@ -526,14 +520,11 @@ export function TypographyShowcase() {
                   </Stack>
                 </Box>
               </TabPanel>
-
-              <TabPanel value={3}>
+<TabPanel value={3}>
                 <DocChanges component="Typography" />
               </TabPanel>
-            </Tabs>
-          </Box>
-        </Grid>
-      </Grid>
+      </Tabs>
+
     </Box>
   );
 }

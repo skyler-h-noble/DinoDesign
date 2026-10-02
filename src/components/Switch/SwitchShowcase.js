@@ -121,10 +121,22 @@ export function SwitchShowcase() {
     <Box sx={{ pb: 8 }}>
       <H3>Switch</H3>
 
-      <Grid container sx={{ mt: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-
-        {/* ── LEFT: Preview + Code ── */}
-        <Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, pr: { md: 3 } }}>
+      {/* Layout A: the tab bar spans the page, so Summary, Accessibility and
+          Change Log get the full width to read. The preview/controls split
+          lives INSIDE Playground, the only tab that needs it. */}
+      <Tabs defaultValue={0} variant="standard" color="primary">
+        <TabList>
+                <Tab>Summary</Tab>
+                <Tab>Playground</Tab>
+                <Tab>Accessibility</Tab>
+                <Tab>Change Log</Tab>
+              </TabList>
+<TabPanel value={0}>
+                <DocSummary component="Switch" theme={bgTheme} surface={bgSurface} />
+              </TabPanel>
+<TabPanel value={1}>
+        <Grid container sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
+<Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, pr: { md: 3 } }}>
 
           <PreviewSurface theme={bgTheme} surface={bgSurface}>
             <Switch
@@ -147,32 +159,7 @@ export function SwitchShowcase() {
             sx={{ mt: 2 }}
           />
         </Grid>
-
-        {/* ── RIGHT: Tabs ── */}
-        <Grid item sx={{ width: { xs: '100%', md: '45%' }, flexShrink: 0, alignSelf: 'flex-start', minWidth: 0, overflow: 'hidden' }}>
-          <Box sx={{ backgroundColor: 'var(--Background)', overflow: 'hidden' }}>
-
-            {/* Theme + surface live ABOVE the tabs: the Summary example, the
-                Playground preview and the live contrast numbers all answer to
-                them, so a control inside one tab would hide the input driving
-                what you read in another. */}
-            <Box sx={{ mb: 2 }}>
-              <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
-            </Box>
-            <Tabs defaultValue={0} variant="standard" color="primary">
-              <TabList>
-                <Tab>Summary</Tab>
-                <Tab>Playground</Tab>
-                <Tab>Accessibility</Tab>
-                <Tab>Change Log</Tab>
-              </TabList>
-
-              {/* ── Playground ── */}
-              <TabPanel value={0}>
-                <DocSummary component="Switch" theme={bgTheme} surface={bgSurface} />
-              </TabPanel>
-
-              <TabPanel value={1}>
+          <Grid item sx={{ width: { xs: '100%', md: '45%' }, flexShrink: 0, minWidth: 0 }}>
                 <Box sx={{ p: 3 }}>
 
 
@@ -276,10 +263,10 @@ export function SwitchShowcase() {
                   </Box>
 
                 </Box>
-              </TabPanel>
-
-              {/* ── Accessibility ── */}
-              <TabPanel value={2}>
+              </Grid>
+        </Grid>
+      </TabPanel>
+<TabPanel value={2}>
                 <Box sx={{ p: 3 }}>
                   <Stack spacing={3}>
 
@@ -306,14 +293,11 @@ export function SwitchShowcase() {
                   </Stack>
                 </Box>
               </TabPanel>
-
-              <TabPanel value={3}>
+<TabPanel value={3}>
                 <DocChanges component="Switch" />
               </TabPanel>
-            </Tabs>
-          </Box>
-        </Grid>
-      </Grid>
+      </Tabs>
+
     </Box>
   );
 }

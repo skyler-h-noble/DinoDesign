@@ -202,10 +202,22 @@ export function IconShowcase() {
   return (
     <Box sx={{ pb: 8 }}>
       <H3>Icon</H3>
-      <Grid container sx={{ mt: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-
-        {/* ── LEFT ── */}
-        <Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, pr: { md: 3 } }}>
+      {/* Layout A: the tab bar spans the page, so Summary, Accessibility and
+          Change Log get the full width to read. The preview/controls split
+          lives INSIDE Playground, the only tab that needs it. */}
+      <Tabs defaultValue={0} variant="standard" color="primary">
+        <TabList>
+                <Tab>Summary</Tab>
+                <Tab>Playground</Tab>
+                <Tab>Accessibility</Tab>
+                <Tab>Change Log</Tab>
+              </TabList>
+<TabPanel value={0}>
+                <DocSummary component="Icon" />
+              </TabPanel>
+<TabPanel value={1}>
+        <Grid container sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
+<Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, pr: { md: 3 } }}>
           <Box sx={{ p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
             minHeight: 200, backgroundColor: 'var(--Background)', borderBottom: '1px solid var(--Border)', gap: 2 }}>
             <Icon
@@ -226,24 +238,7 @@ export function IconShowcase() {
             sx={{ mt: 2 }}
           />
         </Grid>
-
-        {/* ── RIGHT ── */}
-        <Grid item sx={{ width: { xs: '100%', md: '45%' }, flexShrink: 0, alignSelf: 'flex-start', minWidth: 0, overflow: 'hidden' }}>
-          <Box sx={{ backgroundColor: 'var(--Background)', overflow: 'hidden' }}>
-            <Tabs defaultValue={0} variant="standard" color="primary">
-              <TabList>
-                <Tab>Summary</Tab>
-                <Tab>Playground</Tab>
-                <Tab>Accessibility</Tab>
-                <Tab>Change Log</Tab>
-              </TabList>
-
-              {/* ── Playground ── */}
-              <TabPanel value={0}>
-                <DocSummary component="Icon" />
-              </TabPanel>
-
-              <TabPanel value={1}>
+          <Grid item sx={{ width: { xs: '100%', md: '45%' }, flexShrink: 0, minWidth: 0 }}>
                 <Box sx={{ p: 3 }}>
 
                   {/* Icon name */}
@@ -365,10 +360,10 @@ export function IconShowcase() {
                     <Switch checked={disabled} onChange={(e) => setDisabled(e.target.checked)} size="small" aria-label="Toggle disabled" />
                   </Box>
                 </Box>
-              </TabPanel>
-
-              {/* ── Accessibility ── */}
-              <TabPanel value={2}>
+              </Grid>
+        </Grid>
+      </TabPanel>
+<TabPanel value={2}>
                 <Box sx={{ p: 3 }}>
                   <BodySmall color="quiet" style={{ marginBottom: 24 }}>
                     {STYLE_LABELS[style]} / {cap(color)} / {size === 'custom' ? customSize + 'px' : size}
@@ -497,14 +492,11 @@ export function IconShowcase() {
                   </Stack>
                 </Box>
               </TabPanel>
-
-              <TabPanel value={3}>
+<TabPanel value={3}>
                 <DocChanges component="Icon" />
               </TabPanel>
-            </Tabs>
-          </Box>
-        </Grid>
-      </Grid>
+      </Tabs>
+
     </Box>
   );
 }
