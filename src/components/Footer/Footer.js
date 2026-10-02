@@ -39,6 +39,8 @@ import { BrandIcon } from '../BrandIcon/BrandIcon';
  *   socialLinks   — [{ icon, url, label? }] — optional social icon row.
  *   subscribe     — { title?, description?, placeholder?, buttonLabel?,
  *                     onSubscribe(email) } — optional email subscribe form.
+ *   copyright     — show the copyright line. Default true. Mirrors the
+ *                   Boolean on Figma's Footer component.
  *   copyrightName — string passed to <Copyright companyName>.
  *   copyrightYear — number passed to <Copyright year>.
  *
@@ -58,6 +60,14 @@ export function Footer({
   address,
   columns = [],
   socialLinks = [],
+  /* Figma carries this as a Boolean on the Footer. Default true: a
+     footer almost always has the line, and the cases that do not are
+     app shells rather than pages. Kept as a prop rather than left
+     unconditional so the two sides can express the same thing — a
+     toggle in the file that code cannot honour is how a design and
+     its implementation drift without either looking wrong. */
+  copyright = true,
+  children,
   subscribe,
   copyrightName,
   copyrightYear,
@@ -103,10 +113,19 @@ export function Footer({
             gap: 40,
           }}
         >
-          <AddressColumn address={address} />
-          {visibleColumns.map((col, i) => (
-            <LinksColumn key={i} {...col} />
-          ))}
+          {/* `children` IS Figma's Slot (Slot#9250:92), which wraps exactly this
+              region. A slot means the columns are the consumer's to fill with
+              whatever they have — so children, when given, replace the built-in
+              address + link columns rather than sitting beside them. The props
+              stay as the convenient path for the ordinary case. */}
+          {children || (
+            <>
+              <AddressColumn address={address} />
+              {visibleColumns.map((col, i) => (
+                <LinksColumn key={i} {...col} />
+              ))}
+            </>
+          )}
         </div>
 
         {(socialLinks.length > 0 || subscribe) && (
@@ -128,7 +147,9 @@ export function Footer({
         )}
       </div>
 
-      <Copyright color={color} companyName={copyrightName} year={copyrightYear} />
+      {copyright && (
+        <Copyright color={color} companyName={copyrightName} year={copyrightYear} />
+      )}
     </footer>
   );
 }
@@ -227,15 +248,19 @@ function SocialRow({ links }) {
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: 36,
-              height: 36,
-              borderRadius: '50%',
+              /* No ring. Figma's SocialLinks row is three Brand-Icons
+                 instances at their natural glyph widths (24, 21, 21) with a
+                 Sizing-2 gap and nothing drawn around them. The 36px bordered
+                 circle here was invented, and it is the kind of invention that
+                 sticks: it reads as deliberate, so nobody checks it. The hit
+                 area is kept at 36 via padding, since 24px of glyph is under
+                 the 24x24 floor once you account for the glyph's own bearing. */
+              padding: 6,
               /* --Border-Variant, not a hardcoded white at 18%. The literal
                  assumed a dark footer: on a light surface it painted an
                  invisible border, and it could not follow a theme at all.
                  Border-Variant is the decorative tier, which is right here —
                  this ring outlines a link but carries no meaning of its own. */
-              border: '1px solid var(--Border-Variant)',
               textDecoration: 'none',
               transition: 'opacity var(--Motion-Duration-Fast, 150ms) var(--Motion-Easing-Standard, ease)',
             }}
@@ -243,7 +268,7 @@ function SocialRow({ links }) {
             {/* `brand` takes a Font Awesome brand icon and renders the real
                 mark; `icon` stays supported for anything already passing its
                 own node. */}
-            {s.brand ? <BrandIcon name={s.brand} size="18px" /> : s.icon}
+            {s.brand ? <BrandIcon name={s.brand} size="24px" /> : s.icon}
           </a>
         );
       })}
