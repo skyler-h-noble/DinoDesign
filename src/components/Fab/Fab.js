@@ -46,7 +46,15 @@ const SIZE_MAP = {
 };
 
 function getTokens(color) {
-  const C = tokenSegment(color);
+  /* `default` on a FAB means TERTIARY, deliberately.
+     A FAB is not tied to the button palette: it floats above the content as
+     the one primary action, so its resting colour is a different palette from
+     whatever the default Button is — otherwise it reads as just another button
+     that happens to be round.
+     This lived in FabShowcase as `color === 'default' ? 'tertiary' : color`,
+     which meant the gallery showed the real colour and anyone importing Fab
+     got --Buttons-Default-*. Every other value passes through untouched. */
+  const C = tokenSegment(color === 'default' ? 'tertiary' : color);
   return {
     bg: 'var(--Buttons-' + C + '-Button)',
     text: 'var(--Buttons-' + C + '-Text)',
@@ -88,13 +96,10 @@ export function Fab({
   icon,
   label,
   variant = 'solid',
-  /* `default` — the brand's own default button colour, same as every other
-     control in the system. Figma does not pin this: a FAB's colour comes from
-     the Buttons MODE set on its frame, and that collection's ten modes are the
-     same list this prop takes.
-     It used to be `primary`, with FabShowcase quietly remapping `default` to
-     tertiary — so the gallery showed one colour and anyone importing Fab got
-     another. */
+  /* `default`, which for a FAB resolves to the TERTIARY palette — see
+     getTokens. Figma does not pin the colour: it comes from the Buttons MODE
+     set on the frame, and that collection's ten modes are the list this prop
+     takes. */
   color = 'default',
   size = 'medium',
   extended = false,

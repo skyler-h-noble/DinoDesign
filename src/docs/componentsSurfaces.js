@@ -118,8 +118,10 @@ export const FAB_DOC = {
     note: 'The ten modes of Figma\'s Buttons collection. A FAB has no Color '
       + 'variant axis — in FIGMA you change its colour by setting the Buttons '
       + 'MODE on the frame, and in CODE it is this prop, taking the same ten '
-      + 'names. Defaults to `default`, the brand\'s own button colour — '
-      + 'the same rule every other control in the system follows.'
+      + 'names. Defaults to `default`, which on a FAB resolves to the '
+      + 'TERTIARY palette: a FAB floats above the content as the one primary '
+      + 'action, so it is deliberately not the colour of a default Button — '
+      + 'otherwise it reads as just another button that happens to be round.'
   }, {
     name: 'size',
     type: 'string',
