@@ -67,7 +67,7 @@ const CONTAINERS = [
 
 function SurfaceRow({ name, usedBy }) {
   return (
-    <HStack gap="var(--Sizing-2)" style={{ alignItems: 'center' }}>
+    <HStack gap="var(--Sizing-2)" style={{ alignItems: 'center' }} enforceMinGap={false}>
       <Box data-surface={name} sx={{
         width: 104, height: 56, flexShrink: 0,
         borderRadius: 'var(--Style-Border-Radius, 4px)',
@@ -77,10 +77,18 @@ function SurfaceRow({ name, usedBy }) {
       }}>
         <Caption>Aa</Caption>
       </Box>
-      <VStack gap="2px">
-        <Caption style={{ fontFamily: 'ui-monospace, Menlo, monospace' }}>{name}</Caption>
-        <Caption color="quiet">{usedBy}</Caption>
-      </VStack>
+      {/* A plain Box, not a VStack.
+          OmniStack raises its gap to --min-stack-gap when a child is "small",
+          and Caption is on that list — so a 2px gap silently became 8px, the
+          text block grew taller than the 56px swatch beside it, and the name
+          floated above the swatch while its description sat below. It read as
+          each description belonging to the NEXT row.
+          The smart gap is right for a stack of controls and wrong for two
+          lines of a label, so this opts out by not being a stack. */}
+      <Box sx={{ minWidth: 0 }}>
+        <Caption style={{ fontFamily: 'ui-monospace, Menlo, monospace', display: 'block', lineHeight: 1.4 }}>{name}</Caption>
+        <Caption color="quiet" style={{ display: 'block', lineHeight: 1.4 }}>{usedBy}</Caption>
+      </Box>
     </HStack>
   );
 }

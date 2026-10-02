@@ -72,23 +72,46 @@ export function StyleTable({ styles, tokensFor, defaultColorFor, render }) {
       <tbody>
         {styles.map((name) => (
           <tr key={name}>
-            <Box component="td" sx={{ py: 1.5, pr: 2, borderBottom: '1px solid var(--Border-Variant)', verticalAlign: 'top', whiteSpace: 'nowrap' }}>
+            <Box component="td" sx={{ py: 1, pr: 2, borderBottom: '1px solid var(--Border-Variant)', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
               <Caption style={{ fontFamily: 'ui-monospace, Menlo, monospace' }}>{name}</Caption>
             </Box>
-            <Box component="td" sx={{ py: 1.5, pr: 2, borderBottom: '1px solid var(--Border-Variant)', verticalAlign: 'top', minWidth: 180 }}>
-              {render(name)}
+            {/* The sample is CAPPED.
+                Rendered at its real size, alt-display-large is 72px and takes a
+                thousand-pixel row, so a table meant for scanning becomes a
+                scroll. The cap is applied to the style's own --*-Font-Size
+                token via min(), so the face, weight, tracking and case are all
+                still the real thing — only the scale is clamped, and the true
+                size is right there in the Variables column. */}
+            <Box component="td" sx={{
+              py: 1, pr: 2, borderBottom: '1px solid var(--Border-Variant)',
+              verticalAlign: 'middle', minWidth: 160, maxWidth: 320,
+            }}>
+              <Box sx={{
+                '& > *': {
+                  fontSize: (() => {
+                    const sizeToken = (tokensFor(name) || []).find(t => t.endsWith('-Font-Size'));
+                    return sizeToken ? `min(var(${sizeToken}), 26px)` : undefined;
+                  })(),
+                  lineHeight: 1.3,
+                  margin: 0,
+                },
+              }}>
+                {render(name)}
+              </Box>
             </Box>
-            <Box component="td" sx={{ py: 1.5, pr: 2, borderBottom: '1px solid var(--Border-Variant)', verticalAlign: 'top', whiteSpace: 'nowrap' }}>
+            <Box component="td" sx={{ py: 1, pr: 2, borderBottom: '1px solid var(--Border-Variant)', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
               <Caption color="quiet">
                 {defaultColorFor(name) === 'header' ? '--Header-*' : '--Text-*'}
               </Caption>
             </Box>
-            <Box component="td" sx={{ py: 1.5, borderBottom: '1px solid var(--Border-Variant)', verticalAlign: 'top' }}>
-              <VStack gap="2px">
-                {tokensFor(name).map((t) => (
-                  <Caption key={t} color="quiet" style={{ fontFamily: 'ui-monospace, Menlo, monospace', fontSize: 10 }}>{t}</Caption>
-                ))}
-              </VStack>
+            {/* Inline and wrapping, not one per line. Eight tokens stacked made
+                the row taller than everything else in it. */}
+            <Box component="td" sx={{ py: 1, borderBottom: '1px solid var(--Border-Variant)', verticalAlign: 'middle' }}>
+              <Caption color="quiet" style={{
+                fontFamily: 'ui-monospace, Menlo, monospace', fontSize: 10, lineHeight: 1.5,
+              }}>
+                {tokensFor(name).map(t => t.replace(/^--/, '')).join(' · ')}
+              </Caption>
             </Box>
           </tr>
         ))}
