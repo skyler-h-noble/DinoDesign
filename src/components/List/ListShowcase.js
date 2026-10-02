@@ -1,10 +1,12 @@
 // src/components/List/ListShowcase.js
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Stack, Grid, Tabs, Tab, Tooltip, IconButton as MuiIconButton,
+  Box, Stack, Grid, Tooltip, IconButton as MuiIconButton,
   Divider as MuiDivider, Switch, Avatar, TextField,
   Checkbox as MuiCheckbox, Radio as MuiRadio,
 } from '@mui/material';
+import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
+import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -194,7 +196,6 @@ function PlaceholderImg({ size }) {
 }
 
 export function ListShowcase() {
-  const [mainTab, setMainTab] = useState(0);
   // Variant / color / size pickers were removed — the lib now offers
   // only the default style at a single auto-sizing footprint that grows
   // and shrinks with content. These are pinned at the API level so
@@ -341,15 +342,27 @@ export function ListShowcase() {
   return (
     <Box sx={{ pb: 8 }}>
       <H3>List</H3>
-      <Tabs value={mainTab} onChange={(e, v) => setMainTab(v)}
-        sx={{ mt: 3, mb: 0, borderBottom: '1px solid var(--Border)',
-          '& .MuiTabs-indicator': { backgroundColor: 'var(--Buttons-Primary-Button)', height: 3 },
-          '& .MuiTab-root': { color: 'var(--Text-Quiet)', textTransform: 'none', fontWeight: 500, '&.Mui-selected': { color: 'var(--Text)' } } }}>
-        <Tab label="Playground" />
-        <Tab label="Accessibility" />
-      </Tabs>
+      {/* Layout A: the tab bar spans the page, so Summary, Accessibility and
+          Change Log get the full width to read. The preview/controls split
+          stays INSIDE Playground, the only tab that needs it.
 
-      {mainTab === 0 && (
+          The lib's own Tabs, not MUI's — the bar this replaces was a MUI
+          <Tabs> hand-styled with --Buttons-Primary-Button and a 3px
+          indicator, i.e. the gallery demonstrating chrome the library does
+          not ship. */}
+      <Tabs defaultValue={0} variant="standard" color="primary">
+        <TabList>
+          <Tab>Summary</Tab>
+          <Tab>Playground</Tab>
+          <Tab>Accessibility</Tab>
+          <Tab>Change Log</Tab>
+        </TabList>
+
+      <TabPanel value={0}>
+        <DocSummary component="List" />
+      </TabPanel>
+
+      <TabPanel value={1}>
         <Grid container sx={{ minHeight: 400 }}>
           <Grid item sx={{ width: { xs: '100%', md: 'calc((100vw - 432px) / 2)' }, flexShrink: 0 }}>
             <Box sx={{ p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
@@ -500,9 +513,10 @@ export function ListShowcase() {
             )}
           </Grid>
         </Grid>
-      )}
 
-      {mainTab === 1 && (
+      </TabPanel>
+
+      <TabPanel value={2}>
         <Box sx={{ p: 4 }}>
           <H4>Accessibility Requirements</H4>
           <BodySmall color="quiet" style={{ marginBottom: 32 }}>
@@ -650,7 +664,12 @@ export function ListShowcase() {
             </Box>
           </Stack>
         </Box>
-      )}
+      </TabPanel>
+
+      <TabPanel value={3}>
+        <DocChanges component="List" />
+      </TabPanel>
+      </Tabs>
     </Box>
   );
 }

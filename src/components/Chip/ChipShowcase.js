@@ -2,11 +2,13 @@
 import { getContrast, getCssVar } from '../contrast';
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Stack, Grid, Tabs, Tab, TextField, Divider,
+  Box, Stack, Grid, TextField, Divider,
   Tooltip, IconButton as MuiIconButton, Switch,
   Checkbox as MuiCheckbox, FormControlLabel,
   Avatar as MuiAvatar,
 } from '@mui/material';
+import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
+import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -196,7 +198,6 @@ function ControlButton({ label, selected, onClick, disabled: isDisabled }) {
 // --- Main Showcase -----------------------------------------------------------
 
 export function ChipShowcase() {
-  const [mainTab, setMainTab] = useState(0);
 
   // Playground state
   const [style, setStyle] = useState('solid');
@@ -320,23 +321,28 @@ export function ChipShowcase() {
   return (
     <Box sx={{ pb: 8 }}>
       <H3>Chips</H3>
+      {/* Layout A: the tab bar spans the page, so Summary, Accessibility and
+          Change Log get the full width to read. The preview/controls split
+          stays INSIDE Playground, the only tab that needs it.
 
-      <Tabs
-        value={mainTab}
-        onChange={(e, v) => setMainTab(v)}
-        sx={{
-          mt: 3, mb: 0,
-          borderBottom: '1px solid var(--Border)',
-          '& .MuiTabs-indicator': { backgroundColor: 'var(--Buttons-Primary-Button)', height: 3 },
-          '& .MuiTab-root': { color: 'var(--Text-Quiet)', textTransform: 'none', fontWeight: 500, '&.Mui-selected': { color: 'var(--Text)' } },
-        }}
-      >
-        <Tab label="Playground" />
-        <Tab label="Accessibility" />
-      </Tabs>
+          The lib's own Tabs, not MUI's — the bar this replaces was a MUI
+          <Tabs> hand-styled with --Buttons-Primary-Button and a 3px
+          indicator, i.e. the gallery demonstrating chrome the library does
+          not ship. */}
+      <Tabs defaultValue={0} variant="standard" color="primary">
+        <TabList>
+          <Tab>Summary</Tab>
+          <Tab>Playground</Tab>
+          <Tab>Accessibility</Tab>
+          <Tab>Change Log</Tab>
+        </TabList>
+
+      <TabPanel value={0}>
+        <DocSummary component="Chip" />
+      </TabPanel>
 
       {/* == PLAYGROUND TAB == */}
-      {mainTab === 0 && (
+      <TabPanel value={1}>
         <Grid container spacing={0} sx={{ minHeight: 600 }}>
 
           {/* LEFT: Preview */}
@@ -635,7 +641,9 @@ export function ChipShowcase() {
       )}
 
       {/* == ACCESSIBILITY TAB == */}
-      {mainTab === 1 && (
+      </TabPanel>
+
+      <TabPanel value={2}>
         <Box sx={{ p: 4 }}>
           <H4>Accessibility Requirements</H4>
           <BodySmall color="quiet" style={{ marginBottom: 32 }}>
@@ -795,7 +803,12 @@ export function ChipShowcase() {
             )}
           </Stack>
         </Box>
-      )}
+      </TabPanel>
+
+      <TabPanel value={3}>
+        <DocChanges component="Chip" />
+      </TabPanel>
+      </Tabs>
     </Box>
   );
 }

@@ -3,10 +3,12 @@ import { CodeBlock } from '../CodeBlock/CodeBlock';
 import { getContrast, getCssVar } from '../contrast';
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Stack, Grid, Tabs, Tab, TextField,
+  Box, Stack, Grid, TextField,
   Tooltip, IconButton as MuiIconButton,
   Checkbox as MuiCheckbox, FormControlLabel,
 } from '@mui/material';
+import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
+import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import MailIcon from '@mui/icons-material/Mail';
@@ -137,7 +139,6 @@ function ControlButton({ label, selected, onClick }) {
 // --- Main Showcase -----------------------------------------------------------
 
 export function BadgeShowcase() {
-  const [mainTab, setMainTab] = useState(0);
 
   // Playground state
   const [style, setStyle] = useState('solid');
@@ -210,15 +211,28 @@ if (style === 'solid') {
         Small label attached to an element showing status or count.
         Solid and outline variants across all 8 colors.
       </Body>
+      {/* Layout A: the tab bar spans the page, so Summary, Accessibility and
+          Change Log get the full width to read. The preview/controls split
+          stays INSIDE Playground, the only tab that needs it.
 
-      <Tabs value={mainTab} onChange={(e, v) => setMainTab(v)}
-        sx={{ borderBottom: '1px solid var(--Border)', mb: 0 }}>
-        <Tab label="Playground" />
-        <Tab label="Accessibility" />
-      </Tabs>
+          The lib's own Tabs, not MUI's — the bar this replaces was a MUI
+          <Tabs> hand-styled with --Buttons-Primary-Button and a 3px
+          indicator, i.e. the gallery demonstrating chrome the library does
+          not ship. */}
+      <Tabs defaultValue={0} variant="standard" color="primary">
+        <TabList>
+          <Tab>Summary</Tab>
+          <Tab>Playground</Tab>
+          <Tab>Accessibility</Tab>
+          <Tab>Change Log</Tab>
+        </TabList>
+
+      <TabPanel value={0}>
+        <DocSummary component="Badge" />
+      </TabPanel>
 
       {/* PLAYGROUND TAB */}
-      {mainTab === 0 && (
+      <TabPanel value={1}>
         <Grid container sx={{ minHeight: 400 }}>
           {/* LEFT: Preview + Code */}
           <Grid item sx={{
@@ -351,7 +365,9 @@ if (style === 'solid') {
       )}
 
       {/* ACCESSIBILITY TAB */}
-      {mainTab === 1 && (
+      </TabPanel>
+
+      <TabPanel value={2}>
         <Box sx={{ p: 4 }}>
           <H4>Accessibility Requirements</H4>
           <BodySmall color="quiet" style={{ marginBottom: 32 }}>
@@ -460,7 +476,12 @@ if (style === 'solid') {
             </Box>
           </Stack>
         </Box>
-      )}
+      </TabPanel>
+
+      <TabPanel value={3}>
+        <DocChanges component="Badge" />
+      </TabPanel>
+      </Tabs>
     </Box>
   );
 }

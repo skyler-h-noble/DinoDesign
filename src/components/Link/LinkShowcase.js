@@ -3,8 +3,10 @@ import { CodeBlock } from '../CodeBlock/CodeBlock';
 import { getContrast, getCssVar } from '../contrast';
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Stack, Grid, Tabs, Tab, Tooltip, IconButton as MuiIconButton, Switch,
+  Box, Stack, Grid, Tooltip, IconButton as MuiIconButton, Switch,
 } from '@mui/material';
+import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
+import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import { Link, LINK_STYLES, LINK_COLORS } from './Link';
@@ -86,7 +88,6 @@ function ControlButton({ label, selected, onClick }) {
 }
 
 export function LinkShowcase() {
-  const [mainTab, setMainTab] = useState(0);
   const [textStyle, setTextStyle] = useState('body');
   const [color, setColor] = useState('primary');
   const [disabled, setDisabled] = useState(false);
@@ -114,15 +115,27 @@ export function LinkShowcase() {
   return (
     <Box sx={{ pb: 8 }}>
       <H3>Link</H3>
-      <Tabs value={mainTab} onChange={(e, v) => setMainTab(v)}
-        sx={{ mt: 3, mb: 0, borderBottom: '1px solid var(--Border)',
-          '& .MuiTabs-indicator': { backgroundColor: 'var(--Buttons-Primary-Button)', height: 3 },
-          '& .MuiTab-root': { color: 'var(--Text-Quiet)', textTransform: 'none', fontWeight: 500, '&.Mui-selected': { color: 'var(--Text)' } } }}>
-        <Tab label="Playground" />
-        <Tab label="Accessibility" />
-      </Tabs>
+      {/* Layout A: the tab bar spans the page, so Summary, Accessibility and
+          Change Log get the full width to read. The preview/controls split
+          stays INSIDE Playground, the only tab that needs it.
 
-      {mainTab === 0 && (
+          The lib's own Tabs, not MUI's — the bar this replaces was a MUI
+          <Tabs> hand-styled with --Buttons-Primary-Button and a 3px
+          indicator, i.e. the gallery demonstrating chrome the library does
+          not ship. */}
+      <Tabs defaultValue={0} variant="standard" color="primary">
+        <TabList>
+          <Tab>Summary</Tab>
+          <Tab>Playground</Tab>
+          <Tab>Accessibility</Tab>
+          <Tab>Change Log</Tab>
+        </TabList>
+
+      <TabPanel value={0}>
+        <DocSummary component="Link" />
+      </TabPanel>
+
+      <TabPanel value={1}>
         <Grid container sx={{ minHeight: 400 }}>
           {/* Preview */}
           <Grid item sx={{ width: { xs: '100%', md: 'calc((100vw - 432px) / 2)' }, flexShrink: 0 }}>
@@ -222,7 +235,9 @@ export function LinkShowcase() {
       )}
 
       {/* == ACCESSIBILITY == */}
-      {mainTab === 1 && (
+      </TabPanel>
+
+      <TabPanel value={2}>
         <Box sx={{ p: 4 }}>
           <H4>Accessibility Requirements</H4>
           <BodySmall color="quiet" style={{ marginBottom: 32 }}>
@@ -335,7 +350,12 @@ export function LinkShowcase() {
             </Box>
           </Stack>
         </Box>
-      )}
+      </TabPanel>
+
+      <TabPanel value={3}>
+        <DocChanges component="Link" />
+      </TabPanel>
+      </Tabs>
     </Box>
   );
 }
