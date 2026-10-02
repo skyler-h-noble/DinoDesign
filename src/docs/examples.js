@@ -199,12 +199,34 @@ export const PROP_EXAMPLES = {
       <Fab size="large"  icon={<Icon size="large"><AddIcon /></Icon>}  ariaLabel="Add, large" />
     </HStack>,
 
-    /* Colour is the Buttons collection, which has ten modes — default,
-       primary, secondary, tertiary, neutral, info, success, warning, error and
-       black-white. In Figma the FAB's fill is bound to Buttons/<mode>/Button
-       and its stroke to Buttons/<mode>/Border, so you change colour by setting
-       the Buttons MODE on the frame, not by picking a variant. In code it is
-       the `color` prop, and the names are the same list. */
+    /* Colour, and this entry used to get it wrong in a way worth recording.
+       It said "set the Buttons MODE on the frame". Verified against the real
+       file (FAB, 6778:14825): the FAB's fill is bound to Buttons/Default/Button
+       and its stroke to Buttons/Default/Border — PINNED to Default, so the
+       Buttons mode is not the axis and setting it on the frame does nothing.
+
+       What varies the colour is a THEME mode on an inner frame named
+       Theme-Container, shipped at Tertiary. The Theme changes what
+       Buttons/Default/* resolves to, which is why the fill can stay pinned.
+
+       That lands in the same trap as component size and the Alt Display: the
+       control is a variable mode on a frame INSIDE the instance, so there is
+       nothing to find on the instance itself and the component looks like it
+       has one colour. Hence the screenshot slot on the showcase.
+
+       The two sides agree on the default — Figma ships Theme-Container at
+       Tertiary and getTokens() maps `default` to tertiary — but they reach it
+       along different collections, so the names are NOT one list:
+
+         Theme    9 modes   Default Primary Secondary Tertiary Neutral
+                            Info Success Warning Error
+         Buttons 10 modes   the same nine, lowercase, plus black-white
+
+       black-white is therefore reachable from code and NOT from Figma. It is
+       shown below because it renders and someone will pass it, but it has no
+       counterpart in the design file — a FAB built in Figma cannot be that
+       colour. Flagged rather than removed: the gap is in the Theme collection,
+       not in this sample. */
     color: () => {
       /* The DEFAULT sits on its own at the left, labelled, with a rule between
          it and the rest — otherwise it is just one swatch among ten and the

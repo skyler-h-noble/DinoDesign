@@ -11,6 +11,8 @@ import React from 'react';
 import { Box, Stack } from '@mui/material';
 import { COMPONENT_DOCS } from './components';
 import { EXAMPLES, hasExample, PROP_EXAMPLES, hasPropExample } from './examples';
+import { howToFor } from './figmaHowTo';
+import { HowToSlot } from '../components/Foundations/HowToSlot';
 import { PreviewSurface } from '../components/PreviewSurface';
 import { docsSlug } from './docsLink';
 import { H5, Body, BodySmall, Caption, EyebrowSmall } from '../components/Typography';
@@ -85,6 +87,9 @@ export function DocSummary({ component, theme = null, surface = 'Surface' }) {
   const doc = docFor(component);
   if (!doc) return <Missing component={component} what="reference" />;
   const example = hasExample(doc.name) ? EXAMPLES[doc.name] : null;
+  /* Only the components whose control is a variable mode on an inner frame
+     have one of these — the rest are answered by the property panel itself. */
+  const howTo = howToFor(doc.name);
   /* Where this component lives in the Figma library. The map has existed in
      figmaLinks.js since the docs moved into the lib and nothing ever rendered
      it, so the answer to "where is this in Figma" was sitting in the source
@@ -104,6 +109,20 @@ export function DocSummary({ component, theme = null, surface = 'Surface' }) {
         ) : null}
 
         <Body>{doc.summary}</Body>
+
+        {howTo && (
+          <Section title={howTo.title}>
+            <Stack spacing={2}>
+              <BodySmall>{howTo.body}</BodySmall>
+              <HowToSlot title={howTo.shot} />
+              {howTo.caveat ? (
+                <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>
+                  {howTo.caveat}
+                </Caption>
+              ) : null}
+            </Stack>
+          </Section>
+        )}
 
 
         {doc.insteadUse.length > 0 && (

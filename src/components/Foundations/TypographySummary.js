@@ -14,7 +14,7 @@ import { H4, H5, Body, BodySmall, Caption, Typography,
          STYLE_TOKENS, STYLE_DEFAULT_COLOR } from '../Typography';
 import { VStack, HStack } from '../Stack/Stack';
 import { FoundationTopic } from './FoundationTopic';
-import { VideoSlot } from './VideoSlot';
+import { HowToSlot } from './HowToSlot';
 import { RoleSwatches, StyleTable } from './TokenRoles';
 import { FOUNDATIONS } from '../../docs/foundations';
 
@@ -38,8 +38,8 @@ export function TypographySummary() {
 
       <VStack gap="var(--Sizing-3)">
         <FoundationTopic topic={topic('The Alt Display')} />
-        <VideoSlot
-          title="Switching the Alt Display treatment in Figma"
+        <HowToSlot
+          title="The Alt-Display dropdown in Figma's right-hand panel, showing Default, Colored and Gradient"
           shows="The paint style is already a two-stop gradient with both stops bound — it renders SOLID because the Alt-Display collection sits on Default, where both stops resolve to Header. Set the frame's mode to Gradient and the same style becomes a gradient."
         />
         <VStack gap="var(--Sizing-2)">

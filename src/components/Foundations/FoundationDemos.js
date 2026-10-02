@@ -8,7 +8,7 @@ import React from 'react';
 import { Box } from '@mui/material';
 import { H5, BodySmall, Caption, EyebrowSmall } from '../Typography';
 import { VStack, HStack } from '../Stack/Stack';
-import { VideoSlot } from './VideoSlot';
+import { HowToSlot } from './HowToSlot';
 
 /* Elevation is a CONTAINER LEVEL plus a shadow, not a shadow alone.
    The tone carries most of it, and the direction FLIPS with the mode — a
@@ -119,8 +119,8 @@ function SurfaceRow({ name, usedBy }) {
 export function SurfacesDemo() {
   return (
     <VStack gap="var(--Sizing-3)">
-      <VideoSlot
-        title="Setting a theme and a surface on a frame in Figma"
+      <HowToSlot
+        title="Figma's right-hand panel with a frame selected, cropped to the Theme and Surface mode dropdowns"
         shows="Both are variable modes, so they are set on the FRAME and everything inside follows. The failure this prevents is reaching for a FILL instead — which paints the box and leaves the text, borders and states on the parent's tone."
       />
       <VStack gap="var(--Sizing-1)">
@@ -177,8 +177,8 @@ const STATE_TOKENS = [
 export function StatesDemo() {
   return (
     <VStack gap="var(--Sizing-3)">
-      <VideoSlot
-        title="Switching light and dark in Figma"
+      <HowToSlot
+        title="The same panel cropped to the Modes dropdown, with Light and Dark open"
         shows="A mode on the Modes collection. The theme does NOT change with it — dark mode is the same theme read from the dark sheet, which is the part most often got wrong."
       />
       <VStack gap="var(--Sizing-1)">
@@ -292,7 +292,7 @@ export function ComponentSizeDemo() {
         </BodySmall>
       </VStack>
 
-      <VideoSlot src="/videos/component-size.mp4" />
+      <HowToSlot src="/videos/component-size.mp4" maxWidth={820} />
 
       <VStack gap="var(--Sizing-1)">
         <EyebrowSmall>The steps</EyebrowSmall>
