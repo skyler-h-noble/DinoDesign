@@ -741,13 +741,22 @@ export const SWATCH_DOC = {
   theming: [
     { collection: 'Theme',
       inCode: 'The chip takes no theme — its fill is the `color` prop. The border, scrims and focus ring resolve from whatever zone it sits in.',
-      inFigma: 'The Swatch set binds width, height AND radius to Button/Button-Height, so size follows the Component-Size mode rather than a Size axis.' },
+      inFigma: 'The Swatch set binds width and height to Button/Button-Height, so size follows the Component-Size mode rather than a Size axis. The radius is a SEPARATE binding to Button/Button-Radius.' },
   ],
   themingNotes: [
-    'The radius is the full height, so a swatch is a CIRCLE at every size.',
+    'A swatch is a ROUNDED SQUARE, not a circle. Width and height come from '
+      + '--Button-Height, the radius from --Button-Radius — two tokens, not one, '
+      + 'and the radius is a flat 2px at every size.',
+    'This entry used to say the radius was the full height and a swatch was '
+      + 'therefore a circle. The binding it named does not exist in the Figma '
+      + 'file, and both the component and its focus ring were drawn round '
+      + 'because of it. A stated binding gets believed rather than re-derived, '
+      + 'which is what makes a wrong one expensive.',
   ],
   tokens: [
-    { name: '--Button-Height', sets: 'the chip diameter', variesWith: 'size and data-platform', figma: 'Button/Button-Height' },
+    { name: '--Button-Height', sets: "the chip's width and height", variesWith: 'size and data-platform', figma: 'Button/Button-Height' },
+    { name: '--Button-Radius', sets: 'the chip corner', variesWith: 'nothing — a flat 2px across all three sizes', figma: 'Button/Button-Radius' },
+    { name: '--Button-Focus-Radius', sets: 'the focus ring corner', variesWith: 'nothing — 5px, 3px outside a 2px chip', figma: 'Button/Button-Focus-Radius' },
     { name: '--Border', sets: 'the chip edge', variesWith: 'surface', figma: 'Border' },
     { name: '--Hover / --Pressed', sets: 'the interaction scrim', variesWith: 'surface', figma: 'the Hover and Pressed overlays' },
     { name: '--Focus-Visible', sets: 'the focus ring', variesWith: 'surface', figma: 'Focus-Visible' },

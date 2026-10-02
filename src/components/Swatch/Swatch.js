@@ -12,10 +12,22 @@
 // height AND radius to Button/Button-Height — so a swatch lines up with the
 // controls beside it and follows the device chain for free.
 //
-// The radius is the full height, so it is a CIRCLE. The old Button variant read
-// --Button-Icon-Radius, which is why the studio reported swatches "staying
-// square" when a brand set a large corner: that token is a percentage of a
-// square's height and currently non-monotonic (12 / 32 / 28).
+// It is a ROUNDED SQUARE, not a circle. Figma binds the chip's width and height
+// to Button/Button-Height and its radius to Button/Button-Radius — two separate
+// tokens, and the radius is a flat 2 at every size.
+//
+// This comment previously said the radius was bound to Button-Height too, so
+// "the radius is the full height, so it is a CIRCLE". That binding does not
+// exist, and the circle was derived from it rather than from the design. A
+// stated binding is worth checking against the file precisely because everything
+// downstream follows it without re-deriving: the focus ring was drawn at 50% to
+// match a circle that should never have been round.
+//
+// The old Button variant read --Button-Icon-Radius, which is why the studio
+// reported swatches "staying square" when a brand set a large corner: that token
+// is a percentage of a square's height and currently non-monotonic (12 / 32 /
+// 28). --Button-Radius has no such problem — it is pixels, and the same value
+// the buttons beside it use.
 import React from 'react';
 import { Box } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
@@ -59,11 +71,15 @@ const CHECK_DISC = {
   pointerEvents: 'none',
 };
 
+/* The ring sits 3px outside the chip and takes its own radius token rather than
+   the chip's. Figma binds it to Button-Focus-Radius (5) while the chip is
+   Button-Radius (2), and the 3px gap is exactly the difference — an offset ring
+   has to be rounder than what it surrounds or the corners pinch. */
 const FOCUS_RING = {
   content: '""',
   position: 'absolute',
   inset: '-3px',
-  borderRadius: '50%',
+  borderRadius: 'var(--Button-Focus-Radius, 5px)',
   border: '2px solid var(--Focus-Visible)',
   pointerEvents: 'none',
 };
@@ -113,7 +129,7 @@ export function Swatch({
         width: dim,
         height: dim,
         flexShrink: 0,
-        borderRadius: '50%',
+        borderRadius: 'var(--Button-Radius, 2px)',
         backgroundColor: color,
         border: 'var(--Button-Border-Width, 1px) solid var(--Border)',
         boxSizing: 'border-box',
@@ -126,11 +142,13 @@ export function Swatch({
         ...(clickable && {
           cursor: 'pointer',
           /* The scrim is composited over the colour as a background LAYER, so
-             it needs no extra element and cannot escape the circle.
+             it needs no extra element and cannot escape the chip.
 
-             Figma draws it as a square overlay — radius 0 on a circular swatch,
-             so its corners sit outside the chip — filled with hardcoded black at
-             5% and 8%. Both are used here as --Hover and --Pressed instead:
+             Figma draws it as an overlay at radius 0 filled with hardcoded
+             black at 5% and 8%. The radius matters far less now the chip is a
+             2px square than it did when this was drawn as a circle, but the
+             fill still wants pointing at a token. --Hover and --Pressed are
+             used here instead:
              those are the surface-aware scrims the system already defines, and
              a fixed black tint does not work on a dark surface. The intent is
              the same; the Figma overlay wants its radius bound and its fill
