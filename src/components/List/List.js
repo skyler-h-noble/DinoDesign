@@ -158,7 +158,33 @@ export function ListItem({
         ...(!isClickable && rightBorder ? {
           borderRight: '1px solid var(--Border-Variant)',
         } : {}),
-        backgroundColor: selected ? 'var(--Hover)' : 'transparent',
+        backgroundColor: 'transparent',
+        /* Selected is a RING, not a tint.
+           Figma draws it (7022:49393, Selected#9250:94) as a sibling frame 2px
+           larger than the row — 454x142 against 452x140 — with strokes bound to
+           Border and the corner at Menu/Menu-Item-Radius. So: a 1px Border-
+           coloured outline sitting just outside the row.
+
+           It used to paint `backgroundColor: var(--Hover)`, which conflated two
+           different things: hovering a selected row then looked identical to
+           selecting it, and a selected row under the pointer gave no feedback
+           at all. A ring and a tint can coexist; two tints cannot.
+
+           ::before rather than `outline`, because the focus ring already sets
+           `outline: none` on :focus-visible — a selected row that was also
+           focused would have lost its ring. ::after is taken by focus, so
+           selection takes ::before and the two can show together, which is
+           exactly when you need both. */
+        ...(selected ? {
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            inset: '-1px',
+            border: '1px solid var(--Border)',
+            borderRadius: 'var(--Menu-Item-Radius, var(--Input-Radius))',
+            pointerEvents: 'none',
+          },
+        } : {}),
         '&:hover':         isFocusable ? { backgroundColor: 'var(--Hover)',  boxShadow: 'var(--Effect-Level-2)' } : {},
         '&:active':        isFocusable ? { backgroundColor: 'var(--Pressed)', boxShadow: 'var(--Effect-Level-1)' } : {},
         // Inset focus ring rendered as a pseudo-element so the corner

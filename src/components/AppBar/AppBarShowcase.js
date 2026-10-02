@@ -174,7 +174,7 @@ export function AppBarShowcase() {
         <Grid container sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
 <Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, pr: { md: 3 } }}>
 
-          <PreviewSurface theme={bgTheme}>
+          <PreviewSurface theme={bgTheme} surface={bgSurface}>
             <Box sx={{ width: '100%', maxWidth: isDesktop ? '100%' : 420, overflow: 'hidden' }}>
               {isDesktop ? (
                 <DesktopAppBar

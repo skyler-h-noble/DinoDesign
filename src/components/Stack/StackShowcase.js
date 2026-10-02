@@ -176,7 +176,7 @@ function Playground() {
   return (
     <Grid container spacing={3} sx={{ mt: 1 }}>
       <Grid item xs={12} md={7}>
-        <PreviewSurface theme={bgTheme}>
+        <PreviewSurface theme={bgTheme} surface={bgSurface}>
           <Box sx={{ width: '100%' }}>
             {willEnforce && (
               <Box sx={{

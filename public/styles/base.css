@@ -441,3 +441,25 @@
 [data-surface="Container-Highest"] {
   --Background: var(--Container-Highest);
 }
+
+/* Raised specificity so the mode sheet's bare [data-theme] rule, which loads
+   later, cannot overwrite the container background. */
+[data-theme][data-surface="Container"] {
+  --Background: var(--Container);
+}
+
+[data-theme][data-surface="Container-Low"] {
+  --Background: var(--Container-Low);
+}
+
+[data-theme][data-surface="Container-Lowest"] {
+  --Background: var(--Container-Lowest);
+}
+
+[data-theme][data-surface="Container-High"] {
+  --Background: var(--Container-High);
+}
+
+[data-theme][data-surface="Container-Highest"] {
+  --Background: var(--Container-Highest);
+}

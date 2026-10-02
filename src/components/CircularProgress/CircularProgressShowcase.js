@@ -134,7 +134,7 @@ export function CircularProgressShowcase() {
         <Grid container sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
 <Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, pr: { md: 3 } }}>
 
-          <PreviewSurface theme={bgTheme}>
+          <PreviewSurface theme={bgTheme} surface={bgSurface}>
             <CircularProgress
               color={color}
               size={size}
