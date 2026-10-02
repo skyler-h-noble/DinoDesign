@@ -29,7 +29,7 @@ function ControlButton({ label, selected, onClick }) {
 }
 
 export function CopyrightShowcase() {
-  const [bgTheme, setBgTheme] = useState(null);
+  const [bgTheme, setBgTheme] = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
   const [companyName, setCompanyName] = useState('DinoDesign');
   const [year, setYear] = useState(new Date().getFullYear());

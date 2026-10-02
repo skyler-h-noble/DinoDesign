@@ -91,7 +91,7 @@ export function AlertShowcase() {
   const [color, setColor]         = useState('info');
   const [size, setSize]           = useState('medium');
   const [showIcon, setShowIcon]   = useState(true);
-  const [bgTheme, setBgTheme]     = useState(null);
+  const [bgTheme, setBgTheme]     = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
 
   const alertIcon = showIcon && ICON_MAP[color]

@@ -94,7 +94,7 @@ export function SnackbarShowcase() {
   const [showIcon, setShowIcon]   = useState(true);
   const [showClose, setShowClose] = useState(true);
   const [open, setOpen]           = useState(false);
-  const [bgTheme, setBgTheme]     = useState(null);
+  const [bgTheme, setBgTheme]     = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
 
   const snackIcon = showIcon && ICON_MAP[color]

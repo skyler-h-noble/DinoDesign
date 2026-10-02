@@ -198,7 +198,7 @@ function PlaceholderImg({ size }) {
 }
 
 export function ListShowcase() {
-  const [bgTheme, setBgTheme] = useState(null);
+  const [bgTheme, setBgTheme] = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
   // Variant / color / size pickers were removed — the lib now offers
   // only the default style at a single auto-sizing footprint that grows

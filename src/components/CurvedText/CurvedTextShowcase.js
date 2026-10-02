@@ -44,7 +44,7 @@ function defaultCurve(direction) {
 }
 
 export function CurvedTextShowcase() {
-  const [bgTheme, setBgTheme] = useState(null);
+  const [bgTheme, setBgTheme] = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
   const [text, setText] = useState('Your Brand. Perfected.');
   const [textStyle, setTextStyle] = useState('display-large');

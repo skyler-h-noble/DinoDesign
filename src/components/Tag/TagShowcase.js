@@ -115,7 +115,7 @@ export function TagShowcase() {
   const [color, setColor]               = useState('primary');
   const [labelText, setLabelText]       = useState('New');
   const [allCaps, setAllCaps]           = useState(false);
-  const [bgTheme, setBgTheme]           = useState(null);
+  const [bgTheme, setBgTheme]           = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
   const [contrastData, setContrastData] = useState({});
 

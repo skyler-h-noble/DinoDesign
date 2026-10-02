@@ -113,7 +113,7 @@ export function SelectShowcase() {
   const [startDeco, setStartDeco]       = useState(false);
   const [iconName, setIconName]         = useState('Search');
   const [selectedValue, setSelectedValue] = useState('');
-  const [bgTheme, setBgTheme]           = useState(null);
+  const [bgTheme, setBgTheme]           = useState('Default');
   const [bgSurface, setBgSurface]       = useState('Surface');
   // Swatch (color) mode — each option renders a colored swatch sized to
   // the Select height. When labels are off, the trigger shows just the

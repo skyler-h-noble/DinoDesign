@@ -47,7 +47,7 @@ export function BreadcrumbsShowcase() {
   const [size, setSize]           = useState('medium');
   const [separator, setSeparator] = useState('/');
   const [condense, setCondense]   = useState(false);
-  const [bgTheme, setBgTheme]     = useState(null);
+  const [bgTheme, setBgTheme]     = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
 
   const generateCode = () => {

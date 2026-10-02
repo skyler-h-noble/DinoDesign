@@ -28,7 +28,7 @@ const COLOR_GROUPS = [
 const ICONS = [HomeIcon, CodeIcon, CheckCircleOutlineIcon, StarIcon, GridViewIcon, ComputerIcon];
 
 export function IconBadgeShowcase() {
-  const [bgTheme, setBgTheme] = useState(null);
+  const [bgTheme, setBgTheme] = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
   const [color, setColor] = useState('primary');
   const [variant, setVariant] = useState('solid');

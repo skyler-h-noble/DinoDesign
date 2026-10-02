@@ -49,7 +49,7 @@ function ControlButton({ label, selected, onClick }) {
 export function TransferListShowcase() {
   const [mode, setMode]           = useState('basic');
   const [disabled, setDisabled]   = useState(false);
-  const [bgTheme, setBgTheme]     = useState(null);
+  const [bgTheme, setBgTheme]     = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
 
   const generateCode = () => {

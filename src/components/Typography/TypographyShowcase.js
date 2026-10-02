@@ -250,7 +250,7 @@ export function TypographyShowcase() {
   const [width, setWidth]         = useState('');
   const [sampleText, setSampleText] = useState(SAMPLE_TEXT);
   const [noWrap, setNoWrap]       = useState(false);
-  const [bgTheme, setBgTheme]     = useState(null);
+  const [bgTheme, setBgTheme]     = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
   const [contrastData, setContrastData] = useState({});
 

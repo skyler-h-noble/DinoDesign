@@ -156,7 +156,7 @@ function PlacementGrid({ placement, onSelect }) {
 }
 
 export function TooltipShowcase() {
-  const [bgTheme, setBgTheme] = useState(null);
+  const [bgTheme, setBgTheme] = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
   const [variant, setVariant] = useState('solid');
   const [color, setColor] = useState('black-white');

@@ -141,7 +141,7 @@ function ControlButton({ label, selected, onClick }) {
 // --- Main Showcase -----------------------------------------------------------
 
 export function BadgeShowcase() {
-  const [bgTheme, setBgTheme] = useState(null);
+  const [bgTheme, setBgTheme] = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
 
   // Playground state

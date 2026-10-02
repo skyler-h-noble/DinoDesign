@@ -108,7 +108,7 @@ export function AppBarShowcase() {
   const [brandType, setBrandType]           = useState('name');
   const [searchPosition, setSearchPosition] = useState('right');
   const [mobileVariant, setMobileVariant]   = useState('search');
-  const [bgTheme, setBgTheme]               = useState(null);
+  const [bgTheme, setBgTheme]               = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
   const [contrastData, setContrastData]     = useState({});
 

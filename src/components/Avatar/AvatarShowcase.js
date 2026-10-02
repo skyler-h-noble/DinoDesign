@@ -101,7 +101,7 @@ export function AvatarShowcase() {
   const [clickable, setClickable]     = useState(false);
   const [insideButton, setInsideButton] = useState(false);
   const [showGroup, setShowGroup]     = useState(false);
-  const [bgTheme, setBgTheme]         = useState(null);
+  const [bgTheme, setBgTheme]         = useState('Default');
   const [bgSurface, setBgSurface]     = useState('Surface');
 
   // Photo content overrides color — the image IS the visual, so we don't pass

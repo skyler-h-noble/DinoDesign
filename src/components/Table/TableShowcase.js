@@ -115,7 +115,7 @@ function ControlButton({ label, selected, onClick, disabled: isDisabled }) {
 }
 
 export function TableShowcase() {
-  const [bgTheme, setBgTheme] = useState(null);
+  const [bgTheme, setBgTheme] = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
   const [variant, setVariant] = useState('default');
   const [color, setColor] = useState('primary');

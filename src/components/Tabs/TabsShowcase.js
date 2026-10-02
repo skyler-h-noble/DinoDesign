@@ -82,7 +82,7 @@ export function TabsShowcase() {
   const [color, setColor]             = useState('default');
   const [size, setSize]               = useState('medium');
   const [orientation, setOrientation] = useState('horizontal');
-  const [bgTheme, setBgTheme]         = useState(null);
+  const [bgTheme, setBgTheme]         = useState('Default');
   const [bgSurface, setBgSurface]     = useState('Surface');
   const [rounded, setRounded]         = useState(false);
 

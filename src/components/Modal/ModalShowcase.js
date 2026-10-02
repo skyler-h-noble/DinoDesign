@@ -83,7 +83,7 @@ export function ModalShowcase() {
   const [transition, setTransition]   = useState('fade');
   const [closeOnBackdrop, setCloseOnBackdrop] = useState(true);
   const [showClose, setShowClose]     = useState(true);
-  const [bgTheme, setBgTheme]         = useState(null);
+  const [bgTheme, setBgTheme]         = useState('Default');
   const [bgSurface, setBgSurface]     = useState('Surface');
 
   const generateCode = () => {

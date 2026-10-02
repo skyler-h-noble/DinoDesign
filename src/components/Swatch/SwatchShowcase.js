@@ -24,7 +24,7 @@ export function SwatchShowcase() {
   const [disabled, setDisabled] = useState(false);
   const [clickable, setClickable] = useState(true);
   const [radio, setRadio]       = useState(false);
-  const [bgTheme, setBgTheme]   = useState(null);
+  const [bgTheme, setBgTheme]   = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
 
   const generateCode = () => {

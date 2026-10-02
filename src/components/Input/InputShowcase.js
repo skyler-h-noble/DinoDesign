@@ -139,7 +139,7 @@ export function InputShowcase() {
   const [multiline, setMultiline]       = useState(false);
   const [startAdorn, setStartAdorn]     = useState('none');
   const [endAdorn, setEndAdorn]         = useState('none');
-  const [bgTheme, setBgTheme]           = useState(null);
+  const [bgTheme, setBgTheme]           = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
 
   const effectiveColor = color === 'default' ? 'primary' : color;

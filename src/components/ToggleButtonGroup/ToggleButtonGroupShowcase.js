@@ -167,7 +167,7 @@ export function ToggleButtonGroupShowcase() {
   // rather than a fixed three. The tables below are sliced to `segments`.
   const [segments, setSegments] = useState(3);
   const [style, setStyle] = useState('fill');
-  const [bgTheme, setBgTheme] = useState(null);
+  const [bgTheme, setBgTheme] = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
   const [contentType, setContentType] = useState('icon');
   const [alignment, setAlignment] = useState('left');

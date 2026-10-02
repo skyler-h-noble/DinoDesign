@@ -108,7 +108,7 @@ export function FabShowcase() {
   const [extendedLabel, setExtendedLabel] = useState('Create');
   const [animate, setAnimate] = useState(false);
   const [disabled, setDisabled] = useState(false);
-  const [bgTheme, setBgTheme] = useState(null);
+  const [bgTheme, setBgTheme] = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
 
   /* No remap. This used to read `color === 'default' ? 'tertiary' : color`,

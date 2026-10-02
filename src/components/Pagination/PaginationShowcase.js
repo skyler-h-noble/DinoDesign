@@ -81,7 +81,7 @@ export function PaginationShowcase() {
   const [showFirst, setShowFirst]     = useState(false);
   const [showLast, setShowLast]       = useState(false);
   const [disabled, setDisabled]       = useState(false);
-  const [bgTheme, setBgTheme]         = useState(null);
+  const [bgTheme, setBgTheme]         = useState('Default');
   const [bgSurface, setBgSurface]     = useState('Surface');
 
   const generateCode = () => {

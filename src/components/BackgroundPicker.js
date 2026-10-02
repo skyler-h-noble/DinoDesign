@@ -35,7 +35,15 @@ const NULL_TOKEN = '__null__';
 //   *-Light → gone entirely; lightness is the SURFACE axis now
 // Pick Neutral in this dropdown and the surface next to it.
 const THEME_OPTIONS = [
-  { label: 'Default',   value: NULL_TOKEN },
+  /* 'Default' is a real published theme — [data-theme="Default"] has its own
+     block in both mode sheets — so it emits that string rather than null.
+     It used to map to NULL_TOKEN, which rendered NO data-theme at all and left
+     the preview INHERITING whatever was above it. The two only look the same
+     while the ancestor happens to be Default: inherit a themed ancestor and
+     the dropdown says Default while the preview is Primary, with nothing
+     indicating the disagreement. Saying the theme is never worse than
+     assuming it. */
+  { label: 'Default',   value: 'Default' },
   { label: 'Primary',   value: 'Primary' },
   { label: 'Secondary', value: 'Secondary' },
   { label: 'Tertiary',  value: 'Tertiary' },
@@ -54,7 +62,7 @@ const CONTAINER_SURFACES = ['Container', 'Container-Highest', 'Container-High', 
 const ALL_SURFACES       = [...CARD_SURFACES, ...CONTAINER_SURFACES];
 
 export function BackgroundPicker({
-  theme           = null,
+  theme           = 'Default',
   onThemeChange,
   surface         = 'Surface',
   onSurfaceChange,
@@ -68,7 +76,10 @@ export function BackgroundPicker({
       <Box sx={{ width: 160 }}>
         <Select
           options={THEME_OPTIONS}
-          value={theme ?? NULL_TOKEN}
+          /* null still displays as Default, for a caller that has not picked
+             one yet — the select must show an option that exists or it renders
+             blank. */
+          value={theme ?? 'Default'}
           onChange={(v) => onThemeChange?.(v === NULL_TOKEN ? null : v)}
           labelPosition="none"
           size={size}

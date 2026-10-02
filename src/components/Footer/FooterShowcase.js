@@ -71,7 +71,7 @@ function ControlButton({ label, selected, onClick }) {
 }
 
 export function FooterShowcase() {
-  const [bgTheme, setBgTheme] = useState(null);
+  const [bgTheme, setBgTheme] = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
   const [columnCount, setColumnCount] = useState(4);
   const [showSocial, setShowSocial] = useState(true);

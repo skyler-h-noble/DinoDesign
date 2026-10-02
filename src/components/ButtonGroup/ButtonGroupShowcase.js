@@ -118,7 +118,7 @@ export function ButtonGroupShowcase() {
      shape it cannot read. */
   const [selectedBtn, setSelectedBtn]   = useState('week');
   const [selectedMany, setSelectedMany] = useState(['week']);
-  const [bgTheme, setBgTheme]           = useState(null);
+  const [bgTheme, setBgTheme]           = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
 
   const getIconEl = () => {

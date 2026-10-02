@@ -87,7 +87,7 @@ export function AccordionShowcase() {
   const [size, setSize]           = useState('medium');
   const [spacing, setSpacing]     = useState(0);
   const [disabled, setDisabled]   = useState(false);
-  const [bgTheme, setBgTheme]     = useState(null);
+  const [bgTheme, setBgTheme]     = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
 
   const generateCode = () => {

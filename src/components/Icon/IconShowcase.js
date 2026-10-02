@@ -153,7 +153,7 @@ function ControlButton({ label, selected, onClick }) {
 }
 
 export function IconShowcase() {
-  const [bgTheme, setBgTheme] = useState(null);
+  const [bgTheme, setBgTheme] = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
   const [style, setStyle]           = useState('filled');
   const [color, setColor]           = useState('default');

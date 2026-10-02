@@ -59,7 +59,7 @@ export function DrawerShowcase() {
   const [open, setOpen]         = useState(false);
   const [size, setSize]         = useState('medium');
   const [anchor, setAnchor]     = useState('left');
-  const [bgTheme, setBgTheme]   = useState(null);
+  const [bgTheme, setBgTheme]   = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
 
   const generateCode = () => {

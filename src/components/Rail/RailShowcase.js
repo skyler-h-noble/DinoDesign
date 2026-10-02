@@ -61,7 +61,7 @@ export function RailShowcase() {
   const [expandable, setExpandable]       = useState(true);
   const [expandedWidth, setExpandedWidth] = useState('partial');
   const [showFab, setShowFab]             = useState(false);
-  const [bgTheme, setBgTheme]             = useState(null);
+  const [bgTheme, setBgTheme]             = useState('Default');
   const [bgSurface, setBgSurface]         = useState('Surface');
 
   const generateCode = () => {

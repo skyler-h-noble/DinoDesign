@@ -80,7 +80,7 @@ export function LinearProgressShowcase() {
   const [size, setSize]               = useState('medium');
   const [determinate, setDeterminate] = useState(false);
   const [value, setValue]             = useState(65);
-  const [bgTheme, setBgTheme]         = useState(null);
+  const [bgTheme, setBgTheme]         = useState('Default');
   const [bgSurface, setBgSurface]     = useState('Surface');
 
   const generateCode = () => {

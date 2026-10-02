@@ -200,7 +200,7 @@ function ControlButton({ label, selected, onClick, disabled: isDisabled }) {
 // --- Main Showcase -----------------------------------------------------------
 
 export function ChipShowcase() {
-  const [bgTheme, setBgTheme] = useState(null);
+  const [bgTheme, setBgTheme] = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
 
   // Playground state

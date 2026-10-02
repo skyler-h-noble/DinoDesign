@@ -156,7 +156,7 @@ export function CardShowcase() {
   const [clickable, setClickable]     = useState(false);
   const [selected, setSelected]       = useState(false);
   const [elevated, setElevated]       = useState(false);
-  const [bgTheme, setBgTheme]         = useState(null);
+  const [bgTheme, setBgTheme]         = useState('Default');
   const [bgSurface, setBgSurface]     = useState('Surface');
   const [contrastData, setContrastData] = useState({});
 

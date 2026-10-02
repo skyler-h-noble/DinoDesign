@@ -93,7 +93,7 @@ export function AutocompleteShowcase() {
   const [clearable, setClearable]       = useState(true);
   const [disabled, setDisabled]         = useState(false);
   const [fullWidth, setFullWidth]       = useState(true);
-  const [bgTheme, setBgTheme]           = useState(null);
+  const [bgTheme, setBgTheme]           = useState('Default');
   const [bgSurface, setBgSurface]       = useState('Surface');
 
   const generateCode = () => {

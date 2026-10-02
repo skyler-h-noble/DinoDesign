@@ -86,7 +86,7 @@ export function SliderShowcase() {
   const [marks, setMarks]               = useState(false);
   const [disabled, setDisabled]         = useState(false);
   const [showLabel, setShowLabel]       = useState(true);
-  const [bgTheme, setBgTheme]           = useState(null);
+  const [bgTheme, setBgTheme]           = useState('Default');
   const [bgSurface, setBgSurface]       = useState('Surface');
 
   const effectiveColor = color === 'default' ? 'default' : color;

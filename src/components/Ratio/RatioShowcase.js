@@ -83,7 +83,7 @@ export function RatioShowcase() {
   const [padding, setPadding]     = useState('none');
   const [elevated, setElevated]   = useState(false);
   const [clickable, setClickable] = useState(false);
-  const [bgTheme, setBgTheme]     = useState(null);
+  const [bgTheme, setBgTheme]     = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
 
   const generateCode = () => {

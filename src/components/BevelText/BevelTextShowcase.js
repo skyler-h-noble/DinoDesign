@@ -82,7 +82,7 @@ function PresetCard({ option, active, onClick }) {
 }
 
 export function BevelTextShowcase() {
-  const [bgTheme, setBgTheme] = useState(null);
+  const [bgTheme, setBgTheme] = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
   const [text, setText] = useState('DinoDesign');
   const [theme, setTheme] = useState('Primary');

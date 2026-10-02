@@ -79,7 +79,7 @@ export function SearchFieldShowcase() {
   const [size, setSize]             = useState('medium');
   const [disabled, setDisabled]     = useState(false);
   const [showClear, setShowClear]   = useState(true);
-  const [bgTheme, setBgTheme]       = useState(null);
+  const [bgTheme, setBgTheme]       = useState('Default');
   const [bgSurface, setBgSurface]   = useState('Surface');
 
   const generateCode = () => {

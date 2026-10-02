@@ -87,7 +87,7 @@ export function SwitchShowcase() {
   const [iconOnName, setIconOnName]   = useState('Home');
   const [iconOffName, setIconOffName] = useState('Home');
   const [disabled, setDisabled] = useState(false);
-  const [bgTheme, setBgTheme]   = useState(null);
+  const [bgTheme, setBgTheme]   = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
 
   const effectiveColor = color === 'default' ? 'default' : color;

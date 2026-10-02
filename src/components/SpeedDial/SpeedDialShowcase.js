@@ -91,7 +91,7 @@ export function SpeedDialShowcase() {
   const [color, setColor]             = useState('default');
   const [direction, setDirection]     = useState('up');
   const [showTooltips, setShowTooltips] = useState(true);
-  const [bgTheme, setBgTheme]         = useState(null);
+  const [bgTheme, setBgTheme]         = useState('Default');
   const [bgSurface, setBgSurface]     = useState('Surface');
 
   const generateCode = () => {

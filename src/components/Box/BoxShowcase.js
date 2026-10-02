@@ -55,7 +55,7 @@ function ControlButton({ label, selected, onClick }) {
 export function BoxShowcase() {
   const [theme, setTheme]         = useState('');
   const [surface, setSurface]     = useState('');
-  const [bgTheme, setBgTheme]     = useState(null);
+  const [bgTheme, setBgTheme]     = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
 
   const generateCode = () => {

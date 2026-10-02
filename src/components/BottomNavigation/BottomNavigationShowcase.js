@@ -162,7 +162,7 @@ function CheckboxControl({ label, checked, onChange, caption, disabled }) {
 }
 
 export function BottomNavigationShowcase() {
-  const [bgTheme, setBgTheme] = useState(null);
+  const [bgTheme, setBgTheme] = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
   const [activeNav, setActiveNav] = useState(0);
 

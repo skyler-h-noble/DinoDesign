@@ -40,7 +40,7 @@ export function CodeBlockShowcase() {
   const [showCopy, setShowCopy] = useState(true);
   const [wrap, setWrap] = useState(false);
   const [capped, setCapped] = useState(false);
-  const [bgTheme, setBgTheme] = useState(null);
+  const [bgTheme, setBgTheme] = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
 
   const pickLanguage = (l) => {

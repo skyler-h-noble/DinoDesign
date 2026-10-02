@@ -95,7 +95,7 @@ export function CircularProgressShowcase() {
   const [determinate, setDeterminate] = useState(false);
   const [value, setValue] = useState(65);
   const [showLabel, setShowLabel] = useState(false);
-  const [bgTheme, setBgTheme] = useState(null);
+  const [bgTheme, setBgTheme] = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
 
   const generateCode = () => {

@@ -226,7 +226,7 @@ export function TreeViewShowcase() {
   const [disableSel, setDisableSel]         = useState(false);
   const [showIcons, setShowIcons]           = useState(false);
   const [jsonItems, setJsonItems]           = useState(DEFAULT_ITEMS);
-  const [bgTheme, setBgTheme]               = useState(null);
+  const [bgTheme, setBgTheme]               = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
   const [contrastData, setContrastData]     = useState({});
 

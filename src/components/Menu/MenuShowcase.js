@@ -78,7 +78,7 @@ export function MenuShowcase() {
   const [variant, setVariant]     = useState('outline');
   const [color, setColor]         = useState('default');
   const [size, setSize]           = useState('medium');
-  const [bgTheme, setBgTheme]     = useState(null);
+  const [bgTheme, setBgTheme]     = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
 
   const generateCode = () => {

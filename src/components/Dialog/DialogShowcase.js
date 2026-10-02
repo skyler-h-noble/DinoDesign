@@ -50,7 +50,7 @@ export function DialogShowcase() {
   const [transition, setTransition] = useState('none');
   const [alert, setAlert]           = useState(false);
   const [nonModal, setNonModal]     = useState(false);
-  const [bgTheme, setBgTheme]       = useState(null);
+  const [bgTheme, setBgTheme]       = useState('Default');
   const [bgSurface, setBgSurface]   = useState('Surface');
 
   const handleClose = (event, reason) => {

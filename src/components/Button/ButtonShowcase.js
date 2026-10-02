@@ -203,7 +203,7 @@ export function ButtonShowcase() {
   const [badge, setBadge]               = useState(false);
   const [badgeContent, setBadgeContent] = useState('3');
   const [contrastData, setContrastData] = useState({});
-  const [bgTheme, setBgTheme]           = useState(null);
+  const [bgTheme, setBgTheme]           = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
   const surfaceRef = useRef(null);
   // The brand CSS is fetched from storage AFTER mount. Measuring before it

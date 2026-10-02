@@ -84,7 +84,7 @@ export function StepperShowcase() {
   const [activeStep, setActiveStep]     = useState(1);
   const [clickable, setClickable]       = useState(false);
   const [dashed, setDashed]             = useState(false);
-  const [bgTheme, setBgTheme]           = useState(null);
+  const [bgTheme, setBgTheme]           = useState('Default');
   const [bgSurface, setBgSurface]       = useState('Surface');
 
   const generateCode = () => {

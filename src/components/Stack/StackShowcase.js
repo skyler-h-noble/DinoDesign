@@ -114,7 +114,7 @@ function Playground() {
   const [childSet, setChildSet]     = useState('small');
   const [enforceMinGap, setEnforce] = useState(true);
   const [flexWrap, setFlexWrap]     = useState(false);
-  const [bgTheme, setBgTheme]       = useState(null);
+  const [bgTheme, setBgTheme]       = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
 
   const childSets = {
@@ -268,7 +268,7 @@ export function StackShowcase() {
   /* Its own state. The inner Playground() has a pair of the same name for
      its own preview; these belong to the page header, and reading the
      inner ones from here is how the Icons page crashed. */
-  const [bgTheme, setBgTheme] = useState(null);
+  const [bgTheme, setBgTheme] = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
   return (
     <Box sx={{ pb: 8 }}>

@@ -78,7 +78,7 @@ export function SheetShowcase() {
   const [surfaceLevel, setSurfaceLevel] = useState('Surface');
   const [color, setColor]         = useState('default');
   const [elevated, setElevated]   = useState(false);
-  const [bgTheme, setBgTheme]     = useState(null);
+  const [bgTheme, setBgTheme]     = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
 
   const generateCode = () => {

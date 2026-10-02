@@ -90,7 +90,7 @@ function ControlButton({ label, selected, onClick }) {
 }
 
 export function LinkShowcase() {
-  const [bgTheme, setBgTheme] = useState(null);
+  const [bgTheme, setBgTheme] = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
   const [textStyle, setTextStyle] = useState('body');
   const [color, setColor] = useState('primary');

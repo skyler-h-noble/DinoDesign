@@ -88,7 +88,7 @@ export function DividerShowcase() {
   const [indicatorText, setIndicatorText] = useState('OR');
   const [indicatorStyle, setIndicatorStyle] = useState('outline');
   const [textAlign, setTextAlign]         = useState('center');
-  const [bgTheme, setBgTheme]             = useState(null);
+  const [bgTheme, setBgTheme]             = useState('Default');
   const [bgSurface, setBgSurface]         = useState('Surface');
 
   const isVertical = orientation === 'vertical';

@@ -83,7 +83,7 @@ export function CheckboxShowcase() {
   const [showLabel, setShowLabel] = useState(true);
   const [labelText] = useState('Accept terms');
   const [disabled, setDisabled]   = useState(false);
-  const [bgTheme, setBgTheme]     = useState(null);
+  const [bgTheme, setBgTheme]     = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
 
   const effectiveColor = color === 'default' ? 'default' : color;
