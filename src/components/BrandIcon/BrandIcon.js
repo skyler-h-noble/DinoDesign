@@ -10,43 +10,82 @@
 // component rather than a `brand` prop on Icon that would quietly inherit
 // rules that do not apply to it.
 //
+// Takes a NAME, matching Figma. The Brand-Icons component there (9155:26699)
+// is Font Awesome 6 Brands as a LIGATURE font — one component with a text
+// layer, where you type the brand's name and the font draws the glyph — so its
+// API is a lowercase hyphenated string: `github`, `x-twitter`, `linkedin`.
+// This mirrors that, and mirrors <Icon>, which is Material Symbols by the same
+// mechanism. A component whose API is a different shape from the design it
+// implements is one the converter cannot map.
+//
 // Path data comes from @fortawesome/free-brands-svg-icons (CC BY 4.0) rather
 // than being drawn here, because a hand-copied path is a subtly wrong logo and
-// nobody reviewing a diff can tell. Icons are imported BY NAME at the call
-// site, so a bundler ships only the marks actually used — the package holds
-// 610 and a footer wants four.
+// nobody reviewing a diff can tell. The web has no ligature-font equivalent
+// bundled with the package, so the name is resolved to the icon object instead
+// — same input, same output, different mechanism.
 //
-// Colour: `currentColor` by default, so it takes the text role of whatever it
-// sits in — a footer link's colour, usually. Brand guidelines often require
-// the official colour instead, which is what `color="brand"` is for; it is
-// opt-in because a row of six official brand colours in a themed footer looks
-// like a ransom note, and monochrome is the convention for exactly that reason.
+// CHANGING THE COLOUR
+//
+//   in code    the `color` prop, or leave it and it inherits. The default is
+//              `currentColor`, so it takes the colour of the text around it —
+//              a footer link's colour, usually, which is what you want when it
+//              sits beside a label. Pass any CSS colour or a token:
+//              <BrandIcon name="github" color="var(--Icons-Primary)" />
+//
+//   in Figma   it is a TEXT layer in a ligature font, so its colour is the
+//              layer's FILL. Bind that to a variable the way any other text
+//              fill is bound — Icons/Icons-Primary, Text, or whatever the
+//              surface calls for. There is no colour variant on the component,
+//              and there should not be: 610 glyphs times a colour axis is a
+//              variant set nobody can load.
+//
+// Monochrome is the convention for brand marks in a themed UI, which is why
+// there is no "official brand colour" mode here. A row of six logos in their
+// own corporate colours reads as a ransom note and cannot meet a contrast
+// requirement, since each one is a fixed hex that knows nothing about the
+// surface behind it.
 import React from 'react';
+import * as brands from '@fortawesome/free-brands-svg-icons';
+
+/* 'x-twitter' -> 'faXTwitter'. Font Awesome exports PascalCase of the
+   hyphenated name, which is exactly what Figma's text layer holds, so the
+   two stay in step without a lookup table to maintain. */
+function iconForName(name) {
+  if (typeof name !== 'string' || !name) return null;
+  const key = 'fa' + name.split('-')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('');
+  return brands[key] || null;
+}
 
 /**
- * @param icon   a Font Awesome brand icon object, e.g. `faGithub`
+ * @param name   lowercase, hyphenated, as Figma's text layer holds it:
+ *               'github', 'x-twitter', 'linkedin', 'dribbble', 'instagram'
+ * @param icon   a Font Awesome icon object, if you would rather import it
+ *               yourself. Takes precedence over `name`.
  * @param size   any CSS length. Defaults to 1em so it rides the text beside it.
- * @param color  'currentColor' (default) | 'brand' | any CSS colour
+ * @param color  any CSS colour or token. Defaults to currentColor.
  * @param title  accessible name. Omit for decoration beside a visible label —
  *               the icon is then aria-hidden, which is the common case in a
  *               footer where the link text already says "GitHub".
  */
-export function BrandIcon({ icon, size = '1em', color = 'currentColor', title, ...props }) {
-  if (!icon || !icon.icon) {
+export function BrandIcon({ name, icon, size = '1em', color = 'currentColor', title, ...props }) {
+  const resolved = icon || iconForName(name);
+  if (!resolved || !resolved.icon) {
     if (process.env.NODE_ENV !== 'production') {
       console.warn(
-        '[BrandIcon] needs an `icon` from @fortawesome/free-brands-svg-icons, '
-        + 'e.g. import { faGithub } from "@fortawesome/free-brands-svg-icons". '
-        + 'Rendering nothing.',
+        `[BrandIcon] no brand mark for ${JSON.stringify(name ?? icon)}. Names are `
+        + 'lowercase and hyphenated, exactly as Font Awesome lists them and as '
+        + "Figma's Brand-Icons text layer holds them: github, x-twitter, "
+        + 'linkedin, dribbble, instagram. Rendering nothing.',
       );
     }
     return null;
   }
 
   // Font Awesome's shape: [width, height, ligatures, unicode, pathData]
-  const [width, height, , , pathData] = icon.icon;
+  const [width, height, , , pathData] = resolved.icon;
   const d = Array.isArray(pathData) ? pathData.join(' ') : pathData;
-  const fill = color === 'brand' ? undefined : color;
 
   return (
     <svg
@@ -54,7 +93,7 @@ export function BrandIcon({ icon, size = '1em', color = 'currentColor', title, .
       viewBox={`0 0 ${width} ${height}`}
       width={size}
       height={size}
-      fill={fill}
+      fill={color}
       role={title ? 'img' : undefined}
       aria-hidden={title ? undefined : 'true'}
       focusable="false"

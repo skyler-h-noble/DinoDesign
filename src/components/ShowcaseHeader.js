@@ -16,7 +16,6 @@ import { Box } from '@mui/material';
 import { H3 } from './Typography';
 import { Link } from './Link/Link';
 import { BrandIcon } from './BrandIcon';
-import { faFigma } from '@fortawesome/free-brands-svg-icons';
 import { figmaUrlFor } from '../docs/figmaLinks';
 
 export function ShowcaseHeader({ title, component }) {
@@ -39,7 +38,7 @@ export function ShowcaseHeader({ title, component }) {
           sx={{ ml: 'auto', display: 'inline-flex', alignItems: 'center',
                 gap: 0.75, flexShrink: 0, whiteSpace: 'nowrap' }}
         >
-          <BrandIcon icon={faFigma} />
+          <BrandIcon name="figma" />
           Open in Figma
         </Link>
       )}

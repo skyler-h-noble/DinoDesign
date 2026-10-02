@@ -53,6 +53,7 @@ import { Alert } from '../components/Alert';
 import { Card } from '../components/Card';
 import { Avatar } from '../components/Avatar';
 import { Icon } from '../components/Icon';
+import { BrandIcon } from '../components/BrandIcon/BrandIcon';
 import { Fab } from '../components/Fab';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -88,6 +89,11 @@ export const EXAMPLES = {
   /* The default instance: medium, default colour, icon only. Not extended
      and not animated, because a sample that moves on a page of prose draws
      the eye away from the prose. */
+  BrandIcon: () => <HStack gap="var(--Sizing-2)" style={{ alignItems: 'center' }}>
+    {['github', 'linkedin', 'instagram', 'dribbble', 'x-twitter'].map(n => (
+      <BrandIcon key={n} name={n} size="24px" />
+    ))}
+  </HStack>,
   Fab: () => <Fab icon={<Icon size="medium"><AddIcon /></Icon>} ariaLabel="Add" />,
   ButtonGroup: () => <ButtonGroup value="a" onChange={() => {}} size="small">
       <Button value="a" size="small">Day</Button>

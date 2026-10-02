@@ -358,4 +358,98 @@ export const ACCORDION_DOC = {
   accessibility: ['The summary is a button that toggles the details and carries `aria-expanded`.', 'Do not nest an accordion inside an accordion — the heading levels stop making sense.'],
   gotchas: ['Two focus radii, and they are not a mistake: `Accordion-Focus-Radius` is `radius + 3` for the outer ring, `Accordion-Inner-Focus-Radius` is `max(0, radius − 3)` for the inner one. CSS needs neither — a browser draws an outline concentric with the border — but Figma cannot do arithmetic on a variable, so both are stated.']
 };
-export const SURFACE_DOCS = [ICON_DOC, FAB_DOC, SNACKBAR_DOC, ACCORDION_DOC];
+
+export const BRANDICON_DOC = {
+  name: 'BrandIcon',
+  summary: 'A company or service mark — GitHub, LinkedIn, Figma. Somebody else\'s artwork, not ours.',
+  insteadUse: [{
+    when: 'It is part of the system\'s own vocabulary — a chevron, a trash can',
+    use: 'Icon'
+  }, {
+    when: 'It is clickable on its own',
+    use: 'Button with iconOnly, wrapping this'
+  }, {
+    when: 'It is a person or entity',
+    use: 'Avatar'
+  }],
+  props: [{
+    name: 'name',
+    type: 'string',
+    default: 'undefined',
+    note: 'Lowercase and hyphenated, exactly as Font Awesome lists it and as '
+      + 'Figma\'s Brand-Icons text layer holds it: `github`, `linkedin`, '
+      + '`instagram`, `dribbble`, `x-twitter`. An unknown name renders NOTHING '
+      + 'and warns in development rather than drawing a wrong or empty glyph.'
+  }, {
+    name: 'color',
+    type: 'string',
+    default: 'currentColor',
+    note: 'HOW TO CHANGE THE COLOUR. In CODE, pass any CSS colour or token — '
+      + '`color="var(--Icons-Primary)"`. Left alone it is `currentColor`, so it '
+      + 'takes the colour of the text around it, which is what you want beside '
+      + 'a label. In FIGMA it is a TEXT layer in a ligature font, so its colour '
+      + 'is the layer\'s FILL: bind that to a variable the way any text fill is '
+      + 'bound. There is no colour variant on the component and there should '
+      + 'not be — 610 glyphs times a colour axis is a set nobody can load.'
+  }, {
+    name: 'size',
+    type: 'string',
+    default: '1em',
+    note: 'Any CSS length. 1em by default so it rides the text beside it '
+      + 'instead of needing to be kept in step with it.'
+  }, {
+    name: 'title',
+    type: 'string',
+    default: 'undefined',
+    note: 'The accessible name. Omit it for decoration beside visible text — '
+      + 'the mark is then aria-hidden, which is the common case in a footer '
+      + 'where the link already says "GitHub". Give it only when the mark is '
+      + 'the only thing identifying the destination.'
+  }],
+  states: [{
+    state: 'Unknown name',
+    setBy: 'prop',
+    note: 'Renders nothing and warns in development. A wrong logo is worse '
+      + 'than no logo: it looks deliberate.'
+  }],
+  theming: [{
+    collection: 'Icons',
+    inCode: 'Inherits currentColor, so it follows whatever text role surrounds '
+      + 'it. Pass `color` to pin it to an Icons token instead.',
+    inFigma: 'The glyph is text, so it takes the text layer\'s fill. Bind it to '
+      + 'Icons/* or Text like any other.'
+  }],
+  themingNotes: [
+    'Monochrome, deliberately. There is no "official brand colour" mode: a row '
+      + 'of logos in their own corporate colours cannot meet a contrast '
+      + 'requirement, because each one is a fixed hex that knows nothing about '
+      + 'the surface behind it.',
+    'Separate from Icon on purpose. Icon renders the design system\'s own '
+      + 'vocabulary and takes the brand\'s icon colour and ramp. A brand mark '
+      + 'cannot be derived, is not ours to restyle, and carries a trademark.',
+  ],
+  tokens: [
+    { name: 'currentColor', sets: 'the glyph', variesWith: 'the text role around it', figma: 'the text layer fill' },
+  ],
+  composition: [
+    'In a footer, wrap it in the link and let the link own the accessible name.',
+    'For a clickable mark on its own, put it inside <Button iconOnly aria-label="...">.',
+  ],
+  accessibility: [
+    'aria-hidden unless you pass `title`, so a mark beside visible text is not '
+      + 'announced twice.',
+    'Name the DESTINATION, not the glyph — "GitHub", not "octocat".',
+  ],
+  gotchas: [
+    'Path data comes from @fortawesome/free-brands-svg-icons rather than being '
+      + 'drawn by hand, because a hand-copied path is a subtly wrong logo and no '
+      + 'diff review catches it.',
+    'Figma draws these with the Font Awesome 6 Brands LIGATURE font — one '
+      + 'component, type the name into the text layer. The web has no bundled '
+      + 'ligature equivalent, so the name is resolved to path data instead: '
+      + 'same input, same output, different mechanism.',
+  ],
+  changes: [],
+};
+
+export const SURFACE_DOCS = [ICON_DOC, BRANDICON_DOC, FAB_DOC, SNACKBAR_DOC, ACCORDION_DOC];

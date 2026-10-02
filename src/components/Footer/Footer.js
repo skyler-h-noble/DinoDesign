@@ -243,7 +243,7 @@ function SocialRow({ links }) {
             {/* `brand` takes a Font Awesome brand icon and renders the real
                 mark; `icon` stays supported for anything already passing its
                 own node. */}
-            {s.brand ? <BrandIcon icon={s.brand} size="18px" /> : s.icon}
+            {s.brand ? <BrandIcon name={s.brand} size="18px" /> : s.icon}
           </a>
         );
       })}
