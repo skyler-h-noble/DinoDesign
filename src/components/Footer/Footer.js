@@ -11,6 +11,7 @@ import { Button } from '../Button/Button';
 import { Input as TextInput } from '../Input/Input';
 import { Copyright } from '../Copyright/Copyright';
 import { BrandIcon } from '../BrandIcon/BrandIcon';
+import { VStack, HStack } from '../Stack/Stack';
 
 /**
  * Footer Component
@@ -213,14 +214,21 @@ function AddressColumn({ address }) {
 }
 
 function LinksColumn({ title, links = [] }) {
+  /* VStack, matching Figma's shape exactly: a Links frame at Sizing-1 holding
+     the Header and an inner Links frame, also at Sizing-1. The gaps were 12px
+     and 8px of hand-written margin before — close to the token but not it, and
+     not following a brand that changes its spacing scale.
+
+     `component` passes through to the underlying stack, so the list stays a
+     real <ul>/<li>. That matters more than it looks: a screen reader announces
+     "list, 4 items" and lets you jump the group, which a stack of divs does
+     not. A layout primitive should not cost semantics. */
   return (
-    <div>
-      {title && (
-        <H4 style={{ color: 'inherit', marginBottom: 12 }}>{title}</H4>
-      )}
-      <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+    <VStack gap="var(--Sizing-1)">
+      {title && <H4 style={{ color: 'inherit' }}>{title}</H4>}
+      <VStack component="ul" gap="var(--Sizing-1)" sx={{ listStyle: 'none', m: 0, p: 0 }}>
         {links.map((l, i) => (
-          <li key={i} style={{ marginBottom: 8 }}>
+          <li key={i}>
             <Link
               href={l.href}
               onClick={l.onClick}
@@ -231,14 +239,15 @@ function LinksColumn({ title, links = [] }) {
             </Link>
           </li>
         ))}
-      </ul>
-    </div>
+      </VStack>
+    </VStack>
   );
 }
 
 function SocialRow({ links }) {
+  // Sizing-2, which is what Figma's SocialLinks frame uses.
   return (
-    <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+    <HStack gap="var(--Sizing-2)" style={{ alignItems: 'center' }}>
       {links.map((s, i) => {
         /* A name that exists but says nothing passes every automated checker
            AND silences the warnings — `aria-label="Social link"` on six links
@@ -290,7 +299,7 @@ function SocialRow({ links }) {
           </a>
         );
       })}
-    </div>
+    </HStack>
   );
 }
 
