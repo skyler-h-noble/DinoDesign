@@ -253,10 +253,68 @@ export function StaticColorsDemo() {
   );
 }
 
+/* Changing the size in Figma, shown rather than described.
+   It is a MODE on a frame, not a property on the component, and that is the
+   part prose keeps failing to convey — people look for a Size dropdown on the
+   instance, find none, and conclude the component has one size. Ten seconds of
+   video answers it; three paragraphs do not.
+
+   The file is H.264 in an .mp4 container, which every current browser plays.
+   It was recorded as .mov and rewrapped rather than re-encoded, so it is the
+   original frames at the original size.
+
+   No autoplay and no loop: this sits inside a reference page people read, and
+   motion starting on its own pulls the eye off the text beside it. `preload`
+   is metadata only, so the 2.8MB is fetched when someone presses play rather
+   than on every visit to the page. */
+export function ComponentSizeDemo() {
+  return (
+    <VStack gap="var(--Sizing-3)">
+      <VStack gap="var(--Sizing-1)">
+        <H5>Changing it in Figma</H5>
+        <BodySmall color="quiet">
+          Component size is a variable MODE, so you set it on the FRAME and everything
+          inside follows. There is no size control on the instance itself — which is the
+          usual reason people think a component has only one size.
+        </BodySmall>
+      </VStack>
+
+      <Box
+        component="video"
+        src="/videos/component-size.mp4"
+        controls
+        preload="metadata"
+        playsInline
+        sx={{
+          width: '100%', maxWidth: 820, display: 'block',
+          borderRadius: 'var(--Card-Radius, var(--Style-Border-Radius))',
+          border: '1px solid var(--Border-Variant)',
+        }}
+      />
+
+      <VStack gap="var(--Sizing-1)">
+        <EyebrowSmall>The steps</EyebrowSmall>
+        {[
+          'Select the FRAME holding the components — not an individual instance.',
+          'In the right-hand panel, open the layer’s variable modes.',
+          'Set Component-Size to small, medium or large.',
+          'Everything inside re-reads the collection at once: heights, radii, icons, gaps, padding, focus rings and type.',
+        ].map((step, i) => (
+          <HStack key={i} gap="var(--Sizing-1)" style={{ alignItems: 'flex-start' }} enforceMinGap={false}>
+            <Caption color="quiet" style={{ minWidth: 16 }}>{i + 1}.</Caption>
+            <BodySmall>{step}</BodySmall>
+          </HStack>
+        ))}
+      </VStack>
+    </VStack>
+  );
+}
+
 /** Topic title -> demo. A topic with no entry renders prose only. */
 export const FOUNDATION_DEMOS = {
   'Elevation': ElevationDemo,
   'Surfaces': SurfacesDemo,
+  'Component size': ComponentSizeDemo,
   'Static colors': StaticColorsDemo,
   'States are generated, not chosen': StatesDemo,
 };
