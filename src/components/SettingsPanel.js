@@ -36,7 +36,17 @@ const PLATFORM_SCOPE = {
 };
 
 function applyPlatform(value) {
-  document.documentElement.setAttribute('data-platform', PLATFORM_SCOPE[value] || 'Desktop');
+  const scope = PLATFORM_SCOPE[value] || 'Desktop';
+  /* BOTH attributes, deliberately.
+     The generator now emits [data-device="…"], but a design system's CSS is
+     FROZEN in Storage and cannot be regenerated — an older system's sheet
+     still selects on [data-platform="…"]. Setting only the new name would
+     leave every existing system with no platform block at all, which fails
+     silently: the selectors simply match nothing and every metric falls back.
+     Same reasoning as the Overline -> Eyebrow alias, which is kept emitted for
+     exactly this reason. */
+  document.documentElement.setAttribute('data-device', scope);
+  document.documentElement.setAttribute('data-platform', scope);
 }
 
 export function SettingsPanel() {
