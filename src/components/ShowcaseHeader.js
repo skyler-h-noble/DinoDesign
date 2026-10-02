@@ -21,14 +21,22 @@ import { figmaUrlFor } from '../docs/figmaLinks';
 export function ShowcaseHeader({ title, component }) {
   const figma = component ? figmaUrlFor(component) : null;
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-      <H3>{title}</H3>
+    /* No wrapping, and the title does not grow. H3 is a block element, so in a
+       flex row it claimed the full width and pushed the link onto a second
+       line — which read as the link being below the title rather than beside
+       it. `flex: 0 1 auto` lets it shrink instead, and the link holds the
+       right edge on the same row. */
+    <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2, flexWrap: 'nowrap' }}>
+      <Box sx={{ flex: '0 1 auto', minWidth: 0 }}>
+        <H3>{title}</H3>
+      </Box>
       {figma && (
         <Link
           href={figma}
           target="_blank"
           rel="noopener noreferrer"
-          sx={{ ml: 'auto', display: 'inline-flex', alignItems: 'center', gap: 0.75 }}
+          sx={{ ml: 'auto', display: 'inline-flex', alignItems: 'center',
+                gap: 0.75, flexShrink: 0, whiteSpace: 'nowrap' }}
         >
           <FigmaIcon />
           Open in Figma

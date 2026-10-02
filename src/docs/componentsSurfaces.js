@@ -112,17 +112,39 @@ export const FAB_DOC = {
   }, {
     name: 'color',
     type: 'string',
-    default: 'primary'
+    values: ['default', 'primary', 'secondary', 'tertiary', 'neutral',
+             'info', 'success', 'warning', 'error', 'black-white'],
+    default: 'tertiary',
+    note: 'The ten modes of Figma\'s Buttons collection. A FAB has no Color '
+      + 'variant axis — in FIGMA you change its colour by setting the Buttons '
+      + 'MODE on the frame, and in CODE it is this prop, taking the same ten '
+      + 'names. Defaults to `tertiary`: a FAB floats above everything, so it '
+      + 'reads loudly at any colour, and taking `primary` would leave the real '
+      + 'primary buttons underneath competing with it.'
   }, {
     name: 'size',
     type: 'string',
     values: ['small', 'medium', 'large'],
-    default: 'medium'
+    default: 'medium',
+    note: 'Figma carries this in the Component-Size collection rather than on a '
+      + 'variant axis: FAB/FAB-Width is 32 / 48 / 56 and FAB/FAB-Icon is '
+      + '16 / 24 / 32, so you switch the MODE on the frame.'
   }, {
     name: 'extended',
     type: 'boolean',
     default: 'false',
     note: 'Widens it to carry a label beside the icon.'
+  }, {
+    name: 'animate',
+    type: 'boolean',
+    default: 'false',
+    note: 'A slow pulse ring, for drawing the eye to a newly available action. '
+      + 'Figma draws it as the FAB-Animation set (Start / Middle / End): the '
+      + 'ring grows from a 0 to an 8px stroke at 50% opacity, then holds that '
+      + 'width and fades to 0 — it does NOT grow and fade at the same time. '
+      + 'The ring takes the button\'s own colour. It stops entirely under '
+      + 'prefers-reduced-motion, since an indefinite animation with no way to '
+      + 'stop it is what WCAG 2.2.2 is about.'
   }, {
     name: 'ariaLabel',
     type: 'string',

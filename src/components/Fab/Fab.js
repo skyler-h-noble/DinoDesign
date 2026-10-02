@@ -54,11 +54,30 @@ function getTokens(color) {
   };
 }
 
+/* The pulse, read off Figma's FAB-Animation set (9244:7809).
+ *
+ * It is drawn there as three keyframes, and the shape matters: the ring GROWS
+ * at a constant opacity and only THEN fades. It does not do both at once.
+ *
+ *   Start   stroke 0   opacity 0.5
+ *   Middle  stroke 8   opacity 0.5
+ *   End     stroke 8   opacity 0
+ *
+ * This used to spread to 12px while fading to zero by 70%, then collapse back
+ * to 0 — a different motion from the one designed, at a different size, at 0.4
+ * rather than 0.5.
+ *
+ * The colour is the bigger fix. Figma binds the ring's stroke to the `Button`
+ * variable, i.e. the FAB's own fill. This read --pulse-rgb, which NOTHING in
+ * the component ever set, so every pulse fell through to the 0,0,0 fallback
+ * and rang black regardless of the button's colour. --Buttons-<C>-Button is
+ * set per colour already, so the ring now follows the button it surrounds.
+ */
 const pulseKeyframes = `
 @keyframes fab-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(var(--pulse-rgb, 0,0,0), 0.4); }
-  70% { box-shadow: 0 0 0 12px rgba(var(--pulse-rgb, 0,0,0), 0); }
-  100% { box-shadow: 0 0 0 0 rgba(var(--pulse-rgb, 0,0,0), 0); }
+  0% { box-shadow: 0 0 0 0 var(--fab-pulse-color); }
+  50% { box-shadow: 0 0 0 8px var(--fab-pulse-color); }
+  100% { box-shadow: 0 0 0 8px transparent; }
 }
 `;
 
@@ -67,12 +86,18 @@ export function Fab({
   icon,
   label,
   variant = 'solid',
-  /* `default`, not `primary`. Figma binds the FAB's fill to
-     Buttons/Default/Button and its stroke to Buttons/Default/Border, so the
-     colour it ships with is the brand's default button — the same rule every
-     other control in the system follows. Reach for `primary` only where a
-     design marks it. */
-  color = 'default',
+  /* Tertiary.
+     A FAB is the one primary action floating over the content, and it is
+     deliberately NOT the primary palette: it sits above everything, so it
+     reads loudly at any colour, and taking primary would leave the actual
+     primary buttons underneath competing with it.
+     The showcase already applied this as `color === 'default' ? 'tertiary'`,
+     which meant the intended colour lived in the gallery rather than in the
+     component — anyone importing Fab got something else.
+     Figma does not pin this: a FAB's colour comes from the Buttons MODE set on
+     its frame, and that collection's ten modes are the same list this prop
+     takes. */
+  color = 'tertiary',
   size = 'medium',
   extended = false,
   animate = false,
@@ -162,6 +187,10 @@ export function Fab({
           '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px' },
           // Animation
           ...(animate && !disabled && {
+            /* 50% of the button's own colour — Figma's Start and Middle both
+               sit at opacity 0.5, and colour-mix gets that from the same token
+               the fill uses rather than needing a second variable. */
+            '--fab-pulse-color': `color-mix(in srgb, ${tokens.bg} 50%, transparent)`,
             animation: 'fab-pulse 2s var(--Motion-Easing-Standard, ease) infinite',
             /* The design system zeroes --Motion-Duration-* under
                prefers-reduced-motion, and this loop ignored that entirely: a

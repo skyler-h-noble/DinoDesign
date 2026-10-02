@@ -110,7 +110,11 @@ export function FabShowcase() {
   const [bgTheme, setBgTheme] = useState(null);
   const [bgSurface, setBgSurface] = useState('Surface');
 
-  const effectiveColor = color === 'default' ? 'tertiary' : color;
+  /* No remap. This used to read `color === 'default' ? 'tertiary' : color`,
+     which put the intended default colour in the GALLERY instead of the
+     component — so the showcase looked right and anyone importing Fab got
+     something else. Fab now defaults to tertiary itself. */
+  const effectiveColor = color;
   const getIconEl = () => {
     const IconComp = MuiIcons[iconName] || MuiIcons['Add'];
     return <Icon size="medium"><IconComp /></Icon>;
