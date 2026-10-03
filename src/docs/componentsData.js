@@ -113,19 +113,57 @@ export const SLIDER_DOC = {
     when: 'It is on or off',
     use: 'SwitchInput'
   }],
+  /* Every axis the component actually has.
+     This listed variant, size, value, min, max and the two handlers — and
+     stopped there, so orientation, fill direction, marks, the value label and
+     the step were undocumented despite all five being real props with real
+     Figma axes behind them. A prop table that is a SUBSET of the component
+     reads as the whole of it, which is worse than a short one that says so. */
   props: [...zoneProps, {
     name: 'variant',
     type: 'string',
-    default: 'primary'
+    values: ['default', 'primary', 'secondary', 'tertiary', 'neutral',
+             'info', 'success', 'warning', 'error'],
+    /* Was documented as 'primary', which was true of the code and against the
+       house rule; the code now defaults to `default` like Button. */
+    default: 'default',
+    note: 'The palette. Thumb, track, rail edge and marks all move together — a coloured slider is coloured throughout, not a coloured fill between surface-coloured parts.'
   }, {
     name: 'size',
     type: 'string',
     values: ['small', 'medium', 'large'],
-    default: 'medium'
+    default: 'medium',
+    note: 'The VISUAL height — 12 / 16 / 20px. The thumb stays 24x24 at every size for the WCAG 2.2 target, with the smaller dot drawn in ::before.'
   }, {
     name: 'value / defaultValue',
-    type: 'number',
-    default: 'undefined'
+    type: 'number | number[]',
+    default: 'undefined',
+    note: 'An ARRAY makes it a range slider. That is the whole switch — there is no `range` prop. Figma folds the thumb count into its Type axis instead (single / double), because a variant set cannot take a value.'
+  }, {
+    name: 'fill',
+    type: "'standard' | 'inverted' | false",
+    default: "'standard'",
+    note: 'Which side of the thumb the fill sits on. `false` draws no fill at all. Figma spells it as the other half of its Type axis — single-inverted / double-inverted. MUI calls the prop `track`, which still works, `normal` included.'
+  }, {
+    name: 'orientation',
+    type: "'horizontal' | 'vertical'",
+    default: "'horizontal'",
+    note: 'A separate Orientation axis in Figma, and it combines freely with the fill direction. A vertical slider needs a height on its container — it has no intrinsic one.'
+  }, {
+    name: 'marks',
+    type: 'boolean | array',
+    default: 'false',
+    note: '`true` puts a dot at every step; an array of `{ value, label }` puts them where you say and labels them. Drawn as 2px round dots that flip colour once the fill passes them, so they stay legible on both sides.'
+  }, {
+    name: 'step',
+    type: 'number | null',
+    default: '1',
+    note: 'RESTRICTED VALUES are `step={null}` with an explicit `marks` array: the thumb then snaps to those values only. `step={null}` with `marks` set to `true` has nothing to snap to, so it is ignored and warns in development.'
+  }, {
+    name: 'valueLabelDisplay',
+    type: "'off' | 'on' | 'auto'",
+    default: "'off'",
+    note: "`auto` shows the bubble on hover and focus. Its ground is --Text with --Background text — the surface pair inverted, which is legible on any surface by definition where a palette colour would not be."
   }, {
     name: 'min',
     type: 'number',
@@ -134,6 +172,15 @@ export const SLIDER_DOC = {
     name: 'max',
     type: 'number',
     default: '100'
+  }, {
+    name: 'label',
+    type: 'string',
+    default: 'undefined',
+    note: 'A visible label above the track. Without one the slider needs `aria-label`, and a range slider needs MUI`s `getAriaLabel` rather than either.'
+  }, {
+    name: 'disabled',
+    type: 'boolean',
+    default: 'false'
   }, {
     name: 'onChange',
     type: 'function',

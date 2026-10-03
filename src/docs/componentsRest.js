@@ -498,47 +498,7 @@ export const REST_DOCS = [SELECT_DOC, MENU_DOC, CODE_BLOCK_DOC, undesigned('Auto
 }, {
   state: 'Selected',
   setBy: 'prop'
-}], [surfaceToken('--Background', 'the bar'), surfaceToken('--Hover', 'item hover')], ['Items are data. A FAB comes from `fab` rather than being nested.'], ['Icon-only items each need a name saying the action.', 'A toolbar is a `toolbar` role with arrow-key navigation between items, and one tab stop for the whole thing.'], ['No Figma drawing. `AppBar` shares its elevation group — AppBar, Toolbars and Menus are one row in the elevation table.']), undesigned('CodeBlock', 'A block of code or a copyable command, with its own copy button.', [{
-  when: 'It is inline code in a sentence',
-  use: 'a `code` element'
-}, {
-  when: 'It is editable',
-  use: 'TextArea'
-}], [{
-  name: 'code',
-  type: 'string',
-  default: "''"
-}, {
-  name: 'language',
-  type: 'string',
-  default: 'JSX',
-  note: 'Shown as a header label — `bash`, `JSX`, `CSS`, `URL`.'
-}, {
-  name: 'showCopy',
-  type: 'boolean',
-  default: 'true'
-}, {
-  name: 'showHeader',
-  type: 'boolean',
-  default: 'true'
-}, {
-  name: 'maxHeight',
-  type: 'number',
-  default: 'undefined'
-}, {
-  name: 'wrap',
-  type: 'boolean',
-  default: 'false'
-}], [{
-  state: 'Copied',
-  setBy: 'interaction',
-  note: 'The component owns the confirmation and its timer.'
-}], [{
-  name: '--Background',
-  sets: 'the dark region',
-  variesWith: 'theme + surface',
-  figma: 'Modes → Theme → Surface'
-}], ['Code goes in `code`, not as children. The copy button is built in — do not add one.'], ['The copy button needs a name and its confirmation must be announced, not only drawn.'], ['Its dark region is NOT a hardcoded color: it declares `data-theme="Neutral"` + `data-surface="Surface-Dimmest"`, so it follows the brand’s own neutrals and stays legible in both modes. Do not override its background.', 'It brings its own copy state and timer, so the surrounding component must not keep a `copied` flag.']), undesigned('IconBadge', 'An icon with a badge already positioned on it.', [{
+}], [surfaceToken('--Background', 'the bar'), surfaceToken('--Hover', 'item hover')], ['Items are data. A FAB comes from `fab` rather than being nested.'], ['Icon-only items each need a name saying the action.', 'A toolbar is a `toolbar` role with arrow-key navigation between items, and one tab stop for the whole thing.'], ['No Figma drawing. `AppBar` shares its elevation group — AppBar, Toolbars and Menus are one row in the elevation table.']), undesigned('IconBadge', 'An icon with a badge already positioned on it.', [{
   when: 'You are badging something else',
   use: 'Badge around it'
 }, {

@@ -75,12 +75,18 @@ import { Accordion } from '../components/Accordion';
 import { Body, H3 } from '../components/Typography';
 import { VStack, HStack } from '../components/Stack';
 import { Caption } from '../components/Typography';
+import { SLIDER_SAMPLES } from './samples.slider';
+import { LEAD_EXAMPLES } from './examples.lead';
+import { CORE_SAMPLES } from './samples.core';
 // Relative, not the package name: this file now lives INSIDE the library, and
 // importing the package from within it would resolve to the installed copy
 // rather than this source — a second React tree and a stale component set.
 
 /** Rendered inside the provider, so every token resolves to the user's brand. */
 export const EXAMPLES = {
+  /* The 29 components that had no lead example. Merged first so an entry
+     below can still override one. */
+  ...LEAD_EXAMPLES,
   /* ONE instance, in its default configuration — enough to recognise the
      component. The variants, sizes and states are shown further down, beside
      the prop that controls them (PROP_EXAMPLES), so a sample sits where the
@@ -187,7 +193,25 @@ export function hasExample(component) {
  * is already "whatever the user has set" without doing anything. The argument
  * is there for the samples that must name a theme explicitly.
  */
-export const PROP_EXAMPLES = {
+/* Per-axis samples live in their own modules, merged in here.
+ *
+ * They are long — a complete axis is nine palettes, three sizes and every
+ * boolean, per component — and this file is the lead examples. Keeping them
+ * together would bury the one-example-per-component list that is the point of
+ * this module, so each group is written beside the others of its kind and
+ * folded in below. */
+/* Merged PER COMPONENT, not with a top-level spread.
+ *
+ * A spread replaces a component's whole sample object, so `...CORE_SAMPLES`
+ * sitting above a literal `Button: { ... }` silently dropped the four axes the
+ * module added to Button — the samples existed, were imported, and never
+ * rendered. The coverage count caught it; nothing else would have, because the
+ * entries that DID survive still looked right, so the page showed samples and
+ * was simply missing four.
+ *
+ * mergeSamples folds each group in key by key, so two modules can both add to
+ * one component and neither shadows the other by position. */
+const PROP_EXAMPLES_BASE = {
   Fab: {
     /* Figma carries FAB size in the Component-Size collection
        (FAB/FAB-Width 32 / 48 / 56) rather than on a variant axis, so there is
@@ -401,6 +425,19 @@ export const PROP_EXAMPLES = {
     </VStack>,
   },
 };
+
+/** Fold a group of per-component samples in without replacing what is there. */
+function mergeSamples(target, group) {
+  for (const [component, samples] of Object.entries(group)) {
+    target[component] = { ...(target[component] || {}), ...samples };
+  }
+  return target;
+}
+
+export const PROP_EXAMPLES = [
+  { Slider: SLIDER_SAMPLES },
+  CORE_SAMPLES,
+].reduce(mergeSamples, PROP_EXAMPLES_BASE);
 
 /** Does this component have a sample for this prop? */
 export function hasPropExample(component, prop) {
