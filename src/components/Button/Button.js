@@ -916,6 +916,17 @@ export function Button({
           outlineOffset: '2px',
         },
 
+        /* Disabled is the RESTING button with opacity applied, and nothing
+           else. Figma says it the same way: the Disabled variant of every
+           Type is its Default variant with opacity 0.38 on the component, no
+           fill or label rebound. The three restatements below are there only
+           because MUI's own Mui-disabled rule would otherwise grey them out.
+
+           `boxShadow: 'none'` was the one thing that did not follow that
+           rule — it deleted the bevel instead of letting it fade with
+           everything else, so a disabled button was not a dimmer version of
+           itself but a flatter one. Figma applies the opacity to the whole
+           component, effects included. */
         '&.Mui-disabled': {
           opacity: 'var(--Disabled, 0.38)',
           cursor: 'not-allowed',
@@ -923,7 +934,6 @@ export function Button({
           backgroundColor: variantStyles.backgroundColor,
           color: variantStyles.color,
           border: variantStyles.border,
-          boxShadow: 'none',
         },
 
         ...(swatch && {
