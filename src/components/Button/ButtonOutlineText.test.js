@@ -32,6 +32,14 @@ const cssFor = (el) => {
 const btnCss = (jsx) => cssFor(render(jsx).container.querySelector('button'));
 
 describe('outline button label', () => {
+  /* Presence anywhere in the button's CSS, which is all this file checks.
+     That was enough when Outline-Text was the colour in EVERY state; it is
+     not enough now that rest takes Outline-Quiet and only the interaction
+     states take Outline-Text, because this assertion passes on the hover rule
+     alone and says nothing about rest. The rest/interaction split is pinned
+     in ButtonLabelStates.test.js, which separates the base rule from the
+     pseudo-class rules. What survives here is the part that is still this
+     file's point: the token is PER PALETTE, so two palettes differ. */
   it('takes Outline-Text from its own palette', () => {
     for (const [variant, token] of [
       ['success-outline', '--Buttons-Success-Outline-Text'],

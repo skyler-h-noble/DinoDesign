@@ -160,9 +160,19 @@ function solidStyles(color, elevated = false, selected = false, size = 'medium')
   const hoverLevel = elevated ? SHADOW_LEVEL_2 : SHADOW_LEVEL_1;
   const restShadow = restLevel === 'none' ? bevel : `${bevel}, ${restLevel}`;
   const hoverShadow = `${bevel}, ${hoverLevel}`;
+  /* The label is MUTED at rest and goes full strength on interaction.
+     Figma binds Buttons/Quiet on Default and Buttons/Text on Hover, Pressed
+     and Focus-Visible — uniformly, across all 80 variants of the set — and
+     the icon takes the same token as the label, which it gets here for free
+     because Icon paints `currentColor`.
+     Selected is the exception: it reads as engaged, not as resting, so it
+     holds Text. Disabled takes the REST token plus opacity, since disabled is
+     the resting button dimmed and nothing else. */
+  const restText = selected ? `var(--Buttons-${C}-Text)` : `var(--Buttons-${C}-Quiet)`;
+  const activeText = `var(--Buttons-${C}-Text)`;
   return {
     backgroundColor: `var(--Buttons-${C}-Button)`,
-    color: `var(--Buttons-${C}-Text)`,
+    color: restText,
     border: `var(--Button-Border-Width) solid var(--Buttons-${C}-Border)`,
     boxShadow: restShadow,
     position: 'relative',
@@ -173,16 +183,19 @@ function solidStyles(color, elevated = false, selected = false, size = 'medium')
     },
     '&:hover': {
       backgroundColor: `var(--Buttons-${C}-Hover)`,
+      color: activeText,
       boxShadow: hoverShadow,
       ...(!selected && { transform: 'translateY(-1px)' }),
     },
     '&:active': {
       backgroundColor: `var(--Buttons-${C}-Pressed)`,
+      color: activeText,
       boxShadow: bevel, // No elevation on press
       ...(!selected && { transform: 'translateY(0)' }),
     },
     '&.Mui-focusVisible': {
       backgroundColor: `var(--Buttons-${C}-Button)`,
+      color: activeText,
       outline: '2px solid var(--Focus-Visible)',
       outlineOffset: '2px',
     },
@@ -208,8 +221,18 @@ function outlineStyles(color, selected = false) {
        the label on the SURFACE, checked against that instead. Figma keeps them
        apart in the same way: the Selected state, which is the only outline
        variant that gains a fill, is also the only one that switches to
-       Buttons::Text. */
-    color: `var(--Buttons-${C}-Outline-Text)`,
+       Buttons::Text.
+
+       Rest takes Outline-QUIET and interaction takes Outline-Text — the same
+       two-step the solid style makes, one row down the table. This read
+       Outline-Text in every state, so an outline button had no label change
+       to give on hover at all; the only feedback was the surface scrim.
+       Outline-Quiet had no consumer anywhere in the library until now, which
+       is why its absence was easy to read as "the token is unused" rather
+       than "the rest state is missing". */
+    color: selected
+      ? `var(--Buttons-${C}-Text)`
+      : `var(--Buttons-${C}-Outline-Quiet)`,
     border: `var(--Button-Border-Width) solid var(--Buttons-${C}-Border)`,
     boxShadow: 'none',
     // Outline (like Ghost) has no fill of its own, so its hover/active
@@ -222,15 +245,18 @@ function outlineStyles(color, selected = false) {
     },
     '&:hover': {
       backgroundColor: 'var(--Hover)',
+      color: `var(--Buttons-${C}-Outline-Text)`,
       boxShadow: 'none',
       ...(!selected && { transform: 'translateY(-1px)' }),
     },
     '&:active': {
       backgroundColor: 'var(--Pressed)',
+      color: `var(--Buttons-${C}-Outline-Text)`,
       ...(!selected && { transform: 'translateY(0)' }),
     },
     '&.Mui-focusVisible': {
       backgroundColor: 'transparent',
+      color: `var(--Buttons-${C}-Outline-Text)`,
       outline: '2px solid var(--Focus-Visible)',
       outlineOffset: '2px',
     },
@@ -240,11 +266,22 @@ function outlineStyles(color, selected = false) {
 function ghostStyles(isTextContent, selected = false) {
   return {
     backgroundColor: 'transparent',
-    // Text ghost buttons read like links (--Hotlink). Icon-only ghosts
-    // are pure affordances — link styling is too colored for a calendar
-    // icon, so they fall back to the secondary text token and only
-    // darken to --Text on hover.
-    color: isTextContent ? 'var(--Hotlink)' : 'var(--Quiet)',
+    /* Text ghost buttons read like links (--Hotlink), which is a deliberate
+       departure from Figma: it binds Buttons/Outline-Quiet here, but a ghost
+       that looks like a link is the better accessibility answer, so --Hotlink
+       stays.
+
+       Icon-only ghosts are pure affordances — link styling is too coloured
+       for a calendar icon. They already had the right SHAPE, muted at rest
+       and darkening on interaction; they were just reading the SURFACE pair
+       rather than the button one, so a ghost in a themed zone ignored its
+       palette the same way outline buttons used to. Ghost is palette-less in
+       the variant map, so `Default` is the palette, matching `map['outline']`. */
+    color: isTextContent
+      ? 'var(--Hotlink)'
+      : (selected
+        ? 'var(--Buttons-Default-Text)'
+        : 'var(--Buttons-Default-Outline-Quiet)'),
     border: 'var(--Button-Border-Width) solid transparent',
     boxShadow: 'none',
     textDecoration: 'none',
@@ -267,22 +304,26 @@ function ghostStyles(isTextContent, selected = false) {
       ...(!selected && { transform: 'translateY(-1px)' }),
       ...(isTextContent
         ? { '& .btn-text-content': { textDecoration: 'none' } }
-        : { color: 'var(--Text)' }),
+        : { color: 'var(--Buttons-Default-Outline-Text)' }),
     },
     '&:active': {
       backgroundColor: 'var(--Pressed)',
       ...(!selected && { transform: 'translateY(0)' }),
       ...(isTextContent
         ? { '& .btn-text-content': { textDecoration: 'none' } }
-        : { color: 'var(--Text)' }),
+        : { color: 'var(--Buttons-Default-Outline-Text)' }),
     },
     '&.Mui-focusVisible': {
       backgroundColor: 'transparent',
       outline: '2px solid var(--Focus-Visible)',
       outlineOffset: '2px',
-      ...(isTextContent && {
-        '& .btn-text-content': { textDecoration: 'none' },
-      }),
+      /* Focus-Visible takes the interaction label too. Figma treats it as one
+         of the three active states, and it was the only one here that left
+         the label on its rest colour — so keyboard focus said less than
+         hover did, on the state where the label matters most. */
+      ...(isTextContent
+        ? { '& .btn-text-content': { textDecoration: 'none' } }
+        : { color: 'var(--Buttons-Default-Outline-Text)' }),
     },
   };
 }
