@@ -385,7 +385,6 @@ export function BottomNavigationShowcase() {
             </Box>
           </Grid>
         </Grid>
-      )}
 
       {/* == ACCESSIBILITY == */}
       </TabPanel>

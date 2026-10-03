@@ -645,7 +645,6 @@ export function ChipShowcase() {
             )}
           </Grid>
         </Grid>
-      )}
 
       {/* == ACCESSIBILITY TAB == */}
       </TabPanel>

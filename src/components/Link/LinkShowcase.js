@@ -239,7 +239,6 @@ export function LinkShowcase() {
             </Box>
           </Grid>
         </Grid>
-      )}
 
       {/* == ACCESSIBILITY == */}
       </TabPanel>

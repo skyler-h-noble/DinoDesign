@@ -369,7 +369,6 @@ if (style === 'solid') {
             </Box>
           </Grid>
         </Grid>
-      )}
 
       {/* ACCESSIBILITY TAB */}
       </TabPanel>
