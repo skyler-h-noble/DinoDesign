@@ -152,8 +152,8 @@ export const Vertical = {
 export const InvertedTrack = {
   render: () => (
     <Stack spacing={3} sx={{ width: 300, p: 2 }}>
-      <Slider defaultValue={40} track="normal" label="Standard Track" />
-      <Slider defaultValue={40} track="inverted" label="Inverted Track" />
+      <Slider defaultValue={40} fill="standard" label="Standard Fill" />
+      <Slider defaultValue={40} fill="inverted" label="Inverted Fill" />
     </Stack>
   ),
 };

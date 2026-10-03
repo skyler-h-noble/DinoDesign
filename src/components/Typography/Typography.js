@@ -650,6 +650,16 @@ const LEGACY_CLASS = {
 const HEADER_COLOR_MAP = {
   header:    'var(--Header)',
   default:   'var(--Header)',
+  /* Take the container's colour instead of a surface role.
+     For text sitting ON a painted fill — a selected rail item, a nav pill,
+     anything whose background comes from the Buttons table — no surface role
+     is right, because the pairing belongs to the fill and not to the surface
+     underneath it. The container sets `color` once and its text follows.
+     Without this key the only way to say it was `style={{ color }}`, which
+     this component strips: every other property in the style object landed
+     and `color` alone was dropped, so the call looked correct, rendered
+     `--Text`, and reported nothing. */
+  inherit:   'inherit',
   primary:   'var(--Header-Primary)',
   secondary: 'var(--Header-Secondary)',
   tertiary:  'var(--Header-Tertiary)',
@@ -663,6 +673,16 @@ const HEADER_COLOR_MAP = {
 const TEXT_COLOR_MAP = {
   standard:  'var(--Text)',
   default:   'var(--Text)',
+  /* Take the container's colour instead of a surface role.
+     For text sitting ON a painted fill — a selected rail item, a nav pill,
+     anything whose background comes from the Buttons table — no surface role
+     is right, because the pairing belongs to the fill and not to the surface
+     underneath it. The container sets `color` once and its text follows.
+     Without this key the only way to say it was `style={{ color }}`, which
+     this component strips: every other property in the style object landed
+     and `color` alone was dropped, so the call looked correct, rendered
+     `--Text`, and reported nothing. */
+  inherit:   'inherit',
   quiet:     'var(--Quiet)',
   // The eyebrow's own role. The design system publishes --Eyebrow per theme
   // AND per surface — it is a deliberate rotation off the surface's palette

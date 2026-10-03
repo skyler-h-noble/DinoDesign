@@ -45,7 +45,7 @@ describe('Slider Component', () => {
     const { container } = render(
       <Slider defaultValue={50} aria-label="No label" />
     );
-    expect(container.querySelector('.slider-primary')).toBeInTheDocument();
+    expect(container.querySelector('.slider-default')).toBeInTheDocument();
   });
 
   // --- Disabled ---
@@ -63,25 +63,42 @@ describe('Slider Component', () => {
 
   // --- Variants ---
 
-  test('defaults to primary variant', () => {
+  /* `default`, not `primary` — a component asked for no colour gets the
+     brand's own button colour, the same as Button and Checkbox. */
+  test('defaults to the default variant', () => {
     const { container } = render(
       <Slider defaultValue={50} aria-label="Test" />
     );
-    expect(container.querySelector('.slider-primary')).toBeInTheDocument();
+    expect(container.querySelector('.slider-default')).toBeInTheDocument();
+    expect(container.querySelector('.slider-primary')).toBeNull();
   });
 
-  test('applies light variant class', () => {
+  test('takes a named palette', () => {
+    const { container } = render(
+      <Slider variant="success" defaultValue={50} aria-label="Test" />
+    );
+    expect(container.querySelector('.slider-success')).toBeInTheDocument();
+  });
+
+  /* Two tests here asserted `.slider-success-light` and
+     `.slider-secondary-light` rendered. They passed, and proved nothing: the
+     class is `'slider-' + variant` interpolated, so any string at all
+     produced a matching class. There was never a `-light` branch in
+     `colorStyles` — an unknown variant missed the map and took the fallback,
+     painting a DIFFERENT colour than the one named. The class those tests
+     found was the only part of `-light` that ever existed. */
+  test('an unknown variant falls back to default rather than another palette', () => {
     const { container } = render(
       <Slider variant="success-light" defaultValue={50} aria-label="Test" />
     );
-    expect(container.querySelector('.slider-success-light')).toBeInTheDocument();
-  });
-
-  test('applies secondary light variant class', () => {
-    const { container } = render(
-      <Slider variant="secondary-light" defaultValue={50} aria-label="Test" />
-    );
-    expect(container.querySelector('.slider-secondary-light')).toBeInTheDocument();
+    const rail = container.querySelector('.MuiSlider-rail');
+    expect(rail).toBeInTheDocument();
+    /* The fallback used to be `primary`, so `success-light` silently painted
+       a primary slider. It is `default` now, matching the default prop. */
+    const css = Array.from(document.styleSheets)
+      .flatMap((sh) => { try { return Array.from(sh.cssRules || []); } catch { return []; } })
+      .map((r) => r.cssText).join('\n');
+    expect(css).not.toContain('--Buttons-Primary-Button');
   });
 
   // --- Sizes ---

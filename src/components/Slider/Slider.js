@@ -9,8 +9,19 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, bevelShadow } from '../_shadows';
  * Full-featured slider with complete design system integration
  *
  * VARIANTS:
- *   SOLID   variant="{color}"           solid track + handle border, all 8 colors
- *   LIGHT   variant="{color}-light"     colored track + thumb, all 8 colors
+ *   variant="{color}"   solid track + handle border, all 9 colors
+ *
+ * There is no `-light` shape. This header documented one for as long as the
+ * component existed, and nothing ever implemented it: `colorStyles` has no
+ * branch for the suffix, so `variant="primary-light"` missed the variant map
+ * and took its unknown-variant fallback — painting the SOLID slider of a
+ * different colour than the one asked for, with no warning. Removed in the
+ * same release that deleted `-light` from Button, Chip, Badge and
+ * SwitchInput; a shape named in the docs and absent from the code is worse
+ * than either having it or not.
+ *
+ * The default is `default`, not `primary`: a component with no variant asked
+ * for gets the brand's own button colour, the same as Button and Checkbox.
  *
  * SIZES: small (12px visual) | medium (16px visual) | large (20px visual)
  *   Thumb element is always 24×24px for WCAG 2.2 AA touch target.
@@ -20,7 +31,12 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, bevelShadow } from '../_shadows';
  * LABEL DISPLAY: off | on | auto (show on hover/focus)
  *
  * ORIENTATION: horizontal (default) | vertical
- * TRACK: normal | inverted
+ * FILL: standard | inverted | false
+ *   Which side of the thumb the fill sits on. Figma's Slider `Type` combines
+ *   this with the thumb count (single / single-inverted / double /
+ *   double-inverted); here the thumb count comes from `value` being an array,
+ *   so `fill` carries only the direction. `track` is MUI's name for it and is
+ *   still accepted, including its `normal`.
  * RANGE: pass value={[20, 80]} for a two-thumb range slider
  */
 
@@ -143,7 +159,7 @@ const SIZE_MAP = {
 export function Slider({
   theme,
   surface,
-  variant = 'primary',
+  variant = 'default',
   size = 'medium',
   value,
   defaultValue,
@@ -155,7 +171,17 @@ export function Slider({
   marks = false,
   valueLabelDisplay = 'off',
   orientation = 'horizontal',
-  track = 'normal',
+  /* Which side of the thumb the fill sits on.
+     `standard` fills from the start of the rail to the thumb; `inverted`
+     fills from the thumb to the end. Figma folds this into its Slider `Type`
+     alongside the thumb count — single / single-inverted / double /
+     double-inverted — because a variant set needs one axis per property and
+     thumb count is not a property there. In code the thumb count is already
+     carried by `value` being an array, so only the fill needs a prop.
+     Named `fill` with `standard`, which is what Figma calls it. `track` is
+     MUI's name for the same thing and keeps working, as does `normal`. */
+  fill,
+  track = 'standard',
   disabled = false,
   label,
   name,
@@ -166,7 +192,12 @@ export function Slider({
   ...props
 }) {
   const variantMap = buildVariantMap();
-  const styles = variantMap[variant] || variantMap['primary'];
+  /* Falls back to the DEFAULT arm, which is also the default prop value — so
+     an unknown variant and an unspecified one land in the same place. These
+     disagreed while the fallback said `primary`: `variant="primary-light"`
+     silently painted a primary slider, which looks deliberate and is why the
+     `-light` shape in the header above survived so long unimplemented. */
+  const styles = variantMap[variant] || variantMap['default'];
   const sizeConfig = SIZE_MAP[size] || SIZE_MAP.medium;
   /* Marks have NO counterpart in the design, and the density is the reason
      this warns rather than silently coping.
@@ -219,7 +250,12 @@ export function Slider({
 
   const isVertical = orientation === 'vertical';
   const isRange = Array.isArray(value) || Array.isArray(defaultValue);
-  const isInverted = track === 'inverted';
+  /* `fill` wins when both are given; `normal` is accepted as a synonym for
+     `standard` so a MUI-shaped call still reads correctly. `false` stays
+     meaningful — it is MUI's "draw no fill at all", which is neither. */
+  const fillMode = fill !== undefined ? fill : track;
+  const isInverted = fillMode === 'inverted';
+  const noFill = fillMode === false;
   const LabelComp = size === 'small' ? BodySmall : Body;
 
   const totalTrack = sizeConfig.track + 2; // inner height + 1px border each side
@@ -441,7 +477,7 @@ export function Slider({
       marks={safeMarks}
       valueLabelDisplay={valueLabelDisplay}
       orientation={orientation}
-      track={track === 'inverted' ? 'inverted' : track === false ? false : 'normal'}
+      track={isInverted ? 'inverted' : noFill ? false : 'normal'}
       disabled={disabled}
       name={name}
       aria-label={ariaLabel}

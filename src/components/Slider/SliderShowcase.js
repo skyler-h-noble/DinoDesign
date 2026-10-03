@@ -94,7 +94,7 @@ export function SliderShowcase() {
   const [isRange, setIsRange]           = useState(false);
   const [valueLabelDisplay, setValueLabelDisplay] = useState('off');
   const [orientation, setOrientation]   = useState('horizontal');
-  const [track, setTrack]               = useState('normal');
+  const [fill, setFill]                 = useState('standard');
   const [marks, setMarks]               = useState(false);
   const [disabled, setDisabled]         = useState(false);
   const [showLabel, setShowLabel]       = useState(true);
@@ -112,7 +112,7 @@ export function SliderShowcase() {
     else parts.push('value={50}');
     if (valueLabelDisplay !== 'off') parts.push('valueLabelDisplay="' + valueLabelDisplay + '"');
     if (orientation !== 'horizontal') parts.push('orientation="vertical"');
-    if (track !== 'normal') parts.push('track="' + track + '"');
+    if (fill !== 'standard') parts.push('fill="' + fill + '"');
     if (marks) parts.push('marks');
     if (disabled) parts.push('disabled');
     parts.push('onChange={handleChange}');
@@ -159,7 +159,7 @@ export function SliderShowcase() {
                 onChange={(_, v) => isRange ? setRangeValue(v) : setValue(v)}
                 valueLabelDisplay={valueLabelDisplay}
                 orientation={orientation}
-                track={track}
+                fill={fill}
                 /* An ARRAY, not `true`. MUI reads `marks={true}` as "a tick at
                    every step", and the step here is 1 over 0–100 — 101 ticks
                    about 3px apart, which renders as a hatched band rather than
@@ -261,15 +261,19 @@ export function SliderShowcase() {
                         positions distinguished the two readings, because both
                         produce a working slider with a plausible fill. */}
                     <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
-                      {isRange ? 'FILL — BETWEEN OR OUTSIDE' : 'FILL — FROM THE START OR THE END'}
+                      FILL
                     </EyebrowSmall>
+                    {/* One pair of labels for both cases. They used to read
+                        Between/Outside for a range and From start/From end for
+                        a single, which named four things for a prop that has
+                        two values — and neither pair matched Figma or MUI. */}
                     <Stack direction="row" spacing={1}>
                       <ControlButton
-                        label={isRange ? 'Between' : 'From start'}
-                        selected={track === 'normal'} onClick={() => setTrack('normal')} />
+                        label="Standard"
+                        selected={fill === 'standard'} onClick={() => setFill('standard')} />
                       <ControlButton
-                        label={isRange ? 'Outside' : 'From end'}
-                        selected={track === 'inverted'} onClick={() => setTrack('inverted')} />
+                        label="Inverted"
+                        selected={fill === 'inverted'} onClick={() => setFill('inverted')} />
                     </Stack>
                   </Box>
 
@@ -280,8 +284,8 @@ export function SliderShowcase() {
                       <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>
                         Two-thumb range slider · Figma Type:{' '}
                         {isRange
-                          ? (track === 'inverted' ? 'double-inverted' : 'double')
-                          : (track === 'inverted' ? 'single-inverted' : 'single')}
+                          ? (fill === 'inverted' ? 'double-inverted' : 'double')
+                          : (fill === 'inverted' ? 'single-inverted' : 'single')}
                       </Caption>
                     </Box>
                     <Switch variant="default-outline" checked={isRange} onChange={(e) => setIsRange(e.target.checked)}

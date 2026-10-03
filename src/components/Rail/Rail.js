@@ -7,6 +7,16 @@ import { Button } from '../Button/Button';
 import { Icon } from '../Icon/Icon';
 import { LabelExtraSmall } from '../Typography';
 
+/* Figma's Buttons collection names its modes in lower-kebab; the CSS tokens
+   are PascalCase, and `black-white` closes up rather than keeping the seam. */
+const BUTTON_PALETTE = {
+  default: 'Default', primary: 'Primary', secondary: 'Secondary',
+  tertiary: 'Tertiary', neutral: 'Neutral', info: 'Info',
+  success: 'Success', warning: 'Warning', error: 'Error',
+  'black-white': 'BlackWhite',
+};
+const cap = (v) => BUTTON_PALETTE[v] || 'Default';
+
 /**
  * Rail (Navigation Rail) Component
  *
@@ -104,6 +114,16 @@ export function Rail({
      Contained is the default because it is what the Nav Rail component is
      assembled from in the file. */
   labelStyle = 'contained',
+  /* Which palette a SELECTED item paints from.
+     In Figma this is not a property on the Rail at all — the selected item's
+     fill binds a variable named plainly `Button`, which lives in the Buttons
+     collection, and that collection's MODE picks the palette. Nothing on the
+     Rail page sets the mode, so the shipped design resolves at `default`.
+     CSS has one flat namespace and cannot hold a `Button` that means a
+     different colour per mode, so the mode becomes a prop and the component
+     interpolates the palette into the token name. Same translation Button
+     makes for its own `variant`. */
+  variant = 'default',
   /* Which Component-Size mode this rail resolves at. A prop rather than
      something inferred from the viewport: the size is a decision about the
      product, not about the window — a dense tool wants the small rail at
@@ -161,7 +181,7 @@ export function Rail({
         section.items.forEach((item) => {
           const idx = globalIndex;
           elements.push(
-            <RailItem key={'item-' + idx} item={item}
+            <RailItem key={'item-' + idx} item={item} variant={variant}
               selected={activeIndex === idx} expanded={isExpanded} labelStyle={labelStyle}
               onClick={() => handleSelect(idx)} />
           );
@@ -171,7 +191,7 @@ export function Rail({
       return elements;
     }
     return items.map((item, i) => (
-      <RailItem key={i} item={item}
+      <RailItem key={i} item={item} variant={variant}
         selected={activeIndex === i} expanded={isExpanded} labelStyle={labelStyle}
         onClick={() => handleSelect(i)} />
     ));
@@ -295,14 +315,31 @@ export function Rail({
  * it, always. That is the entire difference, which is why it is one flag
  * rather than two components.
  */
-function RailItem({ item, selected, expanded, labelStyle, onClick }) {
+function RailItem({ item, selected, expanded, labelStyle, variant = 'default', onClick }) {
   const { icon, avatar, label, badge, disabled } = item;
 
   /* The design's own words: an item is Selected OR it is one of the pointer
      states, never both. Selected wins, so a selected item does not lose its
      fill to a hover. */
-  const stateBg = selected ? 'var(--Button)' : 'transparent';
-  const labelColor = selected || expanded ? 'var(--Text)' : 'var(--Quiet)';
+
+  /* These two read the BUTTONS table, not the surface's — which is what the
+     docblock at the top of this file has specified all along.
+     They were `var(--Button)` and `var(--Text)`: the Figma variable names
+     copied literally off the selected variant, where they are unambiguous
+     because the Buttons collection is its own namespace. CSS has one flat
+     namespace, so the palette has to be written into the name.
+     `Text` happens to exist as a surface role too, so it resolved to the
+     surface's text and looked plausible. `Button` does not exist, and a var()
+     on an undefined property with no fallback is dropped — so a selected item
+     painted nothing. One of the two failures was visible and one was not,
+     from a single cause. */
+  const C = cap(variant);
+  const stateBg = selected ? `var(--Buttons-${C}-Button)` : 'transparent';
+  /* A selected label sits ON that fill, so it takes the fill's own paired
+     foreground. Expanded-but-unselected is still on the surface. */
+  const labelColor = selected
+    ? `var(--Buttons-${C}-Text)`
+    : (expanded ? 'var(--Text)' : 'var(--Quiet)');
 
   /* Contained puts the state on the ITEM; outside puts it on the circle. One
      of the two is always transparent, so they are computed together rather
@@ -310,12 +347,27 @@ function RailItem({ item, selected, expanded, labelStyle, onClick }) {
   const contained = labelStyle !== 'outside';
   const onItem = contained && !expanded;
 
-  const stateStyles = disabled ? {} : {
+  /* "Selected wins" has to be enforced here, not just stated above.
+     Hover and Pressed paint SURFACE tokens, so applying them to a selected
+     item replaced its button fill with the surface's hover tint and its
+     paired label with the surface's text — the exact thing the rule forbids,
+     on every selected item, on every pointer-over.
+     It survived because `stateBg` used to resolve to nothing: against a
+     selected item that painted no fill, a hover that painted one looked like
+     the feature rather than the bug. Fixing the fill is what makes this
+     visible, so the two belong in one change.
+     Focus-visible is NOT in the exclusion — a selected item still has to show
+     where the keyboard is. Only its label recolour is dropped, since the ring
+     carries the affordance and the label is already correct. */
+  const pointerStates = selected ? {} : {
     '&:hover': { backgroundColor: 'var(--Hover)', '& .rail-item-label': { color: 'var(--Text)' } },
     '&:active': { backgroundColor: 'var(--Pressed)', '& .rail-item-label': { color: 'var(--Text)' } },
+  };
+  const stateStyles = disabled ? {} : {
+    ...pointerStates,
     '&:focus-visible': {
       outline: '3px solid var(--Focus-Visible)', outlineOffset: '-3px',
-      '& .rail-item-label': { color: 'var(--Text)' },
+      ...(selected ? {} : { '& .rail-item-label': { color: 'var(--Text)' } }),
     },
   };
 
@@ -345,7 +397,9 @@ function RailItem({ item, selected, expanded, labelStyle, onClick }) {
         borderRadius: expanded ? 0 : ITEM_RADIUS,
         backgroundColor: onItem || expanded ? stateBg : 'transparent',
         boxShadow: selected && onItem ? 'var(--Shadow-1, none)' : 'none',
-        color: 'inherit',
+        /* The ITEM owns the foreground, so the label and the icon inside it
+           both follow the fill without either restating it. */
+        color: labelColor,
         cursor: disabled ? 'not-allowed' : 'pointer',
         /* The token is a RATIO now, so the divide is gone. It read
            calc(var(--Disabled, 38) / 100) because Figma stores 38 — its UI
@@ -405,8 +459,12 @@ function RailItem({ item, selected, expanded, labelStyle, onClick }) {
               repairing it silently. */}
           <LabelExtraSmall
             className="rail-item-label"
+            /* `color="inherit"` rather than style={{ color }} — Typography
+               strips a `color` from the style object and uses its own prop,
+               so the inline form silently rendered --Text on every selected
+               item while the rest of the style object applied normally. */
+            color="inherit"
             style={{
-              color: labelColor,
               textAlign: 'center',
               whiteSpace: expanded ? 'nowrap' : 'normal',
               overflow: 'hidden', textOverflow: 'ellipsis',

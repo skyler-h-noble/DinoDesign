@@ -45,12 +45,14 @@ describe('surface tokens, not the button palette', () => {
        the rail HAS an edge, and not a decorative one — is unchanged. */
     render(<Slider defaultValue={40} />);
     const c = css().replace(/\s+/g, '');
-    /* Primary, not Default: Slider's own default variant is 'primary'. That
-       contradicts the house rule that components default to `default` and
-       never to primary — recorded here because the test is where it surfaced,
-       not fixed here, because changing a default recolours every existing
-       slider. */
-    expect(c).toContain('1pxsolidvar(--Buttons-Primary-Border)');
+    /* Default, as the house rule requires. This read `Primary` and carried a
+       note that Slider's default variant contradicted the rule but was left
+       alone because changing it would recolour every existing slider. It has
+       now been changed, so the note is spent and the assertion follows.
+       Keeping the exception recorded in a passing test is what let it sit:
+       the suite agreed with the code, so nothing ever failed. */
+    expect(c).toContain('1pxsolidvar(--Buttons-Default-Border)');
+    expect(c).not.toContain('var(--Buttons-Primary-Border)');
     expect(c).not.toContain('var(--Border-Variant)');
   });
 
