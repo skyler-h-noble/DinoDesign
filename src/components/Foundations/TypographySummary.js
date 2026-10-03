@@ -22,13 +22,25 @@ const topic = (title) => FOUNDATIONS.find(t => t.title === title);
 
 /* The three Alt Display modes, shown together.
    Figma's Alt-Display collection resolves Color-Stop-1 and -2 differently per
-   mode, so all three are the same two-stop gradient and only `gradient` has
-   ends that differ. Side by side is the only way that reads as one mechanism
-   rather than three treatments. */
+   mode, so all three are the same two-stop gradient and the mode decides
+   whether the ends differ. Side by side is the only way that reads as one
+   mechanism rather than three treatments.
+
+   `default` used to point both stops at --Header, which made it identical to a
+   plain Display and was the whole reason the gradient never appeared: the
+   Alt-Display-Gradient paint style was correct, bound on both stops, and used
+   by nothing — and the mode it inherited flattened it anyway. Default now
+   carries the gradient, so a brand gets it without choosing it.
+
+   That leaves `gradient` holding the same pair as `default`, which looks like
+   the redundancy invariant 2 warns about. It is the opposite case: the test is
+   not whether the copies match but whether anything SELECTS between them, and
+   here something does — a frame pinned to `gradient` keeps the gradient if
+   `default` is ever repointed again. Kept deliberately, not overlooked. */
 const ALT_MODES = [
-  { mode: 'default',  note: 'both stops → --Header. Solid, and the fallback when a brand sets no alt color.' },
+  { mode: 'default',  note: 'stops → --Alt-Color-Gradient-Stop-1 / -2. The gradient, because this is the mode a frame inherits when nobody chooses.' },
   { mode: 'colored',  note: 'both stops → --Alt-Display-Color. Solid, in the brand’s alt color.' },
-  { mode: 'gradient', note: 'stops → --Alt-Color-Gradient-Stop-1 / -2. The only mode whose ends differ.' },
+  { mode: 'gradient', note: 'the same pair as default. Kept as a name you can point at, not a different result.' },
 ];
 
 export function TypographySummary() {
@@ -40,7 +52,7 @@ export function TypographySummary() {
         <FoundationTopic topic={topic('The Alt Display')} />
         <HowToSlot
           title="The Alt-Display dropdown in Figma's right-hand panel, showing Default, Colored and Gradient"
-          shows="The paint style is already a two-stop gradient with both stops bound — it renders SOLID because the Alt-Display collection sits on Default, where both stops resolve to Header. Set the frame's mode to Gradient and the same style becomes a gradient."
+          shows="Pick Colored for a solid alt color. Default already paints the gradient, so the usual reason to open this menu is to turn the gradient OFF."
         />
         <VStack gap="var(--Sizing-2)">
           <H5>The three modes</H5>
