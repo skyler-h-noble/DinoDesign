@@ -9,15 +9,15 @@ import { useGhost, ghostBlockSx } from '../_ghost';
  * Wraps any MUI icon with design-system color tokens and sizing.
  *
  * COLORS:
- *   default    var(--Icons-Default)         Two-tone: var(--Icons-Variant-Default)
- *   primary    var(--Icons-Primary)         Two-tone: var(--Icons-Variant-Primary)
- * *   secondary  var(--Icons-Secondary)       Two-tone: var(--Icons-Variant-Secondary)
- *   tertiary   var(--Icons-Tertiary)        Two-tone: var(--Icons-Variant-Tertiary)
- *   neutral    var(--Icons-Neutral)         Two-tone: var(--Icons-Variant-Neutral)
- *   info       var(--Icons-Info)            Two-tone: var(--Icons-Variant-Info)
- *   success    var(--Icons-Success)         Two-tone: var(--Icons-Variant-Success)
- *   warning    var(--Icons-Warning)         Two-tone: var(--Icons-Variant-Warning)
- *   error      var(--Icons-Error)           Two-tone: var(--Icons-Variant-Error)
+ *   default    var(--Icons-Default)         Two-tone: the same at 50% opacity
+ *   primary    var(--Icons-Primary)         Two-tone: the same at 50% opacity
+ * *   secondary  var(--Icons-Secondary)       Two-tone: the same at 50% opacity
+ *   tertiary   var(--Icons-Tertiary)        Two-tone: the same at 50% opacity
+ *   neutral    var(--Icons-Neutral)         Two-tone: the same at 50% opacity
+ *   info       var(--Icons-Info)            Two-tone: the same at 50% opacity
+ *   success    var(--Icons-Success)         Two-tone: the same at 50% opacity
+ *   warning    var(--Icons-Warning)         Two-tone: the same at 50% opacity
+ *   error      var(--Icons-Error)           Two-tone: the same at 50% opacity
  *
  * SIZES (Figma-aligned):
  *   xs      12px
@@ -30,7 +30,7 @@ import { useGhost, ghostBlockSx } from '../_ghost';
  *   filled     HomeIcon            (default)
  *   outlined   HomeOutlined
  *   rounded    HomeRounded
- *   twotone    HomeTwoTone         (uses Icons-Variant-{Color} for secondary fill)
+ *   twotone    HomeTwoTone         (secondary fill = the icon colour at 50%)
  *   sharp      HomeSharp
  *
  * DISABLED: 0.38 opacity
@@ -92,6 +92,9 @@ export const ICON_SIZE_MAP = {
 
 const SIZE_MAP = ICON_SIZE_MAP;
 
+/** Colors/Icon-Variant-Opacity in the Modes collection — 50 in both modes. */
+const ICON_VARIANT_OPACITY = 50;
+
 export function Icon({
   children,
   color = 'default',
@@ -114,8 +117,23 @@ export function Icon({
 
   // Color token — 'default' inherits from parent (e.g. Button text color)
   const colorToken = color === 'default' ? 'inherit' : 'var(--Icons-' + C + ')';
-  // Two-tone variant token (used for secondary fill in TwoTone icons)
-  const variantToken = 'var(--Icons-Variant-' + C + ')';
+  /* The two-tone secondary fill is the icon's OWN colour at a fixed opacity,
+     not a second token.
+
+     This read var(--Icons-Variant-{Color}), which is not a token: the Icons
+     collection has Icon, Icon-Variant and On-Icon, but Icon-Variant is not a
+     separate colour — it is `{ color: <the same Icon alias>, opacity: <shared
+     variable> }`, and every one of the ten modes points at the same opacity.
+     That variable is Colors/Icon-Variant-Opacity = 50, in light mode and dark.
+
+     So there was nothing for the generator to emit, and the reference had no
+     fallback: --twotone-variant resolved to nothing and the secondary fill of
+     every TwoTone icon came out uncoloured. Composing it here is both correct
+     and the only form that can follow `default`, where the icon inherits its
+     colour from whatever it sits in and no token names it. */
+  const iconColor = color === 'default' ? 'currentColor' : 'var(--Icons-' + C + ')';
+  const variantToken =
+    `color-mix(in srgb, ${iconColor} ${ICON_VARIANT_OPACITY}%, transparent)`;
 
   return (
     <Box

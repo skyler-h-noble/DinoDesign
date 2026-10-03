@@ -242,24 +242,24 @@ export function SliderShowcase() {
                         for. Figma's Slider has a single Type axis whose four
                         values are exactly this toggle crossed with Range:
 
-                          single + normal    single-start-fill
-                          single + inverted  single-end-fill
-                          range  + normal    double-middle-fill
-                          range  + inverted  double-outside-fill
+                          single + normal    single
+                          single + inverted  single-inverted
+                          range  + normal    double
+                          range  + inverted  double-inverted
 
                         So the four Figma Types already existed in code and were
                         simply unreachable by name. The label now changes with
                         Range so it describes the slider in front of you.
 
-                        The single pair was mapped BACKWARDS here first, and the
-                        names are why: "single-end-fill" reads like the thumb
-                        ends the fill, i.e. MUI's normal. It is the opposite.
-                        Settled by geometry rather than by reading —
-                        single-start-fill has `Left Fill x=0 w=115` before the
-                        handle, so the fill is at the START, which is normal;
-                        single-end-fill has no left fill at all. Both readings
-                        produce a working slider, so only the x positions tell
-                        them apart. */}
+                        The Type values were renamed in Figma to match these
+                        props exactly, so the mapping is now one word to one
+                        word and there is nothing left to get backwards. It was
+                        worth getting wrong once: the previous names described
+                        the RESULT — single-end-fill, double-outside-fill — and
+                        "single-end-fill" reads like the thumb ends the fill,
+                        which is the opposite of what it drew. Only the x
+                        positions distinguished the two readings, because both
+                        produce a working slider with a plausible fill. */}
                     <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                       {isRange ? 'FILL — BETWEEN OR OUTSIDE' : 'FILL — FROM THE START OR THE END'}
                     </EyebrowSmall>
@@ -280,8 +280,8 @@ export function SliderShowcase() {
                       <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>
                         Two-thumb range slider · Figma Type:{' '}
                         {isRange
-                          ? (track === 'inverted' ? 'double-outside-fill' : 'double-middle-fill')
-                          : (track === 'inverted' ? 'single-end-fill' : 'single-start-fill')}
+                          ? (track === 'inverted' ? 'double-inverted' : 'double')
+                          : (track === 'inverted' ? 'single-inverted' : 'single')}
                       </Caption>
                     </Box>
                     <Switch variant="default-outline" checked={isRange} onChange={(e) => setIsRange(e.target.checked)}
