@@ -1,7 +1,7 @@
 // src/components/Card/Card.js
 import React, { createContext, useContext } from 'react';
 import { Box } from '@mui/material';
-import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3, SHADOW_LEVEL_4 } from '../_shadows';
+import { SHADOW_LEVEL_0, SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3 } from '../_shadows';
 
 /**
  * Card Component
@@ -126,9 +126,27 @@ export function Card({
       : '1px solid var(--Buttons-Default-Border)';
 
   // Elevation shadows (on outer shell, inherits parent dropshadow-color)
-  const restShadow  = elevated ? SHADOW_LEVEL_3 : SHADOW_LEVEL_2;
-  const hoverShadow = elevated ? SHADOW_LEVEL_4 : SHADOW_LEVEL_3;
-  const activeShadow = elevated ? SHADOW_LEVEL_2 : SHADOW_LEVEL_1;
+  /* Level 1 at rest, not 2 — read off the file rather than chosen.
+     The five Effect-Levels ARE the five named effect styles, and the mapping
+     is exact once you line up the alphas and radii in a published bundle:
+
+       Level 1  a=0.145 r=1.6   Card / Accordion, Handle, Alert, Bottom-Sheet
+       Level 2  a=0.169 r=3.6   Card-Hover / App bars, Toolbars, Menus, Tooltip
+       Level 3  a=0.200 r=8.1   FAB, Snackbar
+       Level 4  a=0.184 r=18.1  FAB-Hover
+       Level 5  a=0.251 r=40.4  Dialog & Modal
+
+     So Figma's `Card` style is Level ONE. This sat at Level 2, which is the
+     App-bar step — every card in every brand wore a shadow a full level too
+     heavy, and a card nested in a card wore it twice. It reads as a glow rather
+     than as a mistake, because an over-heavy shadow is still a plausible
+     shadow, and the number 2 looks as reasonable in the source as 1 does.
+
+     elevated moves the whole set up one, which is what the prop means and what
+     keeps `Card` and `Card-Hover` one step apart at either setting. */
+  const restShadow  = elevated ? SHADOW_LEVEL_2 : SHADOW_LEVEL_1;
+  const hoverShadow = elevated ? SHADOW_LEVEL_3 : SHADOW_LEVEL_2;
+  const activeShadow = elevated ? SHADOW_LEVEL_1 : SHADOW_LEVEL_0;
 
   return (
     <CardContext.Provider value={{ variant, color, size, orientation }}>
@@ -192,7 +210,13 @@ export function Card({
             '&:active': {
               cursor: 'grabbing',
               zIndex: 10,
-              boxShadow: SHADOW_LEVEL_4,
+              /* Level 3 — FAB, Snackbar: the step for something floating free
+                 of the page. It was 4 (FAB-Hover) when rest was 2, so moving
+                 rest to the level the design names would have widened the lift
+                 from two steps to three and made dragging feel heavier, with
+                 nobody deciding that. The design has no drag state, so the
+                 RELATIONSHIP is the thing to preserve, not the number. */
+              boxShadow: SHADOW_LEVEL_3,
               transform: 'scale(1.02)',
               // Thicker border on active so the outer shell visually grows
               // along with the scale (a 1px border at 1.02x is imperceptible).
