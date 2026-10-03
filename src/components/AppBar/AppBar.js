@@ -7,6 +7,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { SearchField } from '../SearchField/SearchField';
 import { Tabs, TabList, Tab } from '../Tabs/Tabs';
 import { Drawer } from '../Drawer/Drawer';
+import { H3 } from '../Typography';
 import { Button } from '../Button/Button';
 import { SHADOW_LEVEL_1 } from '../_shadows';
 
@@ -124,29 +125,45 @@ function DesktopAppBar({
             </AppBarIconButton>
           )}
 
+          {/* The wordmark is H3 — the STYLE, on a span or a button.
+              It was `fontWeight: 700, fontSize: '18px'` and no font-family at
+              all, so it inherited whatever face the bar happened to give it and
+              the brand name came out in a typeface nobody had chosen. H3 reads
+              --Font-Family-Header, --H3-Font-Weight and --Font-Variation-Header,
+              so the wordmark picks up every Google Sans Flex axis the design
+              tunes — weight, width, optical size, slant, grade, roundness —
+              instead of sitting at the variable font's defaults beside headings
+              that do not.
+
+              component="span" / "button" on purpose: H3 renders an <h3>, and a
+              wordmark is not a section heading. Left as one it joins the
+              document outline above the page's own H1 and a screen reader
+              announces the brand as a heading on every screen. The style is
+              what was wanted here; the semantics were not.
+
+              Nothing new in Figma — this IS H3, so there is no wordmark
+              variable or style to keep in step. */}
           {/* Brand: slot overrides default rendering */}
           {brand !== undefined ? (
             onBrandClick ? (
-              <Box
+              <H3
                 component="button"
                 type="button"
                 onClick={onBrandClick}
                 sx={{
                   background: 'transparent', border: 'none', padding: 0,
-                  cursor: 'pointer', color: 'inherit', font: 'inherit',
-                  fontWeight: 700, fontSize: '18px',
-                  whiteSpace: 'nowrap', flexShrink: 0,
+                  cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
                 }}
               >
                 {brand}
-              </Box>
+              </H3>
             ) : (
-              <Box sx={{ fontWeight: 700, fontSize: '18px', whiteSpace: 'nowrap', flexShrink: 0 }}>{brand}</Box>
+              <H3 component="span" sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}>{brand}</H3>
             )
           ) : brandType === 'logo' ? (
             <Box sx={{ width: 32, height: 32, borderRadius: '6px', backgroundColor: 'var(--Text)', opacity: 0.8, flexShrink: 0 }} aria-label="Company logo" />
           ) : (
-            <Box sx={{ fontWeight: 700, fontSize: '18px', whiteSpace: 'nowrap', flexShrink: 0 }}>{companyName}</Box>
+            <H3 component="span" sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}>{companyName}</H3>
           )}
 
           {/* Center: slot overrides default search/tabs.
