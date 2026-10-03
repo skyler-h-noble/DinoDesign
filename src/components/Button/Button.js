@@ -196,7 +196,20 @@ function outlineStyles(color, selected = false) {
   const C = seg(color);
   return {
     backgroundColor: 'transparent',
-    color: 'var(--Text)',
+    /* Buttons::Outline-Text — the label colour for a button with NO fill.
+       This was --Text, the surface's own body colour, so an outline button's
+       label ignored its palette entirely: a success outline and an error
+       outline had identical text. The token exists per palette and nothing in
+       this library read it, which is why its one gap (BlackWhite) went
+       unnoticed — a token nobody consumes cannot be missed.
+
+       It is a different colour from --Buttons-{C}-Text on purpose. That one is
+       the label ON the fill and is contrast-checked against it; Outline-Text is
+       the label on the SURFACE, checked against that instead. Figma keeps them
+       apart in the same way: the Selected state, which is the only outline
+       variant that gains a fill, is also the only one that switches to
+       Buttons::Text. */
+    color: `var(--Buttons-${C}-Outline-Text)`,
     border: `var(--Button-Border-Width) solid var(--Buttons-${C}-Border)`,
     boxShadow: 'none',
     // Outline (like Ghost) has no fill of its own, so its hover/active
