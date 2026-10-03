@@ -262,10 +262,20 @@ export const PROP_EXAMPLES = {
       <Fab icon={<Icon size="medium"><EditIcon /></Icon>} extended label="Edit" />
     </HStack>,
 
-    /* animate is CODE-ONLY — Figma has no such property, so there is nothing
-       to bind it to and nothing to check it against. It is a mount transition,
-       which a static design file cannot express. Shown as the resting state,
-       with the behaviour described rather than looped. */
+    /* animate is a BOOLEAN in Figma now — Animate#9244:86, default false,
+       beside Extended on the FAB set. This said it was code-only, which was
+       true when written and stopped being true when the property was added;
+       the comment had no way to notice.
+
+       It is backed by a FAB-Animation component set with a Property 1 axis of
+       Start | Middle | End — the three keyframes of the pulse, drawn as states
+       because a static file cannot show motion. The instance sits inside
+       Theme-Container at 48x48 and is hidden on every State variant, so the
+       boolean reveals it rather than swapping a variant.
+
+       So the design does not specify the TIMING, only the shape of each
+       keyframe. The duration and easing remain code's to choose, and that is
+       the honest line to draw rather than "Figma has no such property". */
     animate: () => <HStack gap="var(--Sizing-2)" style={{ alignItems: 'center' }}>
       <Fab icon={<Icon size="medium"><AddIcon /></Icon>} ariaLabel="Add" />
       <Fab icon={<Icon size="medium"><AddIcon /></Icon>} animate ariaLabel="Add, animated" />

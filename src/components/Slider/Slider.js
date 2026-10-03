@@ -64,24 +64,32 @@ function colorStyles(color) {
      looks like a styling choice. --Buttons-Default-Button is the real name and
      is defined 72 times in a published mode sheet. */
   return {
-    /* Figma binds the Handle and both bar edges to Buttons::Border, and they
-       stay on the SURFACE --Border here instead. A deliberate divergence, not
-       an oversight — see the note above the component: the thumb, rail and
-       focus ring each carry a contrast REQUIREMENT, and --Border is the 3:1
-       token guaranteed against the surface they sit on. --Buttons-{C}-Border
-       is guaranteed against its own button fill, which is a different
-       comparison, so a named colour would move the edge to a token nothing
-       has checked against the page. SliderColoring.test.js pins this.
+    /* Buttons::Border, as Figma binds the Handle and both bar edges.
+       The thumb, rail edge and track edge move WITH the fill, so a coloured
+       slider is coloured throughout rather than a palette fill between surface
+       edges.
 
-       The two agree at `default` and part company the moment a colour is set,
-       so the divergence is invisible until it matters. Raised with the design
-       owner rather than resolved here. */
-    thumb:          'var(--Border)',
+       This file previously kept them on the surface --Border, and the reasoning
+       is worth keeping because it is the thing to re-check if contrast ever
+       looks wrong here: --Border is the 3:1 token guaranteed against the
+       SURFACE, while --Buttons-{C}-Border is guaranteed against its own button
+       fill. Those are different comparisons, and the two tokens agree at
+       `default` and diverge the moment a colour is set.
+
+       The design owner's call, made deliberately: the design specifies the
+       button border here, and its palettes are generated with the border tone
+       chosen for contrast, so the guarantee comes from the generator rather
+       than from which token the component reaches for. */
+    thumb:          'var(--Buttons-' + C + '-Border)',
+    /* The thumb's own edge stays --Background. It is what separates the handle
+       from the fill it sits on AND from the focus ring outside it, so both
+       comparisons land on a known colour rather than on whatever the handle
+       happens to be overlapping at that point on the track. */
     thumbBorder:    '1px solid var(--Background)',
     track:          'var(--Buttons-' + C + '-Button)',
-    trackBorder:    '1px solid var(--Border)',
+    trackBorder:    '1px solid var(--Buttons-' + C + '-Border)',
     rail:           'var(--Background)',
-    railBorder:     '1px solid var(--Border)',
+    railBorder:     '1px solid var(--Buttons-' + C + '-Border)',
     /* The label stays on the SURFACE pair, inverted, and deliberately so: it is
        --Text on --Background, which is legible on any surface by definition.
        A colour from the button palette is not. Figma agrees — Label is

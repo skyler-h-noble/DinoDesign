@@ -74,6 +74,18 @@ function ColorSwatchButton({ color, selected, onClick }) {
 }
 
 /* ── Main Showcase ── */
+/* Marks have no counterpart in Figma — its Slider set has Type and Orientation
+   and no mark element — so this is the demo choosing a sensible scale rather
+   than mirroring a spec. Quarter points, labelled, which is what the control is
+   for. */
+const DEMO_MARKS = [
+  { value: 0, label: '0' },
+  { value: 25, label: '25' },
+  { value: 50, label: '50' },
+  { value: 75, label: '75' },
+  { value: 100, label: '100' },
+];
+
 export function SliderShowcase() {
   const [color, setColor]               = useState('default');
   const [size, setSize]                 = useState('medium');
@@ -148,7 +160,16 @@ export function SliderShowcase() {
                 valueLabelDisplay={valueLabelDisplay}
                 orientation={orientation}
                 track={track}
-                marks={marks}
+                /* An ARRAY, not `true`. MUI reads `marks={true}` as "a tick at
+                   every step", and the step here is 1 over 0–100 — 101 ticks
+                   about 3px apart, which renders as a hatched band rather than
+                   a scale. The demo was showing the control misused.
+
+                   Five labelled marks is what a scale actually looks like, and
+                   it also demonstrates the form worth copying: the array is the
+                   only way to put LABELS on the ticks, which `true` cannot do
+                   at any density. */
+                marks={marks ? DEMO_MARKS : false}
                 disabled={disabled}
                 aria-label={!showLabel ? 'Volume' : undefined}
               />
@@ -215,10 +236,30 @@ export function SliderShowcase() {
 
                   {/* Track */}
                   <Box sx={{ mt: 3 }}>
-                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>TRACK</EyebrowSmall>
+                    {/* Named by what it DOES, and by what Figma calls the result.
+                        "Normal / Inverted" is MUI's vocabulary and says nothing
+                        about which end fills — the one thing this control is
+                        for. Figma's Slider has a single Type axis whose four
+                        values are exactly this toggle crossed with Range:
+
+                          single + normal    single-end-fill
+                          single + inverted  single-start-fill
+                          range  + normal    double-middle-fill
+                          range  + inverted  double-outside-fill
+
+                        So the four Figma Types already existed in code and were
+                        simply unreachable by name. The label now changes with
+                        Range so it describes the slider in front of you. */}
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
+                      {isRange ? 'FILL — BETWEEN OR OUTSIDE' : 'FILL — FROM THE START OR THE END'}
+                    </EyebrowSmall>
                     <Stack direction="row" spacing={1}>
-                      <ControlButton label="Normal" selected={track === 'normal'} onClick={() => setTrack('normal')} />
-                      <ControlButton label="Inverted" selected={track === 'inverted'} onClick={() => setTrack('inverted')} />
+                      <ControlButton
+                        label={isRange ? 'Between' : 'From start'}
+                        selected={track === 'normal'} onClick={() => setTrack('normal')} />
+                      <ControlButton
+                        label={isRange ? 'Outside' : 'From end'}
+                        selected={track === 'inverted'} onClick={() => setTrack('inverted')} />
                     </Stack>
                   </Box>
 
@@ -226,7 +267,12 @@ export function SliderShowcase() {
                   <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box>
                       <Label>Range</Label>
-                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Two-thumb range slider</Caption>
+                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>
+                        Two-thumb range slider · Figma Type:{' '}
+                        {isRange
+                          ? (track === 'inverted' ? 'double-outside-fill' : 'double-middle-fill')
+                          : (track === 'inverted' ? 'single-start-fill' : 'single-end-fill')}
+                      </Caption>
                     </Box>
                     <Switch variant="default-outline" checked={isRange} onChange={(e) => setIsRange(e.target.checked)}
                       size="small" aria-label="Range" />

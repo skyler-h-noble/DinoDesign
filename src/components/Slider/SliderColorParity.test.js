@@ -63,21 +63,32 @@ describe('Slider colors match Figma', () => {
     expect(src).toMatch(/track:\s*'var\(--Buttons-' \+ C \+ '-Button\)'/);
   });
 
-  it('keeps rail, track edge and thumb on the SURFACE border, not the palette', () => {
-    /* A KNOWN divergence from Figma, pinned so it stays deliberate.
-       Figma binds the Handle and both bar edges to Buttons::Border. The code
-       uses --Border, because each of those carries a contrast requirement
-       against the surface and --Border is the 3:1 token guaranteed against it;
-       --Buttons-{C}-Border is guaranteed against its own button fill, which is
-       a different comparison. The two agree at `default` and diverge the moment
-       a colour is set — so following Figma here would move the edge to a token
-       nothing has checked against the page, invisibly. */
+  it('moves thumb, rail edge and track edge onto the button palette', () => {
+    /* Figma binds the Handle and both bar edges to Buttons::Border, and the
+       component follows, so a coloured slider is coloured throughout instead of
+       a palette fill between surface-grey edges. The screenshots that prompted
+       this showed the fill changing per variant while the thumb stayed grey.
+
+       What that trades: --Border is the 3:1 token guaranteed against the
+       SURFACE, --Buttons-{C}-Border against its own button fill. Different
+       comparisons, identical at `default`, divergent the moment a colour is
+       set. Taken deliberately — the palettes are generated with the border tone
+       chosen for contrast, so the guarantee moves to the generator. */
     const src = fs.readFileSync(path.join(__dirname, 'Slider.js'), 'utf8');
     for (const k of ['thumb', 'trackBorder', 'railBorder']) {
       const line = src.match(new RegExp(`\\b${k}:\\s*([^,]+),`))?.[1] || '';
-      expect(`${k} on surface --Border: ${/var\(--Border\)/.test(line)}`)
-        .toBe(`${k} on surface --Border: true`);
+      expect(`${k} follows the palette: ${/--Buttons-' \+ C \+ '-Border/.test(line)}`)
+        .toBe(`${k} follows the palette: true`);
     }
+  });
+
+  it("keeps the thumb's own edge on --Background", () => {
+    /* The one surface token that stays, and it is load-bearing: it separates the
+       handle from the fill it sits on and from the focus ring outside it, so
+       both comparisons land on a known colour rather than on whatever the
+       handle is overlapping at that point on the track. */
+    const src = fs.readFileSync(path.join(__dirname, 'Slider.js'), 'utf8');
+    expect(src).toMatch(/thumbBorder:\s*'1px solid var\(--Background\)'/);
   });
 
   it('keeps the focus ring flush, with no halo between', () => {

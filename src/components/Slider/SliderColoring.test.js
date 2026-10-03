@@ -32,15 +32,26 @@ describe('the focus indicator is measurable', () => {
 });
 
 describe('surface tokens, not the button palette', () => {
-  test('the rail has a --Border edge, not a decorative one', () => {
+  test('the rail has a button-palette edge, not a decorative one', () => {
     /* It was --Border-Variant as a fill with no edge, and Border-Variant is the
-       token documented as DECORATIVE — no contrast requirement. A slider rail
-       is the boundary of an interactive control, so it needs --Border, the 3:1
-       one. */
+       token documented as DECORATIVE — no contrast requirement. A slider rail is
+       the boundary of an interactive control, so it needs an edge that carries
+       one.
+
+       That edge was the surface --Border and is now --Buttons-{C}-Border, to
+       match what Figma binds. The two are identical at `default`, so this test
+       reads the same either way; what changed is which token carries the
+       requirement once a colour is set. The point it has always defended — that
+       the rail HAS an edge, and not a decorative one — is unchanged. */
     render(<Slider defaultValue={40} />);
     const c = css().replace(/\s+/g, '');
-    expect(c).toContain('1pxsolidvar(--Border)');
-    expect(c).not.toContain('background-color:var(--Border-Variant)');
+    /* Primary, not Default: Slider's own default variant is 'primary'. That
+       contradicts the house rule that components default to `default` and
+       never to primary — recorded here because the test is where it surfaced,
+       not fixed here, because changing a default recolours every existing
+       slider. */
+    expect(c).toContain('1pxsolidvar(--Buttons-Primary-Border)');
+    expect(c).not.toContain('var(--Border-Variant)');
   });
 
   test('the label inverts the surface pair', () => {
