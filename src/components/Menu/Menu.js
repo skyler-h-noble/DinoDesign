@@ -1,4 +1,11 @@
 // src/components/Menu/Menu.js
+/* Level from the Figma effect style that NAMES this component.
+   The five Effect-Levels are the five styles:
+     1  Card / Accordion, Handle, Alert, Bottom-Sheet
+     2  Card-Hover / App bars, Toolbars, Menus, Tooltip, Bottom-Sheet-Hover
+     3  FAB, Snackbar
+     4  FAB-Hover
+     5  Dialog & Modal */
 import React, { createContext, useContext, useState, useRef, useEffect, useCallback, useId } from 'react';
 import { Box } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -196,7 +203,10 @@ export function Menu({ children, className = '', placement = 'bottom-start', sx 
         border: '1px solid ' + borderToken,
         // Menu's floating panel — same frame role as Select's dropdown.
         borderRadius: 'var(--Dropdown-Frame-Radius, var(--Input-Radius, var(--Style-Border-Radius, 4px)))',
-        boxShadow: 'none',
+        /* "Menus" sits in the Level 2 style, with App bars, Toolbars and
+           Tooltip. The panel floats over the page and had no shadow at all,
+           so it read as part of whatever it covered. */
+        boxShadow: SHADOW_LEVEL_2,
         overflow: 'hidden',
         ...sx,
       }}

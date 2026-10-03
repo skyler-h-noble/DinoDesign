@@ -2,7 +2,14 @@
 import React, { useRef, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { Box } from '@mui/material';
-import { SHADOW_LEVEL_4 } from '../_shadows';
+/* Level from the Figma effect style that NAMES this component.
+   The five Effect-Levels are the five styles:
+     1  Card / Accordion, Handle, Alert, Bottom-Sheet
+     2  Card-Hover / App bars, Toolbars, Menus, Tooltip, Bottom-Sheet-Hover
+     3  FAB, Snackbar
+     4  FAB-Hover
+     5  Dialog & Modal */
+import { SHADOW_LEVEL_2 } from '../_shadows';
 
 /**
  * Popover Component
@@ -88,7 +95,8 @@ export function Popover({
         backgroundColor: 'var(--Background)',
         border: '1px solid var(--Border)',
         borderRadius: 'var(--Style-Border-Radius)',
-        boxShadow: SHADOW_LEVEL_4,
+        boxShadow: SHADOW_LEVEL_2,  // the Menus / Tooltip step
+
         ...sx,
       }}
     >

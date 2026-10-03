@@ -3,7 +3,14 @@ import React from 'react';
 import { Box as MuiBox } from '@mui/material';
 import ImageIcon from '@mui/icons-material/Image';
 import { Icon } from '../Icon/Icon';
-import { SHADOW_LEVEL_2, SHADOW_LEVEL_3, SHADOW_LEVEL_4 } from '../_shadows';
+/* Level from the Figma effect style that NAMES this component.
+   The five Effect-Levels are the five styles:
+     1  Card / Accordion, Handle, Alert, Bottom-Sheet
+     2  Card-Hover / App bars, Toolbars, Menus, Tooltip, Bottom-Sheet-Hover
+     3  FAB, Snackbar
+     4  FAB-Hover
+     5  Dialog & Modal */
+import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3 } from '../_shadows';
 
 /**
  * Ratio Component
@@ -125,8 +132,10 @@ export function Ratio({
   const isDefault = variant === 'default';
 
   // Level 2 rest / Level 3 hover; bump to 3→4 when elevated, matching Box.
-  const restShadow = elevated ? SHADOW_LEVEL_3 : SHADOW_LEVEL_2;
-  const hoverShadow = elevated ? SHADOW_LEVEL_4 : SHADOW_LEVEL_3;
+  /* The Card pair. Ratio is a themed surface with the same shell as Box, so
+     it rests where Card rests; it carried Card's OLD, one-too-heavy pair. */
+  const restShadow = elevated ? SHADOW_LEVEL_2 : SHADOW_LEVEL_1;
+  const hoverShadow = elevated ? SHADOW_LEVEL_3 : SHADOW_LEVEL_2;
 
   return (
     <MuiBox

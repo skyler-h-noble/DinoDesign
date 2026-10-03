@@ -1,4 +1,12 @@
 // src/components/Modal/Modal.js
+/* Level from the Figma effect style that NAMES this component.
+   The five Effect-Levels are the five styles:
+     1  Card / Accordion, Handle, Alert, Bottom-Sheet
+     2  Card-Hover / App bars, Toolbars, Menus, Tooltip, Bottom-Sheet-Hover
+     3  FAB, Snackbar
+     4  FAB-Hover
+     5  Dialog & Modal */
+import { SHADOW_LEVEL_5 } from '../_shadows';
 import React, { useEffect, useRef, useState } from 'react';
 import { Box } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
@@ -222,7 +230,11 @@ export function Modal({
           // Visual
           backgroundColor: 'var(--Background)',
           color: 'var(--Text)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.24)',
+          /* "Dialog & Modal" is the Level 5 style. This was a hardcoded
+             black shadow, so it ignored the brand's dropshadow tint and its
+             intensity entirely — the one component where the shadow is most
+             of the elevation. */
+          boxShadow: SHADOW_LEVEL_5,
           display: 'flex', flexDirection: 'column',
           overflow: 'hidden',
           // Animation

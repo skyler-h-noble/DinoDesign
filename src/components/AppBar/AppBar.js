@@ -9,7 +9,14 @@ import { Tabs, TabList, Tab } from '../Tabs/Tabs';
 import { Drawer } from '../Drawer/Drawer';
 import { H3 } from '../Typography';
 import { Button } from '../Button/Button';
-import { SHADOW_LEVEL_1 } from '../_shadows';
+/* Level from the Figma effect style that NAMES this component.
+   The five Effect-Levels are the five styles:
+     1  Card / Accordion, Handle, Alert, Bottom-Sheet
+     2  Card-Hover / App bars, Toolbars, Menus, Tooltip, Bottom-Sheet-Hover
+     3  FAB, Snackbar
+     4  FAB-Hover
+     5  Dialog & Modal */
+import { SHADOW_LEVEL_2 } from '../_shadows';
 
 /**
  * AppBar Component
@@ -112,7 +119,8 @@ function DesktopAppBar({
         display: 'flex', alignItems: 'center', height: 64,
         px: 2, gap: 2,
         backgroundColor: 'var(--Background)', color: 'var(--Text)',
-        boxShadow: SHADOW_LEVEL_1,
+        boxShadow: SHADOW_LEVEL_2,  // App bars
+
         fontFamily: 'inherit',
         ...sx,
       }}
@@ -285,7 +293,8 @@ function MobileAppBar({
 
   const containerSx = {
     backgroundColor: 'var(--Background)', color: 'var(--Text)',
-    boxShadow: SHADOW_LEVEL_1,
+    boxShadow: SHADOW_LEVEL_2,  // App bars
+
     fontFamily: 'inherit', width: '100%', maxWidth: 420,
     ...sx,
   };

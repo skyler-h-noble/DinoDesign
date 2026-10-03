@@ -1,4 +1,12 @@
 // src/components/Dialog/Dialog.js
+/* Level from the Figma effect style that NAMES this component.
+   The five Effect-Levels are the five styles:
+     1  Card / Accordion, Handle, Alert, Bottom-Sheet
+     2  Card-Hover / App bars, Toolbars, Menus, Tooltip, Bottom-Sheet-Hover
+     3  FAB, Snackbar
+     4  FAB-Hover
+     5  Dialog & Modal */
+import { SHADOW_LEVEL_5 } from '../_shadows';
 import React, { forwardRef } from 'react';
 import {
   Dialog as MuiDialog, DialogTitle as MuiDialogTitle, DialogContent as MuiDialogContent,
@@ -66,7 +74,9 @@ const paperSx = {
   color: 'var(--Text)',
   border: '1px solid var(--Border)',
   borderRadius: 'var(--Style-Border-Radius)',
-  boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+  /* "Dialog & Modal" is the Level 5 style. Hardcoded black before, so it
+     took neither the brand's tint nor its shadow settings. */
+  boxShadow: SHADOW_LEVEL_5,
 };
 
 const titleSx = {

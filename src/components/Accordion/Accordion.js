@@ -7,7 +7,14 @@ import {
   EyebrowSmall, BodyLarge, Body, BodySmall,
   BodyLargeSemibold, BodySemibold, BodySmallSemibold,
 } from '../Typography';
-import { SHADOW_LEVEL_2 } from '../_shadows';
+/* Level from the Figma effect style that NAMES this component.
+   The five Effect-Levels are the five styles:
+     1  Card / Accordion, Handle, Alert, Bottom-Sheet
+     2  Card-Hover / App bars, Toolbars, Menus, Tooltip, Bottom-Sheet-Hover
+     3  FAB, Snackbar
+     4  FAB-Hover
+     5  Dialog & Modal */
+import { SHADOW_LEVEL_1 } from '../_shadows';
 
 /**
  * Accordion Component
@@ -252,7 +259,8 @@ export function Accordion({
           borderRadius: RADIUS,
           backgroundColor: 'var(--Background)',
           overflow: 'hidden',
-          boxShadow: SHADOW_LEVEL_2,
+          boxShadow: SHADOW_LEVEL_1,  // Accordion
+
           opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
           ...sx,
         }}
