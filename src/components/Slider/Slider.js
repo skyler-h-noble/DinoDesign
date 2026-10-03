@@ -54,14 +54,38 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
  * requirement stays on the surface tokens. */
 function colorStyles(color) {
   const C = cap(color);
-  const isDefault = color === 'default';
+  /* `isDefault` no longer branches the FILL, and that is a bug fix rather than
+     a simplification. It read `var(--Button)`, with no fallback, and --Button
+     is not a token: nothing in foundation.css, base.css or any brand bundle
+     defines it. A var() on an undefined property with no fallback is invalid at
+     computed-value time, so the DEFAULT slider — the one every demo shows —
+     painted no track fill at all and rendered as a bare outline. Every named
+     colour worked, which is why it survived: the broken case was the one that
+     looks like a styling choice. --Buttons-Default-Button is the real name and
+     is defined 72 times in a published mode sheet. */
   return {
+    /* Figma binds the Handle and both bar edges to Buttons::Border, and they
+       stay on the SURFACE --Border here instead. A deliberate divergence, not
+       an oversight — see the note above the component: the thumb, rail and
+       focus ring each carry a contrast REQUIREMENT, and --Border is the 3:1
+       token guaranteed against the surface they sit on. --Buttons-{C}-Border
+       is guaranteed against its own button fill, which is a different
+       comparison, so a named colour would move the edge to a token nothing
+       has checked against the page. SliderColoring.test.js pins this.
+
+       The two agree at `default` and part company the moment a colour is set,
+       so the divergence is invisible until it matters. Raised with the design
+       owner rather than resolved here. */
     thumb:          'var(--Border)',
     thumbBorder:    '1px solid var(--Background)',
-    track:          isDefault ? 'var(--Button)' : 'var(--Buttons-' + C + '-Button)',
+    track:          'var(--Buttons-' + C + '-Button)',
     trackBorder:    '1px solid var(--Border)',
     rail:           'var(--Background)',
     railBorder:     '1px solid var(--Border)',
+    /* The label stays on the SURFACE pair, inverted, and deliberately so: it is
+       --Text on --Background, which is legible on any surface by definition.
+       A colour from the button palette is not. Figma agrees — Label is
+       Surface::Text with Surface::Background text. */
     valueLabel:     'var(--Text)',
     valueLabelText: 'var(--Background)',
   };
@@ -136,6 +160,35 @@ export function Slider({
   const variantMap = buildVariantMap();
   const styles = variantMap[variant] || variantMap['primary'];
   const sizeConfig = SIZE_MAP[size] || SIZE_MAP.medium;
+  /* Marks have NO counterpart in the design, and the density is the reason
+     this warns rather than silently coping.
+
+     Figma's Slider set has two axes — Type and Orientation — and no mark
+     elements anywhere in its structure. `marks` is MUI's, passed through.
+     MUI's documented behaviour for `marks={true}` is a tick at every STEP, so
+     the default step of 1 over 0–100 draws 101 ticks about 3px apart: a solid
+     hatched band across the track, which is what it looks like rather than a
+     scale. Nothing is broken — it is doing exactly what it was asked.
+
+     Not clamped, because quietly drawing a different number of marks than the
+     steps the slider actually snaps to would make the scale lie about the
+     control. The fix is the caller's: pass a `marks` ARRAY for the few values
+     worth labelling, or raise `step` so the ticks match what the thumb can
+     land on. */
+  if (process.env.NODE_ENV !== 'production' && marks === true) {
+    const count = Math.floor((max - min) / step) + 1;
+    if (count > 20) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[OmniDesign] <Slider marks> with step=${step} over ${min}–${max} draws ` +
+        `${count} ticks, which reads as a hatched band rather than a scale. ` +
+        'Pass a marks ARRAY for the values worth showing, or raise `step` so the ' +
+        'ticks match where the thumb can land. Marks are code-only — the design ' +
+        'has no mark element.',
+      );
+    }
+  }
+
   const isVertical = orientation === 'vertical';
   const isRange = Array.isArray(value) || Array.isArray(defaultValue);
   const isInverted = track === 'inverted';
@@ -220,7 +273,14 @@ export function Slider({
 
       /* The outer ring of the focus indicator. The inner --Background ring is
          the thumb's own border, so this only adds the --Focus-Visible one —
-         flush against it, which is what keeps the 3:1 measurable. */
+         flush against it, which is what keeps the 3:1 measurable.
+
+         Figma also draws a 4px Buttons/Default/Button halo between the two and
+         a second --Background ring outside. Not reproduced, and deliberately:
+         inserting the halo moves the ring's contrast comparison from
+         Focus-Visible-against-Background, which is guaranteed, to
+         Focus-Visible-against-a-button-colour, which is not. The gap is the
+         exact failure the flush construction was introduced to fix. */
       '&.Mui-focusVisible::before, &:focus-visible::before': {
         boxShadow: `${bevelShadow(variant)}, ${SHADOW_LEVEL_2}, 0 0 0 1px var(--Focus-Visible)`,
       },
