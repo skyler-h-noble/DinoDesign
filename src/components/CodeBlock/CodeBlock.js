@@ -83,6 +83,11 @@ export function CodeBlock({
   sx = {},
   ...rest
 }) {
+  /* Exactly one copy button, and it follows the header. Rendering it in both
+     places when the header is on would give a panel two controls that do the
+     same thing, which reads as two different things. */
+  const headerCopy = showHeader && showCopy && !!code;
+  const bodyCopy = !showHeader && showCopy && !!code;
   return (
     <Box
       // The pair that makes this region dark. Never a literal color.
@@ -110,14 +115,26 @@ export function CodeBlock({
           }}
         >
           <Caption color="quiet">{language}</Caption>
-          {showCopy && code ? <CopyButton code={code} /> : null}
+          {headerCopy ? <CopyButton code={code} /> : null}
         </Box>
       )}
 
-      <Box sx={{ p: 2, overflow: 'auto', maxHeight }}>
+      {/* The copy control moves INTO the body when there is no header.
+          Without this, showHeader={false} removed the only way to copy —
+          the header owned the button, so hiding the chrome silently took
+          the function with it. A code block that cannot be copied is the
+          one thing this component exists to prevent.
+
+          Laid out as the design has it: Code Area is a horizontal frame
+          holding the code and then a `copy` frame, 435 + 32 across 467. It
+          is a SIBLING of the code, not an overlay, so it never sits on top
+          of a long line. The scroll moves to the code child so the button
+          stays put while the code scrolls under it. */}
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, p: 2 }}>
         <Box
           component="pre"
-          sx={{ margin: 0, fontFamily: 'inherit' }}
+          sx={{ margin: 0, fontFamily: 'inherit', flex: 1, minWidth: 0,
+                overflow: 'auto', maxHeight }}
         >
           <Box
             component="code"
@@ -136,6 +153,7 @@ export function CodeBlock({
             {code}
           </Box>
         </Box>
+        {bodyCopy ? <CopyButton code={code} /> : null}
       </Box>
     </Box>
   );
