@@ -144,22 +144,34 @@ export function Swatch({
           /* The scrim is composited over the color as a background LAYER, so
              it needs no extra element and cannot escape the chip.
 
-             Figma draws it as an overlay at radius 0 filled with hardcoded
-             black at 5% and 8%. The radius matters far less now the chip is a
-             2px square than it did when this was drawn as a circle, but the
-             fill still wants pointing at a token. --Hover and --Pressed are
-             used here instead:
-             those are the surface-aware scrims the system already defines, and
-             a fixed black tint does not work on a dark surface. The intent is
-             the same; the Figma overlay wants its radius bound and its fill
-             pointed at the token. */
+             TRANSLUCENT BLACK, not --Hover / --Pressed. This used those tokens
+             on the reasoning that they are "the surface-aware scrims the system
+             already defines, and a fixed black tint does not work on a dark
+             surface". The first half of that is false and it takes the second
+             half with it: --Hover and --Pressed are OPAQUE surface tones —
+             activeAndHoverFor() walks the palette and returns hex — so
+             linear-gradient(var(--Hover), var(--Hover)) painted a solid layer
+             straight over the chip. Hovering a swatch replaced the colour with
+             the page's hover tone, which on a light brand is near-white: the
+             one thing a colour chip must never do is stop showing its colour.
+
+             Figma's values, read off the Swatch set (9212:6816): a black
+             overlay at 5% on Hover and 8% on Pressed, over the Color Swatch
+             fill. Those are used verbatim.
+
+             The dark-surface objection does not apply here and that is why the
+             design says black. A chip's fill is arbitrary USER data, not a
+             theme token — there is no surface to be aware of, and darkening any
+             colour by 5% reads as pressed-ness on all of them. A surface-aware
+             token is the right instinct for a themed element and the wrong one
+             for a swatch. */
           '&:hover': {
             boxShadow: 'var(--Effect-Level-1)',
-            backgroundImage: 'linear-gradient(var(--Hover), var(--Hover))',
+            backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05))',
           },
           '&:active': {
             boxShadow: 'var(--Effect-Level-0)',
-            backgroundImage: 'linear-gradient(var(--Pressed), var(--Pressed))',
+            backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.08))',
           },
         }),
       }}
