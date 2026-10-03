@@ -183,7 +183,27 @@ export function Slider({
      control. The fix is the caller's: pass a `marks` ARRAY for the few values
      worth labelling, or raise `step` so the ticks match what the thumb can
      land on. */
-  if (process.env.NODE_ENV !== 'production' && marks === true) {
+  /* step === null is MUI's RESTRICTED VALUES mode: the thumb may only land on
+     the values in the marks array, so there is no step to count and nothing to
+     warn about. Dividing by it would give Infinity and warn on every render. */
+  /* marks={true} with step={null} CRASHES — MUI's restricted-values mode maps
+     over the marks array, and `true` has no .map. The combination is also
+     meaningless: restricted values means "snap to these specific values", and
+     `true` names none. Coerced to no marks so a page renders instead of
+     throwing, with a warning that says which prop to change, because the raw
+     error — "marks.map is not a function" — names neither prop. */
+  const restrictedToMarks = step === null;
+  const safeMarks = (restrictedToMarks && marks === true) ? false : marks;
+  if (process.env.NODE_ENV !== 'production' && restrictedToMarks && marks === true) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[OmniDesign] <Slider step={null} marks> — restricted values needs the ' +
+      'ARRAY of values to snap to. `marks={true}` names none, and MUI throws ' +
+      'on it. Pass marks={[{ value, label }, …]}.',
+    );
+  }
+
+  if (process.env.NODE_ENV !== 'production' && marks === true && step) {
     const count = Math.floor((max - min) / step) + 1;
     if (count > 20) {
       // eslint-disable-next-line no-console
@@ -368,16 +388,28 @@ export function Slider({
       },
     },
 
-    // Marks
+    /* Marks are DOTS, not full-height bars.
+       They were `width: 2, height: totalTrack` — the full thickness of the bar
+       — and painted in styles.rail, which is --Background. So each mark cut a
+       background-coloured notch clean through the track, and a row of them read
+       as a dashed or hatched line rather than as a scale. On a vertical slider
+       it looked like the track itself was dotted.
+
+       A 2px round dot centred on the bar is what a tick actually is, and it is
+       what MUI draws by default. The colour has to flip with the fill: --Quiet
+       is legible on the unfilled rail and would disappear into a saturated
+       fill, so the ACTIVE marks — the ones the fill has passed — take
+       --Background instead. Two tokens, each chosen against the thing it sits
+       on, which is the same rule the rest of this component follows. */
     '& .MuiSlider-mark': {
-      backgroundColor: styles.rail,
-      width: isVertical ? totalTrack : 2,
-      height: isVertical ? 2 : totalTrack,
-      borderRadius: 1,
+      backgroundColor: 'var(--Quiet)',
+      width: 2,
+      height: 2,
+      borderRadius: '50%',
     },
     '& .MuiSlider-markActive': {
-      backgroundColor: styles.thumb,
-      opacity: 0.6,
+      backgroundColor: 'var(--Background)',
+      opacity: 1,
     },
     '& .MuiSlider-markLabel': {
       color: 'var(--Text-Quiet)',
@@ -406,7 +438,7 @@ export function Slider({
       min={min}
       max={max}
       step={step}
-      marks={marks}
+      marks={safeMarks}
       valueLabelDisplay={valueLabelDisplay}
       orientation={orientation}
       track={track === 'inverted' ? 'inverted' : track === false ? false : 'normal'}
