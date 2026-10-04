@@ -39,7 +39,6 @@ export const SLIDER_SAMPLES = {
       values={SIZES}
       defaultValue="medium"
       width={W}
-      align="center"
       render={(v) => box(<Slider size={v} defaultValue={60} aria-label={v} />)}
     />
   ),
@@ -182,7 +181,6 @@ export const SLIDER_SAMPLES = {
       values={['off', 'auto', 'on']}
       defaultValue="off"
       width={W}
-      align="flex-end"
       render={(v) => box(<Slider valueLabelDisplay={v} defaultValue={60} aria-label={v} />)}
     />
   ),

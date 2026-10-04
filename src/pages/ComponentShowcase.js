@@ -10,6 +10,7 @@ import {
 import * as MuiIcons from '@mui/icons-material';
 import { ButtonShowcase } from '../components/Button/ButtonShowcase';
 import { FoundationsShowcase, FOUNDATION_TOPICS } from '../components/Foundations/FoundationsShowcase';
+import { BrandIconShowcase } from '../components/BrandIcon/BrandIconShowcase';
 import { ColorsShowcase } from '../components/Colors/ColorsShowcase';
 import { ButtonGroupShowcase } from '../components/ButtonGroup/ButtonGroupShowcase';
 import { InputShowcase } from '../components/Input/InputShowcase';
@@ -160,6 +161,12 @@ const NAV_ITEMS = [
       { id: 'foundation-elevation',  label: 'Elevation' },
       { id: 'colors',                label: 'Colors' },
       { id: 'icons',                 label: 'Icons' },
+      /* Brand marks are an ASSET, like a colour or a type scale, not a
+         control with states — so they sit here beside Icons rather than with
+         the components. BrandIcon had a doc and no page at all, which left
+         the component carrying somebody else's trademark as the one with
+         nowhere to read its rules. */
+      { id: 'brand-icons',           label: 'Brand Icons' },
       { id: 'foundation-static',     label: 'Static Colors' },
       { id: 'foundation-states',     label: 'States' },
     ],
@@ -435,6 +442,7 @@ function ShowcaseInner() {
             {activeSection === 'colors' && <ColorsShowcase />}
             {activeSection === 'typography' && <TypographyShowcase />}
             {activeSection === 'icons' && <IconShowcase />}
+            {activeSection === 'brand-icons' && <BrandIconShowcase />}
 
             {/* ============ INPUTS ============ */}
             {activeSection === 'buttons' && <ButtonShowcase />}

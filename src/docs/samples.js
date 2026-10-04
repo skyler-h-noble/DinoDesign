@@ -41,6 +41,8 @@ export const BUTTON_ONLY = ['black-white'];
 export const SIZES = ['small', 'medium', 'large'];
 
 /** One labelled cell. */
+/* One labelled cell. The label sits BELOW the thing it names, and the row
+   bottom-aligns, so every label in an axis starts at the same y. */
 export const Cell = ({ label, emphasis = false, width, children }) => (
   <VStack gap="var(--Sizing-Half)" style={{ alignItems: 'flex-start', width }}>
     <div>{children}</div>
@@ -54,7 +56,7 @@ export const Cell = ({ label, emphasis = false, width, children }) => (
  * `defaultValue` is pulled to the front and separated by a rule, so the
  * resting configuration is findable rather than being swatch number six.
  */
-export const Axis = ({ values, render, defaultValue, width, align = 'flex-start' }) => {
+export const Axis = ({ values, render, defaultValue, width }) => {
   const rest = values.filter(v => v !== defaultValue);
   const cell = (v) => (
     <Cell key={String(v)} label={String(v)} emphasis={v === defaultValue} width={width}>
@@ -62,7 +64,17 @@ export const Axis = ({ values, render, defaultValue, width, align = 'flex-start'
     </Cell>
   );
   return (
-    <HStack gap="var(--Sizing-2)" style={{ alignItems: align, flexWrap: 'wrap' }}>
+    /* BOTTOM-aligned, always, and no longer a prop.
+       A size ramp has a different height in every cell, so a centred row put
+       each label wherever its own glyph happened to end — seven labels on
+       seven baselines, which reads as a list of unrelated things rather than
+       one axis. Bottom-aligning lands every label's top at the same y.
+       It was an `align` prop defaulting to flex-start, and callers showing a
+       ramp passed "center" precisely because the row looked wrong — fixing
+       the symptom one sample at a time while making the misalignment worse.
+       Uniform-height axes are unaffected: with equal cells, bottom and top
+       alignment are the same picture. */
+    <HStack gap="var(--Sizing-2)" style={{ alignItems: 'flex-end', flexWrap: 'wrap' }}>
       {defaultValue !== undefined ? cell(defaultValue) : null}
       {/* `alignSelf: stretch` rather than MUI's `flexItem`.
           The lib's Divider is its own component with no such prop, and it

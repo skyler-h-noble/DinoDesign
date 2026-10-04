@@ -39,7 +39,7 @@ export const FORM_SAMPLES = {
             render={(v) => <Checkbox variant={v} defaultChecked label={v} />} />
     ),
     size: () => (
-      <Axis values={SIZES} defaultValue="medium" align="center"
+      <Axis values={SIZES} defaultValue="medium"
             render={(v) => <Checkbox size={v} defaultChecked label={v} />} />
     ),
     'checked / defaultChecked': () => (
@@ -69,7 +69,7 @@ export const FORM_SAMPLES = {
             render={(v) => <Radio color={v} checked label={v} name={'c-' + v} />} />
     ),
     size: () => (
-      <Axis values={SIZES} defaultValue="medium" align="center"
+      <Axis values={SIZES} defaultValue="medium"
             render={(v) => <Radio size={v} checked label={v} name={'s-' + v} />} />
     ),
     /* FOUR placements. `start` and `end` are the common pair; `top` and
@@ -110,7 +110,7 @@ export const FORM_SAMPLES = {
             render={(v) => <SwitchInput variant={v} defaultChecked label={v} />} />
     ),
     size: () => (
-      <Axis values={SIZES} defaultValue="medium" align="center"
+      <Axis values={SIZES} defaultValue="medium"
             render={(v) => <SwitchInput size={v} defaultChecked label={v} />} />
     ),
     'checked / defaultChecked': () => (

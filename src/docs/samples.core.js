@@ -180,7 +180,7 @@ export const CORE_SAMPLES = {
               offLabel="no photo" onLabel="default photo" />
     ),
     size: () => (
-      <Axis values={SIZES} defaultValue="medium" align="center"
+      <Axis values={SIZES} defaultValue="medium"
             render={(v) => <Avatar size={v} initials="JD" />} />
     ),
     clickable: () => (
@@ -207,7 +207,6 @@ export const CORE_SAMPLES = {
       <Axis
         values={['xxs', 'xs', 'small', 'medium', 'large', 'xl', 'xxl']}
         defaultValue="medium"
-        align="center"
         render={(v) => <Icon size={v} color="primary"><FavoriteIcon /></Icon>}
       />
     ),
@@ -226,7 +225,7 @@ export const CORE_SAMPLES = {
 
   Swatch: {
     size: () => (
-      <Axis values={SIZES} defaultValue="medium" align="center"
+      <Axis values={SIZES} defaultValue="medium"
             render={(v) => <Swatch color="#70947b" size={v} label={v} />} />
     ),
     /* Selection is marked on the chip itself — a check on its disc, always
@@ -347,7 +346,7 @@ export const CORE_SAMPLES = {
             render={(v) => <Loader color={v} size="small" message="" />} />
     ),
     size: () => (
-      <Axis values={SIZES} defaultValue="medium" align="center"
+      <Axis values={SIZES} defaultValue="medium"
             render={(v) => <Loader size={v} message="" />} />
     ),
   },
@@ -384,7 +383,7 @@ export const CORE_SAMPLES = {
     /* The three values of Figma's Style axis, as on Button. Separate from
        colour, which the FAB takes from a Theme mode on an inner frame. */
     variant: () => (
-      <Axis values={['solid', 'outline', 'ghost']} defaultValue="solid" align="center"
+      <Axis values={['solid', 'outline', 'ghost']} defaultValue="solid"
             render={(v) => <Fab variant={v} icon={<Icon size="medium"><AddIcon /></Icon>}
                                 ariaLabel={'Add, ' + v} />} />
     ),
@@ -396,7 +395,7 @@ export const CORE_SAMPLES = {
             render={(v) => <Rating color={v} defaultValue={3} readOnly />} />
     ),
     size: () => (
-      <Axis values={SIZES} defaultValue="medium" align="center"
+      <Axis values={SIZES} defaultValue="medium"
             render={(v) => <Rating size={v} defaultValue={3} readOnly />} />
     ),
     /* Read-only is a DISPLAY of a rating rather than a control for setting
