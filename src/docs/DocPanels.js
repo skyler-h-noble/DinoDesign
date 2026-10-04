@@ -153,13 +153,16 @@ export function DocSummary({ component, theme = null, surface = 'Surface' }) {
                 its label and centres: components that want the room take it,
                 components that do not are unaffected. */}
             <Box sx={{ p: 3, display: 'flex', justifyContent: 'center' }}>
-              <Box sx={{
-                width: '100%', maxWidth: 420,
-                display: 'flex', flexDirection: 'column',
-                alignItems: 'center', justifyContent: 'center',
-                gap: 'var(--Sizing-1)',
-                '& > *': { maxWidth: '100%' },
-              }}>
+              {/* A BLOCK box, not a flex column.
+                  The first attempt at this was `display: flex` with
+                  `alignItems: center`, which fixed nothing: centring a column
+                  makes every child shrink to its content, so Slider collapsed
+                  to its thumb exactly as it had in the bare flex box before.
+                  MUI's Slider is `display: inline-block; width: 100%`, so what
+                  it needs is a parent with width to claim — and `text-align`
+                  centres the inline-level examples (a Button, a Chip) without
+                  taking that width away from the ones that fill. */}
+              <Box sx={{ width: '100%', maxWidth: 420, textAlign: 'center' }}>
                 {example({ theme, surface })}
               </Box>
             </Box>

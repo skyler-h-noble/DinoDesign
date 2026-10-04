@@ -79,13 +79,15 @@ function ColorSwatchButton({ color, selected, onClick }) {
    and no mark element — so this is the demo choosing a sensible scale rather
    than mirroring a spec. Quarter points, labelled, which is what the control is
    for. */
-const DEMO_MARKS = [
-  { value: 0, label: '0' },
-  { value: 25, label: '25' },
-  { value: 50, label: '50' },
-  { value: 75, label: '75' },
-  { value: 100, label: '100' },
-];
+const DEMO_MARK_VALUES = [0, 25, 50, 75, 100];
+
+/* Marks with and without their labels.
+   An entry needs a `value`; `label` is what turns a tick into a readable
+   scale, and leaving it off is a real configuration rather than a lesser one
+   — five bare ticks under a volume slider say "it snaps here" without
+   claiming the numbers matter. */
+const DEMO_MARKS = DEMO_MARK_VALUES.map((value) => ({ value, label: String(value) }));
+const DEMO_MARKS_UNLABELLED = DEMO_MARK_VALUES.map((value) => ({ value }));
 
 export function SliderShowcase() {
   const [color, setColor]               = useState('default');
@@ -98,7 +100,12 @@ export function SliderShowcase() {
   const [fill, setFill]                 = useState('standard');
   const [marks, setMarks]               = useState(false);
   const [disabled, setDisabled]         = useState(false);
-  const [showLabel, setShowLabel]       = useState(true);
+  /* The MARKS' labels, not the slider's own.
+     This was wired to the `label` prop, so "Show Label" turned off the word
+     "Volume" above the control — the one piece of text the slider cannot do
+     without, since without it the control has no name at all. The labels that
+     are genuinely optional are the ones under the ticks. */
+  const [showMarkLabels, setShowMarkLabels] = useState(true);
   const [bgTheme, setBgTheme]           = useState('Default');
   const [bgSurface, setBgSurface]       = useState('Surface');
 
@@ -108,13 +115,15 @@ export function SliderShowcase() {
     const parts = [];
     if (color !== 'default') parts.push('variant="' + color + '"');
     if (size !== 'medium') parts.push('size="' + size + '"');
-    if (showLabel) parts.push('label="Volume"');
+    parts.push('label="Volume"');
     if (isRange) parts.push('value={[25, 75]}');
     else parts.push('value={50}');
     if (valueLabelDisplay !== 'off') parts.push('valueLabelDisplay="' + valueLabelDisplay + '"');
     if (orientation !== 'horizontal') parts.push('orientation="vertical"');
     if (fill !== 'standard') parts.push('fill="' + fill + '"');
-    if (marks) parts.push('marks');
+    if (marks) parts.push(showMarkLabels
+      ? 'marks={[{ value: 0, label: \'0\' }, ...]}'
+      : 'marks={[{ value: 0 }, ...]}');
     if (disabled) parts.push('disabled');
     parts.push('onChange={handleChange}');
     return '<Slider\n  ' + parts.join('\n  ') + '\n/>';
@@ -155,7 +164,7 @@ export function SliderShowcase() {
               <Slider
                 variant={effectiveColor}
                 size={size}
-                label={showLabel ? 'Volume' : undefined}
+                label="Volume"
                 value={isRange ? rangeValue : value}
                 onChange={(_, v) => isRange ? setRangeValue(v) : setValue(v)}
                 valueLabelDisplay={valueLabelDisplay}
@@ -170,9 +179,8 @@ export function SliderShowcase() {
                    it also demonstrates the form worth copying: the array is the
                    only way to put LABELS on the ticks, which `true` cannot do
                    at any density. */
-                marks={marks ? DEMO_MARKS : false}
+                marks={marks ? (showMarkLabels ? DEMO_MARKS : DEMO_MARKS_UNLABELLED) : false}
                 disabled={disabled}
-                aria-label={!showLabel ? 'Volume' : undefined}
               />
             </Box>
           </PreviewSurface>
@@ -302,13 +310,21 @@ export function SliderShowcase() {
                       size="small" aria-label="Marks" />
                   </Box>
 
-                  <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  {/* Only meaningful while there are marks to label, so it
+                      disables rather than disappears — a control that vanishes
+                      reads as a bug, and one that is visibly unavailable says
+                      what it depends on. */}
+                  <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                             opacity: marks ? 1 : 0.5 }}>
                     <Box>
-                      <Label>Show Label</Label>
-                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Text label above slider</Caption>
+                      <Label>Mark Labels</Label>
+                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>
+                        {marks ? 'Numbers under the ticks' : 'Turn marks on first'}
+                      </Caption>
                     </Box>
-                    <Switch variant="default-outline" checked={showLabel} onChange={(e) => setShowLabel(e.target.checked)}
-                      size="small" aria-label="Show label" />
+                    <Switch variant="default-outline" checked={showMarkLabels} disabled={!marks}
+                      onChange={(e) => setShowMarkLabels(e.target.checked)}
+                      size="small" aria-label="Mark labels" />
                   </Box>
 
                   <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
