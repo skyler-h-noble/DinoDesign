@@ -50,6 +50,7 @@ import { Toolbar } from '../components/Toolbar';
 import { Tooltip } from '../components/Tooltip';
 import { OmniTreeView } from '../components/TreeView';
 import { Button } from '../components/Button';
+import { ToggleButtonGroup } from '../components/ToggleButtonGroup';
 import { Body, H3 } from '../components/Typography';
 import { VStack } from '../components/Stack';
 
@@ -205,7 +206,21 @@ const PopoverDemo = () => {
   );
 };
 
+function ToggleButtonGroupExample() {
+  const [align, setAlign] = useState('left');
+  return (
+    <ToggleButtonGroup value={align} onChange={setAlign} aria-label="Alignment">
+      <Button value="left">Left</Button>
+      <Button value="center">Center</Button>
+      <Button value="right">Right</Button>
+    </ToggleButtonGroup>
+  );
+}
+
 export const LEAD_EXAMPLES = {
+  /* Alignment is the case the component is for: the text is aligned somehow
+     whatever you click, so "none selected" is not a state it can be in. */
+  ToggleButtonGroup: () => <ToggleButtonGroupExample />,
   /* The bar is the whole component, so it is shown at a width where its
      regions are distinguishable rather than centred as an object. */
   AppBar: () => (

@@ -594,4 +594,123 @@ export const BUTTON_GROUP_DOC = {
   ]
 };
 
-export const COMPONENT_DOCS = [BUTTON_DOC, BUTTON_GROUP_DOC, TABS_DOC, CARD_DOC, ...FORM_DOCS, ...SURFACE_DOCS, ...OVERLAY_DOCS, ...NAV_DOCS, ...DATA_DOCS, ...REST_DOCS];
+export const TOGGLE_BUTTON_GROUP_DOC = {
+  name: 'ToggleButtonGroup',
+  summary: 'A row of segments with a value, where at least one is always selected.',
+  insteadUse: [{
+    when: 'The buttons are actions, not a state — Save, Cancel, Delete',
+    use: 'ButtonGroup'
+  }, {
+    when: 'The options need labels, help text, or more than a word each',
+    use: 'RadioGroup'
+  }, {
+    when: 'It is a single on/off',
+    use: 'SwitchInput'
+  }, {
+    when: 'There are more than about five options',
+    use: 'Select'
+  }],
+  props: [{
+    /* The one that defines the component. Everything else it shares with
+       ButtonGroup, which is why the two were collapsed into one for a while. */
+    name: 'allowEmpty',
+    type: 'boolean',
+    default: 'false',
+    note: 'FALSE is what makes it a toggle group: the last selected segment cannot be turned off, and the refused click fires no onChange. Set true for a clearable multi-select that still wants toggle styling. Only meaningful with `multiple` — single select has never been able to empty, because clicking the selected segment re-selects it.'
+  }, {
+    name: 'multiple',
+    type: 'boolean',
+    default: 'false',
+    note: 'Any number selected at once. `value` becomes an ARRAY and onChange receives the next array. With `allowEmpty` false that array never empties.'
+  }, {
+    name: 'value / defaultValue',
+    type: 'string | string[]',
+    default: 'undefined',
+    note: 'Each child needs a `value`. Controlled with `value` + `onChange`, uncontrolled with `defaultValue`.'
+  }, {
+    name: 'onChange',
+    type: 'function',
+    default: 'undefined',
+    note: 'Called (value, event) — the system`s order. MUI`s component called (event, value), and a caller signalling that older API with `exclusive` or a colour in `variant` still gets it that way round.'
+  }, {
+    name: 'separated',
+    type: 'boolean',
+    default: 'false',
+    note: 'JOINED when false — segments overlap by one border width so the shared edge is a single line, which is what makes the row read as one control. Figma calls these Style=Default and Style=Separated.'
+  }, {
+    name: 'fit',
+    type: "'hug' | 'fill' | 'equal'",
+    default: "'hug'",
+    note: 'HUG sizes each segment to its label; FILL shares the container width equally; EQUAL hugs but matches every segment to the widest. Figma has the first two as Fit=Default and Fit=Fill.'
+  }, {
+    name: 'orientation',
+    type: "'horizontal' | 'vertical'",
+    default: "'horizontal'",
+    note: 'Vertical stacks the segments and moves the shared-edge overlap to the top border. Its end caps take HALF the button radius — see --Vertical-Button-Radius.'
+  }, {
+    name: 'variant',
+    type: "'outlined' | 'light' | 'ghost'",
+    default: "'outlined'",
+    note: 'The SHAPE of the unselected segments; the selected one is painted by the group. On MUI`s component this prop named the colour, so a palette name here still works and warns once.'
+  }, {
+    name: 'color',
+    type: 'string',
+    values: ['default', 'primary', 'secondary', 'tertiary', 'neutral',
+             'info', 'success', 'warning', 'error'],
+    default: 'default',
+    note: 'The palette. It paints the selected segment`s fill and every segment`s label.'
+  }, {
+    name: 'size',
+    type: 'string',
+    values: ['small', 'medium', 'large'],
+    default: 'medium',
+    note: 'Pass it to the GROUP, not the children — it is forwarded to each segment and a size on a child is overwritten.'
+  }, {
+    name: 'disabled',
+    type: 'boolean',
+    default: 'false'
+  }],
+  states: [{
+    state: 'Selected',
+    setBy: 'prop',
+    note: 'Figma carries it as a Status axis on the segment sets — not-selected / selected — rather than as a State, because a segment can be selected AND hovered.'
+  }, {
+    state: 'Hover', setBy: 'interaction'
+  }, {
+    state: 'Pressed', setBy: 'interaction'
+  }, {
+    state: 'Focus-visible',
+    setBy: 'interaction',
+    note: 'Per segment, and the ring is an outline so the shared borders do not clip it.'
+  }, {
+    state: 'Disabled', setBy: 'prop'
+  }],
+  theming: [{
+    collection: 'Buttons',
+    inCode: 'The `color` prop writes the palette into the token name.',
+    inFigma: 'A MODE on the Buttons collection, set on the frame.'
+  }],
+  tokens: [
+    { name: '--Buttons-{Color}-Button', sets: 'the selected segment\u2019s fill', variesWith: 'color + theme + surface', figma: 'Buttons \u2192 Button' },
+    { name: '--Buttons-{Color}-Text', sets: 'the selected segment\u2019s label', variesWith: 'color + theme + surface', figma: 'Buttons \u2192 Text' },
+    { name: '--Buttons-{Color}-Outline-Quiet', sets: 'an unselected label at rest', variesWith: 'color + theme + surface', figma: 'Buttons \u2192 Outline-Quiet' },
+    { name: '--Buttons-{Color}-Outline-Text', sets: 'an unselected label on hover, pressed and focus', variesWith: 'color + theme + surface', figma: 'Buttons \u2192 Outline-Text' },
+    { name: '--Vertical-Button-Radius', sets: 'the end caps of a vertical group', variesWith: 'size mode', figma: 'Component-Size \u2192 Button' },
+  ],
+  composition: [
+    'Children are `Button`s, each with a `value`. The GROUP assigns each segment its variant, so do NOT set `variant` on a child — an explicit one wins, which is how a group ends up with every segment looking selected.',
+    'A segment is outline or ghost. A solid child is a different control that happens to be in a row.',
+  ],
+  accessibility: [
+    'Single select uses radiogroup semantics — arrow keys move between options and one tab stop covers the control. Multiple select is a group of buttons with `aria-pressed`.',
+    'Selection is not carried by colour alone: the selected segment gains a fill AND `aria-pressed`, and its label moves from Quiet to Text.',
+    'Icon-only segments each need a name saying the ACTION — "Align left", not "left".',
+  ],
+  gotchas: [
+    'The LAST selected segment cannot be turned off, and that refused click fires no onChange — firing it with an unchanged array would make a controlled caller re-render for nothing and read as a bug in their own reducer.',
+    'This component was retired for a while as "ButtonGroup built a second time". The rendering is the same; the concept is not. A button group is a row of actions, none of them on. If nothing should be selected, that is ButtonGroup.',
+    '`variant` names the SHAPE here and named the COLOUR on MUI`s component. Both are accepted and told apart by value — the three shapes are a closed set — because there is no version of this that does not silently repaint somebody`s group.',
+  ]
+};
+
+export const COMPONENT_DOCS = [BUTTON_DOC, BUTTON_GROUP_DOC, TOGGLE_BUTTON_GROUP_DOC, TABS_DOC, CARD_DOC, ...FORM_DOCS, ...SURFACE_DOCS, ...OVERLAY_DOCS, ...NAV_DOCS, ...DATA_DOCS, ...REST_DOCS];

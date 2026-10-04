@@ -24,7 +24,13 @@ export const FIGMA_PAGES = {
   Box: '3156:5155',
   Breadcrumbs: '3156:5265',
   Button: '3492:3526',
-  ButtonGroup: '6583:12058',
+  /* The two have separate pages in the file. The old ButtonGroup page was
+     RENAMED to ToggleButtonGroup — it is the one carrying the Status axis —
+     and a new ButtonGroup page was made for the plain group. So this id moved
+     components rather than the component moving page, which is the kind of
+     thing a link map gets silently wrong. */
+  ButtonGroup: '9350:37170',
+  ToggleButtonGroup: '6583:12058',
   Card: '7442:31014',
   Checkbox: '6729:509',
   Chip: '8927:14974',

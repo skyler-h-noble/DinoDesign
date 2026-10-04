@@ -12,6 +12,7 @@
  */
 import React, { useState } from 'react';
 import { ButtonGroup } from '../components/ButtonGroup';
+import { ToggleButtonGroup } from '../components/ToggleButtonGroup';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
 import { VStack, HStack } from '../components/Stack';
@@ -222,6 +223,169 @@ export const BUTTON_GROUP_SAMPLES = {
         Icon-only segments each need a name saying the ACTION — "Align left",
         not "left".
       </Body>
+    </VStack>
+  ),
+};
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   ToggleButtonGroup — the same geometry, one behaviour added.
+
+   Only the axes that differ from ButtonGroup get their own sample here; the
+   shared ones (size, colour, fit, orientation) are the same pictures and are
+   not worth printing twice.
+   ───────────────────────────────────────────────────────────────────────── */
+
+function ToggleGroup({ options = ['Left', 'Center', 'Right'], initial = 'Left', ...props }) {
+  const [value, setValue] = useState(initial);
+  return (
+    <ToggleButtonGroup value={value} onChange={setValue} aria-label="Align" {...props}>
+      {options.map(o => <Button key={o} value={o}>{o}</Button>)}
+    </ToggleButtonGroup>
+  );
+}
+
+function ToggleMulti({ allowEmpty, ...props }) {
+  const [value, setValue] = useState(['Left']);
+  return (
+    <ToggleButtonGroup multiple allowEmpty={allowEmpty} value={value} onChange={setValue}
+                       aria-label="Align" {...props}>
+      <Button value="Left">Left</Button>
+      <Button value="Center">Center</Button>
+      <Button value="Right">Right</Button>
+    </ToggleButtonGroup>
+  );
+}
+
+export const TOGGLE_BUTTON_GROUP_SAMPLES = {
+  /* THE axis. Try turning every segment off in each: the first will not let
+     you past one, the second will. */
+  allowEmpty: () => (
+    <VStack gap="var(--Sizing-3)">
+      <VStack gap="var(--Sizing-Half)">
+        <Caption color="standard">false — a toggle group. The last one stays on.</Caption>
+        <ToggleMulti allowEmpty={false} />
+      </VStack>
+      <VStack gap="var(--Sizing-Half)">
+        <Caption color="quiet">true — clearable, with toggle styling</Caption>
+        <ToggleMulti allowEmpty />
+      </VStack>
+      <Body color="quiet">
+        The refused click fires no onChange — an unchanged array would make a
+        controlled caller re-render for nothing and read as a bug in their own
+        reducer.
+      </Body>
+    </VStack>
+  ),
+
+  multiple: () => (
+    <VStack gap="var(--Sizing-3)">
+      <VStack gap="var(--Sizing-Half)">
+        <Caption color="standard">false — one answer, and it cannot be cleared</Caption>
+        <ToggleGroup />
+      </VStack>
+      <VStack gap="var(--Sizing-Half)">
+        <Caption color="quiet">true — any number, never none</Caption>
+        <ToggleMulti allowEmpty={false} />
+      </VStack>
+    </VStack>
+  ),
+
+  separated: () => (
+    <VStack gap="var(--Sizing-3)">
+      <VStack gap="var(--Sizing-Half)">
+        <Caption color="standard">false — joined (Figma: Style=Default)</Caption>
+        <ToggleGroup />
+      </VStack>
+      <VStack gap="var(--Sizing-Half)">
+        <Caption color="quiet">true — separated (Figma: Style=Separated)</Caption>
+        <ToggleGroup separated />
+      </VStack>
+    </VStack>
+  ),
+
+  variant: () => (
+    <VStack gap="var(--Sizing-3)">
+      {['outlined', 'light', 'ghost'].map(v => (
+        <VStack key={v} gap="var(--Sizing-Half)">
+          <Caption color={v === 'outlined' ? 'standard' : 'quiet'}>{v}</Caption>
+          <ToggleGroup variant={v} color="primary" />
+        </VStack>
+      ))}
+    </VStack>
+  ),
+
+  color: () => (
+    <VStack gap="var(--Sizing-2)">
+      {['default', ...PALETTES].map(c => (
+        <HStack key={c} gap="var(--Sizing-2)" style={{ alignItems: 'center' }}>
+          <div style={{ width: 84 }}>
+            <Caption color={c === 'default' ? 'standard' : 'quiet'}>{c}</Caption>
+          </div>
+          <ToggleGroup color={c} />
+        </HStack>
+      ))}
+    </VStack>
+  ),
+
+  size: () => (
+    <VStack gap="var(--Sizing-3)">
+      {SIZES.map(v => (
+        <VStack key={v} gap="var(--Sizing-Half)">
+          <Caption color={v === 'medium' ? 'standard' : 'quiet'}>{v}</Caption>
+          <ToggleGroup size={v} />
+        </VStack>
+      ))}
+    </VStack>
+  ),
+
+  fit: () => (
+    <VStack gap="var(--Sizing-3)" style={{ width: '100%', maxWidth: BOX }}>
+      {['hug', 'fill', 'equal'].map(f => (
+        <VStack key={f} gap="var(--Sizing-Half)">
+          <Caption color={f === 'hug' ? 'standard' : 'quiet'}>{f}</Caption>
+          <div style={{ width: BOX, border: '1px dashed var(--Border-Variant)', padding: 4 }}>
+            <ToggleGroup options={['S', 'Medium', 'Extra large']} initial="S" fit={f} />
+          </div>
+        </VStack>
+      ))}
+    </VStack>
+  ),
+
+  orientation: () => (
+    <HStack gap="var(--Sizing-4)" style={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      <Cell label="horizontal" emphasis><ToggleGroup /></Cell>
+      <Cell label="vertical"><ToggleGroup orientation="vertical" /></Cell>
+    </HStack>
+  ),
+
+  'value / defaultValue': () => (
+    <VStack gap="var(--Sizing-Half)">
+      <Caption color="quiet">each child needs a `value`; the group matches against it</Caption>
+      <ToggleGroup />
+    </VStack>
+  ),
+
+  onChange: () => (
+    <VStack gap="var(--Sizing-2)">
+      <ToggleGroup />
+      <Body color="quiet">
+        Called (value, event) — the system`s order. A caller signalling MUI`s older
+        API, with `exclusive` or a colour in `variant`, still gets (event, value).
+      </Body>
+    </VStack>
+  ),
+
+  disabled: () => (
+    <VStack gap="var(--Sizing-3)">
+      <VStack gap="var(--Sizing-Half)">
+        <Caption color="standard">enabled</Caption>
+        <ToggleGroup />
+      </VStack>
+      <VStack gap="var(--Sizing-Half)">
+        <Caption color="quiet">disabled</Caption>
+        <ToggleGroup disabled />
+      </VStack>
     </VStack>
   ),
 };

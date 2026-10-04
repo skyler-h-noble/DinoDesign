@@ -1,11 +1,12 @@
 // src/components/ToggleButtonGroup/index.js
 //
-// RETIRED — see ToggleButtonGroup.js. Every name here is a shim onto
-// ButtonGroup, kept so a stale import is not a build error.
+// The selection control — see ToggleButtonGroup.js for why the retirement was
+// wrong. It renders ButtonGroup, which owns the geometry, and supplies the one
+// behaviour that is the definition: at least one segment always on.
 //
-// The showcase is gone with the implementation: it demonstrated the retired
-// component's own props, and a showcase for something nobody should use is an
-// advertisement for it. ButtonGroup's showcase covers the survivor.
+// The showcase is back with it. The note here used to say "a showcase for
+// something nobody should use is an advertisement for it", which was right
+// about a duplicate and wrong about this — Figma has had two pages all along.
 export {
   ToggleButtonGroup,
   ToggleButton,
@@ -21,3 +22,4 @@ export {
   ErrorToggleButtonGroup,
 } from './ToggleButtonGroup';
 export { default } from './ToggleButtonGroup';
+export { ToggleButtonGroupShowcase } from './ToggleButtonGroupShowcase';

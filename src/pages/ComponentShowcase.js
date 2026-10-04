@@ -13,6 +13,7 @@ import { FoundationsShowcase, FOUNDATION_TOPICS } from '../components/Foundation
 import { BrandIconShowcase } from '../components/BrandIcon/BrandIconShowcase';
 import { ColorsShowcase } from '../components/Colors/ColorsShowcase';
 import { ButtonGroupShowcase } from '../components/ButtonGroup/ButtonGroupShowcase';
+import { ToggleButtonGroupShowcase } from '../components/ToggleButtonGroup/ToggleButtonGroupShowcase';
 import { InputShowcase } from '../components/Input/InputShowcase';
 import { CheckboxShowcase } from '../components/Checkbox/CheckboxShowcase';
 import { RadioShowcase } from '../components/Radio/RadioShowcase';
@@ -178,12 +179,14 @@ const NAV_ITEMS = [
       { id: 'buttons', label: 'Button' },
       { id: 'fab', label: 'FAB' },
       { id: 'buttongroup', label: 'Button Group' },
-      /* ToggleButtonGroup is RETIRED — it is ButtonGroup built a second time,
-         and the file is now a shim that renders one. The export stays (a
-         missing export is a build error in someone else's project), but it is
-         not listed here: a gallery that offers a retired duplicate beside the
-         survivor is how people pick the wrong one, and its playground was
-         generating the retired API as example code. Use Button Group. */
+      /* Listed again, and the delisting note it replaces was wrong in an
+         instructive way. It said ToggleButtonGroup "is ButtonGroup built a
+         second time" — true of the rendering, false of the concept. A button
+         group is a row of actions, none of them on; a toggle group is a
+         control with a value and at least one segment always on. Offering
+         both is not offering a duplicate beside a survivor, it is naming two
+         different things, which is what Figma does on its own two pages. */
+      { id: 'togglebuttongroup', label: 'Toggle Button Group' },
       { id: 'input', label: 'Input' },
       { id: 'select', label: 'Select' },
       { id: 'autocomplete', label: 'Autocomplete' },
@@ -448,6 +451,7 @@ function ShowcaseInner() {
             {activeSection === 'buttons' && <ButtonShowcase />}
             {activeSection === 'fab' && <FabShowcase />}
             {activeSection === 'buttongroup' && <ButtonGroupShowcase />}
+            {activeSection === 'togglebuttongroup' && <ToggleButtonGroupShowcase />}
             {activeSection === 'select' && <SelectShowcase />}
             {activeSection === 'autocomplete' && <AutocompleteShowcase />}
             {activeSection === 'checkbox' && <CheckboxShowcase />}
