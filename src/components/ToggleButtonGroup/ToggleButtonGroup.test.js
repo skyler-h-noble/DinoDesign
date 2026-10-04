@@ -22,7 +22,7 @@ const Group = (props) => (
   </ToggleButtonGroup>
 );
 
-describe('ToggleButtonGroup (retired shim)', () => {
+describe('ToggleButtonGroup — the selection control', () => {
   it('still renders its segments', () => {
     render(<Group />);
     expect(screen.getByText('List')).toBeInTheDocument();
@@ -38,19 +38,39 @@ describe('ToggleButtonGroup (retired shim)', () => {
     expect(screen.getByText('List').closest('button')).toHaveAttribute('aria-pressed', 'false');
   });
 
-  it('SWAPS the onChange arguments', () => {
-    /* The dangerous translation. MUI calls (event, value); ButtonGroup calls
-       (value, event). Not swapping would hand every existing caller an event
-       where it expects a value — no error, no warning, a selection that never
-       updates. Asserted on the first argument's SHAPE, because both are
-       objects and a wrong order still "works" until someone reads it. */
+  /* THE ONE BREAKING CHANGE in un-retiring this component, recorded here
+     because it cannot be detected at runtime and so cannot be warned about
+     precisely.
+
+     A bare `<ToggleButtonGroup onChange={fn}>` is ambiguous: it is equally a
+     caller written against MUI's (event, value) and one written against this
+     system's (value, event). Nothing in the call distinguishes them — arity
+     lies, because `(e) => …` is a legal one-argument handler for either.
+
+     Resolved toward the SYSTEM's order, for two reasons. The component spent
+     its retirement warning every caller to leave, so the population still on
+     the MUI shape is both small and already being told. And going forward
+     this is the system's selection control; an onChange that disagreed with
+     every other component in the library would be a permanent wrong note to
+     avoid a temporary one.
+
+     Callers who signal the old API in any other way — `exclusive`, or a
+     colour in `variant` — still get MUI's order, because there the signal is
+     unambiguous. */
+  it('calls onChange with the system order, (value, event)', () => {
     const onChange = jest.fn();
     render(<Group onChange={onChange} />);
     fireEvent.click(screen.getByText('Grid'));
     expect(onChange).toHaveBeenCalled();
-    /* The shim hands back MUI's order — (event, value) — because that is what
-       existing callers were written against. ButtonGroup's own order is the
-       reverse, which is exactly what the shim exists to translate. */
+    const [first, second] = onChange.mock.calls[0];
+    expect(first).toBe('grid');
+    expect(second).toHaveProperty('type', 'click');
+  });
+
+  it('keeps MUI order when the caller signals the old API', () => {
+    const onChange = jest.fn();
+    render(<Group exclusive onChange={onChange} />);
+    fireEvent.click(screen.getByText('Grid'));
     const [first, second] = onChange.mock.calls[0];
     expect(first).toHaveProperty('type', 'click');
     expect(second).toBe('grid');

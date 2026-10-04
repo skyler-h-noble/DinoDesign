@@ -1,93 +1,135 @@
 // src/components/ToggleButtonGroup/ToggleButtonGroup.js
 //
-// RETIRED. ToggleButtonGroup is ButtonGroup, built a second time.
+// A group of segments with a VALUE. At least one is always selected.
 //
-// The two were the same component under different prop names: a row of
-// segments where the selected one fills with the palette color and the rest
-// carry a --Quiet label. Single vs multiple selection was `exclusive` here and
-// `multiple` there — the same model, inverted. Same nine colors (this one
-// also had black-white). Same removed `{color}-light` variant, documented in
-// both files as reading tokens no design system publishes.
+// ─── UN-RETIRED, and why the retirement was wrong ───────────────────────────
 //
-// It was not two concepts that converged; it was one concept implemented
-// twice. That is why a Figma Button Group could not be converted
-// deterministically — one component set cannot say which of two identical
-// React components to emit, because nothing distinguishes them.
+// This file was a shim onto ButtonGroup, on the reasoning that the two were
+// "one concept implemented twice": same row of segments, same palette fill on
+// the selected one, same removed `{color}-light`. Every one of those
+// observations was true, and they were all about RENDERING.
 //
-// ButtonGroup is the survivor. It carries the SHAPE axis the design actually
-// uses (outlined / light / ghost, with `variant="light"` documented in the
-// studio's own CLAUDE.md), it sets role="group" explicitly rather than
-// inheriting whatever MUI emits, and it is built on the design system's tokens
-// instead of fighting MUI's theming.
+// The concepts differ:
+//
+//   ButtonGroup        a row of buttons that happen to be joined. Save,
+//                      Cancel, Delete. Nothing is selected, because none of
+//                      them is a state — they are three things you can do.
+//
+//   ToggleButtonGroup  a control with a value, and at least one segment on.
+//                      Left / centre / right alignment: the text is aligned
+//                      somehow whatever you click, so "none selected" is not a
+//                      state the thing being controlled can be in.
+//
+// One is layout and the other is state. That is also why a Figma Button Group
+// could not be converted deterministically — not because nothing distinguished
+// the two components, but because the distinction had been removed from the
+// code while the design kept it.
 //
 // ─── What this file is now ──────────────────────────────────────────────────
 //
-// A shim, kept rather than deleted because the named exports ship publicly and
-// a missing export is a build error in someone else's project. Same treatment
-// `variant="{color}-light"` got when it was removed in 0.9.0: it still renders,
-// it warns once in development, and nothing breaks silently.
+// The selection component. It renders ButtonGroup, which owns the geometry
+// (joined edges, end-cap radii, fit, the Buttons-table colours), and supplies
+// the behaviour ButtonGroup no longer claims: a value, and a floor of one.
 //
-// TWO things the shim has to translate, and the second is the dangerous one:
+// `allowEmpty` defaults to FALSE here and true there. That one line is the
+// whole difference in behaviour, and it is the definition of "toggle".
 //
-//   variant   named the COLOUR here and names the SHAPE on ButtonGroup, so it
-//             moves to `color` and the shape becomes "outlined" — this group
-//             always drew a container border.
+// ─── The MUI-shaped props are still translated ──────────────────────────────
 //
-//   onChange  MUI's order is (event, value); ButtonGroup's is (value, event).
-//             Not swapping them would hand every existing caller an event
-//             where it expects a value — no error, no warning, just a
-//             selection that never updates.
+// `exclusive` and an (event, value) onChange came from MUI's component and
+// shipped publicly, so they keep working and keep warning. Two things to know:
 //
-// The segment is now `<Button value="…">`. Button already has `swatch` and
-// `swatchColor`, so the color-chip segment this file used to provide is not
-// lost; nothing outside this directory ever used it.
+//   exclusive   is `multiple` inverted. MUI's default is non-exclusive; this
+//               component's default is single-select, so `exclusive` defaults
+//               to true here.
+//
+//   onChange    MUI's order is (event, value); this system's is (value,
+//               event). Not swapping them hands a caller an event where it
+//               expects a value — no error, no warning, just a selection that
+//               never updates.
+//
+// `variant` is the sharp one: it named the COLOUR on MUI's component and names
+// the SHAPE on this one. A caller passing `variant="primary"` means the
+// colour; a caller passing `variant="outlined"` means the shape. Both are
+// accepted and told apart by value, because there is no version of this that
+// does not silently repaint somebody's group.
 import React from 'react';
 import { ButtonGroup } from '../ButtonGroup/ButtonGroup';
 import { Button } from '../Button/Button';
 
-let warned = false;
-function warnOnce() {
-  if (warned || process.env.NODE_ENV === 'production') return;
-  warned = true;
+/* The three SHAPE values. Anything else in `variant` is a colour from the
+   MUI-shaped API, which is how the two meanings are told apart without asking
+   the caller to migrate first. */
+const SHAPES = ['outlined', 'light', 'ghost'];
+
+let warnedLegacy = false;
+function warnLegacy(what) {
+  if (warnedLegacy || process.env.NODE_ENV === 'production') return;
+  warnedLegacy = true;
   console.warn(
-    '[OmniDesign] ToggleButtonGroup is retired — it was a second implementation ' +
-    'of ButtonGroup. Use <ButtonGroup variant="outlined" color="…"> with ' +
-    '<Button value="…"> segments. Note two prop changes: `exclusive` becomes ' +
-    '`multiple` (inverted), and onChange is (value, event) rather than ' +
-    '(event, value).',
+    `[OmniDesign] ToggleButtonGroup: ${what} This is MUI's shape and still `
+    + 'works; it will be removed in the next major. The native form is '
+    + '`multiple` (not `exclusive`), onChange(value, event), `color` for the '
+    + 'palette and `variant` for the shape.',
   );
 }
 
-/** @deprecated Use ButtonGroup. */
 export function ToggleButtonGroup({
-  variant = 'default',
-  exclusive = true,
+  variant,
+  color,
+  exclusive,
+  multiple,
   onChange,
+  /* FALSE is what makes this a toggle group: the last selected segment
+     cannot be turned off. Exposed rather than hardcoded because a caller may
+     genuinely want a clearable multi-select with toggle styling, and the
+     alternative is reaching for ButtonGroup and losing the floor entirely. */
+  allowEmpty = false,
   ...props
 }) {
-  warnOnce();
+  /* `variant` means the shape natively and meant the colour on MUI's
+     component. Told apart by VALUE: the three shapes are a closed set, so
+     anything else is a palette name from the old API. */
+  const isShape = variant === undefined || SHAPES.includes(variant);
+  if (!isShape) warnLegacy(`variant="${variant}" names a COLOUR.`);
+  if (exclusive !== undefined) warnLegacy('`exclusive` is `multiple` inverted.');
+
+  /* `exclusive` only speaks when `multiple` has not. Both given means the
+     caller is mid-migration, and the native prop is the one they meant. */
+  const effectiveMultiple = multiple !== undefined
+    ? multiple
+    : exclusive !== undefined ? !exclusive : false;
+
+  /* The legacy onChange is (event, value). Detected by the same signal as the
+     props above rather than by sniffing arity, which lies for a handler
+     written as `(e) => …`. */
+  const legacy = !isShape || exclusive !== undefined;
+
   return (
     <ButtonGroup
-      variant="outlined"
-      color={variant}
-      multiple={!exclusive}
-      onChange={onChange ? (next, e) => onChange(e, next) : undefined}
+      __selectionOwner
+      variant={isShape ? (variant || 'outlined') : 'outlined'}
+      color={color !== undefined ? color : (isShape ? undefined : variant)}
+      multiple={effectiveMultiple}
+      allowEmpty={allowEmpty}
+      onChange={onChange
+        ? (legacy ? (next, e) => onChange(e, next) : onChange)
+        : undefined}
       {...props}
     />
   );
 }
 
-/** @deprecated Use Button with a `value` prop as a ButtonGroup segment. */
+/** A segment. Button already is one — this name ships publicly, so it stays. */
 export function ToggleButton(props) {
-  warnOnce();
   return <Button {...props} />;
 }
 
-/* The ten color presets. Kept for the same reason as the components: they are
-   public names, and a stale import should not be a build error. Each is one
-   line, so the cost of keeping them is lower than the cost of breaking someone. */
+/* The ten colour presets. They pass `color`, not `variant` — passing the
+   palette through the ambiguous prop would make every one of them trip the
+   legacy warning, telling users off for using an export this file provides. */
 const preset = (color) => {
-  const C = (p) => <ToggleButtonGroup variant={color} {...p} />;
+  const C = (p) => <ToggleButtonGroup color={color} {...p} />;
   C.displayName = `${color}ToggleButtonGroup`;
   return C;
 };

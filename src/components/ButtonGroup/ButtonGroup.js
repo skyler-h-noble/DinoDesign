@@ -34,7 +34,14 @@ import { Box } from '@mui/material';
  *   Falls back to index (0, 1, 2…) if no value prop is present.
  *   multiple — any number of segments selected at once; value is an ARRAY and
  *              onChange receives the next array. Clicking a selected segment
- *              deselects it.
+ *              deselects it, unless `allowEmpty={false}`.
+ *
+ * ─── TOGGLE vs CHOICE ────────────────────────────────────────────────────────
+ *   `allowEmpty={false}` is what "toggle" means here: the group always has at
+ *   least one segment on, so the last one cannot be turned off. Text alignment
+ *   is the case — left, centre, right, and the text is aligned somehow
+ *   whatever you click, so empty is not a state the thing being controlled can
+ *   be in. A filter row is the opposite and keeps the default.
  *
  * ─── SIZES ───────────────────────────────────────────────────────────────────
  *   small | medium (default) | large
@@ -42,6 +49,32 @@ import { Box } from '@mui/material';
  * ─── ORIENTATION ─────────────────────────────────────────────────────────────
  *   horizontal (default) | vertical
  */
+
+/* ButtonGroup groups buttons. It does not select between them.
+ *
+ * That distinction was lost when ToggleButtonGroup was retired as "ButtonGroup
+ * built a second time" — true of the rendering and false of the concept. A
+ * ButtonGroup is a row of actions that happen to be joined: Save, Cancel,
+ * Delete, none of them "on". A ToggleButtonGroup is a control with a value,
+ * where at least one segment is always selected. One is layout, the other is
+ * state, and a component set in Figma cannot be converted deterministically
+ * while a single React component answers both.
+ *
+ * The selection props still work here and still will until the next major —
+ * silently dropping them would leave a group that renders correctly and never
+ * changes, which is the failure this project keeps designing against. */
+let warnedSelection = false;
+function warnSelectionMoved() {
+  if (warnedSelection || process.env.NODE_ENV === 'production') return;
+  warnedSelection = true;
+  console.warn(
+    '[OmniDesign] ButtonGroup is a group of buttons — selection moved to '
+    + 'ToggleButtonGroup, where at least one segment is always on. '
+    + '`value` / `onChange` / `multiple` still work here and will be removed '
+    + 'in the next major. Swap <ButtonGroup> for <ToggleButtonGroup>; every '
+    + 'other prop is the same.',
+  );
+}
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -131,6 +164,19 @@ export function ButtonGroup({
   //                              onChange receives the next array. Clicking a
   //                              selected segment deselects it.
   multiple = false,
+  /* Can the group end up with NOTHING selected?
+     Defaults to true, which is the existing behaviour: a filter row genuinely
+     can be cleared, and a multi-select with no way to deselect is a one-way
+     door. ToggleButtonGroup passes false, because a toggle group always has
+     at least one segment on.
+     Only meaningful with `multiple` — single mode has never been able to
+     empty, because clicking the selected segment re-selects it. */
+  allowEmpty = true,
+  /* Set by ToggleButtonGroup so the deprecation warning below does not fire
+     on the path that is NOT deprecated. A boolean rather than a check on the
+     caller, because there is no way to ask "who rendered me" and guessing
+     from props would warn on exactly the usage being recommended. */
+  __selectionOwner = false,
   value: controlledValue,
   defaultValue,
   onChange,
@@ -141,6 +187,11 @@ export function ButtonGroup({
   'aria-label': ariaLabel,
   ...props
 }) {
+  if (!__selectionOwner && (controlledValue !== undefined || defaultValue !== undefined
+      || onChange !== undefined || multiple)) {
+    warnSelectionMoved();
+  }
+
   const [internalValue, setInternalValue] = useState(
     defaultValue ?? (multiple ? [] : null),
   );
@@ -202,6 +253,18 @@ export function ButtonGroup({
           ? selectedList.filter(v => v !== childValue)
           : [...selectedList, childValue])
       : childValue;
+
+    /* The LAST one cannot be turned off when the group may not be empty.
+       Dropped silently rather than reported: the click is on a segment that
+       is already on, so the state the user is asking for is the state they
+       already have minus something they cannot remove. Firing onChange with
+       an unchanged array would make a controlled caller re-render for nothing
+       and look like a bug in their reducer. */
+    if (multiple && !allowEmpty && next.length === 0) {
+      childOnClick?.(e);
+      return;
+    }
+
     if (!isControlled) setInternalValue(next);
     onChange?.(next, e);
     childOnClick?.(e);
