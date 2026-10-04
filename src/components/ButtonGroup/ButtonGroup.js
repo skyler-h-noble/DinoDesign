@@ -20,6 +20,8 @@ import { Box } from '@mui/material';
  *   Container border:          var(--Buttons-{Color}-Border)
  *   Selected bg:               var(--Buttons-{Color}-Button)
  *   Selected text:             var(--Buttons-{Color}-Text)
+ *   Selected text:             var(--Buttons-{Color}-Quiet), moving to
+ *                              var(--Buttons-{Color}-Text) on interaction
  *   Unselected text:           var(--Buttons-{Color}-Outline-Quiet)
  *   Hover (unselected) bg:     var(--Hover)            — surface scrim
  *   Hover (unselected) text:   var(--Buttons-{Color}-Outline-Text)
@@ -253,22 +255,42 @@ export function ButtonGroup({
        a near-white scrim — and flips light on hover. Frozen across active and
        focus for the same reason. The focus RING still shows: it is an
        `outline`, which none of these three properties touch. */
+    /* A selected segment rests on its pair's QUIET end and moves to Text on
+       interaction — the same rest/interaction split as every other label in
+       the system. Figma binds Buttons/Quiet on selected/Default and
+       selected/Disabled, and Buttons/Text on Hover, Pressed and Focus.
+
+       Ghost keeps the OUTLINE pair because selected ghost gains no fill: it
+       marks selection with a border alone and leaves the label where it was.
+       So there is no filled pair for it to swap to. */
     const selectedPaint = isGhost
       ? {
           // The `-outline` variant's own paint, pinned so hover cannot move it.
           backgroundColor: 'var(--Background) !important',
-          color:           'var(--Text) !important',
           borderColor:     btnBorder + ' !important',
         }
       : {
-          backgroundColor: btnBg     + ' !important',
-          color:           btnText   + ' !important',
+          backgroundColor: btnBg + ' !important',
           borderColor:     btnBorder + ' !important',
         };
 
+    const selectedRest   = isGhost ? btnOutlineQuiet : 'var(--Buttons-' + C + '-Quiet)';
+    const selectedActive = isGhost ? btnOutlineText  : btnText;
+
+    /* The FILL stays frozen across the pointer states and the LABEL does not.
+       The freeze is here because --Buttons-{C}-Hover is a lighter tone, so a
+       selected segment lightened on hover and read as deselecting. Keeping
+       the fill still while the label moves gives the feedback without that.
+       Figma does move the fill (selected/Hover binds Buttons/Hover), so this
+       is a deliberate divergence rather than an oversight — recorded here
+       because the next person to compare them will find it. */
     const selectedSx = isSelected ? {
       ...selectedPaint,
-      '&:hover, &:active, &.Mui-focusVisible, &:focus-visible': selectedPaint,
+      color: selectedRest + ' !important',
+      '&:hover, &:active, &.Mui-focusVisible, &:focus-visible': {
+        ...selectedPaint,
+        color: selectedActive + ' !important',
+      },
     } : {};
 
     // ── Unselected styles ─────────────────────────────────────────────────

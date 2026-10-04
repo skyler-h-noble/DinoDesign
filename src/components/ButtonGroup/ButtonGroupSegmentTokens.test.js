@@ -90,3 +90,38 @@ describe('unselected segment label', () => {
     expect(base).toContain('--Buttons-Success-Button');
   });
 });
+
+describe('selected segment label', () => {
+  /* Same rest/interaction split as every other label: Quiet at rest, Text on
+     interaction. It was frozen at Text across all states, so a selected
+     segment was the one thing in the group that was loud at rest and had no
+     feedback left to give on hover. */
+  it('rests on the palette Quiet', () => {
+    const { base } = rulesFor(segments('success').selected);
+    expect(colorIn(base)).toContain('--Buttons-Success-Quiet');
+  });
+
+  for (const state of ['hover', 'active', 'focusVisible']) {
+    it(`moves to Text on ${state}`, () => {
+      const { states } = rulesFor(segments('success').selected);
+      expect(colorIn(states[state])).toContain('--Buttons-Success-Text');
+    });
+  }
+
+  /* The FILL stays put while the label moves. --Buttons-{C}-Hover is a
+     lighter tone, so a selected segment that took it lightened on hover and
+     read as deselecting. Figma does move the fill, so this is a recorded
+     divergence — the assertion exists so a future change to it is deliberate
+     rather than accidental.
+
+     Asserted as the PRESENCE of the !important override rather than the
+     absence of --Buttons-{C}-Hover. `rulesFor` buckets every rule matching
+     the element, so the Button's own hover rule is in the same string even
+     though the override beats it on specificity; an absence check there fails
+     on correct code. */
+  it('keeps its fill frozen across the pointer states', () => {
+    const { states } = rulesFor(segments('success').selected);
+    expect(states.hover).toMatch(
+      /background-color:\s*var\(--Buttons-Success-Button\)\s*!important/);
+  });
+});
