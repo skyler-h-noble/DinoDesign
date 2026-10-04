@@ -38,7 +38,7 @@
  * index entirely and have been added, but the studio installs the PUBLISHED
  * package — so they arrive here on the next release, not before.
  */
-import React from 'react';
+import React, { useState } from 'react';
 /* Imported from each component's OWN module, never from '../components'.
  *
  * The barrel re-exports these docs, so a barrel import here closes a cycle:
@@ -87,6 +87,41 @@ import { BUTTON_GROUP_SAMPLES } from './samples.buttongroup';
 // rather than this source — a second React tree and a stale component set.
 
 /** Rendered inside the provider, so every token resolves to the user's brand. */
+/* Lead examples that own state.
+ *
+ * The entries in EXAMPLES are plain functions called during render, so they
+ * cannot hold a hook themselves — anything interactive needs a real component
+ * to put the state in. */
+function ButtonGroupExample() {
+  const [range, setRange] = useState('a');
+  return (
+    <ButtonGroup value={range} onChange={setRange} size="small" aria-label="Range">
+      <Button value="a" size="small">Day</Button>
+      <Button value="b" size="small">Week</Button>
+      <Button value="c" size="small">Month</Button>
+    </ButtonGroup>
+  );
+}
+
+function ChipExample() {
+  const [selected, setSelected] = useState(true);
+  const [dismissed, setDismissed] = useState(false);
+  return (
+    <HStack gap="var(--Sizing-1)" style={{ alignItems: 'center' }}>
+      <Chip label="Unselected" />
+      {/* Toggles, so the selected state is reachable rather than only shown. */}
+      <Chip label="Selected" clickable selected={selected}
+            onClick={() => setSelected(v => !v)} />
+      {/* `onDelete` was a no-op, so the one thing a dismissible chip does was
+          the one thing this did not do. It removes itself now, and says so
+          rather than leaving a gap. */}
+      {dismissed
+        ? <Caption color="quiet">dismissed</Caption>
+        : <Chip label="Dismissible" onDelete={() => setDismissed(true)} />}
+    </HStack>
+  );
+}
+
 export const EXAMPLES = {
   /* The 29 components that had no lead example. Merged first so an entry
      below can still override one. */
@@ -105,16 +140,13 @@ export const EXAMPLES = {
     ))}
   </HStack>,
   Fab: () => <Fab icon={<Icon size="medium"><AddIcon /></Icon>} ariaLabel="Add" />,
-  ButtonGroup: () => <ButtonGroup value="a" onChange={() => {}} size="small">
-      <Button value="a" size="small">Day</Button>
-      <Button value="b" size="small">Week</Button>
-      <Button value="c" size="small">Month</Button>
-    </ButtonGroup>,
-  Chip: () => <HStack gap="var(--Sizing-1)">
-      <Chip label="Unselected" />
-      <Chip label="Selected" selected />
-      <Chip label="Dismissible" onDelete={() => {}} />
-    </HStack>,
+  /* Stateful, because a CONTROL in a sample has to be operable.
+     This was `value="a" onChange={() => {}}` — controlled with a no-op, which
+     is worse than leaving it uncontrolled: the segment takes the click,
+     reports nothing, and the group never moves off Day. A sample that looks
+     interactive and is not teaches that the component is broken. */
+  ButtonGroup: () => <ButtonGroupExample />,
+  Chip: () => <ChipExample />,
   Badge: () => <HStack gap="var(--Sizing-3)">
       <Badge badgeContent={3}><Icon><span>✉</span></Icon></Badge>
       <Badge dot><Icon><span>🔔</span></Icon></Badge>

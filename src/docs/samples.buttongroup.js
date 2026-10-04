@@ -61,6 +61,20 @@ function IconGroup(props) {
   );
 }
 
+/* The group still works; only one segment is out. A no-op onChange here
+   would have made the whole group dead while demonstrating that ONE segment
+   was disabled, which is the opposite of the point. */
+function PartlyDisabledGroup() {
+  const [value, setValue] = useState('Day');
+  return (
+    <ButtonGroup value={value} onChange={setValue} aria-label="Range">
+      <Button value="Day">Day</Button>
+      <Button value="Week" disabled>Week</Button>
+      <Button value="Month">Month</Button>
+    </ButtonGroup>
+  );
+}
+
 const BOX = 360;
 
 export const BUTTON_GROUP_SAMPLES = {
@@ -193,11 +207,7 @@ export const BUTTON_GROUP_SAMPLES = {
       </VStack>
       <VStack gap="var(--Sizing-Half)">
         <Caption color="quiet">a single segment takes its own `disabled`</Caption>
-        <ButtonGroup value="Day" onChange={() => {}} aria-label="Range">
-          <Button value="Day">Day</Button>
-          <Button value="Week" disabled>Week</Button>
-          <Button value="Month">Month</Button>
-        </ButtonGroup>
+        <PartlyDisabledGroup />
       </VStack>
     </VStack>
   ),

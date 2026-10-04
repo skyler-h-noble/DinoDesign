@@ -77,8 +77,14 @@ const Rows = ({ items }) => (
  * The example is here because a page of prose gives no recognition: you cannot
  * tell what a component IS from its prop table. It renders in the theme and
  * surface currently selected, so the picture matches the pickers rather than
- * showing some other configuration. It is the default instance and is not
- * interactive — the Playground tab is where you change things.
+ * showing some other configuration.
+ *
+ * It WORKS. This said the example "is not interactive — the Playground tab is
+ * where you change things", and that reading produced a ButtonGroup whose
+ * segments took the click and never moved: controlled with a no-op onChange.
+ * A control that looks operable and is not does not read as "go to the
+ * Playground", it reads as "this component is broken". Playground is where
+ * you change its PROPS; the example is where you see it behave.
  *
  * Components that need state or a portal to be shown honestly (Modal, Drawer,
  * Snackbar) have no example, and simply lead with the summary instead of
