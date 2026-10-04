@@ -20,10 +20,10 @@ import { Box } from '@mui/material';
  *   Container border:          var(--Buttons-{Color}-Border)
  *   Selected bg:               var(--Buttons-{Color}-Button)
  *   Selected text:             var(--Buttons-{Color}-Text)
- *   Unselected text:           var(--Text-Quiet)
- *   Hover (unselected) bg:     var(--Hover)
- *   Hover (unselected) text:   var(--Text)
- *   Active (unselected) bg:    var(--Pressed)
+ *   Unselected text:           var(--Buttons-{Color}-Outline-Quiet)
+ *   Hover (unselected) bg:     var(--Hover)            — surface scrim
+ *   Hover (unselected) text:   var(--Buttons-{Color}-Outline-Text)
+ *   Active (unselected) bg:    var(--Pressed)          — surface scrim
  *   Focus ring:                var(--Focus-Visible)
  *
  * ─── SELECTION ───────────────────────────────────────────────────────────────
@@ -171,6 +171,16 @@ export function ButtonGroup({
   const btnBorder    = 'var(--Buttons-' + C + '-Border)';
   const btnBg        = 'var(--Buttons-' + C + '-Button)';
   const btnText      = 'var(--Buttons-' + C + '-Text)';
+  /* The UNSELECTED segment's label, which is a button token and not a surface
+     one. Figma binds Buttons/Outline-Quiet at rest and Buttons/Outline-Text on
+     hover, pressed and focus — across both segment sets, both styles and all
+     180 variants. This file used --Quiet and --Text, which are the SURFACE
+     roles: the right shape, the wrong table, so an outline segment in a
+     success group had exactly the same label as one in an error group. Same
+     drift that Button itself carried until the Buttons table gained a
+     consumer. */
+  const btnOutlineQuiet = 'var(--Buttons-' + C + '-Outline-Quiet)';
+  const btnOutlineText  = 'var(--Buttons-' + C + '-Outline-Text)';
   /* `default` gets no data-theme at all — it INHERITS. Naming the Default
      mode would pin the group to the app's theme and override whatever themed
      section it sits in, which is the bug the Modal had. The other eight name
@@ -262,23 +272,36 @@ export function ButtonGroup({
     } : {};
 
     // ── Unselected styles ─────────────────────────────────────────────────
+    /* The FILLS stay on the surface and the LABELS come from the buttons
+       table, which is what Figma does and is not a mix-up: an unselected
+       segment has no fill of its own, so its hover and pressed tints are the
+       surface's scrims — but its label belongs to the group's palette, which
+       is the only thing distinguishing a success group from an error one
+       while nothing is selected.
+
+       The pressed label was --Buttons-Default-Text once, pinned to the
+       DEFAULT palette whatever colour the group was. It was corrected to
+       --Text, which fixed the pinning and lost the palette; Outline-Text is
+       the token that was wanted both times — it follows the group's colour
+       AND is contrast-checked against the surface rather than against a
+       button fill. */
     const unselectedSx = !isSelected ? {
-      color:           'var(--Quiet)',
+      color:           btnOutlineQuiet,
       backgroundColor: 'transparent',
       '&:hover': {
         backgroundColor: 'var(--Hover)',
-        color:           'var(--Text)',
+        color:           btnOutlineText,
         zIndex:          1,
       },
       '&:active': {
         backgroundColor: 'var(--Pressed)',
-        /* --Text, not --Buttons-Default-Text. The pressed color was pinned to
-           the DEFAULT palette's button text whatever color the group was, so
-           pressing a segment in an error group painted it with the default
-           button's label color — on --Pressed, which is a surface token, not
-           a button fill. The pair have to come from the same place, and the
-           surface is what is underneath. */
-        color:           'var(--Text)',
+        color:           btnOutlineText,
+      },
+      /* Focus-Visible is one of the three active states in Figma, and it was
+         the only one here with no label of its own — so keyboard focus said
+         less than hover did. */
+      '&.Mui-focusVisible, &:focus-visible': {
+        color:           btnOutlineText,
       },
     } : {};
 
