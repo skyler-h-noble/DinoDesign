@@ -152,7 +152,18 @@ export function DocSummary({ component, theme = null, surface = 'Surface' }) {
                 `maxWidth` rather than a fixed width, so a Button still hugs
                 its label and centres: components that want the room take it,
                 components that do not are unaffected. */}
-            <Box sx={{ p: 3, display: 'flex', justifyContent: 'center' }}>
+            {/* `width: 100%` HERE, and this is the third attempt at this bug.
+                PreviewSurface is a centring flex container, so this box is a
+                flex item with no width of its own — its width comes from its
+                content. The inner box's `width: 100%` then resolves against a
+                parent whose width is its content, which is circular and falls
+                back to content width. The Slider's content is its thumb, so
+                the whole chain collapsed to a dot while every OTHER slider on
+                the page, rendered through the sample wrappers rather than this
+                one, looked fine.
+                Two earlier fixes were both correct about the inner box and
+                both landed one level too low. */}
+            <Box sx={{ width: '100%', p: 3, display: 'flex', justifyContent: 'center' }}>
               {/* A BLOCK box, not a flex column.
                   The first attempt at this was `display: flex` with
                   `alignItems: center`, which fixed nothing: centring a column
