@@ -322,6 +322,19 @@ export function ComponentSizeDemo() {
  * The HowToSlots stay placeholders until someone crops the panels — see that
  * file for why a crop and not a full canvas.
  */
+/* A shot with its caption. HowToSlot renders the frame; the caption is what
+   turns a picture of a panel into an argument — "here is the control" is worth
+   little next to "here is the control, and here is what it is telling you that
+   a dropdown cannot". */
+function Shot({ src, title, caption, maxWidth = 560 }) {
+  return (
+    <VStack gap="var(--Sizing-Half)" style={{ maxWidth }}>
+      <HowToSlot src={src} title={title} maxWidth={maxWidth} />
+      <Caption color="quiet">{caption}</Caption>
+    </VStack>
+  );
+}
+
 function Method({ name, when, steps, note }) {
   return (
     <Box data-surface="Container" sx={{
@@ -391,10 +404,89 @@ function ThemingDemo() {
         note={'Four things are yours to remember: find the right layer, move Buttons and Icons too, check nothing below it is pinned, and never touch a main component. Those four are what the tools do for you.'}
       />
 
-      <HowToSlot
-        title="The plugin's Theme tab, with a component selected"
-        shows="The dropdowns name the layer they write to, and the line under each row names the binding that brought it in."
-      />
+      {/* Full canvas rather than a crop of the panel, which is a departure
+          from HowToSlot's own rule — see that file. The rule is right about
+          WHERE a control is: a crop is brand-neutral and travels. These shots
+          are making a different point, which is what changes on the canvas when
+          you pick a value, and a crop cannot show that at all. The brand on
+          screen is the cost of showing cause and effect in one frame. */}
+      <VStack gap="var(--Sizing-2)">
+        <EyebrowSmall>The plugin</EyebrowSmall>
+        <Shot
+          src="/images/theming/plugin-panel.png"
+          title="The Omni Design plugin's Theme tab with a Card selected, set to Primary"
+          caption={'It names the layer it writes to \u2014 "Sets Card" \u2014 and the line under each row names the binding that brought the row in. Theme is set here; Surface says "Not set \u2014 resolves to Surface", which means nothing pins it and it takes what it is given.'}
+        />
+        <Shot
+          src="/images/theming/plugin-surface.png"
+          title="The same panel with Surface changed to Surface-Dimmest, the card now near-black"
+          caption={'Theme and Surface are separate axes. The palette is still Primary; only the level moved.'}
+        />
+      </VStack>
+
+      <VStack gap="var(--Sizing-2)">
+        <EyebrowSmall>The widget</EyebrowSmall>
+        <HStack gap="var(--Sizing-2)" style={{ flexWrap: 'wrap', alignItems: 'flex-start' }}>
+          <Shot
+            src="/images/theming/widget-panel.png"
+            title="The Omni Theme widget's panel, Card on Tertiary"
+            caption="Tertiary."
+            maxWidth={360}
+          />
+          <Shot
+            src="/images/theming/widget-second.png"
+            title="The same card switched to Secondary, the widget's own canvas label following"
+            caption={'Secondary \u2014 and the widget\u2019s label on the canvas has followed.'}
+            maxWidth={360}
+          />
+        </HStack>
+      </VStack>
+
+      <VStack gap="var(--Sizing-1)">
+        <EyebrowSmall>Side by side</EyebrowSmall>
+        <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <thead>
+            <tr>
+              {['', 'Plugin', 'Widget', 'By hand'].map((h, i) => (
+                <Box key={i} component="th" sx={{ py: 1, pr: 2, verticalAlign: 'bottom',
+                                                  borderBottom: '1px solid var(--Border)' }}>
+                  <EyebrowSmall>{h}</EyebrowSmall>
+                </Box>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              ['Finds the Theme-* switch for you', 1, 1, 'You find it'],
+              ['Follows your selection', 1, 'Panel only', 1],
+              ['Moves Buttons and Icons with the theme', 1, 1, 'One at a time'],
+              ['Shows the colour before you pick', 1, 1, 0],
+              ['Flags modes set where they do not belong', 1, 1, 0],
+              ['Tells set apart from inherited', 1, 1, 0],
+              ['Refuses to edit a main component', 1, 1, 0],
+              ['Works with nothing installed', 0, 1, 1],
+            ].map((row, r) => (
+              <tr key={r}>
+                {row.map((cell, c) => (
+                  <Box key={c} component="td" sx={{ py: 1.25, pr: 2, verticalAlign: 'top' }}>
+                    {c === 0
+                      ? <BodySmall>{cell}</BodySmall>
+                      /* The yes is a word, not a tick. A tick in a table is a
+                         glyph a screen reader reads as nothing, and the three
+                         "no" cells that say WHAT you get instead are the
+                         interesting ones. */
+                      : cell === 1
+                        ? <BodySmall>Yes</BodySmall>
+                        : cell === 0
+                          ? <BodySmall color="quiet">No</BodySmall>
+                          : <BodySmall color="quiet">{cell}</BodySmall>}
+                  </Box>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </Box>
+      </VStack>
 
       <VStack gap="var(--Sizing-1)">
         <EyebrowSmall>Reading the panel</EyebrowSmall>
