@@ -15,6 +15,13 @@ const surfaceToken = (name, sets) => ({
 export const ICON_DOC = {
   name: 'Icon',
   summary: 'Wraps an icon glyph so it takes a system color and size. Decorative unless you name it.',
+  /* The library ships no icons — it renders Material Symbols, which arrive
+     with the brand's own font. So using Icon means knowing a symbol's NAME,
+     and the name list lives on Google's site rather than here. */
+  links: [{
+    label: 'Browse Material Symbols',
+    href: 'https://fonts.google.com/icons?icon.size=24&icon.color=%23e3e3e3',
+  }],
   insteadUse: [{
     when: 'It is clickable',
     use: 'Button with iconOnly'
@@ -362,6 +369,15 @@ export const ACCORDION_DOC = {
 export const BRANDICON_DOC = {
   name: 'BrandIcon',
   summary: 'A company or service mark — GitHub, LinkedIn, Figma. Somebody else\'s artwork, not ours.',
+  /* A DIFFERENT list from Icon's, and the separation is the point. Icon is
+     Material Symbols; this is Font Awesome 6 Brands, matching the Figma
+     Brand-Icons component, which is that font as a ligature. Sending someone
+     to the Material list for a brand mark would be sending them somewhere the
+     name does not exist. */
+  links: [{
+    label: 'Browse Font Awesome Brands',
+    href: 'https://fontawesome.com/search?o=r&f=brands',
+  }],
   insteadUse: [{
     when: 'It is part of the system\'s own vocabulary — a chevron, a trash can',
     use: 'Icon'

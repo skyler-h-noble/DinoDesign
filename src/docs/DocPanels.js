@@ -160,11 +160,24 @@ export function DocSummary({ component, theme = null, surface = 'Surface' }) {
 
         <Body>{doc.summary}</Body>
 
-        {figmaUrl ? (
-          <Box>
-            <Link href={figmaUrl} target="_blank" rel="noopener noreferrer">
-              Open {doc.name} in Figma
-            </Link>
+        {figmaUrl || (doc.links && doc.links.length) ? (
+          <Box sx={{ display: 'flex', gap: 'var(--Sizing-3)', flexWrap: 'wrap' }}>
+            {figmaUrl ? (
+              <Link href={figmaUrl} target="_blank" rel="noopener noreferrer">
+                Open {doc.name} in Figma
+              </Link>
+            ) : null}
+            {/* Where the component's content comes from when the library does
+                not ship it. Icon and BrandIcon are the cases that need it: the
+                lib renders Material Symbols and Font Awesome Brands by
+                LIGATURE, so using either means knowing a name, and the name
+                list is somebody else's site. Without the link the answer to
+                "what can I put here" was to already know. */}
+            {(doc.links || []).map((l, i) => (
+              <Link key={i} href={l.href} target="_blank" rel="noopener noreferrer">
+                {l.label}
+              </Link>
+            ))}
           </Box>
         ) : null}
 
