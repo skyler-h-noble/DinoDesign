@@ -99,24 +99,35 @@
   --Buttons-Default-Quiet: var(--Buttons-Secondary-Quiet);
   --Buttons-Default-Hover: #efa5a4;
   --Buttons-Default-Pressed: #efa5a4;
-  --Icons-Default: var(--Icon-Surfaces-Neutral-Color-9);
-  --Icons-Default-Variant: var(--Icon-Variant-Surfaces-Neutral-Color-9);
-  --Icons-Primary: var(--Icon-Surfaces-Primary-Color-9);
-  --Icons-Primary-Variant: var(--Icon-Variant-Surfaces-Primary-Color-9);
-  --Icons-Secondary: var(--Icon-Surfaces-Secondary-Color-9);
-  --Icons-Secondary-Variant: var(--Icon-Variant-Surfaces-Secondary-Color-9);
-  --Icons-Tertiary: var(--Icon-Surfaces-Tertiary-Color-9);
-  --Icons-Tertiary-Variant: var(--Icon-Variant-Surfaces-Tertiary-Color-9);
-  --Icons-Neutral: var(--Icon-Surfaces-Neutral-Color-9);
-  --Icons-Neutral-Variant: var(--Icon-Variant-Surfaces-Neutral-Color-9);
-  --Icons-Info: var(--Icon-Surfaces-Info-Color-9);
-  --Icons-Info-Variant: var(--Icon-Variant-Surfaces-Info-Color-9);
-  --Icons-Success: var(--Icon-Surfaces-Success-Color-9);
-  --Icons-Success-Variant: var(--Icon-Variant-Surfaces-Success-Color-9);
-  --Icons-Warning: var(--Icon-Surfaces-Warning-Color-9);
-  --Icons-Warning-Variant: var(--Icon-Variant-Surfaces-Warning-Color-9);
-  --Icons-Error: var(--Icon-Surfaces-Error-Color-9);
-  --Icons-Error-Variant: var(--Icon-Variant-Surfaces-Error-Color-9);
+  /* The Icons ramp, with a fallback that is doing real work.
+     `--Icon-Surfaces-<Palette>-Color-9` and its Variant sibling are referenced
+     here and defined NOWHERE — not in this file and not in a generated brand
+     sheet. An undefined var() makes the whole declaration invalid at computed
+     value time, so every one of these resolved to nothing, and a Switch on
+     `secondary` painted the same dark track as one on `tertiary`, `info` and
+     `error`. Nine variants, one colour, no error anywhere.
+     The surface-scoped name stays FIRST, because a brand that emits it should
+     win — that is the rule this system runs on. The palette ramp behind it is
+     what the themed blocks further down this file already use, so the fallback
+     agrees with them rather than inventing a value. */
+  --Icons-Default: var(--Icon-Surfaces-Neutral-Color-9, var(--Neutral-Color-6));
+  --Icons-Default-Variant: var(--Icon-Variant-Surfaces-Neutral-Color-9, var(--Neutral-Color-7));
+  --Icons-Primary: var(--Icon-Surfaces-Primary-Color-9, var(--Primary-Color-6));
+  --Icons-Primary-Variant: var(--Icon-Variant-Surfaces-Primary-Color-9, var(--Primary-Color-7));
+  --Icons-Secondary: var(--Icon-Surfaces-Secondary-Color-9, var(--Secondary-Color-6));
+  --Icons-Secondary-Variant: var(--Icon-Variant-Surfaces-Secondary-Color-9, var(--Secondary-Color-7));
+  --Icons-Tertiary: var(--Icon-Surfaces-Tertiary-Color-9, var(--Tertiary-Color-6));
+  --Icons-Tertiary-Variant: var(--Icon-Variant-Surfaces-Tertiary-Color-9, var(--Tertiary-Color-7));
+  --Icons-Neutral: var(--Icon-Surfaces-Neutral-Color-9, var(--Neutral-Color-6));
+  --Icons-Neutral-Variant: var(--Icon-Variant-Surfaces-Neutral-Color-9, var(--Neutral-Color-7));
+  --Icons-Info: var(--Icon-Surfaces-Info-Color-9, var(--Info-Color-6));
+  --Icons-Info-Variant: var(--Icon-Variant-Surfaces-Info-Color-9, var(--Info-Color-7));
+  --Icons-Success: var(--Icon-Surfaces-Success-Color-9, var(--Success-Color-6));
+  --Icons-Success-Variant: var(--Icon-Variant-Surfaces-Success-Color-9, var(--Success-Color-7));
+  --Icons-Warning: var(--Icon-Surfaces-Warning-Color-9, var(--Warning-Color-6));
+  --Icons-Warning-Variant: var(--Icon-Variant-Surfaces-Warning-Color-9, var(--Warning-Color-7));
+  --Icons-Error: var(--Icon-Surfaces-Error-Color-9, var(--Error-Color-6));
+  --Icons-Error-Variant: var(--Icon-Variant-Surfaces-Error-Color-9, var(--Error-Color-7));
 }
 
 :root {
