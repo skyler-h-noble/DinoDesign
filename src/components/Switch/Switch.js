@@ -163,9 +163,16 @@ const TOUCH_MIN = 24;
 // at -3px on the left, which would make it 1px lop-sided; it is centred here.
 const THUMB_INSET = 2;
 
+/* Figma's Component-Size collection, not a ramp fitted here.
+   These were 28x16 and 40x24 at small and medium against the collection's 35x20
+   and 42x24 — large matched, which is how it went unnoticed: one size agreeing
+   reads as the set agreeing. The values are published per mode and each one was
+   chosen, so a switch scaled by ratio lands on numbers the system does not
+   contain. docs/foundations.js carries the same table, and
+   SwitchSizeParity.test.js asserts the two against each other. */
 const SIZE_MAP = {
-  small:  { trackW: 28, trackH: 16, dotRadius: 'var(--Sizing-2, 16px)',          icon: 8  },
-  medium: { trackW: 40, trackH: 24, dotRadius: 'var(--Sizing-2-and-Half, 20px)', icon: 16 },
+  small:  { trackW: 35, trackH: 20, dotRadius: 'var(--Sizing-2, 16px)',          icon: 8  },
+  medium: { trackW: 42, trackH: 24, dotRadius: 'var(--Sizing-2-and-Half, 20px)', icon: 16 },
   large:  { trackW: 56, trackH: 32, dotRadius: 'var(--Sizing-2-and-Half, 20px)', icon: 16 },
 };
 
