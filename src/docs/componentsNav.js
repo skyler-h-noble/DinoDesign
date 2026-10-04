@@ -101,6 +101,21 @@ export const RAIL_DOC = {
     type: 'array',
     default: '[]'
   }, {
+    /* Added when the selected item was wired to the Buttons table.
+       Figma has no such property on the Rail: the selected fill binds a
+       variable named plainly `Button`, and which palette that resolves to is
+       a MODE on the Buttons collection. CSS has one flat namespace and cannot
+       hold a `Button` that means a different colour per mode, so the mode
+       becomes a prop here — the same translation Button makes for its own
+       `variant`. Nothing on the Rail page sets the mode, so the shipped
+       design is `default`. */
+    name: 'variant',
+    type: 'string',
+    values: ['default', 'primary', 'secondary', 'tertiary', 'neutral',
+             'info', 'success', 'warning', 'error', 'black-white'],
+    default: 'default',
+    note: 'The palette a SELECTED item paints from — --Buttons-{Palette}-Button for the fill and -Text for its label.'
+  }, {
     name: 'sections',
     type: 'array',
     default: 'undefined'
