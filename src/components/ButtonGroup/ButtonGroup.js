@@ -63,6 +63,20 @@ import { Box } from '@mui/material';
  * The selection props still work here and still will until the next major —
  * silently dropping them would leave a group that renders correctly and never
  * changes, which is the failure this project keeps designing against. */
+let warnedJoined = false;
+function warnJoined() {
+  if (warnedJoined || process.env.NODE_ENV === 'production') return;
+  warnedJoined = true;
+  console.warn(
+    '[OmniDesign] ButtonGroup is separated — a row of actions, spaced. '
+    + '`separated={false}` joins the segments into one control, which is '
+    + 'ToggleButtonGroup\'s Style=Default and not a shape Figma\'s ButtonGroup '
+    + 'has. It still renders and will be removed in the next major. If the '
+    + 'segments are a choice rather than three actions, use '
+    + '<ToggleButtonGroup>.',
+  );
+}
+
 let warnedSelection = false;
 function warnSelectionMoved() {
   if (warnedSelection || process.env.NODE_ENV === 'production') return;
@@ -145,7 +159,16 @@ export function ButtonGroup({
      (4px on desktop, 10px on touch) — not a fixed 4. Joined is -2: the segments
      OVERLAP so the shared edge collapses to one border rather than two sitting
      side by side. */
-  separated = false,
+  /* SEPARATED by default, which is what Figma's ButtonGroup is: all four of
+     its variants are gap 4, there is no Style axis, and joined does not
+     appear on that page at all. Joined belongs to ToggleButtonGroup, whose
+     Style=Default overlaps the segments so the shared edge collapses to one
+     border — because a toggle group is ONE control, and a row of actions is
+     three things that happen to be next to each other.
+     Passing false still joins them and warns: a joined row of actions looks
+     like a control with nothing selected, which is the confusion the two
+     components were split to end. */
+  separated = true,
   spacing,
   // fit — the group's WIDTH variant (in Figma, a "Width"/"Fit" variant property):
   //   'hug'   (default) each button sizes to its own content
@@ -191,6 +214,11 @@ export function ButtonGroup({
       || onChange !== undefined || multiple)) {
     warnSelectionMoved();
   }
+
+  /* Only when the caller ASKED to join. ToggleButtonGroup joins by default
+     and passes separated through, so firing on the value alone would warn on
+     the component that is supposed to be joined. */
+  if (!__selectionOwner && separated === false) warnJoined();
 
   const [internalValue, setInternalValue] = useState(
     defaultValue ?? (multiple ? [] : null),

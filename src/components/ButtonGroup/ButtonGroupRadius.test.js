@@ -1,4 +1,12 @@
 /**
+ * JOINED geometry, which now belongs to ToggleButtonGroup.
+ *
+ * These tests used ButtonGroup, and moved when the two components split:
+ * ButtonGroup is separated by default — Figma's is gap 4 on every variant,
+ * with no Style axis — so it has no shared edges and no end caps to round.
+ * A toggle group is ONE control, so it joins, and the corner rules below are
+ * about the outline of that one control.
+ *
  * The end caps, and the two orientations do not use the same corner.
  *
  * Figma binds Button/Button-Radius on the left and right caps of a horizontal
@@ -14,16 +22,16 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import { ButtonGroup } from './ButtonGroup';
+import { ToggleButtonGroup } from '../ToggleButtonGroup/ToggleButtonGroup';
 import { Button } from '../Button/Button';
 
 function radiiOf(orientation) {
   const { container } = render(
-    <ButtonGroup value="a" onChange={() => {}} orientation={orientation} aria-label="g">
+    <ToggleButtonGroup value="a" onChange={() => {}} orientation={orientation} aria-label="g">
       <Button value="a">A</Button>
       <Button value="b">B</Button>
       <Button value="c">C</Button>
-    </ButtonGroup>
+    </ToggleButtonGroup>
   );
   return Array.from(container.querySelectorAll('button')).map((el) => {
     const classes = Array.from(el.classList);
@@ -93,11 +101,11 @@ describe('vertical end caps', () => {
  *  the base one and is where the ring's own corner lives. */
 function focusCssOf(orientation, index) {
   const { container } = render(
-    <ButtonGroup value="a" onChange={() => {}} orientation={orientation} aria-label="g">
+    <ToggleButtonGroup value="a" onChange={() => {}} orientation={orientation} aria-label="g">
       <Button value="a">A</Button>
       <Button value="b">B</Button>
       <Button value="c">C</Button>
-    </ButtonGroup>
+    </ToggleButtonGroup>
   );
   const el = Array.from(container.querySelectorAll('button'))[index];
   const classes = Array.from(el.classList);
@@ -148,9 +156,9 @@ describe('a single segment', () => {
       ['vertical', '--Vertical-Button-Radius'],
     ]) {
       const { container } = render(
-        <ButtonGroup value="a" onChange={() => {}} orientation={orientation} aria-label="g">
+        <ToggleButtonGroup value="a" onChange={() => {}} orientation={orientation} aria-label="g">
           <Button value="a">Only</Button>
-        </ButtonGroup>
+        </ToggleButtonGroup>
       );
       /* One child is not "connected" — there is no shared edge — so the
          positional radius does not apply and the button keeps its own. The

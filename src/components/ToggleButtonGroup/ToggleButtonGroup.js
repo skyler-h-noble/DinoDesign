@@ -85,6 +85,11 @@ export function ToggleButtonGroup({
      genuinely want a clearable multi-select with toggle styling, and the
      alternative is reaching for ButtonGroup and losing the floor entirely. */
   allowEmpty = false,
+  /* JOINED by default, which is this component's Style=Default in Figma: the
+     segments overlap so the shared edge collapses to one border, because a
+     toggle group is ONE control. ButtonGroup defaults the other way, and that
+     difference is most of what tells the two apart at a glance. */
+  separated = false,
   ...props
 }) {
   /* `variant` means the shape natively and meant the colour on MUI's
@@ -112,6 +117,7 @@ export function ToggleButtonGroup({
       color={color !== undefined ? color : (isShape ? undefined : variant)}
       multiple={effectiveMultiple}
       allowEmpty={allowEmpty}
+      separated={separated}
       onChange={onChange
         ? (legacy ? (next, e) => onChange(e, next) : onChange)
         : undefined}
