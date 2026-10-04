@@ -13,6 +13,8 @@ import React from 'react';
 import { Checkbox } from '../components/Checkbox';
 import { Radio, RadioGroup } from '../components/Radio';
 import { SwitchInput } from '../components/Switch';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
 import { Input as TextInput } from '../components/Input';
 import { TextField } from '../components/TextField';
 import { SearchField } from '../components/SearchField';
@@ -119,6 +121,35 @@ export const FORM_SAMPLES = {
         <Cell label="on"><SwitchInput defaultChecked label="Notifications" /></Cell>
       </HStack>
     ),
+    /* The glyph takes its colour from the SAME place the track does — the
+       Icons collection — so an icon on a `secondary` switch is secondary
+       without anything being passed for it. Shown across the palette rather
+       than once in the default, because "does it follow the variant" is the
+       question an icon on a themed control raises.
+       On and off are separate slots because the design draws a different glyph
+       either side of the toggle; `icon` alone is the shorthand for both. */
+    icon: () => (
+      <VStack gap="var(--Sizing-2)">
+        <Axis values={['default', 'primary', 'secondary', 'tertiary']}
+              defaultValue="default"
+              render={(v) => (
+                <SwitchInput variant={v} defaultChecked label={v}
+                             iconOn={<CheckIcon fontSize="inherit" />}
+                             iconOff={<CloseIcon fontSize="inherit" />} />
+              )} />
+        <HStack gap="var(--Sizing-3)" style={{ flexWrap: 'wrap' }}>
+          <Cell label="off"><SwitchInput label="Sync"
+            iconOn={<CheckIcon fontSize="inherit" />}
+            iconOff={<CloseIcon fontSize="inherit" />} /></Cell>
+          <Cell label="on" emphasis><SwitchInput defaultChecked label="Sync"
+            iconOn={<CheckIcon fontSize="inherit" />}
+            iconOff={<CloseIcon fontSize="inherit" />} /></Cell>
+          <Cell label="same glyph both ways"><SwitchInput defaultChecked label="Sync"
+            icon={<CheckIcon fontSize="inherit" />} /></Cell>
+        </HStack>
+      </VStack>
+    ),
+
     /* Two, not four: a switch's label never sits above or below it, because
        the control reads as the end of the sentence it labels. */
     labelPlacement: () => (
