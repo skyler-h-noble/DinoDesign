@@ -20,8 +20,8 @@ const box = (children, width = W) => <div style={{ width }}>{children}</div>;
 
 export const SLIDER_SAMPLES = {
   /* All nine palettes. The thumb, both rail edges and the marks move with the
-     fill — that is the point of showing a whole slider per colour rather than
-     a swatch: a coloured slider is coloured throughout. */
+     fill — that is the point of showing a whole slider per color rather than
+     a swatch: a colored slider is colored throughout. */
   variant: () => (
     <Axis
       values={['default', ...PALETTES]}
@@ -121,7 +121,7 @@ export const SLIDER_SAMPLES = {
     </HStack>
   ),
 
-  /* Marks are 2px round dots, and they FLIP colour where the fill passes
+  /* Marks are 2px round dots, and they FLIP color where the fill passes
      them — --Quiet on the bare rail, --Background on the filled part — so
      they stay legible on both sides of the thumb instead of disappearing
      into a saturated fill. */
@@ -172,7 +172,7 @@ export const SLIDER_SAMPLES = {
   ),
 
   /* The bubble's ground is --Text with --Background text: the surface pair
-     INVERTED, which is legible on any surface by definition. A palette colour
+     INVERTED, which is legible on any surface by definition. A palette color
      would not be — the bubble floats over whatever happens to be under the
      thumb. `auto` is the one worth using; it appears on hover AND focus, so
      it is reachable by keyboard. */

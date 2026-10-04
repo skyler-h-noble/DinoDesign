@@ -7,7 +7,7 @@
  *
  * This file used --Quiet and --Text, the SURFACE roles. Right shape, wrong
  * table: an outline segment in a success group had exactly the same label as
- * one in an error group, so while nothing was selected the group's colour was
+ * one in an error group, so while nothing was selected the group's color was
  * invisible. The FILLS are surface tokens and stay that way — an unselected
  * segment has no fill of its own, so its hover tint is the surface's scrim.
  */
@@ -66,9 +66,9 @@ describe('unselected segment label', () => {
     });
   }
 
-  /* The regression that mattered: two groups of different colours had
+  /* The regression that mattered: two groups of different colors had
      identical unselected labels. */
-  it('differs between two differently coloured groups', () => {
+  it('differs between two differently colored groups', () => {
     const a = colorIn(rulesFor(segments('success').unselected).base);
     const b = colorIn(rulesFor(segments('error').unselected).base);
     expect(a).not.toEqual(b);

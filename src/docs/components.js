@@ -25,10 +25,10 @@ export const BUTTON_DOC = {
   props: [{
     /* One prop, two axes, so two rows.
        Figma models them separately — Style is a variant axis (solid / outline /
-       ghost) and colour is a Buttons MODE — and the note has said they are
+       ghost) and color is a Buttons MODE — and the note has said they are
        separate axes all along while the page showed them as one list. Reading
        `primary-outline` off a single row, it is not obvious which half is
-       which, or that `ghost` takes no colour at all. */
+       which, or that `ghost` takes no color at all. */
     name: 'variant',
     label: 'variant — shape',
     sample: 'variant',
@@ -42,7 +42,7 @@ export const BUTTON_DOC = {
     values: ['small', 'medium', 'large'],
     default: 'medium'
   }, {
-    /* The colour half of the same prop. Ten values, matching the Buttons
+    /* The color half of the same prop. Ten values, matching the Buttons
        collection exactly — black-white included, which the FAB cannot reach.
        It was previously listed with nine: black-white is added outside the
        COLORS loop in Button.js and the doc copied the loop. */
@@ -529,7 +529,7 @@ export const BUTTON_GROUP_DOC = {
   theming: [{
     collection: 'Buttons',
     inCode: 'The `color` prop. It writes the palette into the token name — `var(--Buttons-Primary-Button)`.',
-    inFigma: 'A MODE on the Buttons collection, set on the frame. There is no colour variant to pick on the instance.'
+    inFigma: 'A MODE on the Buttons collection, set on the frame. There is no color variant to pick on the instance.'
   }, {
     collection: 'Theme',
     inCode: '`data-theme` on an ancestor, or the `theme` prop on a wrapping Section.',
@@ -589,7 +589,7 @@ export const BUTTON_GROUP_DOC = {
   accessibility: [
     'The group is a `group` with an accessible name; each segment is a button with `aria-pressed`. Single-select uses `radiogroup` semantics so arrow keys move between options and one tab stop covers the whole control.',
     'Icon-only segments each need a name saying the ACTION — "Align left", not "left".',
-    'Selection is not carried by colour alone: the selected segment gains a fill AND `aria-pressed`, and its label moves from Quiet to Text.'
+    'Selection is not carried by color alone: the selected segment gains a fill AND `aria-pressed`, and its label moves from Quiet to Text.'
   ],
   gotchas: [
     'The joined style overlaps segments by one border width so the shared edge is a single line. Two adjacent 1px borders would read as a 2px rule between segments and a 1px one at the ends.',
@@ -636,7 +636,7 @@ export const TOGGLE_BUTTON_GROUP_DOC = {
     name: 'onChange',
     type: 'function',
     default: 'undefined',
-    note: 'Called (value, event) — the system`s order. MUI`s component called (event, value), and a caller signalling that older API with `exclusive` or a colour in `variant` still gets it that way round.'
+    note: 'Called (value, event) — the system`s order. MUI`s component called (event, value), and a caller signalling that older API with `exclusive` or a color in `variant` still gets it that way round.'
   }, {
     name: 'separated',
     type: 'boolean',
@@ -656,7 +656,7 @@ export const TOGGLE_BUTTON_GROUP_DOC = {
     name: 'variant',
     type: "'outlined' | 'light' | 'ghost'",
     default: "'outlined'",
-    note: 'The SHAPE of the unselected segments; the selected one is painted by the group. On MUI`s component this prop named the colour, so a palette name here still works and warns once.'
+    note: 'The SHAPE of the unselected segments; the selected one is painted by the group. On MUI`s component this prop named the color, so a palette name here still works and warns once.'
   }, {
     name: 'color',
     type: 'string',
@@ -708,13 +708,13 @@ export const TOGGLE_BUTTON_GROUP_DOC = {
   ],
   accessibility: [
     'Single select uses radiogroup semantics — arrow keys move between options and one tab stop covers the control. Multiple select is a group of buttons with `aria-pressed`.',
-    'Selection is not carried by colour alone: the selected segment gains a fill AND `aria-pressed`, and its label moves from Quiet to Text.',
+    'Selection is not carried by color alone: the selected segment gains a fill AND `aria-pressed`, and its label moves from Quiet to Text.',
     'Icon-only segments each need a name saying the ACTION — "Align left", not "left".',
   ],
   gotchas: [
     'The LAST selected segment cannot be turned off, and that refused click fires no onChange — firing it with an unchanged array would make a controlled caller re-render for nothing and read as a bug in their own reducer.',
     'This component was retired for a while as "ButtonGroup built a second time". The rendering is the same; the concept is not. A button group is a row of actions, none of them on. If nothing should be selected, that is ButtonGroup.',
-    '`variant` names the SHAPE here and named the COLOUR on MUI`s component. Both are accepted and told apart by value — the three shapes are a closed set — because there is no version of this that does not silently repaint somebody`s group.',
+    '`variant` names the SHAPE here and named the COLOR on MUI`s component. Both are accepted and told apart by value — the three shapes are a closed set — because there is no version of this that does not silently repaint somebody`s group.',
   ]
 };
 

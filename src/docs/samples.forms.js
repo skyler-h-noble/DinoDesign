@@ -103,7 +103,7 @@ export const FORM_SAMPLES = {
   },
 
   SwitchInput: {
-    /* NINE, not ten. The ON state takes its colour from the Icons collection
+    /* NINE, not ten. The ON state takes its color from the Icons collection
        — --Icons-{Color} for the track, --Icons-On-{Color} for the knob — and
        that collection has no black-white row, so there is nothing for a
        black-white switch to resolve to. */
@@ -121,7 +121,7 @@ export const FORM_SAMPLES = {
         <Cell label="on"><SwitchInput defaultChecked label="Notifications" /></Cell>
       </HStack>
     ),
-    /* The glyph takes its colour from the SAME place the track does — the
+    /* The glyph takes its color from the SAME place the track does — the
        Icons collection — so an icon on a `secondary` switch is secondary
        without anything being passed for it. Shown across the palette rather
        than once in the default, because "does it follow the variant" is the
@@ -331,7 +331,7 @@ export const FORM_SAMPLES = {
   },
 
   /* Verified against Avatar's own COLOR_MAP: FIVE values, not nine. An
-     avatar's colour is a neutral-to-brand ramp for an initials fallback, so
+     avatar's color is a neutral-to-brand ramp for an initials fallback, so
      the status palettes (info / success / warning / error) have no meaning
      and are not there. */
   Avatar: {

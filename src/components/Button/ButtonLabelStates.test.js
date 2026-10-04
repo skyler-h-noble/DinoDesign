@@ -11,7 +11,7 @@
  * Measured values on the default palette: #464646 → #101010 for solid,
  * #787878 at rest for outline. The icon inside takes the SAME token as the
  * label, which happens for free here because Icon paints `currentColor` and
- * the button root owns the colour.
+ * the button root owns the color.
  *
  * Disabled uses the REST token, not a third one — disabled is the resting
  * button with opacity 0.38 and nothing else rebound.
@@ -102,7 +102,7 @@ describe('solid button label: Quiet at rest, Text on interaction', () => {
     expect(colorIn(states.hover)).toContain('--Buttons-Primary-Text');
   });
 
-  /* Disabled is the REST token dimmed. The rule restates the resting colour
+  /* Disabled is the REST token dimmed. The rule restates the resting color
      only to stop MUI greying it out, so it must not pick up the active one. */
   it('keeps the rest token when disabled', () => {
     const { states } = probe(<Button variant="primary" disabled>x</Button>);

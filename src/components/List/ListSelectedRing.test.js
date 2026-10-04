@@ -15,7 +15,7 @@
  * A button token here would also be wrong in a way that does not look wrong:
  * --Buttons-*-Border carries the palette of the BUTTON mode, so a list inside
  * a frame whose Buttons mode differs from its Theme would outline its selected
- * row in a colour nothing else on the surface uses.
+ * row in a color nothing else on the surface uses.
  */
 import React from 'react';
 import { render } from '@testing-library/react';

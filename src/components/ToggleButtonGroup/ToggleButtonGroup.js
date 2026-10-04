@@ -28,7 +28,7 @@
 // ─── What this file is now ──────────────────────────────────────────────────
 //
 // The selection component. It renders ButtonGroup, which owns the geometry
-// (joined edges, end-cap radii, fit, the Buttons-table colours), and supplies
+// (joined edges, end-cap radii, fit, the Buttons-table colors), and supplies
 // the behaviour ButtonGroup no longer claims: a value, and a floor of one.
 //
 // `allowEmpty` defaults to FALSE here and true there. That one line is the
@@ -48,16 +48,16 @@
 //               expects a value — no error, no warning, just a selection that
 //               never updates.
 //
-// `variant` is the sharp one: it named the COLOUR on MUI's component and names
+// `variant` is the sharp one: it named the COLOR on MUI's component and names
 // the SHAPE on this one. A caller passing `variant="primary"` means the
-// colour; a caller passing `variant="outlined"` means the shape. Both are
+// color; a caller passing `variant="outlined"` means the shape. Both are
 // accepted and told apart by value, because there is no version of this that
 // does not silently repaint somebody's group.
 import React from 'react';
 import { ButtonGroup } from '../ButtonGroup/ButtonGroup';
 import { Button } from '../Button/Button';
 
-/* The three SHAPE values. Anything else in `variant` is a colour from the
+/* The three SHAPE values. Anything else in `variant` is a color from the
    MUI-shaped API, which is how the two meanings are told apart without asking
    the caller to migrate first. */
 const SHAPES = ['outlined', 'light', 'ghost'];
@@ -92,11 +92,11 @@ export function ToggleButtonGroup({
   separated = false,
   ...props
 }) {
-  /* `variant` means the shape natively and meant the colour on MUI's
+  /* `variant` means the shape natively and meant the color on MUI's
      component. Told apart by VALUE: the three shapes are a closed set, so
      anything else is a palette name from the old API. */
   const isShape = variant === undefined || SHAPES.includes(variant);
-  if (!isShape) warnLegacy(`variant="${variant}" names a COLOUR.`);
+  if (!isShape) warnLegacy(`variant="${variant}" names a COLOR.`);
   if (exclusive !== undefined) warnLegacy('`exclusive` is `multiple` inverted.');
 
   /* `exclusive` only speaks when `multiple` has not. Both given means the
@@ -131,7 +131,7 @@ export function ToggleButton(props) {
   return <Button {...props} />;
 }
 
-/* The ten colour presets. They pass `color`, not `variant` — passing the
+/* The ten color presets. They pass `color`, not `variant` — passing the
    palette through the ambiguous prop would make every one of them trip the
    legacy warning, telling users off for using an export this file provides. */
 const preset = (color) => {

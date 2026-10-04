@@ -105,7 +105,7 @@ export const RAIL_DOC = {
        Figma has no such property on the Rail: the selected fill binds a
        variable named plainly `Button`, and which palette that resolves to is
        a MODE on the Buttons collection. CSS has one flat namespace and cannot
-       hold a `Button` that means a different colour per mode, so the mode
+       hold a `Button` that means a different color per mode, so the mode
        becomes a prop here — the same translation Button makes for its own
        `variant`. Nothing on the Rail page sets the mode, so the shipped
        design is `default`. */

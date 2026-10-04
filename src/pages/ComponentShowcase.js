@@ -162,7 +162,7 @@ const NAV_ITEMS = [
       { id: 'foundation-elevation',  label: 'Elevation' },
       { id: 'colors',                label: 'Colors' },
       { id: 'icons',                 label: 'Icons' },
-      /* Brand marks are an ASSET, like a colour or a type scale, not a
+      /* Brand marks are an ASSET, like a color or a type scale, not a
          control with states — so they sit here beside Icons rather than with
          the components. BrandIcon had a doc and no page at all, which left
          the component carrying somebody else's trademark as the one with

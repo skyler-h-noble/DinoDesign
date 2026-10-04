@@ -3,11 +3,11 @@
  *
  * Figma's Button draws it as Buttons::Outline-Text on every unfilled state, and
  * switches to Buttons::Text on Selected — the one outline variant that gains a
- * fill. The two are different colours on purpose: Buttons::Text is the label ON
+ * fill. The two are different colors on purpose: Buttons::Text is the label ON
  * the fill, contrast-checked against it; Outline-Text is the label on the
  * SURFACE, checked against that.
  *
- * The code used --Text, the surface's own body colour, so every outline button
+ * The code used --Text, the surface's own body color, so every outline button
  * had the same label regardless of palette — a success outline and an error
  * outline were identical. Nothing in the library read Outline-Text at all,
  * which is also why its one missing value went unnoticed: the generator emits
@@ -33,7 +33,7 @@ const btnCss = (jsx) => cssFor(render(jsx).container.querySelector('button'));
 
 describe('outline button label', () => {
   /* Presence anywhere in the button's CSS, which is all this file checks.
-     That was enough when Outline-Text was the colour in EVERY state; it is
+     That was enough when Outline-Text was the color in EVERY state; it is
      not enough now that rest takes Outline-Quiet and only the interaction
      states take Outline-Text, because this assertion passes on the hover rule
      alone and says nothing about rest. The rest/interaction split is pinned
@@ -51,8 +51,8 @@ describe('outline button label', () => {
     }
   });
 
-  it('does not fall back to the surface body colour', () => {
-    /* --Text is the page's body colour. Using it made every outline button's
+  it('does not fall back to the surface body color', () => {
+    /* --Text is the page's body color. Using it made every outline button's
        label identical across palettes, which looks deliberate rather than
        wrong — there is no missing-value symptom to notice. */
     const css = btnCss(<Button variant="success-outline">x</Button>);

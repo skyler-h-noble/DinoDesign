@@ -120,7 +120,7 @@ export function Rail({
      collection, and that collection's MODE picks the palette. Nothing on the
      Rail page sets the mode, so the shipped design resolves at `default`.
      CSS has one flat namespace and cannot hold a `Button` that means a
-     different colour per mode, so the mode becomes a prop and the component
+     different color per mode, so the mode becomes a prop and the component
      interpolates the palette into the token name. Same translation Button
      makes for its own `variant`. */
   variant = 'default',

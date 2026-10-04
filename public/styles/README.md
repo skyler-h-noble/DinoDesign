@@ -66,7 +66,7 @@ variable-font axes (`--Font-Slant-Header`, `--Font-Roundness-Header`, …) and
 the full per-style ramp into both.
 
 The old wording — overwrite only base/Light/Dark — therefore gave a consumer
-the brand's colours but not its fonts or axes, silently. A design system with a
+the brand's colors but not its fonts or axes, silently. A design system with a
 header weight of 857 rendered at 600 because the lib's bundled copy won.
 
 **The checked-in copies here are SEEDS, not the authority.** They define the

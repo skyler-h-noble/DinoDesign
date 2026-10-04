@@ -13,7 +13,7 @@
  * defined nowhere — not foundation.css, not base.css, not any brand bundle. An
  * undefined custom property with no fallback is invalid at computed-value time,
  * so the DEFAULT slider painted no fill at all and rendered as a bare outline.
- * Every named colour worked, which is exactly why it lasted: the broken case
+ * Every named color worked, which is exactly why it lasted: the broken case
  * was the one that looks like a deliberate style.
  */
 import React from 'react';
@@ -35,7 +35,7 @@ const cssFor = (el) => {
   return out.join('\n');
 };
 /* The rail, track and thumb are CHILD elements with their own emotion classes,
-   so collecting only the root's rules misses every colour this file is about. */
+   so collecting only the root's rules misses every color this file is about. */
 const rootCss = (jsx) => {
   const { container } = render(jsx);
   const root = container.querySelector('.MuiSlider-root');
@@ -58,20 +58,20 @@ describe('Slider colors match Figma', () => {
      surface as separate cssRules under jsdom — a render assertion here tests
      the harness, not the component. The token NAMES are what parity is about,
      and they are visible in the file. */
-  it('fills the track from the Buttons palette for every colour', () => {
+  it('fills the track from the Buttons palette for every color', () => {
     const src = fs.readFileSync(path.join(__dirname, 'Slider.js'), 'utf8');
     expect(src).toMatch(/track:\s*'var\(--Buttons-' \+ C \+ '-Button\)'/);
   });
 
   it('moves thumb, rail edge and track edge onto the button palette', () => {
     /* Figma binds the Handle and both bar edges to Buttons::Border, and the
-       component follows, so a coloured slider is coloured throughout instead of
+       component follows, so a colored slider is colored throughout instead of
        a palette fill between surface-grey edges. The screenshots that prompted
        this showed the fill changing per variant while the thumb stayed grey.
 
        What that trades: --Border is the 3:1 token guaranteed against the
        SURFACE, --Buttons-{C}-Border against its own button fill. Different
-       comparisons, identical at `default`, divergent the moment a colour is
+       comparisons, identical at `default`, divergent the moment a color is
        set. Taken deliberately — the palettes are generated with the border tone
        chosen for contrast, so the guarantee moves to the generator. */
     const src = fs.readFileSync(path.join(__dirname, 'Slider.js'), 'utf8');
@@ -85,7 +85,7 @@ describe('Slider colors match Figma', () => {
   it("keeps the thumb's own edge on --Background", () => {
     /* The one surface token that stays, and it is load-bearing: it separates the
        handle from the fill it sits on and from the focus ring outside it, so
-       both comparisons land on a known colour rather than on whatever the
+       both comparisons land on a known color rather than on whatever the
        handle is overlapping at that point on the track. */
     const src = fs.readFileSync(path.join(__dirname, 'Slider.js'), 'utf8');
     expect(src).toMatch(/thumbBorder:\s*'1px solid var\(--Background\)'/);
@@ -96,8 +96,8 @@ describe('Slider colors match Figma', () => {
        between the thumb's --Background edge and the Focus-Visible ring, plus a
        second --Background ring outside. Reproducing it moves the ring's
        comparison from Focus-Visible-against-Background, which is guaranteed, to
-       Focus-Visible-against-a-button-colour, which is not — and a gap showing
-       something other than a known colour is the exact failure the flush
+       Focus-Visible-against-a-button-color, which is not — and a gap showing
+       something other than a known color is the exact failure the flush
        construction was introduced to fix. */
     const css = rootCss(<Slider value={50} />);
     const rule = css.split('\n').find((r) => /focus-visible|Mui-focusVisible/.test(r)) || '';
@@ -108,7 +108,7 @@ describe('Slider colors match Figma', () => {
 
   it('keeps the value label on the surface pair', () => {
     /* --Text on --Background is legible on any surface by definition; a button
-       palette colour is not. Figma agrees — Label is Surface::Text. */
+       palette color is not. Figma agrees — Label is Surface::Text. */
     const css = rootCss(<Slider value={50} color="error" valueLabelDisplay="on" />);
     expect(css).toMatch(/var\(--Text\)/);
   });

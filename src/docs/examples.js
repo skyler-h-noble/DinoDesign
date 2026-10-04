@@ -371,9 +371,9 @@ const PROP_EXAMPLES_BASE = {
        ten and the thing a reader most needs — "what do I get if I pass
        nothing?" — is the hardest thing on the page to find.
 
-       Solid and outline on one row each, because they are the same colour in
-       two shapes and showing only solid implies outline is a tenth colour
-       rather than a shape. Ghost is absent on purpose: it takes no colour
+       Solid and outline on one row each, because they are the same color in
+       two shapes and showing only solid implies outline is a tenth color
+       rather than a shape. Ghost is absent on purpose: it takes no color
        prefix at all. */
     variantColor: () => {
       const COLORS = ['primary', 'secondary', 'tertiary', 'neutral', 'info',

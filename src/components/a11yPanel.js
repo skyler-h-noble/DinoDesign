@@ -38,7 +38,7 @@ export function ContrastBadge({ ratio, threshold = 4.5 }) {
  * What the numbers below are a verdict ON.
  *
  * Every ratio in this tab is measured against the component AS CONFIGURED IN
- * THE PLAYGROUND — the variant, colour, size and surface currently selected
+ * THE PLAYGROUND — the variant, color, size and surface currently selected
  * there — not against the component in general. Change a control and these
  * numbers change with it.
  *
@@ -61,7 +61,7 @@ export function A11yScopeNote({ configuration }) {
     }}>
       <BodySmall>
         These are live measurements of the component <strong>as you have it set
-        up in the Playground</strong> — its current variant, colour, size and
+        up in the Playground</strong> — its current variant, color, size and
         surface. Each row is a pass or fail against the threshold named beside
         it. Change a control in Playground and these numbers change.
       </BodySmall>

@@ -92,12 +92,12 @@ const Rows = ({ items }) => (
 /* One reading order for every component's Props list.
  *
  * The order used to be whatever each doc happened to declare, so the same
- * question was answered in a different place on every page — colour third on
+ * question was answered in a different place on every page — color third on
  * one component and eighth on the next. That is a cost paid by the reader on
  * every visit, to save the writer a decision once.
  *
  * The sequence is the order the questions actually arrive: what KIND is it,
- * how big, what colour, what state is it in, what is inside it, how does it
+ * how big, what color, what state is it in, what is inside it, how does it
  * sit in the layout. Anything unlisted keeps its declared position at the end,
  * so adding a prop to a doc never needs a change here.
  */
@@ -112,7 +112,7 @@ const PROP_ORDER = [
 ];
 
 /* The key a prop's sample and how-to are filed under. A prop may carry two
-   independent axes — Button's `variant` is shape AND colour — so the doc can
+   independent axes — Button's `variant` is shape AND color — so the doc can
    split it into two rows that share a name and differ by `sample`. */
 const keyOf = (pr) => pr.sample || pr.name;
 
@@ -223,7 +223,7 @@ export function DocSummary({ component, theme = null, surface = 'Surface' }) {
                   ? PROP_EXAMPLES[doc.name][key]
                   : null;
                 /* Directly beneath the sample it explains, so it reads in the
-                   order the question arrives: here are the colours, here is
+                   order the question arrives: here are the colors, here is
                    how you get them. Up by the summary it was an instruction
                    for something the reader had not seen yet. */
                 const how = howTo && howTo.after === key ? howTo : null;

@@ -321,6 +321,7 @@ export {
   renderColorSystem as renderColourSystem,
   renderComponentDoc,
   COLOR_COLLECTIONS,
+  /* @deprecated British spelling, kept so published imports keep resolving. */
   COLOR_COLLECTIONS as COLOUR_COLLECTIONS,
   docsSlug,
   componentDocsUrl,

@@ -93,7 +93,7 @@ export const NAV_SAMPLES = {
     /* `standard` is the only one that takes its selector from the palette
        (--Buttons-{Color}-Border). The three painted variants resolve their
        selector to --Text inside their own themed zone instead, which is why
-       they do not need a colour of their own. */
+       they do not need a color of their own. */
     variant: () => (
       <VStack gap="var(--Sizing-3)">
         {['standard', 'solid', 'light', 'dark'].map(v => (
@@ -260,7 +260,7 @@ export const NAV_SAMPLES = {
       </VStack>
     ),
     /* The connector AHEAD of the active step becomes dashed, so "done" and
-       "not yet" differ in more than colour — which is the accessibility
+       "not yet" differ in more than color — which is the accessibility
        point, not a decorative one. */
     dashedIncomplete: () => (
       <VStack gap="var(--Sizing-3)">
@@ -318,7 +318,7 @@ export const NAV_SAMPLES = {
       </HStack>
     ),
     /* Selection puts a real control in each row — a checkbox or a radio —
-       rather than marking the row with colour alone. */
+       rather than marking the row with color alone. */
     selectionMode: () => (
       <HStack gap="var(--Sizing-3)" style={{ flexWrap: 'wrap', alignItems: 'flex-start' }}>
         {['none', 'single', 'multiple'].map(m => (

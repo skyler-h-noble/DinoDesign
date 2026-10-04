@@ -650,7 +650,7 @@ const LEGACY_CLASS = {
 const HEADER_COLOR_MAP = {
   header:    'var(--Header)',
   default:   'var(--Header)',
-  /* Take the container's colour instead of a surface role.
+  /* Take the container's color instead of a surface role.
      For text sitting ON a painted fill — a selected rail item, a nav pill,
      anything whose background comes from the Buttons table — no surface role
      is right, because the pairing belongs to the fill and not to the surface
@@ -673,7 +673,7 @@ const HEADER_COLOR_MAP = {
 const TEXT_COLOR_MAP = {
   standard:  'var(--Text)',
   default:   'var(--Text)',
-  /* Take the container's colour instead of a surface role.
+  /* Take the container's color instead of a surface role.
      For text sitting ON a painted fill — a selected rail item, a nav pill,
      anything whose background comes from the Buttons table — no surface role
      is right, because the pairing belongs to the fill and not to the surface

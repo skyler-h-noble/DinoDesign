@@ -4,7 +4,7 @@
 //
 // Built from the Figma Swatch set (9212:6816) rather than from the Button it
 // used to be. It was `<Button swatch swatchColor={hex}>`, which never fitted:
-// Button's two main axes are STYLE (solid / outline / ghost) and COLOUR (the
+// Button's two main axes are STYLE (solid / outline / ghost) and COLOR (the
 // nine palettes), and a swatch uses neither. Its color is arbitrary data from
 // a picker, not a palette choice, and "outline swatch" means nothing.
 //
@@ -151,9 +151,9 @@ export function Swatch({
              half with it: --Hover and --Pressed are OPAQUE surface tones —
              activeAndHoverFor() walks the palette and returns hex — so
              linear-gradient(var(--Hover), var(--Hover)) painted a solid layer
-             straight over the chip. Hovering a swatch replaced the colour with
+             straight over the chip. Hovering a swatch replaced the color with
              the page's hover tone, which on a light brand is near-white: the
-             one thing a colour chip must never do is stop showing its colour.
+             one thing a color chip must never do is stop showing its color.
 
              Figma's values, read off the Swatch set (9212:6816): a black
              overlay at 5% on Hover and 8% on Pressed, over the Color Swatch
@@ -162,7 +162,7 @@ export function Swatch({
              The dark-surface objection does not apply here and that is why the
              design says black. A chip's fill is arbitrary USER data, not a
              theme token — there is no surface to be aware of, and darkening any
-             colour by 5% reads as pressed-ness on all of them. A surface-aware
+             color by 5% reads as pressed-ness on all of them. A surface-aware
              token is the right instinct for a themed element and the wrong one
              for a swatch. */
           '&:hover': {

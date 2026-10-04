@@ -15,13 +15,13 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, bevelShadow } from '../_shadows';
  * component existed, and nothing ever implemented it: `colorStyles` has no
  * branch for the suffix, so `variant="primary-light"` missed the variant map
  * and took its unknown-variant fallback — painting the SOLID slider of a
- * different colour than the one asked for, with no warning. Removed in the
+ * different color than the one asked for, with no warning. Removed in the
  * same release that deleted `-light` from Button, Chip, Badge and
  * SwitchInput; a shape named in the docs and absent from the code is worse
  * than either having it or not.
  *
  * The default is `default`, not `primary`: a component with no variant asked
- * for gets the brand's own button colour, the same as Button and Checkbox.
+ * for gets the brand's own button color, the same as Button and Checkbox.
  *
  * SIZES: small (12px visual) | medium (16px visual) | large (20px visual)
  *   Thumb element is always 24×24px for WCAG 2.2 AA touch target.
@@ -76,13 +76,13 @@ function colorStyles(color) {
      defines it. A var() on an undefined property with no fallback is invalid at
      computed-value time, so the DEFAULT slider — the one every demo shows —
      painted no track fill at all and rendered as a bare outline. Every named
-     colour worked, which is why it survived: the broken case was the one that
+     color worked, which is why it survived: the broken case was the one that
      looks like a styling choice. --Buttons-Default-Button is the real name and
      is defined 72 times in a published mode sheet. */
   return {
     /* Buttons::Border, as Figma binds the Handle and both bar edges.
-       The thumb, rail edge and track edge move WITH the fill, so a coloured
-       slider is coloured throughout rather than a palette fill between surface
+       The thumb, rail edge and track edge move WITH the fill, so a colored
+       slider is colored throughout rather than a palette fill between surface
        edges.
 
        This file previously kept them on the surface --Border, and the reasoning
@@ -90,7 +90,7 @@ function colorStyles(color) {
        looks wrong here: --Border is the 3:1 token guaranteed against the
        SURFACE, while --Buttons-{C}-Border is guaranteed against its own button
        fill. Those are different comparisons, and the two tokens agree at
-       `default` and diverge the moment a colour is set.
+       `default` and diverge the moment a color is set.
 
        The design owner's call, made deliberately: the design specifies the
        button border here, and its palettes are generated with the border tone
@@ -99,7 +99,7 @@ function colorStyles(color) {
     thumb:          'var(--Buttons-' + C + '-Border)',
     /* The thumb's own edge stays --Background. It is what separates the handle
        from the fill it sits on AND from the focus ring outside it, so both
-       comparisons land on a known colour rather than on whatever the handle
+       comparisons land on a known color rather than on whatever the handle
        happens to be overlapping at that point on the track. */
     thumbBorder:    '1px solid var(--Background)',
     track:          'var(--Buttons-' + C + '-Button)',
@@ -108,7 +108,7 @@ function colorStyles(color) {
     railBorder:     '1px solid var(--Buttons-' + C + '-Border)',
     /* The label stays on the SURFACE pair, inverted, and deliberately so: it is
        --Text on --Background, which is legible on any surface by definition.
-       A colour from the button palette is not. Figma agrees — Label is
+       A color from the button palette is not. Figma agrees — Label is
        Surface::Text with Surface::Background text. */
     valueLabel:     'var(--Text)',
     valueLabelText: 'var(--Background)',
@@ -343,7 +343,7 @@ export function Slider({
          a second --Background ring outside. Not reproduced, and deliberately:
          inserting the halo moves the ring's contrast comparison from
          Focus-Visible-against-Background, which is guaranteed, to
-         Focus-Visible-against-a-button-colour, which is not. The gap is the
+         Focus-Visible-against-a-button-color, which is not. The gap is the
          exact failure the flush construction was introduced to fix. */
       '&.Mui-focusVisible::before, &:focus-visible::before': {
         boxShadow: `${bevelShadow(variant)}, ${SHADOW_LEVEL_2}, 0 0 0 1px var(--Focus-Visible)`,
@@ -427,12 +427,12 @@ export function Slider({
     /* Marks are DOTS, not full-height bars.
        They were `width: 2, height: totalTrack` — the full thickness of the bar
        — and painted in styles.rail, which is --Background. So each mark cut a
-       background-coloured notch clean through the track, and a row of them read
+       background-colored notch clean through the track, and a row of them read
        as a dashed or hatched line rather than as a scale. On a vertical slider
        it looked like the track itself was dotted.
 
        A 2px round dot centred on the bar is what a tick actually is, and it is
-       what MUI draws by default. The colour has to flip with the fill: --Quiet
+       what MUI draws by default. The color has to flip with the fill: --Quiet
        is legible on the unfilled rail and would disappear into a saturated
        fill, so the ACTIVE marks — the ones the fill has passed — take
        --Background instead. Two tokens, each chosen against the thing it sits

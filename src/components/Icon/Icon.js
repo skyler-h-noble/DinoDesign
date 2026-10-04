@@ -30,7 +30,7 @@ import { useGhost, ghostBlockSx } from '../_ghost';
  *   filled     HomeIcon            (default)
  *   outlined   HomeOutlined
  *   rounded    HomeRounded
- *   twotone    HomeTwoTone         (secondary fill = the icon colour at 50%)
+ *   twotone    HomeTwoTone         (secondary fill = the icon color at 50%)
  *   sharp      HomeSharp
  *
  * DISABLED: 0.38 opacity
@@ -117,12 +117,12 @@ export function Icon({
 
   // Color token — 'default' inherits from parent (e.g. Button text color)
   const colorToken = color === 'default' ? 'inherit' : 'var(--Icons-' + C + ')';
-  /* The two-tone secondary fill is the icon's OWN colour at a fixed opacity,
+  /* The two-tone secondary fill is the icon's OWN color at a fixed opacity,
      not a second token.
 
      This read var(--Icons-Variant-{Color}), which is not a token: the Icons
      collection has Icon, Icon-Variant and On-Icon, but Icon-Variant is not a
-     separate colour — it is `{ color: <the same Icon alias>, opacity: <shared
+     separate color — it is `{ color: <the same Icon alias>, opacity: <shared
      variable> }`, and every one of the ten modes points at the same opacity.
      That variable is Colors/Icon-Variant-Opacity = 50, in light mode and dark.
 
@@ -130,7 +130,7 @@ export function Icon({
      fallback: --twotone-variant resolved to nothing and the secondary fill of
      every TwoTone icon came out uncoloured. Composing it here is both correct
      and the only form that can follow `default`, where the icon inherits its
-     colour from whatever it sits in and no token names it. */
+     color from whatever it sits in and no token names it. */
   const iconColor = color === 'default' ? 'currentColor' : 'var(--Icons-' + C + ')';
   const variantToken =
     `color-mix(in srgb, ${iconColor} ${ICON_VARIANT_OPACITY}%, transparent)`;

@@ -105,7 +105,7 @@
      sheet. An undefined var() makes the whole declaration invalid at computed
      value time, so every one of these resolved to nothing, and a Switch on
      `secondary` painted the same dark track as one on `tertiary`, `info` and
-     `error`. Nine variants, one colour, no error anywhere.
+     `error`. Nine variants, one color, no error anywhere.
      The surface-scoped name stays FIRST, because a brand that emits it should
      win — that is the rule this system runs on. The palette ramp behind it is
      what the themed blocks further down this file already use, so the fallback
@@ -186,7 +186,7 @@
 
 
 :root {
-  /* Default Primary / Secondary / Tertiary Tone — the Color-N each brand colour sits at. */
+  /* Default Primary / Secondary / Tertiary Tone — the Color-N each brand color sits at. */
   --DPT: 6;
   --DST: 7;
   --DTT: 8;

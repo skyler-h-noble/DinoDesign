@@ -3,7 +3,7 @@
  *
  * They were `width: 2, height: totalTrack` filled with styles.rail — the full
  * thickness of the bar, in --Background. Each mark therefore cut a
- * background-coloured notch clean through the track, so a row of them read as a
+ * background-colored notch clean through the track, so a row of them read as a
  * dashed line rather than a scale; on a vertical slider the track itself looked
  * dotted. Nothing about that is obviously a bug in the source: a 2px-wide
  * full-height rectangle is a plausible tick, and --Background is a real token.

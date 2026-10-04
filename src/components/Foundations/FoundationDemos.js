@@ -460,7 +460,7 @@ function ThemingDemo() {
               ['Finds the Theme-* switch for you', 1, 1, 'You find it'],
               ['Follows your selection', 1, 'Panel only', 1],
               ['Moves Buttons and Icons with the theme', 1, 1, 'One at a time'],
-              ['Shows the colour before you pick', 1, 1, 0],
+              ['Shows the color before you pick', 1, 1, 0],
               ['Flags modes set where they do not belong', 1, 1, 0],
               ['Tells set apart from inherited', 1, 1, 0],
               ['Refuses to edit a main component', 1, 1, 0],

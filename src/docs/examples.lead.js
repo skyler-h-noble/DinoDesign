@@ -366,7 +366,7 @@ export const LEAD_EXAMPLES = {
     </Frame>
   ),
 
-  /* An arbitrary CSS colour, not a palette name — a swatch's colour is data
+  /* An arbitrary CSS color, not a palette name — a swatch's color is data
      the user picked, which is the whole reason the component exists. */
   Swatch: () => <Swatch color="#70947b" label="Primary" />,
 

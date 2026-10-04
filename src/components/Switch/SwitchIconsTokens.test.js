@@ -1,11 +1,11 @@
 /**
- * Every Switch variant has to resolve to a DIFFERENT colour.
+ * Every Switch variant has to resolve to a DIFFERENT color.
  *
  * The ON state takes its fill from the Icons collection — `--Icons-<Color>` for
  * the track, `--Icons-On-<Color>` for the knob — and base.css pointed every one
  * of those at `--Icon-Surfaces-<Palette>-Color-9`, a name defined nowhere. An
  * undefined var() invalidates the whole declaration at computed value time, so
- * the tokens resolved to nothing and nine variants painted one colour. Nothing
+ * the tokens resolved to nothing and nine variants painted one color. Nothing
  * errored; the samples just all looked the same.
  *
  * Asserted on the stylesheet rather than on a rendered switch, because that is
@@ -46,7 +46,7 @@ describe('the Icons tokens the Switch paints with', () => {
     expect(defined.has(refs[refs.length - 1])).toBe(true);
   });
 
-  /* The point of the whole thing: nine variants, nine colours. Two palettes
+  /* The point of the whole thing: nine variants, nine colors. Two palettes
      resolving to one value is the bug this file exists for. */
   test('no two palettes land on the same final fallback', () => {
     const finals = COLORS.map((c) => {

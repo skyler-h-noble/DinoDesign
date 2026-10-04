@@ -63,8 +63,8 @@ describe('Slider Component', () => {
 
   // --- Variants ---
 
-  /* `default`, not `primary` — a component asked for no colour gets the
-     brand's own button colour, the same as Button and Checkbox. */
+  /* `default`, not `primary` — a component asked for no color gets the
+     brand's own button color, the same as Button and Checkbox. */
   test('defaults to the default variant', () => {
     const { container } = render(
       <Slider defaultValue={50} aria-label="Test" />
@@ -85,7 +85,7 @@ describe('Slider Component', () => {
      class is `'slider-' + variant` interpolated, so any string at all
      produced a matching class. There was never a `-light` branch in
      `colorStyles` — an unknown variant missed the map and took the fallback,
-     painting a DIFFERENT colour than the one named. The class those tests
+     painting a DIFFERENT color than the one named. The class those tests
      found was the only part of `-light` that ever existed. */
   test('an unknown variant falls back to default rather than another palette', () => {
     const { container } = render(

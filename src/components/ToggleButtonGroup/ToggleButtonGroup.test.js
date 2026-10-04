@@ -55,7 +55,7 @@ describe('ToggleButtonGroup — the selection control', () => {
      avoid a temporary one.
 
      Callers who signal the old API in any other way — `exclusive`, or a
-     colour in `variant` — still get MUI's order, because there the signal is
+     color in `variant` — still get MUI's order, because there the signal is
      unambiguous. */
   it('calls onChange with the system order, (value, event)', () => {
     const onChange = jest.fn();

@@ -176,7 +176,7 @@ export const BUTTON_GROUP_SAMPLES = {
    ToggleButtonGroup — the same geometry, one behaviour added.
 
    Only the axes that differ from ButtonGroup get their own sample here; the
-   shared ones (size, colour, fit, orientation) are the same pictures and are
+   shared ones (size, color, fit, orientation) are the same pictures and are
    not worth printing twice.
    ───────────────────────────────────────────────────────────────────────── */
 
@@ -328,7 +328,7 @@ export const TOGGLE_BUTTON_GROUP_SAMPLES = {
       <ToggleGroup />
       <Body color="quiet">
         Called (value, event) — the system`s order. A caller signalling MUI`s older
-        API, with `exclusive` or a colour in `variant`, still gets (event, value).
+        API, with `exclusive` or a color in `variant`, still gets (event, value).
       </Body>
     </VStack>
   ),

@@ -217,14 +217,14 @@ function outlineStyles(color, selected = false) {
   const C = seg(color);
   return {
     backgroundColor: 'transparent',
-    /* Buttons::Outline-Text — the label colour for a button with NO fill.
-       This was --Text, the surface's own body colour, so an outline button's
+    /* Buttons::Outline-Text — the label color for a button with NO fill.
+       This was --Text, the surface's own body color, so an outline button's
        label ignored its palette entirely: a success outline and an error
        outline had identical text. The token exists per palette and nothing in
        this library read it, which is why its one gap (BlackWhite) went
        unnoticed — a token nobody consumes cannot be missed.
 
-       It is a different colour from --Buttons-{C}-Text on purpose. That one is
+       It is a different color from --Buttons-{C}-Text on purpose. That one is
        the label ON the fill and is contrast-checked against it; Outline-Text is
        the label on the SURFACE, checked against that instead. Figma keeps them
        apart in the same way: the Selected state, which is the only outline
@@ -287,7 +287,7 @@ function ghostStyles(isTextContent, selected = false) {
        that looks like a link is the better accessibility answer, so --Hotlink
        stays.
 
-       Icon-only ghosts are pure affordances — link styling is too coloured
+       Icon-only ghosts are pure affordances — link styling is too colored
        for a calendar icon. They already had the right SHAPE, muted at rest
        and darkening on interaction; they were just reading the SURFACE pair
        rather than the button one, so a ghost in a themed zone ignored its
@@ -339,7 +339,7 @@ function ghostStyles(isTextContent, selected = false) {
       outlineOffset: '2px',
       /* Focus-Visible takes the interaction label too. Figma treats it as one
          of the three active states, and it was the only one here that left
-         the label on its rest colour — so keyboard focus said less than
+         the label on its rest color — so keyboard focus said less than
          hover did, on the state where the label matters most. */
       ...(isTextContent
         ? { '& .btn-text-content': { textDecoration: 'none' } }
@@ -618,7 +618,7 @@ export const Button = React.forwardRef(function Button({
   /* RETIRED — use the Swatch component.
  
      A swatch was never a kind of button. Button's two axes are STYLE (solid /
-     outline / ghost) and COLOUR (the nine palettes), and a swatch uses neither:
+     outline / ghost) and COLOR (the nine palettes), and a swatch uses neither:
      "outline swatch" means nothing, and its color is arbitrary data from a
      picker rather than a palette choice. It is a circle with a color in it.
  

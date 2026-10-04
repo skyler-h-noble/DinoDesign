@@ -441,9 +441,9 @@ export function ButtonGroup({
        while nothing is selected.
 
        The pressed label was --Buttons-Default-Text once, pinned to the
-       DEFAULT palette whatever colour the group was. It was corrected to
+       DEFAULT palette whatever color the group was. It was corrected to
        --Text, which fixed the pinning and lost the palette; Outline-Text is
-       the token that was wanted both times — it follows the group's colour
+       the token that was wanted both times — it follows the group's color
        AND is contrast-checked against the surface rather than against a
        button fill. */
     const unselectedSx = !isSelected ? {
@@ -517,7 +517,7 @@ export function ButtonGroup({
       ...ghostSx,
       /* The focus ring's own corner, set HERE and not in positionalSx.
          `unselectedSx` carries a '&.Mui-focusVisible, &:focus-visible' key of
-         its own for the label colour, and it is spread later — so the same
+         its own for the label color, and it is spread later — so the same
          key in positionalSx was replaced wholesale on every UNSELECTED
          segment and the radius silently vanished. Only the selected one kept
          it, which is the hardest version to notice: the group looked right

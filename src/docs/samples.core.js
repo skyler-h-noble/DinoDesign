@@ -70,7 +70,7 @@ export const CORE_SAMPLES = {
       />
     ),
     /* Not one of Figma's four Types. A swatch button carries an arbitrary
-       colour rather than a palette, so it takes a --Border ring instead of
+       color rather than a palette, so it takes a --Border ring instead of
        the button's own border — the fill could be anything and its contrast
        cannot be known in advance. */
     swatch: () => (
@@ -154,7 +154,7 @@ export const CORE_SAMPLES = {
   },
 
   Alert: {
-    /* FOUR colours, not nine: an alert says something about status, so the
+    /* FOUR colors, not nine: an alert says something about status, so the
        accent palettes have no meaning here. */
     color: () => (
       <AxisStack
@@ -192,7 +192,7 @@ export const CORE_SAMPLES = {
 
   Icon: {
     /* Ten values: the nine palettes plus `quiet`. `default` is
-       `currentColor`, so an icon with no colour takes the colour of whatever
+       `currentColor`, so an icon with no color takes the color of whatever
        it sits in — which is why an icon inside a button needs nothing. */
     color: () => (
       <Axis
@@ -210,8 +210,8 @@ export const CORE_SAMPLES = {
         render={(v) => <Icon size={v} color="primary"><FavoriteIcon /></Icon>}
       />
     ),
-    /* Two-tone is one colour at two opacities — a fixed 50% on the secondary
-       pass — not a second colour. So it stays within the palette it was given
+    /* Two-tone is one color at two opacities — a fixed 50% on the secondary
+       pass — not a second color. So it stays within the palette it was given
        and needs no extra token. */
     twoTone: () => (
       <Toggle render={(on) => <Icon color="primary" twoTone={on} size="large"><FavoriteIcon /></Icon>}
@@ -229,7 +229,7 @@ export const CORE_SAMPLES = {
             render={(v) => <Swatch color="#70947b" size={v} label={v} />} />
     ),
     /* Selection is marked on the chip itself — a check on its disc, always
-       drawn on --Background and never on the colour, because the colour is
+       drawn on --Background and never on the color, because the color is
        arbitrary and its contrast cannot be known. */
     selected: () => (
       <Toggle render={(on) => <Swatch color="#70947b" label="Primary" selected={on} />}
@@ -240,7 +240,7 @@ export const CORE_SAMPLES = {
               offLabel="enabled" onLabel="disabled" />
     ),
     /* With a radio every state is delegated to the radio, so the chip stays a
-       plain colour. Without one the chip carries the state itself. The two
+       plain color. Without one the chip carries the state itself. The two
        mark selection differently, and that IS the design. */
     radio: () => (
       <Toggle render={(on) => <Swatch color="#70947b" label="Primary" radio={on} selected />}
@@ -381,7 +381,7 @@ export const CORE_SAMPLES = {
 
   Fab: {
     /* The three values of Figma's Style axis, as on Button. Separate from
-       colour, which the FAB takes from a Theme mode on an inner frame. */
+       color, which the FAB takes from a Theme mode on an inner frame. */
     variant: () => (
       <Axis values={['solid', 'outline', 'ghost']} defaultValue="solid"
             render={(v) => <Fab variant={v} icon={<Icon size="medium"><AddIcon /></Icon>}

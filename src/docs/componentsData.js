@@ -127,7 +127,7 @@ export const SLIDER_DOC = {
     /* Was documented as 'primary', which was true of the code and against the
        house rule; the code now defaults to `default` like Button. */
     default: 'default',
-    note: 'The palette. Thumb, track, rail edge and marks all move together — a coloured slider is coloured throughout, not a coloured fill between surface-coloured parts.'
+    note: 'The palette. Thumb, track, rail edge and marks all move together — a colored slider is colored throughout, not a colored fill between surface-colored parts.'
   }, {
     name: 'size',
     type: 'string',
@@ -153,7 +153,7 @@ export const SLIDER_DOC = {
     name: 'marks',
     type: 'boolean | array',
     default: 'false',
-    note: '`true` puts a dot at every step; an array of `{ value, label }` puts them where you say and labels them. Drawn as 2px round dots that flip colour once the fill passes them, so they stay legible on both sides.'
+    note: '`true` puts a dot at every step; an array of `{ value, label }` puts them where you say and labels them. Drawn as 2px round dots that flip color once the fill passes them, so they stay legible on both sides.'
   }, {
     name: 'step',
     type: 'number | null',
@@ -163,7 +163,7 @@ export const SLIDER_DOC = {
     name: 'valueLabelDisplay',
     type: "'off' | 'on' | 'auto'",
     default: "'off'",
-    note: "`auto` shows the bubble on hover and focus. Its ground is --Text with --Background text — the surface pair inverted, which is legible on any surface by definition where a palette colour would not be."
+    note: "`auto` shows the bubble on hover and focus. Its ground is --Text with --Background text — the surface pair inverted, which is legible on any surface by definition where a palette color would not be."
   }, {
     name: 'min',
     type: 'number',

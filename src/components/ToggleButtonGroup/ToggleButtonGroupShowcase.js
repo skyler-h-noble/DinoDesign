@@ -199,7 +199,7 @@ export function ToggleButtonGroupShowcase() {
               </Box>
               <Box>
                 <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
-                  NOT COLOUR ALONE
+                  NOT COLOR ALONE
                 </EyebrowSmall>
                 <BodySmall>
                   The selected segment gains a fill AND `aria-pressed`, and its label

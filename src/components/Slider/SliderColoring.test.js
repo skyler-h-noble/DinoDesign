@@ -41,7 +41,7 @@ describe('surface tokens, not the button palette', () => {
        That edge was the surface --Border and is now --Buttons-{C}-Border, to
        match what Figma binds. The two are identical at `default`, so this test
        reads the same either way; what changed is which token carries the
-       requirement once a colour is set. The point it has always defended — that
+       requirement once a color is set. The point it has always defended — that
        the rail HAS an edge, and not a decorative one — is unchanged. */
     render(<Slider defaultValue={40} />);
     const c = css().replace(/\s+/g, '');

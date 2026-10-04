@@ -67,7 +67,7 @@ function selectedItemCSS(container) {
     }
   }
   /* Inline `style` attributes count too, and they are not optional here: the
-     label's colour is set that way, so a helper reading only stylesheet rules
+     label's color is set that way, so a helper reading only stylesheet rules
      saw the label's emotion class (`color: var(--Text)`, from the Typography
      component's own default) and concluded the pairing was broken when the
      inline style was overriding it correctly. Rules alone answer a different

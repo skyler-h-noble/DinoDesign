@@ -9,13 +9,13 @@
  *
  * The summary leads with ONE example, which answers "what is this". These
  * answer the next question — "what can it be" — and they are only useful if
- * they are COMPLETE. A sample showing four of nine colours reads as the
+ * they are COMPLETE. A sample showing four of nine colors reads as the
  * component having four, which is worse than no sample: a missing one sends
  * you to the prop values, and a partial one stops you looking.
  *
  * So the axis lists below are built from constants rather than typed out per
  * component. Hand-written lists are where a palette quietly loses `neutral`,
- * which is exactly what had happened to the FAB's colour sample.
+ * which is exactly what had happened to the FAB's color sample.
  *
  * Imported from each component's OWN module, never from '../components' — the
  * barrel re-exports the docs, so a barrel import closes a cycle that resolves

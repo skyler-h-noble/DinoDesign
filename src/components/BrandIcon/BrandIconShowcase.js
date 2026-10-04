@@ -6,7 +6,7 @@
 // nowhere to read them.
 //
 // It belongs under Foundations rather than with the components: a brand mark
-// is an ASSET, like a colour or a type scale, not a control with states. It
+// is an ASSET, like a color or a type scale, not a control with states. It
 // sits beside Icon for the same reason the two are separate components —
 // Icon is the system's own vocabulary and this is not.
 import React, { useState } from 'react';
@@ -38,11 +38,11 @@ const SIZES = [
   { label: '48px', value: '48px' },
 ];
 
-/* The icon COLOUR roles. A brand mark is somebody else's artwork, so the
+/* The icon COLOR roles. A brand mark is somebody else's artwork, so the
    honest default is currentColor — it sits in running text and takes the
-   colour of the text around it. The named roles are here because a mark in a
+   color of the text around it. The named roles are here because a mark in a
    footer or a button row has to meet that surface, not because the brand's
-   own colour is ours to change. */
+   own color is ours to change. */
 const COLORS = [
   { label: 'currentColor', value: 'currentColor' },
   { label: '--Icons-Default', value: 'var(--Icons-Default)' },
@@ -271,8 +271,8 @@ export function BrandIconShowcase() {
                 </BodySmall>
                 <BodySmall style={{ marginTop: 8 }}>
                   The marks are drawn in `currentColor` by default, so they inherit a
-                  text colour that has already been checked. Setting an explicit brand
-                  colour is where this stops being true — a brand's own blue was not
+                  text color that has already been checked. Setting an explicit brand
+                  color is where this stops being true — a brand's own blue was not
                   chosen against your surfaces.
                 </BodySmall>
               </Box>
@@ -285,7 +285,7 @@ export function BrandIconShowcase() {
                   These are other companies' marks. They are not the design system's to
                   restyle, which is why this is a separate component from `Icon` rather
                   than a `brand` prop on it — a prop would have quietly inherited the
-                  system's colour and sizing rules, and those do not apply here.
+                  system's color and sizing rules, and those do not apply here.
                 </BodySmall>
               </Box>
             </Stack>

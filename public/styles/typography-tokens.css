@@ -551,7 +551,7 @@
 
   /* Alt Display — mirrors Display step for step. The pairing sets one word
      on one baseline ("Omni" + "Design"), so the two must not diverge in
-     size or leading; colour is what separates them. */
+     size or leading; color is what separates them. */
   --Alt-Display-Small-Font-Size:     34px;
   --Alt-Display-Small-Font-Weight:   900;
   --Alt-Display-Small-Line-Height:   41px;
@@ -790,7 +790,7 @@
 
   /* Alt Display — mirrors Display step for step. The pairing sets one word
      on one baseline ("Omni" + "Design"), so the two must not diverge in
-     size or leading; colour is what separates them. */
+     size or leading; color is what separates them. */
   --Alt-Display-Small-Font-Size:     34px;
   --Alt-Display-Small-Font-Weight:   900;
   --Alt-Display-Small-Line-Height:   41px;
@@ -1029,7 +1029,7 @@
 
   /* Alt Display — mirrors Display step for step. The pairing sets one word
      on one baseline ("Omni" + "Design"), so the two must not diverge in
-     size or leading; colour is what separates them. */
+     size or leading; color is what separates them. */
   --Alt-Display-Small-Font-Size:     36px;
   --Alt-Display-Small-Font-Weight:   900;
   --Alt-Display-Small-Line-Height:   44px;
@@ -1269,7 +1269,7 @@
 
   /* Alt Display — mirrors Display step for step. The pairing sets one word
      on one baseline ("Omni" + "Design"), so the two must not diverge in
-     size or leading; colour is what separates them. */
+     size or leading; color is what separates them. */
   --Alt-Display-Small-Font-Size:     36px;
   --Alt-Display-Small-Font-Weight:   900;
   --Alt-Display-Small-Line-Height:   44px;
@@ -1391,11 +1391,11 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Alt Display colour — three variants, one pair of stops
+   Alt Display color — three variants, one pair of stops
 
    Set data-alt-display on the element or any ancestor:
      default   (or unset)  the Alt reads as a heading
-     colored               a flat Alt colour
+     colored               a flat Alt color
      gradient              the two stops the theme publishes
 
    The stops are re-published per theme and surface, so every variant follows
@@ -1420,7 +1420,7 @@
 .typography-alt-display-large,
 .typography-alt-display-medium,
 .typography-alt-display-small {
-  /* Stop 1 alone: in the flat variants the two agree, and a plain colour keeps
+  /* Stop 1 alone: in the flat variants the two agree, and a plain color keeps
      the selection highlight, print, and forced-colors working. */
   color: var(--Alt-Display-Color-Stop-1);
 }
@@ -1453,7 +1453,7 @@
 .typography-alt-display-small[data-alt-display="gradient"],
 [data-alt-display="gradient"] .typography-alt-display-small {
     /* The UA drops background-image here, and transparent text would leave
-       nothing on screen. Hand the glyphs back to the system colour. */
+       nothing on screen. Hand the glyphs back to the system color. */
     background-image: none;
     -webkit-background-clip: border-box;
     background-clip: border-box;

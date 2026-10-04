@@ -17,7 +17,7 @@
  * shadow, and `2` looks as reasonable in the source as `1` does. Only the
  * Figma effect style names tell you which is right.
  *
- * Asserted as the LEVEL rather than a rendered colour: the literals are
+ * Asserted as the LEVEL rather than a rendered color: the literals are
  * brand-generated, so a test on the painted shadow would be a test of the
  * shadow generator, not of which rung Card chose.
  */
