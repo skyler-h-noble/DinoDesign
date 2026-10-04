@@ -70,6 +70,20 @@ describe('doc coverage', () => {
     expect(orphans).toEqual([]);
   });
 
+  /* A lead example for a component with no DOC renders nowhere: DocSummary
+     looks the doc up first and returns the "not written yet" panel, so the
+     example is unreachable.
+     This is exactly how ButtonGroup went undocumented — it had an example
+     from the day the docs moved into the lib, four other components pointed
+     at it ("use ButtonGroup instead"), and its own page said no reference had
+     been written. The gate above could not see it, because it asks whether
+     every DOC has an example rather than whether every EXAMPLE has a doc. */
+  it('has no lead example for a component with no doc', () => {
+    const names = COMPONENT_DOCS.map(d => d.name);
+    const orphans = Object.keys(EXAMPLES).filter(c => !names.includes(c));
+    expect(orphans).toEqual([]);
+  });
+
   it('has no samples for a component with no doc', () => {
     const names = COMPONENT_DOCS.map(d => d.name);
     const stray = Object.keys(PROP_EXAMPLES).filter(c => !names.includes(c));
