@@ -67,6 +67,31 @@ export const FOUNDATIONS = [{
   body: ['The gradient comes in two kinds, and the palette decides which — not whether. Denying the treatment to the roughly half of brands whose Primary and Secondary sit far apart on the wheel would make it a lottery.', '**duo** — Header-Primary to Header-Secondary, when the two hues are near enough to blend.', '**mono** — Header-Primary to a lighter or darker shade of ITSELF, chosen against the background. One hue, so it cannot collide.', 'A brand whose palette cannot be read at all lands on `mono`, because that is the treatment that needs only one hue to be known. A grey Secondary counts as maximally distant rather than as zero — a grey blended into a colored Primary looks like a rendering fault, and zero would be the one answer that turns the gradient on.', 'Solid Header-Secondary is the sibling VARIANT, not the failure case: a designer picks between them. Two values are fine when something selects between them, and here the selector is a person.', 'Its WEIGHT is a contrast with Display\'s, in whichever direction has room — a drop alone cannot work at both ends, because a Display already at 600 has nowhere light to go without becoming thin at Alt-Display-Small.'],
   trap: 'The gradient is not a brand choice to override with two colors of your own. It is derived from the palette, and hand-picking the stops produces a pair nothing guarantees is legible against the background.'
 }, {
+  /* This one is about Figma, not CSS, which is new for this file — every other
+     topic tells an agent what to write. It is here because the question "how do
+     I change a component's theme" has a wrong answer that looks right, and the
+     people asking it are in Figma rather than in the code. The consequence lands
+     in the code eventually: a component themed on the wrong layer exports tokens
+     nobody can trace. */
+  title: 'Theming a component',
+  lede: 'A theme is a variable mode on ONE layer, and that layer is named `Theme-*`.',
+  body: [
+    'It is not a property of the component. A card themed Secondary has a `Theme-Container` frame inside it holding the Secondary mode, and everything under that frame inherits. Changing the card means changing the mode on that frame — not on the card, and not on the layers inside it.',
+    'When a component has no `Theme-*` child, the mode belongs on the instance itself. Those are the only two places it is allowed. A mode anywhere else stops that layer following the theme, which is invisible until the day the theme changes and one layer does not move.',
+    'Theme and Surface are separate axes. Theme picks the palette; Surface picks the level within it — so a Primary card and a Primary card at `Surface-Dimmest` are the same palette at two tones. Buttons and Icons are their own collections, with one mode per palette, and they are meant to move WITH the theme rather than be set separately.',
+    'Never set a mode on a main component. It edits the library: every instance that has not overridden it moves, in every file that has the component, and nobody whose file changed will know why. Place an instance and theme that.',
+  ],
+  table: {
+    head: ['Where the mode goes', 'When'],
+    rows: [
+      ['the outermost `Theme-*` frame', 'whenever the component has one'],
+      ['the selected instance', 'only when it has no `Theme-*` child'],
+      ['a `Theme-Button` frame', 'buttons — it carries the Buttons palette and nothing else'],
+      ['anywhere else', '**never** — it is drift, and it will go stale silently'],
+    ]
+  },
+  trap: 'Setting the mode on the instance when a `Theme-*` child exists appears to do nothing: the child keeps its own value and wins. Both are now set, they drift apart, and the component looks correct until somebody re-themes it. The Omni Design plugin and the Omni Theme widget find the right layer for you, move Buttons and Icons with it, and name any mode sitting where it should not be.'
+}, {
   title: 'Static colors',
   lede: 'The raw tone ramp. For graphics and SVGs — never for a background or a component.',
   body: ['Every palette publishes twelve numbered tones, `--Primary-Color-1` through `--Primary-Color-12`, nine palettes deep. They are STATIC: a tone is the same color whatever surface it sits on and whichever mode is active. That is what makes them useful for illustration, and what makes them wrong for anything else.', 'A background, a border or a component color must follow the cascade — `--Background`, `--Text`, `--Border`, `--Buttons-*` all resolve differently per surface and per mode, and they carry contrast guarantees that were measured. A numbered tone carries none: it is a color, not a role, and nothing checks what sits on it.', 'Reach for them when you are drawing — an SVG illustration, a chart series, a decorative shape — where there is no text to contrast against and no surface to follow. Everywhere else, name the role.'],

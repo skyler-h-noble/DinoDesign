@@ -168,6 +168,10 @@ const NAV_ITEMS = [
          the component carrying somebody else's trademark as the one with
          nowhere to read its rules. */
       { id: 'brand-icons',           label: 'Brand Icons' },
+      /* In Foundations rather than with the components, because it is not
+         about any one of them: it is how a theme reaches ANY component, and
+         the question gets asked of Card, Button and List Item equally. */
+      { id: 'foundation-theming',    label: 'Theming' },
       { id: 'foundation-static',     label: 'Static Colors' },
       { id: 'foundation-states',     label: 'States' },
     ],

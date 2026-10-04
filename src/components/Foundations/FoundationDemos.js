@@ -313,10 +313,126 @@ export function ComponentSizeDemo() {
 }
 
 /** Topic title -> demo. A topic with no entry renders prose only. */
+
+/* Theming — three ways to do one thing, and what each costs you.
+ *
+ * Not a live demo, because the thing being demonstrated is in Figma rather
+ * than in the DOM. What it can do is the part prose keeps losing: say the
+ * steps in order, and say what the two tools catch that a dropdown cannot.
+ * The HowToSlots stay placeholders until someone crops the panels — see that
+ * file for why a crop and not a full canvas.
+ */
+function Method({ name, when, steps, note }) {
+  return (
+    <Box data-surface="Container" sx={{
+      backgroundColor: 'var(--Background)', color: 'var(--Text)',
+      p: 2, borderRadius: 'var(--Card-Radius, var(--Style-Border-Radius))',
+      border: '1px solid var(--Border-Variant)',
+    }}>
+      <VStack gap="var(--Sizing-1)">
+        <VStack gap="var(--Sizing-Quarter)">
+          <H5>{name}</H5>
+          <Caption color="quiet">{when}</Caption>
+        </VStack>
+        <Box component="ol" sx={{ m: 0, pl: 2.2, display: 'flex',
+                                  flexDirection: 'column', gap: 0.5 }}>
+          {steps.map((t, i) => (
+            <Box component="li" key={i}><BodySmall>{t}</BodySmall></Box>
+          ))}
+        </Box>
+        {note ? <BodySmall color="quiet">{note}</BodySmall> : null}
+      </VStack>
+    </Box>
+  );
+}
+
+function ThemingDemo() {
+  return (
+    <VStack gap="var(--Sizing-3)">
+      <VStack gap="var(--Sizing-1)">
+        <EyebrowSmall>Three ways</EyebrowSmall>
+        <BodySmall color="quiet">
+          All three write the same thing: one variable mode, on one layer. They
+          differ in how much you have to know about which layer.
+        </BodySmall>
+      </VStack>
+
+      <Method
+        name="The Omni Design plugin"
+        when="Building or fixing components. Follows your selection."
+        steps={[
+          'Plugins \u2192 Omni Design \u2192 Theme. Leave the tab open.',
+          'Click any component. The panel follows \u2014 there is nothing to refresh.',
+          'Pick a value. It applies as you choose it; there is no Apply button.',
+          'Reset to how it was puts the selection back exactly as you found it.',
+        ]}
+        note={'It names the layer it writes to, so you can see the mode is going to the switch and not to whatever you happened to click.'}
+      />
+
+      <Method
+        name="The Omni Theme widget"
+        when="A shared file, or anyone who does not have the plugin."
+        steps={[
+          'Click the widget on the canvas. The same panel opens and follows your selection.',
+          'Click the component you want, then pick a value.',
+          'Drop the widget inside a plain frame and it labels that frame with its theme permanently.',
+        ]}
+        note={'It lives in the file, so there is nothing to install and no account to have. It cannot go inside an instance \u2014 Figma does not allow adding layers there \u2014 so keep it beside the work, not in it.'}
+      />
+
+      <Method
+        name="By hand"
+        when="One known change, on a layer you have already found."
+        steps={[
+          'In Layers, select the Theme-* frame inside the component \u2014 not the component.',
+          'Under Appearance, set the Theme and Surface dropdowns.',
+          'The dash beside a dropdown clears it back to inheriting.',
+        ]}
+        note={'Four things are yours to remember: find the right layer, move Buttons and Icons too, check nothing below it is pinned, and never touch a main component. Those four are what the tools do for you.'}
+      />
+
+      <HowToSlot
+        title="The plugin's Theme tab, with a component selected"
+        shows="The dropdowns name the layer they write to, and the line under each row names the binding that brought it in."
+      />
+
+      <VStack gap="var(--Sizing-1)">
+        <EyebrowSmall>Reading the panel</EyebrowSmall>
+        <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <tbody>
+            {[
+              ['Leave as is (Primary)', 'A mode is pinned here, and it is Primary.'],
+              ['Leave as is (inherits Primary)', 'Nothing here sets it. It comes from a frame above, which the hint names.'],
+              ['Not set \u2014 resolves to Surface', 'Nothing anywhere sets it. That value is Figma\u2019s fallback, not a decision.'],
+              ['Leave as is (mixed)', 'More than one thing is selected and they disagree.'],
+              ['Set where it does not belong', 'A layer that is not the switch is holding a mode, and has stopped following the theme.'],
+            ].map(([k, v], i) => (
+              <tr key={i}>
+                <Box component="td" sx={{ py: 1, pr: 2, verticalAlign: 'top', width: '38%' }}>
+                  <Box component="code" sx={{
+                    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+                    fontSize: '0.85em', px: 0.5, py: '1px',
+                    borderRadius: 'var(--Sizing-Half, 4px)',
+                    backgroundColor: 'var(--Hover)',
+                  }}>{k}</Box>
+                </Box>
+                <Box component="td" sx={{ py: 1, verticalAlign: 'top' }}>
+                  <BodySmall>{v}</BodySmall>
+                </Box>
+              </tr>
+            ))}
+          </tbody>
+        </Box>
+      </VStack>
+    </VStack>
+  );
+}
+
 export const FOUNDATION_DEMOS = {
   'Elevation': ElevationDemo,
   'Surfaces': SurfacesDemo,
   'Component size': ComponentSizeDemo,
   'Static colors': StaticColorsDemo,
   'States are generated, not chosen': StatesDemo,
+  'Theming a component': ThemingDemo,
 };
