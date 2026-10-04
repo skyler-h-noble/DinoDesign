@@ -36,7 +36,11 @@ const ALIASED = {
 
 /** Build- and demo-time helpers. Not components, and not part of the package's
  *  surface — exporting them would commit the library to supporting them. */
-const INTERNAL = ['Showcase', 'shared'];
+/* Not components: the docs site's own UI, which lives under src/components
+   only because that is where its pieces were written. Nothing outside this
+   repo renders a Showcase. `Foundations` is the same thing — the Foundations
+   page and its demos, not a thing a consumer imports. */
+const INTERNAL = ['Showcase', 'shared', 'Foundations'];
 
 /** Real gaps: a component with tests and stories that the index does not reach.
  *

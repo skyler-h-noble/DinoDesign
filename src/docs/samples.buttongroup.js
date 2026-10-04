@@ -1,14 +1,16 @@
 // @ts-nocheck
 /**
- * ButtonGroup — every axis.
+ * ButtonGroup — a row of actions, and every axis it has.
  *
- * The component had no doc at all until now, so none of this was shown
- * anywhere: joined vs separated, the three fits, the three shapes, the nine
- * palettes, the sizes, or either selection mode.
+ * NO SELECTION. These samples used `value` and `onChange`, which post-split
+ * both warn and demonstrate the deprecated path — a sample teaching the thing
+ * the component is telling you not to do. A button group is Save / Cancel /
+ * Delete: three things you can do, none of them "on". Each child is an
+ * ordinary Button carrying its own variant, which is why they all look the
+ * same here rather than one filled and the rest outlined.
  *
- * `separated` and `fit` are the two that are easiest to confuse because both
- * are about width, so each is shown against its opposite in a bounded box —
- * "fill" means nothing without a container to be full of.
+ * ToggleButtonGroup's samples are at the bottom of this file; they are the
+ * ones with a value.
  */
 import React, { useState } from 'react';
 import { ButtonGroup } from '../components/ButtonGroup';
@@ -22,146 +24,92 @@ import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
 import FormatAlignCenterIcon from '@mui/icons-material/FormatAlignCenter';
 import FormatAlignRightIcon from '@mui/icons-material/FormatAlignRight';
 
-/* Uncontrolled would leave every sample stuck on its first value, so each
-   group owns a little state. A sample you cannot click is a picture of a
-   control rather than the control. */
-function Group({ options = ['Day', 'Week', 'Month'], initial = 'Day', ...props }) {
-  const [value, setValue] = useState(initial);
-  return (
-    <ButtonGroup value={value} onChange={setValue} aria-label="Range" {...props}>
-      {options.map(o => <Button key={o} value={o}>{o}</Button>)}
-    </ButtonGroup>
-  );
-}
+const BOX = 360;
 
-function MultiGroup(props) {
-  const [value, setValue] = useState(['Bold']);
+/* All the same kind. A group of actions is a set of peers — one solid button
+   beside two outlines reads as "this one is selected", which is the exact
+   misreading the split was meant to end. The variant lives on the CHILDREN,
+   because the group does not restyle what is inside it. */
+function Group({ labels = ['Save', 'Cancel', 'Delete'], variant = 'default', ...props }) {
   return (
-    <ButtonGroup multiple value={value} onChange={setValue} aria-label="Style" {...props}>
-      <Button value="Bold">Bold</Button>
-      <Button value="Italic">Italic</Button>
-      <Button value="Under">Underline</Button>
+    <ButtonGroup aria-label="Actions" {...props}>
+      {labels.map(l => (
+        <Button key={l} variant={variant} onClick={() => {}}>{l}</Button>
+      ))}
     </ButtonGroup>
   );
 }
 
 function IconGroup(props) {
-  const [value, setValue] = useState('left');
   return (
-    <ButtonGroup value={value} onChange={setValue} aria-label="Alignment" {...props}>
-      <Button value="left" iconOnly aria-label="Align left">
+    <ButtonGroup aria-label="Alignment" {...props}>
+      <Button iconOnly aria-label="Align left" onClick={() => {}}>
         <Icon><FormatAlignLeftIcon /></Icon>
       </Button>
-      <Button value="center" iconOnly aria-label="Align center">
+      <Button iconOnly aria-label="Align center" onClick={() => {}}>
         <Icon><FormatAlignCenterIcon /></Icon>
       </Button>
-      <Button value="right" iconOnly aria-label="Align right">
+      <Button iconOnly aria-label="Align right" onClick={() => {}}>
         <Icon><FormatAlignRightIcon /></Icon>
       </Button>
     </ButtonGroup>
   );
 }
 
-/* The group still works; only one segment is out. A no-op onChange here
-   would have made the whole group dead while demonstrating that ONE segment
-   was disabled, which is the opposite of the point. */
-function PartlyDisabledGroup() {
-  const [value, setValue] = useState('Day');
-  return (
-    <ButtonGroup value={value} onChange={setValue} aria-label="Range">
-      <Button value="Day">Day</Button>
-      <Button value="Week" disabled>Week</Button>
-      <Button value="Month">Month</Button>
-    </ButtonGroup>
-  );
-}
-
-const BOX = 360;
-
 export const BUTTON_GROUP_SAMPLES = {
-  /* Figma's Style axis. JOINED overlaps the segments by one border width so
-     the shared edge is a single line — two adjacent 1px borders would read as
-     a 2px rule between segments and a 1px one at the ends, which is what
-     makes a joined row stop reading as one control. */
+  /* Figma's ButtonGroup is gap 4 on every variant and has no Style axis, so
+     separated is the default and the only shape on that page. Joined is
+     ToggleButtonGroup's, because a toggle group is one control. */
   separated: () => (
     <VStack gap="var(--Sizing-3)">
       <VStack gap="var(--Sizing-Half)">
-        <Caption color="standard">false — joined (Figma: Style=Default)</Caption>
+        <Caption color="standard">true — the default, and what Figma draws</Caption>
         <Group />
       </VStack>
       <VStack gap="var(--Sizing-Half)">
-        <Caption color="quiet">true — separated (Figma: Style=Separated)</Caption>
-        <Group separated />
+        <Caption color="quiet">false — joins them, and warns</Caption>
+        <Group separated={false} />
       </VStack>
-    </VStack>
-  ),
-
-  /* Bounded, because "fill" means nothing without a container to be full of.
-     `equal` is the one with no Figma counterpart: the group still HUGS, but
-     every segment matches the widest, which a row of uneven labels needs. */
-  fit: () => (
-    <VStack gap="var(--Sizing-3)" style={{ width: '100%', maxWidth: BOX }}>
-      <VStack gap="var(--Sizing-Half)">
-        <Caption color="standard">hug — each segment sizes to its label</Caption>
-        <div style={{ width: BOX, border: '1px dashed var(--Border-Variant)', padding: 4 }}>
-          <Group options={['S', 'Medium', 'Extra large']} initial="S" />
-        </div>
-      </VStack>
-      <VStack gap="var(--Sizing-Half)">
-        <Caption color="quiet">fill — the group fills, segments share it equally (Figma: Fit=Fill)</Caption>
-        <div style={{ width: BOX, border: '1px dashed var(--Border-Variant)', padding: 4 }}>
-          <Group options={['S', 'Medium', 'Extra large']} initial="S" fit="fill" />
-        </div>
-      </VStack>
-      <VStack gap="var(--Sizing-Half)">
-        <Caption color="quiet">equal — still hugs, every segment matches the widest (code only)</Caption>
-        <div style={{ width: BOX, border: '1px dashed var(--Border-Variant)', padding: 4 }}>
-          <Group options={['S', 'Medium', 'Extra large']} initial="S" fit="equal" />
-        </div>
-      </VStack>
-    </VStack>
-  ),
-
-  /* The shape of the UNSELECTED segments. The selected one is painted by the
-     group either way, so what changes here is the other two. */
-  variant: () => (
-    <VStack gap="var(--Sizing-3)">
-      {['outlined', 'light', 'ghost'].map(v => (
-        <VStack key={v} gap="var(--Sizing-Half)">
-          <Caption color={v === 'outlined' ? 'standard' : 'quiet'}>{v}</Caption>
-          <Group variant={v} color="primary" />
-        </VStack>
-      ))}
       <Body color="quiet">
-        `light` lightens the unselected segments by changing their SURFACE —
-        data-surface="Surface-Brightest" — not their theme.
+        A joined row of actions looks like a control with nothing selected. If
+        the segments are a choice rather than three things to do, that is
+        ToggleButtonGroup.
       </Body>
     </VStack>
   ),
 
-  /* All nine. The palette paints the selected segment's fill AND every
-     segment's label, so an unselected segment in a success group differs from
-     one in an error group — which it did not until the labels moved onto the
-     Buttons table. */
-  color: () => (
-    <VStack gap="var(--Sizing-2)">
-      {['default', ...PALETTES].map(c => (
-        <HStack key={c} gap="var(--Sizing-2)" style={{ alignItems: 'center' }}>
-          <div style={{ width: 84 }}>
-            <Caption color={c === 'default' ? 'standard' : 'quiet'}>{c}</Caption>
-          </div>
-          <Group color={c} />
-        </HStack>
-      ))}
+  fit: () => (
+    <VStack gap="var(--Sizing-3)" style={{ width: '100%', maxWidth: BOX }}>
+      <VStack gap="var(--Sizing-Half)">
+        <Caption color="standard">hug — each button sizes to its label</Caption>
+        <div style={{ width: BOX, border: '1px dashed var(--Border-Variant)', padding: 4 }}>
+          <Group labels={['S', 'Medium', 'Extra large']} />
+        </div>
+      </VStack>
+      <VStack gap="var(--Sizing-Half)">
+        <Caption color="quiet">fill — the group fills, buttons share it equally</Caption>
+        <div style={{ width: BOX, border: '1px dashed var(--Border-Variant)', padding: 4 }}>
+          <Group labels={['S', 'Medium', 'Extra large']} fit="fill" />
+        </div>
+      </VStack>
+      <VStack gap="var(--Sizing-Half)">
+        <Caption color="quiet">equal — hugs, but every button matches the widest (code only)</Caption>
+        <div style={{ width: BOX, border: '1px dashed var(--Border-Variant)', padding: 4 }}>
+          <Group labels={['S', 'Medium', 'Extra large']} fit="equal" />
+        </div>
+      </VStack>
     </VStack>
   ),
 
-  /* Sizing comes from the BUTTON tokens, so a group matches the buttons
-     around it: --Small-Button-Height / --Button-Height /
-     --Large-Button-Height, with the matching text size.
+  orientation: () => (
+    <HStack gap="var(--Sizing-4)" style={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      <Cell label="horizontal" emphasis><Group /></Cell>
+      <Cell label="vertical"><Group orientation="vertical" /></Cell>
+    </HStack>
+  ),
 
-     Pass it to the GROUP. It is forwarded to each segment, so a size set on a
-     child is overwritten. */
+  /* Forwarded to each child, so it is set on the GROUP. A size on a child is
+     overwritten. */
   size: () => (
     <VStack gap="var(--Sizing-3)">
       {SIZES.map(v => (
@@ -173,25 +121,21 @@ export const BUTTON_GROUP_SAMPLES = {
     </VStack>
   ),
 
-  orientation: () => (
-    <HStack gap="var(--Sizing-4)" style={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
-      <Cell label="horizontal" emphasis><Group /></Cell>
-      <Cell label="vertical"><Group orientation="vertical" /></Cell>
-    </HStack>
-  ),
-
-  /* A different QUESTION, not a different look: "which of these" rather than
-     "which one". The value becomes an array and a selected segment can be
-     clicked off, which a single-select group cannot do. */
-  multiple: () => (
+  /* The buttons carry their own variant, all the same within a group — the
+     group is not a control, so nothing in it is picked out. */
+  variant: () => (
     <VStack gap="var(--Sizing-3)">
+      {['default', 'primary', 'secondary'].map(v => (
+        <VStack key={v} gap="var(--Sizing-Half)">
+          <Caption color={v === 'default' ? 'standard' : 'quiet'}>
+            {`<Button variant="${v}">`}
+          </Caption>
+          <Group variant={v} />
+        </VStack>
+      ))}
       <VStack gap="var(--Sizing-Half)">
-        <Caption color="standard">false — one answer, and it cannot be cleared</Caption>
-        <Group />
-      </VStack>
-      <VStack gap="var(--Sizing-Half)">
-        <Caption color="quiet">true — any number, and clicking a selected one deselects it</Caption>
-        <MultiGroup />
+        <Caption color="quiet">outline, for a row of secondary actions</Caption>
+        <Group variant="default-outline" />
       </VStack>
     </VStack>
   ),
@@ -207,26 +151,26 @@ export const BUTTON_GROUP_SAMPLES = {
         <Group disabled />
       </VStack>
       <VStack gap="var(--Sizing-Half)">
-        <Caption color="quiet">a single segment takes its own `disabled`</Caption>
-        <PartlyDisabledGroup />
+        <Caption color="quiet">a single button takes its own `disabled`</Caption>
+        <ButtonGroup aria-label="Actions">
+          <Button onClick={() => {}}>Save</Button>
+          <Button disabled onClick={() => {}}>Cancel</Button>
+          <Button onClick={() => {}}>Delete</Button>
+        </ButtonGroup>
       </VStack>
     </VStack>
   ),
 
-  'value / defaultValue': () => (
-    <VStack gap="var(--Sizing-3)">
-      <VStack gap="var(--Sizing-Half)">
-        <Caption color="quiet">each child needs a `value`; the group matches against it</Caption>
-        <IconGroup />
-      </VStack>
+  'aria-label': () => (
+    <VStack gap="var(--Sizing-2)">
+      <IconGroup />
       <Body color="quiet">
-        Icon-only segments each need a name saying the ACTION — "Align left",
-        not "left".
+        The group needs a name, and so does each icon-only button — naming the
+        ACTION, not the glyph: "Align left", not "left".
       </Body>
     </VStack>
   ),
 };
-
 
 /* ─────────────────────────────────────────────────────────────────────────
    ToggleButtonGroup — the same geometry, one behaviour added.
@@ -253,6 +197,19 @@ function ToggleMulti({ allowEmpty, ...props }) {
       <Button value="Left">Left</Button>
       <Button value="Center">Center</Button>
       <Button value="Right">Right</Button>
+    </ToggleButtonGroup>
+  );
+}
+
+/* One segment disabled, the selection live on the others. Stateful, because a
+   sample of a control that does not move teaches that the control is broken. */
+function DisabledChoice() {
+  const [v, setV] = React.useState('left');
+  return (
+    <ToggleButtonGroup value={v} onChange={setV} aria-label="Alignment">
+      <Button value="left">Left</Button>
+      <Button value="center">Center</Button>
+      <Button value="right" disabled>Right</Button>
     </ToggleButtonGroup>
   );
 }
@@ -383,8 +340,15 @@ export const TOGGLE_BUTTON_GROUP_SAMPLES = {
         <ToggleGroup />
       </VStack>
       <VStack gap="var(--Sizing-Half)">
-        <Caption color="quiet">disabled</Caption>
+        <Caption color="quiet">disabled — the whole group</Caption>
         <ToggleGroup disabled />
+      </VStack>
+      <VStack gap="var(--Sizing-Half)">
+        {/* The case the group-level flag cannot express: one choice is off the
+            table and the rest still move. A disabled segment must never be the
+            selected one — that strands the group on an answer it cannot leave. */}
+        <Caption color="quiet">one choice unavailable</Caption>
+        <DisabledChoice />
       </VStack>
     </VStack>
   ),

@@ -140,12 +140,10 @@ export const EXAMPLES = {
     ))}
   </HStack>,
   Fab: () => <Fab icon={<Icon size="medium"><AddIcon /></Icon>} ariaLabel="Add" />,
-  /* Stateful, because a CONTROL in a sample has to be operable.
-     This was `value="a" onChange={() => {}}` — controlled with a no-op, which
-     is worse than leaving it uncontrolled: the segment takes the click,
-     reports nothing, and the group never moves off Day. A sample that looks
-     interactive and is not teaches that the component is broken. */
-  ButtonGroup: () => <ButtonGroupExample />,
+  /* ButtonGroup's lead example moved to examples.lead.js, where it shows the
+     two components side by side — the difference is the whole point and it is
+     visible in one glance. This entry would have shadowed it: the merge is
+     per component, and a later key wins. */
   Chip: () => <ChipExample />,
   Badge: () => <HStack gap="var(--Sizing-3)">
       <Badge badgeContent={3}><Icon><span>✉</span></Icon></Badge>

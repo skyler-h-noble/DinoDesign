@@ -51,7 +51,8 @@ import { Tooltip } from '../components/Tooltip';
 import { OmniTreeView } from '../components/TreeView';
 import { Button } from '../components/Button';
 import { ToggleButtonGroup } from '../components/ToggleButtonGroup';
-import { Body, H3 } from '../components/Typography';
+import { ButtonGroup } from '../components/ButtonGroup';
+import { Body, H3, Caption } from '../components/Typography';
 import { VStack } from '../components/Stack';
 
 import HomeIcon from '@mui/icons-material/Home';
@@ -217,7 +218,31 @@ function ToggleButtonGroupExample() {
   );
 }
 
+/* The two side by side, because the difference is the whole point and it is
+   visible in one glance: the actions are peers and all look alike; the choice
+   has one picked out. Describing that in prose takes a paragraph and still
+   leaves you checking which is which. */
+function ButtonGroupExample() {
+  return (
+    <VStack gap="var(--Sizing-3)" style={{ alignItems: 'flex-start' }}>
+      <VStack gap="var(--Sizing-Half)" style={{ alignItems: 'flex-start' }}>
+        <Caption color="quiet">ButtonGroup — three things you can do</Caption>
+        <ButtonGroup aria-label="Actions">
+          <Button onClick={() => {}}>Save</Button>
+          <Button onClick={() => {}}>Duplicate</Button>
+          <Button onClick={() => {}}>Delete</Button>
+        </ButtonGroup>
+      </VStack>
+      <VStack gap="var(--Sizing-Half)" style={{ alignItems: 'flex-start' }}>
+        <Caption color="quiet">ToggleButtonGroup — one answer, and never none</Caption>
+        <ToggleButtonGroupExample />
+      </VStack>
+    </VStack>
+  );
+}
+
 export const LEAD_EXAMPLES = {
+  ButtonGroup: () => <ButtonGroupExample />,
   /* Alignment is the case the component is for: the text is aligned somehow
      whatever you click, so "none selected" is not a state it can be in. */
   ToggleButtonGroup: () => <ToggleButtonGroupExample />,

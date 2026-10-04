@@ -435,8 +435,11 @@ import { DATA_DOCS } from './componentsData';
 import { REST_DOCS } from './componentsRest';
 export const BUTTON_GROUP_DOC = {
   name: 'ButtonGroup',
-  summary: 'A row of mutually exclusive choices, joined into one control so they read as one question with several answers.',
+  summary: 'A row of buttons, spaced and grouped. Nothing in it is selected \u2014 they are things you can do, not a choice.',
   insteadUse: [{
+    when: 'One of them should be selected \u2014 a choice, not a set of actions',
+    use: 'ToggleButtonGroup'
+  }, {
     when: 'The options need labels, help text, or more than a word each',
     use: 'RadioGroup'
   }, {
@@ -457,7 +460,7 @@ export const BUTTON_GROUP_DOC = {
        explicit choice in the design was a side effect of a number here. */
     name: 'separated',
     type: 'boolean',
-    default: 'false',
+    default: 'true',
     note: 'JOINED when false — segments overlap by one border width so the shared edge is a single line, which is what makes the row read as one control. SEPARATED when true, gapped by --Platform-Spacer. Figma calls these Style=Default and Style=Separated.'
   }, {
     name: 'fit',
@@ -470,12 +473,15 @@ export const BUTTON_GROUP_DOC = {
     default: "'outlined'",
     note: 'The SHAPE of the unselected segments. The selected one is always painted by the group. `light` lightens the unselected segments by changing their SURFACE — data-surface="Surface-Brightest" — not their theme.'
   }, {
-    name: 'color',
+    /* No `color` on the group. A button group does not restyle what is
+       inside it — each Button carries its own variant, which is why every
+       button in a group looks the SAME rather than one being picked out. A
+       group that paints one segment differently is a control with a value,
+       and that is ToggleButtonGroup. */
+    name: 'variant (on the children)',
+    sample: 'variant',
     type: 'string',
-    values: ['default', 'primary', 'secondary', 'tertiary', 'neutral',
-             'info', 'success', 'warning', 'error'],
-    default: 'default',
-    note: 'The palette. It paints the SELECTED segment’s fill and every segment’s label — an unselected segment reads --Buttons-{Color}-Outline-Quiet, which is the only thing distinguishing a success group from an error one while nothing is selected.'
+    note: 'Set on each Button, not on the group. Use the same one throughout \u2014 a solid button beside two outlines reads as "this one is selected", which is the misreading the two components were split to end.'
   }, {
     name: 'size',
     type: 'string',
@@ -488,15 +494,14 @@ export const BUTTON_GROUP_DOC = {
     default: "'horizontal'",
     note: 'Vertical stacks the segments and moves the shared-edge overlap to the top border. A vertical group equalizes its segment widths on its own, so `fit="equal"` is only meaningful horizontally.'
   }, {
-    name: 'multiple',
-    type: 'boolean',
-    default: 'false',
-    note: 'Any number selected at once. `value` becomes an ARRAY and onChange receives the next array; clicking a selected segment deselects it. This is a different question from the single-select default — "which of these" rather than "which one".'
-  }, {
-    name: 'value / defaultValue',
-    type: 'string | string[]',
+    /* The selection props are gone from this table. They still WORK and warn
+       once, because removing them silently would leave a group that renders
+       correctly and never changes — but documenting them here would keep
+       teaching the thing the warning points away from. */
+    name: 'aria-label',
+    type: 'string',
     default: 'undefined',
-    note: 'Each child needs a `value`, and the group matches against it. Controlled with `value` + `onChange`, uncontrolled with `defaultValue`.'
+    note: 'The group needs a name. Icon-only buttons inside need one each, naming the ACTION rather than the glyph \u2014 "Align left", not "left".'
   }, {
     name: 'disabled',
     type: 'boolean',

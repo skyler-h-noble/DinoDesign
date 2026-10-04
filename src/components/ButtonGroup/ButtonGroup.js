@@ -210,10 +210,20 @@ export function ButtonGroup({
   'aria-label': ariaLabel,
   ...props
 }) {
-  if (!__selectionOwner && (controlledValue !== undefined || defaultValue !== undefined
-      || onChange !== undefined || multiple)) {
+  const askedForSelection = controlledValue !== undefined || defaultValue !== undefined
+      || onChange !== undefined || multiple;
+
+  if (!__selectionOwner && askedForSelection) {
     warnSelectionMoved();
   }
+
+  /* Whether this group HAS a selection at all, which is a different question
+     from who owns it. ToggleButtonGroup always does. A plain ButtonGroup does
+     only on the legacy path — the warning above says to move, and until the
+     caller does, the old behaviour has to keep working rather than quietly
+     turning into a row of unpressable outlines. A plain group with none is a
+     row of peers: no pressed state to report, nothing to escalate from. */
+  const hasSelection = __selectionOwner || askedForSelection;
 
   /* Only when the caller ASKED to join. ToggleButtonGroup joins by default
      and passes separated through, so firing on the value alone would warn on
@@ -528,18 +538,30 @@ export function ButtonGroup({
       /* One step of escalation from the group's own style:
            outlined / light   unselected `-outline`  ->  selected SOLID
            ghost              unselected `ghost`     ->  selected `-outline`
-         An explicit child.variant always wins. */
+         An explicit child.variant always wins.
+
+         Escalation only means something where there is something to escalate
+         TO. A plain ButtonGroup has no selection, so every segment sits on the
+         unselected rung forever — a row of outlines waiting for a solid that
+         never arrives. Its segments are peers instead, and peers look alike:
+         the group's own style, same for all of them. */
       variant: child.props.variant ?? (
-        isGhost
-          ? (isSelected ? color + '-outline' : 'ghost')
-          : isSelected
-            ? color
-            : color + '-outline'
+        !hasSelection
+          ? (isGhost ? 'ghost' : color)
+          : isGhost
+            ? (isSelected ? color + '-outline' : 'ghost')
+            : isSelected
+              ? color
+              : color + '-outline'
       ),
       size:    child.props.size ?? size,
       disabled: child.props.disabled ?? disabled,
       onClick: handleClick(childValue, child.props.onClick),
-      'aria-pressed': isSelected,
+      /* aria-pressed is a TOGGLE's word. On a plain group of actions,
+         aria-pressed="false" tells a screen reader there is an off state to
+         turn on — "Delete, not pressed" — which is a promise the button does
+         not keep. Omitted entirely unless the group owns a selection. */
+      ...(hasSelection ? { 'aria-pressed': isSelected } : {}),
       sx: buttonSx,
     });
 

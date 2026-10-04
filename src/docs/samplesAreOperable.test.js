@@ -53,33 +53,70 @@ describe('no dead controls', () => {
 });
 
 describe('the ButtonGroup samples respond', () => {
-  it('the lead example moves its selection', () => {
-    render(<div>{EXAMPLES.ButtonGroup({ theme: null, surface: 'Surface' })}</div>);
-    const week = screen.getByRole('button', { name: 'Week' });
-    const day = screen.getByRole('button', { name: 'Day' });
-    expect(day).toHaveAttribute('aria-pressed', 'true');
-    expect(week).toHaveAttribute('aria-pressed', 'false');
+  /* The lead example is now the two components SIDE BY SIDE, because the
+     difference between them is what a reader comes to that page for. So the
+     assertion is the difference itself: the ButtonGroup half has no selection
+     to move, and the ToggleButtonGroup half does. This used to click a segment
+     of the ButtonGroup and expect aria-pressed to follow, which is exactly the
+     reading the split was meant to end. */
+  it('the lead example shows a group with no selection beside one with', () => {
+    const { container } = render(
+      <div>{EXAMPLES.ButtonGroup({ theme: null, surface: 'Surface' })}</div>);
 
-    fireEvent.click(week);
+    const pressable = Array.from(container.querySelectorAll('button[aria-pressed]'));
+    // Only the toggle half reports a pressed state, and exactly one is on.
+    expect(pressable.length).toBeGreaterThan(0);
+    expect(pressable.filter(b => b.getAttribute('aria-pressed') === 'true')).toHaveLength(1);
 
-    expect(screen.getByRole('button', { name: 'Week' }))
+    // The action half's buttons are peers: clickable, never pressed.
+    const actions = ['Save', 'Duplicate', 'Delete']
+      .map(n => screen.getByRole('button', { name: n }));
+    for (const b of actions) expect(b).not.toHaveAttribute('aria-pressed');
+
+    fireEvent.click(actions[1]);
+    for (const b of actions) expect(b).not.toHaveAttribute('aria-pressed');
+  });
+
+  it('the toggle half of the lead example moves its selection', () => {
+    render(<div>{EXAMPLES.ToggleButtonGroup({ theme: null, surface: 'Surface' })}</div>);
+    const [left, center] = ['Left', 'Center']
+      .map(n => screen.getByRole('button', { name: n }));
+    expect(left).toHaveAttribute('aria-pressed', 'true');
+
+    fireEvent.click(center);
+
+    expect(screen.getByRole('button', { name: 'Center' }))
       .toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('button', { name: 'Day' }))
+    expect(screen.getByRole('button', { name: 'Left' }))
       .toHaveAttribute('aria-pressed', 'false');
   });
 
-  it('the disabled sample still works on its enabled segments', () => {
+  /* The disabled sample lives on both components now. ButtonGroup's version
+     is about a segment you cannot press at all; the selection case moved to
+     ToggleButtonGroup, which is the component that has one. */
+  it('the disabled ButtonGroup sample leaves its enabled segments clickable', () => {
     const { container } = render(
       <div>{PROP_EXAMPLES.ButtonGroup.disabled({ theme: null, surface: 'Surface' })}</div>);
+    const buttons = Array.from(container.querySelectorAll('button'));
+    const enabled = buttons.filter(b => !b.disabled);
+    expect(enabled.length).toBeGreaterThan(0);
+    for (const b of enabled) fireEvent.click(b);   // must not throw
+  });
+
+  it('the disabled ToggleButtonGroup sample still moves on its enabled segments', () => {
+    const { container } = render(
+      <div>{PROP_EXAMPLES.ToggleButtonGroup.disabled({ theme: null, surface: 'Surface' })}</div>);
     /* The last group in that sample is the one with a single disabled
        segment; the group around it must still move. */
     const groups = container.querySelectorAll('[role="group"], [role="radiogroup"]');
     const last = groups[groups.length - 1];
     const buttons = Array.from(last.querySelectorAll('button'));
-    const month = buttons.find(b => b.textContent.includes('Month'));
-    expect(month).toBeTruthy();
-    fireEvent.click(month);
-    expect(month).toHaveAttribute('aria-pressed', 'true');
+    const movable = buttons.find(b => !b.disabled && b.getAttribute('aria-pressed') === 'false');
+    // the sample must actually contain a disabled segment, or this proves nothing
+    expect(buttons.some(b => b.disabled)).toBe(true);
+    expect(movable).toBeTruthy();
+    fireEvent.click(movable);
+    expect(movable).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('the dismissible chip actually dismisses', () => {
