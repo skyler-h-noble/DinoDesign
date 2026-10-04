@@ -16,20 +16,19 @@ import { BackgroundPicker } from '../BackgroundPicker';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack, Grid } from '@mui/material';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs';
-import { BrandIcon } from './BrandIcon';
+import { BrandIcon, BRAND_ICON_NAMES, hasBrandIcon } from './BrandIcon';
 import { CodeBlock } from '../CodeBlock';
 import { Body, BodySmall, Caption, EyebrowSmall, H3 } from '../Typography';
 import { Link } from '../Link';
 
-/* The marks the design file's Brand-Icons component carries, in the order it
-   lists them. Not every Font Awesome brand — this is the set the system has
-   decided it uses, and a gallery of 400 logos would answer a question nobody
-   asked. The link in the Summary goes to the full list. */
-const BRANDS = [
-  'github', 'x-twitter', 'linkedin', 'instagram', 'dribbble',
-  'figma', 'youtube', 'facebook', 'slack', 'medium',
-  'behance', 'google', 'apple', 'android', 'spotify',
-];
+/* No curated list. An earlier version offered fifteen buttons, which was a
+   guess at which marks matter dressed up as a feature: this build carries
+   609, so the grid was hiding 594 of them behind a decision nobody made.
+   A name field reaches all of them, and the datalist means it does not have
+   to be typed from memory. */
+const SUGGEST_LIMIT = 600;
+
+const BROWSE_URL = 'https://fontawesome.com/search?f=brands&ic=free-collection';
 
 const SIZES = [
   { label: '1em — inherits', value: '1em' },
@@ -82,6 +81,8 @@ export function BrandIconShowcase() {
   const [color, setColor] = useState('currentColor');
   const [titled, setTitled] = useState(false);
 
+  const known = hasBrandIcon(name);
+
   const generateCode = () => {
     const parts = [`name="${name}"`];
     if (size !== '1em') parts.push(`size="${size}"`);
@@ -123,8 +124,14 @@ export function BrandIconShowcase() {
                   border: '1px solid var(--Border-Variant)',
                 }}
               >
-                <BrandIcon name={name} size={size} color={color}
-                           title={titled ? name : undefined} />
+                {known ? (
+                  <BrandIcon name={name} size={size} color={color}
+                             title={titled ? name : undefined} />
+                ) : (
+                  <BodySmall style={{ color: 'var(--Quiet)' }}>
+                    Nothing to draw — type a mark name.
+                  </BodySmall>
+                )}
               </Box>
               <CodeBlock code={generateCode()} language="JSX" wrap sx={{ mt: 2 }} />
             </Grid>
@@ -135,12 +142,52 @@ export function BrandIconShowcase() {
                   <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                     MARK
                   </EyebrowSmall>
-                  <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', rowGap: 1 }}>
-                    {BRANDS.map((b) => (
-                      <ControlButton key={b} label={b} selected={name === b}
-                                     onClick={() => setName(b)} />
+                  <input
+                    type="text"
+                    list="brand-icon-names"
+                    value={name}
+                    onChange={(e) => setName(e.target.value.trim().toLowerCase())}
+                    placeholder="github"
+                    aria-label="Brand mark name"
+                    aria-invalid={name && !known ? 'true' : undefined}
+                    style={{
+                      width: '100%', boxSizing: 'border-box',
+                      padding: '8px 10px', fontSize: 12, fontFamily: 'inherit',
+                      color: 'var(--Text)', background: 'var(--Background)',
+                      borderRadius: 'var(--Input-Radius, 6px)',
+                      border: `1px solid ${name && !known ? 'var(--Buttons-Error-Border)' : 'var(--Border)'}`,
+                    }}
+                  />
+                  {/* All 609, so the name does not have to be typed from
+                      memory. A datalist suggests without constraining —
+                      anything Font Awesome adds still works by typing it. */}
+                  <datalist id="brand-icon-names">
+                    {BRAND_ICON_NAMES.slice(0, SUGGEST_LIMIT).map((n) => (
+                      <option key={n} value={n} />
                     ))}
-                  </Stack>
+                  </datalist>
+
+                  {/* An unknown name renders NOTHING — the component returns
+                      null and warns in the console. Without this the field's
+                      failure mode is an empty square and no explanation, which
+                      reads as the component being broken. */}
+                  {name && !known ? (
+                    <Caption style={{ color: 'var(--Text-Error)', display: 'block', marginTop: 6 }}>
+                      No mark named “{name}”. Names are lowercase and hyphenated,
+                      exactly as Font Awesome lists them.
+                    </Caption>
+                  ) : (
+                    <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
+                      {BRAND_ICON_NAMES.length} marks available. Lowercase and
+                      hyphenated — `x-twitter`, `square-github`.
+                    </Caption>
+                  )}
+
+                  <Box sx={{ mt: 1 }}>
+                    <Link href={BROWSE_URL} target="_blank" rel="noopener noreferrer">
+                      Browse Font Awesome Brands
+                    </Link>
+                  </Box>
                 </Box>
 
                 <Box sx={{ mt: 3 }}>

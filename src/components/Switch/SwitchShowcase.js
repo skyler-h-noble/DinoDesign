@@ -137,7 +137,7 @@ export function SwitchShowcase() {
                 <Tab>Change Log</Tab>
               </TabList>
 <TabPanel value={0}>
-                <DocSummary component="Switch" theme={bgTheme} surface={bgSurface} />
+                <DocSummary component="SwitchInput" theme={bgTheme} surface={bgSurface} />
               </TabPanel>
 <TabPanel value={1}>
         <Grid container sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
@@ -300,7 +300,7 @@ export function SwitchShowcase() {
                 </Box>
               </TabPanel>
 <TabPanel value={3}>
-                <DocChanges component="Switch" />
+                <DocChanges component="SwitchInput" />
               </TabPanel>
       </Tabs>
 

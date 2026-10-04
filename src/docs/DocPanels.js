@@ -15,7 +15,6 @@ import { howToFor } from './figmaHowTo';
 import { HowToSlot } from '../components/Foundations/HowToSlot';
 import { PreviewSurface } from '../components/PreviewSurface';
 import { docsSlug } from './docsLink';
-import { figmaUrlFor } from './figmaLinks';
 import { H5, Body, BodySmall, Caption, EyebrowSmall } from '../components/Typography';
 import { Link } from '../components/Link/Link';
 
@@ -136,44 +135,53 @@ export function DocSummary({ component, theme = null, surface = 'Surface' }) {
   /* Only the components whose control is a variable mode on an inner frame
      have one of these — the rest are answered by the property panel itself. */
   const howTo = howToFor(doc.name);
-  /* Where this component lives in the Figma library.
-     The map and `figmaUrlFor` have existed in figmaLinks.js since the docs
-     moved into the lib, fully written and never called — so the answer to
-     "where is this in Figma" sat in the source, reachable only by reading it.
-     This comment described rendering it and outlived the code it described,
-     which is the worse half of the problem: it read as done.
-     Null for a component with no design, which is a real answer —
-     figmaUrlFor returns null rather than pointing at the file root and
-     leaving someone to hunt through 68 pages. */
-  const figmaUrl = figmaUrlFor(doc.name);
+
 
   return (
     <Box sx={{ p: 3 }}>
       <Stack spacing={3}>
         {example ? (
           <PreviewSurface theme={theme} surface={surface} minHeight={120}>
-            <Box sx={{ p: 3, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {example({ theme, surface })}
+            {/* The example gets a WIDTH to live in.
+                This was a bare centred flex box, and a flex child with no
+                intrinsic width collapses to nothing — so Slider rendered as
+                its thumb alone, a single dot in the middle of an empty panel,
+                and every other width-driven component (Input, Select,
+                TextField, Table) was equally wrong in a way that looked less
+                obviously like a bug.
+                `maxWidth` rather than a fixed width, so a Button still hugs
+                its label and centres: components that want the room take it,
+                components that do not are unaffected. */}
+            <Box sx={{ p: 3, display: 'flex', justifyContent: 'center' }}>
+              <Box sx={{
+                width: '100%', maxWidth: 420,
+                display: 'flex', flexDirection: 'column',
+                alignItems: 'center', justifyContent: 'center',
+                gap: 'var(--Sizing-1)',
+                '& > *': { maxWidth: '100%' },
+              }}>
+                {example({ theme, surface })}
+              </Box>
             </Box>
           </PreviewSurface>
         ) : null}
 
         <Body>{doc.summary}</Body>
 
-        {figmaUrl || (doc.links && doc.links.length) ? (
+        {/* No Figma link here. ShowcaseHeader already puts one in the top
+            right of every page, so adding a second put two links to the same
+            place on one screen — and the one further down looked like it went
+            somewhere else. The map in figmaLinks.js is what the header reads;
+            rendering it twice was the mistake, not authoring it.
+
+            These links are a different thing: where the component's CONTENT
+            comes from when the library does not ship it. Icon renders Material
+            Symbols and BrandIcon renders Font Awesome Brands, both by
+            ligature, so using either means knowing a name that lives on
+            somebody else's site. */}
+        {doc.links && doc.links.length ? (
           <Box sx={{ display: 'flex', gap: 'var(--Sizing-3)', flexWrap: 'wrap' }}>
-            {figmaUrl ? (
-              <Link href={figmaUrl} target="_blank" rel="noopener noreferrer">
-                Open {doc.name} in Figma
-              </Link>
-            ) : null}
-            {/* Where the component's content comes from when the library does
-                not ship it. Icon and BrandIcon are the cases that need it: the
-                lib renders Material Symbols and Font Awesome Brands by
-                LIGATURE, so using either means knowing a name, and the name
-                list is somebody else's site. Without the link the answer to
-                "what can I put here" was to already know. */}
-            {(doc.links || []).map((l, i) => (
+            {doc.links.map((l, i) => (
               <Link key={i} href={l.href} target="_blank" rel="noopener noreferrer">
                 {l.label}
               </Link>

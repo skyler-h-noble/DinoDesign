@@ -58,6 +58,31 @@ function iconForName(name) {
   return brands[key] || null;
 }
 
+/* Every brand mark this build can draw, as the names the component takes.
+ *
+ * Read off the icon objects' own `iconName` rather than reversed from the
+ * export keys: Font Awesome is the authority on its own spelling, and a list
+ * derived by un-camel-casing would be a second guess at something already
+ * stated. All 609 round-trip back through iconForName, which is asserted
+ * rather than assumed.
+ *
+ * Exported because a free-text name field needs two things the component
+ * alone cannot give it: something to autocomplete from, and a way to say
+ * "that one does not exist" — an unknown name renders NOTHING, so without
+ * this the field's failure mode is a blank square.
+ */
+export const BRAND_ICON_NAMES = Array.from(new Set(
+  Object.values(brands)
+    .filter((v) => v && typeof v === 'object' && v.iconName && Array.isArray(v.icon))
+    .map((v) => v.iconName),
+)).sort();
+
+/** Does this build have a mark for that name? */
+export function hasBrandIcon(name) {
+  const resolved = iconForName(name);
+  return Boolean(resolved && resolved.icon);
+}
+
 /**
  * @param name   lowercase, hyphenated, as Figma's text layer holds it:
  *               'github', 'x-twitter', 'linkedin', 'dribbble', 'instagram'

@@ -21,7 +21,11 @@ const EXPECTED = [
   'behance', 'google', 'apple', 'android', 'spotify',
 ];
 
-describe('every offered mark resolves', () => {
+describe('a representative sample of marks resolves', () => {
+  /* Not "every offered mark" any more — the showcase offers all of them, and
+     the exported list is derived from the icon objects themselves, so
+     checking it against itself would prove nothing. These are the names the
+     component's own docblock promises. */
   it.each(EXPECTED)('%s draws a glyph', (name) => {
     const { container } = render(<BrandIcon name={name} title={name} />);
     const svg = container.querySelector('svg');
@@ -49,13 +53,54 @@ describe('the showcase', () => {
     }
   });
 
-  /* The mark buttons live in Playground, which is not the default tab, so
-     the tab has to be opened first — Summary is what a reader lands on. */
-  it('offers every mark as a control in Playground', () => {
+  /* A NAME FIELD, not a grid of buttons. The grid offered fifteen of the 609
+     this build carries, which was a guess at which marks matter dressed up as
+     a feature. */
+  it('takes any mark by name', () => {
     render(<BrandIconShowcase />);
     fireEvent.click(screen.getByText('Playground'));
-    for (const name of EXPECTED) {
-      expect(screen.getByRole('button', { name })).toBeInTheDocument();
+    const field = screen.getByLabelText('Brand mark name');
+    fireEvent.change(field, { target: { value: 'spotify' } });
+    expect(field.value).toBe('spotify');
+  });
+
+  it('suggests from the real list rather than a curated one', () => {
+    const { container } = render(<BrandIconShowcase />);
+    fireEvent.click(screen.getByText('Playground'));
+    const options = container.querySelectorAll('#brand-icon-names option');
+    expect(options.length).toBeGreaterThan(200);
+    const values = Array.from(options).map((o) => o.value);
+    for (const n of ['github', 'x-twitter', 'square-github']) {
+      expect(values).toContain(n);
     }
+  });
+
+  /* The failure the field makes possible, and the reason it has to be
+     handled: an unknown name renders null, so without a message the result
+     is a blank square that reads as the component being broken. */
+  it('says so when a name does not exist', () => {
+    render(<BrandIconShowcase />);
+    fireEvent.click(screen.getByText('Playground'));
+    const field = screen.getByLabelText('Brand mark name');
+    fireEvent.change(field, { target: { value: 'not-a-real-brand' } });
+    expect(field).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByText(/No mark named/)).toBeInTheDocument();
+  });
+
+  it('accepts a real name without complaining', () => {
+    render(<BrandIconShowcase />);
+    fireEvent.click(screen.getByText('Playground'));
+    const field = screen.getByLabelText('Brand mark name');
+    fireEvent.change(field, { target: { value: 'figma' } });
+    expect(field).not.toHaveAttribute('aria-invalid');
+    expect(screen.queryByText(/No mark named/)).toBeNull();
+  });
+
+  it('links out to the list, in the Playground where the choice is made', () => {
+    render(<BrandIconShowcase />);
+    fireEvent.click(screen.getByText('Playground'));
+    const links = screen.getAllByRole('link', { name: /Font Awesome Brands/i });
+    expect(links.length).toBeGreaterThan(0);
+    expect(links[0]).toHaveAttribute('href', expect.stringContaining('free-collection'));
   });
 });
