@@ -171,6 +171,13 @@ export function ListItem({
            Border and the corner at Menu/Menu-Item-Radius. So: a 1px Border-
            colored outline sitting just outside the row.
 
+           Border from SURFACE, not from Buttons. The file had it bound to the
+           Buttons collection's `Border` for a while — same variable name, a
+           different collection — which reads as correct in every panel and is
+           only visible where the two palettes differ. Fixed in Figma; held
+           here by ListSelectedRing.test.js, because the lib being right by
+           luck is not the same as it being right on purpose.
+
            It used to paint `backgroundColor: var(--Hover)`, which conflated two
            different things: hovering a selected row then looked identical to
            selecting it, and a selected row under the pointer gave no feedback
