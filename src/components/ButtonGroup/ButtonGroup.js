@@ -270,7 +270,6 @@ export function ButtonGroup({
     // ── Per-button sx ─────────────────────────────────────────────────────
     const positionalSx = isConnected && count > 1 ? {
       borderRadius,
-      '&.Mui-focusVisible, &:focus-visible': { outlineOffset: '2px', borderRadius: focusRadius },
       ...(!isFirst && (isHorizontal ? { marginLeft: 'calc(-1 * var(--Button-Border-Width))' } : { marginTop: 'calc(-1 * var(--Button-Border-Width))' })),
       position: 'relative',
       '&:hover, &:focus-visible': { zIndex: 1 },
@@ -415,10 +414,19 @@ export function ButtonGroup({
       ...selectedSx,
       ...unselectedSx,
       ...ghostSx,
-      '&:focus-visible': {
+      /* The focus ring's own corner, set HERE and not in positionalSx.
+         `unselectedSx` carries a '&.Mui-focusVisible, &:focus-visible' key of
+         its own for the label colour, and it is spread later — so the same
+         key in positionalSx was replaced wholesale on every UNSELECTED
+         segment and the radius silently vanished. Only the selected one kept
+         it, which is the hardest version to notice: the group looked right
+         wherever you happened to be looking.
+         This block is last, so nothing can shadow it. */
+      '&:focus-visible, &.Mui-focusVisible': {
         outline:       '2px solid var(--Focus-Visible)',
         outlineOffset: '2px',
         zIndex:        2,
+        ...(focusRadius ? { borderRadius: focusRadius } : {}),
       },
       ...child.props.sx,
     };

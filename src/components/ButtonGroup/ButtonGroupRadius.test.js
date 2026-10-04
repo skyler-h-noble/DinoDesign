@@ -89,6 +89,58 @@ describe('vertical end caps', () => {
   });
 });
 
+/** The focus-visible rules for a segment, which is a different bucket from
+ *  the base one and is where the ring's own corner lives. */
+function focusCssOf(orientation, index) {
+  const { container } = render(
+    <ButtonGroup value="a" onChange={() => {}} orientation={orientation} aria-label="g">
+      <Button value="a">A</Button>
+      <Button value="b">B</Button>
+      <Button value="c">C</Button>
+    </ButtonGroup>
+  );
+  const el = Array.from(container.querySelectorAll('button'))[index];
+  const classes = Array.from(el.classList);
+  const out = [];
+  for (const sheet of Array.from(document.styleSheets)) {
+    let list; try { list = sheet.cssRules; } catch { continue; }
+    for (const r of Array.from(list || [])) {
+      const sel = r.selectorText || '';
+      if (/focus/i.test(sel) && classes.some((c) => sel.includes('.' + c))) out.push(r.cssText);
+    }
+  }
+  return out.join('\n');
+}
+
+describe('the focus ring follows the corner it surrounds', () => {
+  /* The ring is the corner plus 3, so the gap stays even. A square ring
+     around a rounded cap is the failure this prevents — and it was the state
+     before, because the positional radius applied to the button and not to
+     its focus rule.
+
+     Worth pinning rather than trusting: a later `&:focus-visible` key in the
+     same sx object would shadow this one, and nothing about that would look
+     wrong in a diff. */
+  it('rounds a vertical top cap at the vertical FOCUS radius', () => {
+    expect(focusCssOf('vertical', 0)).toMatch(
+      /border-radius:\s*var\(--Vertical-Button-Focus-Radius\) var\(--Vertical-Button-Focus-Radius\) 0 0/);
+  });
+
+  it('rounds a vertical bottom cap on the bottom only', () => {
+    expect(focusCssOf('vertical', 2)).toMatch(
+      /border-radius:\s*0 0 var\(--Vertical-Button-Focus-Radius\) var\(--Vertical-Button-Focus-Radius\)/);
+  });
+
+  it('rounds a horizontal first cap at the button FOCUS radius', () => {
+    expect(focusCssOf('horizontal', 0)).toMatch(
+      /border-radius:\s*var\(--Button-Focus-Radius\) 0 0 var\(--Button-Focus-Radius\)/);
+  });
+
+  it('leaves a middle segment square', () => {
+    expect(focusCssOf('vertical', 1)).toMatch(/border-radius:\s*0[;\s}]/);
+  });
+});
+
 describe('a single segment', () => {
   it('rounds all four corners, with the orientation deciding which token', () => {
     for (const [orientation, token] of [
