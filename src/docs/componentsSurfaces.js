@@ -376,7 +376,12 @@ export const BRANDICON_DOC = {
      name does not exist. */
   links: [{
     label: 'Browse Font Awesome Brands',
-    href: 'https://fontawesome.com/search?o=r&f=brands',
+    /* Filtered to the FREE collection. The brand marks are all free, but an
+       unfiltered search mixes in Pro results, so the first thing someone sees
+       can be a glyph this font does not have — and a ligature miss renders
+       blank rather than erroring, which reads as the component being broken
+       rather than the name being unavailable. */
+    href: 'https://fontawesome.com/search?f=brands&ic=free-collection',
   }],
   insteadUse: [{
     when: 'It is part of the system\'s own vocabulary — a chevron, a trash can',

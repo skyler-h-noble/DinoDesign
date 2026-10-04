@@ -30,6 +30,14 @@ describe('doc links', () => {
     expect(links[0].href).not.toContain('fonts.google.com');
   });
 
+  /* Filtered to the free collection. The brand marks are all free, but an
+     unfiltered search mixes in Pro results, so the first glyph someone finds
+     can be one this font does not carry — and a ligature miss renders blank
+     rather than erroring, so it reads as the component being broken. */
+  it('filters BrandIcon to the free collection', () => {
+    expect(docFor('BrandIcon').links[0].href).toContain('free-collection');
+  });
+
   it('gives the two components different lists', () => {
     expect(docFor('Icon').links[0].href).not.toBe(docFor('BrandIcon').links[0].href);
   });
