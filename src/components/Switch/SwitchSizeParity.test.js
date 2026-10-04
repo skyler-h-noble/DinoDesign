@@ -41,7 +41,30 @@ function sizeMapFromSource() {
   return out;
 }
 
+/* The CSS tokens, which are the third copy of this number and the one a
+   consumer actually reads. Added at the same time as the Figma payload started
+   writing Switch-Width / Switch-Height, so all three can be checked against
+   each other instead of two of them agreeing while the third drifts. */
+function cssSwitchSizes() {
+  const fs = require('fs');
+  const path = require('path');
+  const css = fs.readFileSync(
+    path.join(__dirname, '../../../public/styles/base.css'), 'utf8');
+  const px = (name) => {
+    const m = css.match(new RegExp('--' + name + ':\\s*([\\d.]+)px'));
+    expect(m).toBeTruthy();
+    return Number(m[1]);
+  };
+  return {
+    small:  [px('Sm-Switch-Width'), px('Sm-Switch-Height')],
+    medium: [px('Switch-Width'),    px('Switch-Height')],
+    large:  [px('Lg-Switch-Width'), px('Lg-Switch-Height')],
+  };
+}
+
 test.each(['small', 'medium', 'large'])(
   'the %s switch is the size Figma publishes', (size) => {
-    expect(sizeMapFromSource()[size]).toEqual(publishedSwitchSizes()[size]);
+    const published = publishedSwitchSizes()[size];
+    expect(sizeMapFromSource()[size]).toEqual(published);
+    expect(cssSwitchSizes()[size]).toEqual(published);
   });

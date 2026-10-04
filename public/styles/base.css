@@ -261,6 +261,17 @@
   --Checkbox-Gap: 8px;
   --Sm-Checkbox-Gap: 4px;
   --Lg-Checkbox-Gap: 12px;
+  /* The Switch track. These are the Component-Size collection's values, and
+     they are here because they were nowhere: the number lived in Figma and
+     again as a literal in Switch.js, with nothing able to see the two drift.
+     They had — 28x16 and 40x24 against the file's 35x20 and 42x24, with large
+     matching, which is why it read as consistent. */
+  --Switch-Width: 42px;
+  --Sm-Switch-Width: 35px;
+  --Lg-Switch-Width: 56px;
+  --Switch-Height: 24px;
+  --Sm-Switch-Height: 20px;
+  --Lg-Switch-Height: 32px;
   --Divider: 1px;
   --Sm-Divider: 0.5px;
   --Lg-Divider: 2px;
