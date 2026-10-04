@@ -1,5 +1,6 @@
 // src/components/List/ListShowcase.js
 import React, { useState, useEffect } from 'react';
+import { A11yScopeNote } from '../a11yPanel';
 import { ShowcaseHeader } from '../ShowcaseHeader';
 import { BackgroundPicker } from '../BackgroundPicker';
 import {
@@ -533,6 +534,7 @@ export function ListShowcase() {
       </TabPanel>
 
       <TabPanel value={2}>
+                <A11yScopeNote />
         <Box sx={{ p: 4 }}>
           <H4>Accessibility Requirements</H4>
           <BodySmall color="quiet" style={{ marginBottom: 32 }}>

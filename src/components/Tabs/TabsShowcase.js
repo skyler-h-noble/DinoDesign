@@ -1,5 +1,6 @@
 // src/components/Tabs/TabsShowcase.js
 import React, { useState } from 'react';
+import { A11yScopeNote } from '../a11yPanel';
 import { ShowcaseHeader } from '../ShowcaseHeader';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -249,6 +250,7 @@ export function TabsShowcase() {
               </TabPanel>
 
               <TabPanel value={1}>
+                <A11yScopeNote />
                 <Box sx={{ p: 3 }}>
                   <Stack spacing={3}>
                     <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>

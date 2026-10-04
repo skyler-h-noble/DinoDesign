@@ -1,5 +1,6 @@
 // src/components/Icon/IconShowcase.js
 import React, { useState, useEffect } from 'react';
+import { A11yScopeNote } from '../a11yPanel';
 import { ShowcaseHeader } from '../ShowcaseHeader';
 import { BackgroundPicker } from '../BackgroundPicker';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
@@ -371,6 +372,7 @@ export function IconShowcase() {
         </Grid>
       </TabPanel>
 <TabPanel value={2}>
+                <A11yScopeNote />
                 <Box sx={{ p: 3 }}>
                   <BodySmall color="quiet" style={{ marginBottom: 24 }}>
                     {STYLE_LABELS[style]} / {cap(color)} / {size === 'custom' ? customSize + 'px' : size}

@@ -15,6 +15,7 @@ import { howToFor } from './figmaHowTo';
 import { HowToSlot } from '../components/Foundations/HowToSlot';
 import { PreviewSurface } from '../components/PreviewSurface';
 import { docsSlug } from './docsLink';
+import { figmaUrlFor } from './figmaLinks';
 import { H5, Body, BodySmall, Caption, EyebrowSmall } from '../components/Typography';
 import { Link } from '../components/Link/Link';
 
@@ -129,12 +130,16 @@ export function DocSummary({ component, theme = null, surface = 'Surface' }) {
   /* Only the components whose control is a variable mode on an inner frame
      have one of these — the rest are answered by the property panel itself. */
   const howTo = howToFor(doc.name);
-  /* Where this component lives in the Figma library. The map has existed in
-     figmaLinks.js since the docs moved into the lib and nothing ever rendered
-     it, so the answer to "where is this in Figma" was sitting in the source
-     and reachable only by reading it. Null for a component with no design,
-     which is a real answer — figmaUrlFor returns null rather than pointing at
-     the file root and leaving someone to hunt. */
+  /* Where this component lives in the Figma library.
+     The map and `figmaUrlFor` have existed in figmaLinks.js since the docs
+     moved into the lib, fully written and never called — so the answer to
+     "where is this in Figma" sat in the source, reachable only by reading it.
+     This comment described rendering it and outlived the code it described,
+     which is the worse half of the problem: it read as done.
+     Null for a component with no design, which is a real answer —
+     figmaUrlFor returns null rather than pointing at the file root and
+     leaving someone to hunt through 68 pages. */
+  const figmaUrl = figmaUrlFor(doc.name);
 
   return (
     <Box sx={{ p: 3 }}>
@@ -148,6 +153,14 @@ export function DocSummary({ component, theme = null, surface = 'Surface' }) {
         ) : null}
 
         <Body>{doc.summary}</Body>
+
+        {figmaUrl ? (
+          <Box>
+            <Link href={figmaUrl} target="_blank" rel="noopener noreferrer">
+              Open {doc.name} in Figma
+            </Link>
+          </Box>
+        ) : null}
 
 
         {doc.insteadUse.length > 0 && (

@@ -1,5 +1,6 @@
 // src/components/Slider/SliderShowcase.js
 import React, { useState } from 'react';
+import { A11yScopeNote } from '../a11yPanel';
 import { ShowcaseHeader } from '../ShowcaseHeader';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack, Grid } from '@mui/material';
@@ -324,6 +325,7 @@ export function SliderShowcase() {
         </Grid>
       </TabPanel>
 <TabPanel value={2}>
+                <A11yScopeNote />
                 <Box sx={{ p: 3 }}>
                   <Stack spacing={3}>
 

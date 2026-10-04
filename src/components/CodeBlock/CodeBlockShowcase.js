@@ -10,6 +10,7 @@
 // brand's own neutrals and stays legible in both modes. The background picker
 // below changes the surface AROUND the block to show that it holds up anywhere.
 import React, { useState } from 'react';
+import { A11yScopeNote } from '../a11yPanel';
 import { ShowcaseHeader } from '../ShowcaseHeader';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack, Grid } from '@mui/material';
@@ -153,6 +154,7 @@ export function CodeBlockShowcase() {
         </Grid>
       </TabPanel>
 <TabPanel value={2}>
+                <A11yScopeNote />
                 <Box sx={{ p: 3 }}>
                   <Stack spacing={3}>
                     <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>

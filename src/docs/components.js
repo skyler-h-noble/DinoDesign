@@ -433,4 +433,165 @@ import { OVERLAY_DOCS } from './componentsOverlays';
 import { NAV_DOCS } from './componentsNav';
 import { DATA_DOCS } from './componentsData';
 import { REST_DOCS } from './componentsRest';
-export const COMPONENT_DOCS = [BUTTON_DOC, TABS_DOC, CARD_DOC, ...FORM_DOCS, ...SURFACE_DOCS, ...OVERLAY_DOCS, ...NAV_DOCS, ...DATA_DOCS, ...REST_DOCS];
+export const BUTTON_GROUP_DOC = {
+  name: 'ButtonGroup',
+  summary: 'A row of mutually exclusive choices, joined into one control so they read as one question with several answers.',
+  insteadUse: [{
+    when: 'The options need labels, help text, or more than a word each',
+    use: 'RadioGroup'
+  }, {
+    when: 'There is one action, not a choice',
+    use: 'Button'
+  }, {
+    when: 'It is a filter you add and remove',
+    use: 'Chip with `selected`'
+  }, {
+    when: 'There are more than about five options',
+    use: 'Select'
+  }],
+  props: [{
+    /* Figma's ButtonGroup Style axis is Default | Separated, and this prop is
+       the same decision — but it is NOT the `variant` prop, which carries
+       outlined / light / ghost. Keeping them apart is the whole reason
+       `separated` exists: it was once inferred from `spacing === 0`, so an
+       explicit choice in the design was a side effect of a number here. */
+    name: 'separated',
+    type: 'boolean',
+    default: 'false',
+    note: 'JOINED when false — segments overlap by one border width so the shared edge is a single line, which is what makes the row read as one control. SEPARATED when true, gapped by --Platform-Spacer. Figma calls these Style=Default and Style=Separated.'
+  }, {
+    name: 'fit',
+    type: "'hug' | 'fill' | 'equal'",
+    default: "'hug'",
+    note: 'HUG — each segment sizes to its own label. FILL — the group fills its container and the segments share the width equally. EQUAL — the group still hugs, but every segment matches the widest. Figma has the first two as Fit=Default and Fit=Fill; `equal` is code-only.'
+  }, {
+    name: 'variant',
+    type: "'outlined' | 'light' | 'ghost'",
+    default: "'outlined'",
+    note: 'The SHAPE of the unselected segments. The selected one is always painted by the group. `light` lightens the unselected segments by changing their SURFACE — data-surface="Surface-Brightest" — not their theme.'
+  }, {
+    name: 'color',
+    type: 'string',
+    values: ['default', 'primary', 'secondary', 'tertiary', 'neutral',
+             'info', 'success', 'warning', 'error'],
+    default: 'default',
+    note: 'The palette. It paints the SELECTED segment’s fill and every segment’s label — an unselected segment reads --Buttons-{Color}-Outline-Quiet, which is the only thing distinguishing a success group from an error one while nothing is selected.'
+  }, {
+    name: 'size',
+    type: 'string',
+    values: ['small', 'medium', 'large'],
+    default: 'medium',
+    note: 'Sets each segment’s height and padding from the button tokens — --Small-Button-Height, --Button-Height, --Large-Button-Height, with --Sm-Button-Text / --Button-Text / --Lg-Button-Text for the label. Pass it to the GROUP, not the children: it is forwarded to each segment, and a size on a child is overwritten.'
+  }, {
+    name: 'orientation',
+    type: "'horizontal' | 'vertical'",
+    default: "'horizontal'",
+    note: 'Vertical stacks the segments and moves the shared-edge overlap to the top border. A vertical group equalizes its segment widths on its own, so `fit="equal"` is only meaningful horizontally.'
+  }, {
+    name: 'multiple',
+    type: 'boolean',
+    default: 'false',
+    note: 'Any number selected at once. `value` becomes an ARRAY and onChange receives the next array; clicking a selected segment deselects it. This is a different question from the single-select default — "which of these" rather than "which one".'
+  }, {
+    name: 'value / defaultValue',
+    type: 'string | string[]',
+    default: 'undefined',
+    note: 'Each child needs a `value`, and the group matches against it. Controlled with `value` + `onChange`, uncontrolled with `defaultValue`.'
+  }, {
+    name: 'disabled',
+    type: 'boolean',
+    default: 'false',
+    note: 'Disables every segment. A single segment takes its own `disabled`.'
+  }],
+  states: [{
+    state: 'Selected',
+    setBy: 'prop',
+    note: 'Figma carries it as a Status axis on the segment sets — not-selected / selected — rather than as a State, because a segment can be selected AND hovered.'
+  }, {
+    state: 'Hover',
+    setBy: 'interaction'
+  }, {
+    state: 'Pressed',
+    setBy: 'interaction'
+  }, {
+    state: 'Focus-visible',
+    setBy: 'interaction',
+    note: 'Per segment, and the ring is an outline so the shared borders do not clip it.'
+  }, {
+    state: 'Disabled',
+    setBy: 'prop'
+  }],
+  theming: [{
+    collection: 'Buttons',
+    inCode: 'The `color` prop. It writes the palette into the token name — `var(--Buttons-Primary-Button)`.',
+    inFigma: 'A MODE on the Buttons collection, set on the frame. There is no colour variant to pick on the instance.'
+  }, {
+    collection: 'Theme',
+    inCode: '`data-theme` on an ancestor, or the `theme` prop on a wrapping Section.',
+    inFigma: 'The segment sets pin nothing and inherit.'
+  }],
+  tokens: [{
+    name: '--Buttons-{Color}-Button',
+    sets: 'the selected segment’s fill',
+    variesWith: 'color + theme + surface',
+    figma: 'Buttons → Button'
+  }, {
+    name: '--Buttons-{Color}-Quiet',
+    sets: 'the selected segment’s label at rest',
+    variesWith: 'color + theme + surface',
+    figma: 'Buttons → Quiet'
+  }, {
+    name: '--Buttons-{Color}-Text',
+    sets: 'the selected segment’s label on hover, pressed and focus',
+    variesWith: 'color + theme + surface',
+    figma: 'Buttons → Text'
+  }, {
+    name: '--Buttons-{Color}-Outline-Quiet',
+    sets: 'an unselected segment’s label at rest',
+    variesWith: 'color + theme + surface',
+    figma: 'Buttons → Outline-Quiet'
+  }, {
+    name: '--Buttons-{Color}-Outline-Text',
+    sets: 'an unselected segment’s label on hover, pressed and focus',
+    variesWith: 'color + theme + surface',
+    figma: 'Buttons → Outline-Text'
+  }, {
+    name: '--Buttons-{Color}-Border',
+    sets: 'every segment’s border, and the shared edge',
+    variesWith: 'color + theme + surface',
+    figma: 'Buttons → Border'
+  }, {
+    name: '--Hover / --Pressed',
+    sets: 'an unselected segment’s hover and pressed tint',
+    variesWith: 'theme + surface',
+    figma: 'Surface → Hover / Pressed'
+  }, {
+    name: '--Platform-Spacer',
+    sets: 'the gap when `separated`',
+    variesWith: 'platform',
+    figma: 'Devices-Type'
+  }, {
+    name: '--Button-Border-Width',
+    sets: 'the shared-edge overlap, as a negative margin',
+    variesWith: 'fixed at 1px',
+    figma: 'Sizing'
+  }],
+  composition: [
+    'Children are `Button`s, and each needs a `value`. The GROUP assigns each segment its variant — the palette when selected, `-outline` when not — so do NOT set `variant` on a child: an explicit one wins, which is how a group ends up with every segment looking selected.',
+    'Pass `size` and `color` to the group, not to the children.',
+    'A segment is outline or ghost. A solid child is a different control that happens to be in a row, and the group warns about it in development.'
+  ],
+  accessibility: [
+    'The group is a `group` with an accessible name; each segment is a button with `aria-pressed`. Single-select uses `radiogroup` semantics so arrow keys move between options and one tab stop covers the whole control.',
+    'Icon-only segments each need a name saying the ACTION — "Align left", not "left".',
+    'Selection is not carried by colour alone: the selected segment gains a fill AND `aria-pressed`, and its label moves from Quiet to Text.'
+  ],
+  gotchas: [
+    'The joined style overlaps segments by one border width so the shared edge is a single line. Two adjacent 1px borders would read as a 2px rule between segments and a 1px one at the ends.',
+    'A SELECTED segment’s fill is frozen across hover and pressed, while its label moves. --Buttons-{Color}-Hover is a LIGHTER tone, so a selected segment that took it lightened on hover and read as deselecting. Figma does move the fill, so this is a deliberate divergence.',
+    '`variant="light"` changes the unselected segments’ SURFACE, not their theme. It used to name a {Color}-Light theme, which no longer exists — every one of those names bound nothing, so a light group took whatever palette the page was on.',
+    '`fit="equal"` has no Figma counterpart. It lays a horizontal group out as an inline-grid of equal 1fr columns so every segment matches the widest, while the group still hugs.'
+  ]
+};
+
+export const COMPONENT_DOCS = [BUTTON_DOC, BUTTON_GROUP_DOC, TABS_DOC, CARD_DOC, ...FORM_DOCS, ...SURFACE_DOCS, ...OVERLAY_DOCS, ...NAV_DOCS, ...DATA_DOCS, ...REST_DOCS];

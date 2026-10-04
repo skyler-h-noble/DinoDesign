@@ -14,7 +14,7 @@ import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import { CodeBlock } from '../CodeBlock/CodeBlock';
-import { A11yRow, A11yCheckRow, useMeasuredTokens, getContrast } from '../a11yPanel';
+import { A11yScopeNote, A11yRow, A11yCheckRow, useMeasuredTokens, getContrast } from '../a11yPanel';
 import {
   H3, H5, BodySmall, Caption, Label, EyebrowSmall
 } from '../Typography';
@@ -292,6 +292,7 @@ export function FabShowcase() {
         </Grid>
       </TabPanel>
 <TabPanel value={2}>
+                <A11yScopeNote />
                 <Box sx={{ p: 3 }}>
                   <Stack spacing={3}>
 

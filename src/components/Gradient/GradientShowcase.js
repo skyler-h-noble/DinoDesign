@@ -1,5 +1,6 @@
 // src/components/Gradient/GradientShowcase.js
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { A11yScopeNote } from '../a11yPanel';
 import { ShowcaseHeader } from '../ShowcaseHeader';
 import { BackgroundPicker } from '../BackgroundPicker';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
@@ -689,6 +690,7 @@ export function GradientShowcase() {
         </Grid>
       </TabPanel>
 <TabPanel value={2}>
+                <A11yScopeNote />
                 <Box sx={{ p: 3 }}>
                   <Stack spacing={3}>
 

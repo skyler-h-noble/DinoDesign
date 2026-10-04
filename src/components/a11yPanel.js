@@ -34,6 +34,51 @@ export function ContrastBadge({ ratio, threshold = 4.5 }) {
   );
 }
 
+/**
+ * What the numbers below are a verdict ON.
+ *
+ * Every ratio in this tab is measured against the component AS CONFIGURED IN
+ * THE PLAYGROUND — the variant, colour, size and surface currently selected
+ * there — not against the component in general. Change a control and these
+ * numbers change with it.
+ *
+ * Saying so matters because the two readings lead opposite ways. A FAIL here
+ * means "this combination fails", which is a thing the user chose and can
+ * change; read as "this component fails" it becomes a bug report against the
+ * library for a configuration nobody shipped. And a PASS on the default
+ * configuration says nothing about the eight palettes the user did not look
+ * at — so a tab that stated no scope was quietly inviting both mistakes.
+ *
+ * One component, one place: the wording lives here rather than in 54
+ * showcases, so it can be corrected once.
+ */
+export function A11yScopeNote({ configuration }) {
+  return (
+    <Box sx={{
+      mb: 3, p: 2,
+      borderLeft: '3px solid var(--Border)',
+      backgroundColor: 'var(--Hover)',
+    }}>
+      <BodySmall>
+        These are live measurements of the component <strong>as you have it set
+        up in the Playground</strong> — its current variant, colour, size and
+        surface. Each row is a pass or fail against the threshold named beside
+        it. Change a control in Playground and these numbers change.
+      </BodySmall>
+      {configuration ? (
+        <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 8 }}>
+          Measuring: {configuration}
+        </Caption>
+      ) : null}
+      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 8 }}>
+        A pass here covers this configuration only. Other palettes and surfaces
+        are checked the same way — switch to them to see their numbers. A row
+        reading “--” could not be measured and is not a failure.
+      </Caption>
+    </Box>
+  );
+}
+
 export function A11yRow({ label, ratio, threshold, note }) {
   return (
     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',

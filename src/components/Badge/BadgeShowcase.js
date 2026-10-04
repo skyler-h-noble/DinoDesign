@@ -1,5 +1,6 @@
 // src/components/Badge/BadgeShowcase.js
 import { CodeBlock } from '../CodeBlock/CodeBlock';
+import { A11yScopeNote } from '../a11yPanel';
 import { BackgroundPicker } from '../BackgroundPicker';
 import { ShowcaseHeader } from '../ShowcaseHeader';
 import { getContrast, getCssVar } from '../contrast';
@@ -374,6 +375,7 @@ if (style === 'solid') {
       </TabPanel>
 
       <TabPanel value={2}>
+                <A11yScopeNote />
         <Box sx={{ p: 4 }}>
           <H4>Accessibility Requirements</H4>
           <BodySmall color="quiet" style={{ marginBottom: 32 }}>

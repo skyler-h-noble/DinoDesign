@@ -1,5 +1,6 @@
 // src/components/ToggleButtonGroup/ToggleButtonGroupShowcase.js
 import React, { useState, useEffect, useRef } from 'react';
+import { A11yScopeNote } from '../a11yPanel';
 import { ShowcaseHeader } from '../ShowcaseHeader';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import {
@@ -480,6 +481,7 @@ export function ToggleButtonGroupShowcase() {
 
       {/* ACCESSIBILITY TAB */}
       <TabPanel value={2}>
+                <A11yScopeNote />
         <Box sx={{ p: 4 }}>
           <H4>Accessibility Requirements</H4>
           <BodySmall color="quiet" style={{ marginBottom: 32 }}>

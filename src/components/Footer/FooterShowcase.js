@@ -1,5 +1,6 @@
 // src/components/Footer/FooterShowcase.js
 import React, { useState, useRef, useEffect } from 'react';
+import { A11yScopeNote } from '../a11yPanel';
 import { BackgroundPicker } from '../BackgroundPicker';
 import { ShowcaseHeader } from '../ShowcaseHeader';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
@@ -218,6 +219,7 @@ export function FooterShowcase() {
 
         {/* Accessibility */}
         <TabPanel value={2}>
+                <A11yScopeNote />
           <Stack spacing={2} sx={{ p: 3, maxWidth: 560 }}>
             <Caption style={{ color: 'var(--Text-Quiet)' }}>
               Live WCAG 2.1 contrast against the painted background. AA needs

@@ -1,5 +1,6 @@
 // src/components/BottomNavigation/BottomNavigationShowcase.js
 import { CodeBlock } from '../CodeBlock/CodeBlock';
+import { A11yScopeNote } from '../a11yPanel';
 import { ShowcaseHeader } from '../ShowcaseHeader';
 import { BackgroundPicker } from '../BackgroundPicker';
 import React, { useState, useEffect } from 'react';
@@ -390,6 +391,7 @@ export function BottomNavigationShowcase() {
       </TabPanel>
 
       <TabPanel value={2}>
+                <A11yScopeNote />
         <Box sx={{ p: 4 }}>
           <H4>Accessibility Requirements</H4>
           <BodySmall color="quiet" style={{ marginBottom: 32 }}>

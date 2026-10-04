@@ -81,6 +81,7 @@ import { CORE_SAMPLES } from './samples.core';
 import { FORM_SAMPLES } from './samples.forms';
 import { NAV_SAMPLES } from './samples.nav';
 import { SURFACE_SAMPLES } from './samples.surfaces';
+import { BUTTON_GROUP_SAMPLES } from './samples.buttongroup';
 // Relative, not the package name: this file now lives INSIDE the library, and
 // importing the package from within it would resolve to the installed copy
 // rather than this source — a second React tree and a stale component set.
@@ -443,6 +444,7 @@ export const PROP_EXAMPLES = [
   FORM_SAMPLES,
   NAV_SAMPLES,
   SURFACE_SAMPLES,
+  { ButtonGroup: BUTTON_GROUP_SAMPLES },
 ].reduce(mergeSamples, PROP_EXAMPLES_BASE);
 
 /** Does this component have a sample for this prop? */
