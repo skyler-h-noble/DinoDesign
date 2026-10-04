@@ -92,13 +92,17 @@ describe('unselected segment label', () => {
 });
 
 describe('selected segment label', () => {
-  /* Same rest/interaction split as every other label: Quiet at rest, Text on
-     interaction. It was frozen at Text across all states, so a selected
-     segment was the one thing in the group that was loud at rest and had no
-     feedback left to give on hover. */
-  it('rests on the palette Quiet', () => {
+  /* Text at rest AND on interaction. A selected segment is the engaged one,
+     so muting it would make the chosen option read quieter than the options
+     beside it — which inverts what the group is for. */
+  it('holds the palette Text at rest', () => {
     const { base } = rulesFor(segments('success').selected);
-    expect(colorIn(base)).toContain('--Buttons-Success-Quiet');
+    /* The !important override, not the absence of Quiet. The segment IS a
+       Button, so Button's own base rule — Quiet at rest for an unselected
+       solid — is in the same bucket even though the group's override beats
+       it. An absence check there fails on correct code, which is the same
+       trap the fill-freeze assertion fell into. */
+    expect(base).toMatch(/color:\s*var\(--Buttons-Success-Text\)\s*!important/);
   });
 
   for (const state of ['hover', 'active', 'focusVisible']) {

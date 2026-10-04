@@ -16,10 +16,12 @@
  * Disabled uses the REST token, not a third one — disabled is the resting
  * button with opacity 0.38 and nothing else rebound.
  *
- * `selected` is not an exception either. It decides whether the element has a
- * FILL, and that decides which PAIR applies — Quiet/Text with a fill,
- * Outline-Quiet/Outline-Text without. The rest/interaction split is the same
- * either way, so there is one rule and no special case.
+ * SELECTED is the exception, and the only one. It decides which PAIR applies
+ * by deciding whether there is a FILL — Quiet/Text with one,
+ * Outline-Quiet/Outline-Text without — and then pins to that pair's Text end,
+ * at rest and on interaction alike. A selected segment is the engaged one;
+ * muting it would make the chosen option read quieter than the options beside
+ * it, which inverts what a group is for.
  *
  * Before this, every state used the interaction token: a button had no label
  * change to give on hover, and Outline-Quiet had no consumer anywhere in the
@@ -85,18 +87,17 @@ describe('solid button label: Quiet at rest, Text on interaction', () => {
     expect(colorIn(base)).toContain('--Buttons-Error-Quiet');
   });
 
-  /* Selected is NOT an exception — it rests on Quiet like everything else.
-     This asserted the opposite, on the reasoning that selected "reads as
-     engaged, not resting". Button-Group-Segments binds Buttons/Quiet on
-     selected/Default and selected/Disabled, so the rule has no special case:
-     rest is Quiet, interaction is Text, and all `selected` decides is which
-     PAIR applies by deciding whether there is a fill. */
-  it('still rests on Quiet when selected', () => {
+  /* Selected holds Text throughout. `selected` decides which PAIR applies by
+     deciding whether there is a fill, then pins to that pair's Text end — a
+     selected segment is the engaged one, and muting it would make the chosen
+     option read quieter than the options beside it. */
+  it('holds Text at rest when selected', () => {
     const { base } = probe(<Button variant="primary" selected>x</Button>);
-    expect(colorIn(base)).toContain('--Buttons-Primary-Quiet');
+    expect(colorIn(base)).toContain('--Buttons-Primary-Text');
+    expect(colorIn(base)).not.toContain('--Buttons-Primary-Quiet');
   });
 
-  it('moves to Text on interaction when selected', () => {
+  it('stays on Text through interaction when selected', () => {
     const { states } = probe(<Button variant="primary" selected>x</Button>);
     expect(colorIn(states.hover)).toContain('--Buttons-Primary-Text');
   });
@@ -127,19 +128,16 @@ describe('outline button label: Outline-Quiet at rest, Outline-Text on interacti
   }
 
   /* Selected gains a FILL, so an outline button swaps from the Outline pair
-     to the filled one — but it still rests on that pair's QUIET end. This
-     asserted Text, which made a selected outline button the one thing in the
-     system that was loud at rest. */
-  it('swaps to the filled pair when selected, still resting on its Quiet end', () => {
+     to the filled one, and pins to its Text end. */
+  it('swaps to the filled pair Text when selected', () => {
     const { base } = probe(<Button variant="success-outline" selected>x</Button>);
-    expect(colorIn(base)).toContain('--Buttons-Success-Quiet');
+    expect(colorIn(base)).toContain('--Buttons-Success-Text');
     expect(colorIn(base)).not.toContain('--Buttons-Success-Outline-Quiet');
   });
 
-  it('moves to the filled pair Text on interaction when selected', () => {
+  it('stays on the filled pair Text through interaction when selected', () => {
     const { states } = probe(<Button variant="success-outline" selected>x</Button>);
     expect(colorIn(states.hover)).toContain('--Buttons-Success-Text');
-    expect(colorIn(states.hover)).not.toContain('--Buttons-Success-Outline-Text');
   });
 
   it('covers black-white, whose Outline-Text the generator still omits', () => {

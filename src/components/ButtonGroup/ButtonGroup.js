@@ -20,8 +20,8 @@ import { Box } from '@mui/material';
  *   Container border:          var(--Buttons-{Color}-Border)
  *   Selected bg:               var(--Buttons-{Color}-Button)
  *   Selected text:             var(--Buttons-{Color}-Text)
- *   Selected text:             var(--Buttons-{Color}-Quiet), moving to
- *                              var(--Buttons-{Color}-Text) on interaction
+ *   Selected text:             var(--Buttons-{Color}-Text), at rest and on
+ *                              interaction — the engaged segment stays loud
  *   Unselected text:           var(--Buttons-{Color}-Outline-Quiet)
  *   Hover (unselected) bg:     var(--Hover)            — surface scrim
  *   Hover (unselected) text:   var(--Buttons-{Color}-Outline-Text)
@@ -215,10 +215,23 @@ export function ButtonGroup({
     const childValue = child.props.value ?? index;
     const isSelected = isValueSelected(childValue);
 
-    // ── Border radius in connected mode ───────────────────────────────────
+    /* ── Border radius in connected mode ───────────────────────────────────
+       The end caps, and the two orientations do NOT use the same corner.
+
+       Figma binds Button/Button-Radius on the left and right caps of a
+       horizontal group, and Button/Vertical-Button-Radius — half of it — on
+       the top and bottom caps of a vertical one. The full corner is drawn for
+       a control as wide as a button is; on the short edge of a stacked
+       segment it reads as a pill cap.
+
+       Both were --Style-Border-Radius here, which is the brand's generic
+       corner rather than the button's. The two can differ, so a group could
+       round differently from the buttons beside it even horizontally. */
     let borderRadius;
     if (isConnected && count > 1) {
-      const r = 'var(--Style-Border-Radius)';
+      const r = isHorizontal
+        ? 'var(--Button-Radius)'
+        : 'var(--Vertical-Button-Radius)';
       if (isHorizontal) {
         borderRadius = (isFirst && isLast) ? r
           : isFirst ? r + ' 0 0 ' + r
@@ -232,9 +245,32 @@ export function ButtonGroup({
       }
     }
 
+    /* The focus ring follows the corner it surrounds. Figma binds
+       Vertical-Button-Focus-Radius on the ring of a vertical end cap — the
+       corner plus 3, so the gap stays even. A middle segment has square
+       corners, so its ring is square too. */
+    let focusRadius;
+    if (isConnected && count > 1) {
+      const fr = isHorizontal
+        ? 'var(--Button-Focus-Radius)'
+        : 'var(--Vertical-Button-Focus-Radius)';
+      if (isHorizontal) {
+        focusRadius = (isFirst && isLast) ? fr
+          : isFirst ? fr + ' 0 0 ' + fr
+          : isLast  ? '0 ' + fr + ' ' + fr + ' 0'
+          : '0';
+      } else {
+        focusRadius = (isFirst && isLast) ? fr
+          : isFirst ? fr + ' ' + fr + ' 0 0'
+          : isLast  ? '0 0 ' + fr + ' ' + fr
+          : '0';
+      }
+    }
+
     // ── Per-button sx ─────────────────────────────────────────────────────
     const positionalSx = isConnected && count > 1 ? {
       borderRadius,
+      '&.Mui-focusVisible, &:focus-visible': { outlineOffset: '2px', borderRadius: focusRadius },
       ...(!isFirst && (isHorizontal ? { marginLeft: 'calc(-1 * var(--Button-Border-Width))' } : { marginTop: 'calc(-1 * var(--Button-Border-Width))' })),
       position: 'relative',
       '&:hover, &:focus-visible': { zIndex: 1 },
@@ -274,8 +310,11 @@ export function ButtonGroup({
           borderColor:     btnBorder + ' !important',
         };
 
-    const selectedRest   = isGhost ? btnOutlineQuiet : 'var(--Buttons-' + C + '-Quiet)';
-    const selectedActive = isGhost ? btnOutlineText  : btnText;
+    /* Text at rest AND on interaction. A selected segment is the engaged one,
+       so muting it would make the chosen option read quieter than the options
+       beside it — which inverts what the group is for. */
+    const selectedRest   = isGhost ? btnOutlineText : btnText;
+    const selectedActive = selectedRest;
 
     /* The FILL stays frozen across the pointer states and the LABEL does not.
        The freeze is here because --Buttons-{C}-Hover is a lighter tone, so a

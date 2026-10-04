@@ -165,21 +165,18 @@ function solidStyles(color, elevated = false, selected = false, size = 'medium')
      and Focus-Visible — uniformly, across all 80 variants of the set — and
      the icon takes the same token as the label, which it gets here for free
      because Icon paints `currentColor`.
-     Selected is NOT an exception, and reading it as one was a mistake worth
-     recording. The rule has no special case: REST — which means Default and
-     Disabled — takes the Quiet flavour, and the three INTERACTION states take
-     the Text flavour. All `selected` decides is whether the element has a
-     fill, and that decides WHICH flavour: Quiet/Text when there is one,
-     Outline-Quiet/Outline-Text when there is not.
-
-     The earlier version gave a selected button Text at rest on the reasoning
-     that selected "reads as engaged, not resting". Button-Group-Segments says
-     otherwise — selected/Default and selected/Disabled both bind Buttons/Quiet
-     — and the uniform rule is the simpler one to hold.
+     SELECTED is the exception: it holds Text throughout, at rest and on
+     interaction alike. A selected segment is the engaged one, and muting its
+     label would make the chosen option read quieter than the ones beside it.
+     `selected` decides WHICH pair applies by deciding whether there is a
+     fill — Quiet/Text with one, Outline-Quiet/Outline-Text without — and then
+     pins to that pair's Text end.
 
      Disabled takes the REST token plus opacity, since disabled is the resting
-     button dimmed and nothing else. */
-  const restText = `var(--Buttons-${C}-Quiet)`;
+     button dimmed and nothing else. For a selected button that rest token is
+     Text, so a disabled selected button stays legible rather than dropping
+     two steps at once. */
+  const restText = selected ? `var(--Buttons-${C}-Text)` : `var(--Buttons-${C}-Quiet)`;
   const activeText = `var(--Buttons-${C}-Text)`;
   return {
     backgroundColor: `var(--Buttons-${C}-Button)`,
@@ -241,12 +238,10 @@ function outlineStyles(color, selected = false) {
        Outline-Quiet had no consumer anywhere in the library until now, which
        is why its absence was easy to read as "the token is unused" rather
        than "the rest state is missing". */
-    /* Selected gains a FILL, so it swaps to the filled pair — but it still
-       rests on that pair's QUIET end. It read Text here, which made a
-       selected outline button the one thing in the system that was loud at
-       rest. */
+    /* Selected gains a FILL, so it swaps to the filled pair — and pins to
+       that pair's TEXT end, because a selected segment is the engaged one. */
     color: selected
-      ? `var(--Buttons-${C}-Quiet)`
+      ? `var(--Buttons-${C}-Text)`
       : `var(--Buttons-${C}-Outline-Quiet)`,
     border: `var(--Button-Border-Width) solid var(--Buttons-${C}-Border)`,
     boxShadow: 'none',
@@ -299,12 +294,14 @@ function ghostStyles(isTextContent, selected = false) {
        palette the same way outline buttons used to. Ghost is palette-less in
        the variant map, so `Default` is the palette, matching `map['outline']`. */
     /* A ghost segment stays on the OUTLINE pair even when selected: Figma
-       gives selected ghost no fill at all — it marks selection with a border
-       and leaves the label where it was. So there is no filled pair to swap
-       to, and `selected` changes nothing here. */
+       gives selected ghost no fill at all — it marks selection with a border.
+       So there is no filled pair to swap to, but selection still pins to the
+       pair's TEXT end. */
     color: isTextContent
       ? 'var(--Hotlink)'
-      : 'var(--Buttons-Default-Outline-Quiet)',
+      : (selected
+        ? 'var(--Buttons-Default-Outline-Text)'
+        : 'var(--Buttons-Default-Outline-Quiet)'),
     border: 'var(--Button-Border-Width) solid transparent',
     boxShadow: 'none',
     textDecoration: 'none',
