@@ -380,9 +380,15 @@ export const TREEVIEW_DOC = {
     type: 'array',
     default: '[]'
   }, {
-    name: 'defaultExpanded',
+    /* `defaultExpandedItems`, not `defaultExpanded`. The doc had the shorter
+       name and the component has never accepted it — it fell into `...props`
+       and was spread onto the DOM node, so the tree rendered fully collapsed
+       and React warned about an unknown attribute. Anyone following the prop
+       table got a tree that ignored them. */
+    name: 'defaultExpandedItems',
     type: 'array',
-    default: '[]'
+    default: '[]',
+    note: 'Ids of the nodes to start open. The controlled form is `expandedItems`.'
   }, {
     name: 'selectionMode',
     type: 'string',

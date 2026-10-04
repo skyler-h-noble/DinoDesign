@@ -276,7 +276,7 @@ export function Table({
           ))}
         </Box>
         )}
-        /* The footer is decided PER STATE, not dropped wholesale.
+        {/* The footer is decided PER STATE, not dropped wholesale.
 
            loading — ghosted, not hidden. A total that vanishes and reappears
              moves the table's height twice, which is the reflow the header is
@@ -293,7 +293,13 @@ export function Table({
              computed over data that failed to arrive is not missing, it is
              WRONG, and a wrong number shown confidently is worse than no
              number. Partial failures are the sharp case: some rows land, the
-             sum looks plausible, and nothing on screen says it is short. */
+             sum looks plausible, and nothing on screen says it is short.
+
+           This comment was written WITHOUT the surrounding braces, so JSX
+           treated the whole thing as a string child and rendered it into
+           every table as a text node — invalid directly inside a table
+           element, and React said so on every render. A block comment in JSX
+           is CONTENT unless it is wrapped in braces. */}
         {footerShown && (
           <Box component="tfoot">
             {footerRows.map((row, fi) => (

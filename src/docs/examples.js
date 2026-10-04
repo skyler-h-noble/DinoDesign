@@ -78,6 +78,9 @@ import { Caption } from '../components/Typography';
 import { SLIDER_SAMPLES } from './samples.slider';
 import { LEAD_EXAMPLES } from './examples.lead';
 import { CORE_SAMPLES } from './samples.core';
+import { FORM_SAMPLES } from './samples.forms';
+import { NAV_SAMPLES } from './samples.nav';
+import { SURFACE_SAMPLES } from './samples.surfaces';
 // Relative, not the package name: this file now lives INSIDE the library, and
 // importing the package from within it would resolve to the installed copy
 // rather than this source — a second React tree and a stale component set.
@@ -271,7 +274,7 @@ const PROP_EXAMPLES_BASE = {
       return (
         <HStack gap="var(--Sizing-2)" style={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
           {swatch('default', true)}
-          <Divider orientation="vertical" flexItem />
+          <Divider orientation="vertical" style={{ alignSelf: 'stretch' }} />
           {['primary', 'secondary', 'tertiary', 'neutral', 'info',
             'success', 'warning', 'error', 'black-white'].map(c => swatch(c, false))}
         </HStack>
@@ -347,7 +350,7 @@ const PROP_EXAMPLES_BASE = {
       const row = (suffix) => (
         <HStack gap="var(--Sizing-1)" style={{ alignItems: 'center', flexWrap: 'wrap' }}>
           <Button variant={suffix ? 'default' + suffix : 'default'} size="small">default</Button>
-          <Divider orientation="vertical" flexItem />
+          <Divider orientation="vertical" style={{ alignSelf: 'stretch' }} />
           {COLORS.map(c => (
             <Button key={c} variant={suffix ? c + suffix : c} size="small">{c}</Button>
           ))}
@@ -437,6 +440,9 @@ function mergeSamples(target, group) {
 export const PROP_EXAMPLES = [
   { Slider: SLIDER_SAMPLES },
   CORE_SAMPLES,
+  FORM_SAMPLES,
+  NAV_SAMPLES,
+  SURFACE_SAMPLES,
 ].reduce(mergeSamples, PROP_EXAMPLES_BASE);
 
 /** Does this component have a sample for this prop? */

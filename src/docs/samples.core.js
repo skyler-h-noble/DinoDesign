@@ -320,7 +320,7 @@ export const CORE_SAMPLES = {
         </Cell>
         <Cell label="vertical" width={60}>
           <div style={{ height: 60, display: 'flex' }}>
-            <Divider orientation="vertical" flexItem />
+            <Divider orientation="vertical" style={{ alignSelf: 'stretch' }} />
           </div>
         </Cell>
       </HStack>

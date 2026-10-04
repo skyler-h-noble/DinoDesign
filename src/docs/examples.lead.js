@@ -351,6 +351,6 @@ export const LEAD_EXAMPLES = {
   ),
 
   TreeView: () => (
-    <Frame><OmniTreeView items={TREE_ITEMS} defaultExpanded={['src', 'components']} /></Frame>
+    <Frame><OmniTreeView items={TREE_ITEMS} defaultExpandedItems={['src', 'components']} /></Frame>
   ),
 };

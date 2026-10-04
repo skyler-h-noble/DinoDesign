@@ -64,8 +64,13 @@ export const Axis = ({ values, render, defaultValue, width, align = 'flex-start'
   return (
     <HStack gap="var(--Sizing-2)" style={{ alignItems: align, flexWrap: 'wrap' }}>
       {defaultValue !== undefined ? cell(defaultValue) : null}
+      {/* `alignSelf: stretch` rather than MUI's `flexItem`.
+          The lib's Divider is its own component with no such prop, and it
+          spreads unknown props straight onto the DOM node — so `flexItem`
+          reached the element and React warned on every render. The style is
+          what flexItem does anyway: let the rule take the row's height. */}
       {defaultValue !== undefined && rest.length ? (
-        <Divider orientation="vertical" flexItem />
+        <Divider orientation="vertical" style={{ alignSelf: 'stretch' }} />
       ) : null}
       {rest.map(cell)}
     </HStack>

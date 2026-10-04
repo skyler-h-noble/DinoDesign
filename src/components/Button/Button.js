@@ -559,7 +559,19 @@ function getSizingStyles({ size, iconOnly, letterNumber, avatar, swatch }) {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function Button({
+/* forwardRef, and it is not a nicety.
+ *
+ * MUI's Tooltip positions itself against its child and needs a ref to do it;
+ * Popover takes an `anchorRef` and reads getBoundingClientRect off it. With a
+ * plain function component both fail — React warns "Function components
+ * cannot be given refs", the ref stays null, and the tooltip or panel has
+ * nothing to anchor to.
+ *
+ * The cost was already being paid in the library's own TooltipShowcase, which
+ * wraps a raw MUI Button hand-styled with brand tokens rather than using this
+ * component. That is the project's one rule broken inside the project, and it
+ * was not a styling preference — it was the only way to get a ref. */
+export const Button = React.forwardRef(function Button({
   variant = 'default',
   size = 'medium',
   elevated = false,
@@ -618,7 +630,7 @@ export function Button({
   className = '',
   sx = {},
   ...props
-}) {
+}, ref) {
   /* contentType wins when given; otherwise the booleans are read as before. */
   if (swatch) warnSwatchOnce();
   const t = resolveContentType(contentType, { iconOnly, letterNumber, avatar });
@@ -835,6 +847,7 @@ export function Button({
         },
       }} />
       <MuiButton
+      ref={ref}
       size={size}
       {...(effectiveFullWidth && { fullWidth: true })}
       disabled={disabled}
@@ -1038,57 +1051,80 @@ export function Button({
     );
   }
   return out;
-}
+});
 
 // ─── Convenience Exports ──────────────────────────────────────────────────────
 
+/* Built through a factory so each one FORWARDS ITS REF.
+ *
+ * They were 37 plain arrow functions — `(p) => <Button variant="x" {...p} />`
+ * — and a plain function component cannot hold a ref, so every one of them
+ * broke as a Tooltip child or a Popover anchor even after Button itself was
+ * fixed. `IconButton` is where that showed: CodeBlock wraps it in a Tooltip
+ * for the copy affordance, and React warned "Function components cannot be
+ * given refs" on every code block in the library.
+ *
+ * A factory also gives each one a displayName, so they appear by name in the
+ * React tree and in a warning rather than as anonymous ForwardRef.
+ *
+ * Caller props spread LAST, so a caller can still override the preset — which
+ * is how the arrow versions behaved and what `<IconButton variant="ghost">`
+ * in CodeBlock relies on. */
+const preset = (displayName, presetProps) => {
+  const Preset = React.forwardRef((props, ref) => (
+    <Button ref={ref} {...presetProps} {...props} />
+  ));
+  Preset.displayName = displayName;
+  return Preset;
+};
+
 // Default
-export const DefaultButton        = (p) => <Button variant="default"           {...p} />;
-export const DefaultOutlineButton = (p) => <Button variant="default-outline"   {...p} />;
+export const DefaultButton        = preset('DefaultButton',        { variant: 'default' });
+export const DefaultOutlineButton = preset('DefaultOutlineButton', { variant: 'default-outline' });
 
 // Solid
-export const PrimaryButton          = (p) => <Button variant="primary"            {...p} />;
-export const SecondaryButton        = (p) => <Button variant="secondary"          {...p} />;
-export const TertiaryButton         = (p) => <Button variant="tertiary"           {...p} />;
-export const NeutralButton          = (p) => <Button variant="neutral"            {...p} />;
-export const InfoButton             = (p) => <Button variant="info"               {...p} />;
-export const SuccessButton          = (p) => <Button variant="success"            {...p} />;
-export const WarningButton          = (p) => <Button variant="warning"            {...p} />;
-export const ErrorButton            = (p) => <Button variant="error"              {...p} />;
-export const DangerButton           = (p) => <Button variant="error"              {...p} />;
+export const PrimaryButton   = preset('PrimaryButton',   { variant: 'primary' });
+export const SecondaryButton = preset('SecondaryButton', { variant: 'secondary' });
+export const TertiaryButton  = preset('TertiaryButton',  { variant: 'tertiary' });
+export const NeutralButton   = preset('NeutralButton',   { variant: 'neutral' });
+export const InfoButton      = preset('InfoButton',      { variant: 'info' });
+export const SuccessButton   = preset('SuccessButton',   { variant: 'success' });
+export const WarningButton   = preset('WarningButton',   { variant: 'warning' });
+export const ErrorButton     = preset('ErrorButton',     { variant: 'error' });
+export const DangerButton    = preset('DangerButton',    { variant: 'error' });
 
 // Outline
-export const PrimaryOutlineButton   = (p) => <Button variant="primary-outline"    {...p} />;
-export const SecondaryOutlineButton = (p) => <Button variant="secondary-outline"  {...p} />;
-export const TertiaryOutlineButton  = (p) => <Button variant="tertiary-outline"   {...p} />;
-export const NeutralOutlineButton   = (p) => <Button variant="neutral-outline"    {...p} />;
-export const InfoOutlineButton      = (p) => <Button variant="info-outline"       {...p} />;
-export const SuccessOutlineButton   = (p) => <Button variant="success-outline"    {...p} />;
-export const WarningOutlineButton   = (p) => <Button variant="warning-outline"    {...p} />;
-export const ErrorOutlineButton     = (p) => <Button variant="error-outline"      {...p} />;
+export const PrimaryOutlineButton   = preset('PrimaryOutlineButton',   { variant: 'primary-outline' });
+export const SecondaryOutlineButton = preset('SecondaryOutlineButton', { variant: 'secondary-outline' });
+export const TertiaryOutlineButton  = preset('TertiaryOutlineButton',  { variant: 'tertiary-outline' });
+export const NeutralOutlineButton   = preset('NeutralOutlineButton',   { variant: 'neutral-outline' });
+export const InfoOutlineButton      = preset('InfoOutlineButton',      { variant: 'info-outline' });
+export const SuccessOutlineButton   = preset('SuccessOutlineButton',   { variant: 'success-outline' });
+export const WarningOutlineButton   = preset('WarningOutlineButton',   { variant: 'warning-outline' });
+export const ErrorOutlineButton     = preset('ErrorOutlineButton',     { variant: 'error-outline' });
 
 // Deprecated: the Light shape is gone. Each renders its SOLID color.
 // Kept because deleting a published export breaks an import at build time; they
 // point at the solid variant directly so they do not fire the dev warning,
 // which is aimed at hand-written variant strings. Remove on the next major.
-export const PrimaryLightButton     = (p) => <Button variant="primary"            {...p} />;
-export const SecondaryLightButton   = (p) => <Button variant="secondary"          {...p} />;
-export const TertiaryLightButton    = (p) => <Button variant="tertiary"           {...p} />;
-export const NeutralLightButton     = (p) => <Button variant="neutral"            {...p} />;
-export const InfoLightButton        = (p) => <Button variant="info"               {...p} />;
-export const SuccessLightButton     = (p) => <Button variant="success"            {...p} />;
-export const WarningLightButton     = (p) => <Button variant="warning"            {...p} />;
-export const ErrorLightButton       = (p) => <Button variant="error"              {...p} />;
+export const PrimaryLightButton   = preset('PrimaryLightButton',   { variant: 'primary' });
+export const SecondaryLightButton = preset('SecondaryLightButton', { variant: 'secondary' });
+export const TertiaryLightButton  = preset('TertiaryLightButton',  { variant: 'tertiary' });
+export const NeutralLightButton   = preset('NeutralLightButton',   { variant: 'neutral' });
+export const InfoLightButton      = preset('InfoLightButton',      { variant: 'info' });
+export const SuccessLightButton   = preset('SuccessLightButton',   { variant: 'success' });
+export const WarningLightButton   = preset('WarningLightButton',   { variant: 'warning' });
+export const ErrorLightButton     = preset('ErrorLightButton',     { variant: 'error' });
 
 // Ghost / Text
-export const GhostButton  = (p) => <Button variant="ghost" {...p} />;
-export const TextButton   = (p) => <Button variant="text"  {...p} />;
+export const GhostButton = preset('GhostButton', { variant: 'ghost' });
+export const TextButton  = preset('TextButton',  { variant: 'text' });
 
 // Aliases
-export const OutlineButton = (p) => <Button variant="primary-outline" {...p} />;
-export const IconButton    = (p) => <Button iconOnly     {...p} />;
-export const LetterButton  = (p) => <Button letterNumber {...p} />;
-export const AvatarButton  = (p) => <Button avatar       {...p} />;
-export const SwatchButton  = (p) => <Button swatch       {...p} />;
+export const OutlineButton = preset('OutlineButton', { variant: 'primary-outline' });
+export const IconButton    = preset('IconButton',    { iconOnly: true });
+export const LetterButton  = preset('LetterButton',  { letterNumber: true });
+export const AvatarButton  = preset('AvatarButton',  { avatar: true });
+export const SwatchButton  = preset('SwatchButton',  { swatch: true });
 
 export default Button;

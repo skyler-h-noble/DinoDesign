@@ -61,10 +61,20 @@ export function Paper({
 }) {
   const { dataSurface, elevation } = usePaperSurface(surface);
 
+  /* Read the ELEVATION off the variant, not off the `outlined` shorthand.
+     `outlined` defaults `variant`, but the two are independent inputs — pass
+     `variant="outlined"` on its own and `outlined` is still false, so the
+     elevation came through non-zero and MUI warned that combining
+     `elevation={4}` with `variant="outlined"` has no effect.
+     A border and a shadow are two answers to the same question, so the
+     variant is the one that decides: whichever way the caller says it, an
+     outlined Paper is flat. */
+  const isOutlined = variant === 'outlined' || outlined;
+
   return (
     <MuiPaper
       variant={variant}
-      elevation={outlined ? 0 : elevation}
+      elevation={isOutlined ? 0 : elevation}
       data-surface={dataSurface}
       sx={{
         padding: 2,

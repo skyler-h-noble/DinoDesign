@@ -91,6 +91,12 @@ export function ListItem({
   // separates rows in a vertical non-clickable list; rightBorder separates
   // items in a horizontal non-clickable list.
   bottomBorder = false, rightBorder = false,
+  /* The element to render as. `li` is right whenever the item is a direct
+     child of the List's own <ul>, which is every ordinary case — but the
+     loading skeleton nests rows inside a wrapper, and an <li> inside an <li>
+     is invalid markup that React warns about and some screen readers
+     flatten. */
+  component = 'li',
   sx = {}, ...props
 }) {
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
@@ -116,7 +122,7 @@ export function ListItem({
   };
 
   return (
-    <Box component="li" role={getRole()} tabIndex={isFocusable ? 0 : undefined}
+    <Box component={component} role={getRole()} tabIndex={isFocusable ? 0 : undefined}
       aria-disabled={disabled || undefined}
       aria-selected={isSelectable ? selected : (selected || undefined)}
       aria-checked={selectionMode === 'checkbox' ? selected : undefined}
@@ -325,8 +331,14 @@ export function List({
       return (
         <Box component="li" sx={{ listStyle: 'none' }}>
           <Ghost label="Loading">
+            {/* `component="div"`: these rows sit inside the wrapper <li>
+                above, and Ghost puts a <div> between, so rendering them as
+                <li> gave ul > li > div > li — an <li> descended from an <li>.
+                They are still real ListItems, which is the point of the
+                skeleton: the row height and decorator positions are the ones
+                the data will land in. */}
             {Array.from({ length: skeletonRows }).map((_, i) => (
-              <ListItem key={'sk-' + i} size={size} variant={variant} color={color}>
+              <ListItem key={'sk-' + i} component="div" size={size} variant={variant} color={color}>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               </ListItem>
             ))}
