@@ -72,7 +72,7 @@ export const BUTTON_DOC = {
     name: 'fullWidth',
     type: 'boolean — Figma\'s Fit axis',
     default: 'false',
-    note: 'Fit=default hugs the label; Fit=fullWidth stretches to the container. Ignored for iconOnly and letterNumber, which are square by definition.',
+    note: 'Hugs its label by default; `fullWidth` stretches it to the container. There is no longer a Figma variant for this — the Fit property was removed because one button filling its parent is native auto-layout sizing, and a variant for it said one thing twice. Read the button’s horizontal sizing instead: FILL means `fullWidth`. Ignored for iconOnly and letterNumber, which are square by definition.',
     note: 'Text buttons only. It is IGNORED on `iconOnly` and `letterNumber` (Button.js:476), and Figma matches by offering `Fit` only on `Type=text` — there is no such thing as a full-width icon button.'
   }, {
     name: 'disabled',
