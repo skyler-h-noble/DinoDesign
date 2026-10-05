@@ -136,13 +136,24 @@ export function normalizeSwitchVariant(variant) {
 function buildVariantMap() {
   const map = {};
   COLORS.forEach((color) => {
+    /* BOTH spellings, for every color.
+       Only `-outline` was registered here, plus `primary` as a one-off at the
+       bottom — so `secondary`, `tertiary`, `neutral`, `info`, `success`,
+       `warning` and `error` were not in the map at all and fell through to the
+       default. Nine documented variants, one color on screen, and primary the
+       only one that looked right because it was the only one written down.
+       The suffix is vestigial on this component: the Figma set has State and
+       Status axes and no shape axis, so there is no outline shape for
+       `{color}-outline` to mean. It stays because the prop table documents it
+       and a published spelling that stops resolving is worse than a redundant
+       one. */
+    map[color]             = outlineStyles(color);
     map[color + '-outline'] = outlineStyles(color);
   });
   // `default` in every spelling is the design-file switch.
   map['default']         = themedStyles();
   map['default-outline'] = themedStyles();
   map['outline']         = themedStyles();
-  map['primary']         = outlineStyles('primary');
   return map;
 }
 

@@ -107,13 +107,16 @@ export const FORM_SAMPLES = {
        — --Icons-{Color} for the track, --Icons-On-{Color} for the knob — and
        that collection has no black-white row, so there is nothing for a
        black-white switch to resolve to. */
+    /* No `label` on the axis samples: Axis already captions each cell with the
+       value, so passing it again printed the word twice side by side. The
+       label belongs on the samples that are ABOUT labelling. */
     variant: () => (
       <Axis values={NINE} defaultValue="default"
-            render={(v) => <SwitchInput variant={v} defaultChecked label={v} />} />
+            render={(v) => <SwitchInput variant={v} defaultChecked />} />
     ),
     size: () => (
       <Axis values={SIZES} defaultValue="medium"
-            render={(v) => <SwitchInput size={v} defaultChecked label={v} />} />
+            render={(v) => <SwitchInput size={v} defaultChecked />} />
     ),
     'checked / defaultChecked': () => (
       <HStack gap="var(--Sizing-3)" style={{ flexWrap: 'wrap' }}>
@@ -133,7 +136,7 @@ export const FORM_SAMPLES = {
         <Axis values={['default', 'primary', 'secondary', 'tertiary']}
               defaultValue="default"
               render={(v) => (
-                <SwitchInput variant={v} defaultChecked label={v}
+                <SwitchInput variant={v} defaultChecked
                              iconOn={<CheckIcon fontSize="inherit" />}
                              iconOff={<CloseIcon fontSize="inherit" />} />
               )} />
