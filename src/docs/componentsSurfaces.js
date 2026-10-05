@@ -650,6 +650,12 @@ export const SPEED_DIAL_DOC = {
     default: '50',
     note: 'Milliseconds between each action appearing, so they stagger rather than arriving at once.'
   }, {
+    name: 'size',
+    type: 'string',
+    values: ['small', 'medium', 'large'],
+    default: 'medium',
+    note: 'Steps the dial down the FAB ramp (48 / 56 / 56) and the gap along the sizing scale (8 / 12 / 16, which is `SpeedDial-Gap`). The ACTIONS stay 32 at every size \u2014 the hierarchy comes from the dial growing, not from the targets shrinking.'
+  }, {
     name: 'openOnHover',
     type: 'boolean',
     default: 'false',
@@ -674,6 +680,17 @@ export const SPEED_DIAL_DOC = {
     '`openOnHover` is built to WCAG 1.4.13, which asks three things of content that appears on hover. DISMISSIBLE \u2014 Escape closes it. HOVERABLE \u2014 closing is delayed and cancelled if the pointer lands anywhere in the container, so you can reach across the 12px gap into the fan without it shutting underneath you. PERSISTENT \u2014 it never times out on its own; the delay only governs closing after the pointer has left.',
     'Hover is gated on `(hover: hover) and (pointer: fine)`, which asks what the user is holding rather than what they are sitting at. A Surface has both; an iPad with a trackpad is a "mobile" device with a fine pointer.',
   ],
+  tokens: [{
+    name: '--SpeedDial-Gap',
+    sets: 'the space between the dial and its actions, and between the actions',
+    variesWith: 'size mode',
+    figma: 'Component-Size/SpeedDial/SpeedDial-Gap'
+  }, {
+    name: '--FAB-Width',
+    sets: 'the dial, through Fab',
+    variesWith: 'size mode',
+    figma: 'Component-Size/FAB/FAB-Width'
+  }],
   gotchas: [
     'Figma\u2019s SpeedDial set has TEN values in its State property for five states: `default | hover | pressed | focus-visible | disabled` AND `Default | Hover | Active | Focus-Visible | Disabled`. Two naming conventions in one property, and `pressed` and `Active` are the same state under two names. See the parity table.',
     'The set has three Child Slots, so it is built for exactly three actions. The component takes any number, and more than five stops being scannable.',

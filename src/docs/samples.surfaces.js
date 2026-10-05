@@ -199,6 +199,20 @@ export const SURFACE_SAMPLES = {
         ))}
       </HStack>
     ),
+    /* Open, so the gap is visible: it is the thing that changes, and a closed
+       dial shows three sizes of the same circle. */
+    size: () => (
+      <HStack gap="var(--Sizing-6)" style={{ flexWrap: 'wrap', alignItems: 'flex-end' }}>
+        {['small', 'medium', 'large'].map((v) => (
+          <Cell key={v} label={v} emphasis={v === 'medium'}>
+            <div style={{ height: 200, width: 120, position: 'relative' }}>
+              <SpeedDial open size={v} ariaLabel={'Create ' + v} actions={SPEED_ACTIONS} />
+            </div>
+          </Cell>
+        ))}
+      </HStack>
+    ),
+
     /* Both are shown OPEN, because the difference is how they GOT there and a
        still frame cannot show a pointer. The captions carry it. */
     openOnHover: () => (

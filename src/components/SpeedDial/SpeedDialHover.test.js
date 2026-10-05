@@ -147,3 +147,56 @@ describe('the FAB icon rotates about its centre', () => {
     expect(css).toMatch(/transform-origin:\s*50% 50%/);
   });
 });
+
+/* SpeedDial-Gap: 8 / 12 / 16.
+ *
+ * Three consecutive steps of the sizing scale rather than a ramp invented for
+ * this component, and medium keeps the value the single constant held before
+ * the axis existed — so adding the axis moved nothing that was already there.
+ *
+ * Read from the source, because the gap reaches the DOM as a computed `bottom`
+ * on each action and asserting that would be testing the offset arithmetic
+ * instead of the ramp.
+ */
+describe('the size ramp', () => {
+  const sizeMap = () => {
+    const fs = require('fs');
+    const path = require('path');
+    const src = fs.readFileSync(path.join(__dirname, 'SpeedDial.js'), 'utf8');
+    const out = {};
+    const re = /(small|medium|large):\s*\{\s*fab:\s*(\d+),[^}]*action:\s*(\d+),\s*gap:\s*(\d+)/g;
+    let m;
+    while ((m = re.exec(src)) !== null) {
+      out[m[1]] = { fab: Number(m[2]), action: Number(m[3]), gap: Number(m[4]) };
+    }
+    return out;
+  };
+
+  test('the gap walks the sizing scale', () => {
+    const map = sizeMap();
+    expect([map.small.gap, map.medium.gap, map.large.gap]).toEqual([8, 12, 16]);
+  });
+
+  test('medium is unchanged from before the axis existed', () => {
+    expect(sizeMap().medium.gap).toBe(12);
+  });
+
+  /* The reason `small` starts the dial at 48 rather than 32: a dial the same
+     size as its own actions does not read as the parent of the fan. */
+  test('the dial is always larger than its actions', () => {
+    const map = sizeMap();
+    for (const k of ['small', 'medium', 'large']) {
+      expect(map[k].fab).toBeGreaterThan(map[k].action);
+    }
+  });
+
+  /* WCAG 2.5.8 wants 24px. Keeping the actions at 32 at every size means the
+     smallest dial does not come with the smallest targets. */
+  test('every action stays a 32px target', () => {
+    const map = sizeMap();
+    for (const k of ['small', 'medium', 'large']) {
+      expect(map[k].action).toBe(32);
+      expect(map[k].action).toBeGreaterThanOrEqual(24);
+    }
+  });
+});

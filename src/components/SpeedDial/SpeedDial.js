@@ -19,18 +19,39 @@ import { Fab } from '../Fab/Fab';
  * Accessibility: role="menu", FAB has aria-expanded/aria-haspopup, actions are role="menuitem"
  */
 
-// Main FAB is large (56), actions are small (32) — matches the Fab size scale.
-// On open the main FAB rotates 45° so the AddIcon (+) becomes an × without
-// swapping icon elements (clean visual, no remount).
-const FAB_SIZE = 56;
-const ACTION_SIZE = 32;
-const GAP = 12;
+/* The dial steps down the FAB ramp; the actions do not.
+ *
+ * Dial sizes are the Fab scale's own — 48 and 56 — rather than numbers chosen
+ * here, because the dial IS a Fab and a second copy of its height is how two
+ * values for one thing start to drift. `small` starts the dial at 48 rather
+ * than 32: at 32 it would be the same size as its own actions, and a dial that
+ * does not read as the parent of the fan is just four buttons in a line.
+ *
+ * ACTIONS STAY 32 at every size. They are the small Fab throughout, which
+ * keeps every action target at 32 and clears WCAG 2.5.8's 24px minimum with
+ * room at the smallest size — and the hierarchy comes from the dial growing,
+ * not from the actions shrinking below a tappable size.
+ *
+ * The GAP is `SpeedDial-Gap`, 8 / 12 / 16: three consecutive steps of the
+ * sizing scale (--Sizing-1, -1-and-Half, -2) rather than a ramp invented for
+ * this component. Medium is 12, which is what the single constant held before
+ * the axis existed, so nothing moves for anything already using the default.
+ *
+ * On open the dial rotates 45° so the AddIcon (+) becomes an × without
+ * swapping icon elements (clean visual, no remount).
+ */
+const SIZE_MAP = {
+  small:  { fab: 48, fabSize: 'medium', action: 32, gap: 8  },
+  medium: { fab: 56, fabSize: 'large',  action: 32, gap: 12 },
+  large:  { fab: 56, fabSize: 'large',  action: 32, gap: 16 },
+};
 
 export function SpeedDial({
   actions = [],
   variant = 'solid',
   color = 'default',
   direction = 'up',
+  size = 'medium',
   speed = 50,
   /* OFF by default, and the default is the argument.
    *
@@ -54,6 +75,11 @@ export function SpeedDial({
   sx = {},
   ...props
 }) {
+  const sc = SIZE_MAP[size] || SIZE_MAP.medium;
+  const FAB_SIZE = sc.fab;
+  const ACTION_SIZE = sc.action;
+  const GAP = sc.gap;
+
   const [internalOpen, setInternalOpen] = useState(false);
   const isControlled = controlledOpen !== undefined;
   const isOpen = isControlled ? controlledOpen : internalOpen;
@@ -230,7 +256,7 @@ export function SpeedDial({
     >
       {/* Main FAB — large (56), rotates 45° on open */}
       <Fab
-        size="large"
+        size={sc.fabSize}
         variant={fabVariant}
         color={color}
         onClick={handleToggle}
