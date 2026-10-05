@@ -67,6 +67,11 @@ import { Checkbox } from '../components/Checkbox';
 import { Radio, RadioGroup } from '../components/Radio';
 import { SwitchInput } from '../components/Switch';
 import { Slider } from '../components/Slider';
+import { CurvedText } from '../components/CurvedText';
+import { BevelText } from '../components/BevelText';
+import { Gradient } from '../components/Gradient';
+import { MiniSwatch } from '../components/MiniSwatch';
+import { Grid } from '../components/Grid';
 import { Tag } from '../components/Tag';
 import { Container } from '../components/Container';
 import { Section } from '../components/Section';
@@ -207,6 +212,32 @@ export const EXAMPLES = {
     </Box>
   ),
   Copyright: () => <Copyright companyName="Acme" />,
+  Grid: () => (
+    <Grid container spacing={1}>
+      {[1, 2, 3, 4].map((n) => (
+        <Grid item key={n} xs={6}>
+          <Box surface="Container" radius="small" style={{ padding: 'var(--Sizing-1)' }}>
+            <Body>{'Cell ' + n}</Body>
+          </Box>
+        </Grid>
+      ))}
+    </Grid>
+  ),
+  /* In a row, which is the only place it makes sense: the chip is a marker
+     beside a name, not a thing on its own. */
+  MiniSwatch: () => (
+    <HStack gap="var(--Sizing-1)">
+      <MiniSwatch color="var(--Primary-Color-6)" />
+      <Body>Primary</Body>
+    </HStack>
+  ),
+  Gradient: () => (
+    <Gradient minHeight={120} style={{ width: 280 }}>
+      <Box style={{ padding: 'var(--Sizing-2)' }}><H3>On brand color</H3></Box>
+    </Gradient>
+  ),
+  BevelText: () => <BevelText text="Bevel" textStyle="display-small" />,
+  CurvedText: () => <CurvedText text="CURVED AROUND" arc={180} radius={60} />,
   /* A ladder, not one line. Typography's job is the RELATIONSHIP between
      styles — the step from a heading to its body, the drop to a caption — and
      a single sentence in one style shows none of it. */

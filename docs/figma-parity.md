@@ -9,7 +9,24 @@ that agrees is not listed; silence means parity.
 
 Last read: 2026-10-05
 
+**Summary.** 24 components documented in this pass. The library is ahead of the
+file almost everywhere the two differ: six sets have properties with a single
+value built, three components have a page but no set, and one — ToggleButton —
+has no way to exist in Figma at all. Two things need fixing in the FILE rather
+than the code, and they are at the top of the next section.
+
 ---
+
+## Needs fixing in the file
+
+Two of these are not gaps but mistakes — they will misread for anything that
+parses the variant names, including the converter.
+
+| Set | Problem | Why it matters |
+| --- | --- | --- |
+| `SpeedDial` | **Ten values in `State` for five states**: `default \| hover \| pressed \| focus-visible \| disabled` AND `Default \| Hover \| Active \| Focus-Visible \| Disabled` | Two naming conventions in one property, with `pressed` and `Active` being the same state twice. Nothing can read this reliably. |
+| `Button` vs `Button-Group-Segments` | `Status=unselected` against `Status=not-selected` | One concept, two spellings, in two sets meant to pair. The converter has to special-case it forever unless one moves. |
+| `Radio Group` | Pins `Icons=Warning` | Nothing in a radio group reads an Icons mode. Looks like drift; the plugin's Theme panel will now show it as its own dropdown there. |
 
 ## Figma is missing variants the library has
 
@@ -43,6 +60,35 @@ wrong in these rows — the file has not been built out.
 | Concept | Button set | Button-Group-Segments | Note |
 | --- | --- | --- | --- |
 | The unselected state | `Status=unselected` | `Status=not-selected` | One idea, two spellings, in two sets that are meant to pair. The converter has to special-case it forever unless one moves. |
+
+## No Figma counterpart, correctly
+
+These need no set, and the absence is deliberate rather than an oversight.
+Listed so nobody goes looking.
+
+| Component | Why |
+| --- | --- |
+| Section, Stack, Container, Grid, Box | Frame properties in Figma — a theme mode, auto-layout, a frame size, a layout grid. There is nothing to build. |
+| Typography | Held as text styles and a 201-variable collection, not a set. |
+| Gradient | A fill on a frame. |
+| CurvedText | A path effect on a text layer. |
+| MiniSwatch | A layer inside the Select and Menu sets rather than a component. |
+
+## Not exported, and still has a Figma page
+
+| Component | Figma | Note |
+| --- | --- | --- |
+| TransferList | Has a page | In the library but not exported — one of the three `KNOWN_GAPS` in `publicIndex.test.js`. Exporting it is an API decision, so it is flagged rather than done. |
+| Sheet | Has a page | Same. |
+| Progress | — | Same; superseded by CircularProgress and LinearProgress, which are exported and now documented. |
+
+## Still undocumented
+
+| Component | Why it was left |
+| --- | --- |
+| BarChart, LineChart, PieChart | Data visualisation, with their own accessibility story (`ChartTable`, hit targets, motion tokens). Worth doing carefully rather than quickly. Figma's page is "Data Visualization". |
+| Colors, Spacing | These display the palette and the scale — documentation components rather than things to compose with. They may belong in Foundations instead. |
+| MainLayout | An app shell. |
 
 ## Resolved
 

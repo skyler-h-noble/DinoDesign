@@ -502,8 +502,215 @@ export const TYPOGRAPHY_DOC = {
   ]
 };
 
+export const GRID_DOC = {
+  name: 'Grid',
+  summary: 'Rows and columns, for layouts a stack cannot express.',
+  insteadUse: [{
+    when: 'The children are one row or one column',
+    use: 'Stack'
+  }, {
+    when: 'You are bounding the page width',
+    use: 'Container'
+  }],
+  props: [{
+    name: 'container',
+    type: 'boolean (structural)',
+    default: 'false',
+    note: 'Makes this the grid. Its children take `item` \u2014 the two are a pair, and neither does anything alone, so the lead example shows both rather than each having a sample of its own.'
+  }, {
+    name: 'item',
+    type: 'boolean (structural)',
+    default: 'false',
+    note: 'Makes this a cell of the grid above it. See `container`.'
+  }, {
+    name: 'spacing',
+    type: 'number',
+    default: '0',
+    note: 'The gutter, on the sizing scale.'
+  }],
+  composition: [
+    'Reach for Stack first. Most layouts that look like a grid are a row that wraps, and a stack says that in one element instead of two.',
+  ],
+  accessibility: [
+    'No role: a grid here is visual arrangement, not a data grid. Use Table when the rows and columns MEAN something, because that is what a screen reader needs to navigate.',
+  ],
+  gotchas: [
+    'No Figma counterpart. A grid there is auto-layout, or the layout grid on a frame \u2014 both frame properties rather than components.',
+  ]
+};
+
+export const MINI_SWATCH_DOC = {
+  name: 'MiniSwatch',
+  summary: 'The small color chip that sits inside a row \u2014 a menu item, a select in color mode.',
+  insteadUse: [{
+    when: 'The swatch is the subject rather than a marker in a row',
+    use: 'Swatch'
+  }, {
+    when: 'It is a status dot',
+    use: 'Badge'
+  }],
+  props: [{
+    name: 'color',
+    type: 'string',
+    default: 'undefined',
+    note: 'The color to show. A token or a literal \u2014 this is one of the few places a literal is right, because the swatch IS the color rather than being painted by it.'
+  }],
+  composition: [
+    'It is a marker, not a control. Put it inside the row that is clickable rather than making it clickable itself.',
+  ],
+  accessibility: [
+    'Decorative: the row\u2019s text is what names the choice. A chip with no text beside it is a color nobody can name, which fails for anyone who cannot distinguish it.',
+  ],
+  gotchas: [
+    'No Figma set of its own \u2014 it appears inside the Select and Menu sets as a layer rather than as a component.',
+  ]
+};
+
+export const GRADIENT_DOC = {
+  name: 'Gradient',
+  summary: 'A brand gradient as a surface \u2014 a hero backdrop, a card wash, a decorative field.',
+  insteadUse: [{
+    when: 'The region needs a flat surface',
+    use: 'Section'
+  }, {
+    when: 'It is a card with the system\u2019s chrome',
+    use: 'Card'
+  }],
+  props: [{
+    name: 'variant',
+    type: 'string',
+    default: 'undefined',
+    note: 'Which gradient shape \u2014 linear, radial, or the blob field.'
+  }, {
+    name: 'color',
+    type: 'string',
+    default: 'undefined',
+    note: 'The palette it draws from, so a gradient follows the brand rather than naming its own colors.'
+  }, {
+    name: 'angle',
+    type: 'number',
+    default: 'undefined'
+  }, {
+    name: 'stops',
+    type: 'array',
+    default: 'undefined',
+    note: 'Override the generated stops. Rarely right: the defaults come from the palette ramp, and hand-picked stops stop tracking it.'
+  }, {
+    name: 'minHeight',
+    type: 'string | number',
+    default: 'undefined'
+  }],
+  composition: [
+    'Put content inside it rather than beside it. A gradient with nothing on it is decoration; the component exists so text can sit on brand color and stay legible.',
+  ],
+  accessibility: [
+    'Text on a gradient has no single contrast ratio \u2014 it changes across the field. Check the worst point, not the middle, and prefer a flat Section where the text matters.',
+  ],
+  gotchas: [
+    'No Figma component set. Gradients there are fills on frames, so there is nothing to match variant by variant.',
+  ]
+};
+
+export const BEVEL_TEXT_DOC = {
+  name: 'BevelText',
+  summary: 'Display text with the brand\u2019s bevel \u2014 lit from above, on its own surface.',
+  insteadUse: [{
+    when: 'It is ordinary heading or body text',
+    use: 'Typography'
+  }, {
+    when: 'The text follows a curve',
+    use: 'CurvedText'
+  }],
+  props: [{
+    name: 'text',
+    type: 'string',
+    default: 'undefined'
+  }, {
+    name: 'preset',
+    type: 'string',
+    default: 'undefined',
+    note: 'Which bevel. The presets carry the light direction and depth together, which is what keeps two bevels on a page lit from the same place.'
+  }, {
+    name: 'theme',
+    type: 'string',
+    default: 'undefined'
+  }, {
+    name: 'textStyle',
+    type: 'string',
+    default: 'undefined',
+    note: 'Any Typography style. A bevel is a treatment, not a size.'
+  }],
+  composition: [
+    'A bevel lights the component\u2019s OWN surface, so it follows the theme it sits on. That is the difference from a drop shadow, which falls on the page and reads the page\u2019s theme.',
+  ],
+  accessibility: [
+    'Still text. Keep the contrast of the face itself legible \u2014 the bevel is relief, not color, and a beveled label on a close-toned surface is as unreadable as a flat one.',
+  ],
+  gotchas: [
+    'Presets rather than free parameters, on purpose: two bevels lit from different angles on one page read as a mistake rather than as variety.',
+  ]
+};
+
+export const CURVED_TEXT_DOC = {
+  name: 'CurvedText',
+  summary: 'Text set along an arc \u2014 a badge, a seal, a label around a circle.',
+  insteadUse: [{
+    when: 'It is a straight line of display text',
+    use: 'BevelText'
+  }, {
+    when: 'It is ordinary text',
+    use: 'Typography'
+  }],
+  props: [{
+    name: 'text',
+    type: 'string',
+    default: 'undefined'
+  }, {
+    name: 'arc',
+    type: 'number',
+    default: 'undefined',
+    note: 'How far round, in degrees.'
+  }, {
+    name: 'radius',
+    type: 'number',
+    default: 'undefined'
+  }, {
+    name: 'direction',
+    type: 'string',
+    default: 'undefined',
+    note: 'Clockwise or not. Text on the bottom of a circle reads better reversed, which is what this is for.'
+  }, {
+    name: 'rotation',
+    type: 'number',
+    default: 'undefined'
+  }, {
+    name: 'autoCrop',
+    type: 'boolean (layout)',
+    default: 'undefined',
+    note: 'Trims the box to the drawn arc, so a half-circle of text does not reserve a whole square.'
+  }, {
+    name: 'textStyle',
+    type: 'string',
+    default: 'undefined'
+  }, {
+    name: 'color',
+    type: 'string',
+    default: 'undefined'
+  }],
+  composition: [
+    'Keep it short. Curved text is read letter by letter, so a sentence on an arc is slower to read than the same sentence straight.',
+  ],
+  accessibility: [
+    'It renders as real text, so it is selectable and readable by a screen reader in order \u2014 which is the reason to use this rather than an image of curved text.',
+  ],
+  gotchas: [
+    'No Figma counterpart: curved text there is a path effect on a text layer rather than a component.',
+  ]
+};
+
 export const REST_DOCS = [SELECT_DOC, MENU_DOC, CODE_BLOCK_DOC, PLAYER_DOC,
-  CIRCULAR_PROGRESS_DOC, LINEAR_PROGRESS_DOC, TYPOGRAPHY_DOC, undesigned('Autocomplete', 'A text field whose list narrows as the user types.', [{
+  CIRCULAR_PROGRESS_DOC, LINEAR_PROGRESS_DOC, TYPOGRAPHY_DOC,
+  GRID_DOC, MINI_SWATCH_DOC, GRADIENT_DOC, BEVEL_TEXT_DOC, CURVED_TEXT_DOC, undesigned('Autocomplete', 'A text field whose list narrows as the user types.', [{
   when: 'The list is short and fixed',
   use: 'Select'
 }, {
