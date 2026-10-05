@@ -18,6 +18,7 @@ import { InputShowcase } from '../components/Input/InputShowcase';
 import { CheckboxShowcase } from '../components/Checkbox/CheckboxShowcase';
 import { RadioShowcase } from '../components/Radio/RadioShowcase';
 import { RadioGroupShowcase } from '../components/Radio/RadioGroupShowcase';
+import { PlayerShowcase } from '../components/Player/PlayerShowcase';
 import { SliderShowcase } from '../components/Slider/SliderShowcase';
 import { SwitchShowcase } from '../components/Switch/SwitchShowcase';
 import { BadgeShowcase } from '../components/Badge/BadgeShowcase';
@@ -203,6 +204,7 @@ const NAV_ITEMS = [
       { id: 'radio-group', label: 'Radio Group' },
       { id: 'switch', label: 'Switch' },
       { id: 'slider', label: 'Slider' },
+      { id: 'player', label: 'Player' },
       { id: 'numberfield', label: 'Number Field' },
       { id: 'rating', label: 'Rating' },
       { id: 'swatch', label: 'Swatch' },
@@ -466,6 +468,7 @@ function ShowcaseInner() {
             {activeSection === 'checkbox' && <CheckboxShowcase />}
             {activeSection === 'radio' && <RadioShowcase />}
             {activeSection === 'radio-group' && <RadioGroupShowcase />}
+            {activeSection === 'player' && <PlayerShowcase />}
             {activeSection === 'input' && <InputShowcase />}
             {activeSection === 'slider' && <SliderShowcase />}
             {activeSection === 'switch' && <SwitchShowcase />}

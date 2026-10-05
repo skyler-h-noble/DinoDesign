@@ -12,6 +12,7 @@ import { Chip } from '../components/Chip';
 import { Badge } from '../components/Badge';
 import { Alert } from '../components/Alert';
 import { Avatar } from '../components/Avatar';
+import { Player } from '../components/Player';
 import { Icon } from '../components/Icon';
 import { Swatch } from '../components/Swatch';
 import { Tag } from '../components/Tag';
@@ -34,6 +35,60 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 const SNIPPET = 'npm install @omni-design/components';
 
 export const CORE_SAMPLES = {
+  Player: {
+    /* Every sample is a real track with a real running time. A player showing
+       0:00 of 0:00 is a picture of the parts rather than the thing. */
+    size: () => (
+      <Axis values={SIZES} defaultValue="medium"
+            render={(v) => (
+              <div style={{ width: 420 }}>
+                <Player size={v} title="Weather Report" subtitle="The Mercury Lamps"
+                        avatarInitials="ML" defaultPosition={42} duration={195}
+                        onSeek={() => {}} onPlayPause={() => {}} />
+              </div>
+            )} />
+    ),
+    /* The two states side by side rather than a toggle: a player's resting
+       state is the thing a reader is checking, and flipping one control hides
+       the comparison. */
+    'playing / defaultPlaying': () => (
+      <VStack gap="var(--Sizing-2)">
+        <Cell label="paused" emphasis>
+          <div style={{ width: 420 }}>
+            <Player title="Weather Report" avatarInitials="ML"
+                    defaultPosition={42} duration={195}
+                    onSeek={() => {}} onPlayPause={() => {}} />
+          </div>
+        </Cell>
+        <Cell label="playing">
+          <div style={{ width: 420 }}>
+            <Player playing title="Weather Report" avatarInitials="ML"
+                    defaultPosition={42} duration={195}
+                    onSeek={() => {}} onPlayPause={() => {}} />
+          </div>
+        </Cell>
+      </VStack>
+    ),
+    showTime: () => (
+      <Toggle offLabel="true" onLabel="false" render={(off) => (
+        <div style={{ width: 420 }}>
+          <Player showTime={!off} title="Weather Report" avatarInitials="ML"
+                  defaultPosition={42} duration={195}
+                  onSeek={() => {}} onPlayPause={() => {}} />
+        </div>
+      )} />
+    ),
+    disabled: () => (
+      <Toggle render={(on) => (
+        <div style={{ width: 420 }}>
+          <Player disabled={on} title="Weather Report" avatarInitials="ML"
+                  defaultPosition={42} duration={195}
+                  onSeek={() => {}} onPlayPause={() => {}} />
+        </div>
+      )} />
+    ),
+  },
+
   Button: {
     /* Figma's TYPE axis is one dropdown of four exclusive values. Code splits
        it into booleans, so `selected` is not part of that axis at all — it is

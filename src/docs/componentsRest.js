@@ -231,7 +231,96 @@ export const CODE_BLOCK_DOC = {
   accessibility: ['The copy control is a button with a name, not an icon alone — "Copy code", not "copy".', 'Copying is announced; a purely visual tick tells a screen-reader user nothing.'],
   gotchas: ['Its dark region is NOT a hardcoded color. The wrapper declares `data-theme="Neutral"` + `data-surface="Surface-Dimmest"`, so it follows the brand\'s neutrals and stays legible in both modes. Do not override its background — that is the one change that breaks dark mode for it.', 'Any block of code, shell command or copyable URL uses this. Hand-rolling a `<pre>`/`<code>` panel with its own copy button is what it replaces, and the studio still has ten of those.']
 };
-export const REST_DOCS = [SELECT_DOC, MENU_DOC, CODE_BLOCK_DOC, undesigned('Autocomplete', 'A text field whose list narrows as the user types.', [{
+export const PLAYER_DOC = {
+  name: 'Player',
+  summary: 'An audio player bar: who is playing, the transport, and where you are in it.',
+  insteadUse: [{
+    when: 'The user is choosing a value rather than watching one',
+    use: 'Slider'
+  }, {
+    when: 'It is a single action with no state to show',
+    use: 'Button'
+  }, {
+    when: 'You only need to show progress of something running',
+    use: 'LinearProgress'
+  }],
+  props: [{
+    name: 'title / subtitle',
+    type: 'string',
+    default: 'undefined',
+    note: 'Both optional. With neither, and no avatar, the meta block is not rendered at all \u2014 a bare transport is a real shape.'
+  }, {
+    name: 'avatarSrc / avatarInitials',
+    type: 'string',
+    default: 'undefined',
+    note: 'Artwork, through the lib\u2019s Avatar. Its alt text is derived from `title`.'
+  }, {
+    name: 'position / defaultPosition',
+    type: 'number',
+    default: '0',
+    note: 'Seconds elapsed. Controlled or not, like every other input here.'
+  }, {
+    name: 'duration',
+    type: 'number',
+    default: '0',
+    note: 'Seconds. The scrubber\u2019s max, and the right-hand clock.'
+  }, {
+    name: 'onSeek',
+    type: 'function',
+    default: 'undefined',
+    note: 'Absent means the scrubber is disabled \u2014 a player you can watch and not scrub, which is a preview rather than a broken control.'
+  }, {
+    name: 'playing / defaultPlaying',
+    type: 'boolean',
+    default: 'false'
+  }, {
+    name: 'onPlayPause',
+    type: 'function',
+    default: 'undefined',
+    note: 'Called with the state it is moving TO, so `onPlayPause={setPlaying}` works.'
+  }, {
+    name: 'onPrevious / onNext',
+    type: 'function',
+    default: 'undefined',
+    note: 'Absent means the button is not rendered. A player with no previous track should not show a dead control.'
+  }, {
+    name: 'variant',
+    type: 'string',
+    default: 'default',
+    note: 'The palette, passed to the buttons and the scrubber together so they cannot disagree.'
+  }, {
+    name: 'size',
+    type: 'string',
+    values: ['small', 'medium', 'large'],
+    default: 'medium'
+  }, {
+    name: 'showTime',
+    type: 'boolean',
+    default: 'true',
+    note: 'Elapsed and total either side of the scrubber. Off for a bar too narrow to carry them.'
+  }, {
+    name: 'disabled',
+    type: 'boolean',
+    default: 'false'
+  }],
+  composition: [
+    'Every part is an existing component \u2014 Avatar, Button, Slider, Typography \u2014 arranged. There is no new primitive, and there should not be: a player that drew its own round button would be a second button with its own focus ring to keep in step.',
+    'The meta block, the transport and the scrubber each disappear when they have nothing to show, so one component covers a full bar and a bare transport without a `variant` for each.',
+  ],
+  accessibility: [
+    'The bar is one `role="group"` with a name, so a screen reader announces it as a player rather than as three loose controls.',
+    'The play button is named for what pressing it DOES \u2014 "Play" when paused. A button named for the current state tells you where you are and not what you get.',
+    'The scrubber reports `aria-valuetext` as "0:42 of 3:15". Without it a screen reader reads "42", leaving the listener to work out what that is of.',
+    'Elapsed and total use `tabular-nums`, so the track does not shuffle sideways as the digits change.',
+  ],
+  gotchas: [
+    'Time is NOT a slider label. `valueLabelDisplay` puts a bubble over the thumb, which is right for a value you are choosing and wrong for a clock you are reading \u2014 it moves, it covers the track, and it vanishes when you let go.',
+    '`onPlayPause` receives the NEXT state, not the current one.',
+    'Figma\u2019s Player page is a sketch rather than a component set \u2014 a 400px row holding 554px of placeholder content. This is built to the shape it points at, not matched to it variant by variant.',
+  ]
+};
+
+export const REST_DOCS = [SELECT_DOC, MENU_DOC, CODE_BLOCK_DOC, PLAYER_DOC, undesigned('Autocomplete', 'A text field whose list narrows as the user types.', [{
   when: 'The list is short and fixed',
   use: 'Select'
 }, {

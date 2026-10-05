@@ -128,6 +128,7 @@ export { Select, SelectShowcase } from './Select';
 export { Autocomplete, AutocompleteShowcase } from './Autocomplete';
 export { Checkbox } from './Checkbox';
 export { Radio, RadioGroup, RadioInput } from './Radio';
+export { Player, formatTime } from './Player';
 export { SwitchInput } from './Switch';
 export { SliderInput, RangeSlider } from './Slider';
 export { RatingInput } from './Rating';

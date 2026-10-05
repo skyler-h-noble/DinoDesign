@@ -35,6 +35,7 @@ import { Modal } from '../components/Modal';
 import { Paper } from '../components/Paper';
 import { Popover } from '../components/Popover';
 import { Rail } from '../components/Rail';
+import { Player } from '../components/Player';
 import { Ratio } from '../components/Ratio';
 import { SearchField } from '../components/SearchField';
 import { Select } from '../components/Select';
@@ -241,7 +242,30 @@ function ButtonGroupExample() {
   );
 }
 
+/* Stateful, because a transport that does not move is a picture of a player.
+   The position does not run on its own: an example that animates forever is a
+   thing readers wait for rather than read, and the point here is the shape. */
+function PlayerExample() {
+  const [playing, setPlaying] = useState(false);
+  const [pos, setPos] = useState(42);
+  return (
+    <Player
+      title="Weather Report"
+      subtitle="The Mercury Lamps"
+      avatarInitials="ML"
+      playing={playing}
+      onPlayPause={setPlaying}
+      position={pos}
+      onSeek={setPos}
+      duration={195}
+      onPrevious={() => setPos(0)}
+      onNext={() => setPos(0)}
+    />
+  );
+}
+
 export const LEAD_EXAMPLES = {
+  Player: () => <PlayerExample />,
   ButtonGroup: () => <ButtonGroupExample />,
   /* Alignment is the case the component is for: the text is aligned somehow
      whatever you click, so "none selected" is not a state it can be in. */
