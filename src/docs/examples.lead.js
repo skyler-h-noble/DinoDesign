@@ -115,8 +115,16 @@ export const TREE_ITEMS = [
    A rail, a bar or a sidebar has no natural size — dropped into the centred
    example slot it either collapses or runs to the full page width, and
    neither shows what the component looks like in use. */
-const Frame = ({ w = 320, h, children }) => (
-  <div style={{ width: w, height: h, position: 'relative', overflow: 'hidden' }}>
+/* `pad` is for the components whose content is MEANT to leave their own box.
+   A Stepper's labels are wider than the circles they name and hang out either
+   side, so the first and last ones sit outside the component's bounds — the
+   design file does the same and gives the stepper a wider parent frame. With
+   overflow: hidden and no padding this frame sliced the first circle's border
+   off and truncated the last label. */
+const Frame = ({ w = 320, h, pad = 0, children }) => (
+  <div style={{ width: w, height: h, position: 'relative', overflow: 'hidden',
+                padding: pad ? `0 ${pad}px` : undefined,
+                boxSizing: 'border-box' }}>
     {children}
   </div>
 );
@@ -414,7 +422,7 @@ export const LEAD_EXAMPLES = {
   ),
 
   Stepper: () => (
-    <Frame w={360}>
+    <Frame w={440} pad={48}>
       <Stepper activeStep={1}>
         <Step label="Colors" />
         <Step label="Type" />

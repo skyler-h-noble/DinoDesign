@@ -26,7 +26,8 @@ import { Label } from '../Typography';
  *   Border:     var(--Buttons-{C}-Border) always
  *   Focus:      var(--Focus-Visible)
  *
- * SIZES: small (24×24 indicator via ::after touch target), medium (32×32), large (40×40)
+ * SIZES: Button-Height — 24 / 32 / 56. Large was 40, a number this file chose
+ *        rather than read.
  * ORIENTATION: horizontal | vertical
  * BUTTONS: steps can be clickable StepButtons
  * DASHED: incomplete connector paths rendered dashed
@@ -68,7 +69,7 @@ const SIZE_MAP = {
   medium: { indicator: 32, fontSize: 'var(--Button-Numbers, 12px)',
             dot: 'var(--No-Count-Step, 12px)',
             connectorThickness: 'var(--Step-Bar, 2px)', gap: 0 },
-  large:  { indicator: 40, fontSize: 'var(--Lg-Button-Numbers, 16px)',
+  large:  { indicator: 56, fontSize: 'var(--Lg-Button-Numbers, 16px)',
             dot: 'var(--Lg-No-Count-Step, 16px)',
             connectorThickness: 'var(--Lg-Step-Bar, 4px)', gap: 0 },
 };
@@ -358,6 +359,26 @@ export function Step({
     </Box>
   );
 
+  /* THE BAND. Every step — numbered circle or bare dot — sits in a slot one
+     Button-Height tall, and the connector's rule is centred on that same
+     height. That is what lets a 12px dot and a 32px circle share one rule:
+     the dot is not centred on itself, it is centred in the band.
+     ACROSS the band differs from DOWN it. Horizontally the dot's slot is the
+     DOT's width, because the file butts the line straight against the dot's
+     edge — a 12px dot at x 0 and the line starting at x 12. Vertically the
+     slot is the full Button-Height, so the rule running down the column
+     passes through the dot's centre. */
+  const bandedIndicator = (
+    <Box sx={{
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      flexShrink: 0,
+      width:  isHorizontal ? (isDot ? s.dot : s.indicator + 'px') : s.indicator + 'px',
+      height: isHorizontal ? s.indicator + 'px' : (isDot ? s.dot : s.indicator + 'px'),
+    }}>
+      {indicatorEl}
+    </Box>
+  );
+
   // Connector line
   const connectorTraversed = _index < activeStep;
   const connectorEl = !isLast ? (
@@ -385,6 +406,13 @@ export function Step({
               /* calc, not arithmetic: connectorThickness is a token now, so
                  `indicator / 2 - thickness / 2` would produce NaN. The maths
                  moves into CSS, where the variable can actually resolve. */
+              /* Half the BAND, for count and noCount alike. Briefly this
+                 halved the DOT instead, which put the rule through the middle
+                 of a 12px dot and therefore above the middle of the 32px row
+                 the dot sits in. Measured in the file, the dot's Ellipse sits
+                 at relY 10 of a 32 row (centre 16) and the rule centres on 16
+                 too — the dot is not centred on itself, it is centred in the
+                 band. */
               marginTop: `calc(${s.indicator / 2}px - ${s.connectorThickness} / 2)`,
             }
           : {
@@ -471,7 +499,7 @@ export function Step({
           flexShrink: 0,
           width: isDot ? s.dot : s.indicator + 'px',
         }}>
-          {indicatorEl}
+          {bandedIndicator}
           {/* width 100% so the nowrap label centres on the circle and spills
               evenly both ways; it adds height to the column but never width. */}
           {/* CENTRED BY FLEX, not by text-align. The wrapper is one circle
@@ -506,7 +534,7 @@ export function Step({
     >
       {/* Step and Right Label binds itemSpacing -> Sizing-1. */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 'var(--Sizing-1)' }}>
-        {indicatorEl}
+        {bandedIndicator}
         {labelEl}
       </Box>
       {connectorEl}

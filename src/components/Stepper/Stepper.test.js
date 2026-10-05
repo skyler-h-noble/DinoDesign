@@ -537,6 +537,38 @@ describe('the status ladder', () => {
      ten. This file briefly consolidated to one width — right about the
      current step, which is filled and says so with its fill, and wrong about
      the complete one, which is an outline and has only its ring. */
+  /* THE DOT AND THE RULE SHARE A BAND. Measured in the file: in the noCount
+     stepper the dot's Ellipse sits at relY 10 of a 32px row, so its centre is
+     16, and the Step-Line's 2px rule centres on 16 too. The dot is not
+     centred on itself — it is centred in a Button-Height band, which is what
+     lets a 12px dot and a 32px circle sit on one rule. A version of this
+     halved the dot instead and ran the line along the bottom edge of the
+     dots. */
+  test('the dot sits in a Button-Height band, not its own box', () => {
+    const { container } = threeSteps({ variant: 'noCount' });
+    const band = container.querySelector('.step-indicator').parentElement;
+    expect(cssFor(band)).toContain('height: 32px');
+    expect(cssFor(band)).toContain('align-items: center');
+  });
+
+  test('so the rule is offset by half the band at either style', () => {
+    for (const variant of ['count', 'noCount']) {
+      const { container, unmount } = threeSteps({ variant });
+      const css = cssFor(container.querySelector('.step-connector'));
+      expect(css).toContain('margin-top: calc(16px -');
+      unmount();
+    }
+  });
+
+  /* Button-Height, read off Component-Size: 24 / 32 / 56. Large was 40, a
+     number the lib chose rather than read. */
+  test('large is Button-Height 56, not 40', () => {
+    const { container } = threeSteps({ size: 'large' });
+    const css = cssFor(container.querySelector('.step-indicator'));
+    expect(css).toContain('width: 56px');
+    expect(css).not.toContain('width: 40px');
+  });
+
   test('current and incomplete rings are one border width', () => {
     const { container } = threeSteps();
     for (const sel of ['.step-indicator-active', '.step-indicator-incomplete']) {

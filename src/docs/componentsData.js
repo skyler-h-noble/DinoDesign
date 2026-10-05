@@ -65,7 +65,7 @@ export const STEPPER_DOC = {
     name: 'dashedIncomplete',
     type: 'boolean',
     default: 'false',
-    note: 'Draws the incomplete connectors dashed. LIBRARY ONLY \u2014 Figma\u2019s `Step - Line` set has `State: complete | incomplete` and no dashed form.'
+    note: 'Draws the untravelled connectors dashed. The file HAS this \u2014 it is the `Step-Line` variant named `incomplete-solid`, which is confusingly the DASHED one (`incomplete` is the solid). Dash is 2 on / 2 off across and 4/4 down.'
   }, {
     name: 'variant',
     type: 'string',

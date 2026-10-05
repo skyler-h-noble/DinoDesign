@@ -172,26 +172,26 @@ export const SURFACE_SAMPLES = {
   },
 
   SpeedDial: {
-    variant: () => (
-      <HStack gap="var(--Sizing-6)" style={{ flexWrap: 'wrap' }}>
-        {['solid', 'outline'].map((v) => (
-          <Cell key={v} label={v} emphasis={v === 'solid'}>
-            <div style={{ height: 180, width: 120, position: 'relative' }}>
-              <SpeedDial open variant={v} ariaLabel={'Create ' + v}
-                         actions={SPEED_ACTIONS} />
-            </div>
-          </Cell>
-        ))}
-      </HStack>
-    ),
-    /* All four, open, because the direction IS the fan and a closed dial
-       points nowhere. */
+    /* CLOSED, and you open them by hovering. These were all forced open, and
+       an open dial is taller than the cell it sits in — the fan escaped
+       upward and landed on top of the prop documentation above it. Closed is
+       also the honest resting state, and since openOnHover is on by default
+       the page demonstrates the behaviour instead of describing it. The one
+       axis that still opens is `direction`, below, where the fan IS the
+       thing being shown. */
     direction: () => (
       <HStack gap="var(--Sizing-6)" style={{ flexWrap: 'wrap' }}>
-        {['up', 'down', 'left', 'right'].map((d) => (
+        {[['up', 'flex-end', 'center'], ['down', 'flex-start', 'center'],
+          ['left', 'center', 'flex-end'], ['right', 'center', 'flex-start']].map(
+          ([d, alignV, alignH]) => (
           <Cell key={d} label={d} emphasis={d === 'up'}>
-            <div style={{ height: 200, width: 200, position: 'relative',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {/* ANCHORED AWAY FROM THE FAN. A dial centred in its cell throws
+                half the fan outside it; parked at the far edge the whole fan
+                opens inward. 260 square holds a dial plus three actions and
+                the gaps at every size. */}
+            <div style={{ height: 260, width: 260, position: 'relative',
+                          display: 'flex', alignItems: alignV,
+                          justifyContent: alignH, overflow: 'hidden' }}>
               <SpeedDial open direction={d} ariaLabel={'Create ' + d}
                          actions={SPEED_ACTIONS} />
             </div>
@@ -199,32 +199,30 @@ export const SURFACE_SAMPLES = {
         ))}
       </HStack>
     ),
-    /* Open, so the gap is visible: it is the thing that changes, and a closed
-       dial shows three sizes of the same circle. */
+    /* Closed: the dial IS the size, and with the actions now matching the
+       dial rather than sitting at a flat 32, an open fan shows three stacks
+       of the same circle and buries the one thing that changes. */
     size: () => (
       <HStack gap="var(--Sizing-6)" style={{ flexWrap: 'wrap', alignItems: 'flex-end' }}>
         {['small', 'medium', 'large'].map((v) => (
           <Cell key={v} label={v} emphasis={v === 'medium'}>
-            <div style={{ height: 200, width: 120, position: 'relative' }}>
-              <SpeedDial open size={v} ariaLabel={'Create ' + v} actions={SPEED_ACTIONS} />
-            </div>
+            <SpeedDial size={v} ariaLabel={'Create ' + v} actions={SPEED_ACTIONS} />
           </Cell>
         ))}
       </HStack>
     ),
-
-    /* Both are shown OPEN, because the difference is how they GOT there and a
-       still frame cannot show a pointer. The captions carry it. */
     openOnHover: () => (
       <HStack gap="var(--Sizing-6)" style={{ flexWrap: 'wrap' }}>
-        <Cell label="false — click to open" emphasis>
-          <div style={{ height: 180, width: 140, position: 'relative' }}>
-            <SpeedDial open ariaLabel="Create by click" actions={SPEED_ACTIONS} />
+        <Cell label="true — hover this one" emphasis>
+          <div style={{ height: 240, width: 140, position: 'relative',
+                        display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+            <SpeedDial ariaLabel="Create by hover" actions={SPEED_ACTIONS} />
           </div>
         </Cell>
-        <Cell label="true — opens on hover, on a fine pointer">
-          <div style={{ height: 180, width: 140, position: 'relative' }}>
-            <SpeedDial open openOnHover ariaLabel="Create by hover" actions={SPEED_ACTIONS} />
+        <Cell label="false — this one needs a click">
+          <div style={{ height: 240, width: 140, position: 'relative',
+                        display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+            <SpeedDial openOnHover={false} ariaLabel="Create by click" actions={SPEED_ACTIONS} />
           </div>
         </Cell>
       </HStack>
@@ -233,7 +231,8 @@ export const SURFACE_SAMPLES = {
       <HStack gap="var(--Sizing-6)" style={{ flexWrap: 'wrap' }}>
         {[false, true].map((on) => (
           <Cell key={String(on)} label={String(on)} emphasis={!on}>
-            <div style={{ height: 180, width: 180, position: 'relative' }}>
+            <div style={{ height: 260, width: 220, position: 'relative',
+                          display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
               <SpeedDial open showTooltips={on} ariaLabel={'Create ' + on}
                          actions={SPEED_ACTIONS} />
             </div>

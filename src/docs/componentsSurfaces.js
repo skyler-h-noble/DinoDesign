@@ -114,7 +114,6 @@ export const FAB_DOC = {
   }, {
     name: 'variant',
     type: 'string',
-    values: ['solid'],
     default: 'solid',
     note: 'Solid is the only shape. The design\u2019s FAB set has no shape axis \u2014 its axes are State plus the Extended and Animate booleans \u2014 so outline and ghost FABs were library inventions. Anything else normalises to solid and warns in development.'
   }, {
@@ -633,7 +632,6 @@ export const SPEED_DIAL_DOC = {
   }, {
     name: 'variant',
     type: 'string',
-    values: ['solid'],
     default: 'solid',
     note: 'Solid is the only shape. The design\u2019s FAB set has no shape axis \u2014 its axes are State plus the Extended and Animate booleans \u2014 so outline and ghost FABs were library inventions. Anything else normalises to solid and warns in development.'
   }, {
@@ -660,8 +658,8 @@ export const SPEED_DIAL_DOC = {
   }, {
     name: 'openOnHover',
     type: 'boolean',
-    default: 'false',
-    note: 'Opens the fan when the pointer is over it. OFF by default \u2014 a FAB\u2019s main habitat is touch, where hover does not exist, and it floats over content, so a pointer crossing the screen passes through it. Click works either way.'
+    default: 'true',
+    note: 'Opens the fan when the pointer is over the dial. ON by default, matching the file\u2019s openOnHover boolean. It needs no false default to be safe on touch: every hover path is gated behind `(hover: hover) and (pointer: fine)`, so a touch device never opens on hover whatever this says. Click works either way.'
   }, {
     name: 'showTooltips',
     type: 'boolean',
