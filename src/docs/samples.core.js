@@ -13,6 +13,8 @@ import { Badge } from '../components/Badge';
 import { Alert } from '../components/Alert';
 import { Avatar } from '../components/Avatar';
 import { Player } from '../components/Player';
+import { LinearProgress } from '../components/LinearProgress';
+import { CircularProgress } from '../components/CircularProgress';
 import { Icon } from '../components/Icon';
 import { Swatch } from '../components/Swatch';
 import { Tag } from '../components/Tag';
@@ -35,6 +37,29 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 const SNIPPET = 'npm install @omni-design/components';
 
 export const CORE_SAMPLES = {
+  CircularProgress: {
+    size: () => (
+      <Axis values={SIZES} defaultValue="medium"
+            render={(v) => <CircularProgress size={v} value={68} />} />
+    ),
+    showValue: () => (
+      <Toggle offLabel="false" onLabel="true"
+              render={(on) => <CircularProgress value={68} showValue={on} />} />
+    ),
+  },
+
+  LinearProgress: {
+    size: () => (
+      <VStack gap="var(--Sizing-2)">
+        {['small', 'medium', 'large'].map((v) => (
+          <Cell key={v} label={v} emphasis={v === 'medium'}>
+            <div style={{ width: 280 }}><LinearProgress size={v} value={68} /></div>
+          </Cell>
+        ))}
+      </VStack>
+    ),
+  },
+
   Player: {
     /* Every sample is a real track with a real running time. A player showing
        0:00 of 0:00 is a picture of the parts rather than the thing. */

@@ -65,6 +65,8 @@ import { Checkbox } from '../components/Checkbox';
 import { Radio, RadioGroup } from '../components/Radio';
 import { SwitchInput } from '../components/Switch';
 import { Slider } from '../components/Slider';
+import { LinearProgress } from '../components/LinearProgress';
+import { CircularProgress } from '../components/CircularProgress';
 import { NumberField } from '../components/NumberField';
 import { Rating } from '../components/Rating';
 import { Input as TextInput } from '../components/Input';
@@ -186,6 +188,13 @@ export const EXAMPLES = {
       <SwitchInput label="On" defaultChecked />
     </VStack>,
   Slider: () => <Slider defaultValue={40} />,
+  /* Determinate, because an indeterminate spinner in a still frame is a
+     circle: the example has to show the thing the component is FOR, and what
+     it is for is reporting how far along something is. */
+  CircularProgress: () => <CircularProgress value={68} showValue />,
+  LinearProgress: () => (
+    <div style={{ width: 280 }}><LinearProgress value={68} /></div>
+  ),
   /* A real quantity with a real range. A number field showing 0 with no label
      and no bounds is a picture of the parts — the label says what is being
      counted and min/max are what make the steppers mean anything. */

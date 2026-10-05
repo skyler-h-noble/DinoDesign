@@ -320,7 +320,119 @@ export const PLAYER_DOC = {
   ]
 };
 
-export const REST_DOCS = [SELECT_DOC, MENU_DOC, CODE_BLOCK_DOC, PLAYER_DOC, undesigned('Autocomplete', 'A text field whose list narrows as the user types.', [{
+export const CIRCULAR_PROGRESS_DOC = {
+  name: 'CircularProgress',
+  summary: 'Shows that something is running, and how far along it is when that is known.',
+  insteadUse: [{
+    when: 'The wait is a whole page or a region settling',
+    use: 'Loader'
+  }, {
+    when: 'Progress reads better as a line \u2014 a form, an upload, a step bar',
+    use: 'LinearProgress'
+  }, {
+    when: 'The shape of the thing being loaded is known',
+    use: 'Skeleton'
+  }],
+  props: [{
+    name: 'value',
+    type: 'number',
+    default: 'undefined',
+    note: '0\u2013100. OMIT IT for indeterminate: a spinner that does not know how far along it is should not draw an arc that implies it does.'
+  }, {
+    name: 'color',
+    type: 'string',
+    default: 'primary'
+  }, {
+    name: 'size',
+    type: "'small' | 'medium' | 'large' | number",
+    default: 'medium',
+    note: 'A number is a diameter in px, and the thickness scales with it. The named sizes are 24 / 40 / 56.'
+  }, {
+    name: 'thickness',
+    type: 'number',
+    default: 'undefined',
+    note: 'Overrides the ring weight the size would give. Rarely needed \u2014 the ramp is tuned so a small dial does not read as a hairline.'
+  }, {
+    name: 'showValue',
+    type: 'boolean',
+    default: 'false',
+    note: 'Prints the percentage in the middle. Meaningless without `value`, and ignored at `small`, where there is no room for legible digits.'
+  }],
+  states: [{ state: 'Indeterminate', setBy: 'omitting `value`' },
+           { state: 'Determinate', setBy: '`value`' }],
+  theming: [{
+    collection: 'Theme',
+    inCode: '`color`, or `data-theme` on an ancestor.',
+    inFigma: 'The Progress Dial set pins nothing and inherits.'
+  }],
+  themingNotes: ['The track is the surface\u2019s own quiet tone and the arc is the palette, so a dial reads on any surface without being told which one it is on.'],
+  tokens: [{ name: '--Icons-{Color}', sets: 'the arc', variesWith: 'Icons mode', figma: 'Icons' }],
+  composition: [
+    'Give it a `value` only when you have one. An arc that creeps to 90% and stops is worse than a spinner, because it made a promise.',
+  ],
+  accessibility: [
+    'It carries `role="progressbar"`. With a `value` it reports `aria-valuenow`; without one it reports nothing, which is how a screen reader tells determinate from indeterminate.',
+    'A spinner alone says something is happening and not WHAT. Put a line of text beside it, or label it, when the wait is longer than a moment.',
+  ],
+  gotchas: [
+    'Figma\u2019s Progress Dial has ONE variant \u2014 Size=Large, Color=Default. The properties exist with a single value each, so there is nothing in the file to check small or medium against, and the lib\u2019s large (56px) does not match the set\u2019s 80x80 frame. See the parity table in the Change Log.',
+    '`showValue` without `value` prints nothing. It is not a spinner label.',
+  ]
+};
+
+export const LINEAR_PROGRESS_DOC = {
+  name: 'LinearProgress',
+  summary: 'A bar that fills as something runs \u2014 an upload, a form, a step.',
+  insteadUse: [{
+    when: 'It is a spinner in a button or beside a line of text',
+    use: 'CircularProgress'
+  }, {
+    when: 'The whole page or region is waiting',
+    use: 'Loader'
+  }, {
+    when: 'The steps are named and the user moves between them',
+    use: 'Stepper'
+  }],
+  props: [{
+    name: 'value',
+    type: 'number',
+    default: 'undefined',
+    note: '0\u2013100. Omit for indeterminate, which animates rather than filling.'
+  }, {
+    name: 'color',
+    type: 'string',
+    default: 'primary'
+  }, {
+    name: 'size',
+    type: 'string',
+    values: ['small', 'medium', 'large'],
+    default: 'medium',
+    note: 'The bar HEIGHT: 4 / 6 / 8px. Width comes from the container, because a progress bar spans the thing it is about.'
+  }],
+  states: [{ state: 'Indeterminate', setBy: 'omitting `value`' },
+           { state: 'Determinate', setBy: '`value`' }],
+  theming: [{
+    collection: 'Theme',
+    inCode: '`color`, or `data-theme` on an ancestor.',
+    inFigma: 'The Progress Bar set pins nothing and inherits.'
+  }],
+  themingNotes: ['The track is the surface\u2019s quiet tone; the fill is the palette.'],
+  tokens: [{ name: '--Icons-{Color}', sets: 'the fill', variesWith: 'Icons mode', figma: 'Icons' }],
+  composition: [
+    'It fills its container, so put it in something with a width rather than giving it one.',
+  ],
+  accessibility: [
+    '`role="progressbar"`, with `aria-valuenow` when determinate and none when not.',
+    'A bar with no label says something is progressing and not what. Name it, or put the text that explains it directly above.',
+  ],
+  gotchas: [
+    'Figma\u2019s Progress Bar has ONE variant \u2014 Type=Progress, Size=Large. The size ramp has no other value built, so small and medium cannot be checked against the file. Its 8px height does match the lib\u2019s large.',
+    'The Type property exists with only "Progress" in it. Whatever else it was meant to hold has not been built.',
+  ]
+};
+
+export const REST_DOCS = [SELECT_DOC, MENU_DOC, CODE_BLOCK_DOC, PLAYER_DOC,
+  CIRCULAR_PROGRESS_DOC, LINEAR_PROGRESS_DOC, undesigned('Autocomplete', 'A text field whose list narrows as the user types.', [{
   when: 'The list is short and fixed',
   use: 'Select'
 }, {
