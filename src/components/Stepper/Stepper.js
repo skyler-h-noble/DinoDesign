@@ -1,7 +1,7 @@
 // src/components/Stepper/Stepper.js
 import React, { createContext, useContext } from 'react';
 import { Box } from '@mui/material';
-import { BodySmall, Caption } from '../Typography';
+import { Label } from '../Typography';
 
 /**
  * Stepper Component
@@ -52,8 +52,8 @@ const SIZE_MAP = {
      dot is Component-Size `No Count Step` (8 / 12 / 16), the diameter of a
      noCount step. */
   /* labelFontSize is NOT here. It sat in this table as 13 / 14 / 16 literal
-     pixels and nothing ever read it — the label renders through BodySmall and
-     Caption, which take their size from the type tokens already. A dead entry
+     pixels and nothing ever read it — the label renders through Label, which
+     takes its size from the Dynamic-Label ramp already. A dead entry
      that looks like configuration is worse than none: the next person tunes it
      and nothing happens.
 
@@ -209,12 +209,28 @@ export function Step({
    * color, not the fill's: per invariant 3 the label is derived from the
    * fill, so a palette whose button is light would put light text on it. */
   const borderToken = isIncomplete ? 'var(--Quiet)' : 'var(--Buttons-' + C + '-Border)';
-  const bgToken     = isActive ? 'var(--Buttons-' + C + '-Button)' : 'transparent';
+  /* --Background, not transparent. The design fills every unselected circle
+     with Background rather than letting the surface through, which is the
+     same picture on a plain surface and a different one the moment a step
+     sits on a Container: transparent shows the container tone through the
+     ring, Background punches the surface back out. */
+  const bgToken     = isActive ? 'var(--Buttons-' + C + '-Button)' : 'var(--Background)';
+  /* The COMPLETE circle has no fill, which makes it an outline button, so its
+     digit is the outline button's text token. The CURRENT one is filled, so
+     per invariant 3 its digit is the token paired with that fill.
+     The file binds Outline-Text to BOTH. On this brand's default palette that
+     happens to read (dark on pink), but Outline-Text is tuned for text on the
+     SURFACE — on a palette whose Button is dark it would be dark on dark. See
+     docs/figma-parity.md; this is a file fix, not a lib one. */
   const textToken   = isActive     ? 'var(--Buttons-' + C + '-Text)'
                     : isIncomplete ? 'var(--Quiet)'
-                    : 'var(--Text)';
-  const hoverToken  = isActive ? 'var(--Buttons-' + C + '-Hover)' : 'var(--Hover)';
-  const activeToken = isActive ? 'var(--Buttons-' + C + '-Pressed)' : 'var(--Pressed)';
+                    : 'var(--Buttons-' + C + '-Outline-Text)';
+  /* Hover and Pressed are BUTTONS tokens at every status, not just the
+     current one. The lib read the surface's --Hover/--Pressed for complete
+     and incomplete, so hovering those two steps picked up the page's grey
+     instead of the palette's. */
+  const hoverToken  = 'var(--Buttons-' + C + '-Hover)';
+  const activeToken = 'var(--Buttons-' + C + '-Pressed)';
   const isDot       = variant === 'noCount';
 
   const indicatorEl = (
@@ -349,43 +365,58 @@ export function Step({
                  `indicator / 2 - thickness / 2` would produce NaN. The maths
                  moves into CSS, where the variable can actually resolve. */
               marginTop: `calc(${s.indicator / 2}px - ${s.connectorThickness} / 2)`,
-              marginLeft: '8px',
-              marginRight: '8px',
             }
           : {
               width: s.connectorThickness,
               minHeight: '24px',
               marginLeft: `calc(${s.indicator / 2}px - ${s.connectorThickness} / 2)`,
-              marginTop: '4px',
-              marginBottom: '4px',
             }),
-        backgroundColor: connectorTraversed ? 'var(--Buttons-' + C + '-Button)' : 'var(--Border)',
+        /* Step-Line binds its stroke to Border when complete and Quiet when
+           not. Border is a BUTTONS token and Quiet a SURFACE one, so the two
+           sides of the connector come from different collections — which is
+           why a traversed segment follows the palette and an untravelled one
+           follows the page. The lib had --Buttons-{C}-Button for traversed,
+           a full-strength fill where the design draws a border tone. */
+        backgroundColor: connectorTraversed
+          ? 'var(--Buttons-' + C + '-Border)'
+          : 'var(--Quiet)',
         ...(dashedIncomplete && !connectorTraversed && {
           backgroundColor: 'transparent',
+          /* 2 on, 2 off across and 4/4 down, copied from the file's dash
+             arrays. It was 6/6 both ways, which at a 2px rule reads as a row
+             of dashes rather than the dotted line the design draws. */
           backgroundImage: isHorizontal
-            ? 'repeating-linear-gradient(90deg, var(--Border) 0px, var(--Border) 6px, transparent 6px, transparent 12px)'
-            : 'repeating-linear-gradient(180deg, var(--Border) 0px, var(--Border) 6px, transparent 6px, transparent 12px)',
-          backgroundSize: isHorizontal ? '12px 100%' : '100% 12px',
+            ? 'repeating-linear-gradient(90deg, var(--Quiet) 0px, var(--Quiet) 2px, transparent 2px, transparent 4px)'
+            : 'repeating-linear-gradient(180deg, var(--Quiet) 0px, var(--Quiet) 4px, transparent 4px, transparent 8px)',
+          backgroundSize: isHorizontal ? '4px 100%' : '100% 8px',
         }),
         transition: 'background-color 0.15s ease',
       }}
     />
   ) : null;
 
-  const labelEl = displayLabel ? (() => {
-    const LabelComp = size === 'small' ? Caption : BodySmall;
-    return (
-      <LabelComp style={{
-        fontWeight: isActive ? 600 : 400,
-        color: (isActive || isCompleted) ? 'var(--Text)' : 'var(--Quiet)',
-        textAlign: isHorizontal ? 'center' : 'left',
-        whiteSpace: 'nowrap',
-        lineHeight: 1.3,
-      }}>
-        {displayLabel}
-      </LabelComp>
-    );
-  })() : null;
+  /* The LABEL type style, not Caption or BodySmall. Every step label in the
+     file binds Labels/Label-Font-Family and the Dynamic-Label ramp for size,
+     spacing, line-height and weight — so a brand that picks a label face was
+     moving the design's step labels and not the lib's. One component at every
+     size, because the ramp is already per size mode.
+     Its color tracks status the way the circle does: Quiet before you reach
+     it, Text on the one you are on, and the palette's Border tone once it is
+     behind you. That last one is a 3:1 token carrying text — see
+     docs/figma-parity.md. */
+  const labelToken = isActive     ? 'var(--Text)'
+                   : isIncomplete ? 'var(--Quiet)'
+                   : 'var(--Buttons-' + C + '-Border)';
+  const labelEl = displayLabel ? (
+    <Label style={{
+      fontWeight: isActive ? 600 : 400,
+      color: labelToken,
+      textAlign: isHorizontal ? 'center' : 'left',
+      whiteSpace: 'nowrap',
+    }}>
+      {displayLabel}
+    </Label>
+  ) : null;
 
   if (isHorizontal) {
     return (
@@ -404,7 +435,8 @@ export function Step({
         {/* Circle + label column */}
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
           {indicatorEl}
-          {labelEl && <Box sx={{ mt: '4px' }}>{labelEl}</Box>}
+          {/* Bottom Label binds paddingTop -> Sizing-Half. */}
+          {labelEl && <Box sx={{ mt: 'var(--Sizing-Half)' }}>{labelEl}</Box>}
         </Box>
         {/* Connector — centered to circle via negative margin for label height */}
         {connectorEl}
@@ -422,7 +454,8 @@ export function Step({
       sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', ...sx }}
       {...props}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      {/* Step and Right Label binds itemSpacing -> Sizing-1. */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 'var(--Sizing-1)' }}>
         {indicatorEl}
         {labelEl}
       </Box>

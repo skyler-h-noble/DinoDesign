@@ -416,15 +416,44 @@ describe('the status ladder', () => {
     expect(cssFor(now)).toContain('background-color: var(--Buttons-Default-Button)');
   });
 
-  test('only the CURRENT step is filled', () => {
+  /* Background, NOT transparent. The design fills every unselected circle
+     with Background, which looks identical on a plain surface and differs the
+     moment a step sits on a Container: transparent lets the container tone
+     through the ring, Background punches the surface back out. */
+  test('only the CURRENT step is filled; the rest take Background', () => {
     const { container } = threeSteps();
     const done = container.querySelector('.step-indicator-completed');
     const now  = container.querySelector('.step-indicator-active');
     const todo = container.querySelector('.step-indicator-incomplete');
 
     expect(cssFor(now)).toContain('background-color: var(--Buttons-Primary-Button)');
-    expect(cssFor(done)).toContain('background-color: transparent');
-    expect(cssFor(todo)).toContain('background-color: transparent');
+    expect(cssFor(done)).toContain('background-color: var(--Background)');
+    expect(cssFor(todo)).toContain('background-color: var(--Background)');
+    expect(cssFor(done)).not.toContain('background-color: transparent');
+  });
+
+  /* The completed circle has no fill, which makes it an outline button, so
+     its digit is the outline button's text token rather than the surface's
+     --Text. The file binds Outline-Text to the CURRENT one too, where the
+     fill is solid — that one stays on the paired token, see the test below
+     and docs/figma-parity.md. */
+  test('the completed circle numbers in the outline button text token', () => {
+    const { container } = threeSteps();
+    const done = container.querySelector('.step-indicator-completed');
+    expect(cssFor(done)).toContain('color: var(--Buttons-Primary-Outline-Text)');
+  });
+
+  /* Hover and Pressed are Buttons tokens at EVERY status. The lib read the
+     surface's --Hover/--Pressed for complete and incomplete, so hovering
+     those two picked up the page's grey instead of the palette's. */
+  test('hover and pressed come from the palette at every status', () => {
+    const { container } = threeSteps({ clickable: true, onStepClick: jest.fn() });
+    for (const sel of ['.step-indicator-active', '.step-indicator-completed',
+                       '.step-indicator-incomplete']) {
+      const css = cssFor(container.querySelector(sel));
+      expect(css).toContain('var(--Buttons-Primary-Hover)');
+      expect(css).toContain('var(--Buttons-Primary-Pressed)');
+    }
   });
 
   test('incomplete draws its ring and number in Quiet, not the brand', () => {
@@ -440,6 +469,51 @@ describe('the status ladder', () => {
     const { container } = threeSteps();
     const now = container.querySelector('.step-indicator-active');
     expect(cssFor(now)).toContain('var(--Buttons-Primary-Text)');
+  });
+
+  /* THE CONNECTOR MEETS THE CIRCLE. Figma's Step Holder is a horizontal
+     auto-layout with itemSpacing 0 and no padding, and the three children sit
+     at x=0 / x=32 / x=273 against 32px circles — the line starts exactly where
+     the circle ends. The lib put 8px either side of the horizontal connector
+     and 4px above and below the vertical one, so every segment floated clear
+     of the steps it joins. Margins, not gap, which is why `gap: 0` in the size
+     table did not catch it. */
+  test('the connector carries no margin, so it meets the circle', () => {
+    const { container } = threeSteps();
+    const css = cssFor(container.querySelector('.step-connector'));
+    expect(css).not.toContain('margin-left: 8px');
+    expect(css).not.toContain('margin-right: 8px');
+  });
+
+  test('and the same vertically', () => {
+    const { container } = threeSteps({ orientation: 'vertical' });
+    const css = cssFor(container.querySelector('.step-connector'));
+    expect(css).not.toContain('margin-top: 4px');
+    expect(css).not.toContain('margin-bottom: 4px');
+  });
+
+  /* Step-Line strokes Border when complete and Quiet when not — a BUTTONS
+     token on one side and a SURFACE one on the other, so a travelled segment
+     follows the palette and an untravelled one follows the page. The lib drew
+     the travelled one in --Buttons-{C}-Button, a full-strength fill where the
+     design draws a border tone. */
+  test('the connector reads Border behind you and Quiet ahead', () => {
+    const { container } = threeSteps();
+    const segs = container.querySelectorAll('.step-connector');
+    expect(cssFor(segs[0])).toContain('background-color: var(--Buttons-Primary-Border)');
+    expect(cssFor(segs[1])).toContain('background-color: var(--Quiet)');
+    expect(cssFor(segs[0])).not.toContain('var(--Buttons-Primary-Button)');
+  });
+
+  /* The dashed incomplete line is NOT library-only — the file has it, as the
+     Step-Line variant confusingly named `incomplete-solid`. 2 on / 2 off
+     across and 4/4 down, from the file's own dash arrays. */
+  test('dashedIncomplete dots the untravelled segment in Quiet', () => {
+    const { container } = threeSteps({ dashedIncomplete: true });
+    const css = cssFor(container.querySelector('.step-connector-dashed'));
+    expect(css).toContain('var(--Quiet)');
+    expect(css).toContain('2px');
+    expect(css).not.toContain('var(--Border)');
   });
 
   test('every ring is one border width', () => {
