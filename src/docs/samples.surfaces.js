@@ -27,7 +27,7 @@ import { Popover } from '../components/Popover';
 import { Button } from '../components/Button';
 import { List } from '../components/List';
 import { VStack, HStack } from '../components/Stack';
-import { Caption, Body, H3 } from '../components/Typography';
+import { Caption, Body, H3, Label } from '../components/Typography';
 import { SIZES, Axis, AxisStack, Toggle, Cell } from './samples';
 import { TABLE_COLUMNS, TABLE_ROWS, LIST_ITEMS } from './examples.lead';
 
@@ -90,6 +90,8 @@ function PopoverDemo() {
 }
 
 import { Box } from '../components/Box';
+import { Container } from '../components/Container';
+import { Tag } from '../components/Tag';
 import { SpeedDial } from '../components/SpeedDial';
 import AddIcon from '@mui/icons-material/Add';
 import PersonIcon from '@mui/icons-material/Person';
@@ -105,6 +107,55 @@ const SPEED_ACTIONS = [
 ];
 
 export const SURFACE_SAMPLES = {
+  Container: {
+    /* Shown against a painted edge, because the gutter is only visible where
+       the content would otherwise touch something. */
+    disableGutters: () => (
+      <VStack gap="var(--Sizing-2)">
+        {[false, true].map((off) => (
+          <Cell key={String(off)} label={off ? 'true' : 'false'} emphasis={!off}>
+            <Box surface="Container" style={{ width: 320 }}>
+              <Container maxWidth={false} disableGutters={off}>
+                <Body>Text against the edge, or not.</Body>
+              </Container>
+            </Box>
+          </Cell>
+        ))}
+      </VStack>
+    ),
+  },
+
+  Stack: {
+    direction: () => (
+      <HStack gap="var(--Sizing-4)" style={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <Cell label="column" emphasis>
+          <VStack gap="var(--Sizing-1)"><Tag>one</Tag><Tag>two</Tag><Tag>three</Tag></VStack>
+        </Cell>
+        <Cell label="row">
+          <HStack gap="var(--Sizing-1)"><Tag>one</Tag><Tag>two</Tag><Tag>three</Tag></HStack>
+        </Cell>
+      </HStack>
+    ),
+    /* The pair this exists for: a label and its description, which the rule
+       pushes apart on the left and leaves tight on the right. */
+    enforceMinGap: () => (
+      <HStack gap="var(--Sizing-4)" style={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <Cell label="true" emphasis>
+          <VStack gap="var(--Sizing-Half)">
+            <Label>Display name</Label>
+            <Caption color="quiet">Shown beside your comments.</Caption>
+          </VStack>
+        </Cell>
+        <Cell label="false">
+          <VStack gap="var(--Sizing-Half)" enforceMinGap={false}>
+            <Label>Display name</Label>
+            <Caption color="quiet">Shown beside your comments.</Caption>
+          </VStack>
+        </Cell>
+      </HStack>
+    ),
+  },
+
   Box: {
     /* Painted, not outlined. A radius ramp on a transparent box shows nothing
        — the corner is only visible where a surface ends. */

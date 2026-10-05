@@ -67,6 +67,9 @@ import { Checkbox } from '../components/Checkbox';
 import { Radio, RadioGroup } from '../components/Radio';
 import { SwitchInput } from '../components/Switch';
 import { Slider } from '../components/Slider';
+import { Tag } from '../components/Tag';
+import { Container } from '../components/Container';
+import { Section } from '../components/Section';
 import { SpeedDial } from '../components/SpeedDial';
 import { Copyright } from '../components/Copyright';
 import { Footer } from '../components/Footer';
@@ -204,6 +207,35 @@ export const EXAMPLES = {
     </Box>
   ),
   Copyright: () => <Copyright companyName="Acme" />,
+  /* Two surfaces touching, which is the only way to show what a Section does:
+     one alone looks like a div with a background. */
+  Section: () => (
+    <div style={{ width: 300 }}>
+      <Section surface="Surface" padding="var(--Sizing-2)">
+        <Body>Surface</Body>
+        <Caption color="quiet">Text and border arrive with it.</Caption>
+      </Section>
+      <Section surface="Container" padding="var(--Sizing-2)">
+        <Body>Container</Body>
+        <Caption color="quiet">Same markup, one level down.</Caption>
+      </Section>
+    </div>
+  ),
+  Stack: () => (
+    <VStack gap="var(--Sizing-2)">
+      <HStack gap="var(--Sizing-1)">
+        <Tag>row</Tag><Tag>with</Tag><Tag>a gap</Tag>
+      </HStack>
+      <VStack gap="var(--Sizing-1)">
+        <Tag>column</Tag><Tag>with the same gap</Tag>
+      </VStack>
+    </VStack>
+  ),
+  Container: () => (
+    <Container maxWidth="sm">
+      <Body>Capped and centred, with gutters that keep text off the edge.</Body>
+    </Container>
+  ),
   Footer: () => (
     <Footer
       brand="Acme"

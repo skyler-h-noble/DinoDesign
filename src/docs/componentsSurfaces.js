@@ -673,5 +673,131 @@ export const SPEED_DIAL_DOC = {
   ]
 };
 
+export const SECTION_DOC = {
+  name: 'Section',
+  summary: 'A region of a page that paints its own surface \u2014 the thing to reach for instead of writing a background.',
+  insteadUse: [{
+    when: 'You need the attributes but something inside paints itself',
+    use: 'ThemedZone'
+  }, {
+    when: 'It is a surface rather than a region of the page',
+    use: 'Box'
+  }, {
+    when: 'It is a card with the system\u2019s chrome',
+    use: 'Card'
+  }],
+  props: [{
+    name: 'theme',
+    type: 'string',
+    default: 'undefined',
+    note: 'Absent means inherit, which is usually what a section inside an already-themed page wants.'
+  }, {
+    name: 'surface',
+    type: 'string',
+    default: 'Surface',
+    note: 'The level within the theme. Surface, Container, and the Dim / Bright steps either side.'
+  }, {
+    name: 'as',
+    type: 'string',
+    default: 'section',
+    note: 'The element. A `<section>` by default because that is usually what a page region is \u2014 pass `div` when it is not a landmark.'
+  }, {
+    name: 'padding',
+    type: 'string',
+    default: 'undefined',
+    note: 'A CSS padding value. Not on the sizing scale by accident: a page region\u2019s inset is a layout decision, not a token.'
+  }],
+  composition: [
+    'This is what the rule "never write `background: var(--Surface)`" points at. Setting theme and surface exposes the whole matched set \u2014 background, text, quiet, border, hover, link \u2014 all tuned for that level, so nothing inside has to be told what it is sitting on.',
+    'Reach for ThemedZone instead when the thing inside paints its own background, such as an AppBar. Section paints; ThemedZone only declares.',
+  ],
+  accessibility: [
+    'Renders a `<section>`, which is a landmark ONLY when it has an accessible name. An unnamed section is just a div to a screen reader, which is fine \u2014 but if it is meant to be navigable, give it an `aria-label`.',
+    'Changing the surface changes contrast for everything inside, and the paired tokens are what keep it legible. Painting a background by hand is what breaks that.',
+  ],
+  gotchas: [
+    'No Figma counterpart, and there should not be one: a section in Figma is a frame with a theme and surface mode set on it. This component is that, expressed in CSS.',
+  ]
+};
+
+export const STACK_DOC = {
+  name: 'Stack',
+  summary: 'Lays children in a row or a column with a real gap, and keeps small text from crowding.',
+  insteadUse: [{
+    when: 'The children form a grid',
+    use: 'Grid'
+  }, {
+    when: 'You are painting a surface rather than arranging things',
+    use: 'Box'
+  }],
+  props: [{
+    name: 'direction',
+    type: 'string',
+    values: ['row', 'column'],
+    default: 'column',
+    note: '`HStack` and `VStack` are the two you will usually import \u2014 they are this with the direction already chosen.'
+  }, {
+    name: 'gap',
+    type: 'string | number',
+    default: 'undefined',
+    note: 'A `--Sizing-*` token, not a number of pixels. The scale is what keeps two stacks beside each other in rhythm.'
+  }, {
+    name: 'enforceMinGap',
+    type: 'boolean',
+    default: 'true',
+    note: 'Raises the gap when a child is small text, so a label and its description do not touch.'
+  }, {
+    name: 'useFlexGap',
+    type: 'boolean (advanced)',
+    default: 'true',
+    note: 'Uses flexbox gap rather than margins between children. Off only for a browser that needs it; there is nothing to see either way.'
+  }],
+  composition: [
+    'Use `HStack` and `VStack`. The bare `OmniStack` exists so the two can share an implementation, not because the direction is usually worth stating twice.',
+    'Gaps come from the sizing scale. A literal pixel gap is the thing that stops tracking when the brand changes it.',
+  ],
+  accessibility: [
+    'A div with flexbox on it \u2014 no role, no semantics. That is correct: arrangement is not meaning, and a stack that announced itself would be noise.',
+  ],
+  gotchas: [
+    '`enforceMinGap` raises the gap when it thinks a child is "small", and the list of small things includes typography components \u2014 Caption, Label, BodySmall, Legal. A label-and-description pair gets pushed apart whether or not you wanted it. Pass `enforceMinGap={false}` where the tight pairing is the point.',
+    'No Figma counterpart: a stack is auto-layout, and auto-layout is a frame property rather than a component.',
+  ]
+};
+
+export const CONTAINER_DOC = {
+  name: 'Container',
+  summary: 'Caps the page\u2019s reading width and centres it.',
+  insteadUse: [{
+    when: 'The region needs a surface',
+    use: 'Section'
+  }, {
+    when: 'You are arranging children rather than bounding them',
+    use: 'Stack'
+  }],
+  props: [{
+    name: 'maxWidth',
+    type: 'string | false',
+    default: 'lg',
+    note: 'A breakpoint name, or `false` for no cap.'
+  }, {
+    name: 'disableGutters',
+    type: 'boolean',
+    default: 'false',
+    note: 'Removes the side padding. Rarely right \u2014 the gutter is what stops text touching a phone\u2019s edge.'
+  }],
+  composition: [
+    'A container bounds; it does not paint. Wrap it in a Section when the region needs a surface, rather than giving the container one.',
+  ],
+  accessibility: [
+    'No role of its own. Width is not meaning.',
+    'Keep the gutters on at phone width. Text against the screen edge is hard to read and, on a rounded display, partly clipped.',
+  ],
+  gotchas: [
+    'No Figma counterpart. Max width is expressed there as the frame\u2019s own size.',
+  ]
+};
+
 export const SURFACE_DOCS = [ICON_DOC, BRANDICON_DOC, FAB_DOC, SNACKBAR_DOC, ACCORDION_DOC,
-  BOX_DOC, FOOTER_DOC, COPYRIGHT_DOC, SPEED_DIAL_DOC];
+  BOX_DOC, FOOTER_DOC, COPYRIGHT_DOC, SPEED_DIAL_DOC,
+  SECTION_DOC, STACK_DOC, CONTAINER_DOC];
