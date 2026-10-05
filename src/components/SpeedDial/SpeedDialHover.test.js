@@ -37,8 +37,21 @@ beforeEach(() => { jest.useFakeTimers(); setPointer({ fine: true }); });
 afterEach(() => { jest.useRealTimers(); });
 
 describe('openOnHover', () => {
-  test('is off by default — hover does nothing', () => {
+  /* ON by default, matching the file's openOnHover boolean. This asserted
+     false on the argument that a FAB lives on touch, where hover does not
+     exist — but pointerCanHover() already gates every hover path behind
+     `(hover: hover) and (pointer: fine)`, so a touch device never opens on
+     hover whatever the default says. The test below pins that, and it is the
+     one doing the protecting. */
+  test('is on by default — a fine pointer opens it', () => {
     const { container } = render(<SpeedDial ariaLabel="Create" actions={ACTIONS} />);
+    fireEvent.mouseEnter(container.firstChild);
+    expect(isOpen()).toBe(true);
+  });
+
+  test('and off when asked, whatever the pointer', () => {
+    const { container } = render(
+      <SpeedDial openOnHover={false} ariaLabel="Create" actions={ACTIONS} />);
     fireEvent.mouseEnter(container.firstChild);
     expect(isOpen()).toBe(false);
   });
@@ -164,7 +177,7 @@ describe('the size ramp', () => {
     const path = require('path');
     const src = fs.readFileSync(path.join(__dirname, 'SpeedDial.js'), 'utf8');
     const out = {};
-    const re = /(small|medium|large):\s*\{\s*fab:\s*(\d+),[^}]*action:\s*(\d+),\s*gap:\s*(\d+)/g;
+    const re = /(small|medium|large):\s*\{\s*fab:\s*(\d+),[^}]*?action:\s*(\d+),[^}]*?gap:\s*(\d+)/g;
     let m;
     while ((m = re.exec(src)) !== null) {
       out[m[1]] = { fab: Number(m[2]), action: Number(m[3]), gap: Number(m[4]) };
@@ -181,21 +194,31 @@ describe('the size ramp', () => {
     expect(sizeMap().medium.gap).toBe(12);
   });
 
-  /* The reason `small` starts the dial at 48 rather than 32: a dial the same
-     size as its own actions does not read as the parent of the fan. */
-  test('the dial is always larger than its actions', () => {
+  /* FAB-Width's own ramp, read off the Component-Size collection: 32 / 48 /
+     56. This table used to be 48 / 56 / 56, so `small` rendered a medium Fab
+     and `medium` a large one — every dial one step bigger than asked for. */
+  test('the dial is FAB-Width at every size', () => {
+    const map = sizeMap();
+    expect([map.small.fab, map.medium.fab, map.large.fab]).toEqual([32, 48, 56]);
+  });
+
+  /* THE ACTIONS ARE THE SAME SIZE AS THE DIAL. This previously asserted the
+     opposite — that the dial is always larger, on the reasoning that a dial
+     the size of its own fan reads as four buttons in a line. The file says
+     otherwise: the SpeedDial set binds the dial's FAB and every child FAB in
+     the slot to the same FAB/FAB-Width. */
+  test('the actions are the same size as the dial', () => {
     const map = sizeMap();
     for (const k of ['small', 'medium', 'large']) {
-      expect(map[k].fab).toBeGreaterThan(map[k].action);
+      expect(map[k].action).toBe(map[k].fab);
     }
   });
 
-  /* WCAG 2.5.8 wants 24px. Keeping the actions at 32 at every size means the
-     smallest dial does not come with the smallest targets. */
-  test('every action stays a 32px target', () => {
+  /* WCAG 2.5.8 wants 24px, and the bottom of the ramp clears it — which is
+     what made the old flat-32 floor unnecessary rather than protective. */
+  test('even the smallest action clears the 24px minimum', () => {
     const map = sizeMap();
     for (const k of ['small', 'medium', 'large']) {
-      expect(map[k].action).toBe(32);
       expect(map[k].action).toBeGreaterThanOrEqual(24);
     }
   });

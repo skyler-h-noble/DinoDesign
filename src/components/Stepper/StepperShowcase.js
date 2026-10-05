@@ -81,6 +81,9 @@ export function StepperShowcase() {
   const [color, setColor]               = useState('default');
   const [size, setSize]                 = useState('medium');
   const [orientation, setOrientation]   = useState('horizontal');
+  /* The dot stepper had no control at all, so the playground could not
+     produce it and the page read as though the library had only one style. */
+  const [variant, setVariant]           = useState('count');
   const [stepCount, setStepCount]       = useState(4);
   const [activeStep, setActiveStep]     = useState(1);
   const [clickable, setClickable]       = useState(false);
@@ -93,6 +96,7 @@ export function StepperShowcase() {
     if (color !== 'default') parts.push('color="' + color + '"');
     if (size !== 'medium') parts.push('size="' + size + '"');
     if (orientation !== 'horizontal') parts.push('orientation="vertical"');
+    if (variant !== 'count') parts.push('variant="noCount"');
     parts.push('activeStep={' + activeStep + '}');
     if (clickable) parts.push('clickable onStepClick={setActiveStep}');
     if (dashed) parts.push('dashedIncomplete');
@@ -133,6 +137,7 @@ export function StepperShowcase() {
                 color={color}
                 size={size}
                 orientation={orientation}
+                variant={variant}
                 activeStep={activeStep}
                 clickable={clickable}
                 onStepClick={clickable ? setActiveStep : undefined}
@@ -200,6 +205,18 @@ export function StepperShowcase() {
                     <Stack direction="row" spacing={1}>
                       {['small', 'medium', 'large'].map((s) => (
                         <ControlButton key={s} label={cap(s)} selected={size === s} onClick={() => setSize(s)} />
+                      ))}
+                    </Stack>
+                  </Box>
+
+                  {/* Style — Figma's axis name for it. `count` numbers the
+                      circles; `noCount` draws a plain dot, which the file
+                      builds as a separate set (No-Count Step, 8/12/16). */}
+                  <Box sx={{ mt: 3 }}>
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</EyebrowSmall>
+                    <Stack direction="row" spacing={1}>
+                      {['count', 'noCount'].map((v) => (
+                        <ControlButton key={v} label={v} selected={variant === v} onClick={() => setVariant(v)} />
                       ))}
                     </Stack>
                   </Box>

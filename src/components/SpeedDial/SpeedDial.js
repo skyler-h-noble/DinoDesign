@@ -7,9 +7,11 @@ import { Fab } from '../Fab/Fab';
 /**
  * SpeedDial Component
  *
- * VARIANTS:
- *   solid     FAB + actions: bg var(--Buttons-{C}-Button), border var(--Buttons-{C}-Border)
- *   outline   FAB + actions: bg transparent, border var(--Buttons-{C}-Border)
+ * ONE VARIANT: solid. The design's FAB set has no shape axis at all — its
+ * only axes are State plus the Extended and Animate booleans — so an outline
+ * FAB is something the library offered and the system does not have. `outline`
+ * now normalises to solid with a development warning, the same way Fab already
+ * handles the variant it lost.
  *
  * COLORS: default | primary | secondary | tertiary | neutral | info | success | warning | error
  *
@@ -19,18 +21,23 @@ import { Fab } from '../Fab/Fab';
  * Accessibility: role="menu", FAB has aria-expanded/aria-haspopup, actions are role="menuitem"
  */
 
-/* The dial steps down the FAB ramp; the actions do not.
+/* ONE SIZE THROUGHOUT: the dial and its actions are both FAB-Width.
  *
- * Dial sizes are the Fab scale's own — 48 and 56 — rather than numbers chosen
- * here, because the dial IS a Fab and a second copy of its height is how two
- * values for one thing start to drift. `small` starts the dial at 48 rather
- * than 32: at 32 it would be the same size as its own actions, and a dial that
- * does not read as the parent of the fan is just four buttons in a line.
+ * This table used to start the dial at 48 for `small` and hold the actions at
+ * a flat 32, on the reasoning that a dial the same size as its own fan reads
+ * as four buttons in a line rather than as their parent. The file disagrees,
+ * and the file is the system: the SpeedDial set binds the dial's FAB and every
+ * child FAB in the slot to the SAME FAB/FAB-Width, with SpeedDial-Gap between
+ * them. Read on the page in its large mode, that is 56 for the dial, 56 for
+ * each action and 16 of gap.
  *
- * ACTIONS STAY 32 at every size. They are the small Fab throughout, which
- * keeps every action target at 32 and clears WCAG 2.5.8's 24px minimum with
- * room at the smallest size — and the hierarchy comes from the dial growing,
- * not from the actions shrinking below a tappable size.
+ * So the ramp is simply FAB-Width's own — 32 / 48 / 56 — and `size` passes
+ * straight through to Fab rather than being remapped a step up. The old table
+ * rendered a medium Fab for `small` and a large one for `medium`, so every
+ * dial was one step bigger than it was asked for.
+ *
+ * WCAG 2.5.8 still clears at the bottom of the ramp: 32 is comfortably past
+ * the 24px minimum, which is what made the flat-32 floor unnecessary.
  *
  * The GAP is `SpeedDial-Gap`, 8 / 12 / 16: three consecutive steps of the
  * sizing scale (--Sizing-1, -1-and-Half, -2) rather than a ramp invented for
@@ -41,9 +48,9 @@ import { Fab } from '../Fab/Fab';
  * swapping icon elements (clean visual, no remount).
  */
 const SIZE_MAP = {
-  small:  { fab: 48, fabSize: 'medium', action: 32, gap: 8  },
-  medium: { fab: 56, fabSize: 'large',  action: 32, gap: 12 },
-  large:  { fab: 56, fabSize: 'large',  action: 32, gap: 16 },
+  small:  { fab: 32, fabSize: 'small',  action: 32, actionSize: 'small',  gap: 8  },
+  medium: { fab: 48, fabSize: 'medium', action: 48, actionSize: 'medium', gap: 12 },
+  large:  { fab: 56, fabSize: 'large',  action: 56, actionSize: 'large',  gap: 16 },
 };
 
 export function SpeedDial({
@@ -53,18 +60,17 @@ export function SpeedDial({
   direction = 'up',
   size = 'medium',
   speed = 50,
-  /* OFF by default, and the default is the argument.
+  /* ON by default, matching the file's openOnHover boolean.
    *
-   * A FAB's main habitat is touch, where hover does not exist — so opening on
-   * hover would make the primary interaction the one unavailable in the place
-   * the component is most used. It also floats over content, so a pointer
-   * crossing the screen toward something else passes through it, and the cost
-   * of an accidental open is a fan of actions covering what you were reaching
-   * for.
-   *
-   * Opt in where the dial lives on a desktop toolbar and the speed is worth
-   * it. Click keeps working either way. */
-  openOnHover = false,
+   * This defaulted to false on the argument that a FAB's main habitat is
+   * touch, where hover does not exist, so opening on hover would make the
+   * primary interaction the one unavailable where the component is most used.
+   * That objection is already answered in this file: pointerCanHover() gates
+   * every hover path behind `(hover: hover) and (pointer: fine)`, so a touch
+   * device never opens on hover whatever this says. With the risk handled in
+   * code there was nothing left for the default to protect against, and the
+   * design asks for true. Click keeps working either way. */
+  openOnHover = true,
   showTooltips = true,
   open: controlledOpen,
   onOpen,
@@ -75,6 +81,16 @@ export function SpeedDial({
   sx = {},
   ...props
 }) {
+  /* Normalised rather than typed away, so an existing variant="outline" keeps
+     rendering instead of breaking at a call site that cannot be edited. */
+  if (process.env.NODE_ENV !== 'production' && variant !== 'solid') {
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[SpeedDial] variant="' + variant + '" is not a SpeedDial variant; '
+      + 'rendering solid. The design\'s FAB set has no shape axis \u2014 only '
+      + 'State, Extended and Animate \u2014 so an outline FAB is not in the system.'
+    );
+  }
   const sc = SIZE_MAP[size] || SIZE_MAP.medium;
   const FAB_SIZE = sc.fab;
   const ACTION_SIZE = sc.action;
@@ -85,8 +101,9 @@ export function SpeedDial({
   const isOpen = isControlled ? controlledOpen : internalOpen;
   const containerRef = useRef(null);
 
-  // Fab handles its own tokens/states; we just thread the variant + color.
-  const fabVariant = variant;
+  // Fab handles its own tokens and states; we thread the color only.
+  const fabVariant = 'solid';
+  const ACTION_FAB_SIZE = sc.actionSize;
 
   const handleToggle = useCallback(() => {
     if (isOpen) {
@@ -276,7 +293,10 @@ export function SpeedDial({
           const actionEl = (
             <Fab
               key={action.key || index}
-              size="small"
+              /* The dial's own size, not a hardcoded small — the file binds
+                 every child FAB in the slot to the same FAB-Width as the
+                 dial. */
+              size={ACTION_FAB_SIZE}
               variant={fabVariant}
               color={color}
               role="menuitem"

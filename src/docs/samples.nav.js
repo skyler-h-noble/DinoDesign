@@ -25,8 +25,17 @@ import { Caption, Body } from '../components/Typography';
 import { SIZES, PALETTES, Axis, AxisStack, Toggle, Cell } from './samples';
 import { NAV_ITEMS, LIST_ITEMS, TOOLBAR_ITEMS, TREE_ITEMS } from './examples.lead';
 
-const Frame = ({ w = 320, h, children }) => (
-  <div style={{ width: w, height: h, position: 'relative', overflow: 'hidden' }}>
+/* `pad` exists for the Stepper and anything else whose content is MEANT to
+   overflow its own box. A step's label is wider than the circle it names and
+   hangs out either side — Figma does the same, with a 305px stepper inside a
+   353px frame, 24px of air each side. Without that room this frame's
+   overflow: hidden sliced the first circle's border off and truncated the
+   last label. The padding shrinks the content box rather than letting the
+   overflow out, which is the same answer the design file gives. */
+const Frame = ({ w = 320, h, pad = 0, children }) => (
+  <div style={{ width: w, height: h, position: 'relative', overflow: 'hidden',
+                padding: pad ? `0 ${pad}px` : undefined,
+                boxSizing: 'border-box' }}>
     {children}
   </div>
 );
@@ -215,14 +224,14 @@ export const NAV_SAMPLES = {
     variant: () => (
       <VStack gap="var(--Sizing-3)">
         <Cell label="count" emphasis width={300}>
-          <Frame w={300}>
+          <Frame w={300} pad={24}>
             <Stepper activeStep={1}>
               <Step label="Colors" /><Step label="Type" /><Step label="Export" />
             </Stepper>
           </Frame>
         </Cell>
         <Cell label="noCount" width={300}>
-          <Frame w={300}>
+          <Frame w={300} pad={24}>
             <Stepper variant="noCount" activeStep={1}>
               <Step label="Colors" /><Step label="Type" /><Step label="Export" />
             </Stepper>
@@ -233,7 +242,7 @@ export const NAV_SAMPLES = {
     orientation: () => (
       <HStack gap="var(--Sizing-4)" style={{ flexWrap: 'wrap', alignItems: 'flex-start' }}>
         <Cell label="horizontal" emphasis width={300}>
-          <Frame w={300}>
+          <Frame w={300} pad={24}>
             <Stepper activeStep={1}>
               <Step label="Colors" /><Step label="Type" /><Step label="Export" />
             </Stepper>
@@ -251,7 +260,7 @@ export const NAV_SAMPLES = {
         {SIZES.map(v => (
           <VStack key={v} gap="var(--Sizing-Half)">
             <Caption color={v === 'medium' ? 'standard' : 'quiet'}>{v}</Caption>
-            <Frame w={320}>
+            <Frame w={320} pad={24}>
               <Stepper size={v} activeStep={1}>
                 <Step label="Colors" /><Step label="Type" /><Step label="Export" />
               </Stepper>
@@ -268,7 +277,7 @@ export const NAV_SAMPLES = {
     color: () => (
       <VStack gap="var(--Sizing-3)">
         <Cell label="default" emphasis width={320}>
-          <Frame w={320}>
+          <Frame w={320} pad={24}>
             <Stepper activeStep={1}>
               <Step label="Colors" /><Step label="Type" /><Step label="Export" />
             </Stepper>
@@ -276,7 +285,7 @@ export const NAV_SAMPLES = {
         </Cell>
         {PALETTES.map(c => (
           <Cell key={c} label={c} width={320}>
-            <Frame w={320}>
+            <Frame w={320} pad={24}>
               <Stepper color={c} activeStep={1}>
                 <Step label="Colors" /><Step label="Type" /><Step label="Export" />
               </Stepper>
@@ -291,7 +300,7 @@ export const NAV_SAMPLES = {
       <VStack gap="var(--Sizing-3)">
         <VStack gap="var(--Sizing-Half)">
           <Caption color="standard">false — display only</Caption>
-          <Frame w={320}>
+          <Frame w={320} pad={24}>
             <Stepper activeStep={2}>
               <Step label="Colors" /><Step label="Type" /><Step label="Export" />
             </Stepper>
@@ -299,7 +308,7 @@ export const NAV_SAMPLES = {
         </VStack>
         <VStack gap="var(--Sizing-Half)">
           <Caption color="quiet">true — completed steps go back</Caption>
-          <Frame w={320}>
+          <Frame w={320} pad={24}>
             <Stepper activeStep={2} clickable>
               <Step label="Colors" /><Step label="Type" /><Step label="Export" />
             </Stepper>
@@ -314,7 +323,7 @@ export const NAV_SAMPLES = {
       <VStack gap="var(--Sizing-3)">
         <VStack gap="var(--Sizing-Half)">
           <Caption color="standard">false — one solid connector</Caption>
-          <Frame w={320}>
+          <Frame w={320} pad={24}>
             <Stepper activeStep={1}>
               <Step label="Colors" /><Step label="Type" /><Step label="Export" />
             </Stepper>
@@ -322,7 +331,7 @@ export const NAV_SAMPLES = {
         </VStack>
         <VStack gap="var(--Sizing-Half)">
           <Caption color="quiet">true — remaining steps dashed</Caption>
-          <Frame w={320}>
+          <Frame w={320} pad={24}>
             <Stepper activeStep={1} dashedIncomplete>
               <Step label="Colors" /><Step label="Type" /><Step label="Export" />
             </Stepper>

@@ -114,8 +114,9 @@ export const FAB_DOC = {
   }, {
     name: 'variant',
     type: 'string',
-    values: ['solid', 'outline', 'ghost'],
-    default: 'solid'
+    values: ['solid'],
+    default: 'solid',
+    note: 'Solid is the only shape. The design\u2019s FAB set has no shape axis \u2014 its axes are State plus the Extended and Animate booleans \u2014 so outline and ghost FABs were library inventions. Anything else normalises to solid and warns in development.'
   }, {
     name: 'color',
     type: 'string',
@@ -632,8 +633,9 @@ export const SPEED_DIAL_DOC = {
   }, {
     name: 'variant',
     type: 'string',
-    values: ['solid', 'outline'],
-    default: 'solid'
+    values: ['solid'],
+    default: 'solid',
+    note: 'Solid is the only shape. The design\u2019s FAB set has no shape axis \u2014 its axes are State plus the Extended and Animate booleans \u2014 so outline and ghost FABs were library inventions. Anything else normalises to solid and warns in development.'
   }, {
     name: 'color',
     type: 'string',

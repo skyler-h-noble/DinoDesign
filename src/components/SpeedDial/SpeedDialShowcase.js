@@ -88,7 +88,6 @@ function ColorSwatchButton({ color, selected, onClick }) {
 
 /* ── Main Showcase ── */
 export function SpeedDialShowcase() {
-  const [variant, setVariant]         = useState('solid');
   const [color, setColor]             = useState('default');
   const [direction, setDirection]     = useState('up');
   const [showTooltips, setShowTooltips] = useState(true);
@@ -97,7 +96,6 @@ export function SpeedDialShowcase() {
 
   const generateCode = () => {
     const parts = [];
-    if (variant !== 'solid') parts.push('variant="' + variant + '"');
     if (color !== 'default') parts.push('color="' + color + '"');
     if (direction !== 'up') parts.push('direction="' + direction + '"');
     if (!showTooltips) parts.push('showTooltips={false}');
@@ -132,7 +130,6 @@ export function SpeedDialShowcase() {
 
           <PreviewSurface theme={bgTheme} surface={bgSurface} sx={{ minHeight: 300, alignItems: 'flex-end', justifyContent: 'center' }}>
             <SpeedDial
-              variant={variant}
               color={color}
               direction={direction}
               showTooltips={showTooltips}
@@ -152,15 +149,9 @@ export function SpeedDialShowcase() {
                 <Box sx={{ p: 3 }}>
 
 
-                  {/* Style */}
-                  <Box>
-                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</EyebrowSmall>
-                    <Stack direction="row" spacing={1}>
-                      {['solid', 'outline'].map((v) => (
-                        <ControlButton key={v} label={cap(v)} selected={variant === v} onClick={() => setVariant(v)} />
-                      ))}
-                    </Stack>
-                  </Box>
+                  {/* No STYLE control. The design's FAB set has no shape
+                      axis, so solid is the only shape and a two-button
+                      toggle with one real answer is worse than no toggle. */}
 
                   {/* Color */}
                   <Box sx={{ mt: 3 }}>

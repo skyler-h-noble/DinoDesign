@@ -434,6 +434,9 @@ export function Step({
       color: labelToken,
       textAlign: isHorizontal ? 'center' : 'left',
       whiteSpace: 'nowrap',
+      /* A flex item, and one that must not be squeezed: the column it sits in
+         is one circle wide and the label is routinely wider. */
+      flexShrink: 0,
     }}>
       {displayLabel}
     </Label>
@@ -471,8 +474,18 @@ export function Step({
           {indicatorEl}
           {/* width 100% so the nowrap label centres on the circle and spills
               evenly both ways; it adds height to the column but never width. */}
+          {/* CENTRED BY FLEX, not by text-align. The wrapper is one circle
+              wide and the label is wider, so `text-align: center` only
+              centres it if the label is a block that fills the wrapper —
+              Label is not, so it sat against the left edge and the whole
+              caption read as shifted right of its circle. A flex container
+              with justify-content: center centres the item on the box and
+              lets it overflow both ways, whatever the child's display. */}
           {labelEl && (
-            <Box sx={{ mt: 'var(--Sizing-Half)', width: '100%' }}>{labelEl}</Box>
+            <Box sx={{
+              mt: 'var(--Sizing-Half)', width: '100%',
+              display: 'flex', justifyContent: 'center',
+            }}>{labelEl}</Box>
           )}
         </Box>
         {/* Connector — centered to circle via negative margin for label height */}
