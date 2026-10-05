@@ -478,6 +478,22 @@ describe('the status ladder', () => {
      and 4px above and below the vertical one, so every segment floated clear
      of the steps it joins. Margins, not gap, which is why `gap: 0` in the size
      table did not catch it. */
+  /* Count Step is FIXED at Button-Height with clipsContent false, and its
+     Bottom Label sits at x = -6: 44px of text centred on a 32px column. The
+     lib let the column size to the LABEL, so a long one pushed the connector
+     away — the margins were only half the gap. */
+  test('the step column is one circle wide, whatever the label says', () => {
+    const { container } = render(
+      <Stepper activeStep={1}>
+        <Step label="A" />
+        <Step label="An extremely long step label that dwarfs the circle" />
+        <Step label="C" />
+      </Stepper>
+    );
+    const cols = container.querySelectorAll('.step-horizontal > div:first-of-type');
+    for (const col of cols) expect(cssFor(col)).toContain('width: 32px');
+  });
+
   test('the connector carries no margin, so it meets the circle', () => {
     const { container } = threeSteps();
     const css = cssFor(container.querySelector('.step-connector'));
@@ -516,11 +532,33 @@ describe('the status ladder', () => {
     expect(css).not.toContain('var(--Border)');
   });
 
-  test('every ring is one border width', () => {
+  /* The COMPLETE ring is 2px; current and incomplete are 1. Button-Fill's
+     strokeWeight is a plain 2 on all five complete states and 1 on the other
+     ten. This file briefly consolidated to one width — right about the
+     current step, which is filled and says so with its fill, and wrong about
+     the complete one, which is an outline and has only its ring. */
+  test('current and incomplete rings are one border width', () => {
     const { container } = threeSteps();
-    for (const sel of ['.step-indicator-active', '.step-indicator-completed']) {
+    for (const sel of ['.step-indicator-active', '.step-indicator-incomplete']) {
       expect(cssFor(container.querySelector(sel))).toContain('var(--Button-Border-Width, 1px)');
     }
+  });
+
+  test('the completed ring is 2px', () => {
+    const { container } = threeSteps();
+    const css = cssFor(container.querySelector('.step-indicator-completed'));
+    expect(css).toContain('border: 2px solid var(--Buttons-Primary-Border)');
+  });
+
+  /* typography-tokens.css declares --Font-Family-Button as
+     var(--Platform-Font-Families-Body) with NO fallback, and nothing defines
+     that outside a brand's own device blocks — so in the bundled CSS it is
+     the guaranteed-invalid value. A lone `var(--Font-Family-Button, inherit)`
+     dropped to the page font and the digit came out in the host's face. */
+  test('the digit names the body face before giving up to inherit', () => {
+    const { container } = threeSteps();
+    const css = cssFor(container.querySelector('.step-indicator-active'));
+    expect(css).toContain('var(--Font-Family-Button, var(--Font-Family-Body, inherit))');
   });
 });
 

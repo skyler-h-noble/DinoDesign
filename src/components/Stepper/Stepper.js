@@ -268,7 +268,16 @@ export function Step({
            carrying a distinction the fill now makes far more clearly; the
            design system has a single --Button-Border-Width (1px) and this is
            the same ring. */
-        border: 'var(--Button-Border-Width, 1px) solid ' + borderToken,
+        /* The COMPLETE ring is 2px and the other two are 1. A literal in the
+           file as well as here — Button-Fill's strokeWeight is a plain 2 on
+           all five complete states, bound to nothing — so it cannot follow a
+           brand that moves its border width. Flagged in docs/figma-parity.md.
+           This file previously consolidated to one width on the grounds that
+           the fill already carries the distinction; that was right about the
+           CURRENT step, which is filled, and wrong about the complete one,
+           which is an outline and has only its ring to say so. */
+        border: (isCompleted ? '2px' : 'var(--Button-Border-Width, 1px)')
+                + ' solid ' + borderToken,
         backgroundColor: bgToken,
         color: textToken,
         fontSize: s.fontSize,
@@ -279,7 +288,19 @@ export function Step({
            number came out in the body font on a docs page and in whatever the
            host set everywhere else: a different-looking digit in a circle the
            right size, which reads as the whole component being wrong. */
-        fontFamily: 'var(--Font-Family-Button, inherit)',
+        /* --Font-Family-Body is a REAL second step, not belt-and-braces.
+           typography-tokens.css declares
+             --Font-Family-Button: var(--Platform-Font-Families-Body);
+           with no fallback, while --Font-Family-Body gets
+             var(--Platform-Font-Families-Body, var(--Set-Font-Family-Body)).
+           Nothing defines --Platform-Font-Families-Body outside a brand's own
+           device blocks, so in the library's bundled CSS the Button one is
+           the guaranteed-invalid value and the Body one is Poppins. A single
+           `var(--Font-Family-Button, inherit)` therefore dropped straight to
+           the page's font and the digit came out in whatever the host set.
+           Naming the body face second is also correct rather than merely
+           safe: the generator defines the button face AS the body face. */
+        fontFamily: 'var(--Font-Family-Button, var(--Font-Family-Body, inherit))',
         /* The design binds Typography/Buttons/Small to the step's digit, so
            the weight comes from there rather than a literal 700 — a brand that
            picks a lighter button face moved the design's numbers and not the
@@ -426,17 +447,33 @@ export function Step({
           (isActive ? ' step-active' : '') + (isCompleted ? ' step-completed' : '') +
           (isIncomplete ? ' step-incomplete' : '') + ' ' + className}
         sx={{
-          display: 'flex', alignItems: 'center',
+          display: 'flex', alignItems: 'flex-start',
           flex: !isLast ? 1 : 'none',
           ...sx,
         }}
         {...props}
       >
-        {/* Circle + label column */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+        {/* THE STEP IS ONE CIRCLE WIDE AND THE LABEL HANGS OUT OF IT.
+            Count Step is layoutSizingHorizontal FIXED at Button-Height with
+            clipsContent false, and its Bottom Label sits at x = -6 — 44px of
+            text centred on a 32px column, overflowing 6px each side. In the
+            assembled row the steps are 32 wide at x 48 / 185 / 321 and the
+            lines FILL everything between them.
+            Without the explicit width this column sized to the LABEL, so a
+            long one pushed the connector away from the circle. That is the
+            rest of the gap: removing the 8px margins was necessary and not
+            sufficient, because the column itself was too wide. */}
+        <Box sx={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          flexShrink: 0,
+          width: isDot ? s.dot : s.indicator + 'px',
+        }}>
           {indicatorEl}
-          {/* Bottom Label binds paddingTop -> Sizing-Half. */}
-          {labelEl && <Box sx={{ mt: 'var(--Sizing-Half)' }}>{labelEl}</Box>}
+          {/* width 100% so the nowrap label centres on the circle and spills
+              evenly both ways; it adds height to the column but never width. */}
+          {labelEl && (
+            <Box sx={{ mt: 'var(--Sizing-Half)', width: '100%' }}>{labelEl}</Box>
+          )}
         </Box>
         {/* Connector — centered to circle via negative margin for label height */}
         {connectorEl}
