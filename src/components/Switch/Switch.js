@@ -68,14 +68,25 @@ export function themedStyles() {
     //
     // The track's border is the SAME token as its fill. Figma binds both to
     // Icon; there is no separate edge color in the On state.
-    trackOn:        'var(--Icons-Default)',
-    trackOnBorder:  'var(--Icons-Default)',
+    /* PRIMARY, not Default, and the difference is a mode rather than a token.
+     *
+     * The Figma set pins `Icons=Primary`, so a switch dropped in the file
+     * resolves `Icons::Icon` through the Primary palette — that pin IS the
+     * component's default appearance. `--Icons-Default` is a different thing:
+     * the Default MODE of the same collection, which resolves to
+     * Neutral-Color-4. Reading it here made the library's default switch grey
+     * while every switch in the design file was the brand's color.
+     *
+     * CSS has no modes, so the mode a component pins has to be spelt as the
+     * token that mode resolves to. Pinned Primary means --Icons-Primary. */
+    trackOn:        'var(--Icons-Primary)',
+    trackOnBorder:  'var(--Icons-Primary)',
     dotOff:         'var(--Quiet)',
-    dotOn:          'var(--Icons-On-Default)',
+    dotOn:          'var(--Icons-On-Primary)',
     iconOff:        'var(--Background)',
     // An icon inside the dot sits ON On-Icon, so it returns to Icon — the same
     // alternation the collection is built around.
-    iconOn:         'var(--Icons-Default)',
+    iconOn:         'var(--Icons-Primary)',
   };
 }
 

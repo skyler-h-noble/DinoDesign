@@ -216,7 +216,7 @@ export const SWITCH_DOC = {
     name: 'variant',
     type: 'string',
     default: 'default',
-    note: 'Picks which Icons color the on state paints with: `primary` resolves the track to `--Icons-Primary`. Also takes `{color}-outline`.'
+    note: 'Picks which Icons color the on state paints with: `secondary` resolves the track to `--Icons-Secondary`. `default` is the Figma set\u2019s pinned mode, which is Primary \u2014 so a switch is the brand\u2019s color until you say otherwise. Also takes `{color}-outline`.'
   }, {
     name: 'size',
     type: 'string',

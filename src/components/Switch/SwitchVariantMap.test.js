@@ -41,9 +41,17 @@ describe('the Switch variant map', () => {
 
   /* The point of the whole file: nine variants, nine results. Seven landing on
      the default's token is what this looked like. */
-  test('no two variants paint the same track', () => {
+  /* `default` is PRIMARY, because the Figma set pins Icons=Primary — that pin
+     is the component's default appearance, and CSS has no modes to inherit it
+     through. So default and primary are the same color on purpose, and the
+     eight named colors still have to differ from each other. */
+  test('default paints the pinned Primary color', () => {
+    expect(variantMap()['default'].trackOn).toBe('var(--Icons-Primary)');
+  });
+
+  test('no two named colors paint the same track', () => {
     const map = variantMap();
-    const tracks = ['default', ...COLORS].map((c) => map[c].trackOn);
+    const tracks = COLORS.map((c) => map[c].trackOn);
     expect(new Set(tracks).size).toBe(tracks.length);
   });
 });

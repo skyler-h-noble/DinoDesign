@@ -157,12 +157,16 @@ export const FORM_SAMPLES = {
        the control reads as the end of the sentence it labels. */
     labelPlacement: () => (
       <HStack gap="var(--Sizing-3)" style={{ flexWrap: 'wrap' }}>
-        <Cell label="end" emphasis><SwitchInput defaultChecked label="Dark mode" /></Cell>
-        <Cell label="start"><SwitchInput defaultChecked labelPlacement="start" label="Dark mode" /></Cell>
+        {/* NOT "Dark mode". This page has a light and a dark mode of its own,
+            so a switch labelled for it reads as a control that works — and
+            then does nothing when you press it. A sample about where the label
+            sits should not also look like a setting. */}
+        <Cell label="end" emphasis><SwitchInput defaultChecked label="Auto-save" /></Cell>
+        <Cell label="start"><SwitchInput defaultChecked labelPlacement="start" label="Auto-save" /></Cell>
       </HStack>
     ),
     disabled: () => (
-      <Toggle render={(on) => <SwitchInput defaultChecked disabled={on} label="Dark mode" />}
+      <Toggle render={(on) => <SwitchInput defaultChecked disabled={on} label="Auto-save" />}
               offLabel="enabled" onLabel="disabled" />
     ),
   },

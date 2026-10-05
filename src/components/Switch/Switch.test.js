@@ -255,14 +255,22 @@ describe('Switch — Accessibility (jest-axe)', () => {
  *   Status=On  Dot          fill            -> Icons::On-Icon
  *   Status=Off Switch-Body  stroke          -> Quiet
  *   Status=Off Dot          fill            -> Quiet
- * No variant pins an explicit Icons mode, so the mode is inherited — in CSS
- * that is the flattened name the `variant` prop selects.
+ * The SET PINS `Icons=Primary`, read from the file on 2026-10-05. This note
+ * previously said no variant pins an Icons mode and the mode is therefore
+ * inherited — which made the library's default switch read `--Icons-Default`,
+ * the Default MODE of that collection, resolving to Neutral-Color-4. So every
+ * switch in the design file wore the brand's color and every switch out of the
+ * library was grey, and the two were compared for months without either
+ * looking broken on its own.
+ *
+ * CSS has no modes, so a mode the component pins has to be spelt as the token
+ * that mode resolves to: pinned Primary means `--Icons-Primary`.
  */
 describe('Switch — on-state tokens follow the Icons collection', () => {
-  it('the default variant reads Icon / On-Icon', () => {
+  it('the default variant reads the PINNED Primary mode', () => {
     const s = themedStyles();
-    expect(s.trackOn).toBe('var(--Icons-Default)');
-    expect(s.dotOn).toBe('var(--Icons-On-Default)');
+    expect(s.trackOn).toBe('var(--Icons-Primary)');
+    expect(s.dotOn).toBe('var(--Icons-On-Primary)');
   });
 
   it('the on track edge is the SAME token as its fill', () => {
@@ -276,7 +284,7 @@ describe('Switch — on-state tokens follow the Icons collection', () => {
   });
 
   it('an icon in the knob returns to Icon, because the knob is On-Icon', () => {
-    expect(themedStyles().iconOn).toBe('var(--Icons-Default)');
+    expect(themedStyles().iconOn).toBe('var(--Icons-Primary)');
     expect(outlineStyles('primary').iconOn).toBe('var(--Icons-Primary)');
   });
 
