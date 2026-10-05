@@ -1,6 +1,6 @@
 // src/pages/ComponentShowcase.js
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -541,18 +541,53 @@ function ShowcaseInner() {
 }
 
 /**
- * AppBar wrapper that reads the loaded design system's name from the
- * OmniDesignProvider context (populated from theme.json's `name` field) and
- * passes it as `brand`. Falls back to the default "Company" rendering when
- * no name is available (no themeURL or older manifests without `name`).
+ * The design system's name, for a gallery that is not loading one from
+ * Storage.
+ *
+ * `themeURL` is undefined without a ?user= param — the local case hands the
+ * Provider individual CSS paths instead of a manifest, deliberately, because
+ * index.html already links foundation / core / typography / base / styles and
+ * only the mode sheets have to go through the Provider's swapping slot. The
+ * cost is that nothing ever reads public/styles/theme.json, so the context's
+ * `name` is null however good that file is.
+ *
+ * So this reads the one field it needs, directly. Not by giving the local case
+ * a themeURL: that would make the Provider fetch every slot in the manifest on
+ * top of the links already in the document, duplicating the sheets and
+ * reordering the cascade — and the order is load-bearing here, which is why
+ * #omni-mode sitting later in <head> has already caused trouble twice.
+ */
+function useLocalSystemName(skip) {
+  const [name, setName] = useState(null);
+  useEffect(() => {
+    if (skip) return undefined;
+    let live = true;
+    fetch(`${process.env.PUBLIC_URL || ''}/styles/theme.json`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((m) => { if (live && m && m.name) setName(m.name); })
+      /* A gallery with no name in its manifest is the pre-existing behaviour,
+         not a failure worth shouting about. */
+      .catch(() => {});
+    return () => { live = false; };
+  }, [skip]);
+  return name;
+}
+
+/**
+ * AppBar wrapper that shows the loaded design system's name as `brand`.
+ *
+ * Hosted (?user=): the Provider has it from the fetched manifest.
+ * Local: nothing fetches a manifest, so read it here.
+ * Neither: AppBar falls back to its own "Company" default.
  */
 function BrandedAppBar({ onMenuClick, searchQuery, onSearchChange }) {
   const { name } = useOmniDesign();
+  const localName = useLocalSystemName(!!name);
   return (
     <AppBar
       mode="desktop"
       barColor="default"
-      brand={name || undefined}
+      brand={name || localName || undefined}
       onMenuClick={onMenuClick}
       searchValue={searchQuery}
       onSearchChange={onSearchChange}

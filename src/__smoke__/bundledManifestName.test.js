@@ -34,3 +34,36 @@ describe('the bundled theme.json', () => {
       expect(manifest[slot]).toBeTruthy();
     });
 });
+
+/* AND SOMETHING HAS TO READ IT.
+ *
+ * Adding `name` to the manifest fixed nothing on its own: `themeURL` is
+ * undefined without a ?user= param, so the Provider is handed individual CSS
+ * paths and never fetches public/styles/theme.json at all. The context's
+ * `name` stayed null and the header still said "Company".
+ *
+ * The local case reads the one field it needs directly rather than being given
+ * a themeURL — that would make the Provider fetch every slot in the manifest
+ * on top of the links already in index.html, duplicating the sheets and
+ * reordering a cascade whose order is load-bearing.
+ */
+describe('the gallery reads that name when no manifest is loaded', () => {
+  const src = fs.readFileSync(
+    path.join(__dirname, '..', 'pages', 'ComponentShowcase.js'), 'utf8');
+
+  test('there is a local-manifest fallback', () => {
+    expect(src).toContain('useLocalSystemName');
+    expect(src).toContain('/styles/theme.json');
+  });
+
+  test('and the AppBar prefers the context name, then the local one', () => {
+    expect(src).toContain('brand={name || localName || undefined}');
+  });
+
+  /* Pointing themeURL at the local manifest would ALSO make the name appear,
+     and would quietly double-load every stylesheet. */
+  test('the local case still passes no themeURL', () => {
+    expect(src).toContain('userParam ? themeManifestUrl(userParam) : undefined');
+  });
+});
+
