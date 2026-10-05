@@ -17,6 +17,7 @@ import { ToggleButtonGroupShowcase } from '../components/ToggleButtonGroup/Toggl
 import { InputShowcase } from '../components/Input/InputShowcase';
 import { CheckboxShowcase } from '../components/Checkbox/CheckboxShowcase';
 import { RadioShowcase } from '../components/Radio/RadioShowcase';
+import { RadioGroupShowcase } from '../components/Radio/RadioGroupShowcase';
 import { SliderShowcase } from '../components/Slider/SliderShowcase';
 import { SwitchShowcase } from '../components/Switch/SwitchShowcase';
 import { BadgeShowcase } from '../components/Badge/BadgeShowcase';
@@ -195,7 +196,11 @@ const NAV_ITEMS = [
       { id: 'select', label: 'Select' },
       { id: 'autocomplete', label: 'Autocomplete' },
       { id: 'checkbox', label: 'Checkbox' },
-      { id: 'radio', label: 'Radio Group' },
+      /* Two entries, because there are two components. This one said "Radio
+         Group" and opened Radio — so the group, which is the thing Checkbox,
+         Select and SwitchInput all send readers to, had no way in at all. */
+      { id: 'radio', label: 'Radio' },
+      { id: 'radio-group', label: 'Radio Group' },
       { id: 'switch', label: 'Switch' },
       { id: 'slider', label: 'Slider' },
       { id: 'numberfield', label: 'Number Field' },
@@ -460,6 +465,7 @@ function ShowcaseInner() {
             {activeSection === 'autocomplete' && <AutocompleteShowcase />}
             {activeSection === 'checkbox' && <CheckboxShowcase />}
             {activeSection === 'radio' && <RadioShowcase />}
+            {activeSection === 'radio-group' && <RadioGroupShowcase />}
             {activeSection === 'input' && <InputShowcase />}
             {activeSection === 'slider' && <SliderShowcase />}
             {activeSection === 'switch' && <SwitchShowcase />}
