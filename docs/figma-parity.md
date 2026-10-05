@@ -26,9 +26,17 @@ wrong in these rows — the file has not been built out.
 | Button | — | `Type: text \| iconOnly \| letterNumber \| Avatar` | same | Agrees. |
 | ToggleButtonGroup | `Button-Group-Segments` | `Type: text \| letterNumber \| iconOnly` | — | No `Avatar` type, unlike the Button set. A segment cannot carry an avatar in the file; the library does not stop you. |
 | Player | *(no set)* | A 400×32 sketch frame: a ToggleButtonGroup, a Slider and an icon Button, 554px of content in a 400px box, with placeholder text | A full audio bar: track info, transport, scrubber, time | Built to the shape the sketch points at, not matched to it. There is nothing to reconcile until a set exists. |
+| SpeedDial | `SpeedDial` | 20 variants. `Direction: left \| right \| down \| up`, 3 Child Slots | `actions` of any length, `variant`, `color`, `direction`, `speed`, `showTooltips` | Built for exactly **three** actions — three Child Slots. No `variant` axis (solid/outline) and no color axis. |
+| Footer | *(lone component)* | One COMPONENT, 1177×629. No variants, no properties | `brand`, `columns`, `address`, `socialLinks`, `copyright`, `color` | One worked example rather than an axis to match. |
+| Copyright | *(lone component)* | One COMPONENT, 1177×53. No variants | `companyName`, `year`, `rights`, `color` | Nothing to match. |
+| Box | *(no set)* | A page with no component set | `theme`, `surface`, `radius`, `elevation`, `component` | A box IS a frame with a theme and surface mode, so there is nothing to build. |
 | NumberField | `Field Button` only | The stepper: `Increment: Up \| Down × State`, 48×32, **no size axis** | `size` small/medium/large | The stepper is 48 wide at every size because the file has one width. Should vary per size when the file grows that axis. |
 
 ## Spelled differently in two places
+
+| Concept | Where | Where | Note |
+| --- | --- | --- | --- |
+| The five interaction states | `SpeedDial` uses **both** `default \| hover \| pressed \| focus-visible \| disabled` **and** `Default \| Hover \| Active \| Focus-Visible \| Disabled` | — | **Ten values for five states**, in one property on one set. `pressed` and `Active` are the same state under two names. Worth fixing in the file: nothing can read this reliably. |
 
 | Concept | Button set | Button-Group-Segments | Note |
 | --- | --- | --- | --- |

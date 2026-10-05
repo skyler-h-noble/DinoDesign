@@ -89,7 +89,79 @@ function PopoverDemo() {
   );
 }
 
+import { Box } from '../components/Box';
+import { SpeedDial } from '../components/SpeedDial';
+import AddIcon from '@mui/icons-material/Add';
+import PersonIcon from '@mui/icons-material/Person';
+import SettingsIcon from '@mui/icons-material/Settings';
+
+/* Three actions, named. The name is the accessible name whether or not
+   tooltips are on, so a sample with unnamed actions would be demonstrating the
+   mistake. */
+const SPEED_ACTIONS = [
+  { icon: <AddIcon />, name: 'New document', onClick: () => {} },
+  { icon: <PersonIcon />, name: 'Invite someone', onClick: () => {} },
+  { icon: <SettingsIcon />, name: 'Settings', onClick: () => {} },
+];
+
 export const SURFACE_SAMPLES = {
+  Box: {
+    /* Painted, not outlined. A radius ramp on a transparent box shows nothing
+       — the corner is only visible where a surface ends. */
+    radius: () => (
+      <HStack gap="var(--Sizing-2)" style={{ flexWrap: 'wrap' }}>
+        {['none', 'small', 'medium', 'large'].map((r) => (
+          <Cell key={r} label={r} emphasis={r === 'none'}>
+            <Box surface="Container" radius={r}
+                 style={{ width: 96, height: 64 }} />
+          </Cell>
+        ))}
+      </HStack>
+    ),
+  },
+
+  SpeedDial: {
+    variant: () => (
+      <HStack gap="var(--Sizing-6)" style={{ flexWrap: 'wrap' }}>
+        {['solid', 'outline'].map((v) => (
+          <Cell key={v} label={v} emphasis={v === 'solid'}>
+            <div style={{ height: 180, width: 120, position: 'relative' }}>
+              <SpeedDial open variant={v} ariaLabel={'Create ' + v}
+                         actions={SPEED_ACTIONS} />
+            </div>
+          </Cell>
+        ))}
+      </HStack>
+    ),
+    /* All four, open, because the direction IS the fan and a closed dial
+       points nowhere. */
+    direction: () => (
+      <HStack gap="var(--Sizing-6)" style={{ flexWrap: 'wrap' }}>
+        {['up', 'down', 'left', 'right'].map((d) => (
+          <Cell key={d} label={d} emphasis={d === 'up'}>
+            <div style={{ height: 200, width: 200, position: 'relative',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <SpeedDial open direction={d} ariaLabel={'Create ' + d}
+                         actions={SPEED_ACTIONS} />
+            </div>
+          </Cell>
+        ))}
+      </HStack>
+    ),
+    showTooltips: () => (
+      <HStack gap="var(--Sizing-6)" style={{ flexWrap: 'wrap' }}>
+        {[false, true].map((on) => (
+          <Cell key={String(on)} label={String(on)} emphasis={!on}>
+            <div style={{ height: 180, width: 180, position: 'relative' }}>
+              <SpeedDial open showTooltips={on} ariaLabel={'Create ' + on}
+                         actions={SPEED_ACTIONS} />
+            </div>
+          </Cell>
+        ))}
+      </HStack>
+    ),
+  },
+
   Card: {
     /* The same three shapes as Button — solid, outlined, ghost — because a
        card is a surface and these are what a surface can be. */

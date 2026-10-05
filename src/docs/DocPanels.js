@@ -204,13 +204,18 @@ export function DocSummary({ component, theme = null, surface = 'Surface' }) {
         ) : null}
 
 
-        {doc.insteadUse.length > 0 && (
+        {/* Every section tolerates its field being ABSENT, not just empty.
+            A doc without `states` is legitimate — Copyright is static text and
+            has none — and reading `.length` off undefined took the whole page
+            down rather than hiding one section. A renderer should not require
+            a component to declare the things it does not have. */}
+        {(doc.insteadUse || []).length > 0 && (
           <Section title="Reach for something else when">
             <Rows items={doc.insteadUse.map(i => ({ head: i.when, sub: `Use ${i.use}` }))} />
           </Section>
         )}
 
-        {doc.props.length > 0 && (
+        {(doc.props || []).length > 0 && (
           <Section title="Props">
             {/* A sample sits beside the prop it illustrates rather than in one
                 strip at the top: the picture then appears where the reader is
@@ -264,7 +269,7 @@ export function DocSummary({ component, theme = null, surface = 'Surface' }) {
           </Section>
         )}
 
-        {doc.states.length > 0 && (
+        {(doc.states || []).length > 0 && (
           <Section title="States">
             <Rows items={doc.states.map(s => ({
               head: s.state,
@@ -273,7 +278,7 @@ export function DocSummary({ component, theme = null, surface = 'Surface' }) {
           </Section>
         )}
 
-        {doc.theming.length > 0 && (
+        {(doc.theming || []).length > 0 && (
           <Section title="Theming">
             {/* Two columns because the answers genuinely differ: `data-theme` on
                 an element against a variable mode on one specific Figma node. */}
@@ -287,7 +292,7 @@ export function DocSummary({ component, theme = null, surface = 'Surface' }) {
           </Section>
         )}
 
-        {doc.tokens.length > 0 && (
+        {(doc.tokens || []).length > 0 && (
           <Section title="Tokens">
             <Rows items={doc.tokens.map(t => ({
               head: t.name,
@@ -297,13 +302,13 @@ export function DocSummary({ component, theme = null, surface = 'Surface' }) {
           </Section>
         )}
 
-        {doc.composition.length > 0 && (
+        {(doc.composition || []).length > 0 && (
           <Section title="Composition">
             <Rows items={doc.composition.map(c => ({ head: c }))} />
           </Section>
         )}
 
-        {doc.gotchas.length > 0 && (
+        {(doc.gotchas || []).length > 0 && (
           <Section title="Gotchas">
             <Rows items={doc.gotchas.map(g => ({ head: g }))} />
           </Section>

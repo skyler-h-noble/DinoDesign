@@ -56,6 +56,8 @@ import { Icon } from '../components/Icon';
 import { BrandIcon } from '../components/BrandIcon/BrandIcon';
 import { Fab } from '../components/Fab';
 import AddIcon from '@mui/icons-material/Add';
+import SettingsIcon from '@mui/icons-material/Settings';
+import PersonIcon from '@mui/icons-material/Person';
 import EditIcon from '@mui/icons-material/Edit';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -65,6 +67,10 @@ import { Checkbox } from '../components/Checkbox';
 import { Radio, RadioGroup } from '../components/Radio';
 import { SwitchInput } from '../components/Switch';
 import { Slider } from '../components/Slider';
+import { SpeedDial } from '../components/SpeedDial';
+import { Copyright } from '../components/Copyright';
+import { Footer } from '../components/Footer';
+import { Box } from '../components/Box';
 import { LinearProgress } from '../components/LinearProgress';
 import { CircularProgress } from '../components/CircularProgress';
 import { NumberField } from '../components/NumberField';
@@ -188,6 +194,42 @@ export const EXAMPLES = {
       <SwitchInput label="On" defaultChecked />
     </VStack>,
   Slider: () => <Slider defaultValue={40} />,
+  /* A Box only shows what it is when it is PAINTING something — a bare div
+     with no surface is an empty rectangle and teaches nothing. */
+  Box: () => (
+    <Box surface="Container" radius="medium" elevation={2}
+         style={{ padding: 'var(--Sizing-3)', width: 280 }}>
+      <Body>Container, medium radius, elevation 2.</Body>
+      <Caption color="quiet">Nothing here names a color.</Caption>
+    </Box>
+  ),
+  Copyright: () => <Copyright companyName="Acme" />,
+  Footer: () => (
+    <Footer
+      brand="Acme"
+      columns={[
+        { title: 'Product', links: [{ label: 'Overview', href: '#' }, { label: 'Pricing', href: '#' }] },
+        { title: 'Company', links: [{ label: 'About', href: '#' }, { label: 'Careers', href: '#' }] },
+      ]}
+      copyright="Acme"
+    />
+  ),
+  /* Open, because a closed SpeedDial is a Fab: the thing it is for is the fan,
+     and a lead example showing the resting state shows the wrong component. */
+  SpeedDial: () => (
+    <div style={{ height: 220, position: 'relative', width: 180 }}>
+      <SpeedDial
+        open
+        showTooltips
+        ariaLabel="Create"
+        actions={[
+          { icon: <AddIcon />, name: 'New document', onClick: () => {} },
+          { icon: <PersonIcon />, name: 'Invite someone', onClick: () => {} },
+          { icon: <SettingsIcon />, name: 'Settings', onClick: () => {} },
+        ]}
+      />
+    </div>
+  ),
   /* Determinate, because an indeterminate spinner in a still frame is a
      circle: the example has to show the thing the component is FOR, and what
      it is for is reporting how far along something is. */

@@ -473,4 +473,205 @@ export const BRANDICON_DOC = {
   changes: [],
 };
 
-export const SURFACE_DOCS = [ICON_DOC, BRANDICON_DOC, FAB_DOC, SNACKBAR_DOC, ACCORDION_DOC];
+export const BOX_DOC = {
+  name: 'Box',
+  summary: 'A div that can paint a surface: theme, level, radius and elevation, without writing a color.',
+  insteadUse: [{
+    when: 'The region is a section of a page',
+    use: 'Section'
+  }, {
+    when: 'It is a card with the system\u2019s own chrome',
+    use: 'Card'
+  }, {
+    when: 'You only need to lay children out',
+    use: 'Stack'
+  }],
+  props: [{
+    name: 'theme / surface',
+    type: 'string',
+    default: 'undefined',
+    note: 'Sets `data-theme` / `data-surface`, which is what exposes the whole paired token set. Absent means inherit \u2014 do not pass an empty string.'
+  }, {
+    name: 'radius',
+    type: 'string',
+    values: ['none', 'small', 'medium', 'large'],
+    default: 'none',
+    note: 'Reads the brand\u2019s own corner tokens rather than a fixed px, so a square brand stays square.'
+  }, {
+    name: 'elevation',
+    type: 'number',
+    default: '0',
+    note: '0\u20135. The shadow AND the container tone move together \u2014 elevation is a level, not just a shadow.'
+  }, {
+    name: 'component',
+    type: 'string',
+    default: 'div',
+    note: 'The element to render. Use it to keep the markup honest: a Box standing in for a `<section>` or `<aside>` should say so.'
+  }],
+  composition: [
+    'This is the primitive the rule "never write `background: var(--Surface)`" points at. Set `theme` and `surface` and the background, text, border and state tones all arrive together, tuned for that level.',
+    'It has no padding of its own. Padding is the layout\u2019s decision, and a box that padded itself could not be used as a plain surface.',
+  ],
+  accessibility: [
+    'A div by default, so it contributes nothing to the accessibility tree \u2014 which is right for a surface. Pass `component` when it is really a landmark.',
+    'Changing `surface` changes contrast for everything inside it, and the paired tokens are what keep that legible. Painting a background by hand is what breaks it.',
+  ],
+  gotchas: [
+    'Figma has a Box page with no component set. There is nothing to match variant by variant; a box IS a frame with a theme and surface mode on it, which is the same thing this component does.',
+    '`elevation` is not only a shadow: the container tone moves with it, and the shadow direction flips in dark mode. Setting a `box-shadow` by hand gets the first half and not the second.',
+  ]
+};
+
+export const FOOTER_DOC = {
+  name: 'Footer',
+  summary: 'The bottom of a page: the brand, the columns of links, and the line that says who owns it.',
+  insteadUse: [{
+    when: 'It is the bar at the top',
+    use: 'AppBar'
+  }, {
+    when: 'It is navigation down the side',
+    use: 'Sidebar'
+  }, {
+    when: 'You only need the legal line',
+    use: 'Copyright'
+  }],
+  props: [{
+    name: 'brand',
+    type: 'ReactNode',
+    default: 'undefined'
+  }, {
+    name: 'columns',
+    type: 'Array<{ title, links }>',
+    default: '[]',
+    note: 'The link columns. Each is a heading and its list.'
+  }, {
+    name: 'address',
+    type: 'ReactNode',
+    default: 'undefined'
+  }, {
+    name: 'socialLinks',
+    type: 'Array<{ icon, href, label }>',
+    default: '[]',
+    note: 'Each needs a `label` \u2014 a social icon with no name announces as nothing.'
+  }, {
+    name: 'copyright',
+    type: 'ReactNode',
+    default: 'undefined',
+    note: 'Rendered through Copyright when a string, so the year stays current on its own.'
+  }, {
+    name: 'color',
+    type: 'string',
+    default: 'default'
+  }],
+  composition: [
+    'A footer is a landmark. It renders as `<footer>`, so there should be one per page and it should hold the page\u2019s own ending rather than a repeated block inside a region.',
+  ],
+  accessibility: [
+    'Renders as `<footer>`, which is the `contentinfo` landmark \u2014 screen reader users jump to it directly.',
+    'Every social link needs a label. An icon alone is announced as "link" and nothing else.',
+  ],
+  gotchas: [
+    'Figma\u2019s Footer is a single COMPONENT, not a set \u2014 1177\u00d7629, no variants and no properties. So its layout is one worked example rather than an axis to match; the columns, the social row and the legal line are all composed here rather than selected.',
+  ]
+};
+
+export const COPYRIGHT_DOC = {
+  name: 'Copyright',
+  summary: 'The legal line at the bottom, with the year kept current on its own.',
+  insteadUse: [{
+    when: 'You need the whole bottom of the page',
+    use: 'Footer'
+  }],
+  props: [{
+    name: 'companyName',
+    type: 'string',
+    default: 'undefined'
+  }, {
+    name: 'year',
+    type: 'number',
+    default: 'the current year',
+    note: 'Pass one only to pin it. The default reads the clock, which is the point: a hardcoded year is wrong every January.'
+  }, {
+    name: 'rights',
+    type: 'string',
+    default: 'All rights reserved.'
+  }, {
+    name: 'color',
+    type: 'string',
+    default: 'default'
+  }],
+  composition: [
+    'Let `year` default. The one thing this component is for is not having to remember to change it.',
+  ],
+  accessibility: [
+    'Plain text in the footer landmark. It carries no role of its own because it is a statement, not a control.',
+  ],
+  gotchas: [
+    'Figma\u2019s Copyright is a single COMPONENT (1177\u00d753) with no variants, so there is no axis to match.',
+  ]
+};
+
+export const SPEED_DIAL_DOC = {
+  name: 'SpeedDial',
+  summary: 'A floating button that opens a small set of related actions.',
+  insteadUse: [{
+    when: 'There is one primary action',
+    use: 'Fab'
+  }, {
+    when: 'The actions belong to a selection or a panel',
+    use: 'Toolbar'
+  }, {
+    when: 'It is a list of commands rather than 3\u20135 actions',
+    use: 'Menu'
+  }],
+  props: [{
+    name: 'actions',
+    type: 'Array<{ icon, name, onClick }>',
+    default: '[]',
+    note: 'Three to five. More than that is a menu \u2014 a fan of icons stops being scannable.'
+  }, {
+    name: 'variant',
+    type: 'string',
+    values: ['solid', 'outline'],
+    default: 'solid'
+  }, {
+    name: 'color',
+    type: 'string',
+    default: 'default'
+  }, {
+    name: 'direction',
+    type: 'string',
+    values: ['up', 'down', 'left', 'right'],
+    default: 'up',
+    note: 'Which way the actions fan. Match it to where the dial sits \u2014 a bottom-right dial opens up.'
+  }, {
+    name: 'speed',
+    type: 'number',
+    default: '50',
+    note: 'Milliseconds between each action appearing, so they stagger rather than arriving at once.'
+  }, {
+    name: 'showTooltips',
+    type: 'boolean',
+    default: 'false',
+    note: 'Shows each action\u2019s name beside it. The name is the accessible name either way.'
+  }, {
+    name: 'open / onOpen / onClose',
+    type: 'boolean / function',
+    default: 'undefined',
+    note: 'Controlled when supplied; it manages its own open state otherwise.'
+  }],
+  composition: [
+    'Give every action a `name`. It is the accessible name whether or not tooltips are shown, and an icon without one is announced as "menu item".',
+  ],
+  accessibility: [
+    'The dial is `aria-haspopup` with `aria-expanded`; the fan is `role="menu"` and each action is a `role="menuitem"`.',
+    'Escape closes it and returns focus to the dial, so the keyboard does not get stranded in an open fan.',
+  ],
+  gotchas: [
+    'Figma\u2019s SpeedDial set has TEN values in its State property for five states: `default | hover | pressed | focus-visible | disabled` AND `Default | Hover | Active | Focus-Visible | Disabled`. Two naming conventions in one property, and `pressed` and `Active` are the same state under two names. See the parity table.',
+    'The set has three Child Slots, so it is built for exactly three actions. The component takes any number, and more than five stops being scannable.',
+  ]
+};
+
+export const SURFACE_DOCS = [ICON_DOC, BRANDICON_DOC, FAB_DOC, SNACKBAR_DOC, ACCORDION_DOC,
+  BOX_DOC, FOOTER_DOC, COPYRIGHT_DOC, SPEED_DIAL_DOC];
