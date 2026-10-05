@@ -248,12 +248,22 @@ export function Step({
         backgroundColor: bgToken,
         color: textToken,
         fontSize: s.fontSize,
-        fontFamily: 'inherit',
+        /* The BUTTON face, not whatever is around it.
+           Figma binds the step number to `Buttons/Button-Font-Family` — the
+           count step IS a Button in the file, so its digit wears the button's
+           typeface. `inherit` took the face from the page instead, so the
+           number came out in the body font on a docs page and in whatever the
+           host set everywhere else: a different-looking digit in a circle the
+           right size, which reads as the whole component being wrong. */
+        fontFamily: 'var(--Font-Family-Button, inherit)',
         /* The design binds Typography/Buttons/Small to the step's digit, so
            the weight comes from there rather than a literal 700 — a brand that
            picks a lighter button face moved the design's numbers and not the
            lib's. */
-        fontWeight: 'var(--Button-Small-Font-Weight, 700)',
+        /* The button's weight, for the same reason as the family. The old
+           token was Button-Small's, which is one size's weight standing in for
+           the ramp's. */
+        fontWeight: 'var(--Button-Font-Weight, var(--Button-Small-Font-Weight, 700))',
         /* The digit is centred by the flex box above, so the line box only has
            to not add leading of its own. Figma trims cap-height-to-baseline;
            text-box-trim is the CSS equivalent and falls back to this. */

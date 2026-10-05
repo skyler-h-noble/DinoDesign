@@ -207,6 +207,29 @@ export const NAV_SAMPLES = {
   },
 
   Stepper: {
+    /* The one that was missing. `noCount` has existed on the component the
+       whole time and appeared in no sample, no doc and no showcase — so the
+       dot stepper read as a thing the library did not have. Figma builds the
+       two as separate sets, `Count Step` at 32x32 and `No-Count Step` at
+       12x12, which is the size difference shown here. */
+    variant: () => (
+      <VStack gap="var(--Sizing-3)">
+        <Cell label="count" emphasis width={300}>
+          <Frame w={300}>
+            <Stepper activeStep={1}>
+              <Step label="Colors" /><Step label="Type" /><Step label="Export" />
+            </Stepper>
+          </Frame>
+        </Cell>
+        <Cell label="noCount" width={300}>
+          <Frame w={300}>
+            <Stepper variant="noCount" activeStep={1}>
+              <Step label="Colors" /><Step label="Type" /><Step label="Export" />
+            </Stepper>
+          </Frame>
+        </Cell>
+      </VStack>
+    ),
     orientation: () => (
       <HStack gap="var(--Sizing-4)" style={{ flexWrap: 'wrap', alignItems: 'flex-start' }}>
         <Cell label="horizontal" emphasis width={300}>

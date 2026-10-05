@@ -61,7 +61,14 @@ export const STEPPER_DOC = {
   }, {
     name: 'dashedIncomplete',
     type: 'boolean',
-    default: 'false'
+    default: 'false',
+    note: 'Draws the incomplete connectors dashed. LIBRARY ONLY \u2014 Figma\u2019s `Step - Line` set has `State: complete | incomplete` and no dashed form.'
+  }, {
+    name: 'variant',
+    type: 'string',
+    values: ['count', 'noCount'],
+    default: 'count',
+    note: 'COUNT draws a numbered circle; NOCOUNT draws a plain dot. Figma calls these `Style=count` and `Style=noCount`, and they are separate sets there \u2014 `Count Step` at 32\u00d732 and `No-Count Step` at 12\u00d712.'
   }],
   states: [{
     state: 'Complete / Current / Incomplete',
