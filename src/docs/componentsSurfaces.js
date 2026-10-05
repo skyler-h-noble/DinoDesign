@@ -684,7 +684,7 @@ export const SPEED_DIAL_DOC = {
     name: '--SpeedDial-Gap',
     sets: 'the space between the dial and its actions, and between the actions',
     variesWith: 'size mode',
-    figma: 'Component-Size/SpeedDial/SpeedDial-Gap'
+    figma: 'Component-Size/FAB/SpeedDial-Gap'
   }, {
     name: '--FAB-Width',
     sets: 'the dial, through Fab',
