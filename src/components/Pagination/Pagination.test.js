@@ -276,3 +276,54 @@ describe('Pagination — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+/* THE CURRENT PAGE HAS TO BE VISIBLE ON A THEMED SURFACE.
+ *
+ * Selected used to be the SOLID variant against outline ones. That reads on a
+ * neutral surface and collapses on a themed one: with data-theme="Info",
+ * --Buttons-Info-Button and --Background are both Info-Color-5, and
+ * --Buttons-Info-Text and --Buttons-Info-Outline-Text are both Info-Color-11 —
+ * so the filled current page and the outlined rest came out pixel identical
+ * and a reader could not tell which page they were on.
+ *
+ * Both are the outline variant now, separated by `selected`, which carries the
+ * Pressed fill. Pressed is derived to sit AGAINST the surface rather than to
+ * be it, so it cannot collapse the same way.
+ */
+describe('the current page is distinguishable', () => {
+  const cssFor = (el) => {
+    const cls = (el.className || '').split(/\s+/).find((c) => c.startsWith('css-'));
+    if (!cls) return '';
+    return Array.from(document.styleSheets)
+      .flatMap((sheet) => Array.from(sheet.cssRules || []))
+      .filter((r) => (r.selectorText || '').includes('.' + cls))
+      .map((r) => r.cssText)
+      .join('\n');
+  };
+
+  test('selected takes the Pressed fill; the others take none', () => {
+    const { container } = render(<Pagination count={6} defaultPage={3} color="info" />);
+    const current = container.querySelector('[aria-current="page"]');
+    const others = [...container.querySelectorAll('button')]
+      .filter((b) => b !== current && /^[0-9]+$/.test(b.textContent.trim()));
+
+    expect(cssFor(current)).toContain('background-color: var(--Buttons-Info-Pressed)');
+    for (const o of others) {
+      expect(cssFor(o)).toContain('background-color: transparent');
+    }
+  });
+
+  test('and never paints the current page in --Buttons-{C}-Button', () => {
+    const { container } = render(<Pagination count={6} defaultPage={3} color="info" />);
+    const current = container.querySelector('[aria-current="page"]');
+    expect(cssFor(current)).not.toContain('background-color: var(--Buttons-Info-Button)');
+  });
+
+  /* black-white is the Buttons collection's tenth mode and the one palette
+     that cannot collapse into a themed surface, so it was the wrong one to be
+     missing from the picker. */
+  test('black-white is a usable color', () => {
+    const { container } = render(<Pagination count={6} defaultPage={3} color="black-white" />);
+    expect(container.querySelector('[aria-current="page"]')).toBeInTheDocument();
+  });
+});

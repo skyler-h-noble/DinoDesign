@@ -23,6 +23,11 @@ const COLOR_GROUPS = [
   { label: 'Default', colors: ['default'] },
   { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
   { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
+  /* The Buttons collection's tenth mode, which the Theme collection does not
+     have — reachable from code and not from Figma. It was missing here, so
+     the one palette that CANNOT collapse into a themed surface was also the
+     one you could not pick. */
+  { label: 'Buttons only', colors: ['black-white'] },
 ];
 
 /* ── Helpers ── */

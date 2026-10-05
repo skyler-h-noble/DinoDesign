@@ -194,6 +194,23 @@ export const NAV_SAMPLES = {
   },
 
   Pagination: {
+    /* Every page is the OUTLINE variant; `selected` is what separates the
+       current one. They used to be solid-against-outline, which reads on a
+       neutral surface and collapses on a themed one — --Buttons-{C}-Button
+       resolves to the same tone as --Background there, so the filled current
+       page was painted in the surface's own color. `black-white` is shown
+       last because it is the Buttons collection's tenth mode, reachable from
+       code and not from Figma, and the one palette that cannot collapse into
+       a themed surface. */
+    color: () => (
+      <VStack gap="var(--Sizing-3)">
+        {['default', ...PALETTES, 'black-white'].map((c) => (
+          <Cell key={c} label={c} emphasis={c === 'default'} width={360}>
+            <Pagination count={6} defaultPage={3} color={c} />
+          </Cell>
+        ))}
+      </VStack>
+    ),
     size: () => (
       <AxisStack values={SIZES} defaultValue="medium"
                  render={(v) => <Pagination count={8} defaultPage={3} size={v} />} />

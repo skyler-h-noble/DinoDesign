@@ -334,7 +334,10 @@ export const PAGINATION_DOC = {
   }, {
     name: 'color',
     type: 'string',
-    default: 'default'
+    values: ['default', 'primary', 'secondary', 'tertiary', 'neutral',
+             'info', 'success', 'warning', 'error', 'black-white'],
+    default: 'default',
+    note: 'Includes `black-white`, the Buttons collection\u2019s tenth mode \u2014 reachable from code and not from Figma. On a themed surface it is the one palette that cannot collapse into the background, which makes it the safe choice for a pagination sitting on a saturated state surface.'
   }, {
     name: 'size',
     type: 'string',

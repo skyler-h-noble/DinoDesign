@@ -145,8 +145,17 @@ export function Pagination({
           const isSelected = item === currentPage;
           return (
             <Box component="li" key={item}>
+              {/* BOTH are the outline variant; `selected` is what separates
+                  them. They used to be the SOLID variant against the outline
+                  one, which works on a neutral surface and collapses on a
+                  themed one: --Buttons-{C}-Button resolves to the same tone
+                  as --Background there, so the filled current page was
+                  painted in the surface's own color and the whole row looked
+                  identical. Selected now carries the Pressed fill, which is
+                  derived to sit against the surface rather than to be it. */}
               <Button
-                variant={isSelected ? effectiveColor : effectiveColor + '-outline'}
+                variant={effectiveColor + '-outline'}
+                selected={isSelected}
                 size={s.btnSize}
                 disabled={disabled}
                 onClick={() => setPage(item)}

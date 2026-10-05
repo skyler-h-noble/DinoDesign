@@ -216,7 +216,18 @@ function solidStyles(color, elevated = false, selected = false, size = 'medium')
 function outlineStyles(color, selected = false) {
   const C = seg(color);
   return {
-    backgroundColor: 'transparent',
+    /* SELECTED ACTUALLY GAINS A FILL. The comment below has said so for a
+       long time and the code did not do it — selected changed the label color
+       and nothing else. On a neutral surface that reads, because
+       Outline-Quiet and Text are far apart there. On a THEMED surface they
+       are not: with data-theme="Info" both resolve to Info-Color-11, so a
+       selected outline button and an unselected one came out pixel
+       identical. That is how a pagination lost its current page.
+       Pressed is the token the design names for it — Figma's Pagination
+       Number set fills State=Selected with Pressed — and it is the right one
+       structurally too: Pressed is derived to sit AGAINST the surface, so it
+       cannot collapse into it the way Button can. */
+    backgroundColor: selected ? `var(--Buttons-${C}-Pressed)` : 'transparent',
     /* Buttons::Outline-Text — the label color for a button with NO fill.
        This was --Text, the surface's own body color, so an outline button's
        label ignored its palette entirely: a success outline and an error
