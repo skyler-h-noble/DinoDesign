@@ -64,9 +64,17 @@ describe('the ButtonGroup samples respond', () => {
       <div>{EXAMPLES.ButtonGroup({ theme: null, surface: 'Surface' })}</div>);
 
     const pressable = Array.from(container.querySelectorAll('button[aria-pressed]'));
-    // Only the toggle half reports a pressed state, and exactly one is on.
     expect(pressable.length).toBeGreaterThan(0);
-    expect(pressable.filter(b => b.getAttribute('aria-pressed') === 'true')).toHaveLength(1);
+    /* ONE PER GROUP, not one on the page: the toggle half shows a joined group
+       and a separated one, which is the set's real axis and both halves of
+       what the component is. */
+    const groups = Array.from(container.querySelectorAll('[role="group"], [role="radiogroup"]'))
+      .filter(g => g.querySelector('button[aria-pressed]'));
+    expect(groups.length).toBeGreaterThan(0);
+    for (const g of groups) {
+      const on = Array.from(g.querySelectorAll('button[aria-pressed="true"]'));
+      expect(on).toHaveLength(1);
+    }
 
     // The action half's buttons are peers: clickable, never pressed.
     const actions = ['Save', 'Duplicate', 'Delete']

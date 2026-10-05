@@ -208,14 +208,34 @@ const PopoverDemo = () => {
   );
 };
 
+/* BOTH styles, because Figma has both and they are the set's one real axis:
+   `Style=Default` is joined, `Style=Separated` is gapped. A lead example
+   showing only the joined one implies the separated one is a variation
+   somebody added rather than half of what the component is.
+   Joined is first and labelled as the default, so the resting shape is the one
+   you see before you see the alternative. */
 function ToggleButtonGroupExample() {
   const [align, setAlign] = useState('left');
+  const [view, setView] = useState('day');
   return (
-    <ToggleButtonGroup value={align} onChange={setAlign} aria-label="Alignment">
-      <Button value="left">Left</Button>
-      <Button value="center">Center</Button>
-      <Button value="right">Right</Button>
-    </ToggleButtonGroup>
+    <VStack gap="var(--Sizing-3)" style={{ alignItems: 'flex-start' }}>
+      <VStack gap="var(--Sizing-Half)" style={{ alignItems: 'flex-start' }}>
+        <Caption color="quiet">joined — one control, shared edges</Caption>
+        <ToggleButtonGroup value={align} onChange={setAlign} aria-label="Alignment">
+          <Button value="left">Left</Button>
+          <Button value="center">Center</Button>
+          <Button value="right">Right</Button>
+        </ToggleButtonGroup>
+      </VStack>
+      <VStack gap="var(--Sizing-Half)" style={{ alignItems: 'flex-start' }}>
+        <Caption color="quiet">separated — the same choice, gapped</Caption>
+        <ToggleButtonGroup value={view} onChange={setView} separated aria-label="View">
+          <Button value="day">Day</Button>
+          <Button value="week">Week</Button>
+          <Button value="month">Month</Button>
+        </ToggleButtonGroup>
+      </VStack>
+    </VStack>
   );
 }
 

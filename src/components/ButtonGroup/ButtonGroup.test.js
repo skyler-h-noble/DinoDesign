@@ -3,6 +3,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ButtonGroup } from './ButtonGroup';
 import { Button } from '../Button/Button';
+import { ToggleButtonGroup } from '../ToggleButtonGroup';
 import { axe } from 'jest-axe';
 
 describe('ButtonGroup Component', () => {
@@ -426,5 +427,46 @@ describe('selection escalates one step from the group style', () => {
        element. */
     expect(emotionCss(selected)).not.toContain('border: none');
     expect(emotionCss(unselected)).toContain('border: none');
+  });
+});
+
+/* A plain ButtonGroup cannot be joined — it corrects rather than warns.
+   It used to warn and comply, which left the shape reachable: a row of actions
+   with shared edges reads as one control with one of them chosen, the exact
+   misreading the split into two components was made to end. */
+describe('ButtonGroup cannot be joined', () => {
+  const quiet = () => jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+  test('separated={false} is ignored, and says so', () => {
+    const warn = quiet();
+    const { container } = render(
+      <ButtonGroup separated={false} aria-label="Actions">
+        <Button onClick={() => {}}>Save</Button>
+        <Button onClick={() => {}}>Cancel</Button>
+      </ButtonGroup>,
+    );
+    expect(warn).toHaveBeenCalled();
+    expect(String(warn.mock.calls[0][0])).toMatch(/cannot be joined/i);
+
+    /* The proof it stayed separated: a joined group collapses the gap between
+       segments to zero and overlaps their borders. Asserted on the container's
+       own gap rather than on a class name, which could be renamed without the
+       behaviour changing. */
+    const group = container.firstChild;
+    const gap = window.getComputedStyle(group).gap;
+    expect(gap === '' || gap === '0px').toBe(false);
+    warn.mockRestore();
+  });
+
+  test('ToggleButtonGroup is still allowed to join', () => {
+    const warn = quiet();
+    render(
+      <ToggleButtonGroup value="a" onChange={() => {}} aria-label="Pick">
+        <Button value="a">A</Button>
+        <Button value="b">B</Button>
+      </ToggleButtonGroup>,
+    );
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
   });
 });

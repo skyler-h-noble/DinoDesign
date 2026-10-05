@@ -68,8 +68,9 @@ function warnJoined() {
   if (warnedJoined || process.env.NODE_ENV === 'production') return;
   warnedJoined = true;
   console.warn(
-    '[OmniDesign] ButtonGroup is separated — a row of actions, spaced. '
-    + '`separated={false}` joins the segments into one control, which is '
+    '[OmniDesign] ButtonGroup is separated — a row of actions, spaced — and '
+    + 'cannot be joined, so `separated={false}` is ignored. Joining makes the '
+    + 'row read as one control with one segment chosen, which is '
     + 'ToggleButtonGroup\'s Style=Default and not a shape Figma\'s ButtonGroup '
     + 'has. It still renders and will be removed in the next major. If the '
     + 'segments are a choice rather than three actions, use '
@@ -225,10 +226,25 @@ export function ButtonGroup({
      row of peers: no pressed state to report, nothing to escalate from. */
   const hasSelection = __selectionOwner || askedForSelection;
 
-  /* Only when the caller ASKED to join. ToggleButtonGroup joins by default
-     and passes separated through, so firing on the value alone would warn on
-     the component that is supposed to be joined. */
-  if (!__selectionOwner && separated === false) warnJoined();
+  /* A plain ButtonGroup CANNOT be joined, so this corrects rather than warns.
+   *
+   * It warned and complied, which left the shape reachable: a row of actions
+   * with shared edges reads as one control with one of them chosen, which is
+   * the exact misreading the split into two components was made to end. A
+   * warning that still renders the wrong thing is a note in a console nobody
+   * has open, attached to a component that went out looking wrong.
+   *
+   * Joined is ToggleButtonGroup's Style=Default, and its segments are a
+   * separate Figma set because joining is not something a button can express
+   * about itself — its corners depend on where it sits in the row.
+   *
+   * Only when the caller ASKED to join: ToggleButtonGroup joins by default and
+   * passes `separated` through, so testing the value alone would fire on the
+   * component that is supposed to be joined. */
+  if (!__selectionOwner && separated === false) {
+    warnJoined();
+    separated = true;
+  }
 
   const [internalValue, setInternalValue] = useState(
     defaultValue ?? (multiple ? [] : null),
@@ -587,7 +603,21 @@ export function ButtonGroup({
 
   return (
     <Box
-      role="group"
+      /* role="group" only when the group has a NAME.
+       *
+       * An unnamed group is announced as "group" and nothing else — a word
+       * that tells a screen-reader user a boundary exists and not what is
+       * inside it. For a plain row of actions that boundary is decoration:
+       * the buttons already announce themselves, and the grouping is visual.
+       * So an unnamed ButtonGroup is not a group to the accessibility tree,
+       * which is the honest answer to "is this anything?".
+       *
+       * Name it — aria-label="Text formatting" — and it becomes worth
+       * announcing, because then the boundary carries information.
+       *
+       * ToggleButtonGroup always passes a name, and should: there the group IS
+       * the control, and the options are only meaningful as a set. */
+      role={ariaLabel ? 'group' : undefined}
       aria-label={ariaLabel}
       className={'btn-group btn-group-' + variant + ' btn-group-' + color + ' ' + className}
       sx={{
