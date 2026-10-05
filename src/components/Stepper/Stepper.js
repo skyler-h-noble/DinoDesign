@@ -12,7 +12,13 @@ import { BodySmall, Caption } from '../Typography';
  *   StepIndicator  — circle showing number/icon
  *   StepConnector  — line between steps (auto-inserted)
  *
- * COLORS: 8 brand colors → maps to var(--Buttons-{Color}-*) tokens
+ * COLORS: 9 brand colors → maps to var(--Buttons-{Color}-*) tokens. The
+ * default is `default`, not `primary`: the design's Count Step PINS NOTHING,
+ * so the circle resolves whatever Buttons mode it inherits, which with nothing
+ * above it is Default. Defaulting to primary painted --Buttons-Primary-Button
+ * on a step that Figma draws in the brand's default button color, and because
+ * both are real colors from the same system it looked like a design choice
+ * rather than the wrong token.
  *   Selected:   bg var(--Buttons-{C}-Button), text var(--Buttons-{C}-Text),
  *               hover var(--Buttons-{C}-Hover), active var(--Buttons-{C}-Pressed)
  *   Unselected: bg transparent, text var(--Text),
@@ -71,7 +77,7 @@ const SIZE_MAP = {
 const StepperContext = createContext({
   orientation: 'horizontal',
   size: 'medium',
-  color: 'primary',
+  color: 'default',
   activeStep: 0,
   clickable: false,
   onStepClick: null,
@@ -104,7 +110,9 @@ export function Stepper({
   children,
   orientation = 'horizontal',
   size = 'medium',
-  color = 'primary',
+  /* `default`, matching the Count Step's unpinned Buttons mode — see COLORS
+     above. Pass a palette name only where the design pins one. */
+  color = 'default',
   activeStep = 0,
   clickable = false,
   onStepClick,
@@ -170,7 +178,7 @@ export function Step({
      together rather than only dimming the indicator. */
   const clickable = groupClickable && !disabled;
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
-  const C = COLOR_LABEL_MAP[color] || 'Primary';
+  const C = COLOR_LABEL_MAP[color] || 'Default';
   const isHorizontal = orientation === 'horizontal';
   const isActive = _index === activeStep;
   const isCompleted = _index < activeStep;

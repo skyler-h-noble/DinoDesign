@@ -22,7 +22,7 @@ import { Toolbar } from '../components/Toolbar';
 import { Dropdown, MenuButton, Menu, MenuItem } from '../components/Menu';
 import { VStack, HStack } from '../components/Stack';
 import { Caption, Body } from '../components/Typography';
-import { SIZES, Axis, AxisStack, Toggle, Cell } from './samples';
+import { SIZES, PALETTES, Axis, AxisStack, Toggle, Cell } from './samples';
 import { NAV_ITEMS, LIST_ITEMS, TOOLBAR_ITEMS, TREE_ITEMS } from './examples.lead';
 
 const Frame = ({ w = 320, h, children }) => (
@@ -257,6 +257,31 @@ export const NAV_SAMPLES = {
               </Stepper>
             </Frame>
           </VStack>
+        ))}
+      </VStack>
+    ),
+    /* `default` FIRST and emphasised, because it is what the design draws.
+       Figma's `Count Step` pins no Buttons mode, so the circle takes whatever
+       it inherits — Default — and the lib defaulted to primary instead. Both
+       are real colors from the same system, so the only way to see the
+       difference is side by side with the default named as the default. */
+    color: () => (
+      <VStack gap="var(--Sizing-3)">
+        <Cell label="default" emphasis width={320}>
+          <Frame w={320}>
+            <Stepper activeStep={1}>
+              <Step label="Colors" /><Step label="Type" /><Step label="Export" />
+            </Stepper>
+          </Frame>
+        </Cell>
+        {PALETTES.map(c => (
+          <Cell key={c} label={c} width={320}>
+            <Frame w={320}>
+              <Stepper color={c} activeStep={1}>
+                <Step label="Colors" /><Step label="Type" /><Step label="Export" />
+              </Stepper>
+            </Frame>
+          </Cell>
         ))}
       </VStack>
     ),

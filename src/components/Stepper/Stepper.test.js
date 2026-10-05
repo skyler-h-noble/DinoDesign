@@ -125,11 +125,22 @@ describe('Orientation', () => {
 
 /* ─── Colors ─── */
 describe('Color classes', () => {
-  ['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'].forEach((c) => {
+  ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'].forEach((c) => {
     test(c + ' color class', () => {
       const { container } = renderStepper({ activeStep: 0, color: c });
       expect(container.querySelector('.stepper-' + c)).toBeInTheDocument();
     });
+  });
+
+  /* The default is the one value a converter never writes out, so it is the
+     one nothing else covers. Figma's `Count Step` pins no Buttons mode, so the
+     circle inherits Default — and --Buttons-Primary-Button is a real color
+     from the same system, which is why defaulting to primary read as a design
+     choice instead of the wrong token. */
+  test('defaults to the Default palette, not Primary', () => {
+    const { container } = renderStepper({ activeStep: 0 });
+    expect(container.querySelector('.stepper-default')).toBeInTheDocument();
+    expect(container.querySelector('.stepper-primary')).not.toBeInTheDocument();
   });
 });
 
@@ -381,6 +392,29 @@ describe('the status ladder', () => {
       <Step label="One" /><Step label="Two" /><Step label="Three" />
     </Stepper>
   );
+
+  /* The default palette is the one value a converter never writes out, so it
+     is the one nothing else covers. Figma's `Count Step` pins no Buttons mode,
+     so the circle inherits Default — and --Buttons-Primary-Button is a real
+     color from the same system, which is why defaulting to primary read as a
+     design choice rather than the wrong token. */
+  test('with no color prop the current step fills from the Default palette', () => {
+    const { container } = render(
+      <Stepper activeStep={1}>
+        <Step label="One" /><Step label="Two" /><Step label="Three" />
+      </Stepper>
+    );
+    const now = container.querySelector('.step-indicator-active');
+    expect(cssFor(now)).toContain('background-color: var(--Buttons-Default-Button)');
+    expect(cssFor(now)).toContain('color: var(--Buttons-Default-Text)');
+    expect(cssFor(now)).not.toContain('--Buttons-Primary-');
+  });
+
+  test('an unrecognised color name falls back to Default, not Primary', () => {
+    const { container } = threeSteps({ color: 'nonsense' });
+    const now = container.querySelector('.step-indicator-active');
+    expect(cssFor(now)).toContain('background-color: var(--Buttons-Default-Button)');
+  });
 
   test('only the CURRENT step is filled', () => {
     const { container } = threeSteps();

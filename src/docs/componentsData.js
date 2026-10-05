@@ -47,7 +47,10 @@ export const STEPPER_DOC = {
   }, {
     name: 'color',
     type: 'string',
-    default: 'primary'
+    values: ['default', 'primary', 'secondary', 'tertiary', 'neutral',
+             'info', 'success', 'warning', 'error'],
+    default: 'default',
+    note: 'Which palette the filled indicator draws from \u2014 --Buttons-{Color}-Button. DEFAULT, not primary: Figma\u2019s `Count Step` pins no Buttons mode, so the circle takes whatever it inherits, which is Default. Pass a palette only where the design pins one.'
   }, {
     name: 'size',
     type: 'string',
