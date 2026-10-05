@@ -965,11 +965,26 @@ export const REST_DOCS = [SELECT_DOC, MENU_DOC, CODE_BLOCK_DOC, PLAYER_DOC,
 }, {
   name: 'color',
   type: 'string',
-  default: 'default'
+  values: ['default', 'primary', 'secondary', 'tertiary', 'neutral'],
+  default: 'default',
+  note: 'The THEME. Not the four state palettes \u2014 Info / Success / Warning / Error say something has happened, and a bar of formatting actions is not an event. This used to read `default | primary | primary-light | white | black`, which mixed themes with LIGHTNESSES; lightness is `surface` now. The three old names still resolve so existing call sites keep rendering what they rendered.'
+}, {
+  name: 'surface',
+  type: 'string',
+  values: ['Surface', 'Surface-Dim', 'Surface-Dimmest', 'Surface-Bright',
+           'Surface-Brightest', 'Container', 'Container-Low', 'Container-High'],
+  default: 'Surface',
+  note: 'The LEVEL, separate from the theme \u2014 which is what `white` and `black` were really asking for. A bar sitting on a page usually wants to lift off it, which is the Bright end.'
+}, {
+  name: 'showLabels',
+  type: 'boolean',
+  default: 'false',
+  note: 'Puts each action\u2019s name beside its icon. Off by default because a formatting bar is the case this exists for and B / I / U need no gloss. The name lands in exactly one place either way: `aria-label` when the button is icon-only, the visible text when it is not \u2014 both would announce it twice.'
 }, {
   name: 'fab',
   type: 'object',
-  default: 'undefined'
+  default: 'undefined',
+  note: 'An Fab to the right of a floating bar. Takes the toolbar\u2019s own colour and sits at FAB-Width medium; `fab.size` and `fab.color` override. It was a Button forced round at a hardcoded 56x56 \u2014 the large end of the ramp next to a bar of small buttons \u2014 painted variant="default", which is how a themed bar came with a brand-coloured FAB.'
 }], [{
   state: 'Hover / Focus-visible',
   setBy: 'interaction',

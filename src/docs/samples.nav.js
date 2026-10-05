@@ -578,16 +578,56 @@ export const NAV_SAMPLES = {
   },
 
   Toolbar: {
+    /* alignItems flex-start on the stacks, or the bar stretches.
+       A VStack is a flex column and its default align-items is STRETCH, which
+       overrides inline-flex's shrink-to-fit — the bar spanned the whole cell
+       with its actions bunched at the left end. The component now also sets
+       width: fit-content, so this is belt and braces rather than the fix, but
+       a sample that quietly restyles what it is demonstrating is worth not
+       having either way. */
     type: () => (
-      <VStack gap="var(--Sizing-3)">
-        <VStack gap="var(--Sizing-Half)">
+      <VStack gap="var(--Sizing-3)" style={{ alignItems: 'flex-start' }}>
+        <VStack gap="var(--Sizing-Half)" style={{ alignItems: 'flex-start' }}>
           <Caption color="standard">floating — its own surface and elevation</Caption>
           <Toolbar items={TOOLBAR_ITEMS} defaultValue={0} />
         </VStack>
-        <VStack gap="var(--Sizing-Half)">
+        <VStack gap="var(--Sizing-Half)" style={{ alignItems: 'flex-start' }}>
           <Caption color="quiet">docked — sits flush in the layout</Caption>
           <Toolbar items={TOOLBAR_ITEMS} type="docked" defaultValue={0} />
         </VStack>
+      </VStack>
+    ),
+    showLabels: () => (
+      <VStack gap="var(--Sizing-3)" style={{ alignItems: 'flex-start' }}>
+        <Cell label="false — the icon is the whole control" emphasis>
+          <Toolbar items={TOOLBAR_ITEMS} defaultValue={0} />
+        </Cell>
+        <Cell label="true — the name is beside it">
+          <Toolbar items={TOOLBAR_ITEMS} showLabels defaultValue={0} />
+        </Cell>
+      </VStack>
+    ),
+    /* The five a toolbar can be — the state palettes are deliberately not
+       offered, since a bar of formatting actions is not an event. */
+    color: () => (
+      <VStack gap="var(--Sizing-3)" style={{ alignItems: 'flex-start' }}>
+        {['default', 'primary', 'secondary', 'tertiary', 'neutral'].map((c) => (
+          <Cell key={c} label={c} emphasis={c === 'default'}>
+            <Toolbar items={TOOLBAR_ITEMS} color={c} defaultValue={0} />
+          </Cell>
+        ))}
+      </VStack>
+    ),
+    /* The LEVEL, which is the axis `white` and `black` were really asking
+       for. Shown on one theme so the only thing changing is the lightness. */
+    surface: () => (
+      <VStack gap="var(--Sizing-3)" style={{ alignItems: 'flex-start' }}>
+        {['Surface', 'Surface-Dim', 'Surface-Bright', 'Surface-Brightest',
+          'Container'].map((lvl) => (
+          <Cell key={lvl} label={lvl} emphasis={lvl === 'Surface'}>
+            <Toolbar items={TOOLBAR_ITEMS} surface={lvl} defaultValue={0} />
+          </Cell>
+        ))}
       </VStack>
     ),
     orientation: () => (
