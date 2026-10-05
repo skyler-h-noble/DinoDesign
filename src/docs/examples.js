@@ -84,7 +84,7 @@ import { Pagination } from '../components/Pagination';
 import { Tabs, TabList, Tab, TabPanel } from '../components/Tabs';
 import { ButtonGroup } from '../components/ButtonGroup';
 import { Accordion } from '../components/Accordion';
-import { Body, H3 } from '../components/Typography';
+import { Body, H3, H2, Subtitle } from '../components/Typography';
 import { VStack, HStack } from '../components/Stack';
 import { Caption } from '../components/Typography';
 import { SLIDER_SAMPLES } from './samples.slider';
@@ -207,6 +207,17 @@ export const EXAMPLES = {
     </Box>
   ),
   Copyright: () => <Copyright companyName="Acme" />,
+  /* A ladder, not one line. Typography's job is the RELATIONSHIP between
+     styles — the step from a heading to its body, the drop to a caption — and
+     a single sentence in one style shows none of it. */
+  Typography: () => (
+    <VStack gap="var(--Sizing-Half)" style={{ alignItems: 'flex-start' }}>
+      <H2>A heading</H2>
+      <Subtitle color="standard">A subtitle, which is Body at 700</Subtitle>
+      <Body>Body copy, the style everything else is measured against.</Body>
+      <Caption color="quiet">A caption, quiet by default.</Caption>
+    </VStack>
+  ),
   /* Two surfaces touching, which is the only way to show what a Section does:
      one alone looks like a div with a background. */
   Section: () => (

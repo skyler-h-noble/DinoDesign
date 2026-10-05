@@ -431,8 +431,79 @@ export const LINEAR_PROGRESS_DOC = {
   ]
 };
 
+export const TYPOGRAPHY_DOC = {
+  name: 'Typography',
+  summary: 'Every text style in the system, as one component and a named shortcut for each.',
+  insteadUse: [{
+    when: 'It is a link',
+    use: 'Link'
+  }, {
+    when: 'It is code or a copyable command',
+    use: 'CodeBlock'
+  }, {
+    when: 'It is a label on a control',
+    use: 'the control\u2019s own `label` prop'
+  }],
+  props: [{
+    name: 'textStyle',
+    type: 'string',
+    default: 'body',
+    note: 'Which style. There are 47 \u2014 display, alt-display, h1\u2013h6, subtitle, body, label, caption, eyebrow, legal, button, each with its size steps. The named shortcuts (`<H2>`, `<Body>`, `<Caption>`) are this prop already chosen, and are what you should normally import.'
+  }, {
+    name: 'color',
+    type: 'string',
+    default: "the style's own",
+    note: 'Headings default to a Header tone and body text to a Text tone, which is why `<H2>` and `<Body>` look right without being told. Pass `quiet`, `primary`, `success` and so on to change it \u2014 never `style={{ color }}`.'
+  }, {
+    name: 'altMode',
+    type: 'string',
+    values: ['default', 'colored', 'gradient'],
+    default: 'default',
+    note: 'Alt Display only. The decorative face can take a flat color or the brand gradient; ordinary styles ignore it.'
+  }, {
+    name: 'width',
+    type: 'string',
+    default: 'undefined',
+    note: 'hug or fill. Text hugs by default, which matters inside a flex row where filling would push siblings out.'
+  }, {
+    name: 'component',
+    type: 'string',
+    default: "the style's own element",
+    note: 'Overrides the rendered tag. Use it when the level is wrong for the document outline \u2014 a page with two `<h1>`s is a worse problem than text at the wrong size.'
+  }, {
+    name: 'noWrap',
+    type: 'boolean',
+    default: 'false',
+    note: 'One line, with an ellipsis. Make sure the full text is reachable some other way \u2014 clipped text that exists nowhere else is lost, not shortened.'
+  }, {
+    name: 'gutterBottom',
+    type: 'boolean',
+    default: 'false'
+  }],
+  theming: [{
+    collection: 'Typography',
+    inCode: 'The style tokens are read automatically; `color` picks the tone.',
+    inFigma: 'Figma holds these as TEXT STYLES, not a component set \u2014 201 variables in the Typography collection.'
+  }],
+  themingNotes: ['Sizes are platform-dependent: Desktop uses the brand\u2019s own ramp, iOS and Android use the vendors\u2019 published Dynamic Type tables. That switch is `data-device`, not a media query.'],
+  composition: [
+    'Import the named shortcut, not the base component. `<H2>Title</H2>` says what it is; `<Typography textStyle="h2">` says how it is built.',
+    'Body has two weights and no bold: for bold at body size use Subtitle, which IS Body at 700. Pass `color="standard"` with it, because Subtitle defaults to the header tone.',
+  ],
+  accessibility: [
+    'Each style renders the element it means \u2014 `<h2>` for H2, `<p>` for Body \u2014 so the document outline comes out right without anyone thinking about it.',
+    'When the visual level and the outline disagree, change `component` rather than reaching for a smaller style. Screen readers navigate by heading level, and a page whose outline skips from h1 to h4 is hard to move through.',
+    'Never recolor text with `style={{ color }}`. The `color` prop picks tones that are paired with the surface, so they stay legible when the surface flips; a literal does not.',
+  ],
+  gotchas: [
+    '`textStyle="body-bold"` resolves to the SEMIBOLD style. It is a back-compat alias, not a 700 \u2014 there is no bold Body.',
+    '`--Overline-*` tokens still resolve but the style is called Eyebrow now. The alias points Overline \u2192 Eyebrow, and the direction is load-bearing: pointing it the other way would quietly make Overline canonical again.',
+    'There is no step-less `--Eyebrow-Font-Size`. The sizes are always -Small / -Medium / -Large, and reaching for the bare name gets a silent fallback.',
+  ]
+};
+
 export const REST_DOCS = [SELECT_DOC, MENU_DOC, CODE_BLOCK_DOC, PLAYER_DOC,
-  CIRCULAR_PROGRESS_DOC, LINEAR_PROGRESS_DOC, undesigned('Autocomplete', 'A text field whose list narrows as the user types.', [{
+  CIRCULAR_PROGRESS_DOC, LINEAR_PROGRESS_DOC, TYPOGRAPHY_DOC, undesigned('Autocomplete', 'A text field whose list narrows as the user types.', [{
   when: 'The list is short and fixed',
   use: 'Select'
 }, {

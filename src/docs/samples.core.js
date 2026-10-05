@@ -13,6 +13,7 @@ import { Badge } from '../components/Badge';
 import { Alert } from '../components/Alert';
 import { Avatar } from '../components/Avatar';
 import { Player } from '../components/Player';
+import { Box } from '../components/Box';
 import FormatBoldIcon from '@mui/icons-material/FormatBold';
 import { ToggleButton } from '../components/ToggleButton';
 import { LinearProgress } from '../components/LinearProgress';
@@ -29,7 +30,7 @@ import { Fab } from '../components/Fab';
 import { Rating } from '../components/Rating';
 import { CodeBlock } from '../components/CodeBlock';
 import { VStack, HStack } from '../components/Stack';
-import { Caption, Body } from '../components/Typography';
+import { Caption, Body, Typography } from '../components/Typography';
 import { PALETTES, SIZES, Axis, AxisStack, Toggle, Cell } from './samples';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -39,6 +40,74 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 const SNIPPET = 'npm install @omni-design/components';
 
 export const CORE_SAMPLES = {
+  Typography: {
+    /* Four of the 47, chosen to show the axis rather than catalogue it: the
+       full ramp lives on the Typography foundation page, and a sample that
+       reprints it is a second copy to keep in step. */
+    textStyle: () => (
+      <VStack gap="var(--Sizing-1)" style={{ alignItems: 'flex-start' }}>
+        {[['h2', 'A heading'], ['subtitle', 'A subtitle'],
+          ['body', 'Body copy'], ['caption', 'A caption']].map(([t, text]) => (
+          <Cell key={t} label={t} emphasis={t === 'body'}>
+            <Typography textStyle={t}>{text}</Typography>
+          </Cell>
+        ))}
+      </VStack>
+    ),
+    color: () => (
+      <HStack gap="var(--Sizing-2)" style={{ flexWrap: 'wrap' }}>
+        {['standard', 'quiet', 'primary', 'success', 'error'].map((c) => (
+          <Cell key={c} label={c} emphasis={c === 'standard'}>
+            <Body color={c}>Body</Body>
+          </Cell>
+        ))}
+      </HStack>
+    ),
+    noWrap: () => (
+      <VStack gap="var(--Sizing-2)">
+        {[false, true].map((on) => (
+          <Cell key={String(on)} label={String(on)} emphasis={!on}>
+            <div style={{ width: 180 }}>
+              <Body noWrap={on}>A line long enough to need wrapping or an ellipsis.</Body>
+            </div>
+          </Cell>
+        ))}
+      </VStack>
+    ),
+    altMode: () => (
+      <HStack gap="var(--Sizing-3)" style={{ flexWrap: 'wrap' }}>
+        {['default', 'colored', 'gradient'].map((m) => (
+          <Cell key={m} label={m} emphasis={m === 'default'}>
+            <Typography textStyle="alt-display-small" altMode={m}>Alt</Typography>
+          </Cell>
+        ))}
+      </HStack>
+    ),
+    width: () => (
+      <VStack gap="var(--Sizing-2)">
+        {['hug', 'fill'].map((w) => (
+          <Cell key={w} label={w} emphasis={w === 'hug'}>
+            <Box surface="Container" style={{ width: 240 }}>
+              <Body width={w}>Text</Body>
+            </Box>
+          </Cell>
+        ))}
+      </VStack>
+    ),
+    gutterBottom: () => (
+      <VStack gap="var(--Sizing-2)">
+        {[false, true].map((on) => (
+          <Cell key={String(on)} label={String(on)} emphasis={!on}>
+            <div>
+              <Body gutterBottom={on}>First line.</Body>
+              <Body>Second line.</Body>
+            </div>
+          </Cell>
+        ))}
+      </VStack>
+    ),
+  },
+
   ToggleButton: {
     /* Both states side by side rather than one toggle you have to press: the
        difference between on and off IS the component, and a reader checking
