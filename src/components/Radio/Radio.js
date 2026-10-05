@@ -77,23 +77,33 @@ function RadioCircleIcon({ size, color, checked }) {
         boxSizing: 'border-box',
         borderRadius: '50%',
         border: '2px solid ' + ringColor,
-        overflow: 'hidden',
         flexShrink: 0,
         backgroundColor: 'var(--Background)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        /* The dot is centred by POSITION, not by flex.
+           Flex centring inside a bordered circle depends on the browser
+           resolving the content box the same way the border is painted, and
+           the two round independently — which leaves the dot a sub-pixel off
+           and visibly so on a 10px dot inside a 20px ring. `overflow: hidden`
+           then clipped the low side of that offset, so the dot read as
+           both off-centre and slightly out of round.
+           Half the box, less half the dot, applied as a transform: there is no
+           content box in that sum, so nothing can disagree about where the
+           middle is. */
+        position: 'relative',
         transition: 'border-color 0.15s ease-in-out',
       }}
     >
       {checked && (
         <Box
           sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
             width: sizeConfig.dot,
             height: sizeConfig.dot,
             borderRadius: '50%',
             backgroundColor: dotColor,
-            transition: 'transform 0.15s ease-in-out',
           }}
         />
       )}

@@ -185,6 +185,16 @@ export const EXAMPLES = {
       <SwitchInput label="On" defaultChecked />
     </VStack>,
   Slider: () => <Slider defaultValue={40} />,
+  /* A real question with real options: a group's whole job is to make one
+     choice legible, and placeholder labels cannot show that. */
+  RadioGroup: () => (
+    <RadioGroup label="Delivery" name="lead" defaultValue="std"
+      options={[
+        { value: 'std', label: 'Standard \u2014 3 to 5 days' },
+        { value: 'exp', label: 'Express \u2014 next day' },
+        { value: 'pick', label: 'Collect in store' },
+      ]} />
+  ),
   Rating: () => <Rating defaultValue={3} />,
   Breadcrumbs: () => <Breadcrumbs>
       <Link href="#a">Home</Link>

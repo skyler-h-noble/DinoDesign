@@ -109,6 +109,92 @@ export const CHECKBOX_DOC = {
   accessibility: ['A checkbox without a `label` needs an `aria-label`.', '`indeterminate` sets `aria-checked="mixed"` — do not also set `checked`.', 'The box is centred inside a constant 24px frame so the target meets WCAG 2.5.8 even at `small`.'],
   gotchas: ['It defaults to `variant="primary"`, unlike Button which defaults to `default`. Both are deliberate.', 'The 24px hit area is `--Sizing-3`, not a Checkbox token. It lives on the Sizing scale — a collection, not a Component-Size group, so it has no prefix — and a second name for one number is how the two drift.']
 };
+export const RADIO_GROUP_DOC = {
+  name: 'RadioGroup',
+  summary: 'Presents a set of options where exactly one is chosen.',
+  insteadUse: [{
+    when: 'Options are independent of each other',
+    use: 'Checkbox'
+  }, {
+    when: 'There are more than about seven',
+    use: 'Select'
+  }, {
+    when: 'The choice is between two states of one thing',
+    use: 'SwitchInput'
+  }, {
+    when: 'Choosing one switches the view',
+    use: 'Tabs'
+  }],
+  props: [{
+    name: 'options',
+    type: 'Array<{ value, label, disabled? }>',
+    default: '[]',
+    note: 'The rows. Passing children instead works and is what you want when a row needs more than a label.'
+  }, {
+    name: 'value / onChange',
+    type: 'string / function',
+    default: 'undefined',
+    note: 'Controlled. `onChange` is MUI\u2019s `(event)`, so the chosen value is `event.target.value`.'
+  }, {
+    name: 'orientation',
+    type: 'string',
+    values: ['vertical', 'horizontal'],
+    default: 'vertical',
+    note: 'The Figma set\u2019s only axis. Horizontal wraps rather than overflowing.'
+  }, {
+    name: 'label',
+    type: 'ReactNode',
+    default: 'undefined',
+    note: 'Renders as a `<legend>` inside the group\u2019s `<fieldset>`, which is what names the group to a screen reader.'
+  }, {
+    name: 'color',
+    type: 'string',
+    default: 'primary',
+    note: 'Threaded to every Radio. Primary rather than default, matching the Figma set\u2019s pinned `Theme=Primary`.'
+  }, {
+    name: 'size',
+    type: 'string',
+    values: ['small', 'medium', 'large'],
+    default: 'medium'
+  }, {
+    name: 'labelPlacement',
+    type: 'string',
+    values: ['start', 'end', 'top', 'bottom'],
+    default: 'end',
+    note: 'Threaded to every Radio, so the rows cannot disagree.'
+  }, {
+    name: 'spacing',
+    type: 'number',
+    default: '1',
+    note: 'Gap between rows, on the Sizing scale.'
+  }, {
+    name: 'name',
+    type: 'string',
+    default: 'undefined',
+    note: 'The form field name. Native radios need one to behave as a group \u2014 pass it or the browser treats each as its own.'
+  }, {
+    name: 'disabled',
+    type: 'boolean',
+    default: 'false',
+    note: 'Disables the whole group. A single row is disabled through its own entry in `options`.'
+  }],
+  composition: [
+    'Never use one Radio alone. A radio that cannot be unchecked by clicking it again is only sensible beside others \u2014 for a single on/off, that is a Checkbox or a SwitchInput.',
+    'Give the group a `label`. It becomes the `<legend>`, and without it a screen reader reads the rows with nothing saying what they are a choice about.',
+  ],
+  accessibility: [
+    'The group is a `<fieldset>` and its `label` is the `<legend>`. That pairing is what makes the options read as one question rather than several.',
+    'Without a visible `label`, pass `aria-label` or `aria-labelledby` \u2014 the group still needs a name.',
+    'Arrow keys move between the options and Tab leaves the group. That is the native behaviour and it is the reason to use real radios here rather than styled buttons.',
+    'Each row\u2019s target is the 24px frame around the dot, `--Sizing-3`, so it meets WCAG 2.5.8 even at `small`.',
+  ],
+  gotchas: [
+    '`onChange` gives you an event, not a value. It is MUI\u2019s signature \u2014 read `event.target.value`.',
+    'Pass `name` when the group is inside a real form. Without it the browser does not know the radios belong together, and more than one can end up checked.',
+    'It defaults to `color="primary"`, unlike Button which defaults to `default`. The Figma set pins `Theme=Primary`, so this matches the file rather than the general rule.',
+  ]
+};
+
 export const RADIO_DOC = {
   name: 'Radio',
   summary: 'Picks exactly one option from a set. Never use one alone.',
@@ -785,4 +871,4 @@ export const SWATCH_DOC = {
 
 /* Declared last: every doc it names must already exist, and a `const` is in
    the temporal dead zone until its own line runs. */
-export const FORM_DOCS = [CHECKBOX_DOC, RADIO_DOC, SWITCH_DOC, CHIP_DOC, ALERT_DOC, BADGE_DOC, AVATAR_DOC, INPUT_DOC, SWATCH_DOC];
+export const FORM_DOCS = [CHECKBOX_DOC, RADIO_DOC, RADIO_GROUP_DOC, SWITCH_DOC, CHIP_DOC, ALERT_DOC, BADGE_DOC, AVATAR_DOC, INPUT_DOC, SWATCH_DOC];

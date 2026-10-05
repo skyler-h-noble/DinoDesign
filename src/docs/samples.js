@@ -44,7 +44,16 @@ export const SIZES = ['small', 'medium', 'large'];
 /* One labelled cell. The label sits BELOW the thing it names, and the row
    bottom-aligns, so every label in an axis starts at the same y. */
 export const Cell = ({ label, emphasis = false, width, children }) => (
-  <VStack gap="var(--Sizing-Half)" style={{ alignItems: 'flex-start', width }}>
+  /* CENTRED under what it names.
+     Left-aligned worked while most samples carried their own label and the
+     cell was as wide as that label. With the duplicate labels removed the
+     controls are narrow and the caption is not, so "medium" started under the
+     left edge of a 20px radio and ran out past it — the label no longer
+     pointed at the thing. Centring is what makes a caption belong to the
+     control above it rather than to the column.
+     `text-align` as well as `align-items`, because a caption that wraps to two
+     lines centres both of them. */
+  <VStack gap="var(--Sizing-Half)" style={{ alignItems: 'center', width, textAlign: 'center' }}>
     <div>{children}</div>
     <Caption color={emphasis ? 'standard' : 'quiet'}>{label}</Caption>
   </VStack>

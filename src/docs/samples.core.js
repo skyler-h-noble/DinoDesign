@@ -92,7 +92,7 @@ export const CORE_SAMPLES = {
       <Axis
         values={PALETTES}
         defaultValue="primary"
-        render={(v) => <Chip variant={v} label={v} />}
+        render={(v) => <Chip variant={v} label="Label" />}
       />
     ),
     selected: () => (
@@ -226,7 +226,7 @@ export const CORE_SAMPLES = {
   Swatch: {
     size: () => (
       <Axis values={SIZES} defaultValue="medium"
-            render={(v) => <Swatch color="#70947b" size={v} label={v} />} />
+            render={(v) => <Swatch color="#70947b" size={v} />} />
     ),
     /* Selection is marked on the chip itself — a check on its disc, always
        drawn on --Background and never on the color, because the color is

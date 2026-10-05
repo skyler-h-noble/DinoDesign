@@ -38,11 +38,11 @@ export const FORM_SAMPLES = {
   Checkbox: {
     variant: () => (
       <Axis values={TEN} defaultValue="primary"
-            render={(v) => <Checkbox variant={v} defaultChecked label={v} />} />
+            render={(v) => <Checkbox variant={v} defaultChecked />} />
     ),
     size: () => (
       <Axis values={SIZES} defaultValue="medium"
-            render={(v) => <Checkbox size={v} defaultChecked label={v} />} />
+            render={(v) => <Checkbox size={v} defaultChecked />} />
     ),
     'checked / defaultChecked': () => (
       <HStack gap="var(--Sizing-3)" style={{ flexWrap: 'wrap' }}>
@@ -68,11 +68,11 @@ export const FORM_SAMPLES = {
   Radio: {
     color: () => (
       <Axis values={TEN} defaultValue="primary"
-            render={(v) => <Radio color={v} checked label={v} name={'c-' + v} />} />
+            render={(v) => <Radio color={v} checked name={'c-' + v} />} />
     ),
     size: () => (
       <Axis values={SIZES} defaultValue="medium"
-            render={(v) => <Radio size={v} checked label={v} name={'s-' + v} />} />
+            render={(v) => <Radio size={v} checked name={'s-' + v} />} />
     ),
     /* FOUR placements. `start` and `end` are the common pair; `top` and
        `bottom` stack the label, which is what a row of radios under icons
@@ -99,6 +99,67 @@ export const FORM_SAMPLES = {
     disabled: () => (
       <Toggle render={(on) => <Radio checked disabled={on} label="Dark" name={'d-' + on} />}
               offLabel="enabled" onLabel="disabled" />
+    ),
+  },
+
+  RadioGroup: {
+    /* Real options, not "Option 1 / Option 2". A group is about a choice
+       somebody makes, and a sample reads as one only if the options are
+       things a person would actually pick between. */
+    orientation: () => (
+      <HStack gap="var(--Sizing-4)" style={{ flexWrap: 'wrap', alignItems: 'flex-start' }}>
+        <Cell label="vertical" emphasis>
+          <RadioGroup label="Delivery" name="o-v" defaultValue="std"
+            options={[
+              { value: 'std', label: 'Standard' },
+              { value: 'exp', label: 'Express' },
+              { value: 'pick', label: 'Collect in store' },
+            ]} />
+        </Cell>
+        <Cell label="horizontal">
+          <RadioGroup label="Delivery" name="o-h" orientation="horizontal" defaultValue="std"
+            options={[
+              { value: 'std', label: 'Standard' },
+              { value: 'exp', label: 'Express' },
+            ]} />
+        </Cell>
+      </HStack>
+    ),
+    size: () => (
+      <Axis values={SIZES} defaultValue="medium"
+            render={(v) => (
+              <RadioGroup size={v} name={'s-' + v} defaultValue="a"
+                options={[{ value: 'a', label: 'One' }, { value: 'b', label: 'Two' }]} />
+            )} />
+    ),
+    labelPlacement: () => (
+      <Axis values={['end', 'start', 'top', 'bottom']} defaultValue="end"
+            render={(v) => (
+              <RadioGroup labelPlacement={v} name={'lp-' + v} defaultValue="a"
+                orientation={v === 'top' || v === 'bottom' ? 'horizontal' : 'vertical'}
+                options={[{ value: 'a', label: 'One' }, { value: 'b', label: 'Two' }]} />
+            )} />
+    ),
+    /* Both kinds, because they are different decisions: the GROUP is
+       unavailable, or one option is while the rest can still be chosen. */
+    disabled: () => (
+      <HStack gap="var(--Sizing-4)" style={{ flexWrap: 'wrap', alignItems: 'flex-start' }}>
+        <Cell label="the whole group" emphasis>
+          <RadioGroup label="Delivery" name="d-all" defaultValue="std" disabled
+            options={[
+              { value: 'std', label: 'Standard' },
+              { value: 'exp', label: 'Express' },
+            ]} />
+        </Cell>
+        <Cell label="one option">
+          <RadioGroup label="Delivery" name="d-one" defaultValue="std"
+            options={[
+              { value: 'std', label: 'Standard' },
+              { value: 'exp', label: 'Express' },
+              { value: 'pick', label: 'Collect in store', disabled: true },
+            ]} />
+        </Cell>
+      </HStack>
     ),
   },
 
@@ -183,12 +244,12 @@ export const FORM_SAMPLES = {
       <AxisStack
         values={PALETTES.map(c => c + '-outline')}
         defaultValue="primary-outline"
-        render={(v) => box(<TextInput variant={v} label={v} placeholder="Value" />)}
+        render={(v) => box(<TextInput variant={v} label="Name" placeholder="Value" />)}
       />
     ),
     size: () => (
       <AxisStack values={SIZES} defaultValue="medium"
-                 render={(v) => box(<TextInput size={v} label={v} placeholder="Value" />)} />
+                 render={(v) => box(<TextInput size={v} label="Name" placeholder="Value" />)} />
     ),
     /* `floating` starts the label inside the field and lifts it on focus or
        value. `standard` keeps it above, which is the one that survives a
@@ -232,7 +293,7 @@ export const FORM_SAMPLES = {
     ),
     size: () => (
       <AxisStack values={SIZES} defaultValue="medium"
-                 render={(v) => box(<TextField size={v} label={v} placeholder="Value" />)} />
+                 render={(v) => box(<TextField size={v} label="Name" placeholder="Value" />)} />
     ),
   },
 
@@ -273,14 +334,14 @@ export const FORM_SAMPLES = {
     ),
     size: () => (
       <AxisStack values={SIZES} defaultValue="medium"
-                 render={(v) => box(<Select size={v} label={v} options={SELECT_OPTIONS}
+                 render={(v) => box(<Select size={v} label="Option" options={SELECT_OPTIONS}
                                             defaultValue="system" />)} />
     ),
     /* Three modes, and they change what the control IS rather than how it
        looks: one value, several values, or a filter over the list. */
     mode: () => (
       <AxisStack values={['standard', 'multiselect', 'searchable']} defaultValue="standard"
-                 render={(v) => box(<Select mode={v} label={v} options={SELECT_OPTIONS}
+                 render={(v) => box(<Select mode={v} label="Option" options={SELECT_OPTIONS}
                    defaultValue={v === 'multiselect' ? ['system'] : 'system'} />)} />
     ),
   },
@@ -299,7 +360,7 @@ export const FORM_SAMPLES = {
     ),
     size: () => (
       <AxisStack values={SIZES} defaultValue="medium"
-                 render={(v) => box(<Autocomplete size={v} label={v}
+                 render={(v) => box(<Autocomplete size={v} label="Option"
                                                   options={['Light', 'Dark', 'System']} />)} />
     ),
   },
