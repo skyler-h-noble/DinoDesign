@@ -14,14 +14,21 @@
  */
 import { FOUNDATIONS } from '../../docs/foundations';
 
-/** The published row: ['`Switch-Width` · `Height`', '35 · 20', ...] */
-function publishedSwitchSizes() {
+/** A published row, e.g. ['`Switch-Width` · `Height`', '35 · 20', ...] */
+function publishedRow(label) {
   const topic = FOUNDATIONS.find((t) => t.title === 'Component size');
-  const row = topic.table.rows.find((r) => r[0].includes('Switch-Width'));
+  const row = topic.table.rows.find((r) => r[0].includes(label));
   expect(row).toBeTruthy();
   const parse = (cell) => cell.split('·').map((n) => Number(n.trim()));
   return { small: parse(row[1]), medium: parse(row[2]), large: parse(row[3]) };
 }
+const publishedSwitchSizes = () => publishedRow('Switch-Width');
+
+/* The handle and the icon, which were BOTH wrong and in the same way the track
+   had been: medium agreed and the ends did not. The handle was derived as
+   `trackH - 4`, a rule that fits two of the three sizes; the icon was 8 and 16
+   against a published 12 and 24. */
+const publishedHandleIcon = () => publishedRow('Switch-Handle');
 
 /* Read from the source rather than imported: SIZE_MAP is internal, and
    exporting it so a test can see it would widen the public API to suit a test.
@@ -61,6 +68,22 @@ function cssSwitchSizes() {
     large:  [px('Lg-Switch-Width'), px('Lg-Switch-Height')],
   };
 }
+
+function handleIconFromSource() {
+  const fs = require('fs');
+  const path = require('path');
+  const src = fs.readFileSync(path.join(__dirname, 'Switch.js'), 'utf8');
+  const out = {};
+  const re = /(small|medium|large):\s*\{[^}]*handle:\s*(\d+)[^}]*icon:\s*(\d+)/g;
+  let m;
+  while ((m = re.exec(src)) !== null) out[m[1]] = [Number(m[2]), Number(m[3])];
+  return out;
+}
+
+test.each(['small', 'medium', 'large'])(
+  'the %s handle and icon are the sizes Figma publishes', (size) => {
+    expect(handleIconFromSource()[size]).toEqual(publishedHandleIcon()[size]);
+  });
 
 test.each(['small', 'medium', 'large'])(
   'the %s switch is the size Figma publishes', (size) => {

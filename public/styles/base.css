@@ -272,6 +272,11 @@
   --Switch-Height: 24px;
   --Sm-Switch-Height: 20px;
   --Lg-Switch-Height: 32px;
+  /* The handle is published, not the track minus its inset: that derivation
+     holds at medium and large and gives 16 at small where the file says 15. */
+  --Switch-Handle: 20px;
+  --Sm-Switch-Handle: 15px;
+  --Lg-Switch-Handle: 28px;
   --Divider: 1px;
   --Sm-Divider: 0.5px;
   --Lg-Divider: 2px;

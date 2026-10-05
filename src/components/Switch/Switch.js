@@ -171,9 +171,9 @@ const THUMB_INSET = 2;
    contain. docs/foundations.js carries the same table, and
    SwitchSizeParity.test.js asserts the two against each other. */
 const SIZE_MAP = {
-  small:  { trackW: 35, trackH: 20, dotRadius: 'var(--Sizing-2, 16px)',          icon: 8  },
-  medium: { trackW: 42, trackH: 24, dotRadius: 'var(--Sizing-2-and-Half, 20px)', icon: 16 },
-  large:  { trackW: 56, trackH: 32, dotRadius: 'var(--Sizing-2-and-Half, 20px)', icon: 16 },
+  small:  { trackW: 35, trackH: 20, handle: 15, dotRadius: 'var(--Sizing-2, 16px)',          icon: 12 },
+  medium: { trackW: 42, trackH: 24, handle: 20, dotRadius: 'var(--Sizing-2-and-Half, 20px)', icon: 16 },
+  large:  { trackW: 56, trackH: 32, handle: 28, dotRadius: 'var(--Sizing-2-and-Half, 20px)', icon: 24 },
 };
 
 // --- Component ---------------------------------------------------------------
@@ -211,7 +211,13 @@ export function Switch({
   const sc = SIZE_MAP[size] || SIZE_MAP.medium;
   const LabelComp = size === 'small' ? BodySmall : Body;
 
-  const dot      = sc.trackH - THUMB_INSET * 2;
+  /* The handle is a PUBLISHED value, not the track minus its inset.
+     `trackH - THUMB_INSET * 2` gives 20 and 28 at medium and large, which is
+     what the collection holds — and 16 at small, where the collection says 15.
+     The inset is 2.5 there, so the derivation is a rule fitted to two of the
+     three sizes. Two of three agreeing is the same thing that hid the track
+     being wrong, so the number is read rather than recomputed. */
+  const dot      = sc.handle;
   const rootW    = Math.max(TOUCH_MIN, sc.trackW);
   const rootH    = Math.max(TOUCH_MIN, sc.trackH);
   const trackTop = (rootH - sc.trackH) / 2;
