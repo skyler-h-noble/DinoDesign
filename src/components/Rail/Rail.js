@@ -5,7 +5,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import { Button } from '../Button/Button';
 import { Icon } from '../Icon/Icon';
-import { LabelExtraSmall } from '../Typography';
+import { MobileNavLabel } from '../Typography';
 
 /* Figma's Buttons collection names its modes in lower-kebab; the CSS tokens
    are PascalCase, and `black-white` closes up rather than keeping the seam. */
@@ -446,7 +446,7 @@ function RailItem({ item, selected, expanded, labelStyle, variant = 'default', o
           display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
           width: '100%',
         }}>
-          {/* LabelExtraSmall, not Caption at an overridden 11px.
+          {/* MobileNavLabel, not Caption at an overridden 11px.
               
               The design's style is Typography/Labels/Extra-Small and the lib
               publishes exactly that — --Label-ExtraSmall-*. Caption with an
@@ -457,7 +457,7 @@ function RailItem({ item, selected, expanded, labelStyle, variant = 'default', o
               It also fixes invalid markup. Caption renders a <p>, and a <p>
               inside a <button> is not phrasing content — the browser was
               repairing it silently. */}
-          <LabelExtraSmall
+          <MobileNavLabel
             className="rail-item-label"
             /* `color="inherit"` rather than style={{ color }} — Typography
                strips a `color` from the style object and uses its own prop,
@@ -472,7 +472,7 @@ function RailItem({ item, selected, expanded, labelStyle, variant = 'default', o
             }}
           >
             {label}
-          </LabelExtraSmall>
+          </MobileNavLabel>
         </Box>
       )}
     </Box>

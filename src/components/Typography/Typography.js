@@ -412,6 +412,31 @@ export const STYLE_MAP = {
     defaultWidth: 'hug',
   },
 
+  /* THE NAV LABEL IS ITS OWN STYLE, not Labels/Extra-Small.
+   *
+   * Figma binds Labels/Mobile-Nav-Label-Font-Size / -Line-Height /
+   * -Letter-Spacing on the Nav Item's caption, with the BODY family at
+   * Body-Semibold-Font-Weight. The library rendered it as LabelExtraSmall,
+   * which today resolves to the same six values — Body family, 11px, 600,
+   * 16.5px, 0.0455em — so it looked right and was reading the wrong token.
+   *
+   * They do not stay equal. Mobile-Nav-Label is device-scoped in the file:
+   * 11 on Desktop, 10 on iOS, 12 on Android, and weight 400 rather than 600
+   * on the System face for mobile. A brand or platform that moves its label
+   * scale would move Labels/Extra-Small and leave the nav caption behind, or
+   * the other way round — and neither would show up until someone compared
+   * a phone against a desktop. */
+  'mobile-nav-label': {
+    component: 'span',
+    fontFamily: 'var(--Mobile-Nav-Label-Font-Family, var(--Font-Family-Body))',
+    fontSize: fs('Mobile-Nav-Label'),
+    fontWeight: fw('Mobile-Nav-Label'),
+    lineHeight: lhr('Mobile-Nav-Label'),
+    letterSpacing: ls('Mobile-Nav-Label'),
+    defaultColor: 'standard',
+    defaultWidth: 'hug',
+  },
+
   // ── Labels ────────────────────────────────────────────────────────────────
   'label-extra-small': {
     component: 'label',
@@ -945,6 +970,7 @@ export const Caption     = (p) => <Typography textStyle="caption"      {...p} />
 export const CaptionBold = (p) => <Typography textStyle="caption-bold" {...p} />;
 
 // Labels
+export const MobileNavLabel  = (p) => <Typography textStyle="mobile-nav-label"  {...p} />;
 export const LabelExtraSmall = (p) => <Typography textStyle="label-extra-small" {...p} />;
 export const LabelSmall      = (p) => <Typography textStyle="label-small"       {...p} />;
 export const Label           = (p) => <Typography textStyle="label"             {...p} />;

@@ -2,7 +2,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Box } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { LabelExtraSmall, LabelSmall } from '../Typography';
+import { MobileNavLabel, LabelSmall } from '../Typography';
 
 /**
  * BottomNavigation — the design's Nav-Bar.
@@ -11,7 +11,11 @@ import { LabelExtraSmall, LabelSmall } from '../Typography';
  * rather than from what a bottom bar usually looks like. The component set
  * has three axes and this has all three:
  *
- *   Style        Fixed | Floating      square and edge to edge, or a pill
+ *   Style        Fixed | Floating | Floating +Raised FAB | Right FAB
+ *                square and edge to edge, or a pill; the two FAB styles are
+ *                reached here through `fabAction` + `fabPosition` rather than
+ *                as values of `variant`, because the FAB is a thing you pass
+ *                rather than a shape the bar takes.
  *   Orientation  Horizontal | Vertical the BAR's direction
  *   Labels       Default | No Labels
  *
@@ -25,8 +29,9 @@ import { LabelExtraSmall, LabelSmall } from '../Typography';
  *                  rounded pill.
  *
  *   `orientation`  the BAR's direction, which is what the design means: the
- *                  horizontal variant is 398x83 and the vertical one is
- *                  64x377, a rail of actions rather than a bar.
+ *                  horizontal bar is 80 tall (Other/ToolBar) and the vertical
+ *                  one is Rail-Width across, a rail of actions rather than a
+ *                  bar.
  *   `labelOrientation` REMOVED. It meant the label's position relative to the
  *                  icon, and the design has only one answer — under it, 4px
  *                  away, in every variant. One word for two axes is how the
@@ -110,16 +115,29 @@ const ITEM_GAP = 'var(--Sizing-Half, 4px)';
  *  first and last items away from the corners a thumb actually reaches.
  *
  *  So it is not "padding per orientation" — it is padding per STYLE, and the
- *  orientation only decides which way round it goes. */
+ *  orientation only decides which way round it goes.
+ *
+ *  ONE VALUE, both axes, both orientations: Sizing-2. The file binds
+ *  paddingLeft/Right -> Sizing-2 on the floating horizontal bar and all four
+ *  sides -> Sizing-2 on the vertical one, with no vertical padding on the
+ *  horizontal bar at all. This had Button-Height (32) across and a literal
+ *  12 down, neither of which the design states. */
 const FLOATING_PAD = {
-  horizontal: { px: 'var(--Button-Height, 32px)', py: '12px' },
-  vertical: { px: 'var(--Sizing-1-and-Half, 12px)', py: 'var(--Sizing-2, 16px)' },
+  horizontal: { px: 'var(--Sizing-2, 16px)', py: 0 },
+  vertical: { px: 'var(--Sizing-2, 16px)', py: 'var(--Sizing-2, 16px)' },
 };
 const NO_PAD = { px: 0, py: 0 };
 
-/** A floating bar is a pill. The design's 83 is the horizontal bar's own
- *  height, which is what makes the ends semicircular at any length. */
-const FLOATING_RADIUS = '83px';
+/** A floating bar is a pill, so its radius is its own height — that is what
+ *  makes the ends semicircular at any length.
+ *
+ *  THE NUMBER MOVED AND THE VARIABLE WAS RENAMED. This was a literal 83px,
+ *  taken from `Other/Nav-Bar Height` when that was 83. That variable no
+ *  longer exists in the file: it is `Other/ToolBar` now, and it is 80 — with
+ *  a new `Other/ToolBarShort` at 64 beside it. Reading the token rather than
+ *  restating the number is the point; a literal cannot follow a rename. */
+const TOOLBAR_HEIGHT = 'var(--ToolBar, var(--Nav-Bar-Height, 80px))';
+const FLOATING_RADIUS = TOOLBAR_HEIGHT;
 
 export function BottomNavigation({
   items = [],
@@ -331,11 +349,11 @@ function BottomNavItem({ id, icon, label, selected, showLabel, onClick, ariaLabe
       </Box>
 
       {showLabel && label && (
-        /* LabelExtraSmall — the design's Labels/Extra-Small. This was a Box
-           with an inline 11px, which matched the size and none of the weight,
-           letter-spacing or line height, and would not follow a brand that
-           moved its label scale. */
-        <LabelExtraSmall
+        /* MobileNavLabel — the design's Labels/Mobile-Nav-Label, which is
+           its own style and not Labels/Extra-Small. The two resolve to the
+           same six values today, so reading the wrong one looked right; they
+           are device-scoped differently in the file and do not stay equal. */
+        <MobileNavLabel
           className="bottom-nav-label"
           style={{
             color: selected ? 'var(--Text)' : 'var(--Quiet)',
@@ -344,7 +362,7 @@ function BottomNavItem({ id, icon, label, selected, showLabel, onClick, ariaLabe
           }}
         >
           {label}
-        </LabelExtraSmall>
+        </MobileNavLabel>
       )}
     </Box>
   );
@@ -445,7 +463,7 @@ function BottomNavFab({ icon, label, onClick, showLabel, actions, position = 'en
         {/* A label under the ring only when the items carry theirs, or the ring
             sits higher than its neighbours. */}
         {showLabel && label && (
-          <LabelExtraSmall
+          <MobileNavLabel
             className="bottom-nav-label"
             style={{
               color: 'var(--Buttons-Default-Border)',
@@ -454,7 +472,7 @@ function BottomNavFab({ icon, label, onClick, showLabel, actions, position = 'en
             }}
           >
             {label}
-          </LabelExtraSmall>
+          </MobileNavLabel>
         )}
       </Box>
 

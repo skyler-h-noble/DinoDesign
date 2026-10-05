@@ -19,7 +19,7 @@ export {
   BodySmallSemibold, BodySmallBold, BodyLargeSemibold, BodyLargeBold,
   Body1, Body2,
   // Label
-  Label, LabelSmall, LabelLarge, LabelExtraSmall,
+  Label, LabelSmall, LabelLarge, LabelExtraSmall, MobileNavLabel,
   // Caption
   Caption, CaptionBold,
   // Legal

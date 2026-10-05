@@ -44,6 +44,7 @@ export {
   LegalSemibold,
   Label,
   LabelExtraSmall,
+  MobileNavLabel,
   LabelSmall,
   LabelLarge,
   Eyebrow,
