@@ -65,6 +65,7 @@ import { Checkbox } from '../components/Checkbox';
 import { Radio, RadioGroup } from '../components/Radio';
 import { SwitchInput } from '../components/Switch';
 import { Slider } from '../components/Slider';
+import { NumberField } from '../components/NumberField';
 import { Rating } from '../components/Rating';
 import { Input as TextInput } from '../components/Input';
 import { Breadcrumbs } from '../components/Breadcrumbs';
@@ -185,6 +186,12 @@ export const EXAMPLES = {
       <SwitchInput label="On" defaultChecked />
     </VStack>,
   Slider: () => <Slider defaultValue={40} />,
+  /* A real quantity with a real range. A number field showing 0 with no label
+     and no bounds is a picture of the parts — the label says what is being
+     counted and min/max are what make the steppers mean anything. */
+  NumberField: () => (
+    <NumberField label="Quantity" defaultValue={2} min={1} max={10} />
+  ),
   /* A real question with real options: a group's whole job is to make one
      choice legible, and placeholder labels cannot show that. */
   RadioGroup: () => (

@@ -109,6 +109,139 @@ export const CHECKBOX_DOC = {
   accessibility: ['A checkbox without a `label` needs an `aria-label`.', '`indeterminate` sets `aria-checked="mixed"` — do not also set `checked`.', 'The box is centred inside a constant 24px frame so the target meets WCAG 2.5.8 even at `small`.'],
   gotchas: ['It defaults to `variant="primary"`, unlike Button which defaults to `default`. Both are deliberate.', 'The 24px hit area is `--Sizing-3`, not a Checkbox token. It lives on the Sizing scale — a collection, not a Component-Size group, so it has no prefix — and a second name for one number is how the two drift.']
 };
+export const NUMBER_FIELD_DOC = {
+  name: 'NumberField',
+  summary: 'Takes a number, with buttons to step it and the keyboard to type it.',
+  insteadUse: [{
+    when: 'The exact value matters less than the feel of it',
+    use: 'Slider'
+  }, {
+    when: 'It is any other kind of text',
+    use: 'TextField'
+  }, {
+    when: 'There are a few discrete values',
+    use: 'Select'
+  }],
+  props: [{
+    name: 'value / defaultValue',
+    type: 'number',
+    default: '0',
+    note: 'Controlled or not, as elsewhere.'
+  }, {
+    name: 'onChange',
+    type: 'function',
+    default: 'undefined',
+    note: 'Called with the NUMBER, not an event \u2014 stepping and typing both arrive the same way.'
+  }, {
+    name: 'min / max',
+    type: 'number',
+    default: 'undefined',
+    note: 'Clamps both the steppers and typed input. Absent means unbounded, which is why neither has a default.'
+  }, {
+    name: 'step',
+    type: 'number',
+    default: '1',
+    note: 'How far one press of a stepper moves the value.'
+  }, {
+    name: 'variant',
+    type: 'string',
+    values: ['outlined', 'spinner'],
+    default: 'outlined',
+    note: 'OUTLINED puts the steppers inside the field\u2019s right edge. SPINNER puts them either side of the value, for a quantity in a tight row.'
+  }, {
+    name: 'color',
+    type: 'string',
+    default: 'default'
+  }, {
+    name: 'size',
+    type: 'string',
+    values: ['small', 'medium', 'large'],
+    default: 'medium',
+    note: 'Moves the field height, the type and the icon. The stepper stays 48 wide at every size \u2014 see the gotchas.'
+  }, {
+    name: 'label',
+    type: 'ReactNode',
+    default: 'undefined'
+  }, {
+    name: 'labelPosition',
+    type: 'string',
+    values: ['top', 'floating'],
+    default: 'top',
+    note: 'TOP sits the label above the field. FLOATING starts it inside and lifts it on focus or value, as TextField does.'
+  }, {
+    name: 'placeholder',
+    type: 'string',
+    default: 'undefined'
+  }, {
+    name: 'helperText',
+    type: 'ReactNode',
+    default: 'undefined',
+    note: 'Sits under the field and is wired to it, so a screen reader reads it with the input rather than after it.'
+  }, {
+    name: 'fullWidth',
+    type: 'boolean',
+    default: 'false'
+  }, {
+    name: 'disabled',
+    type: 'boolean',
+    default: 'false'
+  }],
+  theming: [{
+    collection: 'Theme',
+    inCode: '`data-theme` on an ancestor \u2014 the field reads the surface it sits on.',
+    inFigma: 'The `Field Button` set pins only its icon size, so a number field inherits the theme around it.'
+  }],
+  themingNotes: ['The field itself is composed from Input, so its border, radius and states come from there. Only the stepper is a Figma set of its own.'],
+  tokens: [{
+    name: '--Button-Height',
+    sets: 'the field height at `medium`; Small- and Large- for the other two',
+    variesWith: 'size mode',
+    figma: 'Component-Size/Button-Height'
+  }, {
+    name: '--Input-Radius',
+    sets: 'the field corner',
+    variesWith: 'the brand radius',
+    figma: 'Component-Size/Input-Radius'
+  }, {
+    name: '--Hover / --Pressed',
+    sets: 'the stepper under the pointer',
+    variesWith: 'surface',
+    figma: '\u2014'
+  }],
+
+  /* The five the Figma `Field Button` set carries, which is where this
+     component's states actually live: the field around it is composed from
+     Input and takes its states from there. */
+  states: [{
+    state: 'Hover',
+    setBy: 'interaction'
+  }, {
+    state: 'Pressed',
+    setBy: 'interaction'
+  }, {
+    state: 'Focus-visible',
+    setBy: 'interaction'
+  }, {
+    state: 'Disabled',
+    setBy: '`disabled`, and automatically on a stepper that would pass `min` or `max`'
+  }],
+  composition: [
+    'Give it a `label`. A number on its own says nothing about what it counts, and the steppers make it look like a control that needs no explaining.',
+    'Set `min` and `max` where the range is real. Clamping is the only thing that stops a stepper running to -1 items or 400%, and it applies to typed input too.',
+  ],
+  accessibility: [
+    'The input is a real `<input type="number">`, so arrow keys step it and the browser announces it as a spin button without anything being added.',
+    'Each stepper has its own name \u2014 "Increase" and "Decrease" \u2014 rather than the arrow glyph, which announces as nothing.',
+    'A stepper that would pass `min` or `max` is disabled rather than inert, so it reports that the end of the range has been reached instead of silently ignoring the press.',
+    '`helperText` is wired to the input with `aria-describedby`; it is read with the field rather than stranded after it.',
+  ],
+  gotchas: [
+    'The stepper button is 48 wide at EVERY size. Figma\u2019s `Field Button` set is 48x32 with Increment and State axes and no size axis \u2014 one width for all three. This was a 28 / 36 / 44 ramp here, square, which was neither the file\u2019s width nor its shape. It should vary per size, and when the file grows that axis this becomes three values instead of one constant.',
+    '`onChange` gives you a number, unlike TextField, which gives you an event. The field holds a number, so handing back a string to be parsed would make every caller do the same parse.',
+    'The NumberField itself is not a Figma component set \u2014 only its `Field Button` is. The field around it is composed from Input, so its border, radius and states come from there rather than from a set of its own.',
+  ]
+};
+
 export const RADIO_GROUP_DOC = {
   name: 'RadioGroup',
   summary: 'Presents a set of options where exactly one is chosen.',
@@ -871,4 +1004,4 @@ export const SWATCH_DOC = {
 
 /* Declared last: every doc it names must already exist, and a `const` is in
    the temporal dead zone until its own line runs. */
-export const FORM_DOCS = [CHECKBOX_DOC, RADIO_DOC, RADIO_GROUP_DOC, SWITCH_DOC, CHIP_DOC, ALERT_DOC, BADGE_DOC, AVATAR_DOC, INPUT_DOC, SWATCH_DOC];
+export const FORM_DOCS = [CHECKBOX_DOC, RADIO_DOC, RADIO_GROUP_DOC, NUMBER_FIELD_DOC, SWITCH_DOC, CHIP_DOC, ALERT_DOC, BADGE_DOC, AVATAR_DOC, INPUT_DOC, SWATCH_DOC];

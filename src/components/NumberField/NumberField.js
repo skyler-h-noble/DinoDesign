@@ -33,10 +33,27 @@ import { FLOATING_LABEL_STYLE } from '../Input/Input';
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
+/* The stepper is 48 WIDE at every size, and that is the file's number rather
+   than a ramp derived here.
+ *
+ * Figma's `Field Button` set is 48x32, with Increment (Up | Down) x State and
+ * no size axis — one width for all three. This held 28 / 36 / 44, square, which
+ * was neither the file's width nor its shape: a stepper is wider than it is
+ * tall because it holds an arrow with room either side, not a square with an
+ * arrow jammed in.
+ *
+ * It SHOULD vary per size, and the file says it does not yet. Written as one
+ * constant rather than three identical entries so that when the file grows a
+ * size axis there is one place to change and no pretence that a ramp already
+ * existed. The HEIGHT still tracks the field, because a stepper shorter than
+ * the input it sits in is a hole in the border.
+ */
+const STEPPER_WIDTH = 48;
+
 const SIZE_MAP = {
-  small:  { height: 'var(--Small-Button-Height)', fontSize: '13px', padding: '4px 8px',  iconSize: 16, btnSize: 28 },
-  medium: { height: 'var(--Button-Height)',        fontSize: '14px', padding: '6px 12px', iconSize: 18, btnSize: 36 },
-  large:  { height: 'var(--Large-Button-Height)',  fontSize: '16px', padding: '8px 16px', iconSize: 20, btnSize: 44 },
+  small:  { height: 'var(--Small-Button-Height)', fontSize: '13px', padding: '4px 8px',  iconSize: 16 },
+  medium: { height: 'var(--Button-Height)',        fontSize: '14px', padding: '6px 12px', iconSize: 18 },
+  large:  { height: 'var(--Large-Button-Height)',  fontSize: '16px', padding: '8px 16px', iconSize: 20 },
 };
 
 export function NumberField({
@@ -475,7 +492,7 @@ export function NumberField({
           disabled={disabled || atMin}
           sx={{
             ...stepperSx,
-            width: sc.btnSize, height: sc.btnSize,
+            width: STEPPER_WIDTH, height: '100%',
             borderRadius: size === 'small'
               ? 'var(--Sm-Button-Icon-Radius, var(--Button-Icon-Radius, var(--Style-Border-Radius)))'
               : size === 'large'
@@ -538,7 +555,7 @@ export function NumberField({
           disabled={disabled || atMax}
           sx={{
             ...stepperSx,
-            width: sc.btnSize, height: sc.btnSize,
+            width: STEPPER_WIDTH, height: '100%',
             borderRadius: size === 'small'
               ? 'var(--Sm-Button-Icon-Radius, var(--Button-Icon-Radius, var(--Style-Border-Radius)))'
               : size === 'large'

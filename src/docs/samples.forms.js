@@ -17,6 +17,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import { Input as TextInput } from '../components/Input';
 import { TextField } from '../components/TextField';
+import { NumberField } from '../components/NumberField';
 import { SearchField } from '../components/SearchField';
 import { Select } from '../components/Select';
 import { Autocomplete } from '../components/Autocomplete';
@@ -99,6 +100,47 @@ export const FORM_SAMPLES = {
     disabled: () => (
       <Toggle render={(on) => <Radio checked disabled={on} label="Dark" name={'d-' + on} />}
               offLabel="enabled" onLabel="disabled" />
+    ),
+  },
+
+  NumberField: {
+    variant: () => (
+      <HStack gap="var(--Sizing-4)" style={{ flexWrap: 'wrap', alignItems: 'flex-start' }}>
+        <Cell label="outlined" emphasis>
+          <NumberField label="Quantity" defaultValue={2} min={1} max={10} />
+        </Cell>
+        <Cell label="spinner">
+          <NumberField variant="spinner" label="Quantity" defaultValue={2} min={1} max={10} />
+        </Cell>
+      </HStack>
+    ),
+    size: () => (
+      <Axis values={SIZES} defaultValue="medium"
+            render={(v) => <NumberField size={v} label="Quantity" defaultValue={2} min={1} max={10} />} />
+    ),
+    /* The stepper width is the thing to look at here: it stays 48 across all
+       three, because the Figma set has no size axis. */
+    labelPosition: () => (
+      <HStack gap="var(--Sizing-4)" style={{ flexWrap: 'wrap', alignItems: 'flex-start' }}>
+        <Cell label="top" emphasis>
+          <NumberField label="Quantity" defaultValue={2} />
+        </Cell>
+        <Cell label="floating">
+          <NumberField labelPosition="floating" label="Quantity" defaultValue={2} />
+        </Cell>
+      </HStack>
+    ),
+    fullWidth: () => (
+      <Toggle render={(on) => (
+        <div style={{ width: 320 }}>
+          <NumberField fullWidth={on} label="Quantity" defaultValue={2} />
+        </div>
+      )} />
+    ),
+    disabled: () => (
+      <Toggle render={(on) => (
+        <NumberField disabled={on} label="Quantity" defaultValue={2} min={1} max={10} />
+      )} />
     ),
   },
 
