@@ -599,6 +599,62 @@ export const BUTTON_GROUP_DOC = {
   ]
 };
 
+export const TOGGLE_BUTTON_DOC = {
+  name: 'ToggleButton',
+  summary: 'One button that is on or off \u2014 bold, mute, favourite.',
+  insteadUse: [{
+    when: 'It is one of several options and exactly one is chosen',
+    use: 'ToggleButtonGroup'
+  }, {
+    when: 'Pressing it does something rather than turning something on',
+    use: 'Button'
+  }, {
+    when: 'It is a setting in a form, with a label beside it',
+    use: 'SwitchInput'
+  }, {
+    when: 'It is a row of actions',
+    use: 'ButtonGroup'
+  }],
+  props: [{
+    name: 'selected',
+    type: 'boolean',
+    default: 'false',
+    note: 'Whether it is ON. This is the whole component \u2014 a toggle that cannot report its state is a Button.'
+  }, {
+    name: 'onChange',
+    type: 'function',
+    default: 'undefined'
+  }, {
+    name: 'value',
+    type: 'any',
+    default: 'undefined',
+    note: 'Passed back on change, for a handler shared between several toggles.'
+  }, {
+    name: 'children',
+    type: 'ReactNode',
+    default: 'undefined',
+    note: 'Usually an icon. Give the button an `aria-label` when it is \u2014 and name the ACTION, not the glyph.'
+  }],
+  states: [{ state: 'Selected', setBy: '`selected`' },
+           { state: 'Hover', setBy: 'interaction' },
+           { state: 'Pressed', setBy: 'interaction' },
+           { state: 'Focus-visible', setBy: 'interaction' },
+           { state: 'Disabled', setBy: '`disabled`' }],
+  composition: [
+    'A toggle is not a group of one. If there are two or more related choices and exactly one is on, that is a ToggleButtonGroup \u2014 it owns the selection, and a row of independent toggles cannot guarantee one is always chosen.',
+    'An icon-only toggle needs an `aria-label` naming what it does: "Bold", not "B".',
+  ],
+  accessibility: [
+    'It reports `aria-pressed`, which is what tells a screen reader this is a toggle rather than an action. A Button deliberately does not.',
+    'Space and Enter both toggle it, as for any button.',
+    '"Pressed" is announced as state, so the label should name the thing being toggled and stay the same in both states \u2014 a label that flips between "Mute" and "Unmute" says the state twice and contradicts itself.',
+  ],
+  gotchas: [
+    'Figma has a ToggleButton PAGE with two frames and NO component set, so there is nothing to match against \u2014 no states, no sizes, no shapes. See the parity table.',
+    'A second ToggleButtonGroup is defined in this component\u2019s file and deliberately NOT exported. The group you want comes from ToggleButtonGroup, which owns the selection.',
+  ]
+};
+
 export const TOGGLE_BUTTON_GROUP_DOC = {
   name: 'ToggleButtonGroup',
   summary: 'A row of segments with a value, where at least one is always selected.',
@@ -718,4 +774,4 @@ export const TOGGLE_BUTTON_GROUP_DOC = {
   ]
 };
 
-export const COMPONENT_DOCS = [BUTTON_DOC, BUTTON_GROUP_DOC, TOGGLE_BUTTON_GROUP_DOC, TABS_DOC, CARD_DOC, ...FORM_DOCS, ...SURFACE_DOCS, ...OVERLAY_DOCS, ...NAV_DOCS, ...DATA_DOCS, ...REST_DOCS];
+export const COMPONENT_DOCS = [BUTTON_DOC, TOGGLE_BUTTON_DOC, BUTTON_GROUP_DOC, TOGGLE_BUTTON_GROUP_DOC, TABS_DOC, CARD_DOC, ...FORM_DOCS, ...SURFACE_DOCS, ...OVERLAY_DOCS, ...NAV_DOCS, ...DATA_DOCS, ...REST_DOCS];

@@ -13,6 +13,8 @@ import { Badge } from '../components/Badge';
 import { Alert } from '../components/Alert';
 import { Avatar } from '../components/Avatar';
 import { Player } from '../components/Player';
+import FormatBoldIcon from '@mui/icons-material/FormatBold';
+import { ToggleButton } from '../components/ToggleButton';
 import { LinearProgress } from '../components/LinearProgress';
 import { CircularProgress } from '../components/CircularProgress';
 import { Icon } from '../components/Icon';
@@ -37,6 +39,23 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 const SNIPPET = 'npm install @omni-design/components';
 
 export const CORE_SAMPLES = {
+  ToggleButton: {
+    /* Both states side by side rather than one toggle you have to press: the
+       difference between on and off IS the component, and a reader checking
+       whether the selected state reads clearly should not have to interact to
+       see it. */
+    selected: () => (
+      <HStack gap="var(--Sizing-3)" style={{ flexWrap: 'wrap' }}>
+        <Cell label="false" emphasis>
+          <ToggleButton aria-label="Bold"><FormatBoldIcon /></ToggleButton>
+        </Cell>
+        <Cell label="true">
+          <ToggleButton selected aria-label="Bold"><FormatBoldIcon /></ToggleButton>
+        </Cell>
+      </HStack>
+    ),
+  },
+
   CircularProgress: {
     size: () => (
       <Axis values={SIZES} defaultValue="medium"

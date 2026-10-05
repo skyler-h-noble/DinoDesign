@@ -52,6 +52,7 @@ import { Tooltip } from '../components/Tooltip';
 import { OmniTreeView } from '../components/TreeView';
 import { Button } from '../components/Button';
 import { ToggleButtonGroup } from '../components/ToggleButtonGroup';
+import { ToggleButton } from '../components/ToggleButton';
 import { ButtonGroup } from '../components/ButtonGroup';
 import { Body, H3, Caption } from '../components/Typography';
 import { VStack } from '../components/Stack';
@@ -284,7 +285,19 @@ function PlayerExample() {
   );
 }
 
+/* Stateful and ICON-ONLY, because that is the shape a toggle almost always
+   takes — and it is the shape that needs the aria-label the doc insists on. */
+function ToggleButtonExample() {
+  const [bold, setBold] = useState(true);
+  return (
+    <ToggleButton selected={bold} onChange={() => setBold(!bold)} aria-label="Bold">
+      <FormatBoldIcon />
+    </ToggleButton>
+  );
+}
+
 export const LEAD_EXAMPLES = {
+  ToggleButton: () => <ToggleButtonExample />,
   Player: () => <PlayerExample />,
   ButtonGroup: () => <ButtonGroupExample />,
   /* Alignment is the case the component is for: the text is aligned somehow
