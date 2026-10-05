@@ -466,7 +466,7 @@ export const BUTTON_GROUP_DOC = {
     name: 'fit',
     type: "'hug' | 'fill' | 'equal'",
     default: "'hug'",
-    note: 'HUG — each segment sizes to its own label. FILL — the group fills its container and the segments share the width equally. EQUAL — the group still hugs, but every segment matches the widest. Figma has the first two as Fit=Default and Fit=Fill; `equal` is code-only.'
+    note: 'HUG — each segment sizes to its own label. FILL — the group fills its container and the segments share the width equally. EQUAL — the group still hugs, but every segment matches the widest. NONE of the three is a Figma variant any more: the Fit property was removed because Fill is native sizing, and `equal` was never expressible there. Read the group’s sizing to tell hug from fill; `equal` is code-only.'
   }, {
     name: 'variant',
     type: "'outlined' | 'light' | 'ghost'",
@@ -595,7 +595,7 @@ export const BUTTON_GROUP_DOC = {
     'The joined style overlaps segments by one border width so the shared edge is a single line. Two adjacent 1px borders would read as a 2px rule between segments and a 1px one at the ends.',
     'A SELECTED segment’s fill is frozen across hover and pressed, while its label moves. --Buttons-{Color}-Hover is a LIGHTER tone, so a selected segment that took it lightened on hover and read as deselecting. Figma does move the fill, so this is a deliberate divergence.',
     '`variant="light"` changes the unselected segments’ SURFACE, not their theme. It used to name a {Color}-Light theme, which no longer exists — every one of those names bound nothing, so a light group took whatever palette the page was on.',
-    '`fit="equal"` has no Figma counterpart. It lays a horizontal group out as an inline-grid of equal 1fr columns so every segment matches the widest, while the group still hugs.'
+    '`fit="equal"` has no Figma counterpart, and cannot have one. It lays a horizontal group out as an inline-grid of equal 1fr columns so every segment matches the widest while the group still hugs — and Figma auto-layout cannot express that, because children only share space when the parent has width to share and a hugging parent has none. It is code-only by necessity rather than by omission.'
   ]
 };
 
@@ -646,7 +646,7 @@ export const TOGGLE_BUTTON_GROUP_DOC = {
     name: 'fit',
     type: "'hug' | 'fill' | 'equal'",
     default: "'hug'",
-    note: 'HUG sizes each segment to its label; FILL shares the container width equally; EQUAL hugs but matches every segment to the widest. Figma has the first two as Fit=Default and Fit=Fill.'
+    note: 'HUG sizes each segment to its label; FILL shares the container width equally; EQUAL hugs but matches every segment to the widest. The Figma Fit property is gone — Fill is native sizing there, and `equal` has no counterpart at all.'
   }, {
     name: 'orientation',
     type: "'horizontal' | 'vertical'",
