@@ -184,6 +184,25 @@ export function SpeedDial({
     <Box
       sx={{
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        /* lineHeight: 0, or the + rotates off its own centre.
+         *
+         * An inline-flex box reserves a LINE BOX: the strut that line-height
+         * sets aside for ascenders and descenders, whether or not there is any
+         * text in it. So this wrapper came out taller than the icon it holds,
+         * its 50% sat a few pixels below the glyph's middle, and `rotate()`
+         * — which turns about the element's own box, not its contents —
+         * swung the + around that lower point. The result reads as a wobble
+         * rather than a spin, and it is worse at larger icon sizes because the
+         * strut grows with the font size while the glyph does not.
+         *
+         * Zeroing it collapses the strut so the box is exactly the icon, and
+         * the two centres become the same point. */
+        lineHeight: 0,
+        /* Stated rather than relied on. It is the initial value, but a parent
+           setting transform-origin on a descendant selector would otherwise
+           move this silently, and a rotation that is off by a few pixels is
+           hard to trace back to a rule nobody remembers writing. */
+        transformOrigin: '50% 50%',
         transition: 'transform 0.3s ease',
         transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)',
       }}
