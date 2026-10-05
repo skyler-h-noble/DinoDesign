@@ -25,10 +25,13 @@ import { SHADOW_LEVEL_2 } from '../_shadows';
  *
  * ORIENTATION: horizontal | vertical
  *
- * LABELS: `showLabels` puts each action's name beside its icon. Off by
- * default — a formatting bar is the case this exists for, and B / I / U need
- * no gloss. The name lands in exactly one place either way: aria-label when
- * the button is icon-only, the visible text when it is not.
+ * NO LABELS AXIS, deliberately. A `showLabels` prop was added here and taken
+ * back out: the design has one, but on Nav-Bar (Labels: Default | No Labels)
+ * and Nav Item (Show Labels), where the caption sits UNDER the icon. Nothing
+ * on the ToolBar page carries it. Rendering it here as icon-plus-text also
+ * went wrong in a way worth recording — a ghost Button with text takes
+ * --Hotlink, by design, so every action came out looking like a link.
+ * BottomNavigation and Rail are where that axis lives.
  */
 
 /* EVERY THEME, not a hand-picked five.
@@ -63,19 +66,18 @@ const LEGACY_COLORS = {
 
 export const TOOLBAR_COLORS = Object.keys(THEME_MAP);
 
-/* The surface levels, in the order the ladder runs. A toolbar sitting on a
-   page usually wants to lift off it, which is what the Bright end does. */
+/* The five SURFACE levels, in the order the ladder runs — and no Containers.
+   A toolbar sits ON a surface; a Container is the level a card or a panel
+   takes when it is nested INSIDE one, and a bar floating over the page is not
+   that. Offering both would be offering two answers to "how far off the page
+   am I" when only one of them applies. The Bright end is the lift. */
 export const TOOLBAR_SURFACES = [
-  'Surface', 'Surface-Dim', 'Surface-Dimmest', 'Surface-Bright',
-  'Surface-Brightest', 'Container', 'Container-Low', 'Container-High',
+  'Surface', 'Surface-Dim', 'Surface-Dimmest',
+  'Surface-Bright', 'Surface-Brightest',
 ];
 
 export function Toolbar({
   items = [],
-  /* Off by default: a formatting bar is the case this exists for, and B / I /
-     U are glyphs everyone reads. Turn it on where the actions are not
-     universal — the icon stops being a rebus and starts being a picture. */
-  showLabels = false,
   value: controlledValue,
   defaultValue,
   onChange,
@@ -148,24 +150,18 @@ export function Toolbar({
     >
       {items.map((item, index) => {
         const isSelected = activeIndex === index;
-        /* THE NAME GOES IN EXACTLY ONE PLACE.
-           With no label the button is icon-only and carries aria-label. With
-           a label the text IS the accessible name, so passing aria-label too
-           would announce it twice — "Bold, Bold button". */
-        const labelled = showLabels && !!item.label;
         return (
           <Button
             key={item.key || index}
-            iconOnly={!labelled}
+            iconOnly
             variant={isSelected ? 'default' : 'ghost'}
             size="small"
             onClick={() => handleSelect(index)}
-            aria-label={labelled ? undefined : item.label}
+            aria-label={item.label}
             aria-checked={isSelected}
             role="radio"
           >
             <Icon size="small" sx={{ color: 'inherit' }}>{item.icon}</Icon>
-            {labelled && item.label}
           </Button>
         );
       })}

@@ -597,18 +597,6 @@ export const NAV_SAMPLES = {
         </VStack>
       </VStack>
     ),
-    showLabels: () => (
-      <VStack gap="var(--Sizing-3)" style={{ alignItems: 'flex-start' }}>
-        <Cell label="false — the icon is the whole control" emphasis>
-          <Toolbar items={TOOLBAR_ITEMS} defaultValue={0} />
-        </Cell>
-        <Cell label="true — the name is beside it">
-          <Toolbar items={TOOLBAR_ITEMS} showLabels defaultValue={0} />
-        </Cell>
-      </VStack>
-    ),
-    /* The five a toolbar can be — the state palettes are deliberately not
-       offered, since a bar of formatting actions is not an event. */
     color: () => (
       <VStack gap="var(--Sizing-3)" style={{ alignItems: 'flex-start' }}>
         {['default', 'primary', 'secondary', 'tertiary', 'neutral'].map((c) => (
@@ -622,8 +610,8 @@ export const NAV_SAMPLES = {
        for. Shown on one theme so the only thing changing is the lightness. */
     surface: () => (
       <VStack gap="var(--Sizing-3)" style={{ alignItems: 'flex-start' }}>
-        {['Surface', 'Surface-Dim', 'Surface-Bright', 'Surface-Brightest',
-          'Container'].map((lvl) => (
+        {['Surface', 'Surface-Dim', 'Surface-Dimmest',
+          'Surface-Bright', 'Surface-Brightest'].map((lvl) => (
           <Cell key={lvl} label={lvl} emphasis={lvl === 'Surface'}>
             <Toolbar items={TOOLBAR_ITEMS} surface={lvl} defaultValue={0} />
           </Cell>

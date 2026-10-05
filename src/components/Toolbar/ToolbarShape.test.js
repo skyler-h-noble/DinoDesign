@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { Toolbar, TOOLBAR_COLORS } from './Toolbar';
+import { Toolbar, TOOLBAR_COLORS, TOOLBAR_SURFACES } from './Toolbar';
 import FormatBoldIcon from '@mui/icons-material/FormatBold';
 import AddIcon from '@mui/icons-material/Add';
 
@@ -50,6 +50,16 @@ describe('theme and surface are two axes', () => {
     }
   });
 
+  /* Surfaces only. A toolbar sits ON a surface; a Container is the level a
+     card or panel takes when nested INSIDE one, so offering both would be two
+     answers to "how far off the page am I" when one of them cannot apply. */
+  test('the surface levels, and no Containers', () => {
+    expect(TOOLBAR_SURFACES).toEqual([
+      'Surface', 'Surface-Dim', 'Surface-Dimmest',
+      'Surface-Bright', 'Surface-Brightest']);
+    for (const lvl of TOOLBAR_SURFACES) expect(lvl).not.toMatch(/^Container/);
+  });
+
   test('surface is its own prop, not a colour name', () => {
     const { container } = render(
       <Toolbar items={ITEMS} color="primary" surface="Surface-Brightest" />);
@@ -69,24 +79,6 @@ describe('theme and surface are two axes', () => {
     const bar = container.querySelector('.toolbar');
     expect(bar).toHaveAttribute('data-theme', theme);
     expect(bar).toHaveAttribute('data-surface', surface);
-  });
-});
-
-/* The name lands in exactly one place. Both would announce it twice —
-   "Bold, Bold button". */
-describe('showLabels', () => {
-  test('off: the icon button carries the name', () => {
-    const { container } = render(<Toolbar items={ITEMS} />);
-    const btn = container.querySelectorAll('button')[0];
-    expect(btn).toHaveAttribute('aria-label', 'Bold');
-    expect(btn.textContent).not.toContain('Bold');
-  });
-
-  test('on: the visible text is the name, and aria-label is dropped', () => {
-    const { container } = render(<Toolbar items={ITEMS} showLabels />);
-    const btn = container.querySelectorAll('button')[0];
-    expect(btn.textContent).toContain('Bold');
-    expect(btn).not.toHaveAttribute('aria-label');
   });
 });
 

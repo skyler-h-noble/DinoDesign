@@ -1,20 +1,25 @@
 /**
- * Rail reads the BUTTONS table for its selected item.
+ * Rail's selected item reads the SURFACE table, not the Buttons one.
  *
- * The selected fill in Figma binds a variable named plainly `Button`, from the
- * Buttons collection — a collection whose ten MODES are the palettes, aliasing
- * into Surface's Buttons/<Palette>/<Slot>. Nothing on the Rail page overrides
- * the mode, so the shipped design resolves at `default`.
+ * This file used to assert the opposite, and the reasoning was half right. In
+ * Figma the selected fill binds a variable named plainly `Button` and the
+ * label one named `Text`; copied literally into CSS those became
+ * `var(--Button)` and `var(--Text)`, which breaks because Figma's collections
+ * are separate namespaces and CSS's custom properties are one. `Text`
+ * collided with the surface role of the same name and resolved to it —
+ * plausible, and silent. `Button` had nothing to collide with, so it was
+ * dropped and a selected item painted nothing.
  *
- * Copied literally, those names became `var(--Button)` and `var(--Text)`,
- * which is wrong in CSS for one reason: Figma's collections are separate
- * namespaces and CSS's custom properties are one. `Text` collided with the
- * surface role of the same name and resolved to it — plausible, and silent.
- * `Button` had nothing to collide with, so it was dropped and a selected item
- * painted nothing.
+ * The fix then taken was to write the palette into both names. That is the
+ * right move for a Buttons token and the wrong table: resolved against the
+ * file, Nav Item (5670:49999) binds its selected Icon-Holder fill and its
+ * selected label to a `Text` that belongs to the SURFACE collection — modes
+ * Surface, Surface-Dim, Surface-Dimmest and so on — as does `Quiet` on the
+ * default label. There is no Buttons token anywhere on that component.
  *
- * These tests assert the palette is in the name, which is the thing that makes
- * both names unambiguous.
+ * Which fits the shape: a nav item is a mark on the surface, not a button
+ * wearing a palette. BottomNavigation has always drawn it that way, and the
+ * two are the same component in two orientations.
  */
 import React from 'react';
 import { render } from '@testing-library/react';
@@ -84,76 +89,45 @@ function selectedItemCSS(container) {
 
 const cssFor = (props) => selectedItemCSS(renderRail(props));
 
-describe('Rail selected state reads --Buttons-<Palette>-*', () => {
+describe('the selected item paints from the surface', () => {
+  /* Still worth guarding: the ORIGINAL bug was a palette-less var(--Button),
+     which is undefined, and an undefined custom property with no fallback
+     drops the whole declaration — so the item painted nothing at all. */
   it('never emits the palette-less var(--Button)', () => {
     const css = cssFor();
-    /* Anchored: the same haystack must contain the token we DO expect, or the
-       `.not` below would pass on CSS that never mentioned buttons at all. */
-    expect(css).toContain('--Buttons-Default-Button');
-    // `--Buttons-Default-Button` contains the substring, so the boundary matters.
-    expect(/var\(\s*--Button\s*\)/.test(css)).toBe(false);
+    expect(css).toContain('var(--Text)');
+    expect(css).not.toMatch(/var\(--Button\)/);
   });
 
-  it('paints the selected item from the Default button fill', () => {
-    expect(cssFor()).toContain('--Buttons-Default-Button');
+  it('fills with --Text, the token the design binds', () => {
+    expect(cssFor()).toContain('background-color: var(--Text)');
   });
 
-  it('pairs the selected label with that fill, not the surface text', () => {
-    expect(cssFor()).toContain('--Buttons-Default-Text');
+  /* The whole point of the correction: not one Buttons token on the item. */
+  it('reaches for no Buttons token at all', () => {
+    expect(cssFor()).not.toMatch(/var\(--Buttons-/);
   });
 
-  it('follows the variant prop into the token name', () => {
-    const css = cssFor({ variant: 'primary' });
-    expect(css).toContain('--Buttons-Primary-Button');
-    expect(css).toContain('--Buttons-Primary-Text');
-    expect(css).not.toContain('--Buttons-Default-Button');
+  /* A contained item is filled edge to edge, so its label sits ON --Text and
+     reverses out. Label-outside fills only the circle, leaving the caption on
+     the surface in --Text itself — which is what the design shows. */
+  it('reverses the label out of the fill when the item is filled', () => {
+    expect(cssFor()).toContain('var(--Background)');
   });
 
-  it('closes up black-white the way the token name does', () => {
-    const css = cssFor({ variant: 'black-white' });
-    expect(css).toContain('--Buttons-BlackWhite-Button');
-    expect(css).not.toContain('--Buttons-black-white-Button');
+  it('and leaves it on the surface when only the circle is filled', () => {
+    const css = cssFor({ labelStyle: 'outside' });
+    expect(css).toContain('background-color: var(--Text)');
+    expect(css).not.toContain('var(--Background)');
   });
 
-  it('falls back to Default for an unknown palette rather than a dead token', () => {
-    const css = cssFor({ variant: 'not-a-palette' });
-    expect(css).toContain('--Buttons-Default-Button');
-    expect(css).not.toContain('not-a-palette');
-  });
-
-  /* "Selected wins" — a selected item keeps its button fill through hover and
-     pressed. Those paint SURFACE tokens, so applying them to a selected item
-     swapped the button fill for the surface's hover tint. It went unnoticed
-     because the fill resolved to nothing: a hover that painted something, over
-     a rest state that painted nothing, read as the feature. */
-  it('keeps the button fill through hover and pressed', () => {
-    const css = cssFor();
-    expect(css).not.toMatch(/:hover[^{]*\{[^}]*--Hover/);
-    expect(css).not.toMatch(/:active[^{]*\{[^}]*--Pressed/);
-  });
-
-  it('still shows a focus ring on the selected item', () => {
-    expect(cssFor()).toContain('--Focus-Visible');
-  });
-
-  it('keeps hover and pressed on an UNSELECTED item', () => {
-    /* The exclusion above must be conditional, not a deletion. Asserted on the
-       same render, from the unselected sibling's own classes. */
-    const container = renderRail();
-    const items = Array.from(container.querySelectorAll('.rail-item'));
-    const unselected = items.find((el) => !el.classList.contains('rail-item-selected'));
-    expect(unselected).toBeTruthy();
-    const classes = Array.from(unselected.classList).filter((c) => c.startsWith('css-'));
-    const out = [];
-    for (const sheet of Array.from(document.styleSheets)) {
-      let rules;
-      try { rules = sheet.cssRules; } catch { continue; }
-      for (const rule of Array.from(rules || [])) {
-        if (classes.some((c) => (rule.selectorText || '').includes(c))) out.push(rule.cssText);
-      }
+  /* The palette prop no longer reaches these two, because they are not
+     palette tokens. It still drives whatever else wants a palette. */
+  it('does not let the variant prop into the fill', () => {
+    for (const variant of ['primary', 'error', 'black-white', 'nonsense']) {
+      const css = cssFor({ variant });
+      expect(css).toContain('background-color: var(--Text)');
+      expect(css).not.toMatch(/var\(--Buttons-/);
     }
-    const css = out.join('\n');
-    expect(css).toMatch(/--Hover/);
-    expect(css).toMatch(/--Pressed/);
   });
 });

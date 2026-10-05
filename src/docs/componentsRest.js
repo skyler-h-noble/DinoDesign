@@ -971,15 +971,10 @@ export const REST_DOCS = [SELECT_DOC, MENU_DOC, CODE_BLOCK_DOC, PLAYER_DOC,
 }, {
   name: 'surface',
   type: 'string',
-  values: ['Surface', 'Surface-Dim', 'Surface-Dimmest', 'Surface-Bright',
-           'Surface-Brightest', 'Container', 'Container-Low', 'Container-High'],
+  values: ['Surface', 'Surface-Dim', 'Surface-Dimmest',
+           'Surface-Bright', 'Surface-Brightest'],
   default: 'Surface',
-  note: 'The LEVEL, separate from the theme \u2014 which is what `white` and `black` were really asking for. A bar sitting on a page usually wants to lift off it, which is the Bright end.'
-}, {
-  name: 'showLabels',
-  type: 'boolean',
-  default: 'false',
-  note: 'Puts each action\u2019s name beside its icon. Off by default because a formatting bar is the case this exists for and B / I / U need no gloss. The name lands in exactly one place either way: `aria-label` when the button is icon-only, the visible text when it is not \u2014 both would announce it twice.'
+  note: 'The LEVEL, separate from the theme \u2014 which is what `white` and `black` were really asking for. Surfaces only, no Containers: a toolbar sits ON a surface, while a Container is the level a card or panel takes when nested INSIDE one. The Bright end is the lift.'
 }, {
   name: 'fab',
   type: 'object',

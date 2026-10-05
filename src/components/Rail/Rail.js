@@ -22,7 +22,7 @@ const cap = (v) => BUTTON_PALETTE[v] || 'Default';
  *
  * data-theme="Default", data-surface="Surface-Dim"
  *
- * SELECTED: bg var(--Buttons-Default-Button), text var(--Buttons-Default-Text)
+ * SELECTED: bg var(--Text), icon/label on it var(--Background); label beside it var(--Text)
  * UNSELECTED: text var(--Quiet), hover var(--Text)
  *
  * MODES:
@@ -299,15 +299,16 @@ export function Rail({
  *   Default        no background            label --Quiet
  *   Hover          --Hover                  label --Text
  *   Pressed        --Pressed                label --Text
- *   Selected       --Button + 1px --Border  label --Text
+ *   Selected       --Text + 1px --Border   label --Text (--Background on it)
  *   Focus-Visible  --Focus-Visible outline  label --Text
  *   Disabled       no background, 38%       label --Quiet
  *
- * The selected label was --Buttons-Default-Text here and is --Text in the
- * design. They are different roles: one is the label ON a default button, the
- * other is the surface's own text. The item is not a button with a default
- * fill, so the button role was the wrong one and would flip to the wrong
- * color on any palette where the two diverge.
+ * NOT BUTTONS TOKENS. Both the selected fill and the selected label bind a
+ * variable called `Text` on Nav Item, and both belong to the SURFACE
+ * collection — so does `Quiet` on the default label. There is no Buttons
+ * token on that component at all. An item is a mark on the surface, not a
+ * button wearing a palette, which is also how BottomNavigation has always
+ * drawn it.
  *
  * ── Where each Style paints ───────────────────────────────────────────────
  * Contained wraps the whole 44px item, icon and label together. Outside
@@ -322,30 +323,40 @@ function RailItem({ item, selected, expanded, labelStyle, variant = 'default', o
      states, never both. Selected wins, so a selected item does not lose its
      fill to a hover. */
 
-  /* These two read the BUTTONS table, not the surface's — which is what the
-     docblock at the top of this file has specified all along.
-     They were `var(--Button)` and `var(--Text)`: the Figma variable names
-     copied literally off the selected variant, where they are unambiguous
-     because the Buttons collection is its own namespace. CSS has one flat
-     namespace, so the palette has to be written into the name.
-     `Text` happens to exist as a surface role too, so it resolved to the
-     surface's text and looked plausible. `Button` does not exist, and a var()
-     on an undefined property with no fallback is dropped — so a selected item
-     painted nothing. One of the two failures was visible and one was not,
-     from a single cause. */
-  const C = cap(variant);
-  const stateBg = selected ? `var(--Buttons-${C}-Button)` : 'transparent';
-  /* A selected label sits ON that fill, so it takes the fill's own paired
-     foreground. Expanded-but-unselected is still on the surface. */
-  const labelColor = selected
-    ? `var(--Buttons-${C}-Text)`
-    : (expanded ? 'var(--Text)' : 'var(--Quiet)');
+  /* THE SURFACE TABLE, not the Buttons one — resolved in the file rather
+     than reasoned about.
+     This read --Buttons-{C}-Button and --Buttons-{C}-Text, on the argument
+     that Figma's bare `Button` and `Text` on the selected variant must be
+     Buttons-collection names, since that collection is its own namespace and
+     CSS is one flat one. Half of that is right and the conclusion is not: on
+     Nav Item (5670:49999) the selected Icon-Holder's fill and the selected
+     label BOTH bind a variable called `Text` that belongs to the SURFACE
+     collection — modes Surface, Surface-Dim, Surface-Dimmest and so on — as
+     does `Quiet` on the default label. There is no Buttons token anywhere on
+     that component.
+     Which also makes sense of the shape: a nav item is not a button with a
+     palette, it is a mark on the surface. BottomNavigation has drawn it this
+     way all along, with the icon reversed out of the fill, and the two are
+     the same component in two orientations. */
+  const SELECTED_FILL = 'var(--Text)';
+  const ON_FILL = 'var(--Background)';
+  const stateBg = selected ? SELECTED_FILL : 'transparent';
 
   /* Contained puts the state on the ITEM; outside puts it on the circle. One
      of the two is always transparent, so they are computed together rather
      than each guessing what the other did. */
   const contained = labelStyle !== 'outside';
   const onItem = contained && !expanded;
+
+  /* WHERE THE LABEL SITS DECIDES ITS COLOUR, which is why this cannot be one
+     value. Contained fills the whole item, so the label is ON --Text and has
+     to reverse out of it. Outside fills only the circle, so the label is on
+     the surface and takes --Text itself — which is what the design shows,
+     the caption below the holder in the same token the holder is filled
+     with. */
+  const labelColor = selected
+    ? (onItem ? ON_FILL : 'var(--Text)')
+    : (expanded ? 'var(--Text)' : 'var(--Quiet)');
 
   /* "Selected wins" has to be enforced here, not just stated above.
      Hover and Pressed paint SURFACE tokens, so applying them to a selected
