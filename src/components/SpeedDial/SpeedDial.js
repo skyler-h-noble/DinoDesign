@@ -32,6 +32,18 @@ export function SpeedDial({
   color = 'default',
   direction = 'up',
   speed = 50,
+  /* OFF by default, and the default is the argument.
+   *
+   * A FAB's main habitat is touch, where hover does not exist — so opening on
+   * hover would make the primary interaction the one unavailable in the place
+   * the component is most used. It also floats over content, so a pointer
+   * crossing the screen toward something else passes through it, and the cost
+   * of an accidental open is a fan of actions covering what you were reaching
+   * for.
+   *
+   * Opt in where the dial lives on a desktop toolbar and the speed is worth
+   * it. Click keeps working either way. */
+  openOnHover = false,
   showTooltips = true,
   open: controlledOpen,
   onOpen,
@@ -59,6 +71,64 @@ export function SpeedDial({
       onOpen?.();
     }
   }, [isOpen, isControlled, onOpen, onClose]);
+
+  /* Hover, built to WCAG 1.4.13 rather than to onMouseEnter/onMouseLeave.
+   *
+   * The criterion asks for three things, and a naive handler pair gives one.
+   *   DISMISSIBLE — Escape closes it. That already existed.
+   *   HOVERABLE   — the pointer has to be able to travel from the dial to the
+   *                 actions. There is a 12px gap between them and another
+   *                 between each action, so leaving the dial means leaving the
+   *                 element: closing on mouseleave would shut the fan while
+   *                 the user was reaching into it. The close is therefore
+   *                 DELAYED, and cancelled if the pointer lands anywhere in
+   *                 the container — which includes the gaps, because the
+   *                 container wraps the whole fan.
+   *   PERSISTENT  — it does not time out on its own. The delay below only
+   *                 governs closing AFTER the pointer has left.
+   *
+   * Gated on the POINTER, not the device: `(hover: hover) and (pointer: fine)`
+   * asks what the user is holding, where `data-device` asks what they are
+   * sitting at. A Surface has both; an iPad with a trackpad is a "mobile"
+   * device with a fine pointer. The platform axis is the right tool for
+   * sizing and the wrong one for this.
+   */
+  const HOVER_CLOSE_DELAY = 120;
+  const closeTimer = useRef(null);
+
+  const pointerCanHover = () =>
+    typeof window !== 'undefined'
+    && typeof window.matchMedia === 'function'
+    && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  const cancelHoverClose = useCallback(() => {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+  }, []);
+
+  const handleHoverOpen = useCallback(() => {
+    if (!openOnHover || !pointerCanHover()) return;
+    cancelHoverClose();
+    if (isOpen) return;
+    if (!isControlled) setInternalOpen(true);
+    onOpen?.();
+  }, [openOnHover, isOpen, isControlled, onOpen, cancelHoverClose]);
+
+  const handleHoverClose = useCallback(() => {
+    if (!openOnHover || !pointerCanHover()) return;
+    cancelHoverClose();
+    closeTimer.current = setTimeout(() => {
+      if (!isControlled) setInternalOpen(false);
+      onClose?.();
+    }, HOVER_CLOSE_DELAY);
+  }, [openOnHover, isControlled, onClose, cancelHoverClose]);
+
+  /* A pending close must not fire after the component has gone, which is the
+     ordinary unmount leak and also what happens when a dial is removed by the
+     action the user just clicked. */
+  useEffect(() => cancelHoverClose, [cancelHoverClose]);
 
   const handleActionClick = useCallback((action, index) => {
     action.onClick?.(index);
@@ -125,6 +195,11 @@ export function SpeedDial({
   return (
     <Box
       ref={containerRef}
+      /* On the CONTAINER, not the Fab: it wraps the dial and the whole fan,
+         including the gaps between them, so the pointer can travel inward
+         without the fan closing underneath it. */
+      onMouseEnter={handleHoverOpen}
+      onMouseLeave={handleHoverClose}
       className={'speed-dial speed-dial-' + variant + ' speed-dial-' + color + ' speed-dial-' + direction + ' ' + className}
       sx={{
         position: 'relative', display: 'inline-flex', overflow: 'visible',

@@ -199,6 +199,22 @@ export const SURFACE_SAMPLES = {
         ))}
       </HStack>
     ),
+    /* Both are shown OPEN, because the difference is how they GOT there and a
+       still frame cannot show a pointer. The captions carry it. */
+    openOnHover: () => (
+      <HStack gap="var(--Sizing-6)" style={{ flexWrap: 'wrap' }}>
+        <Cell label="false — click to open" emphasis>
+          <div style={{ height: 180, width: 140, position: 'relative' }}>
+            <SpeedDial open ariaLabel="Create by click" actions={SPEED_ACTIONS} />
+          </div>
+        </Cell>
+        <Cell label="true — opens on hover, on a fine pointer">
+          <div style={{ height: 180, width: 140, position: 'relative' }}>
+            <SpeedDial open openOnHover ariaLabel="Create by hover" actions={SPEED_ACTIONS} />
+          </div>
+        </Cell>
+      </HStack>
+    ),
     showTooltips: () => (
       <HStack gap="var(--Sizing-6)" style={{ flexWrap: 'wrap' }}>
         {[false, true].map((on) => (

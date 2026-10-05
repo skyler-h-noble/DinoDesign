@@ -650,6 +650,11 @@ export const SPEED_DIAL_DOC = {
     default: '50',
     note: 'Milliseconds between each action appearing, so they stagger rather than arriving at once.'
   }, {
+    name: 'openOnHover',
+    type: 'boolean',
+    default: 'false',
+    note: 'Opens the fan when the pointer is over it. OFF by default \u2014 a FAB\u2019s main habitat is touch, where hover does not exist, and it floats over content, so a pointer crossing the screen passes through it. Click works either way.'
+  }, {
     name: 'showTooltips',
     type: 'boolean',
     default: 'false',
@@ -666,6 +671,8 @@ export const SPEED_DIAL_DOC = {
   accessibility: [
     'The dial is `aria-haspopup` with `aria-expanded`; the fan is `role="menu"` and each action is a `role="menuitem"`.',
     'Escape closes it and returns focus to the dial, so the keyboard does not get stranded in an open fan.',
+    '`openOnHover` is built to WCAG 1.4.13, which asks three things of content that appears on hover. DISMISSIBLE \u2014 Escape closes it. HOVERABLE \u2014 closing is delayed and cancelled if the pointer lands anywhere in the container, so you can reach across the 12px gap into the fan without it shutting underneath you. PERSISTENT \u2014 it never times out on its own; the delay only governs closing after the pointer has left.',
+    'Hover is gated on `(hover: hover) and (pointer: fine)`, which asks what the user is holding rather than what they are sitting at. A Surface has both; an iPad with a trackpad is a "mobile" device with a fine pointer.',
   ],
   gotchas: [
     'Figma\u2019s SpeedDial set has TEN values in its State property for five states: `default | hover | pressed | focus-visible | disabled` AND `Default | Hover | Active | Focus-Visible | Disabled`. Two naming conventions in one property, and `pressed` and `Active` are the same state under two names. See the parity table.',
