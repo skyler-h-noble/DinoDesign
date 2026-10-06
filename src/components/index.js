@@ -130,6 +130,8 @@ export {
    its label through Body/BodySmall at a literal size, so a brand re-picking its
    label scale moved the design file and not the library. */
 export { FormLabel, FORM_LABEL_MARKERS } from './FormLabel';
+export { InputMessage, INPUT_MESSAGE_TYPES, MESSAGE_ICONS } from './InputMessage';
+export { FormHelper, FORM_HELPER_VALIDATIONS, useFormHelperIds } from './FormHelper';
 export { TextAreaField } from './TextAreaField';
 
 export { Select, SelectShowcase } from './Select';
