@@ -125,6 +125,13 @@ export {
   TextFieldGroup
 } from './TextField';
 
+/* The first two pieces of the design's Forms system. FormLabel is the first
+   thing here to read the LABEL type style — every other form component renders
+   its label through Body/BodySmall at a literal size, so a brand re-picking its
+   label scale moved the design file and not the library. */
+export { FormLabel, FORM_LABEL_MARKERS } from './FormLabel';
+export { TextAreaField } from './TextAreaField';
+
 export { Select, SelectShowcase } from './Select';
 export { Autocomplete, AutocompleteShowcase } from './Autocomplete';
 export { Checkbox } from './Checkbox';
