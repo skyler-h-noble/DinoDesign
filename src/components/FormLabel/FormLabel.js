@@ -84,6 +84,71 @@ export function FormLabel({
     );
   }
 
+  /* A LEGEND MUST BE A DIRECT CHILD OF ITS FIELDSET.
+   *
+   * The name of a <fieldset> comes from its first <legend> CHILD. Wrap that
+   * legend in anything — here, the row <div> that holds the More Info link
+   * beside the label — and the group keeps role="group" but loses its name
+   * entirely. It still looks perfect: the caption renders, sighted users read
+   * it, and a screen reader announces an unnamed group of controls. The same
+   * failure mode as Input's missing htmlFor, one level up.
+   *
+   * So the legend is returned BARE, with More Info as a sibling rather than a
+   * child. Inside the legend it would join the group's accessible name
+   * ("Delivery More about delivery") — the same reason it stays out of a
+   * <label>. The consequence is that a group's More Info stacks under its
+   * legend rather than sitting beside it: a row wrapper is precisely the thing
+   * that cannot exist here. */
+  const labelEl = (
+    <Label
+      component={isLegend ? 'legend' : 'label'}
+      htmlFor={isLegend ? undefined : htmlFor}
+      className="form-label"
+      style={{
+        /* --Text, from the SURFACE table. The design briefly bound Buttons'
+           `Text` here — a different role, the label ON a button fill. A form
+           label sits on the surface. */
+        color: disabled ? 'var(--Quiet)' : 'var(--Text)',
+      }}
+    >
+      {children}
+      {marker && (
+        <span
+          className={'form-label-marker form-label-marker-' + type}
+          /* Required is carried by aria-required on the control; optional has
+             no ARIA equivalent, so that one must be read. */
+          aria-hidden={type === 'required' ? 'true' : undefined}
+        >
+          {type === 'required' ? marker : ' ' + marker}
+        </span>
+      )}
+    </Label>
+  );
+
+  const moreInfoEl = moreInfo ? (
+    <Link
+      className="form-label-more-info"
+      href={moreInfo.href}
+      onClick={moreInfo.onClick}
+      aria-label={moreInfo.label}
+      sx={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--Sizing-Half)' }}
+    >
+      {moreInfo.text}
+      {/* aria-hidden by default in this library unless given its own label,
+          so the Link's name is the only one announced. */}
+      <Icon size="small"><InfoOutlinedIcon /></Icon>
+    </Link>
+  ) : null;
+
+  if (isLegend) {
+    return (
+      <>
+        {labelEl}
+        {moreInfoEl}
+      </>
+    );
+  }
+
   return (
     <Box
       className={'form-label-row ' + className}
@@ -96,44 +161,8 @@ export function FormLabel({
       }}
       {...props}
     >
-      <Label
-        component={isLegend ? 'legend' : 'label'}
-        htmlFor={isLegend ? undefined : htmlFor}
-        className="form-label"
-        style={{
-          /* --Text, from the SURFACE table. The design briefly bound Buttons'
-             `Text` here — a different role, the label ON a button fill. A form
-             label sits on the surface. */
-          color: disabled ? 'var(--Quiet)' : 'var(--Text)',
-        }}
-      >
-        {children}
-        {marker && (
-          <span
-            className={'form-label-marker form-label-marker-' + type}
-            /* See the header: required is carried by aria-required on the
-               control, optional has no ARIA equivalent so it must be read. */
-            aria-hidden={type === 'required' ? 'true' : undefined}
-          >
-            {type === 'required' ? marker : ' ' + marker}
-          </span>
-        )}
-      </Label>
-
-      {moreInfo && (
-        <Link
-          className="form-label-more-info"
-          href={moreInfo.href}
-          onClick={moreInfo.onClick}
-          aria-label={moreInfo.label}
-          sx={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--Sizing-Half)' }}
-        >
-          {moreInfo.text}
-          {/* aria-hidden by default in this library unless given its own
-              label, so the Link's name is the only one announced. */}
-          <Icon size="small"><InfoOutlinedIcon /></Icon>
-        </Link>
-      )}
+      {labelEl}
+      {moreInfoEl}
     </Box>
   );
 }

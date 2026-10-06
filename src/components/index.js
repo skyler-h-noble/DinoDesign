@@ -132,6 +132,7 @@ export {
 export { FormLabel, FORM_LABEL_MARKERS } from './FormLabel';
 export { InputMessage, INPUT_MESSAGE_TYPES, MESSAGE_ICONS } from './InputMessage';
 export { FormHelper, FORM_HELPER_VALIDATIONS, useFormHelperIds } from './FormHelper';
+export { FieldGroup } from './FieldGroup';
 export { TextAreaField } from './TextAreaField';
 
 export { Select, SelectShowcase } from './Select';
