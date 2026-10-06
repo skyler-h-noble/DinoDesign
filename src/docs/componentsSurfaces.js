@@ -822,6 +822,139 @@ export const CONTAINER_DOC = {
   ]
 };
 
+
+/* Sheet had no doc entry at all, so its Summary tab opened on an empty page.
+   Not a missing field — a missing ENTRY, which renders as nothing rather
+   than as a gap, which is why it survived. */
+export const SHEET_DOC = {
+  name: 'Sheet',
+  summary: 'A plain surface to put things on, when the thing on it is not a Card.',
+  insteadUse: [{
+    when: 'It has a header, media or actions',
+    use: 'Card'
+  }, {
+    when: 'It only needs to group things for layout',
+    use: 'Box'
+  }, {
+    when: 'It slides in over the page',
+    use: 'Drawer'
+  }],
+  props: [{
+    name: 'surface',
+    type: 'string',
+    values: ['Surface', 'Surface-Dim', 'Surface-Dimmest',
+             'Surface-Bright', 'Surface-Brightest'],
+    default: 'Surface',
+    note: 'The LEVEL. This is the whole component \u2014 pick a level and the cascade paints the background, the text and the border to match.'
+  }, {
+    name: 'color',
+    type: 'string',
+    default: 'default',
+    note: 'The THEME, as `data-theme`.'
+  }, {
+    name: 'elevated',
+    type: 'boolean',
+    default: 'false',
+    note: 'Adds the shadow. A Sheet that is flat on the page needs none; one that reads as lifted off it does.'
+  }, {
+    name: 'component',
+    type: 'string',
+    default: 'div',
+    note: 'The element rendered. `section` or `aside` where the region means something.'
+  }],
+  states: [{
+    state: 'None',
+    setBy: 'prop',
+    note: 'A Sheet is not interactive. What sits on it is.'
+  }],
+  tokens: [surfaceToken('--Background', 'the sheet'), surfaceToken('--Text', 'anything in it')],
+  composition: ['Anything. It sets a surface and gets out of the way.'],
+  accessibility: [
+    'It is a surface, not a landmark. Pass `component="section"` with a heading, or `aria-label`, where the region is one a reader should be able to skip to.',
+    'Nesting sheets stacks surface levels; two levels that land on the same tone leave a border doing all the separating.',
+  ],
+  gotchas: [
+    'It used to carry variant="solid | light | dark", which only ever chose between three of the five surface levels under names that did not say which. `surface` takes any of the five and names it.',
+  ],
+};
+
+/* Same gap as Sheet: no entry, so an empty Summary. */
+export const TRANSFER_LIST_DOC = {
+  name: 'TransferList',
+  summary: 'Moves items between two lists — what is available, and what has been chosen.',
+  insteadUse: [{
+    when: 'The choice is one of a few',
+    use: 'RadioGroup'
+  }, {
+    when: 'Items are picked but never ordered or grouped',
+    use: 'Checkbox, or a multi Select'
+  }, {
+    when: 'There is one list and the question is which rows are selected',
+    use: 'Table or List'
+  }],
+  props: [{
+    name: 'mode',
+    type: 'string',
+    values: ['basic', 'enhanced'],
+    default: 'basic',
+    note: 'BASIC gives one button each direction. ENHANCED adds move-all in both directions and a select-all checkbox in each header.'
+  }, {
+    name: 'defaultLeftItems',
+    type: 'array',
+    default: '[]',
+    note: 'Plain strings. The panel keys on the item and renders it straight into a BodySmall, so an object throws.'
+  }, {
+    name: 'defaultRightItems',
+    type: 'array',
+    default: '[]'
+  }, {
+    name: 'leftItems',
+    type: 'array',
+    default: 'undefined',
+    note: 'Controlled. Pass both sides with `onChange`, or neither.'
+  }, {
+    name: 'rightItems',
+    type: 'array',
+    default: 'undefined'
+  }, {
+    name: 'leftTitle',
+    type: 'string',
+    default: 'Available'
+  }, {
+    name: 'rightTitle',
+    type: 'string',
+    default: 'Chosen'
+  }, {
+    name: 'disabled',
+    type: 'boolean',
+    default: 'false'
+  }],
+  states: [{
+    state: 'Checked',
+    setBy: 'interaction',
+    note: 'Per row. The move buttons act on what is checked, and are disabled while nothing is.'
+  }, {
+    state: 'Disabled',
+    setBy: 'prop'
+  }],
+  tokens: [surfaceToken('--Background', 'each panel'), surfaceToken('--Border', 'the panel outline'), {
+    token: '--Border-Variant',
+    role: 'the rule under each header',
+  }],
+  composition: [
+    'Two panels, each an elevation wrapper around a Container-surfaced frame: header, divider, list.',
+    'A column of move buttons between them.',
+  ],
+  accessibility: [
+    'The whole thing is one `role="group"`; each panel\u2019s rows are checkboxes, so the count in the header is what tells a screen-reader user how long the list is.',
+    'A move button says which direction it moves and is disabled while nothing is checked, so it never looks operable with nothing to operate on.',
+  ],
+  gotchas: [
+    'The panels top-align rather than centring. They rarely hold the same number of rows \u2014 that is the point of the component \u2014 and centring floated the shorter one down the page so the two headers stopped lining up.',
+    'The header is 40 tall INCLUDING its padding. Without border-box the min applied to the content box and the 12px above and below were added to it, so a header specified as 40 came out 64.',
+  ],
+};
+
 export const SURFACE_DOCS = [ICON_DOC, BRANDICON_DOC, FAB_DOC, SNACKBAR_DOC, ACCORDION_DOC,
-  BOX_DOC, FOOTER_DOC, COPYRIGHT_DOC, SPEED_DIAL_DOC,
+  BOX_DOC, FOOTER_DOC, COPYRIGHT_DOC, SPEED_DIAL_DOC, SHEET_DOC, TRANSFER_LIST_DOC,
   SECTION_DOC, STACK_DOC, CONTAINER_DOC];

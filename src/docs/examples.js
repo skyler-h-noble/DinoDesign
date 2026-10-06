@@ -192,10 +192,20 @@ export const EXAMPLES = {
       <Checkbox label="Checked" defaultChecked />
       <Checkbox label="Indeterminate" indeterminate />
     </VStack>,
-  Radio: () => <RadioGroup defaultValue="a" name="docs-radio">
-      <Radio value="a" label="First" />
-      <Radio value="b" label="Second" />
-    </RadioGroup>,
+  /* OPTIONS, not children. RadioGroup renders `options.map(...)` and never
+     touches children, so this rendered an empty group — a blank panel where
+     the example should be. Nothing warned, because passing children to a
+     component that ignores them is legal React. */
+  Radio: () => (
+    <RadioGroup
+      name="docs-radio"
+      defaultValue="a"
+      options={[
+        { value: 'a', label: 'First' },
+        { value: 'b', label: 'Second' },
+      ]}
+    />
+  ),
   Input: () => <TextInput label="Email" placeholder="you@example.com" />,
   SwitchInput: () => <VStack gap="var(--Sizing-Half)">
       <SwitchInput label="Off" />

@@ -1,5 +1,5 @@
 // src/components/Radio/Radio.js
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Radio as MuiRadio,
   RadioGroup as MuiRadioGroup,
@@ -262,6 +262,13 @@ export function RadioGroup({
   label,
   options = [],
   value,
+  /* UNCONTROLLED MODE, which this did not have. Every other input in the
+     library takes one, the docs assumed it worked, and two lead examples
+     passed `defaultValue` that went nowhere — so both rendered a group with
+     nothing selected and looked like the component could not hold a choice.
+     An ignored prop is worse than a missing one: nothing warns, and the page
+     is simply wrong. */
+  defaultValue,
   onChange,
   orientation = 'vertical',
   // Threaded to each child Radio. See Radio() for accepted values.
@@ -275,6 +282,18 @@ export function RadioGroup({
   'aria-labelledby': ariaLabelledBy,
   ...props
 }) {
+  /* Controlled the moment `value` is passed, and not before. Reading
+     `value !== undefined` once keeps a group that starts empty and is later
+     given a value from flipping modes mid-life without saying so. */
+  const isControlled = value !== undefined;
+  const [innerValue, setInnerValue] = useState(defaultValue);
+  const current = isControlled ? value : innerValue;
+
+  const handleChange = (event, next) => {
+    if (!isControlled) setInnerValue(event?.target?.value ?? next);
+    onChange?.(event, next);
+  };
+
   return (
     <FormControl
       component="fieldset"
@@ -298,8 +317,8 @@ export function RadioGroup({
         </FormLabel>
       )}
       <MuiRadioGroup
-        value={value}
-        onChange={onChange}
+        value={current ?? ''}
+        onChange={handleChange}
         name={name}
         aria-label={ariaLabel}
         aria-labelledby={ariaLabelledBy}

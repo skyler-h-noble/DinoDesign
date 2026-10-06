@@ -143,6 +143,12 @@ export function TransferList({
               alignItems: 'flex-start',
               justifyContent: 'flex-start',
               gap: 1,
+              /* 40 IS THE HEIGHT, not the height before padding. Without
+                 border-box the min applies to the CONTENT box and the 12px
+                 above and below are added to it, so a header specified as 40
+                 came out 64 — half again as tall as the design, on both
+                 panels, pushing the lists down. */
+              boxSizing: 'border-box',
               minHeight: '40px',
               padding: '12px 16px',
             }}>
@@ -237,11 +243,16 @@ export function TransferList({
       role="group"
       aria-label="Transfer list"
       sx={{
-        // hstack, centered both axes, gap 4. Available + Chosen are fill (set
-        // via flex: 1 on each renderPanel root).
+        /* TOP-ALIGNED, not centred. The two panels rarely hold the same
+           number of rows — that is the whole point of the component — so
+           centring floated the shorter one down the page and the two headers
+           stopped lining up. Their headers are the pair a reader compares,
+           and they can only be compared if they sit on the same line.
+           The move buttons keep their own centring below, because they belong
+           to the gap between the lists rather than to the top of either. */
         display: 'flex',
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'center',
         gap: '4px',
         fontFamily: 'inherit',
@@ -259,6 +270,9 @@ export function TransferList({
         gap: '8px',
         padding: '8px',
         flexShrink: 0,
+        /* Centred against the TALLER panel, which is what it was getting for
+           free while the row centred everything. */
+        alignSelf: 'center',
       }}>
         {isEnhanced && (
           <Button iconOnly variant="default-outline" size="small" onClick={moveAllRight}

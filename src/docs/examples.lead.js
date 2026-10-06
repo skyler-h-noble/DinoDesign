@@ -54,7 +54,7 @@ import { Button } from '../components/Button';
 import { ToggleButtonGroup } from '../components/ToggleButtonGroup';
 import { ToggleButton } from '../components/ToggleButton';
 import { ButtonGroup } from '../components/ButtonGroup';
-import { Body, H3, Caption } from '../components/Typography';
+import { Body, H3, Caption, Subtitle, BodySmall } from '../components/Typography';
 import { VStack } from '../components/Stack';
 
 import HomeIcon from '@mui/icons-material/Home';
@@ -66,6 +66,8 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import FormatBoldIcon from '@mui/icons-material/FormatBold';
 import FormatItalicIcon from '@mui/icons-material/FormatItalic';
 import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
+import { Sheet } from '../components/Sheet';
+import { TransferList } from '../components/TransferList';
 
 /* Shared sample data. One set per shape, reused by the axis samples too, so a
    reader comparing two of a component's axes is comparing the same content
@@ -390,6 +392,35 @@ export const LEAD_EXAMPLES = {
 
   /* Needs a height: a rail fills its container vertically and has no
      intrinsic one. */
+  /* The last two components whose Summary opened on a blank panel. A missing
+     example does not fail anything — the slot simply renders nothing — so
+     these sat empty until someone looked. examples.coverage.test.js now
+     fails instead. */
+  Sheet: () => (
+    <Frame w={320}>
+      <Sheet surface="Surface-Bright" elevated sx={{ padding: 'var(--Sizing-3)' }}>
+        <VStack gap="var(--Sizing-1)">
+          <Subtitle color="standard">Export settings</Subtitle>
+          <BodySmall color="quiet">
+            A panel that carries its own surface, for content that should read
+            as sitting above the page rather than on it.
+          </BodySmall>
+        </VStack>
+      </Sheet>
+    </Frame>
+  ),
+  /* Both columns populated: an empty right-hand list looks like a broken
+     component rather than a starting state. */
+  TransferList: () => (
+    <TransferList
+      leftTitle="Available"
+      rightTitle="Chosen"
+      /* Plain strings: the panel keys on the item and renders it straight
+         into a BodySmall, so an {id, label} object throws. */
+      defaultLeftItems={['Colors', 'Typography', 'Spacing']}
+      defaultRightItems={['Elevation']}
+    />
+  ),
   Rail: () => <Frame w={88} h={320}><Rail items={NAV_ITEMS} defaultValue={0} /></Frame>,
 
   Ratio: () => <Frame w={240}><Ratio ratio="16:9" /></Frame>,

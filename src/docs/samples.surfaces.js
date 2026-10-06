@@ -27,7 +27,7 @@ import { Popover } from '../components/Popover';
 import { Button } from '../components/Button';
 import { List } from '../components/List';
 import { VStack, HStack } from '../components/Stack';
-import { Caption, Body, H3, Label } from '../components/Typography';
+import { Caption, Body, H3, Label, BodySmall } from '../components/Typography';
 import { SIZES, Axis, AxisStack, Toggle, Cell } from './samples';
 import { TABLE_COLUMNS, TABLE_ROWS, LIST_ITEMS } from './examples.lead';
 
@@ -96,6 +96,8 @@ import { SpeedDial } from '../components/SpeedDial';
 import AddIcon from '@mui/icons-material/Add';
 import PersonIcon from '@mui/icons-material/Person';
 import SettingsIcon from '@mui/icons-material/Settings';
+import { Sheet } from '../components/Sheet';
+import { TransferList } from '../components/TransferList';
 
 /* Three actions, named. The name is the accessible name whether or not
    tooltips are on, so a sample with unnamed actions would be demonstrating the
@@ -640,6 +642,64 @@ export const SURFACE_SAMPLES = {
           </Drawer>
         )}
       />
+    ),
+  },
+
+  Sheet: {
+    /* One theme, five levels, so the only thing changing is the lightness. */
+    surface: () => (
+      <VStack gap="var(--Sizing-2)">
+        {['Surface', 'Surface-Dim', 'Surface-Dimmest',
+          'Surface-Bright', 'Surface-Brightest'].map((lvl) => (
+          <Cell key={lvl} label={lvl} emphasis={lvl === 'Surface'} width={260}>
+            <Sheet surface={lvl} sx={{ padding: 'var(--Sizing-2)', width: 220 }}>
+              <BodySmall>On {lvl}</BodySmall>
+            </Sheet>
+          </Cell>
+        ))}
+      </VStack>
+    ),
+    elevated: () => (
+      <HStack gap="var(--Sizing-4)" style={{ flexWrap: 'wrap' }}>
+        {[false, true].map((on) => (
+          <Cell key={String(on)} label={String(on)} emphasis={!on}>
+            <Sheet elevated={on} sx={{ padding: 'var(--Sizing-2)', width: 180 }}>
+              <BodySmall>{on ? 'Lifted off the page' : 'Flat on it'}</BodySmall>
+            </Sheet>
+          </Cell>
+        ))}
+      </HStack>
+    ),
+  },
+
+  TransferList: {
+    /* ENHANCED adds move-all both ways and a select-all per header, so the
+       difference is the button column and the header checkboxes. */
+    mode: () => (
+      <VStack gap="var(--Sizing-3)">
+        {['basic', 'enhanced'].map((m) => (
+          <Cell key={m} label={m} emphasis={m === 'basic'}>
+            <TransferList
+              mode={m}
+              defaultLeftItems={['Colors', 'Typography', 'Spacing']}
+              defaultRightItems={['Elevation']}
+            />
+          </Cell>
+        ))}
+      </VStack>
+    ),
+    disabled: () => (
+      <VStack gap="var(--Sizing-3)">
+        {[false, true].map((on) => (
+          <Cell key={String(on)} label={String(on)} emphasis={!on}>
+            <TransferList
+              disabled={on}
+              defaultLeftItems={['Colors', 'Typography']}
+              defaultRightItems={['Elevation']}
+            />
+          </Cell>
+        ))}
+      </VStack>
     ),
   },
 

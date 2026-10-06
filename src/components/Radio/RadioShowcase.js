@@ -13,6 +13,7 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import { CodeBlock } from '../CodeBlock/CodeBlock';
+import { colorGroupsFor, useRestrictedColor } from '../colorChoices';
 import {
   H3, H5, BodySmall, Caption, Label, EyebrowSmall,
 } from '../Typography';
@@ -89,6 +90,7 @@ export function RadioShowcase() {
   const [selectedValue, setSelectedValue] = useState('option1');
   const [disabled, setDisabled]         = useState(false);
   const [bgTheme, setBgTheme]           = useState('Default');
+  useRestrictedColor(color, setColor, bgTheme);
   const [bgSurface, setBgSurface]       = useState('Surface');
 
   const generateCode = () => {
@@ -111,7 +113,7 @@ export function RadioShowcase() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      <ShowcaseHeader title="Radio Group" component="Radio" />
+      <ShowcaseHeader title="Radio" component="Radio" />
       <Box sx={{ mt: 1 }}>
         <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
       </Box>
@@ -162,7 +164,7 @@ export function RadioShowcase() {
                   <Box>
                     <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</EyebrowSmall>
                     <Stack spacing={1.5}>
-                      {COLOR_GROUPS.map((group) => (
+                      {colorGroupsFor(COLOR_GROUPS, bgTheme).map((group) => (
                         <Box key={group.label}>
                           <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 4, fontWeight: 600 }}>{group.label}</Caption>
                           <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
