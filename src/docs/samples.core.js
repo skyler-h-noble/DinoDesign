@@ -237,19 +237,11 @@ export const CORE_SAMPLES = {
           : <Button>3 unread</Button>}
       />
     ),
-    /* Not one of Figma's four Types. A swatch button carries an arbitrary
-       color rather than a palette, so it takes a --Border ring instead of
-       the button's own border — the fill could be anything and its contrast
-       cannot be known in advance. */
-    swatch: () => (
-      <Toggle
-        offLabel="ordinary button"
-        onLabel="swatch"
-        render={(on) => on
-          ? <Button swatch aria-label="Brand green" style={{ background: '#70947b' }} />
-          : <Button>Brand green</Button>}
-      />
-    ),
+    /* No `swatch` sample. It was retired as a Button type — a swatch uses
+       neither of Button's axes, since its colour is arbitrary data from a
+       picker rather than a palette, and it has no solid / outline / ghost
+       shape. Figma draws it as its own component with its own clickable and
+       Fit axes, so Button has no swatch to show. */
   },
 
   Chip: {
@@ -392,6 +384,27 @@ export const CORE_SAMPLES = {
   },
 
   Swatch: {
+    /* FILL is what a picker needs: a row of fixed chips with a gap leaves a
+       ragged right edge, while a filled row reads as a block of colour. The
+       height stays on the ramp either way. */
+    fit: () => (
+      <VStack gap="var(--Sizing-3)">
+        <Cell label="fixed" emphasis width={300}>
+          <HStack gap="var(--Sizing-1)">
+            {['#505b45', '#8a9a7b', '#c9d4bd'].map((c) => (
+              <Swatch key={c} color={c} />
+            ))}
+          </HStack>
+        </Cell>
+        <Cell label="fill" width={300}>
+          <HStack gap="var(--Sizing-1)" style={{ width: 300 }}>
+            {['#505b45', '#8a9a7b', '#c9d4bd'].map((c) => (
+              <div key={c} style={{ flex: 1 }}><Swatch color={c} fit="fill" /></div>
+            ))}
+          </HStack>
+        </Cell>
+      </VStack>
+    ),
     size: () => (
       <Axis values={SIZES} defaultValue="medium"
             render={(v) => <Swatch color="#70947b" size={v} />} />

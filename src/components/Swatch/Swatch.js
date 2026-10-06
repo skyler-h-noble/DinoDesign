@@ -88,6 +88,13 @@ export function Swatch({
   color,
   label,
   size = 'medium',
+  /* Figma's Fit axis: Fixed | Fill. FIXED is the chip at its own size off the
+     button ramp; FILL hands the width to whatever is laying it out, which is
+     what a swatch inside a grid of colours needs — a row of fixed chips with
+     a gap leaves a ragged right edge, and a picker is read as a block. The
+     HEIGHT stays on the ramp either way: a swatch that stretched both ways
+     would stop being a rounded square. */
+  fit = 'fixed',
   selected = false,
   disabled = false,
   /* Figma's Style axis: No-Radio | Radio.
@@ -126,7 +133,7 @@ export function Swatch({
       className="swatch-chip"
       sx={{
         position: 'relative',
-        width: dim,
+        width: fit === 'fill' ? '100%' : dim,
         height: dim,
         flexShrink: 0,
         borderRadius: 'var(--Button-Radius, 2px)',

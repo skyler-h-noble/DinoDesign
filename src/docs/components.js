@@ -93,11 +93,6 @@ export const BUTTON_DOC = {
     type: 'boolean',
     default: 'false',
     note: 'Type=letterNumber in Figma — a single letter or digit. Needs an `aria-label`: the glyph is not a name.'
-  }, {
-    name: 'swatch',
-    type: 'boolean',
-    default: 'false',
-    note: 'A color chip, filled from `swatchColor`. Not in the Figma Type axis.'
   }],
   states: [{
     state: 'Hover',
