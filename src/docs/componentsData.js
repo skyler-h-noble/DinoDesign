@@ -86,9 +86,9 @@ export const STEPPER_DOC = {
     setBy: 'interaction'
   }],
   theming: [{
-    collection: 'Theme',
-    inCode: '`theme` / `surface` props, or `data-theme` on an ancestor.',
-    inFigma: 'Count Step and No-Count Step pin Theme on their variant ROOT; the Stepper set pins it on a nested Count Step. Both are candidates for a named `Theme-*` layer.'
+    collection: 'Buttons',
+    inCode: '`color` picks the Buttons palette for the step indicators — fill, number, border, hover and pressed. `theme` / `surface` set the zone around it.',
+    inFigma: 'Set the Buttons mode, not Theme. Count Step and No-Count Step currently pin THEME on their variant root, which is drift: give each a `Theme-Button` frame and Clean Up takes the Theme pin off and leaves Buttons on the frame.'
   }],
   tokens: [{
     name: '--Buttons-{Color}-Button',
@@ -217,9 +217,9 @@ export const SLIDER_DOC = {
     setBy: 'prop'
   }],
   theming: [{
-    collection: 'Theme',
-    inCode: '`theme` / `surface` props, or `data-theme` on an ancestor.',
-    inFigma: 'The Slider sets pin nothing and inherit.'
+    collection: 'Buttons',
+    inCode: '`variant` picks the Buttons palette for the handle, fill and both bar edges — `variant="success"` is a green slider. `theme` / `surface` set the zone around it; the label stays on the surface pair.',
+    inFigma: 'Set the Buttons mode, not Theme: the handle and both bar edges bind `Buttons::Border`. The Slider sets pin nothing, so they take Buttons from the frame or component they sit in.'
   }],
   themingNotes: ['The thumb recolors on its own: it reads `--Border` and `--Background`, which are zone tokens, so moving the zone moves the thumb without the component knowing about themes.'],
   tokens: [{

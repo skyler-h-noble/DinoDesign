@@ -178,9 +178,9 @@ export const FAB_DOC = {
     setBy: 'prop'
   }],
   theming: [{
-    collection: 'Theme',
-    inCode: '`data-theme` on the FAB or an ancestor.',
-    inFigma: 'Set the Theme mode on the `Theme-Container` layer — **not** the variant root. The root carries the drop shadows.'
+    collection: 'Buttons',
+    inCode: '`color` picks the Buttons palette for the fill, icon and border. `data-theme` on an ancestor sets the zone it sits in.',
+    inFigma: 'Set the Buttons mode, not Theme — the fill, icon and border are painted from Buttons. Leave Theme inherited: the root carries the drop shadows, which must read the page.'
   }],
   themingNotes: ['This is the component the shadow rule exists for. A drop shadow falls on the PAGE, so it has to read the page\'s theme; the fill and bevel belong to the component. Theming the root does both and tints the shadow.', 'The root pins `Elevation`, which IS the component\'s own property. Theme inherits, elevation is pinned — that is the whole split in one sentence.'],
   tokens: [{
@@ -670,6 +670,11 @@ export const SPEED_DIAL_DOC = {
     type: 'boolean / function',
     default: 'undefined',
     note: 'Controlled when supplied; it manages its own open state otherwise.'
+  }],
+  theming: [{
+    collection: 'Buttons',
+    inCode: '`color` is passed to every FAB in it, so the dial and its actions share one Buttons palette.',
+    inFigma: 'Set the Buttons mode on the SpeedDial, not Theme. Its child FABs take it from there unless one sets its own.'
   }],
   composition: [
     'Give every action a `name`. It is the accessible name whether or not tooltips are shown, and an icon without one is announced as "menu item".',
