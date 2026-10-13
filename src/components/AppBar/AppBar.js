@@ -150,13 +150,19 @@ function DesktopAppBar({
               what was wanted here; the semantics were not.
 
               Nothing new in Figma — this IS H3, so there is no wordmark
-              variable or style to keep in step. */}
+              variable or style to keep in step.
+
+              width="hug" is REQUIRED. Headings default to width="fill", and
+              with flexShrink: 0 a filling wordmark takes the whole bar and
+              pushes centerSlot and endSlot off the right edge — Login rendered,
+              in the DOM, and unreachable on every screen width. */}
           {/* Brand: slot overrides default rendering */}
           {brand !== undefined ? (
             onBrandClick ? (
               <H3
                 component="button"
                 type="button"
+                width="hug"
                 onClick={onBrandClick}
                 sx={{
                   background: 'transparent', border: 'none', padding: 0,
@@ -166,12 +172,12 @@ function DesktopAppBar({
                 {brand}
               </H3>
             ) : (
-              <H3 component="span" sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}>{brand}</H3>
+              <H3 component="span" width="hug" sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}>{brand}</H3>
             )
           ) : brandType === 'logo' ? (
             <Box sx={{ width: 32, height: 32, borderRadius: '6px', backgroundColor: 'var(--Text)', opacity: 0.8, flexShrink: 0 }} aria-label="Company logo" />
           ) : (
-            <H3 component="span" sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}>{companyName}</H3>
+            <H3 component="span" width="hug" sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}>{companyName}</H3>
           )}
 
           {/* Center: slot overrides default search/tabs.

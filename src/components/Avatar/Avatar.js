@@ -275,6 +275,11 @@ export function Avatar({
           component="img"
           src={effectiveSrc}
           alt={alt || 'Avatar'}
+          /* Google profile photos (lh3.googleusercontent.com) refuse requests
+             that carry a cross-site referrer, so a signed-in user's avatar
+             failed to load and fell through to an empty circle. Sending no
+             referrer is what those URLs need and costs nothing elsewhere. */
+          referrerPolicy="no-referrer"
           onError={() => setImgError(true)}
           sx={{
             width: '100%', height: '100%',

@@ -40,4 +40,18 @@ describe('the AppBar wordmark', () => {
       .toBe('inline font rules: false');
     expect(container).toBeTruthy();
   });
+
+  /* Headings default to width="fill". A filling wordmark with flexShrink: 0
+     took the whole bar and pushed centerSlot and endSlot off the right edge —
+     the studio's Login button was rendered and unreachable at every width. */
+  it.each([
+    ['brand', { brand: 'Popsicles' }],
+    ['clickable brand', { brand: 'Popsicles', onBrandClick: () => {} }],
+    ['companyName', { companyName: 'Popsicles' }],
+  ])('hugs its text as %s, so the slots after it stay on screen', (_, props) => {
+    render(<AppBar {...props} endSlot={<button type="button">Login</button>} />);
+    const mark = screen.getByText('Popsicles');
+    expect(mark).toHaveClass('typography-width-hug');
+    expect(mark).not.toHaveClass('typography-width-fill');
+  });
 });
