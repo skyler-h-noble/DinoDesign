@@ -25,6 +25,7 @@ import { BadgeShowcase } from '../components/Badge/BadgeShowcase';
 import { ChipShowcase } from '../components/Chip/ChipShowcase';
 import { DividerShowcase } from '../components/Divider/DividerShowcase';
 import { CodeBlockShowcase } from '../components/CodeBlock/CodeBlockShowcase';
+import { ChartsShowcase } from '../components/Charts/ChartsShowcase';
 import { SwatchShowcase } from '../components/Swatch/SwatchShowcase';
 import { TableShowcase } from '../components/Table/TableShowcase';
 import { ListShowcase } from '../components/List/ListShowcase';
@@ -255,6 +256,8 @@ const NAV_ITEMS = [
       { id: 'tag', label: 'Tag' },
       { id: 'divider', label: 'Divider' },
       { id: 'codeblock', label: 'Code Block' },
+      // How charts are made: the studio's Charts add-on (code + Figma) and the React components.
+      { id: 'charts', label: 'Charts' },
       { id: 'list', label: 'List' },
       { id: 'table', label: 'Table' },
       { id: 'tooltip', label: 'Tooltip' },
@@ -505,6 +508,7 @@ function ShowcaseInner() {
             {activeSection === 'tag' && <TagShowcase />}
             {activeSection === 'divider' && <DividerShowcase />}
             {activeSection === 'codeblock' && <CodeBlockShowcase />}
+            {activeSection === 'charts' && <ChartsShowcase />}
             {activeSection === 'swatch' && <SwatchShowcase />}
             {activeSection === 'list' && <ListShowcase />}
             {activeSection === 'table' && <TableShowcase />}
