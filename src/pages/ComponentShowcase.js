@@ -26,6 +26,7 @@ import { ChipShowcase } from '../components/Chip/ChipShowcase';
 import { DividerShowcase } from '../components/Divider/DividerShowcase';
 import { CodeBlockShowcase } from '../components/CodeBlock/CodeBlockShowcase';
 import { ChartsShowcase } from '../components/Charts/ChartsShowcase';
+import { HeroGeneratorShowcase } from '../components/AddOns/HeroGeneratorShowcase';
 import { SwatchShowcase } from '../components/Swatch/SwatchShowcase';
 import { TableShowcase } from '../components/Table/TableShowcase';
 import { ListShowcase } from '../components/List/ListShowcase';
@@ -219,6 +220,8 @@ const NAV_ITEMS = [
     children: [
       { id: 'stack', label: 'Stack' },
       { id: 'section', label: 'Section' },
+      // A generated hero (studio add-on): over a photo or a gradient, contrast solved.
+      { id: 'hero-generator', label: 'Hero Generator' },
     ],
   },
   {
@@ -509,6 +512,7 @@ function ShowcaseInner() {
             {activeSection === 'divider' && <DividerShowcase />}
             {activeSection === 'codeblock' && <CodeBlockShowcase />}
             {activeSection === 'charts' && <ChartsShowcase />}
+            {activeSection === 'hero-generator' && <HeroGeneratorShowcase />}
             {activeSection === 'swatch' && <SwatchShowcase />}
             {activeSection === 'list' && <ListShowcase />}
             {activeSection === 'table' && <TableShowcase />}

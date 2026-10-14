@@ -96,6 +96,10 @@ export function Select({
   startDecoration,
   disabled = false,
   fullWidth = false,
+  /* The trigger's floor. 140 keeps a lone select from collapsing around a
+     short value; two side by side in a narrow row (a gradient stop's family
+     and tone) need it lower, so it is a prop rather than a literal. */
+  minWidth = 140,
   className = '',
   sx = {},
   ...props
@@ -481,7 +485,7 @@ export function Select({
         onBlur={() => setFocused(false)}
         sx={{
           display: 'flex', alignItems: 'center', gap: 1,
-          width: '100%', minWidth: 140,
+          width: '100%', minWidth,
           height: sizeConfig.height,
           padding: sizeConfig.padding,
           backgroundColor: 'var(--Hover)',

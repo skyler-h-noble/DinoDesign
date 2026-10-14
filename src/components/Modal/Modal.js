@@ -255,7 +255,11 @@ export function Modal({
             flexShrink: 0,
           }}>
             {title && (
-              <Box sx={{ fontSize: size === 'small' ? '18px' : size === 'large' ? '24px' : '20px', fontWeight: 700, color: 'var(--Text)', flex: 1 }}>
+              /* The header face and color, not the page's. Without a family of
+                 its own the title inherited the host page's, and the generated
+                 CSS deliberately gives the page none — so it came out in the
+                 browser's serif. Same chain as the lib headings use. */
+              <Box className="modal-title" sx={{ fontSize: size === 'small' ? '18px' : size === 'large' ? '24px' : '20px', fontWeight: 'var(--H4-Font-Weight, 700)', fontFamily: 'var(--H4-Font-Family, var(--Font-Family-Header, var(--Header-Font-Family, inherit)))', color: 'var(--Header, var(--Text))', flex: 1 }}>
                 {title}
               </Box>
             )}

@@ -227,3 +227,14 @@ describe('Chip — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+describe('Chip typography', () => {
+  it('takes the button face and weight, not the page font', () => {
+    render(<Chip label="Summer" />);
+    const root = screen.getByText('Summer').closest('.MuiChip-root');
+    const cs = window.getComputedStyle(root);
+    expect(cs.fontFamily).toContain('--Font-Family-Button');
+    expect(cs.fontFamily).not.toBe('inherit');
+    expect(cs.fontWeight).toContain('--Button-Font-Weight');
+  });
+});

@@ -293,8 +293,13 @@ export function Chip({
   const chipSx = {
     height: sc.height,
     fontSize: sc.fontSize,
-    fontWeight: 500,
-    fontFamily: 'inherit',
+    /* The button's face and weight, not the page's. `inherit` took them from
+       the host, and the generated CSS deliberately gives the page no font —
+       so outside a styled parent every chip came out in the UA serif. Same
+       chain as Stepper's digit: --Font-Family-Button is declared with no
+       fallback of its own, so the body face is the real second step. */
+    fontWeight: 'var(--Button-Font-Weight, 500)',
+    fontFamily: 'var(--Font-Family-Button, var(--Font-Family-Body, inherit))',
     borderRadius: (sc.height / 2) + 'px',
     padding: sc.padding,
     // `Sizing-4` on the Figma variant — a chip never narrower than 32px.
