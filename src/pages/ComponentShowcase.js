@@ -221,7 +221,6 @@ const NAV_ITEMS = [
       { id: 'stack', label: 'Stack' },
       { id: 'section', label: 'Section' },
       // A generated hero (studio add-on): over a photo or a gradient, contrast solved.
-      { id: 'hero-generator', label: 'Hero Generator' },
     ],
   },
   {
@@ -259,8 +258,6 @@ const NAV_ITEMS = [
       { id: 'tag', label: 'Tag' },
       { id: 'divider', label: 'Divider' },
       { id: 'codeblock', label: 'Code Block' },
-      // How charts are made: the studio's Charts add-on (code + Figma) and the React components.
-      { id: 'charts', label: 'Charts' },
       { id: 'list', label: 'List' },
       { id: 'table', label: 'Table' },
       { id: 'tooltip', label: 'Tooltip' },
@@ -287,13 +284,22 @@ const NAV_ITEMS = [
     ],
   },
   {
-    id: 'decorative',
-    label: 'Decorative',
+    /* The studio add-ons: one-off pieces generated as code and as a Figma
+       build from the user's own system, rather than components to import.
+       Charts covers the add-on and the React chart components alike. */
+    id: 'add-ons',
+    label: 'Add-Ons',
     children: [
-      { id: 'curvedtext', label: 'Curved Display Text' },
-      { id: 'beveltext', label: 'Bevel Display Text' },
+      { id: 'charts', label: 'Charts' },
+      { id: 'hero-generator', label: 'Hero Generator' },
     ],
   },
+  /* Decorative (Curved and Bevel Display Text) is out of the nav while it
+     needs more work. The showcases are still in the code below, so putting
+     the section back is restoring this entry:
+       { id: 'decorative', label: 'Decorative', children: [
+           { id: 'curvedtext', label: 'Curved Display Text' },
+           { id: 'beveltext', label: 'Bevel Display Text' } ] } */
 ];
 
 function ShowcaseInner() {
