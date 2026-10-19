@@ -61,8 +61,12 @@ const CHECK_DISC = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: '50%',
-  height: '50%',
+  /* A fixed circle, not a share of the chip: at 50% x 50% a Fit=Fill chip
+     (54 x 32) stretched the disc into a 27 x 16 ellipse. Figma binds the check
+     to Icon-Size in the `in-check` mode, which aliases Checkbox/Checkbox-Icon —
+     14 / 12 / 18 by component size, the same glyph the checkbox draws. */
+  width: 'var(--Checkbox-Icon, 14px)',
+  height: 'var(--Checkbox-Icon, 14px)',
   borderRadius: '50%',
   backgroundColor: 'var(--Background)',
   display: 'flex',
@@ -107,7 +111,7 @@ export function Swatch({
      and the control says what is happening. Two marks for one state would be
      one too many.
  
-     Radio has no `non-clickable`, which follows: a radio that cannot be chosen
+     Radio has no `Non-clickable`, which follows: a radio that cannot be chosen
      is not a radio — so a swatch with no onClick renders none, even with
      `radio` set. Figma simply does not draw that combination. */
   radio = false,
@@ -118,9 +122,14 @@ export function Swatch({
   ...props
 }) {
   /* Clickable is the PRESENCE of a handler, not a separate prop. Figma puts
-     `non-clickable` on the same axis as the interaction states, which says the
+     `State=Non-clickable` on the same axis as the interaction states, which says the
      same thing: either it responds or it does not. */
   const clickable = Boolean(onClick) && !disabled;
+  /* A disabled swatch is still the CLICKABLE swatch, dimmed: Figma's
+     State=Disabled draws the radio and the check like Default does. Only
+     Non-clickable (no handler at all) drops them. `clickable` above decides
+     whether it responds; `interactive` decides which variant it is. */
+  const interactive = Boolean(onClick);
   const dim = SIZE_HEIGHT[size] || SIZE_HEIGHT.medium;
 
   /* A color alone is not a name. Where there is no visible label and the
@@ -172,18 +181,20 @@ export function Swatch({
              color by 5% reads as pressed-ness on all of them. A surface-aware
              token is the right instinct for a themed element and the wrong one
              for a swatch. */
+          /* No shadow change on hover: every State in the Figma set carries the
+             same Buttons effect, so hover is the scrim alone. */
           '&:hover': {
-            boxShadow: 'var(--Effect-Level-1)',
             backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05))',
           },
           '&:active': {
-            boxShadow: 'var(--Effect-Level-0)',
             backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.08))',
           },
         }),
       }}
     >
-      {selected && !radio ? (
+      {/* Figma's Non-clickable variant has no check layer — a display swatch
+          is not chosen, so `selected` means nothing without a handler. */}
+      {selected && !radio && interactive ? (
         <Box className="swatch-check" sx={CHECK_DISC}>
           <CheckIcon
             aria-hidden="true"
@@ -211,7 +222,9 @@ export function Swatch({
         flexDirection: 'column',
         alignItems: 'center',
         gap: 'var(--Sizing-Half, 4px)',
-        width: 'var(--Sizing-7, 56px)',
+        /* Fit=Fill hands the width to the layout, the root as well as the chip:
+           a fixed 56px root left a Fill swatch 2px wider than its 54px slot. */
+        width: fit === 'fill' ? '100%' : 'var(--Sizing-7, 56px)',
         padding: 0,
         background: 'none',
         border: 'none',
@@ -226,7 +239,7 @@ export function Swatch({
       {...props}
     >
       {chip}
-      {radio && clickable ? (
+      {radio && interactive ? (
         /* Presentational: the whole swatch is the control, so the radio must
            not be a second tab stop or a second thing to announce. */
         <Radio
