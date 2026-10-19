@@ -51,11 +51,17 @@ const SIZE_MAP = {
    *
    * `gap` is the space between the text column and the chevron.
    */
+  /* One padding at every size, because that is how Figma binds it: the
+     Accordion Summary is Sizing-1 Sizing-1 Sizing-1 Sizing-2 and the Details
+     Sizing-2 whether the group resolves small, medium or large (the Accordion
+     page puts the group at small). The small and large ramps here were not in
+     the design — small made a 32px row where Figma draws 40. Size still picks
+     the icon and the type. */
   small: {
-    summaryPadding: 'var(--Sizing-Half) var(--Sizing-Half) var(--Sizing-Half) var(--Sizing-1-and-Half)',
-    gap: 'var(--Sizing-Half)',
-    detailsPy: 'var(--Sizing-1-and-Half)',
-    detailsPx: 'var(--Sizing-1-and-Half)',
+    summaryPadding: 'var(--Sizing-1) var(--Sizing-1) var(--Sizing-1) var(--Sizing-2)',
+    gap: 'var(--Sizing-1)',
+    detailsPy: 'var(--Sizing-2)',
+    detailsPx: 'var(--Sizing-2)',
     iconSize: 'small',
   },
   medium: {
@@ -66,10 +72,10 @@ const SIZE_MAP = {
     iconSize: 'medium',
   },
   large: {
-    summaryPadding: 'var(--Sizing-1-and-Half) var(--Sizing-1-and-Half) var(--Sizing-1-and-Half) var(--Sizing-2-and-Half)',
-    gap: 'var(--Sizing-1-and-Half)',
-    detailsPy: 'var(--Sizing-2-and-Half)',
-    detailsPx: 'var(--Sizing-2-and-Half)',
+    summaryPadding: 'var(--Sizing-1) var(--Sizing-1) var(--Sizing-1) var(--Sizing-2)',
+    gap: 'var(--Sizing-1)',
+    detailsPy: 'var(--Sizing-2)',
+    detailsPx: 'var(--Sizing-2)',
     iconSize: 'large',
   },
 };
@@ -255,8 +261,24 @@ export function Accordion({
         data-theme={dataTheme}
         data-surface={dataSurface}
         sx={{
-          border: '1px solid var(--Border-Variant)',
+          /* The border is an OVERLAY, not a CSS border — Figma's Theme-
+             Container stroke is INSIDE, which takes no room and paints over
+             the contents. A CSS border added 2px to every segment (77 where
+             Figma draws 75) and pushed the text 1px in. Drawn last, above the
+             summary and details, so a hover or pressed fill on the summary
+             cannot cover it; `inherit` follows the corners a connected group
+             sets per position. */
+          position: 'relative',
           borderRadius: RADIUS,
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            inset: 0,
+            border: '1px solid var(--Border)',
+            borderRadius: 'inherit',
+            pointerEvents: 'none',
+            zIndex: 1,
+          },
           backgroundColor: 'var(--Background)',
           overflow: 'hidden',
           boxShadow: SHADOW_LEVEL_1,  // Accordion
