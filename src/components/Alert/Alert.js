@@ -167,7 +167,12 @@ export function Alert({
           fontFamily: 'inherit',
           lineHeight: 1.5,
           color: 'var(--Text-Match, var(--Text))',
-          backgroundColor: 'var(--Background)',
+          /* 75% of the surface, as Figma's Theme-Container fill (Surface/
+             Background at 0.753 opacity): the page shows faintly through.
+             Text-Match's contrast is set against the opaque surface, so on a
+             busy or contrasting backdrop the text sits on a blend of the two —
+             fine on the page surfaces alerts normally sit on. */
+          backgroundColor: 'color-mix(in srgb, var(--Background) 75.3%, transparent)',
           borderRadius: 'calc(' + RADIUS + ' - 1px)',
         }}
       >
