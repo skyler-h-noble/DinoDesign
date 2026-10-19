@@ -38,8 +38,8 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const seg = tokenSegment;
 
 // --- Sizing ------------------------------------------------------------------
-// touchTarget is the 24×24 parent container; box is the outer ring; dot is the
-// inner filled circle when checked. Padding between target and ring is derived.
+// box is the outer ring; dot is the inner filled circle when checked. The
+// control around them is Sizing-3 square at every size (see `target` below).
 
 const SIZE_MAP = {
 /* Radio/Radio and Radio/Dot from Figma's Component-Size collection. The dot was
@@ -50,9 +50,9 @@ const SIZE_MAP = {
    the browser rounds per axis, and it lands visibly off. 10 in 20 is 5 either
    side, which is what Figma draws (Dot at x=5, y=5). Whole pixels centre; halves
    do not. Large was wrong by 2.5px on top of that. */
-  small:  { touchTarget: 24, box: 16, dot: 8,  gap: 4,  LabelComp: BodySmall },
-  medium: { touchTarget: 24, box: 20, dot: 10, gap: 8,  LabelComp: Body },
-  large:  { touchTarget: 24, box: 24, dot: 12, gap: 12, LabelComp: BodyLarge },
+  small:  { box: 16, dot: 8,  gap: 4,  LabelComp: BodySmall },
+  medium: { box: 20, dot: 10, gap: 8,  LabelComp: Body },
+  large:  { box: 24, dot: 12, gap: 12, LabelComp: BodyLarge },
 };
 
 // --- Custom Radio Icons ------------------------------------------------------
@@ -162,7 +162,13 @@ export function Radio({
   //   small  → 4px (24-16)/2
   //   medium → 2px (24-20)/2
   //   large  → 0px (24-24)/2
-  const inset = (sizeConfig.touchTarget - sizeConfig.box) / 2;
+  /* The control is Sizing-3 square at every size — Figma binds the Radio
+     root's min width and height to it (28px) — with the ring CENTRED in it.
+     This was a 24px root with the ring at its corner, which put a large ring
+     flush with the edge and every ring 2px up and left of where Figma draws
+     it. Centred by flex, not by a computed padding, so a token value is all
+     it needs. */
+  const target = 'var(--Sizing-3, 28px)';
 
   const mergedInputProps = {
     ...inputPropsProp,
@@ -186,11 +192,14 @@ export function Radio({
       inputProps={mergedInputProps}
       disableRipple
       sx={{
-        padding: inset + 'px',
-        width: sizeConfig.touchTarget,
-        height: sizeConfig.touchTarget,
-        minWidth: sizeConfig.touchTarget,
-        minHeight: sizeConfig.touchTarget,
+        padding: 0,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: target,
+        height: target,
+        minWidth: target,
+        minHeight: target,
         boxSizing: 'border-box',
         borderRadius: '50%',
         color: 'inherit',
