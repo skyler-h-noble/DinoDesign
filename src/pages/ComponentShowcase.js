@@ -27,6 +27,7 @@ import { DividerShowcase } from '../components/Divider/DividerShowcase';
 import { CodeBlockShowcase } from '../components/CodeBlock/CodeBlockShowcase';
 import { ChartsShowcase } from '../components/Charts/ChartsShowcase';
 import { HeroGeneratorShowcase } from '../components/AddOns/HeroGeneratorShowcase';
+import { BentoGridShowcase } from '../components/AddOns/BentoGridShowcase';
 import { SwatchShowcase } from '../components/Swatch/SwatchShowcase';
 import { TableShowcase } from '../components/Table/TableShowcase';
 import { ListShowcase } from '../components/List/ListShowcase';
@@ -292,6 +293,7 @@ const NAV_ITEMS = [
     children: [
       { id: 'charts', label: 'Charts' },
       { id: 'hero-generator', label: 'Hero Generator' },
+      { id: 'bento-grid', label: 'Bento Grid' },
     ],
   },
   /* Decorative (Curved and Bevel Display Text) is out of the nav while it
@@ -309,7 +311,14 @@ function ShowcaseInner() {
      beside the Provider's omni-* ones. That is what broke the dark-mode
      toggle — SettingsPanel flipped #css-mode while the Provider's #omni-mode
      sat later in <head> still pointing at Light-Mode.css and won. */
-  const [activeSection, setActiveSection] = useState('buttons');
+  /* ?section=<id> opens a page directly — the studio links to its add-on's
+     page here (e.g. ?section=bento-grid). Any id the nav does not have falls
+     back to Buttons rather than rendering nothing. */
+  const [activeSection, setActiveSection] = useState(() => {
+    const want = new URLSearchParams(window.location.search).get('section');
+    const known = (items) => items.some((it) => it.id === want || (it.children && known(it.children)));
+    return want && known(NAV_ITEMS) ? want : 'buttons';
+  });
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -381,7 +390,8 @@ function ShowcaseInner() {
           color="default"
           selectedItems={activeSection}
           onSelectedItemsChange={handleTreeSelect}
-          defaultExpandedItems={expandedItems || ['inputs']}
+          /* Open the linked page's category too, so ?section= shows where it is. */
+          defaultExpandedItems={expandedItems || ['inputs', ...NAV_ITEMS.filter((c) => c.children && c.children.some((x) => x.id === activeSection)).map((c) => c.id)]}
           animation="slide"
           aria-label="Component navigation"
           sx={{ border: 'none', borderRadius: 0 }}
@@ -519,6 +529,7 @@ function ShowcaseInner() {
             {activeSection === 'codeblock' && <CodeBlockShowcase />}
             {activeSection === 'charts' && <ChartsShowcase />}
             {activeSection === 'hero-generator' && <HeroGeneratorShowcase />}
+            {activeSection === 'bento-grid' && <BentoGridShowcase />}
             {activeSection === 'swatch' && <SwatchShowcase />}
             {activeSection === 'list' && <ListShowcase />}
             {activeSection === 'table' && <TableShowcase />}
