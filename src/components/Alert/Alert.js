@@ -166,14 +166,23 @@ export function Alert({
           fontSize: s.fontSize,
           fontFamily: 'inherit',
           lineHeight: 1.5,
-          color: 'var(--Text-Match, var(--Text))',
-          /* 75% of the surface, as Figma's Theme-Container fill (Surface/
-             Background at 0.753 opacity): the page shows faintly through.
-             Text-Match's contrast is set against the opaque surface, so on a
-             busy or contrasting backdrop the text sits on a blend of the two —
-             fine on the page surfaces alerts normally sit on. */
-          backgroundColor: 'color-mix(in srgb, var(--Background) 75.3%, transparent)',
           borderRadius: 'calc(' + RADIUS + ' - 1px)',
+          /* On the element WITH its zone attributes, because the design
+             system paints every [data-theme][data-surface] element with an
+             opaque --Background and --Text at (0,2,0) — which beat this
+             component's single class and erased both the 75% fill and
+             Text-Match on the page. Class + two attributes is (0,3,0).
+
+             Text-Match: see textNode above.
+
+             The fill is 75% of the surface, as Figma's Theme-Container fill
+             (Surface/Background at 0.753 opacity): the page shows faintly
+             through. Text-Match's contrast is set against the opaque surface,
+             so on a busy backdrop the text sits on a blend of the two. */
+          '&[data-theme][data-surface]': {
+            color: 'var(--Text-Match, var(--Text))',
+            backgroundColor: 'color-mix(in srgb, var(--Background) 75.3%, transparent)',
+          },
         }}
       >
         {innerContent}

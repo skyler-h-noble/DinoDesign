@@ -39,7 +39,8 @@ const seg = tokenSegment;
 
 // --- Sizing ------------------------------------------------------------------
 // box is the outer ring; dot is the inner filled circle when checked. The
-// control around them is Sizing-3 square at every size (see `target` below).
+// control around them hugs the ring with 2px a side, at least Sizing-3 square
+// (see `target` below).
 
 const SIZE_MAP = {
 /* Radio/Radio and Radio/Dot from Figma's Component-Size collection. The dot was
@@ -162,13 +163,13 @@ export function Radio({
   //   small  → 4px (24-16)/2
   //   medium → 2px (24-20)/2
   //   large  → 0px (24-24)/2
-  /* The control is Sizing-3 square at every size — Figma binds the Radio
-     root's min width and height to it (28px) — with the ring CENTRED in it.
-     This was a 24px root with the ring at its corner, which put a large ring
-     flush with the edge and every ring 2px up and left of where Figma draws
-     it. Centred by flex, not by a computed padding, so a token value is all
-     it needs. */
-  const target = 'var(--Sizing-3, 28px)';
+  /* As Figma builds the Radio root: a frame that HUGS the ring with 2px of
+     padding a side, never smaller than Sizing-3 (24px). So it is 28px round a
+     large 24px ring and 24px round the medium and small ones, with the ring
+     centred either way. 0.14.6 made it a fixed Sizing-3 square on the belief
+     that Sizing-3 was 28px — it is 24, which left the large ring exactly where
+     it was. */
+  const target = 'var(--Sizing-3, 24px)';
 
   const mergedInputProps = {
     ...inputPropsProp,
@@ -192,12 +193,10 @@ export function Radio({
       inputProps={mergedInputProps}
       disableRipple
       sx={{
-        padding: 0,
+        padding: '2px',
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        width: target,
-        height: target,
         minWidth: target,
         minHeight: target,
         boxSizing: 'border-box',
