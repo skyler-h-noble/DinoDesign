@@ -70,9 +70,9 @@ describe('Radio Component', () => {
 
   // --- Color ---
 
-  test('defaults to primary color', () => {
+  test('defaults to the default color, not primary', () => {
     const { container } = render(<Radio value="a" label="Default" />);
-    expect(container.querySelector('.radio-primary')).toBeInTheDocument();
+    expect(container.querySelector('.radio-default')).toBeInTheDocument();
   });
 
   test('applies named color class', () => {
@@ -80,9 +80,9 @@ describe('Radio Component', () => {
     expect(container.querySelector('.radio-secondary')).toBeInTheDocument();
   });
 
-  test('falls back to primary for unknown colors', () => {
+  test('falls back to default for unknown colors', () => {
     const { container } = render(<Radio color="purple" value="a" label="Bad" />);
-    expect(container.querySelector('.radio-primary')).toBeInTheDocument();
+    expect(container.querySelector('.radio-default')).toBeInTheDocument();
   });
 
   // --- Sizes ---

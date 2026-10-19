@@ -82,7 +82,11 @@ const CHECK_DISC = {
 const FOCUS_RING = {
   content: '""',
   position: 'absolute',
-  inset: '-3px',
+  /* -3px from the chip's OUTER edge, as Figma draws it (a 2px OUTSIDE stroke
+     on a frame 1px outside the chip). An absolute child measures inset from
+     the padding box, inside the chip's own border, so -3px alone landed the
+     ring a border-width short: 58px across on a 54px chip, not 60. */
+  inset: 'calc(-3px - var(--Button-Border-Width, 1px))',
   borderRadius: 'var(--Button-Focus-Radius, 5px)',
   border: '2px solid var(--Focus-Visible)',
   pointerEvents: 'none',

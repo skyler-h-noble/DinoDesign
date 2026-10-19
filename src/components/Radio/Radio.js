@@ -59,12 +59,11 @@ const SIZE_MAP = {
 
 function RadioCircleIcon({ size, color, checked }) {
   const C = seg(color);
-  // Matches Checkbox: the DEFAULT color draws its ring in --Quiet so an
-  // unselected radio reads as a quiet affordance rather than a button. The dot
-  // keeps the button token, so selecting one is what brings in the brand
-  // color. --Quiet is tuned to 4.5:1 on its surface, past the 3:1 a control
-  // outline requires.
-  const ringColor = C === 'Default' ? 'var(--Quiet)' : 'var(--Buttons-' + C + '-Border)';
+  /* As the Figma Radio set (6778:13571) binds it: unselected, the ring is the
+     surface's --Border (the 3:1 control outline); selected, ring and dot are
+     both the button's Border, so selecting is what brings in the color.
+     Hover takes the button Border too — that is set on the root below. */
+  const ringColor = checked ? 'var(--Buttons-' + C + '-Border)' : 'var(--Border)';
   const dotColor = 'var(--Buttons-' + C + '-Border)';
   const sizeConfig = SIZE_MAP[size] || SIZE_MAP.medium;
 
@@ -78,7 +77,8 @@ function RadioCircleIcon({ size, color, checked }) {
         borderRadius: '50%',
         border: '2px solid ' + ringColor,
         flexShrink: 0,
-        backgroundColor: 'var(--Background)',
+        // No fill: Figma's ring has none, so whatever it sits on shows through.
+        backgroundColor: 'transparent',
         /* The dot is centred by POSITION, not by flex.
            Flex centring inside a bordered circle depends on the browser
            resolving the content box the same way the border is painted, and
@@ -90,7 +90,7 @@ function RadioCircleIcon({ size, color, checked }) {
            content box in that sum, so nothing can disagree about where the
            middle is. */
         position: 'relative',
-        transition: 'border-color 0.15s ease-in-out',
+        transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out',
       }}
     >
       {checked && (
@@ -132,7 +132,9 @@ function RadioCircleIcon({ size, color, checked }) {
 export function Radio({
   theme,
   surface,
-  color = 'primary',
+  // `default`, not `primary`: a control takes the Default button color unless
+  // it asks for another, as the Figma Radio's Buttons mode does.
+  color = 'default',
   size = 'medium',
   label,
   // 'end'    — label to the right of the radio (default)
@@ -153,7 +155,7 @@ export function Radio({
   inputProps: inputPropsProp = {},
   ...props
 }) {
-  const effectiveColor = COLORS.includes(color) ? color : 'primary';
+  const effectiveColor = COLORS.includes(color) ? color : 'default';
   const sizeConfig = SIZE_MAP[size] || SIZE_MAP.medium;
   const LabelComp = sizeConfig.LabelComp;
   // Inset between the 24×24 parent and the outer ring. Comes out to:
@@ -198,13 +200,34 @@ export function Radio({
            the state instead, so the dot stays the one thing that means
            "selected". */
         '&:hover': { backgroundColor: 'transparent' },
-        '&:hover .radio-circle-icon': { borderColor: 'var(--Text)' },
-        '&:active .radio-circle-icon': { borderColor: 'var(--Text)', backgroundColor: 'var(--Pressed)' },
-        '&.Mui-disabled .radio-circle-icon': { opacity: 'var(--Disabled, 0.38)' },
+        /* Hover and Pressed are a HALO outside the ring, as the Figma set
+           draws them: a frame 1px outside the ring with an OUTSIDE stroke of
+           Sizing-Half (hover) or Sizing-1 (pressed), in the button Border at
+           10% opacity. The 1px gap is the surface (--Background here, which is
+           what Figma's transparent gap shows), so the ring keeps --Background
+           on BOTH sides and its 3:1 never depends on the halo's color.
+           box-shadow, not a frame: it takes no layout, so the 42px pressed
+           halo does not push the label or the next radio. */
+        '&:hover .radio-circle-icon': {
+          boxShadow: '0 0 0 1px var(--Background), 0 0 0 calc(1px + var(--Sizing-Half, 4px)) color-mix(in srgb, var(--Buttons-' + seg(effectiveColor) + '-Border) 10%, transparent)',
+        },
+        // Unselected Hover also moves the ring to the button Border; selected
+        // already has it.
+        '&:not(.Mui-checked):hover .radio-circle-icon': { borderColor: 'var(--Buttons-' + seg(effectiveColor) + '-Border)' },
+        '&:active .radio-circle-icon': {
+          boxShadow: '0 0 0 1px var(--Background), 0 0 0 calc(1px + var(--Sizing-1, 8px)) color-mix(in srgb, var(--Buttons-' + seg(effectiveColor) + '-Border) 10%, transparent)',
+        },
+        // Unselected Pressed keeps the resting --Border ring (Figma), so the
+        // hover ring color is undone while the button is held.
+        '&:not(.Mui-checked):active .radio-circle-icon': { borderColor: 'var(--Border)' },
+        /* 2px, 1px out — its outer edge 3px outside the ring, as Figma's
+           Focus-Visible frame (30px, 2px INSIDE stroke, round a 24px ring). */
         '&.Mui-focusVisible .radio-circle-icon': {
           outline: '2px solid var(--Focus-Visible)',
-          outlineOffset: '2px',
+          outlineOffset: '1px',
         },
+        /* Once, on the root. It was also on the ring, which compounded to
+           0.14 where Figma's Disabled is 0.38. */
         '&.Mui-disabled': {
           opacity: 'var(--Disabled, 0.38)',
           cursor: 'not-allowed',
@@ -257,7 +280,9 @@ export function Radio({
 // --- RadioGroup Component ----------------------------------------------------
 
 export function RadioGroup({
-  color = 'primary',
+  // `default`, not `primary`: a control takes the Default button color unless
+  // it asks for another, as the Figma Radio's Buttons mode does.
+  color = 'default',
   size = 'medium',
   label,
   options = [],
