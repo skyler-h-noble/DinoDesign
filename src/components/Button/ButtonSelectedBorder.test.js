@@ -76,4 +76,8 @@ describe('selected border', () => {
     expect(css).toMatch(/font-size:\s*var\(--Button-Icon\)/);
     expect(css).not.toContain('var(--Button-Icon-Only)');
   });
+  it('in a selected outline, an avatar decorator ring follows the label color', () => {
+    render(<Button variant="default-outline" selected>On</Button>);
+    expect(allRules()).toMatch(/\.avatar\s*\{[^}]*border-color:\s*var\(--Buttons-Default-Text\)/);
+  });
 });

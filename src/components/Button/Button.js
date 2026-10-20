@@ -296,6 +296,11 @@ function outlineStyles(color, elevated = false, selected = false, size = 'medium
       : `var(--Buttons-${C}-Outline-Quiet, var(--Outline-Quiet))`,
     border: `${selectedBorderWidth(selected)} solid var(--Buttons-${C}-Border)`,
     boxShadow: selected ? pressedBevel : restLevel,
+    /* A SELECTED outline is filled (Buttons::Button), so an avatar decorator's
+       ring follows the LABEL color on that fill — Buttons::Text — as Figma
+       draws it. The button Border would be a ring of the fill's own outline
+       color, which on the fill is the weaker of the two. */
+    ...(selected && { '& .avatar': { borderColor: `var(--Buttons-${C}-Text)` } }),
     // Outline (like Ghost) has no fill of its own, so its hover/active
     // feedback comes from the surface --Hover / --Pressed scrim — a
     // subtle tone-aware overlay that reads correctly on any surface
