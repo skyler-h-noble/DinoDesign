@@ -89,6 +89,14 @@ function DesktopAppBar({
   searchValue,
   onSearchChange,
   searchPlaceholder = 'Search...',
+  /* Figma's AppBar `Layout`: 'left-brand' | 'center-brand' | 'title'. When
+     set, the bar is built the way the Figma set draws it (see layoutBar
+     below) from `brand`, `title`, `centerSlot` and `endSlot`; when unset the
+     bar renders as it always has, so existing callers do not move. */
+  layout,
+  title,
+  // Figma's `Menu` boolean: the ghost menu button at the start.
+  showMenu = true,
   children,
   className = '', sx = {},
 }) {
@@ -97,6 +105,94 @@ function DesktopAppBar({
   const dataTheme = barTheme.theme;
   const dataSurface = barTheme.surface || surface;
   const effectiveMenu = (menuType === 'expanded' && navLinks.length > 3) ? 'hamburger' : menuType;
+
+  // The navigation drawer the menu button opens — shared by both bars.
+  const navDrawer = (
+      <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} anchor="left" size="small">
+        <Box component="nav" aria-label="Main navigation" sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, py: 1 }}>
+          {navLinks.map((link) => (
+            <Button
+              key={link}
+              variant="ghost"
+              size="medium"
+              onClick={() => setDrawerOpen(false)}
+              sx={{ justifyContent: 'flex-start', width: '100%' }}
+            >
+              {link}
+            </Button>
+          ))}
+        </Box>
+      </Drawer>
+  );
+
+  if (layout) {
+    /* As the Figma AppBar (7442:31333): App-Bar-Height tall, the page Margin
+       either side (the Title layout starts at Sizing-2), the Level 2 shadow,
+       and three groups spread across the bar —
+         left-brand    menu + brand · tabs centred on the bottom edge · end
+         center-brand  menu · tabs from the left · end, brand centred on the bar
+         title         H3 title · end
+       The end group is whatever endSlot holds (Figma: a ButtonGroup and an
+       avatar button, Sizing-2 apart). */
+    const menu = showMenu && layout !== 'title' && (
+      <AppBarIconButton ariaLabel="Open navigation menu" onClick={onMenuClick || (() => setDrawerOpen(true))}>
+        <MenuIcon sx={{ fontSize: 'inherit' }} />
+      </AppBarIconButton>
+    );
+    const brandNode = typeof brand === 'string' ? <H3 component="span">{brand}</H3> : brand;
+    return (
+      <>
+      <Box
+        component="header" role="banner"
+        data-theme={dataTheme}
+        data-surface={dataSurface}
+        className={'appbar appbar-desktop appbar-layout-' + layout + ' appbar-' + barColor + (className ? ' ' + className : '')}
+        sx={{
+          position: 'relative',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          height: 'var(--App-Bar-Height, 64px)',
+          paddingLeft: layout === 'title' ? 'var(--Sizing-2, 16px)' : 'var(--Margin, 64px)',
+          paddingRight: 'var(--Margin, 64px)',
+          backgroundColor: 'var(--Background)', color: 'var(--Text)',
+          boxShadow: SHADOW_LEVEL_2,  // App bars
+          fontFamily: 'inherit',
+          ...sx,
+        }}
+      >
+        {layout === 'title' ? (
+          <H3 className="appbar-title">{title}</H3>
+        ) : (
+          <Box className="appbar-start" sx={{ display: 'flex', alignItems: 'center', gap: 'var(--Sizing-1, 8px)', flexShrink: 0 }}>
+            {menu}
+            {layout === 'left-brand' && brandNode}
+          </Box>
+        )}
+        {layout !== 'title' && (
+          <Box
+            className="appbar-center"
+            sx={{
+              flex: 1, alignSelf: 'stretch', minWidth: 0,
+              display: 'flex', alignItems: 'flex-end',
+              justifyContent: layout === 'left-brand' ? 'center' : 'flex-start',
+            }}
+          >
+            {centerSlot}
+          </Box>
+        )}
+        <Box className="appbar-end" sx={{ display: 'flex', alignItems: 'center', gap: 'var(--Sizing-2, 16px)', flexShrink: 0 }}>
+          {endSlot}
+        </Box>
+        {layout === 'center-brand' && (
+          // Centred on the whole bar, not on the space between the groups.
+          <Box className="appbar-brand-centre" sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', '& > *': { pointerEvents: 'auto' } }}>
+            {brandNode}
+          </Box>
+        )}
+      </Box>
+      {navDrawer}
+      </>
+    );
+  }
 
   const searchField = (
     <SearchField
@@ -262,22 +358,7 @@ function DesktopAppBar({
       )}
     </Box>
 
-    {/* Navigation Drawer */}
-    <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} anchor="left" size="small">
-      <Box component="nav" aria-label="Main navigation" sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, py: 1 }}>
-        {navLinks.map((link) => (
-          <Button
-            key={link}
-            variant="ghost"
-            size="medium"
-            onClick={() => setDrawerOpen(false)}
-            sx={{ justifyContent: 'flex-start', width: '100%' }}
-          >
-            {link}
-          </Button>
-        ))}
-      </Box>
-    </Drawer>
+    {navDrawer}
     </>
   );
 }
