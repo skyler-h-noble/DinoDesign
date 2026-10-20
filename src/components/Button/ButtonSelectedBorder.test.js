@@ -70,4 +70,10 @@ describe('selected border', () => {
     render(<Button variant="primary-outline" selected>On</Button>);
     expect(allRules()).toMatch(/:hover[^}]*box-shadow:[^}]*inset[^}]*--Effect-Level-1/);
   });
+  it('an icon-only button uses the decorator icon size (Button-Icon), not Button-Icon-Only', () => {
+    render(<Button iconOnly aria-label="Home"><svg /></Button>);
+    const css = allRules();
+    expect(css).toMatch(/font-size:\s*var\(--Button-Icon\)/);
+    expect(css).not.toContain('var(--Button-Icon-Only)');
+  });
 });

@@ -577,19 +577,18 @@ function getSizingStyles({ size, iconOnly, letterNumber, avatar, swatch }) {
       fontSize,
       padding: '0',
       '--_height': squareSize,
-      /* Figma keeps TWO icon ramps and they are not the same thing:
-         Button-Icon is a decorator sitting inside a button (16 / 20 / 32), and
-         Button-Icon-Only is the icon-only TYPE (16 / 24 / 40). They differ at
-         medium and large. This used the decorator ramp for both, so every
-         icon-only button was undersized by 4px at medium and 8px at large.
-         The token already existed and already carried the right numbers. */
+      /* ONE icon ramp, Button-Icon (16 / 20 / 32), for a decorator and for the
+         icon-only type alike. Decided 2026-10-20: the Figma icon-only button
+         resolves its icon through Icons & Avatars `in-button` -> Button-Icon,
+         and the smaller icon is the intended one. The separate
+         Button-Icon-Only ramp (16 / 24 / 40) is retired. */
       ...(!avatar && !swatch && {
         '& .MuiSvgIcon-root, & > *': {
           fontSize: size === 'small'
-            ? 'var(--Sm-Button-Icon-Only, var(--Button-Icon-Only))'
+            ? 'var(--Sm-Button-Icon, var(--Button-Icon))'
             : size === 'large'
-              ? 'var(--Lg-Button-Icon-Only, var(--Button-Icon-Only))'
-              : 'var(--Button-Icon-Only)',
+              ? 'var(--Lg-Button-Icon, var(--Button-Icon))'
+              : 'var(--Button-Icon)',
         },
       }),
     };
