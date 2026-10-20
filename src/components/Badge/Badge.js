@@ -50,7 +50,9 @@ function solidStyles(color) {
   return {
     bg:     'var(--Icons-' + C + ')',
     text:   'var(--Icons-On-' + C + ')',
-    border: 'none',
+    // Figma strokes the badge 1px in its own fill (Icons/<palette>); inside
+    // the 16px, so it reads solid and keeps its size.
+    border: '1px solid var(--Icons-' + C + ')',
   };
 }
 
@@ -207,12 +209,9 @@ export function Badge({
       border: styles.border,
       boxSizing: 'border-box',
 
-      // 1px ring in the background color so the badge stays visually separated
-      // from whatever it's anchored to (icon, avatar, button corner) — same
-      // technique MUI uses for its own punch-out badges, but via box-shadow so
-      // it doesn't conflict with the variant border (outline/light variants
-      // already use border for their colored ring).
-      boxShadow: '0 0 0 1px var(--Background)',
+      /* No ring. This drew a 1px ring in the BACKGROUND color to cut the badge
+         out of what it overlaps; the Figma set (3156:5150) has none — just the
+         1px stroke in the badge's own color. Matched to Figma 2026-10-20. */
 
       // Transition
       transition: 'transform 0.2s ease, opacity 0.2s ease',
