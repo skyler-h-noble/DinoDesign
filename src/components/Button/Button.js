@@ -309,7 +309,8 @@ function outlineStyles(color, elevated = false, selected = false, size = 'medium
       color: selected
         ? `var(--Buttons-${C}-Text)`
         : `var(--Buttons-${C}-Outline-Text)`,
-      boxShadow: selected ? pressedBevel : hoverLevel,
+      // Selected lifts too, as the selected solid does (Figma's selected outline Hover).
+      boxShadow: selected ? `${pressedBevel}, ${hoverLevel}` : hoverLevel,
       ...(!selected && { transform: 'translateY(-1px)' }),
     },
     '&:active': {
@@ -362,6 +363,9 @@ function ghostStyles(isTextContent, selected = false) {
       : 'var(--Button-Border-Width) solid transparent',
     boxShadow: 'none',
     textDecoration: 'none',
+    // A selected ghost draws the selected border width like every selected
+    // button: its border at the rest width plus the inner ring (2px or 3px).
+    ...(selected && { boxShadow: selectedRing('Default') }),
     '& .MuiTouchRipple-rippleVisible': {
       color: 'var(--Hover)',
     },
@@ -374,13 +378,13 @@ function ghostStyles(isTextContent, selected = false) {
       /* Lifts like an outline button: Figma's ghost Hover variants (selected
          and not) carry the Level 1 elevation on Button-Effect. The hover fill
          is the opaque --Hover, so the shadow has a body to sit under. */
-      boxShadow: SHADOW_LEVEL_1,
+      boxShadow: withRing(selected, 'Default', SHADOW_LEVEL_1),
       color: loud,
       ...(!selected && { transform: 'translateY(-1px)' }),
     },
     '&:active': {
       backgroundColor: 'var(--Pressed)',
-      boxShadow: 'none',
+      boxShadow: withRing(selected, 'Default', 'none'),
       color: loud,
       ...(!selected && { transform: 'translateY(0)' }),
     },

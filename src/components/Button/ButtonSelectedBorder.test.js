@@ -60,4 +60,14 @@ describe('selected border', () => {
     render(<Button variant="ghost">Go</Button>);
     expect(allRules()).toMatch(/:hover[^}]*box-shadow:\s*var\(--Effect-Level-1/);
   });
+  it('a selected ghost draws the selected width (inner ring), and lifts on hover', () => {
+    render(<Button variant="ghost" selected>On</Button>);
+    const css = allRules();
+    expect(css).toMatch(/box-shadow:\s*inset 0 0 0 calc\(var\(--Button-Selected-Border-Width/);
+    expect(css).toMatch(/:hover[^}]*box-shadow:\s*inset 0 0 0 calc[^}]*--Effect-Level-1/);
+  });
+  it('a selected outline lifts on hover over its pressed-in bevel', () => {
+    render(<Button variant="primary-outline" selected>On</Button>);
+    expect(allRules()).toMatch(/:hover[^}]*box-shadow:[^}]*inset[^}]*--Effect-Level-1/);
+  });
 });
