@@ -153,12 +153,17 @@ const seg = tokenSegment;
 // bevelShadow lives in src/components/_shadows.js so both Button and Slider
 // can share it. Consumers must set --_bevel and --_height on the element.
 
-/* A SELECTED button draws its border one pixel heavier than rest — Figma's
-   selected solid segments stroke 2px over a 1px base — so selection reads
-   whether a brand picked a 1px or a 2px border (--Button-Border-Width). The
-   box is border-box, so the extra pixel goes inward and the size holds. */
-const selectedBorderWidth = (selected) =>
-  selected ? 'calc(var(--Button-Border-Width) + 1px)' : 'var(--Button-Border-Width)';
+/* A SELECTED button reads one pixel heavier than rest — Figma's selected
+   solid segments stroke 2px over a 1px base — so selection reads whether a
+   brand picked a 1px or a 2px border (--Button-Border-Width). */
+const selectedBorderWidth = () => 'var(--Button-Border-Width)';
+/* The extra selected pixel is an INNER RING (an inset box-shadow inside the
+   border), not a thicker border: a button sizes to its content, so a 1px
+   heavier border made a selected button 2px wider and shifted its contents —
+   Figma's stroke sits inside and changes nothing. */
+const selectedRing = (C) => `inset 0 0 0 1px var(--Buttons-${C}-Border)`;
+const withRing = (selected, C, shadow) =>
+  !selected ? shadow : (!shadow || shadow === 'none' ? selectedRing(C) : `${selectedRing(C)}, ${shadow}`);
 
 function solidStyles(color, elevated = false, selected = false, size = 'medium') {
   const C = seg(color);
@@ -190,7 +195,7 @@ function solidStyles(color, elevated = false, selected = false, size = 'medium')
     backgroundColor: `var(--Buttons-${C}-Button)`,
     color: restText,
     border: `${selectedBorderWidth(selected)} solid var(--Buttons-${C}-Border)`,
-    boxShadow: restShadow,
+    boxShadow: withRing(selected, C, restShadow),
     position: 'relative',
     zIndex: 1,
     '& .MuiTouchRipple-rippleVisible': {
@@ -200,13 +205,13 @@ function solidStyles(color, elevated = false, selected = false, size = 'medium')
     '&:hover': {
       backgroundColor: `var(--Buttons-${C}-Hover)`,
       color: activeText,
-      boxShadow: hoverShadow,
+      boxShadow: withRing(selected, C, hoverShadow),
       ...(!selected && { transform: 'translateY(-1px)' }),
     },
     '&:active': {
       backgroundColor: `var(--Buttons-${C}-Pressed)`,
       color: activeText,
-      boxShadow: bevel, // No elevation on press
+      boxShadow: withRing(selected, C, bevel), // No elevation on press
       ...(!selected && { transform: 'translateY(0)' }),
     },
     '&.Mui-focusVisible': {
@@ -226,7 +231,7 @@ function outlineStyles(color, elevated = false, selected = false, size = 'medium
   /* A SELECTED outline is filled (Buttons::Button), and Figma bevels it the
      way it bevels every selected button — pressed in. Unselected has no fill
      and so no bevel. */
-  const pressedBevel = selected ? bevelShadow(color, size, true) : null;
+  const pressedBevel = selected ? withRing(true, C, bevelShadow(color, size, true)) : null;
   /* Elevation as the solid style has it — none (or Level 1 if elevated) at
      rest, one level up on hover, none while pressed. It needs an OPAQUE body
      to read: a shadow under a transparent button shows through it. */
@@ -340,7 +345,9 @@ function ghostStyles(isTextContent, selected = false) {
   const quiet = 'var(--Buttons-Default-Outline-Quiet, var(--Outline-Quiet))';
   const loud = 'var(--Buttons-Default-Outline-Text)';
   return {
-    backgroundColor: 'transparent',
+    // A selected ghost is painted in its surface, like an outline button —
+    // Figma's selected ghost fills Background under its Border stroke.
+    backgroundColor: selected ? 'var(--Background)' : 'transparent',
     color: selected ? loud : quiet,
     /* A SELECTED ghost draws its border — Figma's selected ghost strokes
        Buttons::Border at 1px, inside, as the mark that tells it from an
@@ -370,7 +377,7 @@ function ghostStyles(isTextContent, selected = false) {
       ...(!selected && { transform: 'translateY(0)' }),
     },
     '&.Mui-focusVisible': {
-      backgroundColor: 'transparent',
+      backgroundColor: selected ? 'var(--Background)' : 'transparent',
       outline: '2px solid var(--Focus-Visible)',
       outlineOffset: '2px',
       /* Focus-Visible takes the interaction label too. Figma treats it as one
@@ -799,6 +806,14 @@ export const Button = React.forwardRef(function Button({
             justifyContent: 'center',
             padding: '4px',
             color: 'inherit',
+            /* Figma binds Dynamic-Typography/Dynamic-Button-Number-Font-Size:
+               12 / 14 / 16. Not the 10 / 12 / 16 Button-Numbers ramp (that is
+               Badge's and Stepper's), and not the 16 the button text style
+               gave, which made a 32px number button 37px wide. The generator
+               emits no variable for it yet, so the fallbacks carry it. */
+            fontSize: size === 'small' ? 'var(--Sm-Button-Number-Font-Size, 12px)'
+              : size === 'large' ? 'var(--Lg-Button-Number-Font-Size, 16px)'
+              : 'var(--Button-Number-Font-Size, 14px)',
             lineHeight: 1,
             // Trim to cap height / baseline so the letter or number centres on
             // its own form rather than on the font's ascender-to-descender box.

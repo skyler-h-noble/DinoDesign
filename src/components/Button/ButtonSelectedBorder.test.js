@@ -1,4 +1,4 @@
-/** A selected solid or outline button draws --Button-Border-Width + 1px. */
+/** A selected solid or outline button reads 1px heavier: an inner ring inside its border. */
 import React from 'react';
 import { render } from '@testing-library/react';
 import { Button } from './Button';
@@ -8,9 +8,11 @@ const allRules = () => Array.from(document.styleSheets).flatMap((sh) => {
 }).join('\n');
 
 describe('selected border', () => {
-  it.each(['default', 'default-outline'])('%s: one pixel heavier when selected', (variant) => {
+  it.each(['default', 'default-outline'])('%s: an inner ring when selected, the border unchanged', (variant) => {
     render(<Button variant={variant} selected>On</Button>);
-    expect(allRules()).toMatch(/border:\s*calc\(var\(--Button-Border-Width\) \+ 1px\) solid/);
+    const css = allRules();
+    expect(css).toMatch(/inset 0 0 0 1px var\(--Buttons-Default-Border\)/);
+    expect(css).not.toContain('calc(var(--Button-Border-Width) + 1px)');
   });
   it('rest keeps the base width', () => {
     render(<Button variant="default">Off</Button>);
@@ -44,5 +46,13 @@ describe('selected border', () => {
     render(<Button variant="primary" selected>On</Button>);
     render(<Button variant="primary-outline" selected>On</Button>);
     expect(allRules()).toContain(p1.trim().slice(0, 40));
+  });
+  it('a number button uses the button number size (14px at medium), so it stays square', () => {
+    render(<Button contentType="letterNumber" aria-label="Item 123">123</Button>);
+    expect(allRules()).toMatch(/font-size:\s*var\(--Button-Number-Font-Size, 14px\)/);
+  });
+  it('a selected ghost is painted in its surface', () => {
+    render(<Button variant="ghost" selected>On</Button>);
+    expect(allRules()).toMatch(/background-color:\s*var\(--Background\)/);
   });
 });

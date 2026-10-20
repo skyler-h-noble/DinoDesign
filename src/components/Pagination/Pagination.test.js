@@ -324,8 +324,8 @@ describe('the current page is distinguishable', () => {
     const other = [...container.querySelectorAll('button')]
       .find((b) => b !== current && /^[0-9]+$/.test(b.textContent.trim()));
     const c = cssFor(current), o = cssFor(other);
-    expect(c).toContain('calc(var(--Button-Border-Width) + 1px)');
-    expect(o).not.toContain('calc(var(--Button-Border-Width) + 1px)');
+    expect(c).toContain('inset 0 0 0 1px var(--Buttons-Info-Border)');
+    expect(o).not.toContain('inset 0 0 0 1px var(--Buttons-Info-Border)');
     expect(c).toContain('color: var(--Buttons-Info-Text)');
     expect(o).not.toContain('color: var(--Buttons-Info-Text);');
   });
