@@ -147,6 +147,12 @@ export function AccordionGroup({
           sx={{
             display: 'flex',
             flexDirection: 'column',
+            /* The stack casts ONE shadow, as Figma puts the effect on the
+               connected group rather than on each segment: a shadow per
+               segment would band at every seam. Rounded like the stack so
+               the shadow follows its outer corners. */
+            borderRadius: RADIUS,
+            boxShadow: SHADOW_LEVEL_1,
             '& > .accordion-segment': {
               borderRadius: 0,
               marginBottom: '-1px',
