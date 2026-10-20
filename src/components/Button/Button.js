@@ -815,9 +815,13 @@ export const Button = React.forwardRef(function Button({
         <LetterComp
           component="span"
           sx={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            /* inline-BLOCK, not inline-flex: text-box-trim (CAP_HEIGHT_TRIM
+               below) applies only to a block container, so on a flex box it
+               was silently ignored and the number kept a 14px line box where
+               Figma trims it to the 10px cap height. The button is already a
+               flex row that centers this, so nothing here needs flex. */
+            display: 'inline-block',
+            textAlign: 'center',
             /* The number button has no outer padding to absorb the border, so
                the label's 4px gives it up — Figma's label frame sits 1px in from
                each edge for exactly that. Then a 32px number button is 32px. */
