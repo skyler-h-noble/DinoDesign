@@ -55,8 +55,9 @@ const SIZE_MAP = {
      Accordion Summary is Sizing-1 Sizing-1 Sizing-1 Sizing-2 and the Details
      Sizing-2 whether the group resolves small, medium or large (the Accordion
      page puts the group at small). The small and large ramps here were not in
-     the design — small made a 32px row where Figma draws 40. Size still picks
-     the icon and the type. */
+     the design — small made a 32px row where Figma draws 40. The chevron is
+     24px at every size too (Icon `small`): medium drew it at 32, which made
+     the summary 48px where Figma's is 40. Size picks the type. */
   small: {
     summaryPadding: 'var(--Sizing-1) var(--Sizing-1) var(--Sizing-1) var(--Sizing-2)',
     gap: 'var(--Sizing-1)',
@@ -69,14 +70,14 @@ const SIZE_MAP = {
     gap: 'var(--Sizing-1)',
     detailsPy: 'var(--Sizing-2)',
     detailsPx: 'var(--Sizing-2)',
-    iconSize: 'medium',
+    iconSize: 'small',
   },
   large: {
     summaryPadding: 'var(--Sizing-1) var(--Sizing-1) var(--Sizing-1) var(--Sizing-2)',
     gap: 'var(--Sizing-1)',
     detailsPy: 'var(--Sizing-2)',
     detailsPx: 'var(--Sizing-2)',
-    iconSize: 'large',
+    iconSize: 'small',
   },
 };
 
@@ -279,6 +280,17 @@ export function Accordion({
             pointerEvents: 'none',
             zIndex: 1,
           },
+          /* Focus ring round the whole segment, as Figma's Focus-Visible frame:
+             2px, 1px out, so its outer edge is 3px outside the segment — the
+             same ring Swatch and Radio draw. It was a 3px ring inset in the
+             summary. An outline, not a child, so the segment's own
+             overflow:hidden cannot clip it; raised so a connected neighbour
+             does not paint over it. */
+          '&:has(> .accordion-summary:focus-visible)': {
+            outline: '2px solid var(--Focus-Visible)',
+            outlineOffset: '1px',
+            zIndex: 2,
+          },
           backgroundColor: 'var(--Background)',
           overflow: 'hidden',
           boxShadow: SHADOW_LEVEL_1,  // Accordion
@@ -364,11 +376,14 @@ export function AccordionSummary({
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
       className={'accordion-summary' + (expanded ? ' accordion-summary-expanded' : '') + ' ' + className}
       sx={{
-        // hstack, top-left aligned. The gap scales with size — it was pinned
-        // to Sizing-1-and-Half, which left medium 4px wider than the design.
+        // hstack, centred vertically as Figma's Accordion Summary is: a 21px
+        // title sits in the middle of the 24px chevron row (it was pinned to
+        // the top, 1.5px high), and a tall summary keeps its chevron centred.
+        // The gap scales with size — it was pinned to Sizing-1-and-Half,
+        // which left medium 4px wider than the design.
         display: 'flex',
         flexDirection: 'row',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         justifyContent: 'flex-start',
         width: '100%',
         gap: s.gap,
@@ -418,10 +433,8 @@ export function AccordionSummary({
           backgroundColor: 'var(--Pressed)',
           '& .omni-icon': { color: 'var(--Text)' },
         } : {},
-        '&:focus-visible': {
-          outline: '3px solid var(--Focus-Visible)',
-          outlineOffset: '-3px',
-        },
+        // The focus ring belongs to the SEGMENT — see the :has() rule on it.
+        '&:focus-visible': { outline: 'none' },
         ...sx,
       }}
       {...props}
