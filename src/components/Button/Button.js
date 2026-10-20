@@ -77,8 +77,8 @@ function resolveDecorator(node, buttonSize) {
     });
   }
   if (node.type === DDIcon) {
-    // 16 / 20 / 32 — Button-Icon, the decorator ramp. Not Button-Icon-Only,
-    // which is the icon-only TYPE and a different set of numbers.
+    // 16 / 20 / 32 — Button-Icon, the one icon ramp (decorators and the
+    // icon-only type alike; Button-Icon-Only was retired 2026-10-20).
     return React.cloneElement(node, { size: 'custom', fontSize: mapping.icon });
   }
   return node;
