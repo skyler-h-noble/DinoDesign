@@ -56,14 +56,15 @@ const SIZE_MAP = {
      Sizing-2 whether the group resolves small, medium or large (the Accordion
      page puts the group at small). The small and large ramps here were not in
      the design — small made a 32px row where Figma draws 40. The chevron is
-     one size too: Figma's sits in the Icons & Avatars `in-button` mode, 20px
-     (Icon `xs`). Size picks the type. */
+     Figma's Icons & Avatars `in-button` size, which aliases Button/Button-Icon
+     and so follows the size: 16 / 20 / 32 (Icon xxs / xs / medium). Size also
+     picks the type. */
   small: {
     summaryPadding: 'var(--Sizing-1) var(--Sizing-1) var(--Sizing-1) var(--Sizing-2)',
     gap: 'var(--Sizing-1)',
     detailsPy: 'var(--Sizing-2)',
     detailsPx: 'var(--Sizing-2)',
-    iconSize: 'xs',
+    iconSize: 'xxs',
   },
   medium: {
     summaryPadding: 'var(--Sizing-1) var(--Sizing-1) var(--Sizing-1) var(--Sizing-2)',
@@ -77,7 +78,7 @@ const SIZE_MAP = {
     gap: 'var(--Sizing-1)',
     detailsPy: 'var(--Sizing-2)',
     detailsPx: 'var(--Sizing-2)',
-    iconSize: 'xs',
+    iconSize: 'medium',
   },
 };
 
