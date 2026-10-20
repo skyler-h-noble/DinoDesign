@@ -153,15 +153,18 @@ const seg = tokenSegment;
 // bevelShadow lives in src/components/_shadows.js so both Button and Slider
 // can share it. Consumers must set --_bevel and --_height on the element.
 
-/* A SELECTED button reads one pixel heavier than rest — Figma's selected
-   solid segments stroke 2px over a 1px base — so selection reads whether a
-   brand picked a 1px or a 2px border (--Button-Border-Width). */
+/* A SELECTED button is 2px (--Button-Selected-Border-Width) whether a brand
+   picked a 1px or a 2px border (--Button-Border-Width). Never 3px. */
 const selectedBorderWidth = () => 'var(--Button-Border-Width)';
 /* The extra selected pixel is an INNER RING (an inset box-shadow inside the
    border), not a thicker border: a button sizes to its content, so a 1px
    heavier border made a selected button 2px wider and shifted its contents —
    Figma's stroke sits inside and changes nothing. */
-const selectedRing = (C) => `inset 0 0 0 1px var(--Buttons-${C}-Border)`;
+/* Borders are 1px or 2px, never 3: a selected button is 2px
+   (--Button-Selected-Border-Width), so the ring is the difference — 1px on a
+   1px brand, nothing on a 2px one, where fill and bevel carry the selection. */
+const selectedRing = (C) =>
+  `inset 0 0 0 calc(var(--Button-Selected-Border-Width, 2px) - var(--Button-Border-Width)) var(--Buttons-${C}-Border)`;
 const withRing = (selected, C, shadow) =>
   !selected ? shadow : (!shadow || shadow === 'none' ? selectedRing(C) : `${selectedRing(C)}, ${shadow}`);
 
