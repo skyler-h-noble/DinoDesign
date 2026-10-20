@@ -147,12 +147,25 @@ describe('outline button label: Outline-Quiet at rest, Outline-Text on interacti
 });
 
 describe('ghost button label', () => {
-  /* A text ghost reads like a link. This is a deliberate departure from
-     Figma, which binds Outline-Quiet — kept because link styling is the
-     better accessibility answer for text. */
-  it('keeps --Hotlink for text content', () => {
+  /* A text ghost is a button, not a link (decided 2026-10-20): quiet at rest,
+     Outline-Text when engaged, and loud while selected. It used to read like
+     a link — --Hotlink, underlined. */
+  it('rests a text ghost on Outline-Quiet, with no link color', () => {
     const { base } = probe(<Button variant="ghost">Save</Button>);
-    expect(colorIn(base)).toContain('--Hotlink');
+    expect(colorIn(base)).toContain('--Buttons-Default-Outline-Quiet');
+    expect(colorIn(base)).not.toContain('--Hotlink');
+  });
+
+  for (const state of ['hover', 'active', 'focusVisible']) {
+    it(`moves a text ghost to Outline-Text on ${state}`, () => {
+      const { states } = probe(<Button variant="ghost">Save</Button>);
+      expect(colorIn(states[state])).toContain('--Buttons-Default-Outline-Text');
+    });
+  }
+
+  it('keeps a selected text ghost loud at rest', () => {
+    const { base } = probe(<Button variant="ghost" selected>Save</Button>);
+    expect(colorIn(base)).toContain('--Buttons-Default-Outline-Text');
   });
 
   /* An icon-only ghost had the right shape already, muted at rest and

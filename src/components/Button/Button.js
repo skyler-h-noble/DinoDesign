@@ -295,37 +295,28 @@ function outlineStyles(color, selected = false) {
 }
 
 function ghostStyles(isTextContent, selected = false) {
+  /* Quiet at rest, full-strength when engaged — the same two-step outline
+     buttons make, on the Default outline pair:
+
+       rest                      Buttons/Outline-Quiet
+       hover, pressed, focus     Buttons/Outline-Text
+       selected (any state)      Buttons/Outline-Text
+
+     Text ghosts used to read like links — --Hotlink, underlined — as a
+     deliberate departure from Figma. Decided 2026-10-20 to drop that: the
+     Figma set binds Outline-Quiet / Outline-Text with no underline, and a
+     ghost is a button, not a link. Figma rests a SELECTED ghost on
+     Outline-Quiet; here selection stays loud, so the engaged one reads as
+     engaged. (isTextContent no longer changes the color.) */
+  void isTextContent;
+  const quiet = 'var(--Buttons-Default-Outline-Quiet, var(--Outline-Quiet))';
+  const loud = 'var(--Buttons-Default-Outline-Text)';
   return {
     backgroundColor: 'transparent',
-    /* Text ghost buttons read like links (--Hotlink), which is a deliberate
-       departure from Figma: it binds Buttons/Outline-Quiet here, but a ghost
-       that looks like a link is the better accessibility answer, so --Hotlink
-       stays.
-
-       Icon-only ghosts are pure affordances — link styling is too colored
-       for a calendar icon. They already had the right SHAPE, muted at rest
-       and darkening on interaction; they were just reading the SURFACE pair
-       rather than the button one, so a ghost in a themed zone ignored its
-       palette the same way outline buttons used to. Ghost is palette-less in
-       the variant map, so `Default` is the palette, matching `map['outline']`. */
-    /* A ghost segment stays on the OUTLINE pair even when selected: Figma
-       gives selected ghost no fill at all — it marks selection with a border.
-       So there is no filled pair to swap to, but selection still pins to the
-       pair's TEXT end. */
-    color: isTextContent
-      ? 'var(--Hotlink)'
-      : (selected
-        ? 'var(--Buttons-Default-Outline-Text)'
-        : 'var(--Buttons-Default-Outline-Quiet)'),
+    color: selected ? loud : quiet,
     border: 'var(--Button-Border-Width) solid transparent',
     boxShadow: 'none',
     textDecoration: 'none',
-    ...(isTextContent && {
-      // Underline lives on the text wrapper only — not on the button root or
-      // arbitrary spans — so it never propagates into the start/end decorator
-      // slots (icons, avatars and their inner spans).
-      '& .btn-text-content': { textDecoration: 'underline' },
-    }),
     '& .MuiTouchRipple-rippleVisible': {
       color: 'var(--Hover)',
     },
@@ -336,29 +327,21 @@ function ghostStyles(isTextContent, selected = false) {
       // variants use --Buttons-{C}-Hover instead.
       backgroundColor: 'var(--Hover)',
       boxShadow: 'none',
+      color: loud,
       ...(!selected && { transform: 'translateY(-1px)' }),
-      ...(isTextContent
-        ? { '& .btn-text-content': { textDecoration: 'none' } }
-        : { color: 'var(--Buttons-Default-Outline-Text)' }),
     },
     '&:active': {
       backgroundColor: 'var(--Pressed)',
+      color: loud,
       ...(!selected && { transform: 'translateY(0)' }),
-      ...(isTextContent
-        ? { '& .btn-text-content': { textDecoration: 'none' } }
-        : { color: 'var(--Buttons-Default-Outline-Text)' }),
     },
     '&.Mui-focusVisible': {
       backgroundColor: 'transparent',
       outline: '2px solid var(--Focus-Visible)',
       outlineOffset: '2px',
       /* Focus-Visible takes the interaction label too. Figma treats it as one
-         of the three active states, and it was the only one here that left
-         the label on its rest color — so keyboard focus said less than
-         hover did, on the state where the label matters most. */
-      ...(isTextContent
-        ? { '& .btn-text-content': { textDecoration: 'none' } }
-        : { color: 'var(--Buttons-Default-Outline-Text)' }),
+         of the three active states. */
+      color: loud,
     },
   };
 }
