@@ -286,9 +286,12 @@ describe('Pagination — Accessibility (jest-axe)', () => {
  * so the filled current page and the outlined rest came out pixel identical
  * and a reader could not tell which page they were on.
  *
- * Both are the outline variant now, separated by `selected`, which carries the
- * Pressed fill. Pressed is derived to sit AGAINST the surface rather than to
- * be it, so it cannot collapse the same way.
+ * Both are the outline variant now, separated by `selected`. Since
+ * 2026-10-20 a selected outline takes the button's own colors — Buttons::Button
+ * at rest, its generated Hover / Pressed, Buttons::Text on top (4.5:1 on all
+ * three), as Figma draws it — and draws its border one pixel heavier. Where the
+ * button color matches a same-palette surface, that heavier border and the
+ * Text-vs-Outline-Quiet label are what keep the current page distinct.
  */
 describe('the current page is distinguishable', () => {
   const cssFor = (el) => {
@@ -303,22 +306,28 @@ describe('the current page is distinguishable', () => {
 
   // The others are painted in the surface's own color (--Background), so an
   // outline button's elevation reads; they used to be transparent.
-  test('selected takes the Pressed fill; the others take the surface', () => {
+  test('selected takes the button fill; the others take the surface', () => {
     const { container } = render(<Pagination count={6} defaultPage={3} color="info" />);
     const current = container.querySelector('[aria-current="page"]');
     const others = [...container.querySelectorAll('button')]
       .filter((b) => b !== current && /^[0-9]+$/.test(b.textContent.trim()));
 
-    expect(cssFor(current)).toContain('background-color: var(--Buttons-Info-Pressed)');
+    expect(cssFor(current)).toContain('background-color: var(--Buttons-Info-Button)');
     for (const o of others) {
       expect(cssFor(o)).toContain('background-color: var(--Background)');
     }
   });
 
-  test('and never paints the current page in --Buttons-{C}-Button', () => {
+  test('and the current page differs from the others in fill, border and label', () => {
     const { container } = render(<Pagination count={6} defaultPage={3} color="info" />);
     const current = container.querySelector('[aria-current="page"]');
-    expect(cssFor(current)).not.toContain('background-color: var(--Buttons-Info-Button)');
+    const other = [...container.querySelectorAll('button')]
+      .find((b) => b !== current && /^[0-9]+$/.test(b.textContent.trim()));
+    const c = cssFor(current), o = cssFor(other);
+    expect(c).toContain('calc(var(--Button-Border-Width) + 1px)');
+    expect(o).not.toContain('calc(var(--Button-Border-Width) + 1px)');
+    expect(c).toContain('color: var(--Buttons-Info-Text)');
+    expect(o).not.toContain('color: var(--Buttons-Info-Text);');
   });
 
   /* black-white is the Buttons collection's tenth mode and the one palette

@@ -243,7 +243,13 @@ function outlineStyles(color, elevated = false, selected = false) {
        --Background, then --Hover / --Pressed below. Figma's outline Button-Fill
        binds Background. It was transparent, so it matched the surface by
        accident and its elevation shadow showed through it. */
-    backgroundColor: selected ? `var(--Buttons-${C}-Pressed)` : 'var(--Background)',
+    /* SELECTED takes the button's own colors — Button at rest, then the
+       generated --Buttons-{C}-Hover / -Pressed — with --Buttons-{C}-Text on
+       top, which the generator holds at 4.5:1 on all three. Figma's selected
+       outline fills Buttons::Button and steps to Hover and Pressed. It used to
+       rest on Pressed and hover to the surface scrim, so a selected button got
+       LIGHTER on hover and never showed its own color. */
+    backgroundColor: selected ? `var(--Buttons-${C}-Button)` : 'var(--Background)',
     /* Buttons::Outline-Text — the label color for a button with NO fill.
        This was --Text, the surface's own body color, so an outline button's
        label ignored its palette entirely: a success outline and an error
@@ -285,7 +291,7 @@ function outlineStyles(color, elevated = false, selected = false) {
       color: 'var(--Hover)',
     },
     '&:hover': {
-      backgroundColor: 'var(--Hover)',
+      backgroundColor: selected ? `var(--Buttons-${C}-Hover)` : 'var(--Hover)',
       color: selected
         ? `var(--Buttons-${C}-Text)`
         : `var(--Buttons-${C}-Outline-Text)`,
@@ -293,7 +299,7 @@ function outlineStyles(color, elevated = false, selected = false) {
       ...(!selected && { transform: 'translateY(-1px)' }),
     },
     '&:active': {
-      backgroundColor: 'var(--Pressed)',
+      backgroundColor: selected ? `var(--Buttons-${C}-Pressed)` : 'var(--Pressed)',
       boxShadow: 'none', // No elevation on press, as solid
       color: selected
         ? `var(--Buttons-${C}-Text)`
@@ -301,7 +307,7 @@ function outlineStyles(color, elevated = false, selected = false) {
       ...(!selected && { transform: 'translateY(0)' }),
     },
     '&.Mui-focusVisible': {
-      backgroundColor: selected ? `var(--Buttons-${C}-Pressed)` : 'var(--Background)',
+      backgroundColor: selected ? `var(--Buttons-${C}-Button)` : 'var(--Background)',
       color: selected
         ? `var(--Buttons-${C}-Text)`
         : `var(--Buttons-${C}-Outline-Text)`,

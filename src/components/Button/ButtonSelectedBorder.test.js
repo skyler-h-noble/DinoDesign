@@ -21,4 +21,12 @@ describe('selected border', () => {
     render(<Button variant="ghost" selected>On</Button>);
     expect(allRules()).toMatch(/border:\s*var\(--Button-Border-Width\) solid var\(--Buttons-Default-Border\)/);
   });
+  it('a selected outline takes the button fill, hover and pressed colors', () => {
+    render(<Button variant="primary-outline" selected>On</Button>);
+    const css = allRules();
+    expect(css).toMatch(/background-color:\s*var\(--Buttons-Primary-Button\)/);
+    expect(css).toMatch(/:hover[^}]*background-color:\s*var\(--Buttons-Primary-Hover\)/);
+    expect(css).toMatch(/:active[^}]*background-color:\s*var\(--Buttons-Primary-Pressed\)/);
+    expect(css).toMatch(/color:\s*var\(--Buttons-Primary-Text\)/);
+  });
 });
