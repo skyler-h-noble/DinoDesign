@@ -1,4 +1,4 @@
-/** A selected button is 2px: an inner ring makes up the difference from the rest width (1px or none). */
+/** A selected button is rest + 1px: an inner ring inside the border makes up the difference. */
 import React from 'react';
 import { render } from '@testing-library/react';
 import { Button } from './Button';
@@ -11,8 +11,9 @@ describe('selected border', () => {
   it.each(['default', 'default-outline'])('%s: an inner ring when selected, the border unchanged', (variant) => {
     render(<Button variant={variant} selected>On</Button>);
     const css = allRules();
-    expect(css).toContain('inset 0 0 0 calc(var(--Button-Selected-Border-Width, 2px) - var(--Button-Border-Width)) var(--Buttons-Default-Border)');
-    expect(css).not.toContain('calc(var(--Button-Border-Width) + 1px)');
+    expect(css).toContain('inset 0 0 0 calc(var(--Button-Selected-Border-Width, calc(var(--Button-Border-Width) + 1px)) - var(--Button-Border-Width)) var(--Buttons-Default-Border)');
+    // The BORDER never thickens (that grew the button); only the ring adds.
+    expect(css).not.toMatch(/border:\s*calc\(var\(--Button-Border-Width\) \+ 1px\)/);
   });
   it('rest keeps the base width', () => {
     render(<Button variant="default">Off</Button>);
