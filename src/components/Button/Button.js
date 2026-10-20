@@ -153,6 +153,13 @@ const seg = tokenSegment;
 // bevelShadow lives in src/components/_shadows.js so both Button and Slider
 // can share it. Consumers must set --_bevel and --_height on the element.
 
+/* A SELECTED button draws its border one pixel heavier than rest — Figma's
+   selected solid segments stroke 2px over a 1px base — so selection reads
+   whether a brand picked a 1px or a 2px border (--Button-Border-Width). The
+   box is border-box, so the extra pixel goes inward and the size holds. */
+const selectedBorderWidth = (selected) =>
+  selected ? 'calc(var(--Button-Border-Width) + 1px)' : 'var(--Button-Border-Width)';
+
 function solidStyles(color, elevated = false, selected = false, size = 'medium') {
   const C = seg(color);
   const bevel = bevelShadow(color, size);
@@ -181,7 +188,7 @@ function solidStyles(color, elevated = false, selected = false, size = 'medium')
   return {
     backgroundColor: `var(--Buttons-${C}-Button)`,
     color: restText,
-    border: `var(--Button-Border-Width) solid var(--Buttons-${C}-Border)`,
+    border: `${selectedBorderWidth(selected)} solid var(--Buttons-${C}-Border)`,
     boxShadow: restShadow,
     position: 'relative',
     zIndex: 1,
@@ -258,7 +265,7 @@ function outlineStyles(color, selected = false) {
          the label inherit its parent — loud, not quiet. A fallback is right
          here because it fires only when the name is undefined. */
       : `var(--Buttons-${C}-Outline-Quiet, var(--Outline-Quiet))`,
-    border: `var(--Button-Border-Width) solid var(--Buttons-${C}-Border)`,
+    border: `${selectedBorderWidth(selected)} solid var(--Buttons-${C}-Border)`,
     boxShadow: 'none',
     // Outline (like Ghost) has no fill of its own, so its hover/active
     // feedback comes from the surface --Hover / --Pressed scrim — a
