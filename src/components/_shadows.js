@@ -157,7 +157,10 @@ const BEVEL_PREFIX = { small: 'Sm-', medium: '', large: 'Lg-' };
  * Callers with a height that no size token describes — the Fab's diameter, the
  * Slider's thumb — pass no size and stay entirely on the derived path.
  */
-export function bevelShadow(color, size) {
+/* `pressedIn` swaps the two colors over the same geometry — the dark lowlight
+   to the top-left, the light highlight to the bottom-right — so the surface
+   reads as pushed in. Figma draws every SELECTED button this way. */
+export function bevelShadow(color, size, pressedIn = false) {
   const C = tokenSegment(color);
 
   // Highlight/Lowlight are RGB TRIPLETS, not colors — `239, 228, 241`, the
@@ -195,9 +198,9 @@ export function bevelShadow(color, size) {
   return [
     `inset ${geo('Lowlight-Offset-x', NEG)} ${geo('Lowlight-Offset-y', NEG)} ` +
       `${geo('Lowlight-Blur-Radius', B)} ${geo('Lowlight-Spread', NEG)} ` +
-      mix(`--Buttons-${C}-Lowlight`, '0 0 0'),
+      (pressedIn ? mix(`--Buttons-${C}-Highlight`, '255 255 255') : mix(`--Buttons-${C}-Lowlight`, '0 0 0')),
     `inset ${geo('Highlight-Offset-x', B)} ${geo('Highlight-Offset-y', B)} ` +
       `${geo('Highlight-Blur-Radius', B)} ${geo('Highlight-Spread', NEG)} ` +
-      mix(`--Buttons-${C}-Highlight`, '255 255 255'),
+      (pressedIn ? mix(`--Buttons-${C}-Lowlight`, '0 0 0') : mix(`--Buttons-${C}-Highlight`, '255 255 255')),
   ].join(', ');
 }

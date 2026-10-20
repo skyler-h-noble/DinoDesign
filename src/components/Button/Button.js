@@ -162,7 +162,8 @@ const selectedBorderWidth = (selected) =>
 
 function solidStyles(color, elevated = false, selected = false, size = 'medium') {
   const C = seg(color);
-  const bevel = bevelShadow(color, size);
+  // Selected is pressed in: the bevel's colors swap, as Figma draws it.
+  const bevel = bevelShadow(color, size, selected);
   const restLevel = elevated ? SHADOW_LEVEL_1 : 'none';
   const hoverLevel = elevated ? SHADOW_LEVEL_2 : SHADOW_LEVEL_1;
   const restShadow = restLevel === 'none' ? bevel : `${bevel}, ${restLevel}`;
@@ -220,8 +221,12 @@ function solidStyles(color, elevated = false, selected = false, size = 'medium')
   };
 }
 
-function outlineStyles(color, elevated = false, selected = false) {
+function outlineStyles(color, elevated = false, selected = false, size = 'medium') {
   const C = seg(color);
+  /* A SELECTED outline is filled (Buttons::Button), and Figma bevels it the
+     way it bevels every selected button — pressed in. Unselected has no fill
+     and so no bevel. */
+  const pressedBevel = selected ? bevelShadow(color, size, true) : null;
   /* Elevation as the solid style has it — none (or Level 1 if elevated) at
      rest, one level up on hover, none while pressed. It needs an OPAQUE body
      to read: a shadow under a transparent button shows through it. */
@@ -281,7 +286,7 @@ function outlineStyles(color, elevated = false, selected = false) {
          here because it fires only when the name is undefined. */
       : `var(--Buttons-${C}-Outline-Quiet, var(--Outline-Quiet))`,
     border: `${selectedBorderWidth(selected)} solid var(--Buttons-${C}-Border)`,
-    boxShadow: selected ? 'none' : restLevel,
+    boxShadow: selected ? pressedBevel : restLevel,
     // Outline (like Ghost) has no fill of its own, so its hover/active
     // feedback comes from the surface --Hover / --Pressed scrim — a
     // subtle tone-aware overlay that reads correctly on any surface
@@ -295,12 +300,12 @@ function outlineStyles(color, elevated = false, selected = false) {
       color: selected
         ? `var(--Buttons-${C}-Text)`
         : `var(--Buttons-${C}-Outline-Text)`,
-      boxShadow: selected ? 'none' : hoverLevel,
+      boxShadow: selected ? pressedBevel : hoverLevel,
       ...(!selected && { transform: 'translateY(-1px)' }),
     },
     '&:active': {
       backgroundColor: selected ? `var(--Buttons-${C}-Pressed)` : 'var(--Pressed)',
-      boxShadow: 'none', // No elevation on press, as solid
+      boxShadow: selected ? pressedBevel : 'none', // No elevation on press, as solid
       color: selected
         ? `var(--Buttons-${C}-Text)`
         : `var(--Buttons-${C}-Outline-Text)`,
@@ -487,7 +492,7 @@ function buildVariantMap(isTextContent, elevated = false, selected = false, size
   const map = {};
   COLORS.forEach((color) => {
     map[color]                = solidStyles(color, elevated, selected, size);
-    map[`${color}-outline`]   = outlineStyles(color, elevated, selected);
+    map[`${color}-outline`]   = outlineStyles(color, elevated, selected, size);
   });
   // Black/white — solid and outline.
   //
@@ -500,10 +505,10 @@ function buildVariantMap(isTextContent, elevated = false, selected = false, size
   // and surface block — so the button resolves to black on a light surface and
   // white on a dark one wherever it is placed, with no prop change.
   map['black-white']         = solidStyles('black-white', elevated, selected, size);
-  map['black-white-outline'] = outlineStyles('black-white', elevated, selected);
+  map['black-white-outline'] = outlineStyles('black-white', elevated, selected, size);
 
   map['danger']         = solidStyles('error', elevated, selected, size);
-  map['outline']        = outlineStyles('default', elevated, selected);
+  map['outline']        = outlineStyles('default', elevated, selected, size);
   map['ghost']          = ghostStyles(isTextContent, selected);
   map['text']           = ghostStyles(isTextContent, selected);
   return map;
