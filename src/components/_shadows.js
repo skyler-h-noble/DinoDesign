@@ -82,6 +82,23 @@ const _token = (level, literal) =>
  * Wrapping here fixes all twelve at once and keeps SHADOWS identical, so no
  * consumer has to change. */
 export const SHADOW_LEVEL_0 = 'none';
+/* Over a SCRIM — a modal, dialog or drawer with its neutral black backdrop —
+   the shadow is neutral too. The surface-tinted shadow, painted onto a grey
+   overlay, read as a coloured glow round the panel (Popsicles' modal had a
+   purple halo). The design system publishes --Effect-Level-N-Neutral: the
+   brand's own geometry in black. The literal is the same table, in black, for
+   a consumer with no design system loaded. */
+function _buildNeutralShadow(level) {
+  return _LEVEL_LAYERS[level]
+    .map(function (t) {
+      return t[0] + 'px ' + t[1] + 'px ' + t[2] + 'px ' + t[3] + 'px rgba(0, 0, 0, ' + t[4] + ')';
+    })
+    .join(', ');
+}
+const _scrimToken = (level) => 'var(--Effect-Level-' + level + '-Neutral, ' + _buildNeutralShadow(level) + ')';
+export const SHADOW_SCRIM_LEVEL_3 = _scrimToken(3);
+export const SHADOW_SCRIM_LEVEL_5 = _scrimToken(5);
+
 export const SHADOW_LEVEL_1 = _token(1, _buildShadow(1));
 export const SHADOW_LEVEL_2 = _token(2, _buildShadow(2));
 export const SHADOW_LEVEL_3 = _token(3, _buildShadow(3));

@@ -5,7 +5,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { Button } from '../Button/Button';
 import { Icon } from '../Icon/Icon';
 import { useOmniDesign } from '../../OmniDesignProvider';
-import { SHADOW_LEVEL_3 } from '../_shadows';
+import { SHADOW_LEVEL_3, SHADOW_SCRIM_LEVEL_3 } from '../_shadows';
 
 /**
  * Drawer Component
@@ -161,7 +161,8 @@ export function Drawer({
           backgroundColor: 'var(--Background)',
           color: 'var(--Text)',
           ...BORDER_EDGE[anchor],
-          boxShadow: SHADOW_LEVEL_3,
+          // Neutral over its backdrop; the page's tint when there is none.
+          boxShadow: hideBackdrop ? SHADOW_LEVEL_3 : SHADOW_SCRIM_LEVEL_3,
           display: 'flex',
           flexDirection: 'column',
           outline: 'none',

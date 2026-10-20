@@ -150,6 +150,9 @@ function DesktopAppBar({
         sx={{
           position: 'relative',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          // The Margin padding sits INSIDE the bar's width, as in Figma: a bar
+          // given 1920px is 1920px, not 1920 plus 128 of padding.
+          boxSizing: 'border-box',
           height: 'var(--App-Bar-Height, 64px)',
           paddingLeft: layout === 'title' ? 'var(--Sizing-2, 16px)' : 'var(--Margin, 64px)',
           paddingRight: 'var(--Margin, 64px)',

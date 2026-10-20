@@ -6,7 +6,7 @@
      3  FAB, Snackbar
      4  FAB-Hover
      5  Dialog & Modal */
-import { SHADOW_LEVEL_5 } from '../_shadows';
+import { SHADOW_SCRIM_LEVEL_5 } from '../_shadows';
 import React, { useEffect, useRef, useState } from 'react';
 import { Box } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
@@ -230,11 +230,10 @@ export function Modal({
           // Visual
           backgroundColor: 'var(--Background)',
           color: 'var(--Text)',
-          /* "Dialog & Modal" is the Level 5 style. This was a hardcoded
-             black shadow, so it ignored the brand's dropshadow tint and its
-             intensity entirely — the one component where the shadow is most
-             of the elevation. */
-          boxShadow: SHADOW_LEVEL_5,
+          /* "Dialog & Modal" is the Level 5 style — the brand's geometry, in
+             NEUTRAL: the modal always sits over the black backdrop, where the
+             surface tint read as a coloured glow. */
+          boxShadow: SHADOW_SCRIM_LEVEL_5,
           display: 'flex', flexDirection: 'column',
           overflow: 'hidden',
           // Animation

@@ -6,7 +6,7 @@
      3  FAB, Snackbar
      4  FAB-Hover
      5  Dialog & Modal */
-import { SHADOW_LEVEL_5 } from '../_shadows';
+import { SHADOW_LEVEL_5, SHADOW_SCRIM_LEVEL_5 } from '../_shadows';
 import React, { forwardRef } from 'react';
 import {
   Dialog as MuiDialog, DialogTitle as MuiDialogTitle, DialogContent as MuiDialogContent,
@@ -206,6 +206,8 @@ export function Dialog({
         'data-surface': currentSurface,
         sx: {
           ...paperSx,
+          // Neutral over the backdrop; a non-modal dialog sits on the page and keeps its tint.
+          boxShadow: nonModal ? SHADOW_LEVEL_5 : SHADOW_SCRIM_LEVEL_5,
           ...(fullScreen && { borderRadius: 0, border: 'none' }),
           ...PaperProps.sx,
         },
