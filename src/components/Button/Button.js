@@ -331,7 +331,13 @@ function ghostStyles(isTextContent, selected = false) {
   return {
     backgroundColor: 'transparent',
     color: selected ? loud : quiet,
-    border: 'var(--Button-Border-Width) solid transparent',
+    /* A SELECTED ghost draws its border — Figma's selected ghost strokes
+       Buttons::Border at 1px, inside, as the mark that tells it from an
+       unselected one (which has no fill and no stroke). The transparent border
+       otherwise holds the same box, so selecting it never moves anything. */
+    border: selected
+      ? 'var(--Button-Border-Width) solid var(--Buttons-Default-Border)'
+      : 'var(--Button-Border-Width) solid transparent',
     boxShadow: 'none',
     textDecoration: 'none',
     '& .MuiTouchRipple-rippleVisible': {

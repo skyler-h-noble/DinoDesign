@@ -17,4 +17,8 @@ describe('selected border', () => {
     const css = allRules();
     expect(css).toMatch(/border:\s*var\(--Button-Border-Width\) solid/);
   });
+  it('a selected ghost draws the Border, an unselected one stays transparent', () => {
+    render(<Button variant="ghost" selected>On</Button>);
+    expect(allRules()).toMatch(/border:\s*var\(--Button-Border-Width\) solid var\(--Buttons-Default-Border\)/);
+  });
 });
