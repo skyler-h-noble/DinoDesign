@@ -56,28 +56,28 @@ const SIZE_MAP = {
      Sizing-2 whether the group resolves small, medium or large (the Accordion
      page puts the group at small). The small and large ramps here were not in
      the design — small made a 32px row where Figma draws 40. The chevron is
-     24px at every size too (Icon `small`): medium drew it at 32, which made
-     the summary 48px where Figma's is 40. Size picks the type. */
+     one size too: Figma's sits in the Icons & Avatars `in-button` mode, 20px
+     (Icon `xs`). Size picks the type. */
   small: {
     summaryPadding: 'var(--Sizing-1) var(--Sizing-1) var(--Sizing-1) var(--Sizing-2)',
     gap: 'var(--Sizing-1)',
     detailsPy: 'var(--Sizing-2)',
     detailsPx: 'var(--Sizing-2)',
-    iconSize: 'small',
+    iconSize: 'xs',
   },
   medium: {
     summaryPadding: 'var(--Sizing-1) var(--Sizing-1) var(--Sizing-1) var(--Sizing-2)',
     gap: 'var(--Sizing-1)',
     detailsPy: 'var(--Sizing-2)',
     detailsPx: 'var(--Sizing-2)',
-    iconSize: 'small',
+    iconSize: 'xs',
   },
   large: {
     summaryPadding: 'var(--Sizing-1) var(--Sizing-1) var(--Sizing-1) var(--Sizing-2)',
     gap: 'var(--Sizing-1)',
     detailsPy: 'var(--Sizing-2)',
     detailsPx: 'var(--Sizing-2)',
-    iconSize: 'small',
+    iconSize: 'xs',
   },
 };
 
@@ -158,6 +158,15 @@ export function AccordionGroup({
                which the component cannot read. */
             '& > .accordion-segment .accordion-summary': {
               borderRadius: 0,
+            },
+            /* A connected segment rings INSIDE, as Figma draws it: 3px, its
+               outer edge 2px in from the segment's — an outside ring would be
+               painted over by the neighbours. The outline follows the corners
+               each position has (rounded top, rounded bottom, square middle).
+               A lone segment keeps the outside ring set on the segment. */
+            '& > .accordion-segment:has(> .accordion-summary:focus-visible)': {
+              outline: '3px solid var(--Focus-Visible)',
+              outlineOffset: '-5px',
             },
             '& > .accordion-segment:first-of-type': {
               borderTopLeftRadius: RADIUS,
