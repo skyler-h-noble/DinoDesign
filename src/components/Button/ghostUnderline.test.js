@@ -22,11 +22,15 @@ const textDecorationOf = (container, selector) => {
   return el ? getComputedStyle(el).textDecoration || getComputedStyle(el).textDecorationLine : null;
 };
 
-describe('a ghost button with text is underlined', () => {
-  it('underlines the label', () => {
+describe('a ghost button with text is NOT underlined (it is a button, not a link — 2026-10-20)', () => {
+  it('renders the label with no underline rule', () => {
     const { container } = render(<Button variant="ghost">Read more</Button>);
     const text = container.querySelector('.btn-text-content');
     expect(text).toBeInTheDocument();
+    const css = Array.from(document.styleSheets).flatMap((sh) => {
+      try { return Array.from(sh.cssRules || []).map((r) => r.cssText); } catch { return []; }
+    }).join('\n');
+    expect(css).not.toMatch(/text-decoration:\s*underline/);
     // jsdom does not resolve emotion's generated rules through
     // getComputedStyle, so assert the element the rule targets exists and
     // carries the class the style is keyed on.
