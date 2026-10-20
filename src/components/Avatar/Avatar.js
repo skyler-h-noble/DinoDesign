@@ -151,12 +151,18 @@ function getInitialsComp(size) {
 // This is deliberately NOT read from --Number-{Step}-Font-Size. That ramp is
 // 16 / 28 / 36 and stops well short of the 160px avatar, so the largest steps
 // would render initials at under a quarter of the circle.
-const initialsFontSize = (diameter) => Math.round((diameter * 7) / 12) + 'px';
+/* The Figma ladder, read off Icons & Avatars::Avatar-Initials per mode. It is
+   NOT a single ratio — 9/16, 12/20, 14/24, 18/32, 22/40, 28/56, 40/72 — and the
+   7/12 rule this used put a 32px avatar's initials at 19 where the design has
+   18. Off the ladder (x-large, xx-large, custom) the old 7/12 still scales. */
+const INITIALS_PX = { xxs: 9, xs: 12, small: 14, medium: 18, large: 22, xl: 28, xxl: 40 };
+const initialsFontSize = (diameter, sizeName) =>
+  (INITIALS_PX[sizeName] ?? Math.round((diameter * 7) / 12)) + 'px';
 
-// The design draws the avatar ring at 1px — the same hairline the system uses
-// for a button's border, so it tracks --Button-Border-Width rather than being
-// pinned. (That token is 1px and load-bearing for the Figma button heights; it
-// is only READ here.)
+// The ring is Icons & Avatars::Avatar-Border: 0 at every standalone size and
+// 1px only in the in-button and button-decorator modes — an avatar INSIDE a
+// button. It tracks --Button-Border-Width there (1px, load-bearing for the
+// Figma button heights; only READ here).
 const BORDER_WIDTH = 'var(--Button-Border-Width, 1px)';
 
 export function Avatar({
@@ -200,9 +206,15 @@ export function Avatar({
   const isFallback = !hasSrc && !hasInitials;
   const isClickable = clickable || !!onClick;
 
-  const bg = hasSrc ? 'transparent' : 'var(--Buttons-' + C + '-Button)';
+  /* The Default style is the person glyph ALONE: Figma's Button-Theme-Avatar
+     frame has no fill, and its glyph — which carries its own disc — is filled
+     with Buttons::Border. Painting --Buttons-{C}-Button behind it put a pale
+     disc where the design has none. An explicit `icon` keeps the filled disc. */
+  const glyphOnly = isFallback && !icon;
+  const bg = hasSrc || glyphOnly ? 'transparent' : 'var(--Buttons-' + C + '-Button)';
   const borderColor = 'var(--Buttons-' + C + '-Border)';
-  const textColor = 'var(--Buttons-' + C + '-Text)';
+  // The lone glyph is drawn in currentColor, so the root carries its color.
+  const textColor = glyphOnly ? borderColor : 'var(--Buttons-' + C + '-Text)';
 
   const component = isClickable ? 'button' : 'div';
 
@@ -222,6 +234,9 @@ export function Avatar({
       sx={{
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
         width: s.size + 'px', height: s.size + 'px',
+        // The ring sits INSIDE the diameter, as Figma's stroke does — without
+        // this a 32px avatar in a button measured 34.
+        boxSizing: 'border-box',
         borderRadius: '50%',
         backgroundColor: bg,
         color: textColor,
@@ -233,26 +248,20 @@ export function Avatar({
         fontFamily: 'inherit', fontWeight: 600,
         overflow: 'hidden',
         flexShrink: 0,
-        /* One ring, one token, all three styles.
-           Checked against the Avatar set (3156:2682), whose Style axis is
-           Initials | Default | Photo. Every one of them binds its stroke to
-           Buttons::Border at 1px — `Photo`, `Button-Theme-Initials` and
-           `Button-Theme-Avatar` alike.
+        /* One ring COLOR, all three styles: every variant binds its stroke to
+           Buttons::Border (--Buttons-{C}-Border, the button's own outline,
+           not the surface's --Border — they diverge once a color is set).
 
-           This read differently for each, and was reasoned from the picture
-           rather than from the file: --Border for a photo, on the argument that
-           "a photo has no palette"; nothing at all for the icon, on the
-           argument that "the design's Default style is a filled glyph". The
-           file says otherwise in both cases, and the icon one matters most —
-           an avatar BUTTON with no ring has no outline to carry the 3:1
-           non-text contrast a clickable boundary needs, so the affordance
-           disappears against a surface close to the avatar's own fill.
+           Its WIDTH is Icons & Avatars::Avatar-Border, which is 0 at every
+           standalone size and 1px only in the in-button / button-decorator
+           modes. This drew 1px everywhere, which matched only because the
+           Figma set itself was pinned to the in-button mode. So a standalone
+           avatar has no ring; an avatar inside a button (insideButton) does.
 
-           --Border was not a harmless substitute either: it is tuned against
-           the SURFACE, while --Buttons-{C}-Border is the button's own outline.
-           They agree at `default` and diverge the moment a color is set, which
-           is exactly when the ring is doing work. */
-        border: BORDER_WIDTH + ' solid ' + borderColor,
+           Note for a standalone CLICKABLE avatar: without a ring its boundary
+           is the fill (or photo) alone, so the 3:1 non-text contrast rests on
+           that fill against the surface. */
+        border: insideButton ? BORDER_WIDTH + ' solid ' + borderColor : 'none',
         // Inside-button breathing room. Pure margin so the avatar's circular
         // silhouette doesn't get pushed into an ellipse by padding.
         ...(insideButton && { marginLeft: '2px', marginRight: '2px' }),
@@ -295,7 +304,7 @@ export function Avatar({
             sx={{
               color: 'inherit',
               // No fontWeight override — the Number step carries its own (700).
-              fontSize: initialsFontSize(s.size),
+              fontSize: initialsFontSize(s.size, size === 'custom' ? null : resolveSizeName(size)),
               lineHeight: 1,
               textAlign: 'center',
               // Trim to cap height / baseline — Figma's "cap height to
@@ -308,10 +317,14 @@ export function Avatar({
           </TextComp>
         );
       })()}
-      {isFallback && (
-        <Icon size={size} sx={{ color: 'inherit' }}>
-          {icon || <AvatarGlyph />}
-        </Icon>
+      {/* The glyph fills the disc edge to edge in Buttons::Border. It sat in an
+          Icon with no size of its own, so its 100% resolved against nothing
+          and the SVG drew at the browser's default 300px. */}
+      {glyphOnly && (
+        <AvatarGlyph style={{ display: 'block', width: '100%', height: '100%' }} />
+      )}
+      {isFallback && icon && (
+        <Icon size={size} sx={{ color: 'inherit' }}>{icon}</Icon>
       )}
     </Box>
   );

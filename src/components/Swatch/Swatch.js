@@ -151,7 +151,10 @@ export function Swatch({
         flexShrink: 0,
         borderRadius: 'var(--Button-Radius, 2px)',
         backgroundColor: color,
-        border: 'var(--Button-Border-Width, 1px) solid var(--Border)',
+        /* Only a swatch you can click draws a border. Figma's Non-clickable
+           variant has none: the border is a control's edge, and a display chip
+           is just the color. border-box keeps both the same size. */
+        border: interactive ? 'var(--Button-Border-Width, 1px) solid var(--Border)' : 'none',
         boxSizing: 'border-box',
         boxShadow: 'var(--Effect-Level-0)',
         transition: 'box-shadow 120ms ease',

@@ -66,3 +66,19 @@ describe('Swatch hover and pressed scrims', () => {
       .toBe('non-clickable scrim: false');
   });
 });
+
+/* Figma's Non-clickable swatch has no border: the border is a control's edge,
+   and a display chip is just the color. A clickable or disabled one keeps it. */
+describe('Swatch border', () => {
+  const chipOf = (c) => c.querySelector('.swatch-chip');
+  it('a display swatch draws no border', () => {
+    const { container } = render(<Swatch color="#b8329b" />);
+    expect(rulesFor(chipOf(container))).toMatch(/border:\s*none/);
+  });
+  it('a clickable swatch, even disabled, keeps its border', () => {
+    for (const props of [{ onClick: () => {} }, { onClick: () => {}, disabled: true }]) {
+      const { container } = render(<Swatch color="#b8329b" {...props} />);
+      expect(rulesFor(chipOf(container))).toMatch(/border:[^;]*solid/);
+    }
+  });
+});
