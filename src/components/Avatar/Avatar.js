@@ -245,7 +245,11 @@ export function Avatar({
            block's default. */
         ...(ghost ? ghostBlockSx({ radius: '50%', animate: ghost.animate }) : {}),
         fontFamily: 'inherit', fontWeight: 600,
-        overflow: 'hidden',
+        // The lone glyph overlays the ring (see below), and overflow clips at
+        // the padding edge — inside the border — so it would cut the glyph's
+        // rim off. The glyph is itself a disc; nothing else can spill.
+        position: 'relative',
+        overflow: glyphOnly && !ghost ? 'visible' : 'hidden',
         flexShrink: 0,
         /* One ring, all three styles, at every size: every disc frame in the
            Figma set (Photo, Button-Theme-Avatar, Button-Theme-Initials) draws a
@@ -318,7 +322,18 @@ export function Avatar({
           Icon with no size of its own, so its 100% resolved against nothing
           and the SVG drew at the browser's default 300px. */}
       {glyphOnly && (
-        <AvatarGlyph style={{ display: 'block', width: '100%', height: '100%' }} />
+        <AvatarGlyph
+          style={{
+            /* Over the ring, not inside it: Figma's glyph is the full diameter
+               and covers the 1px Border stroke, which is the same color. Inside
+               the border box it drew at diameter − 2, inset by 1. */
+            position: 'absolute',
+            inset: 'calc(-1 * ' + BORDER_WIDTH + ')',
+            width: 'calc(100% + 2 * ' + BORDER_WIDTH + ')',
+            height: 'calc(100% + 2 * ' + BORDER_WIDTH + ')',
+            display: 'block',
+          }}
+        />
       )}
       {isFallback && icon && (
         <Icon size={size} sx={{ color: 'inherit' }}>{icon}</Icon>

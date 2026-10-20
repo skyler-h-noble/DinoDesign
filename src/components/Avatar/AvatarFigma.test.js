@@ -38,12 +38,13 @@ describe('Avatar matches the Figma variables', () => {
       expect(rulesFor(text)).toMatch(new RegExp(`font-size:\\s*${px}px`));
     });
 
-  it('the Default style is the glyph alone, filling the disc', () => {
+  it('the Default style is the glyph alone, covering the disc and its ring', () => {
     const { container } = render(<Avatar defaultPhoto={false} />);
     const el = container.querySelector('.avatar');
     expect(rulesFor(el)).toMatch(/background-color:\s*transparent/);
     const svg = el.querySelector('svg');
-    expect(svg.style.width).toBe('100%');
+    // Over the ring, at the full diameter (jsdom drops the calc(var()) sizes).
+    expect(svg.style.position).toBe('absolute');
     expect(rulesFor(el)).toMatch(/(^|[;{\s])color:\s*var\(--Buttons-Default-Border\)/);
   });
 });
