@@ -620,11 +620,14 @@ function getSizingStyles({ size, iconOnly, letterNumber, avatar, swatch }) {
   // --Lg-Button-Padding is the canonical spelling, matching --Lg-Button-Min-Width
   // and --Lg-Input-Radius. The export also emits --Large-Button-Padding as an
   // alias of it, for brand CSS generated before the rename.
+  /* The border sits INSIDE the padding, as Figma's stroke sits inside its
+     frame: it costs no width there, and here it was added on top, so every
+     button came out 2px wider than its design (4px at a 2px border). */
   return {
     ...base,
     padding: size === 'large'
-      ? '0 var(--Lg-Button-Padding)'
-      : '0 var(--Button-Padding)',
+      ? '0 calc(var(--Lg-Button-Padding) - var(--Button-Border-Width))'
+      : '0 calc(var(--Button-Padding) - var(--Button-Border-Width))',
   };
 }
 
@@ -816,7 +819,10 @@ export const Button = React.forwardRef(function Button({
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '4px',
+            /* The number button has no outer padding to absorb the border, so
+               the label's 4px gives it up — Figma's label frame sits 1px in from
+               each edge for exactly that. Then a 32px number button is 32px. */
+            padding: '4px calc(4px - var(--Button-Border-Width))',
             color: 'inherit',
             /* Figma binds Dynamic-Typography/Dynamic-Button-Number-Font-Size:
                12 / 14 / 16. Not the 10 / 12 / 16 Button-Numbers ramp (that is
