@@ -302,6 +302,15 @@ export function Accordion({
              summary. An outline, not a child, so the segment's own
              overflow:hidden cannot clip it; raised so a connected neighbour
              does not paint over it. */
+          /* The whole segment takes the state tint while its summary is
+             hovered or pressed — summary and open details alike, as Figma's
+             Hover and Pressed variants fill the segment. Not when disabled. */
+          '&:not(.accordion-disabled):has(> .accordion-summary:hover)': {
+            backgroundColor: 'var(--Hover)',
+          },
+          '&:not(.accordion-disabled):has(> .accordion-summary:active)': {
+            backgroundColor: 'var(--Pressed)',
+          },
           '&:has(> .accordion-summary:focus-visible)': {
             outline: '2px solid var(--Focus-Visible)',
             outlineOffset: '1px',
@@ -435,18 +444,15 @@ export function AccordionSummary({
            mid-panel. Collapsed, the summary IS the segment, so it takes all
            four. A grouped segment overrides both — see the group rules. */
         borderRadius: expanded ? RADIUS + ' ' + RADIUS + ' 0 0' : RADIUS,
+        /* Hover and Pressed tint the whole SEGMENT, as Figma draws them — the
+           fill is set by the :has() rules on the segment. The summary only
+           takes its text and chevron to --Text. */
         '&:hover': !disabled ? {
           color: 'var(--Text)',
-          backgroundColor: 'var(--Hover)',
           '& .omni-icon': { color: 'var(--Text)' },
         } : {},
-        /* The summary is a full-width button, so a scrim is the only pressed
-           feedback available — there is no fill to darken and no border to
-           move. Color alone could not carry it: hover already takes the text
-           to --Text, which leaves pressed nowhere to go. */
         '&:active': !disabled ? {
           color: 'var(--Text)',
-          backgroundColor: 'var(--Pressed)',
           '& .omni-icon': { color: 'var(--Text)' },
         } : {},
         // The focus ring belongs to the SEGMENT — see the :has() rule on it.
