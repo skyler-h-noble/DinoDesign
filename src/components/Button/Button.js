@@ -367,12 +367,16 @@ function ghostStyles(isTextContent, selected = false) {
       // so they need a tone-aware overlay tint to indicate hover. Solid
       // variants use --Buttons-{C}-Hover instead.
       backgroundColor: 'var(--Hover)',
-      boxShadow: 'none',
+      /* Lifts like an outline button: Figma's ghost Hover variants (selected
+         and not) carry the Level 1 elevation on Button-Effect. The hover fill
+         is the opaque --Hover, so the shadow has a body to sit under. */
+      boxShadow: SHADOW_LEVEL_1,
       color: loud,
       ...(!selected && { transform: 'translateY(-1px)' }),
     },
     '&:active': {
       backgroundColor: 'var(--Pressed)',
+      boxShadow: 'none',
       color: loud,
       ...(!selected && { transform: 'translateY(0)' }),
     },

@@ -55,4 +55,8 @@ describe('selected border', () => {
     render(<Button variant="ghost" selected>On</Button>);
     expect(allRules()).toMatch(/background-color:\s*var\(--Background\)/);
   });
+  it('a ghost lifts on hover (Level 1), like an outline button', () => {
+    render(<Button variant="ghost">Go</Button>);
+    expect(allRules()).toMatch(/:hover[^}]*box-shadow:\s*var\(--Effect-Level-1/);
+  });
 });
