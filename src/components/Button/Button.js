@@ -253,7 +253,11 @@ function outlineStyles(color, selected = false) {
        that pair's TEXT end, because a selected segment is the engaged one. */
     color: selected
       ? `var(--Buttons-${C}-Text)`
-      : `var(--Buttons-${C}-Outline-Quiet)`,
+      /* Falls back to the surface's --Outline-Quiet: published systems emit
+         the per-palette name for Default only, and an undefined var() makes
+         the label inherit its parent — loud, not quiet. A fallback is right
+         here because it fires only when the name is undefined. */
+      : `var(--Buttons-${C}-Outline-Quiet, var(--Outline-Quiet))`,
     border: `var(--Button-Border-Width) solid var(--Buttons-${C}-Border)`,
     boxShadow: 'none',
     // Outline (like Ghost) has no fill of its own, so its hover/active

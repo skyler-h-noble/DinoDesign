@@ -1,6 +1,7 @@
 // src/components/ButtonGroup/ButtonGroup.js
 import React, { useState } from 'react';
 import { Box } from '@mui/material';
+import { tokenSegment } from '../_shadows';
 
 /**
  * ButtonGroup Component
@@ -91,7 +92,6 @@ function warnSelectionMoved() {
   );
 }
 
-const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 /* The `light` variant is a SURFACE, not a theme.
  *
@@ -274,7 +274,11 @@ export function ButtonGroup({
   const isEqual = fitMode === 'equal';
   const useGrid = isEqual && isHorizontal;   // equal-width-hug uses an inline-grid
 
-  const C            = cap(color);                               // 'Default', 'Primary', …
+  /* The TOKEN segment, not cap(): `black-white` capitalises to `Black-white`,
+     a name nothing defines, so BlackWhiteToggleButtonGroup painted no fill,
+     border or label. The design system emits --Buttons-BlackWhite-*, and
+     tokenSegment is the one mapping Button already uses for it. */
+  const C            = tokenSegment(color);                      // 'Default', 'Primary', 'BlackWhite', …
   const btnBorder    = 'var(--Buttons-' + C + '-Border)';
   const btnBg        = 'var(--Buttons-' + C + '-Button)';
   const btnText      = 'var(--Buttons-' + C + '-Text)';
@@ -286,13 +290,17 @@ export function ButtonGroup({
      success group had exactly the same label as one in an error group. Same
      drift that Button itself carried until the Buttons table gained a
      consumer. */
-  const btnOutlineQuiet = 'var(--Buttons-' + C + '-Outline-Quiet)';
+  // Falls back to the surface's --Outline-Quiet, which published systems emit
+  // per scope; the per-palette name exists there only for Default.
+  const btnOutlineQuiet = 'var(--Buttons-' + C + '-Outline-Quiet, var(--Outline-Quiet))';
   const btnOutlineText  = 'var(--Buttons-' + C + '-Outline-Text)';
   /* `default` gets no data-theme at all — it INHERITS. Naming the Default
      mode would pin the group to the app's theme and override whatever themed
      section it sits in, which is the bug the Modal had. The other eight name
      their palette, because that is the whole point of asking for one. */
-  const lightTheme   = color === 'default' ? undefined : C;
+  // Black-white has no Theme mode to name either — it is a Buttons palette,
+  // not a theme — so, like default, it inherits.
+  const lightTheme   = color === 'default' || color === 'black-white' ? undefined : C;
 
   const childArray = React.Children.toArray(children).filter(Boolean);
   const count = childArray.length;
