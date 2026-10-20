@@ -220,8 +220,13 @@ function solidStyles(color, elevated = false, selected = false, size = 'medium')
   };
 }
 
-function outlineStyles(color, selected = false) {
+function outlineStyles(color, elevated = false, selected = false) {
   const C = seg(color);
+  /* Elevation as the solid style has it — none (or Level 1 if elevated) at
+     rest, one level up on hover, none while pressed. It needs an OPAQUE body
+     to read: a shadow under a transparent button shows through it. */
+  const restLevel = elevated ? SHADOW_LEVEL_1 : 'none';
+  const hoverLevel = elevated ? SHADOW_LEVEL_2 : SHADOW_LEVEL_1;
   return {
     /* SELECTED ACTUALLY GAINS A FILL. The comment below has said so for a
        long time and the code did not do it — selected changed the label color
@@ -234,7 +239,11 @@ function outlineStyles(color, selected = false) {
        Number set fills State=Selected with Pressed — and it is the right one
        structurally too: Pressed is derived to sit AGAINST the surface, so it
        cannot collapse into it the way Button can. */
-    backgroundColor: selected ? `var(--Buttons-${C}-Pressed)` : 'transparent',
+    /* Unselected, the button is painted in the SURFACE's own color —
+       --Background, then --Hover / --Pressed below. Figma's outline Button-Fill
+       binds Background. It was transparent, so it matched the surface by
+       accident and its elevation shadow showed through it. */
+    backgroundColor: selected ? `var(--Buttons-${C}-Pressed)` : 'var(--Background)',
     /* Buttons::Outline-Text — the label color for a button with NO fill.
        This was --Text, the surface's own body color, so an outline button's
        label ignored its palette entirely: a success outline and an error
@@ -266,7 +275,7 @@ function outlineStyles(color, selected = false) {
          here because it fires only when the name is undefined. */
       : `var(--Buttons-${C}-Outline-Quiet, var(--Outline-Quiet))`,
     border: `${selectedBorderWidth(selected)} solid var(--Buttons-${C}-Border)`,
-    boxShadow: 'none',
+    boxShadow: selected ? 'none' : restLevel,
     // Outline (like Ghost) has no fill of its own, so its hover/active
     // feedback comes from the surface --Hover / --Pressed scrim — a
     // subtle tone-aware overlay that reads correctly on any surface
@@ -280,18 +289,19 @@ function outlineStyles(color, selected = false) {
       color: selected
         ? `var(--Buttons-${C}-Text)`
         : `var(--Buttons-${C}-Outline-Text)`,
-      boxShadow: 'none',
+      boxShadow: selected ? 'none' : hoverLevel,
       ...(!selected && { transform: 'translateY(-1px)' }),
     },
     '&:active': {
       backgroundColor: 'var(--Pressed)',
+      boxShadow: 'none', // No elevation on press, as solid
       color: selected
         ? `var(--Buttons-${C}-Text)`
         : `var(--Buttons-${C}-Outline-Text)`,
       ...(!selected && { transform: 'translateY(0)' }),
     },
     '&.Mui-focusVisible': {
-      backgroundColor: 'transparent',
+      backgroundColor: selected ? `var(--Buttons-${C}-Pressed)` : 'var(--Background)',
       color: selected
         ? `var(--Buttons-${C}-Text)`
         : `var(--Buttons-${C}-Outline-Text)`,
@@ -465,7 +475,7 @@ function buildVariantMap(isTextContent, elevated = false, selected = false, size
   const map = {};
   COLORS.forEach((color) => {
     map[color]                = solidStyles(color, elevated, selected, size);
-    map[`${color}-outline`]   = outlineStyles(color, selected);
+    map[`${color}-outline`]   = outlineStyles(color, elevated, selected);
   });
   // Black/white — solid and outline.
   //
@@ -478,10 +488,10 @@ function buildVariantMap(isTextContent, elevated = false, selected = false, size
   // and surface block — so the button resolves to black on a light surface and
   // white on a dark one wherever it is placed, with no prop change.
   map['black-white']         = solidStyles('black-white', elevated, selected, size);
-  map['black-white-outline'] = outlineStyles('black-white', selected);
+  map['black-white-outline'] = outlineStyles('black-white', elevated, selected);
 
   map['danger']         = solidStyles('error', elevated, selected, size);
-  map['outline']        = outlineStyles('default', selected);
+  map['outline']        = outlineStyles('default', elevated, selected);
   map['ghost']          = ghostStyles(isTextContent, selected);
   map['text']           = ghostStyles(isTextContent, selected);
   return map;
