@@ -159,10 +159,9 @@ const INITIALS_PX = { xxs: 9, xs: 12, small: 14, medium: 18, large: 22, xl: 28, 
 const initialsFontSize = (diameter, sizeName) =>
   (INITIALS_PX[sizeName] ?? Math.round((diameter * 7) / 12)) + 'px';
 
-// The ring is Icons & Avatars::Avatar-Border: 0 at every standalone size and
-// 1px only in the in-button and button-decorator modes — an avatar INSIDE a
-// button. It tracks --Button-Border-Width there (1px, load-bearing for the
-// Figma button heights; only READ here).
+// The ring is 1px at every size — the same hairline as a button's border, so
+// it tracks --Button-Border-Width (1px, load-bearing for the Figma button
+// heights; only READ here).
 const BORDER_WIDTH = 'var(--Button-Border-Width, 1px)';
 
 export function Avatar({
@@ -248,20 +247,18 @@ export function Avatar({
         fontFamily: 'inherit', fontWeight: 600,
         overflow: 'hidden',
         flexShrink: 0,
-        /* One ring COLOR, all three styles: every variant binds its stroke to
-           Buttons::Border (--Buttons-{C}-Border, the button's own outline,
-           not the surface's --Border — they diverge once a color is set).
+        /* One ring, all three styles, at every size: every disc frame in the
+           Figma set (Photo, Button-Theme-Avatar, Button-Theme-Initials) draws a
+           1px stroke bound to Buttons::Border (--Buttons-{C}-Border, the
+           button's own outline — not the surface's --Border, which diverges
+           once a color is set). Decided 2026-10-20: always a ring.
 
-           Its WIDTH is Icons & Avatars::Avatar-Border, which is 0 at every
-           standalone size and 1px only in the in-button / button-decorator
-           modes. This drew 1px everywhere, which matched only because the
-           Figma set itself was pinned to the in-button mode. So a standalone
-           avatar has no ring; an avatar inside a button (insideButton) does.
-
-           Note for a standalone CLICKABLE avatar: without a ring its boundary
-           is the fill (or photo) alone, so the 3:1 non-text contrast rests on
-           that fill against the surface. */
-        border: insideButton ? BORDER_WIDTH + ' solid ' + borderColor : 'none',
+           Icons & Avatars::Avatar-Border (0 standalone, 1 in a button) is bound
+           to the component root, which has no stroke, so it does not reach the
+           ring. 0.14.16 followed that variable and dropped the ring standalone;
+           this restores it. The ring also gives a clickable avatar the 3:1
+           boundary its fill alone may not. */
+        border: BORDER_WIDTH + ' solid ' + borderColor,
         // Inside-button breathing room. Pure margin so the avatar's circular
         // silhouette doesn't get pushed into an ellipse by padding.
         ...(insideButton && { marginLeft: '2px', marginRight: '2px' }),

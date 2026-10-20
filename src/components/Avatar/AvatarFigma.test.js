@@ -1,7 +1,7 @@
 /**
  * The Avatar against Figma's Icons & Avatars variables (set 3156:3696):
  *   Avatar-Size     medium 32
- *   Avatar-Border   0 standalone, 1px in-button / button-decorator
+ *   the ring        1px Buttons::Border on every disc frame, at every size
  *   Avatar-Initials xxs 9 · xs 12 · small 14 · medium 18 · large 22 · xl 28 · xxl 40
  * and the Default style: the person glyph alone, filled with Buttons::Border,
  * on no disc of its own.
@@ -23,12 +23,12 @@ const rulesFor = (el) => {
 };
 
 describe('Avatar matches the Figma variables', () => {
-  it('has no ring standalone, and a 1px ring inside a button, inside the diameter', () => {
-    const solo = render(<Avatar initials="LN" />).container.querySelector('.avatar');
-    expect(rulesFor(solo)).toMatch(/border:\s*none/);
-    const inBtn = render(<Avatar initials="LN" insideButton />).container.querySelector('.avatar');
-    expect(rulesFor(inBtn)).toMatch(/border:[^;]*solid/);
-    expect(rulesFor(inBtn)).toMatch(/box-sizing:\s*border-box/);
+  it('always has a 1px ring, inside the diameter', () => {
+    for (const props of [{}, { insideButton: true }]) {
+      const el = render(<Avatar initials="LN" {...props} />).container.querySelector('.avatar');
+      expect(rulesFor(el)).toMatch(/border:[^;]*solid/);
+      expect(rulesFor(el)).toMatch(/box-sizing:\s*border-box/);
+    }
   });
 
   it.each([['small', 14], ['medium', 18], ['large', 22], ['xl', 28]])(
