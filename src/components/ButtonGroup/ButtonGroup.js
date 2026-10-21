@@ -535,10 +535,17 @@ export function ButtonGroup({
       // that negative margin OVERLAP the shared edge into a single border —
       // the same collapse the flex (hug/fill) modes already get.
       ...positionalSx,
-      ...noLiftSx,
-      ...selectedSx,
-      ...unselectedSx,
-      ...ghostSx,
+      /* The segment treatment — selected / unselected paint, ghost borders,
+         no lift — is a TOGGLE's. A plain group of actions owns no selection,
+         so every segment counted as "unselected" and was repainted as one:
+         transparent fill and the quiet outline label over the solid variant
+         chosen above. Figma's ButtonGroup is three ordinary solid Buttons, so
+         here its buttons stay ordinary Buttons, lift on hover included (they
+         are spaced apart, with no shared edge for a lift to break). */
+      ...((hasSelection || isConnected) && noLiftSx),
+      ...(hasSelection && selectedSx),
+      ...(hasSelection && unselectedSx),
+      ...(hasSelection && ghostSx),
       /* The focus ring's own corner, set HERE and not in positionalSx.
          `unselectedSx` carries a '&.Mui-focusVisible, &:focus-visible' key of
          its own for the label color, and it is spread later — so the same
@@ -590,7 +597,7 @@ export function ButtonGroup({
     });
 
     // ── Light variant: wrap unselected buttons in themed Box ──────────────
-    if (isLight && !isSelected) {
+    if (isLight && hasSelection && !isSelected) {
       return (
         <Box
           key={index}

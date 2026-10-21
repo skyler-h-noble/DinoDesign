@@ -470,3 +470,32 @@ describe('ButtonGroup cannot be joined', () => {
     warn.mockRestore();
   });
 });
+
+/* A plain ButtonGroup is a row of ACTIONS — Figma draws three ordinary solid
+   Buttons. It used to repaint every one as an unselected toggle segment
+   (transparent fill, the quiet outline label) because, owning no selection,
+   each child counted as "not selected". */
+describe('ButtonGroup without a selection keeps its Buttons solid', () => {
+  test('a plain group does not paint the unselected-segment treatment', () => {
+    render(
+      <ButtonGroup aria-label="actions">
+        <Button>One</Button>
+        <Button>Two</Button>
+      </ButtonGroup>
+    );
+    const btn = screen.getByText('One').closest('button');
+    expect(btn).not.toHaveStyle({ backgroundColor: 'transparent' });
+    expect(btn).not.toHaveAttribute('aria-pressed');
+  });
+
+  test('a group that owns a selection still paints its unselected segments', () => {
+    render(
+      <ButtonGroup aria-label="choice" value="a" onChange={() => {}}>
+        <Button value="a">A</Button>
+        <Button value="b">B</Button>
+      </ButtonGroup>
+    );
+    const unselected = screen.getByText('B').closest('button');
+    expect(unselected).toHaveStyle({ backgroundColor: 'transparent' });
+  });
+});
