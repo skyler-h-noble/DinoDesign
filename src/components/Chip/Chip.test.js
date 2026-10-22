@@ -229,12 +229,12 @@ describe('Chip — Accessibility (jest-axe)', () => {
 });
 
 describe('Chip typography', () => {
-  it('takes the button face and weight, not the page font', () => {
+  it('takes the Legal type style the Figma label is bound to, not the page font', () => {
     render(<Chip label="Summer" />);
     const root = screen.getByText('Summer').closest('.MuiChip-root');
     const cs = window.getComputedStyle(root);
-    expect(cs.fontFamily).toContain('--Font-Family-Button');
+    expect(cs.fontFamily).toContain('--Legal-Font-Family');
     expect(cs.fontFamily).not.toBe('inherit');
-    expect(cs.fontWeight).toContain('--Button-Font-Weight');
+    expect(cs.fontWeight).toContain('--Legal-Font-Weight');
   });
 });

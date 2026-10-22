@@ -2,6 +2,7 @@
 import React, { forwardRef } from 'react';
 import { Chip as MuiChip, Avatar as MuiAvatar, Box } from '@mui/material';
 import CancelIcon from '@mui/icons-material/Cancel';
+import { SHADOW_LEVEL_1 } from '../_shadows';
 
 /**
  * Chip Component
@@ -139,8 +140,14 @@ export function normalizeChipVariant(variant) {
    not exist in the design — the other two were extrapolated from the 24px one.
    Sizes in this system come from the `Component-Size` collection's modes anyway,
    not from a per-component ladder; Button carries no Size axis either. */
+/* Figma's layout, read off the set: 4px on the body either side, the
+   decorators flush against the label, and the 4px label holder carrying the
+   rest — so a label-only chip still has 8px a side, and a chip with an avatar
+   and an icon has 4px outside them rather than 8px plus a 4px gap. The body
+   padding is 3px because the 1px border is inside the box here (border-box):
+   border + padding = Figma's 4px. */
 const CHIP_SIZE = {
-  height: 24, fontSize: '12px', iconSize: 16, padding: '0 8px', deleteSize: 16, gap: 4,
+  height: 24, iconSize: 16, padding: '0 3px', labelPadding: '0 4px', deleteSize: 16, gap: 0,
   minWidth: 32,
 };
 
@@ -198,7 +205,7 @@ const ChipDeleteButton = forwardRef(function ChipDeleteButton({ onClick, ...prop
         padding: 0,
         margin: 0,
         marginLeft: '2px',
-        marginRight: '-4px',
+        marginRight: 0,
         border: 'none',
         borderRadius: '50%',
         backgroundColor: 'transparent',
@@ -292,14 +299,15 @@ export function Chip({
 
   const chipSx = {
     height: sc.height,
-    fontSize: sc.fontSize,
-    /* The button's face and weight, not the page's. `inherit` took them from
-       the host, and the generated CSS deliberately gives the page no font —
-       so outside a styled parent every chip came out in the UA serif. Same
-       chain as Stepper's digit: --Font-Family-Button is declared with no
-       fallback of its own, so the body face is the real second step. */
-    fontWeight: 'var(--Button-Font-Weight, 500)',
-    fontFamily: 'var(--Font-Family-Button, var(--Font-Family-Body, inherit))',
+    /* The Legal type style, which is what the Figma label is bound to (every
+       Legal-* variable — size, weight, leading, tracking, face). It used to be
+       the button's face at 12px / 500, which no chip in the file draws. Never
+       `inherit`: the generated CSS gives the page no font, so outside a styled
+       parent the chip would come out in the UA serif. */
+    fontSize: 'var(--Legal-Font-Size, 10px)',
+    fontWeight: 'var(--Legal-Font-Weight, 400)',
+    letterSpacing: 'var(--Legal-Letter-Spacing, 0)',
+    fontFamily: 'var(--Legal-Font-Family, var(--Font-Family-Body, inherit))',
     borderRadius: (sc.height / 2) + 'px',
     padding: sc.padding,
     // `Sizing-4` on the Figma variant — a chip never narrower than 32px.
@@ -330,17 +338,25 @@ export function Chip({
     ...(isClickable && !disabled ? {
       cursor: 'pointer',
       transition: 'background-color 0.15s ease, outline 0.15s ease',
+      transition: 'background-color 0.15s ease, box-shadow 0.15s ease, outline 0.15s ease',
+      /* Figma's Hover chip wears the Level-1 elevation; Pressed drops back to
+         none. MUI's clickable chip adds its own shadow on :active, which is
+         why Pressed has to say `none` rather than leave it unset. */
       '&:hover': {
         backgroundColor: styles.hoverBg,
+        boxShadow: SHADOW_LEVEL_1,
       },
       '&:active': {
         backgroundColor: styles.activeBg,
+        boxShadow: 'none',
       },
     } : {}),
 
+    /* 2px ring 1px outside, as on Card and Checkbox — Figma's Focus-Visible
+       frame sits 3px out with its 2px stroke inside. */
     '&:focus-visible, &.Mui-focusVisible': {
       outline: '2px solid var(--Focus-Visible)',
-      outlineOffset: '2px',
+      outlineOffset: '1px',
     },
 
     ...(disabled ? {
@@ -356,7 +372,8 @@ export function Chip({
       fontSize: 'inherit',
       fontWeight: 'inherit',
       fontFamily: 'inherit',
-      lineHeight: 1.2,
+      lineHeight: 'var(--Legal-Line-Height, 15px)',
+      letterSpacing: 'inherit',
       display: 'flex',
       alignItems: 'center',
       gap: sc.gap + 'px',
@@ -395,17 +412,25 @@ export function Chip({
             justifyContent: 'center',
             flexShrink: 0,
             '& .MuiSvgIcon-root': { fontSize: sc.iconSize },
-            '& .MuiAvatar-root': {
-              width: sc.iconSize + 4,
-              height: sc.iconSize + 4,
-              fontSize: Math.round(sc.iconSize * 0.65) + 'px',
+            /* The lib's Avatar is `.avatar` — `.MuiAvatar-root` alone missed it,
+               so an avatar decorator rendered at its own 32px default and
+               overflowed the 24px chip. Figma pins Icons & Avatars to xxs: 16. */
+            '& .MuiAvatar-root, & .avatar': {
+              width: sc.iconSize,
+              height: sc.iconSize,
+              minWidth: sc.iconSize,
+              fontSize: '9px',
             },
           }}
         >
           {startDecorator}
         </Box>
       )}
-      {displayLabel}
+      {displayLabel != null && displayLabel !== '' && (
+        <Box component="span" sx={{ padding: sc.labelPadding, display: 'inline-flex', alignItems: 'center', lineHeight: 'var(--Legal-Line-Height, 15px)' }}>
+          {displayLabel}
+        </Box>
+      )}
       {endDecorator && (
         <Box
           component="span"
@@ -415,10 +440,14 @@ export function Chip({
             justifyContent: 'center',
             flexShrink: 0,
             '& .MuiSvgIcon-root': { fontSize: sc.iconSize },
-            '& .MuiAvatar-root': {
-              width: sc.iconSize + 4,
-              height: sc.iconSize + 4,
-              fontSize: Math.round(sc.iconSize * 0.65) + 'px',
+            /* The lib's Avatar is `.avatar` — `.MuiAvatar-root` alone missed it,
+               so an avatar decorator rendered at its own 32px default and
+               overflowed the 24px chip. Figma pins Icons & Avatars to xxs: 16. */
+            '& .MuiAvatar-root, & .avatar': {
+              width: sc.iconSize,
+              height: sc.iconSize,
+              minWidth: sc.iconSize,
+              fontSize: '9px',
             },
           }}
         >
