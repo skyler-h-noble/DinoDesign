@@ -1,7 +1,8 @@
 // src/components/Switch/Switch.js
 import React from 'react';
 import { Switch as MuiSwitch, FormControlLabel } from '@mui/material';
-import { Body, BodySmall } from '../Typography';
+import { Label, LabelSmall, LabelLarge } from '../Typography';
+import { labelGap } from '../_labelGap';
 import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
 
 /**
@@ -231,7 +232,8 @@ export function Switch({
   const resolvedVariant = normalizeSwitchVariant(variant);
   const styles = variantMap[resolvedVariant] || variantMap['default'];
   const sc = SIZE_MAP[size] || SIZE_MAP.medium;
-  const LabelComp = size === 'small' ? BodySmall : Body;
+  // The Label type style, as SwitchField's Form-Label sets it.
+  const LabelComp = size === 'small' ? LabelSmall : size === 'large' ? LabelLarge : Label;
 
   /* The handle is a PUBLISHED value, not the track minus its inset.
      `trackH - THUMB_INSET * 2` gives 20 and 28 at medium and large, which is
@@ -407,7 +409,7 @@ export function Switch({
           </LabelComp>
         }
         labelPlacement={labelPlacement}
-        sx={{ gap: '8px', marginLeft: 0, marginRight: 0 }}
+        sx={{ gap: labelGap(size), marginLeft: 0, marginRight: 0 }}
       />
     );
   }

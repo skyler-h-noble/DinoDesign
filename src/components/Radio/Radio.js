@@ -8,7 +8,8 @@ import {
   FormLabel,
   Box,
 } from '@mui/material';
-import { BodyLarge, Body, BodySmall } from '../Typography';
+import { Label, LabelSmall, LabelLarge } from '../Typography';
+import { labelGap } from '../_labelGap';
 import { tokenSegment } from '../_shadows';
 
 /**
@@ -17,9 +18,9 @@ import { tokenSegment } from '../_shadows';
  * Single style (no outline/light split). Color drives the ring + dot.
  *
  * GEOMETRY (Figma-aligned):
- *   small  — parent 24×24, outer ring 16×16, inner dot 8×8,    BodySmall label, 4px gap
- *   medium — parent 24×24, outer ring 20×20, inner dot 9.5×9.5, Body label,      8px gap
- *   large  — parent 24×24, outer ring 24×24, inner dot 9.5×9.5, BodyLarge label, 12px gap
+ *   small  — parent 24×24, ring 16, dot 8,  LabelSmall label, --Sm-Label-Gap (4)
+ *   medium — parent 24×24, ring 20, dot 10, Label label,      --Label-Gap (8)
+ *   large  — parent 24×24, ring 24, dot 12, LabelLarge label, --Lg-Label-Gap (12)
  *
  * COLORS: default | primary | secondary | tertiary | neutral |
  *         info | success | warning | error
@@ -51,9 +52,11 @@ const SIZE_MAP = {
    the browser rounds per axis, and it lands visibly off. 10 in 20 is 5 either
    side, which is what Figma draws (Dot at x=5, y=5). Whole pixels centre; halves
    do not. Large was wrong by 2.5px on top of that. */
-  small:  { box: 16, dot: 8,  gap: 4,  LabelComp: BodySmall },
-  medium: { box: 20, dot: 10, gap: 8,  LabelComp: Body },
-  large:  { box: 24, dot: 12, gap: 12, LabelComp: BodyLarge },
+  /* LABEL is the Label type style (Figma's Form-Label, Dynamic-Label); the
+     gap is --Label-Gap (_labelGap.js), shared with Checkbox and Switch. */
+  small:  { box: 16, dot: 8,  LabelComp: LabelSmall },
+  medium: { box: 20, dot: 10, LabelComp: Label },
+  large:  { box: 24, dot: 12, LabelComp: LabelLarge },
 };
 
 // --- Custom Radio Icons ------------------------------------------------------
@@ -256,7 +259,6 @@ export function Radio({
             component="span"
             sx={{
               color: disabled ? 'var(--Text-Quiet)' : 'var(--Text)',
-              lineHeight: 1.4,
               userSelect: 'none',
             }}
           >
@@ -268,7 +270,7 @@ export function Radio({
         sx={{
           marginLeft: 0,
           marginRight: 0,
-          gap: sizeConfig.gap + 'px',
+          gap: labelGap(size),
           // alignItems: 'center' works for both end/start (cross-axis is
           // vertical) and top/bottom (cross-axis is horizontal) — the radio
           // sits centered relative to the label either way.

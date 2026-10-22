@@ -320,7 +320,9 @@ describe('Checkbox variant is color only', () => {
  *   large  `size === 'small' ? BodySmall : Body` gave a LARGE checkbox the
  *          MEDIUM component — the third step had no branch.
  */
-describe('label and gap follow the same table Radio uses', () => {
+/* The gap is --Label-Gap, the one variable Checkbox Field, RadioField and
+   SwitchField bind; the label is the Label type style (Figma's Form-Label). */
+describe('label and gap follow the shared Label-Gap and Label style', () => {
   const cssFor = (el) => {
     const cls = (el.className || '').split(/\s+/).find((c) => c.startsWith('css-'));
     if (!cls) return '';
@@ -332,10 +334,10 @@ describe('label and gap follow the same table Radio uses', () => {
   };
 
   test.each([
-    ['small', '4px'],
-    ['medium', '8px'],
-    ['large', '12px'],
-  ])('%s gap is %s, a real Sizing rung', (size, expected) => {
+    ['small', 'var(--Sm-Label-Gap, 4px)'],
+    ['medium', 'var(--Label-Gap, 8px)'],
+    ['large', 'var(--Lg-Label-Gap, 12px)'],
+  ])('%s gap is %s', (size, expected) => {
     const { container } = render(<Checkbox size={size} label="Label" />);
     const root = container.querySelector('.MuiFormControlLabel-root');
     expect(cssFor(root)).toContain('gap: ' + expected);
@@ -345,19 +347,19 @@ describe('label and gap follow the same table Radio uses', () => {
      of its own, so the LIB's component is a CHILD of .MuiFormControlLabel-label,
      not that element. Querying the wrapper found MuiTypography-body1 for every
      size and could not tell them apart. */
-  const libLabel = (c) => c.querySelector('[class*="typography-body"]');
+  const libLabel = (c) => c.querySelector('[class*="typography-label"]');
 
   test('the label carries no hardcoded font-size', () => {
     const { container } = render(<Checkbox size="large" label="Label" />);
     /* The typography component owns the size. A font-size here would mean the
-       override is back and the Body tokens are being cancelled again. */
+       override is back and the Label tokens are being cancelled again. */
     expect(cssFor(libLabel(container))).not.toMatch(/font-size:\s*1[357]px/);
   });
 
   test.each([
-    ['small', 'typography-body-small'],
-    ['medium', 'typography-body'],
-    ['large', 'typography-body-large'],
+    ['small', 'typography-label-small'],
+    ['medium', 'typography-label'],
+    ['large', 'typography-label-large'],
   ])('%s uses %s', (size, expected) => {
     const { container } = render(<Checkbox size={size} label="Label" />);
     const cls = libLabel(container).className.split(/\s+/);
@@ -392,4 +394,12 @@ describe('Checkbox matches the Figma set', () => {
     render(<Checkbox disabled aria-label="d" />);
     expect(allRules()).not.toMatch(/\.chk-box-icon\{[^}]*opacity/);
   });
+});
+
+describe('labelPlacement', () => {
+  test.each([['start', 'MuiFormControlLabel-labelPlacementStart'], ['top', 'MuiFormControlLabel-labelPlacementTop'], ['bottom', 'MuiFormControlLabel-labelPlacementBottom']])(
+    '%s reaches the label wrapper', (placement, cls) => {
+      const { container } = render(<Checkbox label="Label" labelPlacement={placement} />);
+      expect(container.querySelector('.MuiFormControlLabel-root')).toHaveClass(cls);
+    });
 });

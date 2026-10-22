@@ -3,7 +3,8 @@ import React from 'react';
 import { Checkbox as MuiCheckbox, FormControlLabel, Box } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import RemoveIcon from '@mui/icons-material/Remove';
-import { Body, BodySmall, BodyLarge } from '../Typography';
+import { Label, LabelSmall, LabelLarge } from '../Typography';
+import { labelGap } from '../_labelGap';
 import { tokenSegment } from '../_shadows';
 
 /**
@@ -128,9 +129,13 @@ const SIZE_MAP = {
      typography component it was applied to, so the real Body sizes (14 / 16 /
      18) never reached it and a brand re-picking its body scale moved every
      label in the system except these. The component now carries the size. */
-  small:  { box: 16, icon: 12, gap: 4,  touchTarget: 24, LabelComp: BodySmall },
-  medium: { box: 20, icon: 14, gap: 8,  touchTarget: 24, LabelComp: Body },
-  large:  { box: 24, icon: 18, gap: 12, touchTarget: 24, LabelComp: BodyLarge },
+  /* LABEL is the Label type style (Figma's Form-Label, Dynamic-Label), not
+     Body: the design sets a checkbox's label in the label face and weight.
+     The GAP is not here: it is --Label-Gap (see _labelGap.js), the one
+     variable Checkbox Field, RadioField and SwitchField all bind. */
+  small:  { box: 16, icon: 12, touchTarget: 24, LabelComp: LabelSmall },
+  medium: { box: 20, icon: 14, touchTarget: 24, LabelComp: Label },
+  large:  { box: 24, icon: 18, touchTarget: 24, LabelComp: LabelLarge },
 };
 
 // --- Custom Icons ------------------------------------------------------------
@@ -216,6 +221,9 @@ export function Checkbox({
   variant = 'default',
   size = 'medium',
   label,
+  /* Where the label sits: 'end' (right, default) | 'start' | 'top' | 'bottom'
+     — Figma's Checkbox Field Label axis (label-right / -left / -top / -bottom). */
+  labelPlacement = 'end',
   checked,
   defaultChecked,
   indeterminate = false,
@@ -311,7 +319,6 @@ export function Checkbox({
             component="span"
             sx={{
               color: disabled ? 'var(--Text-Quiet)' : 'var(--Text)',
-              lineHeight: 1.4,
               userSelect: 'none',
             }}
           >
@@ -319,10 +326,11 @@ export function Checkbox({
           </LabelComp>
         }
         disabled={disabled}
+        labelPlacement={labelPlacement}
         sx={{
           marginLeft: 0,
           marginRight: 0,
-          gap: sizeConfig.gap + 'px',
+          gap: labelGap(size),
           alignItems: 'center',
           '&.Mui-disabled .MuiTypography-root': {
             color: 'var(--Text-Quiet)',
