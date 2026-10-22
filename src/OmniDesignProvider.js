@@ -79,6 +79,7 @@ import React, {
   useCallback,
   useMemo,
 } from 'react';
+import { chartColorVisionCSS } from './components/Charts/colorVision';
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 
@@ -552,6 +553,13 @@ export function OmniDesignProvider({
 
   // Cleanup mode tag on unmount
   useEffect(() => { return () => removeStyleTag(TAG.mode); }, []);
+
+  /* Chart colors per color-vision preference (data-color-vision). Injected by
+     the provider, not shipped in a design system's CSS, because they are the
+     same for every brand: an app gets them on a library update without its
+     system being regenerated. Order-independent — the selectors outrank the
+     brand's chart blocks — so it is simply added once and left in place. */
+  useEffect(() => { injectStyleTag('omni-color-vision', chartColorVisionCSS()); }, []);
 
   // ── Public API ─────────────────────────────────────────────────────────────
   /* The chosen theme, in both modes. A dark theme applies only when one was

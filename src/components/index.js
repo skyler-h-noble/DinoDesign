@@ -305,7 +305,7 @@ export { CodeBlock, CopyButton } from './CodeBlock/CodeBlock';
 // `geometry` is exported too: it is pure math with no React or DOM, shared with
 // the Figma plugin so the two renderers cannot disagree about where a slice
 // ends or how a curve bends.
-export { BarChart, LineChart, PieChart, CHART_TOKENS, CHART_LABEL_TYPE } from './Charts';
+export { BarChart, LineChart, PieChart, CHART_TOKENS, CHART_LABEL_TYPE, CHART_COLOR_VISION, COLOR_VISIONS, chartColorVisionCSS } from './Charts';
 export * as chartGeometry from './Charts/geometry';
 
 /* What a region shows instead of data. A slot on Table and List rather than a
