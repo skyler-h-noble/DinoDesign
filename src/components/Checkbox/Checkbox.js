@@ -70,7 +70,11 @@ function colorStyles(color) {
     borderToken: defaultBorder(C),
     activeBorder: 'var(--Buttons-' + C + '-Border)',
     activeFill: 'var(--Buttons-' + C + '-Button)',
-    icon: 'var(--Buttons-' + C + '-Border)',
+    /* The mark sits ON the fill, so it takes the fill's LABEL color —
+       Buttons-{C}-Text, contrast-checked against Buttons-{C}-Button. It was
+       the Border color, a near-shade of the fill, and the check disappeared
+       into the box (seen on a red default button, 2026-10-22). */
+    icon: 'var(--Buttons-' + C + '-Text)',
   };
 }
 

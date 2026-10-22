@@ -385,6 +385,11 @@ describe('Checkbox matches the Figma set', () => {
     expect(container.querySelector('.chk-primary')).toBeNull();
   });
 
+  test('the check mark takes the fill\'s label color, not its border', () => {
+    render(<Checkbox checked onChange={() => {}} aria-label="mark" />);
+    expect(allRules()).toMatch(/color:\s*var\(--Buttons-Default-Text\)/);
+  });
+
   test('focus is a 2px ring 1px outside the box', () => {
     render(<Checkbox aria-label="f" />);
     expect(allRules()).toMatch(/outline-offset:\s*1px/);
