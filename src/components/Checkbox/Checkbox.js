@@ -58,11 +58,17 @@ const defaultBorder = (C) =>
 // never an axis of the Figma component. What survives is the outline look —
 // transparent box, colored border, glyph on check — which is what the design
 // has always drawn.
+/* Checked and indeterminate are FILLED — Figma's checked box takes the
+   button's fill and border (Buttons::Button / Buttons::Border). It used to stay
+   an empty box with a colored glyph, which this file described as "what the
+   design has always drawn"; the design draws a filled box. */
 function colorStyles(color) {
   const C = tokenSegment(color);
   return {
     color: C,
     borderToken: defaultBorder(C),
+    activeBorder: 'var(--Buttons-' + C + '-Border)',
+    activeFill: 'var(--Buttons-' + C + '-Button)',
     icon: 'var(--Buttons-' + C + '-Border)',
   };
 }
@@ -134,8 +140,8 @@ function CheckboxBoxIcon({ size, variant, checked, indeterminate }) {
   const sizeConfig = SIZE_MAP[size] || SIZE_MAP.medium;
   const isActive = checked || indeterminate;
 
-  // Outer border always uses the themed border token
-  const outerBorder = styles.borderToken;
+  // Unchecked: the quiet box. Checked / indeterminate: the button's border.
+  const outerBorder = isActive ? styles.activeBorder : styles.borderToken;
 
   // Corner radius scales per size via its own token (the box is 16/20/24px,
   // radius = 20% of box). Falls back to that default set (Sm 3.2 / Md 4 /
@@ -173,7 +179,7 @@ function CheckboxBoxIcon({ size, variant, checked, indeterminate }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: 'var(--Background)',
+          backgroundColor: isActive ? styles.activeFill : 'var(--Background)',
           color: 'var(--Text)',
           transition: 'background-color 0.15s ease-in-out',
         }}
@@ -205,7 +211,9 @@ function IndeterminateIcon({ size, variant }) {
 // --- Component ---------------------------------------------------------------
 
 export function Checkbox({
-  variant = 'primary',
+  /* `default`, the brand's default button color — never `primary`, which is a
+     different color and made every unmarked checkbox a deliberate one. */
+  variant = 'default',
   size = 'medium',
   label,
   checked,
@@ -268,12 +276,18 @@ export function Checkbox({
            checkbox did nothing at all. The border is the channel, as on Input:
            the box interior carries the checked state and must stay readable. */
         '&:hover': { backgroundColor: 'transparent' },
-        '&:hover .chk-box-icon': { borderColor: 'var(--Text)' },
-        '&:active .chk-box-icon': { borderColor: 'var(--Text)', backgroundColor: 'var(--Pressed)' },
-        '&.Mui-disabled .chk-box-icon': { opacity: 'var(--Disabled, 0.38)' },
+        /* Hover and Pressed move the border to the button's border color, as
+           Figma does; the box interior does not change. (It was --Text, and
+           Pressed also painted --Pressed into the box.) */
+        '&:hover .chk-box-icon, &:active .chk-box-icon': {
+          borderColor: 'var(--Buttons-' + styles.color + '-Border)',
+        },
+        /* No opacity on the box itself: the root below already dims, and both
+           together made a disabled checkbox 0.38 x 0.38 = 0.14. */
+        /* Focus: a 2px ring 1px outside the box, as Figma draws it. */
         '&.Mui-focusVisible .chk-box-icon': {
           outline: '2px solid var(--Focus-Visible)',
-          outlineOffset: '2px',
+          outlineOffset: '1px',
         },
         '&.Mui-disabled': {
           opacity: 'var(--Disabled, 0.38)',

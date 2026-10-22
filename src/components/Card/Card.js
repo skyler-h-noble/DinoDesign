@@ -215,8 +215,9 @@ export function Card({
                focus. The browser already draws an outline around the box's
                own corners, offset included. */
             '&:focus-visible': {
-              outline: '3px solid var(--Focus-Visible)',
-              outlineOffset: '3px',
+              // Figma: a 2px ring, 1px outside the card.
+              outline: '2px solid var(--Focus-Visible)',
+              outlineOffset: '1px',
             },
           }),
           ...(isDraggable && {
@@ -242,8 +243,9 @@ export function Card({
               borderColor: 'var(--Buttons-Primary-Border)',
             },
             '&:focus-visible': {
-              outline: '3px solid var(--Focus-Visible)',
-              outlineOffset: '3px',
+              // Figma: a 2px ring, 1px outside the card.
+              outline: '2px solid var(--Focus-Visible)',
+              outlineOffset: '1px',
             },
           }),
           ...sx,
@@ -273,7 +275,12 @@ export function Card({
             color: 'var(--Text)',
             fontSize: s.fontSize,
             fontFamily: 'inherit',
-            borderRadius: 'inherit',
+            /* The card's radius MINUS its 1px border, so this surface's edge
+               is concentric with the border's inner edge. At `inherit` it
+               curved 1px too tight, and the selected ring drawn on it pulled
+               away from the border at every corner — a hairline gap that read
+               as two rings. */
+            borderRadius: 'calc(var(--Card-Radius) - 1px)',
             position: 'relative',
             flex: 1,
             minWidth: 0,

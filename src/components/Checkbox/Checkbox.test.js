@@ -364,3 +364,32 @@ describe('label and gap follow the same table Radio uses', () => {
     expect(cls).toContain(expected);
   });
 });
+
+/* Figma's checked / indeterminate box is FILLED with the button's fill and
+   border; the default color is `default`, never `primary`. */
+describe('Checkbox matches the Figma set', () => {
+  const allRules = () => Array.from(document.styleSheets).flatMap((sh) => {
+    try { return Array.from(sh.cssRules || []).map((r) => r.cssText); } catch { return []; }
+  }).join('\n');
+
+  test('checked fills with the default button, not primary', () => {
+    const { container } = render(<Checkbox checked onChange={() => {}} aria-label="on" />);
+    const css = allRules();
+    expect(css).toMatch(/background-color:\s*var\(--Buttons-Default-Button\)/);
+    expect(css).toMatch(/border:\s*2px solid var\(--Buttons-Default-Border\)/);
+    // Earlier tests' rules stay in the document, so the default is read off
+    // the rendered class rather than by the absence of Primary tokens.
+    expect(container.querySelector('.chk-default')).not.toBeNull();
+    expect(container.querySelector('.chk-primary')).toBeNull();
+  });
+
+  test('focus is a 2px ring 1px outside the box', () => {
+    render(<Checkbox aria-label="f" />);
+    expect(allRules()).toMatch(/outline-offset:\s*1px/);
+  });
+
+  test('disabled dims once, not twice', () => {
+    render(<Checkbox disabled aria-label="d" />);
+    expect(allRules()).not.toMatch(/\.chk-box-icon\{[^}]*opacity/);
+  });
+});
