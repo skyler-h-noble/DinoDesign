@@ -288,6 +288,8 @@ export function Checkbox({
         '&.Mui-focusVisible .chk-box-icon': {
           outline: '2px solid var(--Focus-Visible)',
           outlineOffset: '1px',
+          // Focus moves the border too, as Hover and Pressed do (Figma).
+          borderColor: 'var(--Buttons-' + styles.color + '-Border)',
         },
         '&.Mui-disabled': {
           opacity: 'var(--Disabled, 0.38)',
