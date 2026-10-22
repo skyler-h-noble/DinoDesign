@@ -1,7 +1,7 @@
 // src/components/Card/Card.js
 import React, { createContext, useContext } from 'react';
 import { Box } from '@mui/material';
-import { SHADOW_LEVEL_0, SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3 } from '../_shadows';
+import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3 } from '../_shadows';
 
 /**
  * Card Component
@@ -45,9 +45,12 @@ const SOLID_THEME_MAP = {
 // Light and dark now differ from solid only by surface level, as dark already did.
 
 const SIZE_MAP = {
-  small:  { gap: '8px',  fontSize: '13px', padding: 'var(--Card-Padding)' },
-  medium: { gap: '12px', fontSize: '14px', padding: 'var(--Card-Padding)' },
-  large:  { gap: '16px', fontSize: '16px', padding: 'var(--Card-Padding)' },
+  /* Medium is Figma's: the card's padded slot stacks its content 4px apart
+     (it was 12, which put 8px more air between a title and its body than the
+     design has). Small and large keep their old proportion to medium. */
+  small:  { gap: '2px', fontSize: '13px', padding: 'var(--Card-Padding)' },
+  medium: { gap: '4px', fontSize: '14px', padding: 'var(--Card-Padding)' },
+  large:  { gap: '8px', fontSize: '16px', padding: 'var(--Card-Padding)' },
 };
 
 /* --- Context --- */
@@ -119,11 +122,22 @@ export function Card({
     ? `var(--Buttons-${cap(color === 'default' ? 'Default' : color)}-Border)`
     : 'var(--Buttons-Default-Border)';
 
-  const borderStyle = !isClickable
-    ? '1px solid var(--Border-Variant)'
-    : selected
-      ? `2px solid ${borderColorToken}`
+  /* The border is ALWAYS 1px. Selected used to be a 2px border, which pushed
+     the content 1px in and made the card 2px larger than an unselected one —
+     Figma draws the selected ring as a frame laid OVER a card whose border
+     stays put. So the second pixel is an inset ring on the inner surface (see
+     selectedRing), and selecting a card moves nothing.
+
+     Selected is tested before clickable on purpose: a disabled card is not
+     clickable, and the selected ring went with it — Figma's Disabled variant
+     keeps the ring at the disabled opacity, because "chosen, but unavailable"
+     is still chosen. */
+  const borderStyle = selected
+    ? `1px solid ${borderColorToken}`
+    : !isClickable
+      ? '1px solid var(--Border-Variant)'
       : '1px solid var(--Buttons-Default-Border)';
+  const selectedRing = selected ? `inset 0 0 0 1px ${borderColorToken}` : 'none';
 
   // Elevation shadows (on outer shell, inherits parent dropshadow-color)
   /* Level 1 at rest, not 2 — read off the file rather than chosen.
@@ -146,7 +160,9 @@ export function Card({
      keeps `Card` and `Card-Hover` one step apart at either setting. */
   const restShadow  = elevated ? SHADOW_LEVEL_2 : SHADOW_LEVEL_1;
   const hoverShadow = elevated ? SHADOW_LEVEL_3 : SHADOW_LEVEL_2;
-  const activeShadow = elevated ? SHADOW_LEVEL_1 : SHADOW_LEVEL_0;
+  /* Pressed keeps the RESTING elevation: Figma's Pressed card wears the same
+     Card style as Default. It used to drop a level and shrink to 99.5%. */
+  const activeShadow = restShadow;
 
   return (
     <CardContext.Provider value={{ variant, color, size, orientation }}>
@@ -184,21 +200,23 @@ export function Card({
           ...(isClickable && !isDraggable && {
             cursor: 'pointer',
             '&:hover': {
-              borderColor: 'var(--Buttons-Default-Border)',
+              // A selected card keeps its selected border color on hover.
+              ...(!selected && { borderColor: 'var(--Buttons-Default-Border)' }),
               boxShadow: hoverShadow,
               transform: 'translateY(-1px)',
             },
             '&:active': {
-              // Settle back from the lifted hover state AND scale slightly
-              // for the press feedback. CSS overrides `transform` whole,
-              // so both must be in one string.
-              transform: 'translateY(0) scale(0.995)',
+              // Settles back from the hover lift, at rest elevation, no scale.
+              transform: 'translateY(0)',
               boxShadow: activeShadow,
             },
+            /* No borderRadius here. It was calc(--Card-Radius + 3px), meant
+               for the ring — but it rounded the CARD to 27px whenever it had
+               focus. The browser already draws an outline around the box's
+               own corners, offset included. */
             '&:focus-visible': {
               outline: '3px solid var(--Focus-Visible)',
               outlineOffset: '3px',
-              borderRadius: 'calc(var(--Card-Radius) + 3px)',
             },
           }),
           ...(isDraggable && {
@@ -250,6 +268,8 @@ export function Card({
             gap: s.gap,
             padding: s.padding,
             backgroundColor: 'var(--Background)',
+            // The selected ring's second pixel, inside the 1px border.
+            boxShadow: selectedRing,
             color: 'var(--Text)',
             fontSize: s.fontSize,
             fontFamily: 'inherit',

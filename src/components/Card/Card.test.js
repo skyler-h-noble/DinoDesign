@@ -287,3 +287,42 @@ describe('Card — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+/* Figma draws the selected ring as a frame laid over a card whose 1px border
+   stays put, so selecting must not change the card's size or move its content.
+   The second pixel is an inset ring on the inner surface. */
+describe('Card selected ring', () => {
+  /* Read the generated rules, as ButtonSelectedBorder.test does: jsdom drops a
+     `border` shorthand that contains var(), so computed styles read empty. */
+  const allRules = () => Array.from(document.styleSheets).flatMap((sh) => {
+    try { return Array.from(sh.cssRules || []).map((r) => r.cssText); } catch { return []; }
+  }).join('\n');
+
+  test('a selected card keeps a 1px border and draws the ring inside', () => {
+    render(<Card selected>Body</Card>);
+    const css = allRules();
+    expect(css).toMatch(/border:\s*1px solid var\(--Buttons-Default-Border\)/);
+    expect(css).toMatch(/box-shadow:\s*inset 0 0 0 1px var\(--Buttons-Default-Border\)/);
+    // The border never thickens — that grew the card and moved its content.
+    expect(css).not.toMatch(/border:\s*2px solid var\(--Buttons-Default-Border\)/);
+  });
+
+  test('an unselected card has no ring', () => {
+    // Earlier tests' rules stay in the document, so read this card's own.
+    const { container } = render(<Card clickable>Body</Card>);
+    const cls = [...container.querySelector('.card > div').classList].find((c) => c.startsWith('css-'));
+    const own = Array.from(document.styleSheets).flatMap((sh) => Array.from(sh.cssRules || []))
+      .map((r) => r.cssText).filter((t) => t.startsWith('.' + cls + ' ') || t.startsWith('.' + cls + '{')).join('');
+    expect(own).toMatch(/box-shadow:\s*none/);
+  });
+
+  test('a disabled selected card keeps its ring (Figma Disabled keeps it, dimmed)', () => {
+    render(<Card selected disabled>Body</Card>);
+    expect(allRules()).toMatch(/box-shadow:\s*inset 0 0 0 1px var\(--Buttons-Default-Border\)/);
+  });
+
+  test('focus does not round the card itself', () => {
+    render(<Card clickable>Body</Card>);
+    expect(allRules()).not.toMatch(/calc\(var\(--Card-Radius\) \+ 3px\)/);
+  });
+});
