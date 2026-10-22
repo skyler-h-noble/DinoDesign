@@ -349,11 +349,13 @@ publish the same three styles under two names:
 | bold, one step down | `<Typography variant="subtitle-small">` | `--Subtitle-Small-Font-Weight` |
 | bold, one step up | `<SubtitleLarge>` | `--Subtitle-Large-Font-Weight` |
 
-Three things that bite when you make that swap:
+Two things that bite when you make that swap, and one that no longer does:
 
-**Subtitle defaults to `--Header`, Body defaults to `--Text`.** Swapping `<Body>`
-for `<Subtitle>` to gain weight also changes the colour. Pass
-`color="standard"` to keep `--Text`.
+**Subtitle and Body both default to `--Text`.** Subtitle used to default to
+`--Header`, so swapping `<Body>` for `<Subtitle>` to gain weight also changed
+the colour. It no longer does: Subtitle is body-sized, and body-sized text
+needs 4.5:1 — `--Header` only promises the 3:1 that large text gets. Headings
+(h1–h6, display) keep `--Header`.
 
 **`variant="body-bold"` is an alias, not a bold.** The `-bold` body keys still
 resolve so old markup doesn't break, but they land on the *semibold* style. If

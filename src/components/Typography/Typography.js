@@ -52,11 +52,11 @@ import { useGhost, ghostBlockSx } from '../_ghost';
  *   Eyebrow   the eyebrow/overline face
  *   Body      everything else
  *
- * HEADER COLORS (h1–h6, display, subtitle):
+ * HEADER COLORS (h1–h6, display):
  *   default | primary | secondary | tertiary | neutral |
  *   info | success | warning | error
  *
- * TEXT COLORS (all other styles):
+ * TEXT COLORS (all other styles, subtitle included — see HEADING_STYLES):
  *   default | quiet | eyebrow | primary | secondary | tertiary | neutral |
  *   info | success | warning | error
  *
@@ -731,11 +731,15 @@ const TEXT_COLOR_MAP = {
   error:     'var(--Text-Error)',
 };
 
+/* Styles that take the HEADER colors, which promise 3:1 — the WCAG floor for
+   LARGE text only. Subtitle is not here: it is Body at 700, body-sized, so it
+   needs the 4.5:1 that the Text colors carry. It defaulted to --Header, which
+   on a brand whose header tone sits lighter than its text shipped bold
+   body-size copy below the contrast it needs. */
 const HEADING_STYLES = new Set([
   'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
   'display-large', 'display-medium', 'display-small',
   'alt-display-large', 'alt-display-medium', 'alt-display-small',
-  'subtitle-large', 'subtitle', 'subtitle-small',
 ]);
 
 function resolveColor(textStyle, color, defaultColor) {

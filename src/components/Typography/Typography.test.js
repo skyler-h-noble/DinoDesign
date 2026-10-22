@@ -277,3 +277,28 @@ describe('Typography — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+/* Subtitle is Body at 700 — body-sized, so it needs 4.5:1 and takes --Text.
+   --Header only promises 3:1, the floor for LARGE text (headings). */
+describe('Subtitle color', () => {
+  const { Subtitle, SubtitleSmall, SubtitleLarge } = require('./Typography');
+  const allRules = () => Array.from(document.styleSheets).flatMap((sh) => {
+    try { return Array.from(sh.cssRules || []).map((r) => r.cssText); } catch { return []; }
+  }).join('\n');
+  const ownColor = (el) => {
+    const cls = [...el.classList].find((c) => c.startsWith('css-'));
+    const rule = allRules().split('\n').find((t) => t.startsWith('.' + cls + ' ') || t.startsWith('.' + cls + '{')) || '';
+    return (rule.match(/(?:^|[;{\s])color:\s*([^;]+);/) || [])[1];
+  };
+
+  test.each([['Subtitle', Subtitle], ['SubtitleSmall', SubtitleSmall], ['SubtitleLarge', SubtitleLarge]])(
+    '%s defaults to --Text, not --Header', (_name, Comp) => {
+      render(<Comp>Bold body</Comp>);
+      expect(ownColor(screen.getByText('Bold body'))).toBe('var(--Text)');
+    });
+
+  test('a heading still defaults to --Header', () => {
+    render(<H3>Heading</H3>);
+    expect(ownColor(screen.getByText('Heading'))).toMatch(/--Header/);
+  });
+});
