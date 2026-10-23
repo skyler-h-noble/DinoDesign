@@ -140,7 +140,9 @@ export const DayCell = React.forwardRef(function DayCell({
              button's quiet label for this palette — Figma binds
              Buttons › Outline-Quiet, which is Quiet-<Palette> under Tonal
              text and the surface's Quiet under Black & White. */
-          color: filled ? 'var(--Buttons-' + C + '-Text)'
+          /* range-middle sits on the 50% band, where the quiet label fails
+             (4.19:1 on Surf's Up) — it takes the fill's text, as Figma binds. */
+          color: filled || selection === 'range-middle' ? 'var(--Buttons-' + C + '-Text)'
             : 'var(--Buttons-' + C + '-Outline-Quiet, var(--Outline-Quiet, var(--Quiet)))',
           /* The step number's type: Button-Numbers at the button weight, the
              button face (see Stepper for why the body face is the 2nd step). */
