@@ -235,6 +235,6 @@ describe('Chip typography', () => {
     const cs = window.getComputedStyle(root);
     expect(cs.fontFamily).toContain('--Legal-Font-Family');
     expect(cs.fontFamily).not.toBe('inherit');
-    expect(cs.fontWeight).toContain('--Legal-Font-Weight');
+    expect(cs.fontWeight).toContain('--Legal-Semibold-Font-Weight');
   });
 });

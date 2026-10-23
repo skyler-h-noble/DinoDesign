@@ -299,13 +299,14 @@ export function Chip({
 
   const chipSx = {
     height: sc.height,
-    /* The Legal type style, which is what the Figma label is bound to (every
-       Legal-* variable — size, weight, leading, tracking, face). It used to be
+    /* The Legal-Semibold type style, which is what the Figma label is bound to
+       (size, leading, tracking and face from Legal-*, weight from
+       Legal-Semibold-Font-Weight). It used to be
        the button's face at 12px / 500, which no chip in the file draws. Never
        `inherit`: the generated CSS gives the page no font, so outside a styled
        parent the chip would come out in the UA serif. */
     fontSize: 'var(--Legal-Font-Size, 10px)',
-    fontWeight: 'var(--Legal-Font-Weight, 400)',
+    fontWeight: 'var(--Legal-Semibold-Font-Weight, 600)',
     letterSpacing: 'var(--Legal-Letter-Spacing, 0)',
     fontFamily: 'var(--Legal-Font-Family, var(--Font-Family-Body, inherit))',
     borderRadius: (sc.height / 2) + 'px',
@@ -318,6 +319,10 @@ export function Chip({
     backgroundColor: styles.bg,
     color: styles.text,
     border: styles.border,
+    /* Figma's selected chip has no stroke. The border stays as a transparent
+       1px so the content does not move 1px between states; the background
+       paints under it, so the edge is the fill. */
+    ...(selected ? { borderColor: 'transparent' } : {}),
 
 
     // 24x24 minimum touch target (WCAG 2.5.8) — always, there being one size.
@@ -360,7 +365,7 @@ export function Chip({
     },
 
     ...(disabled ? {
-      opacity: 0.5,
+      opacity: 0.38, // Figma's Disabled chip, as on Swatch
       cursor: 'not-allowed',
       pointerEvents: 'none',
     } : {}),
