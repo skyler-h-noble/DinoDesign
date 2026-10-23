@@ -55,9 +55,9 @@ const cap = (v) => BUTTON_PALETTE[v] || 'Default';
  *               at 44 the state can wrap the whole item, which is what the
  *               design does.
  *
- * EXPANDED IS NOT IN THE DESIGN. The Figma page covers the collapsed rail
- * only, so the expanded arrangement below is unchanged and is this file's
- * own — marked so nobody reads it as having been checked against Figma. */
+ * EXPANDED: the ITEM now follows Figma's Expandable Nav Rail Item (see
+ * ExpandedRailItem). The expanded rail's widths and toggle row are still this
+ * file's own — the design draws the item, not the expanded rail around it. */
 /* Three sizes, one per Component-Size mode.
  *
  * Rail-Width is mode-scoped in Figma — 80 / 72 / 96 across medium / small /
@@ -316,7 +316,85 @@ export function Rail({
  * it, always. That is the entire difference, which is why it is one flag
  * rather than two components.
  */
-function RailItem({ item, selected, expanded, labelStyle, variant = 'default', onClick }) {
+/* ── The expanded item: Figma's Expandable Nav Rail Item (8239:5977) ──────
+ *
+ * A 32px row with an 8px corner: a Button-Height icon slot (the 24px icon
+ * with 4px round it), 2px, then the label with 4px above and below. The
+ * collapsed item's metrics above do not carry over — this was this file's
+ * own arrangement (20px side padding, a 12px gap, square corners) from before
+ * the design drew an expanded rail.
+ *
+ *   Default    label --Quiet
+ *   Hover      --Hover fill, label --Text
+ *   Pressed    --Pressed fill, label --Text
+ *   Selected   the Buttons palette: Button fill, Border edge, Text label —
+ *              unlike the collapsed item, which reverses out of --Text
+ *   Focus      2px ring, label --Text
+ *   Disabled   38% */
+function ExpandedRailItem({ item, selected, variant, onClick }) {
+  const { icon, avatar, label, badge, disabled } = item;
+  const C = cap(variant);
+  const interactive = !disabled;
+  return (
+    <Box
+      component="button" type="button" role="tab"
+      aria-selected={selected} aria-label={label} aria-disabled={disabled || undefined}
+      disabled={disabled || undefined}
+      onClick={disabled ? undefined : onClick}
+      className={'rail-item rail-item-expanded' + (selected ? ' rail-item-selected' : '')}
+      sx={{
+        display: 'flex', flexDirection: 'row', alignItems: 'center',
+        gap: '2px',
+        width: '100%',
+        minHeight: CIRCLE,
+        p: 0, m: 0,
+        boxSizing: 'border-box',
+        border: '1px solid ' + (selected ? 'var(--Buttons-' + C + '-Border)' : 'transparent'),
+        borderRadius: ITEM_RADIUS,
+        backgroundColor: selected ? 'var(--Buttons-' + C + '-Button)' : 'transparent',
+        color: selected ? 'var(--Buttons-' + C + '-Text)' : 'var(--Quiet)',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
+        fontFamily: 'inherit', textAlign: 'left',
+        outline: 'none',
+        transition: 'background-color 0.15s ease, color 0.15s ease',
+        ...(interactive && !selected && {
+          '&:hover': { backgroundColor: 'var(--Hover)', color: 'var(--Text)' },
+          '&:active': { backgroundColor: 'var(--Pressed)', color: 'var(--Text)' },
+        }),
+        ...(interactive && {
+          '&:focus-visible, &.Mui-focusVisible': {
+            outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px',
+            ...(selected ? {} : { color: 'var(--Text)' }),
+          },
+        }),
+      }}
+    >
+      <Box className="rail-item-icon" sx={{
+        position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        width: CIRCLE, height: CIRCLE, flexShrink: 0, borderRadius: ITEM_RADIUS,
+      }}>
+        {avatar
+          ? <Box sx={{ display: 'flex', width: ICON_SIZE, height: ICON_SIZE }}>{avatar}</Box>
+          : <Icon size="small" sx={{ color: 'inherit' }}>{icon}</Icon>}
+        {badge && <RailBadge value={badge} />}
+      </Box>
+      {label && (
+        <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0, py: ITEM_PAD_Y }}>
+          <MobileNavLabel className="rail-item-label" color="inherit"
+            style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}>
+            {label}
+          </MobileNavLabel>
+        </Box>
+      )}
+    </Box>
+  );
+}
+
+/* Exported so one item can be placed on its own — a custom rail, or the
+   parity page comparing a single Figma item. Rail renders these itself. */
+export function RailItem({ item, selected, expanded, labelStyle, variant = 'default', onClick }) {
+  if (expanded) return <ExpandedRailItem item={item} selected={selected} variant={variant} onClick={onClick} />;
   const { icon, avatar, label, badge, disabled } = item;
 
   /* The design's own words: an item is Selected OR it is one of the pointer

@@ -83,7 +83,7 @@ export { IconBadgeShowcase } from './IconBadge/IconBadgeShowcase';
 export { Button } from './Button';
 export { ButtonGroup } from './ButtonGroup';
 export { Fab, FabShowcase } from './Fab';
-export { Rail, RailShowcase } from './Rail';
+export { Rail, RailItem, RailShowcase } from './Rail';
 export { Toolbar, ToolbarShowcase } from './Toolbar';
 export { NumberField, NumberFieldShowcase } from './NumberField';
 export { ToggleButton } from './ToggleButton';
