@@ -127,6 +127,10 @@ export function Fab({
   }
   const effectiveVariant = 'solid';
   const tokens = getTokens(color);
+  /* The bevel's highlight / lowlight come from the SAME palette as the fill.
+     It was handed `color` raw, so a default FAB — filled Tertiary — wore the
+     Default button's highlight and lowlight: a teal edge on an orange FAB. */
+  const palette = color === 'default' ? 'tertiary' : color;
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
   const iconEl = icon || children || <AddIcon sx={{ fontSize: s.iconSize }} />;
 
@@ -182,7 +186,7 @@ export function Fab({
              as the fallback for a design system published before these existed;
              it is the same formula, unrounded (9.6px where Figma draws 10). */
           '--_bevel': 'var(--' + (FAB_BEVEL_PREFIX[size] ?? '') + 'FAB-Bevel, min(calc(var(--Button-Bevel) * var(--_height) / 100), calc(var(--_height) / 5)))',
-          boxShadow: `${bevelShadow(color)}, ${SHADOW_LEVEL_3}`,
+          boxShadow: `${bevelShadow(palette)}, ${SHADOW_LEVEL_3}`,
           // Typography
           fontSize: s.fontSize,
           fontFamily: 'inherit',
@@ -193,11 +197,11 @@ export function Fab({
           outline: 'none',
           flexShrink: 0,
           transition: 'background-color 0.15s ease, box-shadow 0.2s ease, transform 0.1s ease',
-          '&:hover': !disabled ? { backgroundColor: tokens.hover, boxShadow: `${bevelShadow(color)}, ${SHADOW_LEVEL_4}` } : {},
+          '&:hover': !disabled ? { backgroundColor: tokens.hover, boxShadow: `${bevelShadow(palette)}, ${SHADOW_LEVEL_4}` } : {},
           /* Pressed changes the fill only. Figma's Pressed FAB keeps the resting
              FAB elevation and its full size — the 96% shrink and the dropped
              shadow were this file's, and the shrink also moved the icon. */
-          '&:active': !disabled ? { backgroundColor: tokens.active, boxShadow: `${bevelShadow(color)}, ${SHADOW_LEVEL_3}` } : {},
+          '&:active': !disabled ? { backgroundColor: tokens.active, boxShadow: `${bevelShadow(palette)}, ${SHADOW_LEVEL_3}` } : {},
           /* 2px ring 1px outside — Figma's Focus-Visible frame sits 3px out
              with a 2px inside stroke (FAB-Focus-Radius = width + 6), the same
              ring as every other component. It was 3px at 2px out. */

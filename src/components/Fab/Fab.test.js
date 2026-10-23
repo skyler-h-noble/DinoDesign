@@ -210,3 +210,14 @@ describe('Fab — bevel follows the FAB-Bevel tokens', () => {
       expect(allCss()).toContain('var(' + token + ',');
     });
 });
+
+describe('Fab — the bevel uses the fill palette', () => {
+  const allCss = () => Array.from(document.styleSheets).flatMap((s) => Array.from(s.cssRules).map((r) => r.cssText)).join('\n');
+  test('a default FAB bevels in Tertiary, like its fill', () => {
+    render(<Fab ariaLabel="Add" />);
+    const css = allCss();
+    expect(css).toContain('--Buttons-Tertiary-Highlight');
+    expect(css).toContain('--Buttons-Tertiary-Lowlight');
+    expect(css).not.toContain('--Buttons-Default-Highlight');
+  });
+});
