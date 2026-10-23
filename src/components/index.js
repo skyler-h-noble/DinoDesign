@@ -195,6 +195,7 @@ export { Pagination, PaginationShowcase } from './Pagination';
 export { Dropdown, MenuButton, Menu, MenuItem, MenuDivider, MenuShowcase } from './Menu';
 export { BottomNavigation, BottomNavigationShowcase } from './BottomNavigation';
 export { Stepper, Step, StepperShowcase, useStepperContext } from './Stepper';
+export { DatePicker, DayCell } from './DatePicker';
 export { SpeedDial, SpeedDialShowcase } from './SpeedDial';
 
 // ========== SURFACES & CARDS ==========
