@@ -145,11 +145,11 @@ describe('DayCell — paint follows the fill', () => {
     expect(c).toContain('var(--Buttons-Default-Text)');
   });
 
-  test('an unfilled day reads the surface text, not the button text', () => {
-    const { container } = render(<DayCell day={3} />);
+  test('an unfilled day reads the palette Outline-Quiet, not the button text', () => {
+    const { container } = render(<DayCell day={3} color="secondary" />);
     const c = css(container.querySelector('.day-cell-day'));
-    expect(c).toContain('var(--Text)');
-    expect(c).not.toContain('var(--Buttons-Default-Text)');
+    expect(c).toContain('var(--Buttons-Secondary-Outline-Quiet');
+    expect(c).not.toContain('var(--Buttons-Secondary-Text)');
   });
 
   test('today is a ring with no fill', () => {

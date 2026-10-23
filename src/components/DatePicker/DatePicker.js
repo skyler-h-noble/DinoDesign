@@ -59,7 +59,7 @@ const before = (a, b) => atNoon(a) < atNoon(b);
  * itself fills only on selected / range-start / range-end; today is a ring.
  *
  * Text follows its fill: --Buttons-<C>-Text on a filled circle (invariant 3:
- * the label is derived from the fill), the surface's --Text everywhere else.
+ * the label is derived from the fill), the palette's Outline-Quiet elsewhere.
  */
 
 export const DayCell = React.forwardRef(function DayCell({
@@ -136,7 +136,12 @@ export const DayCell = React.forwardRef(function DayCell({
           borderRadius: '50%',
           border: ringed ? 'var(--Button-Border-Width, 1px) solid var(--Buttons-' + C + '-Border)' : 'none',
           backgroundColor: filled ? 'var(--Buttons-' + C + '-Button)' : 'transparent',
-          color: filled ? 'var(--Buttons-' + C + '-Text)' : 'var(--Text)',
+          /* Filled: the text paired with the fill. Unfilled: the outline
+             button's quiet label for this palette — Figma binds
+             Buttons › Outline-Quiet, which is Quiet-<Palette> under Tonal
+             text and the surface's Quiet under Black & White. */
+          color: filled ? 'var(--Buttons-' + C + '-Text)'
+            : 'var(--Buttons-' + C + '-Outline-Quiet, var(--Outline-Quiet, var(--Quiet)))',
           /* The step number's type: Button-Numbers at the button weight, the
              button face (see Stepper for why the body face is the 2nd step). */
           fontFamily: 'var(--Font-Family-Button, var(--Font-Family-Body, inherit))',
