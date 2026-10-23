@@ -186,8 +186,14 @@ export function Fab({
           flexShrink: 0,
           transition: 'background-color 0.15s ease, box-shadow 0.2s ease, transform 0.1s ease',
           '&:hover': !disabled ? { backgroundColor: tokens.hover, boxShadow: `${bevelShadow(color)}, ${SHADOW_LEVEL_4}` } : {},
-          '&:active': !disabled ? { backgroundColor: tokens.active, transform: 'scale(0.96)', boxShadow: bevelShadow(color) } : {},
-          '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px' },
+          /* Pressed changes the fill only. Figma's Pressed FAB keeps the resting
+             FAB elevation and its full size — the 96% shrink and the dropped
+             shadow were this file's, and the shrink also moved the icon. */
+          '&:active': !disabled ? { backgroundColor: tokens.active, boxShadow: `${bevelShadow(color)}, ${SHADOW_LEVEL_3}` } : {},
+          /* 2px ring 1px outside — Figma's Focus-Visible frame sits 3px out
+             with a 2px inside stroke (FAB-Focus-Radius = width + 6), the same
+             ring as every other component. It was 3px at 2px out. */
+          '&:focus-visible, &.Mui-focusVisible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px' },
           // Animation
           ...(animate && !disabled && {
             /* 50% of the button's own color — Figma's Start and Middle both

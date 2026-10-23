@@ -349,7 +349,13 @@ function ExpandedRailItem({ item, selected, variant, onClick }) {
         minHeight: CIRCLE,
         p: 0, m: 0,
         boxSizing: 'border-box',
-        border: '1px solid ' + (selected ? 'var(--Buttons-' + C + '-Border)' : 'transparent'),
+        /* Figma's stroke is INSIDE and takes no layout space, so it is an inset
+           ring here, not a border: a 1px border made the row 34px tall and
+           moved the icon and label in by a pixel. Unselected, Figma strokes the
+           surface's own Background — invisible at rest, it frames the hover
+           and pressed fills by a hair. */
+        border: 'none',
+        boxShadow: 'inset 0 0 0 1px ' + (selected ? 'var(--Buttons-' + C + '-Border)' : 'var(--Background)'),
         borderRadius: ITEM_RADIUS,
         backgroundColor: selected ? 'var(--Buttons-' + C + '-Button)' : 'transparent',
         color: selected ? 'var(--Buttons-' + C + '-Text)' : 'var(--Quiet)',
