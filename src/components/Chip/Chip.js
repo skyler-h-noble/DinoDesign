@@ -425,7 +425,9 @@ export function Chip({
         justifyContent: 'center',
         boxSizing: 'border-box',
         padding: sc.padding,
-        borderRadius: 'inherit',
+        /* Stated, not `inherit`: the parent is .MuiChip-label, which has no
+           radius, so inherit drew a square chip. */
+        borderRadius: (sc.height / 2) + 'px',
         backgroundColor: styles.bg,
         color: styles.text,
         border: styles.border,
