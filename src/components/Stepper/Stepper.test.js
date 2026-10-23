@@ -443,16 +443,19 @@ describe('the status ladder', () => {
     expect(cssFor(done)).toContain('color: var(--Buttons-Primary-Outline-Text)');
   });
 
-  /* Hover and Pressed are Buttons tokens at EVERY status. The lib read the
-     surface's --Hover/--Pressed for complete and incomplete, so hovering
-     those two picked up the page's grey instead of the palette's. */
-  test('hover and pressed come from the palette at every status', () => {
+  /* Hover and Pressed follow the FILL: the filled current step takes the
+     palette's, the two Background-filled ones the surface's — Figma's
+     Button-Fill binds Surface › Hover / Pressed on complete and incomplete. */
+  test('hover and pressed follow the fill', () => {
     const { container } = threeSteps({ clickable: true, onStepClick: jest.fn() });
-    for (const sel of ['.step-indicator-active', '.step-indicator-completed',
-                       '.step-indicator-incomplete']) {
+    const now = cssFor(container.querySelector('.step-indicator-active'));
+    expect(now).toContain('var(--Buttons-Primary-Hover)');
+    expect(now).toContain('var(--Buttons-Primary-Pressed)');
+    for (const sel of ['.step-indicator-completed', '.step-indicator-incomplete']) {
       const css = cssFor(container.querySelector(sel));
-      expect(css).toContain('var(--Buttons-Primary-Hover)');
-      expect(css).toContain('var(--Buttons-Primary-Pressed)');
+      expect(css).toContain('var(--Hover)');
+      expect(css).toContain('var(--Pressed)');
+      expect(css).not.toContain('var(--Buttons-Primary-Hover)');
     }
   });
 

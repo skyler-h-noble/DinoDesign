@@ -2,6 +2,7 @@
 import React, { createContext, useContext } from 'react';
 import { Box } from '@mui/material';
 import { Label } from '../Typography';
+import { SHADOW_LEVEL_1 } from '../_shadows';
 
 /**
  * Stepper Component
@@ -226,12 +227,14 @@ export function Step({
   const textToken   = isActive     ? 'var(--Buttons-' + C + '-Text)'
                     : isIncomplete ? 'var(--Quiet)'
                     : 'var(--Buttons-' + C + '-Outline-Text)';
-  /* Hover and Pressed are BUTTONS tokens at every status, not just the
-     current one. The lib read the surface's --Hover/--Pressed for complete
-     and incomplete, so hovering those two steps picked up the page's grey
-     instead of the palette's. */
-  const hoverToken  = 'var(--Buttons-' + C + '-Hover)';
-  const activeToken = 'var(--Buttons-' + C + '-Pressed)';
+  /* Hover and Pressed follow the FILL. The current step is a filled button,
+     so it takes the palette's --Buttons-<C>-Hover / -Pressed. Complete and
+     incomplete are filled with the surface's --Background, so they take the
+     surface's --Hover / --Pressed — which is what Figma's Button-Fill binds on
+     those ten variants. Buttons tokens there tinted an outline step in the
+     palette color on hover, a step Figma does not draw. */
+  const hoverToken  = isActive ? 'var(--Buttons-' + C + '-Hover)' : 'var(--Hover)';
+  const activeToken = isActive ? 'var(--Buttons-' + C + '-Pressed)' : 'var(--Pressed)';
   const isDot       = variant === 'noCount';
 
   const indicatorEl = (
@@ -315,8 +318,12 @@ export function Step({
            text-box-trim is the CSS equivalent and falls back to this. */
         lineHeight: 1,
         flexShrink: 0,
+        /* The border counts inside the 32px. A <button> gets border-box from
+           the UA sheet and a <div> does not, so a step that was not clickable
+           — every disabled one — drew 2px wider (4px when complete). */
+        boxSizing: 'border-box',
         position: 'relative',
-        transition: 'background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease',
+        transition: 'background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
         cursor: disabled ? 'not-allowed' : clickable ? 'pointer' : 'default',
         outline: 'none',
         padding: 0,
@@ -337,11 +344,15 @@ export function Step({
         }),
 
         ...(clickable && {
+          /* Figma's Hover step wears Level-1 elevation (on Button-Effect);
+             Pressed drops back to none. */
           '&:hover': {
             backgroundColor: hoverToken,
+            boxShadow: SHADOW_LEVEL_1,
           },
           '&:active': {
             backgroundColor: activeToken,
+            boxShadow: 'none',
           },
           '&:focus-visible': {
             /* 2px, matching the design and the 35 other components that use
@@ -456,9 +467,21 @@ export function Step({
   const labelToken = isActive     ? 'var(--Text)'
                    : isIncomplete ? 'var(--Quiet)'
                    : 'var(--Buttons-' + C + '-Border)';
+  /* While the step is hovered, pressed or focused its label reads --Text, at
+     every status — Figma's Hover / Pressed / Focus-Visible variants all bind
+     Surface › Text on the label. The indicator is the button and the label
+     its sibling, hence :has on the step. Inline style would beat this, so
+     the important flag is on purpose. */
+  const labelInteractionSx = clickable ? {
+    '&:has(.step-indicator:hover) .step-label, &:has(.step-indicator:active) .step-label, &:has(.step-indicator:focus-visible) .step-label': {
+      color: 'var(--Text) !important',
+    },
+  } : {};
   const labelEl = displayLabel ? (
-    <Label style={{
-      fontWeight: isActive ? 600 : 400,
+    <Label className="step-label" style={{
+      /* No fontWeight: Label's own (the Label ramp) at every status. The
+         file binds Dynamic-Label on all fifteen variants; bolding only the
+         current step, and dropping the rest to 400, was this file's idea. */
       color: labelToken,
       textAlign: isHorizontal ? 'center' : 'left',
       whiteSpace: 'nowrap',
@@ -480,6 +503,7 @@ export function Step({
         sx={{
           display: 'flex', alignItems: 'flex-start',
           flex: !isLast ? 1 : 'none',
+          ...labelInteractionSx,
           ...sx,
         }}
         {...props}
@@ -529,7 +553,7 @@ export function Step({
       className={'step step-' + size + ' step-vertical' +
         (isActive ? ' step-active' : '') + (isCompleted ? ' step-completed' : '') +
         (isIncomplete ? ' step-incomplete' : '') + ' ' + className}
-      sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', ...sx }}
+      sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', ...labelInteractionSx, ...sx }}
       {...props}
     >
       {/* Step and Right Label binds itemSpacing -> Sizing-1. */}
