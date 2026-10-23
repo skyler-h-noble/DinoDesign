@@ -310,19 +310,21 @@ export function Chip({
     letterSpacing: 'var(--Legal-Letter-Spacing, 0)',
     fontFamily: 'var(--Legal-Font-Family, var(--Font-Family-Body, inherit))',
     borderRadius: (sc.height / 2) + 'px',
-    padding: sc.padding,
+    padding: 0,
     // `Sizing-4` on the Figma variant — a chip never narrower than 32px.
     minWidth: sc.minWidth,
     boxSizing: 'border-box',
     position: 'relative',
 
-    backgroundColor: styles.bg,
-    color: styles.text,
-    border: styles.border,
-    /* Figma's selected chip has no stroke. The border stays as a transparent
-       1px so the content does not move 1px between states; the background
-       paints under it, so the edge is the fill. */
-    ...(selected ? { borderColor: 'transparent' } : {}),
+    /* The root is NOT the surface. The paint — fill, border, text — is on the
+       inner `.chip-surface`, which carries data-theme + data-surface. The
+       root keeps the PARENT's tokens, so the focus ring, which sits outside
+       the chip on the page, takes the page's --Focus-Visible. On the root, a
+       selected chip (Surface-Dimmest) drew its ring in the dark surface's
+       light blue — about 2:1 on a light page. Same split as Card's outer
+       shell and inner surface, and as Figma's set, where Focus-Visible is a
+       sibling of Theme-Chip-Body, not inside it. */
+    backgroundColor: 'transparent',
 
 
     // 24x24 minimum touch target (WCAG 2.5.8) — always, there being one size.
@@ -348,11 +350,13 @@ export function Chip({
          none. MUI's clickable chip adds its own shadow on :active, which is
          why Pressed has to say `none` rather than leave it unset. */
       '&:hover': {
-        backgroundColor: styles.hoverBg,
+        backgroundColor: 'transparent',
+        '& .chip-surface': { backgroundColor: styles.hoverBg },
         boxShadow: SHADOW_LEVEL_1,
       },
       '&:active': {
-        backgroundColor: styles.activeBg,
+        backgroundColor: 'transparent',
+        '& .chip-surface': { backgroundColor: styles.activeBg },
         boxShadow: 'none',
       },
     } : {}),
@@ -374,6 +378,9 @@ export function Chip({
 
     '& .MuiChip-label': {
       padding: 0,
+      height: '100%',
+      alignSelf: 'stretch',
+      flex: 1,
       fontSize: 'inherit',
       fontWeight: 'inherit',
       fontFamily: 'inherit',
@@ -401,11 +408,32 @@ export function Chip({
   const labelContent = (
     <Box
       component="span"
+      className="chip-surface"
+      /* The attributes are the paint. Every token here — --Background,
+         --Text, --Border, --Hover, --Pressed — resolves from this pair, so
+         without them the chip falls through to the page's own zone and a
+         Success chip renders in the page color. */
+      data-theme={chipTheme}
+      data-surface={chipSurface}
       sx={{
         display: 'inline-flex',
         alignItems: 'center',
         gap: sc.gap + 'px',
         lineHeight: 1,
+        height: '100%',
+        width: '100%',
+        justifyContent: 'center',
+        boxSizing: 'border-box',
+        padding: sc.padding,
+        borderRadius: 'inherit',
+        backgroundColor: styles.bg,
+        color: styles.text,
+        border: styles.border,
+        /* Figma's selected chip has no stroke. The border stays as a
+           transparent 1px so the content does not move between states; the
+           fill paints under it, so the edge is the fill. */
+        ...(selected ? { borderColor: 'transparent' } : {}),
+        transition: 'background-color 0.15s ease',
       }}
     >
       {startDecorator && (
@@ -472,12 +500,6 @@ export function Chip({
       disabled={disabled}
       onClick={isClickable ? onClick : undefined}
       className={'chip-' + chipColor + (selected ? ' chip-selected' : '') + ' ' + className}
-      /* The attributes are the paint. Every token in chipSx — --Background,
-         --Text, --Border, --Hover, --Pressed — resolves from this pair, so
-         without them the chip falls through to the page's own zone and a
-         Success chip renders in the page color. */
-      data-theme={chipTheme}
-      data-surface={chipSurface}
       sx={chipSx}
       {...selectionProps}
       {...props}

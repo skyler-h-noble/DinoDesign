@@ -46,7 +46,7 @@ describe('Chip Component', () => {
     const { container } = render(<Chip variant={variant} label="Test" />);
     expect(container.querySelector(`.chip-${base}`)).toBeInTheDocument();
     expect(container.querySelector(`.chip-${variant}`)).toBeNull();
-    expect(container.querySelector(`.chip-${base}`).getAttribute('data-surface'))
+    expect(container.querySelector(`.chip-${base} .chip-surface`).getAttribute('data-surface'))
       .toBe('Surface-Brightest');
   });
 
@@ -54,19 +54,29 @@ describe('Chip Component', () => {
     /* The model the design uses: one theme, two surfaces. Both states paint
        var(--Background); the zone decides what that resolves to. */
     const un = render(<Chip variant="success" label="A" />).container
-      .querySelector('.chip-success');
+      .querySelector('.chip-success .chip-surface');
     expect(un.getAttribute('data-surface')).toBe('Surface-Brightest');
     const sel = render(<Chip variant="success" selected label="B" />).container
-      .querySelector('.chip-success.chip-selected');
+      .querySelector('.chip-success.chip-selected .chip-surface');
     expect(sel.getAttribute('data-surface')).toBe('Surface-Dimmest');
     expect(sel.getAttribute('data-theme')).toBe('Success');
+  });
+
+  test('the root carries no surface, so the focus ring takes the page tokens', () => {
+    /* The ring sits outside the chip, on the page. A selected chip is
+       Surface-Dimmest; on the root, its --Focus-Visible was the dark
+       surface's, about 2:1 on a light page. */
+    const { container } = render(<Chip variant="success" selected label="A" />);
+    const root = container.querySelector('.MuiChip-root');
+    expect(root.hasAttribute('data-surface')).toBe(false);
+    expect(root.hasAttribute('data-theme')).toBe(false);
   });
 
   test('default INHERITS its theme rather than pinning one', () => {
     /* Same rule as ButtonGroup: naming a Default theme would pin the chip to
        the brand default even inside a themed zone. */
     const { container } = render(<Chip variant="default" label="Test" />);
-    expect(container.querySelector('.chip-default').hasAttribute('data-theme')).toBe(false);
+    expect(container.querySelector('.chip-default .chip-surface').hasAttribute('data-theme')).toBe(false);
   });
 
   /* The -light shape was removed. Chip resolves an unknown variant as
@@ -190,7 +200,7 @@ describe('Convenience Exports', () => {
      used to be spelled `-light`, then `-outline`, is the default state. */
   test('a light chip is simply an unselected chip', () => {
     const { container } = render(<Chip variant="success" label="Test" />);
-    const chip = container.querySelector('.chip-success');
+    const chip = container.querySelector('.chip-success .chip-surface');
     expect(chip.getAttribute('data-theme')).toBe('Success');
     expect(chip.getAttribute('data-surface')).toBe('Surface-Brightest');
   });
