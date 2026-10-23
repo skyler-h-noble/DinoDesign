@@ -67,7 +67,7 @@ const SIZE_MAP = {
   small:  { indicator: 24, fontSize: 'var(--Sm-Button-Numbers, 10px)',
             dot: 'var(--Sm-No-Count-Step, 8px)',
             connectorThickness: 'var(--Sm-Step-Bar, 1px)', gap: 0 },
-  medium: { indicator: 32, fontSize: 'var(--Button-Numbers, 12px)',
+  medium: { indicator: 32, fontSize: 'var(--Button-Numbers, 14px)',
             dot: 'var(--No-Count-Step, 12px)',
             connectorThickness: 'var(--Step-Bar, 2px)', gap: 0 },
   large:  { indicator: 56, fontSize: 'var(--Lg-Button-Numbers, 16px)',

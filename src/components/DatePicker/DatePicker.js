@@ -147,7 +147,7 @@ export const DayCell = React.forwardRef(function DayCell({
           /* The step number's type: Button-Numbers at the button weight, the
              button face (see Stepper for why the body face is the 2nd step). */
           fontFamily: 'var(--Font-Family-Button, var(--Font-Family-Body, inherit))',
-          fontSize: 'var(--Button-Numbers, 12px)',
+          fontSize: 'var(--Button-Numbers, 14px)',
           fontWeight: 'var(--Button-Font-Weight, 600)',
           lineHeight: 1,
           fontVariantNumeric: 'tabular-nums',
