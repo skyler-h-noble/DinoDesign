@@ -85,6 +85,11 @@ const RAIL_PAD_X = 'var(--Sizing-1, 8px)';
 const SLOT_GAP = 'var(--Sizing-1, 8px)';
 /** The icon, and therefore the avatar that can take its place. */
 const ICON_SIZE = 'var(--Icon-Size, 24px)';
+/** The glyph: Figma's rail items place the Icon component in the
+ *  Icons & Avatars `in-button` mode, which is Component-Size ›
+ *  Button/Button-Icon — 20 at medium. (They used an older 16px font glyph in a
+ *  24px frame; the slot keeps ICON_SIZE so the row height does not move.) */
+const RAIL_ICON = 'var(--Button-Icon, 20px)';
 /** Item width, and the icon's breathing room inside a contained item. */
 const ITEM_WIDTH = 44;
 const ITEM_PAD_Y = 'var(--Sizing-Half, 4px)';
@@ -382,7 +387,7 @@ function ExpandedRailItem({ item, selected, variant, onClick }) {
       }}>
         {avatar
           ? <Box sx={{ display: 'flex', width: ICON_SIZE, height: ICON_SIZE }}>{avatar}</Box>
-          : <Icon size="small" sx={{ color: 'inherit' }}>{icon}</Icon>}
+          : <Icon size="custom" fontSize={RAIL_ICON} sx={{ color: 'inherit' }}>{icon}</Icon>}
         {badge && <RailBadge value={badge} />}
       </Box>
       {label && (
@@ -531,7 +536,7 @@ export function RailItem({ item, selected, expanded, labelStyle, variant = 'defa
             for a glyph and wrong for a picture. */}
         {avatar
           ? <Box sx={{ display: 'flex', width: ICON_SIZE, height: ICON_SIZE }}>{avatar}</Box>
-          : <Icon size="small" sx={{ color: 'inherit' }}>{icon}</Icon>}
+          : <Icon size="custom" fontSize={RAIL_ICON} sx={{ color: 'inherit' }}>{icon}</Icon>}
         {badge && <RailBadge value={badge} />}
       </Box>
 

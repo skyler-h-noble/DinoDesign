@@ -41,10 +41,14 @@ import { SHADOW_LEVEL_3, SHADOW_LEVEL_4, bevelShadow, tokenSegment } from '../_s
 
 const FAB_BEVEL_PREFIX = { small: 'Sm-', medium: '', large: 'Lg-' };
 
+/* iconSize is the Icons & Avatars `in-button` size the Figma FAB places its
+   Icon at — Component-Size › Button/Button-Icon, 16 / 20 / 32 — not
+   FAB-Icon (16 / 24 / 32), which the file binds but the in-button mode
+   overrides. The medium FAB's icon was 24 here, 20 in the design. */
 const SIZE_MAP = {
-  small:  { size: 32, iconSize: 16, fontSize: '13px', px: 12, gap: 6 },
-  medium: { size: 48, iconSize: 24, fontSize: '14px', px: 16, gap: 8 },
-  large:  { size: 56, iconSize: 32, fontSize: '15px', px: 20, gap: 10 },
+  small:  { size: 32, iconSize: 'var(--Sm-Button-Icon, 16px)', fontSize: '13px', px: 12, gap: 6 },
+  medium: { size: 48, iconSize: 'var(--Button-Icon, 20px)',    fontSize: '14px', px: 16, gap: 8 },
+  large:  { size: 56, iconSize: 'var(--Lg-Button-Icon, 32px)', fontSize: '15px', px: 20, gap: 10 },
 };
 
 function getTokens(color) {
@@ -233,7 +237,7 @@ export function Fab({
         {/* Icon */}
         <Box sx={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: s.iconSize + 'px',
+          fontSize: s.iconSize,
           color: 'inherit',
           '& .MuiSvgIcon-root': { fontSize: 'inherit', color: 'inherit' },
         }}>
