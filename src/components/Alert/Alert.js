@@ -164,7 +164,11 @@ export function Alert({
           gap: s.gap,
           padding: s.pad,
           fontSize: s.fontSize,
-          fontFamily: 'inherit',
+          /* The body face, not `inherit`. A string message gets a Typography,
+             but a node — text with a <strong> in it — renders as-is, and the
+             generated CSS gives the page no font, so it came out in the UA
+             serif. */
+          fontFamily: 'var(--Font-Family-Body, inherit)',
           lineHeight: 1.5,
           borderRadius: 'calc(' + RADIUS + ' - 1px)',
           /* On the element WITH its zone attributes, because the design
