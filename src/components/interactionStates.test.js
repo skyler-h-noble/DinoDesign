@@ -110,6 +110,7 @@ const REGISTRY = [
   { control: 'Autocomplete',        file: 'Autocomplete/Autocomplete.js' },
   { control: 'Card (clickable)',    file: 'Card/Card.js' },
   { control: 'Step indicator',      file: 'Stepper/Stepper.js' },
+  { control: 'Day cell',            file: 'DatePicker/DatePicker.js' },
   { control: 'Pagination page',     file: 'Pagination/Pagination.js', delegatesTo: 'Button/Button.js', renders: /<Button\b/ },
   { control: 'Rail item',           file: 'Rail/Rail.js' },
   { control: 'List item',           file: 'List/List.js' },
