@@ -39,6 +39,8 @@ import { SHADOW_LEVEL_3, SHADOW_LEVEL_4, bevelShadow, tokenSegment } from '../_s
    it knows `black-white` becomes `BlackWhite` rather than `Black-white`,
    which is not a token. */
 
+const FAB_BEVEL_PREFIX = { small: 'Sm-', medium: '', large: 'Lg-' };
+
 const SIZE_MAP = {
   small:  { size: 32, iconSize: 16, fontSize: '13px', px: 12, gap: 6 },
   medium: { size: 48, iconSize: 24, fontSize: '14px', px: 16, gap: 8 },
@@ -173,7 +175,13 @@ export function Fab({
           // Same min() cap as Button — bevel can never exceed 20% of height,
           // so the inset can't bleed into icon/label area regardless of
           // how high --Button-Bevel is set.
-          '--_bevel': 'min(calc(var(--Button-Bevel) * var(--_height) / 100), calc(var(--_height) / 5))',
+          /* The FAB's OWN bevel — --FAB-Bevel / --Sm-FAB-Bevel / --Lg-FAB-Bevel,
+             the numbers Figma's FAB-Bevel effect style reads (Component-Size ›
+             FAB/FAB-Bevel, aliased per size to Devices-Type). Deeper than a
+             button's because the FAB is bigger. The height-derived value stays
+             as the fallback for a design system published before these existed;
+             it is the same formula, unrounded (9.6px where Figma draws 10). */
+          '--_bevel': 'var(--' + (FAB_BEVEL_PREFIX[size] ?? '') + 'FAB-Bevel, min(calc(var(--Button-Bevel) * var(--_height) / 100), calc(var(--_height) / 5)))',
           boxShadow: `${bevelShadow(color)}, ${SHADOW_LEVEL_3}`,
           // Typography
           fontSize: s.fontSize,

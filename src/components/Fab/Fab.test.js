@@ -201,3 +201,12 @@ describe('Fab — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+describe('Fab — bevel follows the FAB-Bevel tokens', () => {
+  const allCss = () => Array.from(document.styleSheets).flatMap((s) => Array.from(s.cssRules).map((r) => r.cssText)).join('\n');
+  test.each([['small', '--Sm-FAB-Bevel'], ['medium', '--FAB-Bevel'], ['large', '--Lg-FAB-Bevel']])(
+    '%s reads %s', (size, token) => {
+      render(<Fab size={size} ariaLabel="Add" />);
+      expect(allCss()).toContain('var(' + token + ',');
+    });
+});
