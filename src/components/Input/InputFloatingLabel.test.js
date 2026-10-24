@@ -195,3 +195,22 @@ describe('the label rests until there is focus or content', () => {
     expect(label()).toHaveClass('MuiInputLabel-shrink');
   });
 });
+
+describe('standard and left labels are the FormLabel', () => {
+  const { render, screen } = require('@testing-library/react');
+  const { Input } = require('./Input');
+  test('the label is a FormLabel associated with the field', () => {
+    render(<Input label="Name" />);
+    expect(document.querySelector('.form-label-row label.form-label')).toBeInTheDocument();
+    expect(screen.getByLabelText('Name').tagName).toBe('INPUT');
+  });
+  test('labelType carries the marker through', () => {
+    render(<Input label="Name" labelType="optional" />);
+    expect(screen.getByLabelText(/Name.*Optional/)).toBeInTheDocument();
+  });
+  test('left puts the label in its own column', () => {
+    const { container } = render(<Input label="Name" labelPosition="left" helperText="Help" />);
+    expect(container.firstChild.querySelector(':scope > .form-label-row')).toBeInTheDocument();
+    expect(getComputedStyle(container.firstChild).display).toBe('grid');
+  });
+});

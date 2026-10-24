@@ -10,7 +10,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import { Body, BodySmall } from '../Typography';
+import { FormLabel } from '../FormLabel/FormLabel';
 import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
 
 /**
@@ -38,8 +38,11 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
  *   large:  56px height, 17px font
  *
  * --- LABEL -------------------------------------------------------------------
- *   standard:  label above the input
+ *   standard:  label above the input, Sizing-Half (4) between them
+ *   left:      label beside the input, Sizing-1 (8) between, centred on it
  *   floating:  label inside, shrinks on focus/filled (stays inside the field)
+ *   Figma's Input Field set: label-top / label-left / floating / none (no
+ *   label prop — pass aria-label). The label is the lib's FormLabel.
  *
  * --- VALIDATION --------------------------------------------------------------
  *   info | success | warning | error — icon + colored border + helper message
@@ -288,6 +291,8 @@ export function Input({
   size = 'medium',
   label,
   labelPosition = 'standard',
+  /* FormLabel's Type: 'default' | 'required' | 'optional'. */
+  labelType = 'default',
   placeholder,
   helperText,
   validation,
@@ -331,6 +336,7 @@ export function Input({
   const variantMap = buildVariantMap();
   const styles = variantMap[variant] || variantMap['default'];
   const isFloating = labelPosition === 'floating';
+  const isLeft = labelPosition === 'left';
 
   /* A *-light variant now falls through to primary-outline via the || above,
      which is the right rendering but a silent one — so say so once in dev.
@@ -406,25 +412,23 @@ export function Input({
     ...(ariaInvalid     && { 'aria-invalid': ariaInvalid }),
   };
 
-  // Standard label (above input)
+  /* Standard / left label: the lib's FormLabel, Figma's Form-Label — the
+     Label type style in --Text, with the required / optional marker. It was a
+     Body at a literal 13px / weight 500, the label style nothing else used. */
   const renderStandardLabel = () => {
     if (!label || isFloating) return null;
-    const LabelComp = size === 'small' ? BodySmall : Body;
     return (
-      <LabelComp
-        component="label"
+      <FormLabel
         htmlFor={inputId}
+        type={labelType}
+        disabled={disabled}
         sx={{
-          display: 'block',
-          marginBottom: '6px',
-          color: disabled ? 'var(--Quiet)' : 'var(--Text)',
-          fontSize: sizeConfig.labelSize,
-          fontWeight: 500,
-          opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
+          ...(isLeft ? { flexShrink: 0 } : { marginBottom: 'var(--Sizing-Half, 4px)' }),
+          ...(disabled && { opacity: 'var(--Disabled, 0.38)' }),
         }}
       >
         {label}
-      </LabelComp>
+      </FormLabel>
     );
   };
 
@@ -441,7 +445,20 @@ export function Input({
   return (
     <Box
       className={'inp-' + variant + ' ' + className}
-      sx={{ width: fullWidth ? '100%' : 'auto', ...sx }}
+      sx={{
+        width: fullWidth ? '100%' : 'auto',
+        /* Left label: the label in its own column, centred on the field, and
+           the field plus anything under it (helper, validation) in the second,
+           so a message lines up with the field rather than the label. */
+        ...(isLeft && label && {
+          display: 'grid',
+          gridTemplateColumns: 'auto minmax(0, 1fr)',
+          columnGap: 'var(--Sizing-1, 8px)',
+          alignItems: 'center',
+          '& > :not(.form-label-row)': { gridColumn: 2 },
+        }),
+        ...sx,
+      }}
     >
       {renderStandardLabel()}
 
