@@ -1,5 +1,5 @@
 // src/components/Input/Input.js
-import React, { useId } from 'react';
+import React, { useId, useState } from 'react';
 import {
   TextField as MuiTextField,
   FormHelperText,
@@ -131,9 +131,13 @@ export const FLOATING_SIZE_MAP = {
      the band the typed text occupies, and the adornments take the same pair so
      they share it — see the adornment block below. Kept as numbers rather than
      parsed back out of the string, which contains a var() and does not parse. */
-  small:  { height: '48px', fontSize: '13px', labelSize: '11px', padding: '20px var(--Input-Padding, 12px) 4px', padTop: 20, padBottom: 4, leftPad: 12, iconSize: 16 },
-  medium: { height: '56px', fontSize: '15px', labelSize: '12px', padding: '22px var(--Input-Padding, 14px) 6px', padTop: 22, padBottom: 6, leftPad: 14, iconSize: 18 },
-  large:  { height: '64px', fontSize: '17px', labelSize: '14px', padding: '24px var(--Input-Padding, 16px) 6px', padTop: 24, padBottom: 6, leftPad: 16, iconSize: 20 },
+  /* Figma's floating Input (medium): 56 tall, the icon 20 at the input
+     padding (12), the text and label 12 past it, the text in Body. fontSize is
+     the Body ramp; fontPx is its number, for the label arithmetic below (a
+     var() does not parse). iconSize is the in-button ramp, 16 / 20 / 32. */
+  small:  { height: '48px', fontSize: 'var(--Body-Small-Font-Size, 14px)',  fontPx: 14, labelSize: '11px', padding: '20px var(--Input-Padding, 12px) 4px', padTop: 20, padBottom: 4, leftPad: 12, iconSize: 16 },
+  medium: { height: '56px', fontSize: 'var(--Body-Medium-Font-Size, 16px)', fontPx: 16, labelSize: '12px', padding: '22px var(--Input-Padding, 12px) 6px', padTop: 22, padBottom: 6, leftPad: 12, iconSize: 20 },
+  large:  { height: '64px', fontSize: 'var(--Body-Large-Font-Size, 18px)',  fontPx: 18, labelSize: '14px', padding: '24px var(--Input-Padding, 16px) 6px', padTop: 24, padBottom: 6, leftPad: 16, iconSize: 32 },
 };
 
 /**
@@ -154,7 +158,10 @@ export const FLOATING_SIZE_MAP = {
  * centred `small` and left `large` 4px high — the error grew as the field got
  * TALLER. Two constants, two errors, running in opposite directions.
  */
-export const LABEL_LINE_HEIGHT = 1.4375;   // MUI InputLabel's own line-height
+/* The resting label wears the Body style (tokenFont), whose line is 1.5 — a
+   16px label is a 24px box, as Figma draws it. MUI's own 1.4375 is overridden,
+   so centring on it put the label 1px low. */
+export const LABEL_LINE_HEIGHT = 1.5;
 
 /**
  * Which design-system text style each state of a floating label uses.
@@ -190,11 +197,13 @@ const tokenFont = (t) => ({
  *  the label's x offset. Split across two numbers (a 4px margin plus a 4px
  *  input padding) they drifted apart — the label sat 4px off the text it is
  *  supposed to be the label FOR. One constant, used by both. */
-export const ADORNMENT_GAP = 8;
+/* Sizing-1-and-Half — Figma's gap between a start icon and the text, the same
+   12 the standard field uses. */
+export const ADORNMENT_GAP = 12;
 
 export function floatingLabelGeometry(sizeConfig, hasStartAdornment) {
   const fieldH  = parseInt(sizeConfig.height, 10) || 56;
-  const fontPx  = parseInt(sizeConfig.fontSize, 10) || 15;
+  const fontPx  = sizeConfig.fontPx || parseInt(sizeConfig.fontSize, 10) || 16;
 
   /* THE TEXT INSET IS A TOKEN, SO THE LABEL'S MUST BE THE SAME TOKEN.
    *
@@ -287,6 +296,8 @@ export function Input({
   'aria-required': ariaRequired,
   'aria-invalid': ariaInvalid,
   inputProps: inputPropsProp = {},
+  onFocus,
+  onBlur,
   ...props
 }) {
   const variantMap = buildVariantMap();
@@ -324,6 +335,19 @@ export function Input({
    * never affected — MUI owns that one. */
   const generatedId = useId();
   const inputId = idProp || generatedId;
+
+  /* The floating label rests IN the field until there is something to make
+     room for: focus or content. MUI decides this itself and counts a start
+     adornment as a reason to float, so an empty field with an icon showed its
+     label already raised — nothing typed, nothing focused. Owning the flag
+     puts the label back where Figma's empty field draws it. */
+  const [focused, setFocused] = useState(false);
+  const [typed, setTyped] = useState(() => defaultValue != null && String(defaultValue) !== '');
+  const filled = value != null ? String(value) !== '' : typed;
+  const handleChange = (e) => {
+    if (value == null) setTyped(e.target.value !== '');
+    if (onChange) onChange(e);
+  };
 
   const { labelX, padX, restingY, shrunkY } = floatingLabelGeometry(sizeConfig, !!startAdornment);
   const labelStyle = FLOATING_LABEL_STYLE[size] || FLOATING_LABEL_STYLE.medium;
@@ -451,7 +475,10 @@ export function Input({
           <MuiTextField
             value={value}
             defaultValue={defaultValue}
-            onChange={onChange}
+            onChange={handleChange}
+            onFocus={(e) => { setFocused(true); if (onFocus) onFocus(e); }}
+            onBlur={(e) => { setFocused(false); if (onBlur) onBlur(e); }}
+            InputLabelProps={isFloating ? { shrink: focused || filled } : undefined}
             name={name}
             type={type}
             disabled={disabled}
@@ -545,7 +572,10 @@ export function Input({
                   '&::placeholder': { color: 'var(--Quiet)', opacity: 1 },
                 },
 
+                /* Prefix / suffix text stays Quiet; an ICON is Figma's Icons/Icon (the Default mode → --Icons-Default),
+                   the same as every other icon on the surface. */
                 '& .MuiInputAdornment-root': { color: 'var(--Quiet)' },
+                '& .MuiInputAdornment-positionStart > .MuiSvgIcon-root': { color: 'var(--Icons-Default, var(--Text))' },
 
                 /* Standard field: Figma insets the start icon by the input
                    padding and leaves Sizing-1-and-Half (12) before the text;
@@ -571,13 +601,15 @@ export function Input({
                      the cap and giving it the input's own padTop/padBottom
                      puts its centre exactly where the text's centre is, at
                      every size, with no number to keep in sync. */
+                  /* Centred on the FIELD, as Figma draws them — the 20px icon at
+                     y 18 and the 32px decorator at y 12 of a 56 field. They used
+                     to take the text band's padding, which centred them on the
+                     typed text (low in a floating field) and, around a 32px
+                     button, made the field 60 tall. */
                   '& .MuiInputAdornment-root': {
                     maxHeight: 'none',
                     height: 'auto',
-                    alignSelf: 'stretch',
-                    alignItems: 'center',
-                    paddingTop: sizeConfig.padTop + 'px',
-                    paddingBottom: sizeConfig.padBottom + 'px',
+                    alignSelf: 'center',
                     marginTop: 0,
                     marginBottom: 0,
                   },
@@ -595,9 +627,12 @@ export function Input({
                     width: sizeConfig.iconSize + 'px',
                     minWidth: sizeConfig.iconSize + 'px',
                     justifyContent: 'center',
+                    '& .MuiSvgIcon-root': { fontSize: sizeConfig.iconSize + 'px' },
                   },
+                  // The input padding from the right, as the standard field.
                   '& .MuiInputAdornment-positionEnd': {
-                    marginRight: '8px',
+                    marginLeft: 0,
+                    marginRight: padX,
                   },
                   /* The gap is the adornment's marginRight alone. Splitting it
                      with an input paddingLeft is what let the two halves drift
@@ -643,9 +678,23 @@ export function Input({
                   color: 'var(--Quiet)',
                 },
                 '&.Mui-focused': { color: activeTextColor },
-                '&.Mui-disabled': { color: 'var(--Quiet)', opacity: 'var(--Disabled, 0.38)' },
+                // The shell already dims the whole field to 38%; dimming here too made it 14%.
+                '&.Mui-disabled': { color: 'var(--Quiet)' },
               },
 
+              /* Focus raises the label in CSS as well as through the shrink
+                 flag, so the raised label is a property of :focus-within — the
+                 same selector the ring uses, and one a forced-state preview can
+                 reach without real focus. */
+              ...(isFloating && {
+                /* Figma raises it on HOVER too: the empty field clears its
+                   resting label out of the way as the pointer arrives, ready
+                   for typing. Not when disabled — nothing will be typed. */
+                [disabled ? '&:focus-within .MuiInputLabel-root' : '&:hover .MuiInputLabel-root, &:active .MuiInputLabel-root, &:focus-within .MuiInputLabel-root']: {
+                  transform: 'translate(' + labelX + ', ' + shrunkY + 'px)',
+                  ...tokenFont(labelStyle.shrunk),
+                },
+              }),
               '& .MuiOutlinedInput-notchedOutline legend': { display: 'none' },
               '& .MuiOutlinedInput-notchedOutline': { top: 0 },
 

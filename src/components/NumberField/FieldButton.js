@@ -14,7 +14,7 @@ import { SHADOW_LEVEL_1 } from '../_shadows';
  *            padding, so the button scales with its height instead of being a
  *            48px sliver at small and taller than wide at large
  *   corner   --Input-Radius, the field it belongs to
- *   icon     the in-button size, --Button-Icon (16 / 20 / 32), in --Icons-Icon
+ *   icon     the in-button size, --Button-Icon (16 / 20 / 32), in --Icons-Default (Figma's Icons/Icon, Default mode)
  *   ghost    no edge
  *   outline  1px --Buttons-<C>-Border, inside
  *   Hover    the surface's --Hover, with the Buttons-Hover lift (Level 1)
@@ -61,7 +61,7 @@ export const FieldButton = React.forwardRef(function FieldButton({
         boxShadow: outline ? 'inset 0 0 0 1px var(--Buttons-' + C + '-Border)' : 'none',
         borderRadius: 'var(--' + p + 'Input-Radius, var(--Input-Radius, 4px))',
         backgroundColor: 'transparent',
-        color: 'var(--Icons-Icon, var(--Text))',
+        color: 'var(--Icons-Default, var(--Text))',
         fontSize: 'var(--' + p + 'Button-Icon, ' + fallbackIcon + ')',
         cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 'var(--Disabled, 0.38)' : 1,

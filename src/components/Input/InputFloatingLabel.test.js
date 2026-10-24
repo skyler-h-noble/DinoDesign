@@ -6,9 +6,9 @@ import { floatingLabelGeometry, ADORNMENT_GAP } from './Input';
    TALLER, the horizontal one grew as the icon got SMALLER. */
 
 const SIZES = {
-  small:  { height: '48px', fontSize: '13px', leftPad: 12, iconSize: 16 },
-  medium: { height: '56px', fontSize: '15px', leftPad: 14, iconSize: 18 },
-  large:  { height: '64px', fontSize: '17px', leftPad: 16, iconSize: 20 },
+  small:  { height: '48px', fontSize: '14px', fontPx: 14, leftPad: 12, iconSize: 16 },
+  medium: { height: '56px', fontSize: '16px', fontPx: 16, leftPad: 12, iconSize: 20 },
+  large:  { height: '64px', fontSize: '18px', fontPx: 18, leftPad: 16, iconSize: 32 },
 };
 
 describe('horizontal', () => {
@@ -43,9 +43,10 @@ describe('horizontal', () => {
        4px marginRight and a 4px input paddingLeft; the label counted only one
        half, so it sat 4px inside the text at every size. One ADORNMENT_GAP of
        8 now, counted once, by both. */
-    expect(floatingLabelGeometry(SIZES.small,  true).clearance).toBe(24);
-    expect(floatingLabelGeometry(SIZES.medium, true).clearance).toBe(26);
-    expect(floatingLabelGeometry(SIZES.large,  true).clearance).toBe(28);
+    // icon + one 12px gap (Figma's Sizing-1-and-Half): 16+12 / 20+12 / 32+12.
+    expect(floatingLabelGeometry(SIZES.small,  true).clearance).toBe(28);
+    expect(floatingLabelGeometry(SIZES.medium, true).clearance).toBe(32);
+    expect(floatingLabelGeometry(SIZES.large,  true).clearance).toBe(44);
   });
 
   test('the label starts where the input text starts', () => {
@@ -65,15 +66,15 @@ describe('horizontal', () => {
 
 describe('vertical', () => {
   test('the resting label is centred in the field', () => {
-    expect(floatingLabelGeometry(SIZES.small).restingY).toBe(15);
-    expect(floatingLabelGeometry(SIZES.medium).restingY).toBe(17);
-    expect(floatingLabelGeometry(SIZES.large).restingY).toBe(20);
+    expect(floatingLabelGeometry(SIZES.small).restingY).toBe(14);
+    expect(floatingLabelGeometry(SIZES.medium).restingY).toBe(16);
+    expect(floatingLabelGeometry(SIZES.large).restingY).toBe(19);
   });
 
   test('centred to within a pixel at every size', () => {
     for (const [n, cfg] of Object.entries(SIZES)) {
       const h = parseInt(cfg.height, 10);
-      const box = parseInt(cfg.fontSize, 10) * 1.4375;
+      const box = parseInt(cfg.fontSize, 10) * 1.5;
       const centre = floatingLabelGeometry(cfg).restingY + box / 2;
       expect(Math.abs(centre - h / 2)).toBeLessThanOrEqual(0.5);
     }
@@ -169,5 +170,27 @@ describe('floating label uses design-system text styles', () => {
       require('path').join(__dirname, '../NumberField/NumberField.js'), 'utf8');
     expect(src).toContain("FLOATING_LABEL_STYLE");
     expect(src).not.toContain('NF_LABEL_STYLE');
+  });
+});
+
+describe('the label rests until there is focus or content', () => {
+  const { render, screen, fireEvent } = require('@testing-library/react');
+  const { Input } = require('./Input');
+  const label = () => document.querySelector('.MuiInputLabel-root');
+  test('an empty field with a start icon keeps its label down', () => {
+    render(<Input label="Name" labelPosition="floating" startAdornment={<span>$</span>} />);
+    expect(label()).not.toHaveClass('MuiInputLabel-shrink');
+  });
+  test('focus raises it, blur on an empty field lowers it', () => {
+    render(<Input label="Name" labelPosition="floating" startAdornment={<span>$</span>} />);
+    const input = screen.getByLabelText('Name');
+    fireEvent.focus(input);
+    expect(label()).toHaveClass('MuiInputLabel-shrink');
+    fireEvent.blur(input);
+    expect(label()).not.toHaveClass('MuiInputLabel-shrink');
+  });
+  test('content keeps it raised', () => {
+    render(<Input label="Name" labelPosition="floating" defaultValue="Jane" startAdornment={<span>$</span>} />);
+    expect(label()).toHaveClass('MuiInputLabel-shrink');
   });
 });

@@ -60,16 +60,15 @@ describe('the label starts where the text starts', () => {
   });
 });
 
-describe('the adornment shares the input text band', () => {
-  test('it takes the input own top and bottom padding', () => {
-    /* Not a marginBottom guess. The input carries heavy top padding to clear
-       the shrunken label; the adornment takes the SAME pair, so its centre is
-       the text centre at every size with no number to keep in sync. */
-    const cfg = FLOATING_SIZE_MAP.medium;
+describe('the adornments centre on the field', () => {
+  test('they are centred on the field, not on the text band', () => {
+    /* Figma's floating Input centres its start icon and end decorator on the
+       whole 56px field. They used to take the input's text-band padding, which
+       centred them on the typed text — low in a floating field — and grew the
+       field to 60 around a 32px end button. */
     render(<Input label="Email" labelPosition="floating" startAdornment={<AttachMoneyIcon />} />);
     const c = css().replace(/\s+/g, '');
-    expect(c).toContain('padding-top:' + cfg.padTop + 'px');
-    expect(c).toContain('padding-bottom:' + cfg.padBottom + 'px');
+    expect(c).toContain('align-self:center');
   });
 
   test('padTop/padBottom really are the padding shorthand values', () => {
