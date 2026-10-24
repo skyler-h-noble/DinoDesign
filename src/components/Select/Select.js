@@ -13,7 +13,8 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
  * Select Component
  *
  * MODES: standard (text), color (swatches)
- * LABEL: top | floating | none
+ * LABEL: top | left | floating | none — Figma's SelectField: label-top (Sizing-Half
+ *   below the label), label-left (Sizing-1 beside it, centred), none
  * SIZES: small (32/48px), medium (40/56px), large (56/64px)
  * SELECTION STYLE: default | solid
  *
@@ -167,7 +168,8 @@ export function Select({
   const hasValue = currentValue !== '' && currentValue != null;
 
   const isFloating = labelPosition === 'floating';
-  const isTop = labelPosition === 'top';
+  const isLeft = labelPosition === 'left';
+  const isTop = labelPosition === 'top' || isLeft;
   const isColor = mode === 'color';
   const sizeConfig = isFloating
     ? (FLOATING_SIZE_MAP[size] || FLOATING_SIZE_MAP.medium)
@@ -435,14 +437,24 @@ export function Select({
         (disabled ? ' select-disabled' : '') +
         (className ? ' ' + className : '')
       }
-      sx={{ position: 'relative', width: fullWidth ? '100%' : 'auto', display: 'inline-block', fontFamily: 'inherit', ...sx }}
+      sx={{
+        position: 'relative', width: fullWidth ? '100%' : 'auto', display: 'inline-block', fontFamily: 'inherit',
+        // Left label: label in its own column, centred on the field — as Input.
+        ...(isLeft && label && {
+          display: fullWidth ? 'grid' : 'inline-grid',
+          gridTemplateColumns: 'auto minmax(0, 1fr)',
+          columnGap: 'var(--Sizing-1, 8px)',
+          alignItems: 'center',
+        }),
+        ...sx,
+      }}
       {...props}
     >
       {/* Top label: the lib's FormLabel, as Input's. The trigger is a
           <button>, which IS labelable, so <label for> names it. */}
       {isTop && label && (
         <FormLabel htmlFor={triggerId} disabled={disabled}
-          sx={{ marginBottom: 'var(--Sizing-Half, 4px)', ...(disabled && { opacity: 'var(--Disabled, 0.38)' }) }}>
+          sx={{ ...(isLeft ? { flexShrink: 0 } : { marginBottom: 'var(--Sizing-Half, 4px)' }), ...(disabled && { opacity: 'var(--Disabled, 0.38)' }) }}>
           {label}
         </FormLabel>
       )}

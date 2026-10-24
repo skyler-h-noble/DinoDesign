@@ -225,3 +225,16 @@ describe('Select — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+describe('Select label positions (Figma SelectField)', () => {
+  const { render, screen } = require('@testing-library/react');
+  test('top and left labels are FormLabels that name the trigger', () => {
+    render(<Select label="Fruit" labelPosition="left" options={['Apple']} />);
+    expect(document.querySelector('.form-label-row label.form-label')).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Fruit' })).toBeInTheDocument();
+  });
+  test('left lays the label beside the field', () => {
+    const { container } = render(<Select label="Fruit" labelPosition="left" options={['Apple']} />);
+    expect(getComputedStyle(container.firstChild).display).toMatch(/grid/);
+  });
+});
