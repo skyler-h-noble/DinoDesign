@@ -129,11 +129,12 @@ const sheet = () => {
 };
 
 describe('floating label uses design-system text styles', () => {
-  test('the mapping is Body at rest, Label shrunk', () => {
+  test('the mapping is Body at rest, Floating-Label raised', () => {
+    // Figma's Dynamic-Floating-Label style, 11 / 12 / 14 at weight 500.
     expect(FLOATING_LABEL_STYLE).toEqual({
-      small:  { resting: 'Body-Small',  shrunk: 'Label-ExtraSmall' },
-      medium: { resting: 'Body-Medium', shrunk: 'Label-Small' },
-      large:  { resting: 'Body-Large',  shrunk: 'Label-Medium' },
+      small:  { resting: 'Body-Small',  shrunk: 'Small' },
+      medium: { resting: 'Body-Medium', shrunk: 'Medium' },
+      large:  { resting: 'Body-Large',  shrunk: 'Large' },
     });
   });
 
@@ -144,7 +145,7 @@ describe('floating label uses design-system text styles', () => {
       );
       const css = sheet();
       expect(css).toContain('--' + resting + '-Font-Size');
-      expect(css).toContain('--' + shrunk + '-Font-Size');
+      expect(css).toContain('--Floating-Label-' + shrunk + '-Font-Size');
       unmount();
     });
 
@@ -152,13 +153,13 @@ describe('floating label uses design-system text styles', () => {
     /* The point of a real Label style over a scaled Body — scale() would have
        shrunk these along with the size. */
     render(<Input label="Email" labelPosition="floating" size="large" />);
-    expect(sheet()).toContain('--Label-Medium-Font-Weight');
-    expect(sheet()).toContain('--Label-Medium-Letter-Spacing');
+    expect(sheet()).toContain('--Floating-Label-Font-Weight');
+    expect(sheet()).toContain('--Floating-Label-Letter-Spacing');
   });
 
   test('no scale() survives on the label', () => {
     render(<Input label="Email" labelPosition="floating" size="large" />);
-    const rules = sheet().split('}').filter(r => r.includes('--Label-Medium-Font-Size'));
+    const rules = sheet().split('}').filter(r => r.includes('--Floating-Label-Large-Font-Size'));
     expect(rules.join('')).not.toContain('scale(');
   });
 

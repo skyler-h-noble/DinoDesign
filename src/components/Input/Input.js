@@ -180,9 +180,36 @@ export const LABEL_LINE_HEIGHT = 1.5;
  * So the transition animates FONT-SIZE, not scale.
  */
 export const FLOATING_LABEL_STYLE = {
-  small:  { resting: 'Body-Small',  shrunk: 'Label-ExtraSmall' },
-  medium: { resting: 'Body-Medium', shrunk: 'Label-Small' },
-  large:  { resting: 'Body-Large',  shrunk: 'Label-Medium' },
+  small:  { resting: 'Body-Small',  shrunk: 'Small' },
+  medium: { resting: 'Body-Medium', shrunk: 'Medium' },
+  large:  { resting: 'Body-Large',  shrunk: 'Large' },
+};
+
+/* The raised label is Figma's own style, Dynamic-Floating-Label: 11 / 12 / 14
+   at weight 500, 0.5px tracking, a 1.2 line (14.4 / 16.8 / 19.2), in the Label
+   face. It was Label-ExtraSmall / -Small / -Medium, which are 12.5 at 600 —
+   close, and visibly heavier. The Typography collection names it
+   Labels/Floating-Label-*; the fallbacks hold until the generator emits it.
+
+   Figma sets the line in a 20px box with the text centred (Label Area, 2px
+   padding), so the label carries the difference as padding: its top is the
+   box's, and the glyphs land where Figma's do. */
+const FLOATING_LABEL_FONT = {
+  Small:  { size: 11, line: 14.4 },
+  Medium: { size: 12, line: 16.8 },
+  Large:  { size: 14, line: 19.2 },
+};
+const FLOATING_LABEL_BOX = 20;
+const floatingLabelFont = (step) => {
+  const f = FLOATING_LABEL_FONT[step] || FLOATING_LABEL_FONT.Medium;
+  return {
+    fontFamily:    'var(--Body-Font-Family)',   // labels use the Body face, as Typography's label styles do
+    fontSize:      'var(--Floating-Label-' + step + '-Font-Size, ' + f.size + 'px)',
+    fontWeight:    'var(--Floating-Label-Font-Weight, 500)',
+    letterSpacing: 'var(--Floating-Label-Letter-Spacing, 0.5px)',
+    lineHeight:    'var(--Floating-Label-' + step + '-Line-Height, ' + f.line + 'px)',
+    paddingTop:    Math.max(0, (FLOATING_LABEL_BOX - f.line) / 2) + 'px',
+  };
 };
 
 const tokenFont = (t) => ({
@@ -233,7 +260,8 @@ export function floatingLabelGeometry(sizeConfig, hasStartAdornment) {
     clearance: hasStartAdornment ? clearance : 0,
     restingY: Math.round((fieldH - fontPx * LABEL_LINE_HEIGHT) / 2),
     // Sits in the field's top padding, bottom-aligned to where the text starts.
-    shrunkY: 6,
+    // Figma's Label Area: 2px from the top of the field.
+    shrunkY: 2,
   };
 }
 
@@ -674,7 +702,7 @@ export function Input({
                      to where the text begins. No scale() — it becomes a real
                      Label style, weight and tracking included. */
                   transform: 'translate(' + labelX + ', ' + shrunkY + 'px)',
-                  ...tokenFont(labelStyle.shrunk),
+                  ...floatingLabelFont(labelStyle.shrunk),
                   color: 'var(--Quiet)',
                 },
                 '&.Mui-focused': { color: activeTextColor },
@@ -692,7 +720,7 @@ export function Input({
                    for typing. Not when disabled — nothing will be typed. */
                 [disabled ? '&:focus-within .MuiInputLabel-root' : '&:hover .MuiInputLabel-root, &:active .MuiInputLabel-root, &:focus-within .MuiInputLabel-root']: {
                   transform: 'translate(' + labelX + ', ' + shrunkY + 'px)',
-                  ...tokenFont(labelStyle.shrunk),
+                  ...floatingLabelFont(labelStyle.shrunk),
                 },
               }),
               '& .MuiOutlinedInput-notchedOutline legend': { display: 'none' },
