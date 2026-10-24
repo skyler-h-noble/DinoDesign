@@ -19,10 +19,12 @@ import { render } from '@testing-library/react';
 import { Ratio } from './Ratio';
 
 describe('Ratio scope inheritance', () => {
-  test('emits no data-theme or data-surface by default', () => {
+  test('emits no data-theme by default, and Surface-Dim as its surface', () => {
+    // Figma pins the Ratio's Surface mode to Surface-Dim — a level, so the
+    // theme around it still decides the color.
     const { container } = render(<Ratio />);
     expect(container.querySelector('[data-theme]')).toBeNull();
-    expect(container.querySelector('[data-surface]')).toBeNull();
+    expect(container.querySelector('[data-surface="Surface-Dim"]')).not.toBeNull();
   });
 
   test('does not override a surrounding theme', () => {
@@ -31,9 +33,9 @@ describe('Ratio scope inheritance', () => {
         <Ratio />
       </div>,
     );
-    // Nothing inside the wrapper may re-declare either axis.
+    // The theme is never re-declared inside; only the surface LEVEL is.
     expect(container.querySelectorAll('[data-theme]')).toHaveLength(1);
-    expect(container.querySelectorAll('[data-surface]')).toHaveLength(1);
+    expect(container.querySelector('.ratio [data-surface]').getAttribute('data-surface')).toBe('Surface-Dim');
   });
 
   test('still honours an explicit color', () => {
@@ -54,13 +56,15 @@ describe('Ratio scope inheritance', () => {
     // glyph was present in the DOM but invisible. Assert it is drawn — the
     // color pairing itself (fill --Border-Variant / icon --Quiet, ImagePlaceholder) is a style
     // contract jsdom cannot resolve, and is covered by the source comment.
-    const { container } = render(<Ratio />);
+    const { container } = render(<Ratio placeholder />);
     expect(container.querySelector('svg')).not.toBeNull();
   });
 
-  test('draws no placeholder icon when placeholder is off', () => {
-    const { container } = render(<Ratio placeholder={false} />);
+  test('an empty Ratio is an empty Surface-Dim slot by default, as in Figma', () => {
+    const { container } = render(<Ratio />);
     expect(container.querySelector('svg')).toBeNull();
+    expect(container.querySelector('[data-surface="Surface-Dim"]')).not.toBeNull();
+    expect(container.querySelector('[data-theme]')).toBeNull();
   });
 
   test('a supplied child wins over the placeholder', () => {

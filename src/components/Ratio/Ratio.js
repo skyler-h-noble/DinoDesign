@@ -84,12 +84,12 @@ export function Ratio({
   // ratio. fit="height": fills the parent's height, width derives from the
   // ratio — for fixed-height rows / horizontal layouts.
   fit = 'width',
-  // placeholder: this slot is INTENDED to hold an image. Defaults to TRUE, so an
-  // empty Ratio (no child) renders the Image Placeholder by default — a fill
-  // frame with a large centered photo icon (background var(--Border), icon
-  // var(--Background)). A supplied child (real image) always wins. Pass
-  // placeholder={false} for an empty slot with no placeholder.
-  placeholder = true,
+  // placeholder: show the Image Placeholder (the photo glyph) while the slot is
+  // empty. OFF by default — Figma's Ratio is an empty slot painted Surface-Dim,
+  // and a photo icon on every empty Ratio claimed it held an image when it
+  // might hold a map, a video or a chart. Pass `placeholder` for an image slot
+  // with no image yet. A supplied child always wins.
+  placeholder = false,
   elevated = false,
   clickable = false,
   onClick,
@@ -122,8 +122,11 @@ export function Ratio({
   // the same component in Figma showed dark-on-light. Emit an attribute only
   // when the caller actually asked for one, and let the cascade do the rest.
   const dataTheme = color === 'default' ? undefined : C;
+  /* Default: Surface-Dim, as Figma pins on the Ratio — a level, not a theme,
+     so a Ratio inside a Primary card is Primary's Surface-Dim. */
   const dataSurface = variant === 'dark' ? 'Surface-Dimmest'
     : variant === 'light' ? 'Surface-Brightest'
+    : variant === 'default' ? 'Surface-Dim'
     : undefined;
 
   const p = PADDING_MAP[padding] !== undefined ? PADDING_MAP[padding] : PADDING_MAP.none;
