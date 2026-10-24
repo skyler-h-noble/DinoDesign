@@ -29,7 +29,8 @@ describe('InputMessage declares a zone rather than painting one', () => {
   test('fills from --Background, never a literal or a Surface token', () => {
     const { container } = render(<InputMessage type="error">Bad</InputMessage>);
     const css = cssFor(container.querySelector('.input-message'));
-    expect(css).toContain('background-color: var(--Background)');
+    // 75% of the zone's Background, as Figma's Theme-{State} fill (Background @ 0.75).
+    expect(css).toContain('background-color: color-mix(in srgb, var(--Background) 75%, transparent)');
     expect(css).not.toContain('var(--Surface)');
     expect(css).not.toMatch(/background-color:\s*#/);
   });

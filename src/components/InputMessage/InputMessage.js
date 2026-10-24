@@ -11,7 +11,7 @@
 // contract the rest of the system uses, and the reason a message reads
 // correctly in dark mode without anyone writing a second value.
 //
-// ── Why the text is Text-{State} and not --Text ──────────────────────────────
+// ── Why the text is Text-{State} and not --Text (in Legal-Semibold) ──────────────────────────────
 // Inside the zone, plain --Text would already be legible. The design binds
 // Text-Error / Text-Warning / Text-Success / Text-Info specifically, which are
 // contrast-checked for carrying a semantic meaning rather than for being body
@@ -23,7 +23,7 @@
 // step — so this asks for xxs explicitly.
 import React from 'react';
 import { Box } from '@mui/material';
-import { Legal } from '../Typography';
+import { LegalSemibold } from '../Typography';
 import { Icon } from '../Icon/Icon';
 import ErrorIcon from '@mui/icons-material/Error';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -69,7 +69,17 @@ export function InputMessage({
         gap: 'var(--Sizing-Half)',
         padding: '0 var(--Sizing-Half)',
         borderRadius: 'var(--Sizing-Half)',
-        backgroundColor: 'var(--Background)',
+        /* 75% of the zone's Background — Figma's Theme-{State} fill is
+           Background at 0.75, so the parent surface tints through. In the
+           colour, not as opacity, which would also fade the icon and text. */
+        backgroundColor: 'color-mix(in srgb, var(--Background) 75%, transparent)',
+        /* Again with the zone attributes in the selector: the design system
+           paints every [data-theme][data-surface] element with an OPAQUE
+           --Background at (0,2,0), which beats this single class and drew the
+           chip solid. Class + two attributes is (0,3,0) — Alert's fix. */
+        '&[data-theme][data-surface]': {
+          backgroundColor: 'color-mix(in srgb, var(--Background) 75%, transparent)',
+        },
         ...sx,
       }}
       {...props}
@@ -84,9 +94,9 @@ export function InputMessage({
           and friends — the same tokens Figma binds. Overriding inline would
           also not have worked: Typography folds `style` into its own styling,
           so the attribute never reaches the DOM. */}
-      <Legal className="input-message-text" color={type}>
+      <LegalSemibold className="input-message-text" color={type}>
         {children}
-      </Legal>
+      </LegalSemibold>
     </Box>
   );
 }
