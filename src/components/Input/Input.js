@@ -426,6 +426,11 @@ export function Input({
           /* Figma's Hover, Pressed and Focus-Visible fields draw their text in
              --Text, placeholder included; only the resting field is --Quiet. */
           '&:hover .MuiOutlinedInput-root, &:active .MuiOutlinedInput-root, &:focus-within .MuiOutlinedInput-root': { color: activeTextColor },
+          /* The FILL is the field's hover, by design: it rests on --Hover (a
+             consistent tint against any surface), deepens to --Pressed under
+             the pointer, and returns to --Hover while pressed. */
+          '&:hover .MuiOutlinedInput-root': { backgroundColor: 'var(--Pressed)' },
+          '&:active .MuiOutlinedInput-root': { backgroundColor: 'var(--Hover)' },
         }),
         /* 2px ring 1px outside — Figma's Focus-Visible frame sits 3px out with
            a 2px inside stroke, the same ring as every other control. */

@@ -108,7 +108,7 @@ export {
 // Canonical input: full-featured component with variants, validation,
 // adornments, surface awareness. Exported as `TextInput` (the preferred name).
 // The underlying file is still `./Input/Input.js` for now.
-export { Input as TextInput } from './Input';
+export { Input as TextInput, InputDecorator } from './Input';
 
 // DEPRECATED — kept for backward compat. New code should use `TextInput`
 // (the canonical export above). These are thinner wrappers around MUI
