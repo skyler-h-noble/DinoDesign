@@ -292,7 +292,7 @@ export function LinkShowcase() {
                 <Box sx={{ py: 1.5 }}>
                   <BodySmall>Hover feedback:</BodySmall>
                   <Caption style={{ color: 'var(--Text-Quiet)' }}>
-                    Color shifts to var(--Link-Hover) and underline thickens from 1px to 2px, providing two visual cues.
+                    The underline goes away; the color stays (the design system emits no hover tone for links).
                   </Caption>
                 </Box>
               </Stack>

@@ -6,7 +6,7 @@ import { Box } from '@mui/material';
  * Link Component
  *
  * An anchor element that inherits Typography styles from the design system.
- * ALWAYS underlined — no option to remove underline.
+ * Underlined at rest — no option to remove it there.
  *
  * ALLOWED textStyle values (NO headers, display, or eyebrow):
  *   body, body-small, body-large, body-semibold, body-bold
@@ -17,7 +17,8 @@ import { Box } from '@mui/material';
  *   standard   var(--Text)              — blends with body text
  *   quiet      var(--Text-Quiet)        — subdued links
  *
- * STATES: hover → underline thickens, color unchanged. visited →
+ * STATES: hover / pressed → the underline goes away, color unchanged. Focus
+ *   keeps it: the ring is added to the resting link, not swapped for it. visited →
  *   var(--Link-Visited, --Hotlink-Visited). The design system emits the
  *   --Hotlink spelling; see the note above COLOR_MAP for why the mapping lives
  *   here and not in CSS.
@@ -107,7 +108,7 @@ const STYLE_MAP = {
  * which IS defined and therefore never reaches its fallback.)
  *
  * --Link-Hover is intentionally absent. Links do not change color on hover;
- * the underline thickens instead. Do not add a hover color here — the design
+ * the underline goes away instead. Do not add a hover color here — the design
  * system emits no hover tone for links, so any value would be invented rather
  * than derived, and it would land on text that carries a 4.5:1 requirement.
  */
@@ -192,21 +193,22 @@ export function Link({
           // No color change on hover — deliberate. The design system emits no
           // hover tone for links, and inventing one would put an unverified
           // color on text that has a contrast requirement. The underline
-          // thickening carries the affordance instead, which is a non-color
-          // cue and so does not rely on color perception either.
-          '&:hover': {
-            textDecorationThickness: '2px',
+          // going away carries the change instead (Figma's Hover and Pressed
+          // draw none) — a non-color cue, and the resting link keeps its
+          // underline, so it never relies on color to be found. Focus keeps
+          // the underline: a keyboard user lands on a link that still looks
+          // like one, with the ring around it.
+          '&:hover, &:active': {
+            textDecoration: 'none',
           },
           '&:visited': {
             color: colors.visited,
           },
+          // The ring every control wears: 2px, 1px outside. Square — a link's
+          // text box has no corner to follow.
           '&:focus-visible': {
-            outline:       '3px solid var(--Focus-Visible)',
-            outlineOffset: '2px',
-            borderRadius:  '2px',
-          },
-          '&:active': {
-            textDecorationThickness: '2px',
+            outline:       '2px solid var(--Focus-Visible)',
+            outlineOffset: '1px',
           },
         }),
 
