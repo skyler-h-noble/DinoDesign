@@ -124,6 +124,12 @@ export function FormLabel({
              as one word. */
           style={{ display: 'inline-block', marginLeft: 'var(--Sizing-Half, 4px)' }}
         >
+          {/* Figma draws "Optional" as a bulleted item: "Label • Optional".
+              The bullet is decoration — hidden, so the name is "Label Optional".
+              Its box is the list's 1.5em indent, the bullet centred in it. */}
+          {type === 'optional' && (
+            <span aria-hidden="true" style={{ display: 'inline-block', width: '1.5em', textAlign: 'center' }}>•</span>
+          )}
           {marker}
         </span>
       )}
