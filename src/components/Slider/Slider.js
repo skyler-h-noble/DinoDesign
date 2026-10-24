@@ -1,8 +1,8 @@
 // src/components/Slider/Slider.js
-import React from 'react';
+import React, { useId } from 'react';
 import { Slider as MuiSlider, Box } from '@mui/material';
-import { Body, BodySmall } from '../Typography';
-import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, bevelShadow } from '../_shadows';
+import { FormLabel } from '../FormLabel/FormLabel';
+import { SHADOW_LEVEL_1 } from '../_shadows';
 
 /**
  * Slider Component
@@ -124,16 +124,19 @@ function buildVariantMap() {
 }
 
 // --- Sizing ------------------------------------------------------------------
-// Thumb is always ≥ 24×24px for WCAG 2.2 AA touch target.
-// The visual circle lives in ::before at the designated visual size.
-// Range slider: visual dots offset so they don't overlap when close.
+// Figma's Slider (medium): a 24px thumb on an 8px bar. The thumb IS the
+// touch target now — it was a 16px dot inside a 24px box, and on a range the
+// dots were pushed to the inner edges of their boxes, so neither sat on its
+// value. small / large follow the in-button icon ramp (16 / 32). `track` is
+// the bar's inner height; its 1px edge on each side makes 4 / 8 / 12.
+// The touch box never drops below 24 (WCAG 2.2 target size).
 
 const TOUCH_MIN = 24;
 
 const SIZE_MAP = {
-  small:  { visual: 12, track: 2,  labelSize: 11 },
-  medium: { visual: 16, track: 4,  labelSize: 12 },
-  large:  { visual: 20, track: 6,  labelSize: 13 },
+  small:  { visual: 16, track: 2,  labelSize: 11 },
+  medium: { visual: 24, track: 6,  labelSize: 12 },
+  large:  { visual: 32, track: 10, labelSize: 13 },
 };
 
 // --- Component ---------------------------------------------------------------
@@ -169,7 +172,10 @@ export function Slider({
   max = 100,
   step = 1,
   marks = false,
-  valueLabelDisplay = 'off',
+  /* Figma's thumb carries its value label. 'auto' shows it while the thumb
+     is hovered, dragged or focused — the label is there when the value is
+     changing, without a row of bubbles over every resting slider. */
+  valueLabelDisplay = 'auto',
   orientation = 'horizontal',
   /* Which side of the thumb the fill sits on.
      `standard` fills from the start of the rail to the thumb; `inverted`
@@ -184,6 +190,8 @@ export function Slider({
   track = 'standard',
   disabled = false,
   label,
+  /* 'top' | 'bottom' — Figma's SliderField Label axis. */
+  labelPosition = 'top',
   name,
   className = '',
   sx = {},
@@ -249,14 +257,17 @@ export function Slider({
   }
 
   const isVertical = orientation === 'vertical';
-  const isRange = Array.isArray(value) || Array.isArray(defaultValue);
+  // Figma's hover / pressed halo: the fill color at 20%.
+  const halo = 'color-mix(in srgb, ' + styles.track + ' 20%, transparent)';
   /* `fill` wins when both are given; `normal` is accepted as a synonym for
      `standard` so a MUI-shaped call still reads correctly. `false` stays
      meaningful — it is MUI's "draw no fill at all", which is neither. */
   const fillMode = fill !== undefined ? fill : track;
   const isInverted = fillMode === 'inverted';
   const noFill = fillMode === false;
-  const LabelComp = size === 'small' ? BodySmall : Body;
+  /* The label names the slider through aria-labelledby: a range has two
+     inputs, which one <label for> cannot reach. */
+  const labelId = useId();
 
   const totalTrack = sizeConfig.track + 2; // inner height + 1px border each side
 
@@ -281,36 +292,35 @@ export function Slider({
     '& .MuiSlider-rail': {
       backgroundColor: railBg,
       border: railBorder || 'none',
-      boxSizing: railBorder ? 'content-box' : 'border-box',
+      /* border-box: the 1px edge is inside the bar's length as well as its
+         thickness. As content-box the edge added 2px to the LENGTH too — a
+         334px slider drew a 336px bar. */
+      boxSizing: 'border-box',
       opacity: 1,
-      height: isVertical ? undefined : (railBorder ? sizeConfig.track : totalTrack),
-      width: isVertical ? (railBorder ? sizeConfig.track : totalTrack) : undefined,
+      height: isVertical ? undefined : totalTrack,
+      width: isVertical ? totalTrack : undefined,
       borderRadius: totalTrack / 2,
     },
 
     // Track (filled portion) — inner height + 1px border each side = totalTrack
     '& .MuiSlider-track': {
-      boxSizing: trackBr ? 'content-box' : 'border-box',
+      boxSizing: 'border-box',
       backgroundColor: trackBg,
       border: trackBr || 'none',
-      height: isVertical ? undefined : (trackBr ? sizeConfig.track : totalTrack),
-      width: isVertical ? (trackBr ? sizeConfig.track : totalTrack) : undefined,
+      height: isVertical ? undefined : totalTrack,
+      width: isVertical ? totalTrack : undefined,
       borderRadius: totalTrack / 2,
     },
 
     // Thumb — 24×24 touch target, visual dot in ::before
     '& .MuiSlider-thumb': {
-      width: TOUCH_MIN,
-      height: TOUCH_MIN,
+      width: Math.max(TOUCH_MIN, sizeConfig.visual),
+      height: Math.max(TOUCH_MIN, sizeConfig.visual),
       backgroundColor: 'transparent',
       border: 'none',
       boxShadow: 'none',
       transition: 'none',
-      // Bevel sizing — visual diameter feeds --_bevel via --Button-Bevel %.
-      // Inherited into ::before so the bevelShadow() insets render on the
-      // visual circle, mirroring how Button computes its bevel from height.
-      '--_height': sizeConfig.visual + 'px',
-      '--_bevel': 'min(calc(var(--Button-Bevel) * var(--_height) / 100), calc(var(--_height) / 5))',
+      // No bevel: Figma's handle is flat, its only effect the elevation.
       // Remove MUI default ::after
       '&::after': { display: 'none' },
 
@@ -320,10 +330,12 @@ export function Slider({
         position: 'absolute',
         width: sizeConfig.visual,
         height: sizeConfig.visual,
+        // The 1px --Background edge is inside the 24, as Figma's inside stroke.
+        boxSizing: 'border-box',
         borderRadius: '50%',
         backgroundColor: styles.thumb,
         border: styles.thumbBorder || 'none',
-        boxShadow: `${bevelShadow(variant)}, ${SHADOW_LEVEL_1}`,
+        boxShadow: `${SHADOW_LEVEL_1}`,
         transition: 'box-shadow 0.15s ease-in-out',
         // Centered by default (single slider)
         top: '50%',
@@ -331,8 +343,10 @@ export function Slider({
         transform: 'translate(-50%, -50%)',
       },
 
+      /* Figma's Hover / Pressed: a halo of the fill color at 20% — 4px out on
+         hover, 8px pressed — around the resting thumb. */
       '&:hover::before': {
-        boxShadow: `${bevelShadow(variant)}, ${SHADOW_LEVEL_2}`,
+        boxShadow: `${SHADOW_LEVEL_1}, 0 0 0 4px ${halo}`,
       },
 
       /* The outer ring of the focus indicator. The inner --Background ring is
@@ -346,12 +360,13 @@ export function Slider({
          Focus-Visible-against-a-button-color, which is not. The gap is the
          exact failure the flush construction was introduced to fix. */
       '&.Mui-focusVisible::before, &:focus-visible::before': {
-        boxShadow: `${bevelShadow(variant)}, ${SHADOW_LEVEL_2}, 0 0 0 1px var(--Focus-Visible)`,
+        /* Figma: a 1px --Focus-Visible ring with a 1px --Background ring outside
+           it, flush on the thumb's own --Background edge. */
+        boxShadow: `${SHADOW_LEVEL_1}, 0 0 0 1px var(--Focus-Visible), 0 0 0 2px var(--Background)`,
       },
 
-      '&.Mui-active::before': {
-        // Pressed: keep bevel, drop elevation (matches Button's pressed state)
-        boxShadow: bevelShadow(variant),
+      '&.Mui-active::before, &:active::before': {
+        boxShadow: `${SHADOW_LEVEL_1}, 0 0 0 8px ${halo}`,
       },
 
       '&.Mui-focusVisible': {
@@ -371,40 +386,10 @@ export function Slider({
         outline: 'none',
         borderRadius: '50%',
       },
-      '&.Mui-focusVisible::before': {
-        boxShadow: `${bevelShadow(variant)}, ${SHADOW_LEVEL_2}`,
-      },
     },
 
-    // Range slider — offset visual dots so they don't stack
-    ...(isRange ? (isVertical ? {
-      // Vertical: bottom thumb (index 0) → dot at top, top thumb (index 1) → dot at bottom
-      '& .MuiSlider-thumb[data-index="0"]::before': {
-        top: 0,
-        left: '50%',
-        transform: 'translateX(-50%)',
-      },
-      '& .MuiSlider-thumb[data-index="1"]::before': {
-        top: 'auto',
-        bottom: 0,
-        left: '50%',
-        transform: 'translateX(-50%)',
-      },
-    } : {
-      // Horizontal: left thumb (index 0) → dot right-aligned, right thumb (index 1) → dot left-aligned
-      '& .MuiSlider-thumb[data-index="0"]::before': {
-        left: 'auto',
-        right: 0,
-        top: '50%',
-        transform: 'translateY(-50%)',
-      },
-      '& .MuiSlider-thumb[data-index="1"]::before': {
-        left: 0,
-        right: 'auto',
-        top: '50%',
-        transform: 'translateY(-50%)',
-      },
-    }) : {}),
+    // Range slider: each thumb sits centred on its own value, as Figma draws
+    // it. (The dots used to be pushed to the inner edges of their boxes.)
 
     // Value label (tooltip)
     '& .MuiSlider-valueLabel': {
@@ -452,14 +437,12 @@ export function Slider({
       fontSize: sizeConfig.labelSize,
     },
 
-    // Disabled
+    // Disabled: the resting slider at 38% — Figma's Disabled thumb is the
+    // Default one, shadow included, dimmed.
     '&.Mui-disabled': {
       opacity: 'var(--Disabled, 0.38)',
       cursor: 'not-allowed',
       pointerEvents: 'none',
-      '& .MuiSlider-thumb::before': {
-        boxShadow: 'none',
-      },
     },
 
     ...sx,
@@ -481,7 +464,7 @@ export function Slider({
       disabled={disabled}
       name={name}
       aria-label={ariaLabel}
-      aria-labelledby={ariaLabelledby}
+      aria-labelledby={ariaLabelledby || (label && !ariaLabel ? labelId : undefined)}
       /* Native `disabled` already blocks interaction, but it also drops the
          control out of the tab order — so a keyboard user tabs straight past
          and never learns the slider is there. aria-disabled restores the
@@ -497,29 +480,32 @@ export function Slider({
     />
   );
 
+  /* With a label: Figma's SliderField — the Form-Label above or below the
+     slider, Sizing-Half apart. The slider keeps 48px either side of its bar
+     (Figma's Slider is 104 tall at medium): that is the room its value label
+     needs, so the bubble never lands on the field's own label. */
   if (label) {
+    const labelEl = (
+      <FormLabel id={labelId} disabled={disabled}
+        sx={disabled ? { opacity: 'var(--Disabled, 0.38)' } : undefined}>
+        {label}
+      </FormLabel>
+    );
     return (
       <Box
+        className={'slider-field slider-label-' + labelPosition}
         sx={{
           width: isVertical ? 'auto' : '100%',
           height: isVertical ? '100%' : 'auto',
           display: 'flex',
-          flexDirection: isVertical ? 'column' : 'column',
-          gap: '4px',
+          flexDirection: 'column',
+          gap: 'var(--Sizing-Half, 4px)',
+          ...(!isVertical && { '& .MuiSlider-root': { paddingTop: '48px', paddingBottom: '48px' } }),
         }}
       >
-        <LabelComp
-          component="label"
-          sx={{
-            color: disabled ? 'var(--Text-Quiet)' : 'var(--Text)',
-            fontSize: size === 'small' ? '13px' : '15px',
-            fontWeight: 500,
-            opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
-          }}
-        >
-          {label}
-        </LabelComp>
+        {labelPosition !== 'bottom' && labelEl}
         {sliderElement}
+        {labelPosition === 'bottom' && labelEl}
       </Box>
     );
   }

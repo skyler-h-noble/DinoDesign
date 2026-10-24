@@ -52,6 +52,10 @@ export function FormLabel({
      implicit, and announces as unlabelled while looking correct. That exact
      bug shipped in Input. */
   htmlFor,
+  /* For a control <label for> cannot reach — a range slider's two inputs —
+     give the label an id and point the control's aria-labelledby at it. The
+     id goes on the <label> itself, so the name is the label's text alone. */
+  id,
   /* Figma's Type axis. It was two booleans that could both be true at once. */
   type = 'default',
   /* 'label' for one control, 'legend' for a fieldset of them. */
@@ -68,7 +72,7 @@ export function FormLabel({
   const marker = FORM_LABEL_MARKERS[type];
   const isLegend = as === 'legend';
 
-  if (process.env.NODE_ENV !== 'production' && !isLegend && !htmlFor) {
+  if (process.env.NODE_ENV !== 'production' && !isLegend && !htmlFor && !id) {
     // eslint-disable-next-line no-console
     console.warn(
       '[FormLabel] no `htmlFor`. A <label> whose control is a sibling has no '
@@ -103,6 +107,7 @@ export function FormLabel({
     <Label
       component={isLegend ? 'legend' : 'label'}
       htmlFor={isLegend ? undefined : htmlFor}
+      id={id}
       className="form-label"
       style={{
         /* --Text, from the SURFACE table. The design briefly bound Buttons'

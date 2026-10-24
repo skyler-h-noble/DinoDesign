@@ -355,3 +355,15 @@ describe('Slider — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+describe('Slider label (Figma SliderField)', () => {
+  test('the label names every thumb of a range', () => {
+    render(<Slider label="Price" defaultValue={[20, 60]} />);
+    expect(screen.getAllByRole('slider', { name: 'Price' })).toHaveLength(2);
+  });
+  test('labelPosition="bottom" puts the label after the slider', () => {
+    const { container } = render(<Slider label="Price" labelPosition="bottom" defaultValue={20} />);
+    const field = container.querySelector('.slider-field');
+    expect(field.lastChild).toHaveClass('form-label-row');
+  });
+});
