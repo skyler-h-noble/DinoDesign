@@ -100,7 +100,7 @@ describe('Slider colors match Figma', () => {
        something other than a known color is the exact failure the flush
        construction was introduced to fix. */
     const css = rootCss(<Slider value={50} />);
-    const rule = css.split('\n').find((r) => /focus-visible|Mui-focusVisible/.test(r)) || '';
+    const rule = css.split('\n').find((r) => /(focus-visible|Mui-focusVisible)::before/.test(r)) || '';
     expect(`flush 1px ring: ${/0 0 0 1px var\(--Focus-Visible\)/.test(rule)}`)
       .toBe('flush 1px ring: true');
     expect(`halo present: ${/0 0 0 4px/.test(rule)}`).toBe('halo present: false');
