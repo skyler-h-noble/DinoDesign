@@ -323,6 +323,10 @@ export function Slider({
       // No bevel: Figma's handle is flat, its only effect the elevation.
       // Remove MUI default ::after
       '&::after': { display: 'none' },
+      /* MUI paints its own 8px primary-blue ring on the thumb box for hover,
+         focus and drag. The halo is ours, on ::before in the fill color, so
+         MUI's goes — it was showing as a blue glow behind ours. */
+      '&:hover, &.Mui-focusVisible, &.Mui-active': { boxShadow: 'none' },
 
       // Visual circle
       '&::before': {

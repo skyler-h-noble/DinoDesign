@@ -34,8 +34,10 @@
 // this field". The row is the container; the label is only its first child.
 import React from 'react';
 import { Box } from '@mui/material';
-import { Label } from '../Typography';
-import { Link } from '../Link';
+// Straight from the file, not the folder index: the index also exports the
+// Typography showcase, which imports Select, which imports this — a cycle.
+import { Label } from '../Typography/Typography';
+import { Link } from '../Link/Link';
 import { Icon } from '../Icon/Icon';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
