@@ -118,8 +118,13 @@ export function FormLabel({
           /* Required is carried by aria-required on the control; optional has
              no ARIA equivalent, so that one must be read. */
           aria-hidden={type === 'required' ? 'true' : undefined}
+          /* Figma: the marker is its own text, Sizing-Half after the label.
+             inline-block, so the accessible name still gets a space between
+             "Label" and "Optional" — an inline span with a margin would read
+             as one word. */
+          style={{ display: 'inline-block', marginLeft: 'var(--Sizing-Half, 4px)' }}
         >
-          {type === 'required' ? marker : ' ' + marker}
+          {marker}
         </span>
       )}
     </Label>
