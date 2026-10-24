@@ -87,8 +87,22 @@ function outlineStyles(color) {
   };
 }
 
+/* The DEFAULT field is Figma's Input: the surface's own --Border edge (the 3:1
+   role for a clickable outline), unchanged by hover and press. The palette
+   variants ({color}-outline) stay for a field that wants a coloured edge. */
+function defaultStyles() {
+  return {
+    bg: 'var(--Hover)',
+    border: 'var(--Border)',
+    hoverBorder: 'var(--Border)',
+    pressedBorder: 'var(--Border)',
+    text: 'var(--Text)',
+    focusBg: 'var(--Hover)',
+  };
+}
+
 function buildVariantMap() {
-  const map = {};
+  const map = { default: defaultStyles() };
   COLORS.forEach((color) => {
     map[color + '-outline'] = outlineStyles(color);
   });
@@ -103,9 +117,13 @@ function buildVariantMap() {
 // Vertical stays per-size; each size keeps its original horizontal value as the
 // fallback when --Input-Padding isn't defined.
 const SIZE_MAP = {
-  small:  { height: 'var(--Small-Button-Height)', fontSize: '13px', labelSize: '13px', padding: '4px var(--Input-Padding, 8px)',  iconSize: 16 },
-  medium: { height: 'var(--Button-Height)',        fontSize: '15px', labelSize: '15px', padding: '4px var(--Input-Padding, 12px)', iconSize: 18 },
-  large:  { height: 'var(--Large-Button-Height)',  fontSize: '17px', labelSize: '17px', padding: '4px var(--Input-Padding, 16px)', iconSize: 20 },
+  /* fontSize is the Body ramp — Figma's input text is Dynamic Body, which is
+     Body-Small / -Medium / -Large across the Component-Size modes. It was
+     13 / 15 / 17 literals, in MUI's Roboto. iconSize is the in-button glyph
+     (Button-Icon, 16 / 20 / 32). */
+  small:  { height: 'var(--Small-Button-Height)', fontSize: 'var(--Body-Small-Font-Size, 14px)',  lineHeight: 'var(--Body-Small-Line-Height, 20px)',  labelSize: '13px', padding: '4px var(--Input-Padding, 8px)',  iconSize: 'var(--Sm-Button-Icon, 16px)' },
+  medium: { height: 'var(--Button-Height)',        fontSize: 'var(--Body-Medium-Font-Size, 16px)', lineHeight: 'var(--Body-Medium-Line-Height, 24px)', labelSize: '15px', padding: '4px var(--Input-Padding, 12px)', iconSize: 'var(--Button-Icon, 20px)' },
+  large:  { height: 'var(--Large-Button-Height)',  fontSize: 'var(--Body-Large-Font-Size, 18px)',  lineHeight: 'var(--Body-Large-Line-Height, 28px)',  labelSize: '17px', padding: '4px var(--Input-Padding, 16px)', iconSize: 'var(--Lg-Button-Icon, 32px)' },
 };
 
 export const FLOATING_SIZE_MAP = {
@@ -229,7 +247,7 @@ const VALIDATION_COLORS = {
 // --- Component ---------------------------------------------------------------
 
 export function Input({
-  variant = 'primary-outline',
+  variant = 'default',
   size = 'medium',
   label,
   labelPosition = 'standard',
@@ -272,7 +290,7 @@ export function Input({
   ...props
 }) {
   const variantMap = buildVariantMap();
-  const styles = variantMap[variant] || variantMap['primary-outline'];
+  const styles = variantMap[variant] || variantMap['default'];
   const isFloating = labelPosition === 'floating';
 
   /* A *-light variant now falls through to primary-outline via the || above,
@@ -378,8 +396,18 @@ export function Input({
       {/* Outer border shell — provides contrast against page background.
           Radius uses the size-aware Input-Radius token so a small input is
           rounded by its own height, not the medium button's. */}
-      <Box sx={{
-        border: '1px solid ' + effectiveBorder,
+      <Box className="inp-shell" sx={{
+        /* The edge is an OVERLAY, not a border — Figma's inside stroke, drawn
+           on top and taking no space. As a border it added 2px to the field
+           (34 against 32) and pushed the icon, the text and a 32px end button
+           in by a pixel. */
+        position: 'relative',
+        border: 'none',
+        '&::after': {
+          content: '""', position: 'absolute', inset: 0, pointerEvents: 'none',
+          border: '1px solid ' + effectiveBorder, borderRadius: 'inherit',
+          transition: 'border-color 0.15s ease-in-out',
+        },
         borderRadius: size === 'small'
           ? 'var(--Sm-Input-Radius, var(--Input-Radius, var(--Style-Border-Radius)))'
           : size === 'large'
@@ -393,13 +421,20 @@ export function Input({
            pointer-events would stop it), so an unguarded rule would light up
            a control that cannot be used. */
         ...(!disabled && {
-          '&:hover': { borderColor: stateSource.hoverBorder },
-          '&:active': { borderColor: stateSource.pressedBorder },
+          '&:hover::after': { borderColor: stateSource.hoverBorder },
+          '&:active::after': { borderColor: stateSource.pressedBorder },
+          /* Figma's Hover, Pressed and Focus-Visible fields draw their text in
+             --Text, placeholder included; only the resting field is --Quiet. */
+          '&:hover .MuiOutlinedInput-root, &:active .MuiOutlinedInput-root, &:focus-within .MuiOutlinedInput-root': { color: activeTextColor },
         }),
+        /* 2px ring 1px outside — Figma's Focus-Visible frame sits 3px out with
+           a 2px inside stroke, the same ring as every other control. */
         '&:focus-within': {
           outline: '2px solid var(--Focus-Visible)',
-          outlineOffset: '2px',
+          outlineOffset: '1px',
         },
+        // Disabled dims the WHOLE field (Figma's variant opacity), edge included.
+        ...(disabled && { opacity: 'var(--Disabled, 0.38)' }),
       }}>
 
         {/* Inner wrapper. No data-surface — the input inherits the parent
@@ -436,6 +471,11 @@ export function Input({
                 backgroundColor: 'var(--Hover)',
                 color: 'var(--Quiet)',
                 fontSize: sizeConfig.fontSize,
+                fontFamily: 'var(--Body-Font-Family, var(--Font-Family-Body, inherit))',
+                /* The field is Button-Height OVERALL, as Figma draws it: its
+                   inside stroke takes no space, so the shell's 1px border comes
+                   out of the height rather than being added to it (34 → 32). */
+                // Button-Height overall: the edge is an overlay, so nothing comes off it.
                 minHeight: multiline ? 'auto' : sizeConfig.height,
                 padding: 0,
                 borderRadius: 0,
@@ -466,24 +506,55 @@ export function Input({
                 },
 
                 '&.Mui-disabled': {
-                  opacity: 'var(--Disabled, 0.38)',
+                  // The shell carries the 38%; dimming here too would double it.
+                  opacity: 1,
+                  color: 'var(--Quiet)',
+                  /* MUI paints disabled text its own rgba(0,0,0,.38) — through
+                     -webkit-text-fill-color too — over the design's --Quiet. */
+                  /* A disabled field keeps a typed VALUE in --Text (the whole
+                     field is already at 38%); only the placeholder is --Quiet. */
+                  '& .MuiInputBase-input.Mui-disabled': {
+                    color: 'inherit', WebkitTextFillColor: 'currentColor',
+                    '&:not(:placeholder-shown)': { color: activeTextColor },
+                  },
                   cursor: 'not-allowed',
                 },
 
                 '& input': {
                   padding: sizeConfig.padding,
+                  /* Beside a start icon the icon's gap is the whole space — set
+                     here, in the one '& input' rule, because a second key of the
+                     same name REPLACES this object rather than merging into it
+                     (it dropped the padding and MUI's 16.5px made the row 56). */
+                  ...(!isFloating && startAdornment && { paddingLeft: 0 }),
+                  lineHeight: sizeConfig.lineHeight,
                   color: 'inherit',
                   '&::placeholder': { color: 'var(--Quiet)', opacity: 1 },
                 },
 
                 '& textarea': {
                   padding: sizeConfig.padding,
+                  ...(!isFloating && startAdornment && { paddingLeft: 0 }),
                   color: 'inherit',
                   resize,
                   '&::placeholder': { color: 'var(--Quiet)', opacity: 1 },
                 },
 
                 '& .MuiInputAdornment-root': { color: 'var(--Quiet)' },
+
+                /* Standard field: Figma insets the start icon by the input
+                   padding and leaves Sizing-1-and-Half (12) before the text;
+                   the end decorator sits the same padding in from the right at
+                   full field height, so an icon button fits its own 32. */
+                ...(!isFloating && {
+                  '& .MuiInputAdornment-root': { maxHeight: 'none', height: 'auto', alignSelf: 'stretch', alignItems: 'center' },
+                  '& .MuiInputAdornment-positionStart': {
+                    marginLeft: 'var(--Input-Padding, 12px)',
+                    marginRight: 'var(--Sizing-1-and-Half, 12px)',
+                    '& .MuiSvgIcon-root': { fontSize: sizeConfig.iconSize },
+                  },
+                  '& .MuiInputAdornment-positionEnd': { marginLeft: 0, marginRight: 'var(--Input-Padding, 12px)' },
+                }),
 
                 // Start adornment positioning when floating — gives it some
                 // breathing room from the left edge and pushes it up by the
