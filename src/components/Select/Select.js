@@ -1,11 +1,12 @@
 // src/components/Select/Select.js
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useId } from 'react';
 import ReactDOM from 'react-dom';
 import { Box } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CheckIcon from '@mui/icons-material/Check';
 import { Icon } from '../Icon/Icon';
-import { Body, BodySmall } from '../Typography';
+import { BodySmall } from '../Typography';
+import { FormLabel } from '../FormLabel/FormLabel';
 import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
 
 /**
@@ -38,10 +39,14 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
+/* The trigger is Figma's Input with no start icon and an end decorator (the
+   Select set is built from Input instances), so it shares the Input's ramp:
+   Button-Height tall, Body text, the input padding before the text and after
+   the decorator, the in-button icon in a Button-Height square. */
 const SIZE_MAP = {
-  small:  { height: 'var(--Small-Button-Height)', fontSize: '13px', padding: '4px 8px', iconSize: 16 },
-  medium: { height: 'var(--Button-Height)',        fontSize: '14px', padding: '6px 12px', iconSize: 18 },
-  large:  { height: 'var(--Large-Button-Height)',  fontSize: '16px', padding: '8px 16px', iconSize: 20 },
+  small:  { height: 'var(--Small-Button-Height)', fontSize: 'var(--Body-Small-Font-Size, 14px)',  lineHeight: 'var(--Body-Small-Line-Height, 20px)',  pad: 'var(--Input-Padding, 8px)',  icon: 'var(--Sm-Button-Icon, 16px)', radius: 'var(--Sm-Input-Radius, var(--Input-Radius, var(--Style-Border-Radius)))', iconSize: 16 },
+  medium: { height: 'var(--Button-Height)',        fontSize: 'var(--Body-Medium-Font-Size, 16px)', lineHeight: 'var(--Body-Medium-Line-Height, 24px)', pad: 'var(--Input-Padding, 12px)', icon: 'var(--Button-Icon, 20px)',    radius: 'var(--Input-Radius, var(--Style-Border-Radius))', iconSize: 20 },
+  large:  { height: 'var(--Large-Button-Height)',  fontSize: 'var(--Body-Large-Font-Size, 18px)',  lineHeight: 'var(--Body-Large-Line-Height, 28px)',  pad: 'var(--Input-Padding, 16px)', icon: 'var(--Lg-Button-Icon, 32px)', radius: 'var(--Lg-Input-Radius, var(--Input-Radius, var(--Style-Border-Radius)))', iconSize: 32 },
 };
 
 const FLOATING_SIZE_MAP = {
@@ -109,7 +114,6 @@ export function Select({
   /* There was an `isLight = variant === 'light'` here, read by nothing. So
      variant="light" never changed a color, a token or a style — its ONLY
      effect was the class name below, which is why it looked supported. */
-  const borderToken = 'var(--Buttons-' + C + '-Border)';
 
   /* Normalise both props, so neither can emit a class for a style that no
      longer exists. A stale class is not harmless here: select-variant-light
@@ -138,6 +142,7 @@ export function Select({
   const effectiveVariant = variant === 'light' ? 'outline' : variant;
   const effectiveSelectionStyle = selectionStyle === 'light' ? 'default' : selectionStyle;
   const activeTextColor = color === 'default' ? 'var(--Text)' : 'var(--Text-' + C + ')';
+  const triggerId = useId();
   const [internalValue, setInternalValue] = useState(defaultValue);
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -433,39 +438,41 @@ export function Select({
       sx={{ position: 'relative', width: fullWidth ? '100%' : 'auto', display: 'inline-block', fontFamily: 'inherit', ...sx }}
       {...props}
     >
-      {/* Top label */}
-      {isTop && label && (() => {
-        const LabelComp = size === 'small' ? BodySmall : Body;
-        return (
-          <LabelComp
-            component="label"
-            style={{
-              display: 'block', marginBottom: '6px',
-              color: disabled ? 'var(--Quiet)' : 'var(--Text)',
-              fontWeight: 500,
-              opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
-            }}
-          >
-            {label}
-          </LabelComp>
-        );
-      })()}
+      {/* Top label: the lib's FormLabel, as Input's. The trigger is a
+          <button>, which IS labelable, so <label for> names it. */}
+      {isTop && label && (
+        <FormLabel htmlFor={triggerId} disabled={disabled}
+          sx={{ marginBottom: 'var(--Sizing-Half, 4px)', ...(disabled && { opacity: 'var(--Disabled, 0.38)' }) }}>
+          {label}
+        </FormLabel>
+      )}
 
-      {/* Outer border shell */}
-      <Box sx={{
-        border: '1px solid ' + borderToken,
-        // Select is an input → follow the Input Radius, falling back to the
-        // button/style radius when a design system doesn't define it.
-        borderRadius: 'var(--Input-Radius, var(--Style-Border-Radius))',
+      {/* Outer shell — Input's: the edge an inside-stroke overlay, the fill
+          resting on --Hover, deepening to --Pressed under the pointer and back
+          to --Hover while pressed; the 2px ring 1px out; 38% when disabled. */}
+      <Box className="select-shell" sx={{
+        position: 'relative',
+        border: 'none',
+        '&::after': {
+          content: '""', position: 'absolute', inset: 0, pointerEvents: 'none',
+          border: '1px solid var(--Border)', borderRadius: 'inherit',
+        },
+        borderRadius: isFloating ? 'var(--Input-Radius, var(--Style-Border-Radius))' : sizeConfig.radius,
         overflow: 'hidden',
-        transition: 'border-color 0.15s ease',
+        backgroundColor: 'var(--Hover)',
+        transition: 'background-color 0.15s ease',
         boxShadow: 'none',
+        ...(!disabled && {
+          '&:hover': { backgroundColor: 'var(--Pressed)' },
+          '&:active': { backgroundColor: 'var(--Hover)' },
+          '&:hover .select-trigger, &:active .select-trigger, &:focus-within .select-trigger': { color: 'var(--Text)' },
+        }),
         '&:focus-within': {
           outline: '2px solid var(--Focus-Visible)',
-          outlineOffset: '2px',
+          outlineOffset: '1px',
         },
+        ...(disabled && { opacity: 'var(--Disabled, 0.38)' }),
       }}>
-
       {/* Inner wrapper — no data-surface so trigger inherits parent scope */}
       <Box>
 
@@ -477,25 +484,29 @@ export function Select({
         role="combobox"
         aria-expanded={open}
         aria-haspopup="listbox"
-        aria-label={label || placeholder}
+        id={triggerId}
+        aria-label={isTop && label ? undefined : (label || placeholder)}
+        className="select-trigger"
         tabIndex={disabled ? -1 : 0}
         onClick={toggleOpen}
         onKeyDown={handleKeyDown}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         sx={{
-          display: 'flex', alignItems: 'center', gap: 1,
+          display: 'flex', alignItems: 'center',
+          gap: isFloating ? 1 : 'var(--Sizing-1-and-Half, 12px)',
           width: '100%', minWidth,
-          height: sizeConfig.height,
-          padding: sizeConfig.padding,
-          backgroundColor: 'var(--Hover)',
+          height: isFloating ? sizeConfig.height : sizeConfig.height,
+          padding: isFloating ? sizeConfig.padding : '0 ' + sizeConfig.pad + ' 0 ' + sizeConfig.pad,
+          backgroundColor: 'transparent',
           border: 'none',
           borderRadius: 0,
-          color: (hasValue || open) ? activeTextColor : 'var(--Quiet)',
+          // The field's text is --Text, as Input's; only the placeholder is Quiet.
+          color: (hasValue || open) ? 'var(--Text)' : 'var(--Quiet)',
           fontSize: sizeConfig.fontSize,
-          fontFamily: 'inherit',
+          lineHeight: sizeConfig.lineHeight,
+          fontFamily: 'var(--Body-Font-Family, inherit)',
           cursor: disabled ? 'not-allowed' : 'pointer',
-          opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
           outline: 'none', textAlign: 'left', position: 'relative',
           transition: 'color 0.15s ease',
         }}
@@ -545,18 +556,29 @@ export function Select({
               {showColorLabels && <BodySmall style={{ color: 'inherit', padding: 0 }}>{selectedLabel}</BodySmall>}
             </Box>
           ) : (
-            <BodySmall style={{ color: 'inherit', padding: 0 }}>
+            <Box component="span" className="select-value" sx={{ color: 'inherit', font: 'inherit' }}>
               {hasValue ? selectedLabel : (isFloating && label ? '' : placeholder)}
-            </BodySmall>
+            </Box>
           )}
         </Box>
 
-        <ExpandMoreIcon sx={{
-          fontSize: (sizeConfig.iconSize || 18) + 'px',
-          color: 'var(--Text-Quiet)',
-          transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-          transition: 'transform 0.2s ease', flexShrink: 0,
-        }} />
+        {/* Figma's end decorator: an Input Decorator — a ghost icon button,
+            Button-Height square. Drawn, not a <button>: the trigger is already
+            one, and buttons do not nest. */}
+        <Box component="span" aria-hidden="true" className="select-decorator" sx={{
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0,
+          width: isFloating ? 'auto' : sizeConfig.height,
+          height: isFloating ? 'auto' : sizeConfig.height,
+          color: 'var(--Icons-Default, var(--Text))',
+          '& .MuiSvgIcon-root': {
+            fontSize: isFloating ? (sizeConfig.iconSize || 18) + 'px' : sizeConfig.icon,
+            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.2s ease',
+          },
+        }}>
+          <ExpandMoreIcon />
+        </Box>
       </Box>
 
       </Box>{/* end inner themed surface */}
