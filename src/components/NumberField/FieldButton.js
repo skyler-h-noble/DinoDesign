@@ -8,8 +8,9 @@ import { SHADOW_LEVEL_1 } from '../_shadows';
  *
  * Figma's `Field Button` set (6850:28584): Style ghost | outline x State.
  *
- *   size     Button-Height tall; the width is --Field-Button-Width (and
- *            --Sm- / --Lg-), falling back to 40 / 48 / 64 — the icon plus even
+ *   size     --FieldButton-Height x --FieldButton-Width (and --Sm- / --Lg-),
+ *            Figma's Button/FieldButton-Height and -Width; the height is the
+ *            button height, the width falls back to 40 / 48 / 64 — the icon plus even
  *            padding, so the button scales with its height instead of being a
  *            48px sliver at small and taller than wide at large
  *   corner   --Input-Radius, the field it belongs to
@@ -51,8 +52,8 @@ export const FieldButton = React.forwardRef(function FieldButton({
       sx={{
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
         flexShrink: 0,
-        width: 'var(--' + p + 'Field-Button-Width, ' + (size === 'small' ? '40px' : size === 'large' ? '64px' : '48px') + ')',
-        height,
+        width: 'var(--' + p + 'FieldButton-Width, ' + (size === 'small' ? '40px' : size === 'large' ? '64px' : '48px') + ')',
+        height: 'var(--' + p + 'FieldButton-Height, ' + height + ')',
         boxSizing: 'border-box',
         m: 0, p: 0,
         border: 'none',

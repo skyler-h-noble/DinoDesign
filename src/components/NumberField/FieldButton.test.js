@@ -13,7 +13,7 @@ describe('FieldButton', () => {
     expect(screen.getByRole('button', { name: 'Increase' })).toBeInTheDocument();
   });
 
-  test.each([['small', '--Sm-Field-Button-Width', '40px'], ['medium', '--Field-Button-Width', '48px'], ['large', '--Lg-Field-Button-Width', '64px']])(
+  test.each([['small', '--Sm-FieldButton-Width', '40px'], ['medium', '--FieldButton-Width', '48px'], ['large', '--Lg-FieldButton-Width', '64px']])(
     '%s reads %s, falling back to %s', (size, token, px) => {
       render(<FieldButton size={size} aria-label="Increase"><AddIcon /></FieldButton>);
       expect(allCss()).toContain('var(' + token + ', ' + px + ')');
