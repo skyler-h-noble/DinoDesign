@@ -196,6 +196,7 @@ export { Dropdown, MenuButton, Menu, MenuItem, MenuDivider, MenuShowcase } from 
 export { BottomNavigation, BottomNavigationShowcase } from './BottomNavigation';
 export { Stepper, Step, StepperShowcase, useStepperContext } from './Stepper';
 export { LinkGroup } from './LinkGroup';
+export { ImagePlaceholder } from './ImagePlaceholder';
 export { DatePicker, DayCell } from './DatePicker';
 export { SpeedDial, SpeedDialShowcase } from './SpeedDial';
 

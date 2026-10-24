@@ -5,8 +5,9 @@
 // It used to stamp data-theme="Default" + data-surface="Surface" on every
 // instance. That is not a no-op: `Default` is a real theme in every generated
 // system, so a Ratio inside a Primary card switched out of it, and the Image
-// Placeholder — which fills with var(--Border) and draws its icon in
-// var(--Background) — resolved both against the wrong scope. On a light brand
+// Placeholder — then a var(--Border) fill with its icon in var(--Background),
+// now ImagePlaceholder's --Border-Variant tint and --Quiet icon — resolved
+// both against the wrong scope. On a light brand
 // that is a blank white square with an invisible glyph, which looks like a
 // missing asset rather than a theme bug, so it survived a long time.
 //
@@ -51,7 +52,7 @@ describe('Ratio scope inheritance', () => {
     // The visible symptom of the old bug was a blank square: the fill and the
     // icon both resolved in the wrong scope and landed the same color, so the
     // glyph was present in the DOM but invisible. Assert it is drawn — the
-    // color pairing itself (fill --Border / icon --Background) is a style
+    // color pairing itself (fill --Border-Variant / icon --Quiet, ImagePlaceholder) is a style
     // contract jsdom cannot resolve, and is covered by the source comment.
     const { container } = render(<Ratio />);
     expect(container.querySelector('svg')).not.toBeNull();

@@ -1,8 +1,7 @@
 // src/components/Ratio/Ratio.js
 import React from 'react';
 import { Box as MuiBox } from '@mui/material';
-import ImageIcon from '@mui/icons-material/Image';
-import { Icon } from '../Icon/Icon';
+import { ImagePlaceholder } from '../ImagePlaceholder';
 /* Level from the Figma effect style that NAMES this component.
    The five Effect-Levels are the five styles:
      1  Card / Accordion, Handle, Alert, Bottom-Sheet
@@ -201,24 +200,19 @@ export function Ratio({
           width: '100%',
           height: '100%',
           padding: p,
-          // Image Placeholder fills with var(--Border); else the normal surface.
-          backgroundColor: showPlaceholder ? 'var(--Border)' : 'var(--Background)',
+          // The placeholder paints itself (ImagePlaceholder); else the surface.
+          backgroundColor: showPlaceholder ? 'transparent' : 'var(--Background)',
           color: 'var(--Text)',
           fontFamily: 'inherit',
           borderRadius: isDefault ? 0 : 'calc(var(--Style-Border-Radius) - 1px)',
           // Center the placeholder icon; otherwise let a single child fill.
-          ...(showPlaceholder
-            ? { display: 'flex', alignItems: 'center', justifyContent: 'center' }
-            : { '& > *': { width: '100%', height: '100%' } }),
+          '& > *': { width: '100%', height: '100%' },
         }}
       >
-        {showPlaceholder ? (
-          // Centered photo icon — lib <Icon> at the large (36px) size, colored
-          // var(--Background) so it reads against the var(--Border) fill.
-          <Icon size="large" sx={{ color: 'var(--Background)' }}>
-            <ImageIcon />
-          </Icon>
-        ) : children}
+        {/* Figma's Image Placeholder: a Border-Variant tint with the photo
+            glyph in --Quiet, as large as the slot. It was a solid --Border
+            block with a 36px --Background icon — the design inverted. */}
+        {showPlaceholder ? <ImagePlaceholder /> : children}
       </MuiBox>
     </MuiBox>
   );
