@@ -85,7 +85,7 @@ export { ButtonGroup } from './ButtonGroup';
 export { Fab, FabShowcase } from './Fab';
 export { Rail, RailItem, RailShowcase } from './Rail';
 export { Toolbar, ToolbarShowcase } from './Toolbar';
-export { NumberField, NumberFieldShowcase } from './NumberField';
+export { NumberField, FieldButton, NumberFieldShowcase } from './NumberField';
 export { ToggleButton } from './ToggleButton';
 // The GROUP is a separate component from the standalone ToggleButton: it owns
 // the selection state, so a segmented control comes from here rather than from

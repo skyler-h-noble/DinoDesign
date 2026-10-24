@@ -132,6 +132,7 @@ const REGISTRY = [
   // clickable export, and its docblock promises hover and focus.
   { control: 'InteractivePaper',    file: 'Paper/Paper.js', within: ['export function InteractivePaper', 'export function ElevatedPaper'] },
   { control: 'NumberField spinner', file: 'NumberField/NumberField.js' },
+  { control: 'Field button',        file: 'NumberField/FieldButton.js' },
   {
     control: 'BottomNavItem',
     file: 'BottomNavigation/BottomNavigation.js',
