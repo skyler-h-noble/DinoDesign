@@ -19,11 +19,6 @@ import {
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
 
-const COLOR_GROUPS = [
-  { label: 'Default', colors: ['default'] },
-  { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
-  { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
-];
 
 /* ── Helpers ── */
 function CopyButton({ code }) {
@@ -49,43 +44,19 @@ function ControlButton({ label, selected, onClick }) {
   );
 }
 
-function ColorSwatchButton({ color, selected, onClick }) {
-  const C = cap(color);
-  return (
-    <Box
-      component="button"
-      onClick={() => onClick(color)}
-      aria-label={'Select ' + C}
-      aria-pressed={selected}
-      title={C}
-      sx={{
-        width: 'var(--Button-Height)', height: 'var(--Button-Height)', borderRadius: '4px',
-        backgroundColor: 'var(--Buttons-' + C + '-Button)',
-        border: selected ? '2px solid var(--Text)' : '1px solid var(--Border)',
-        outline: selected ? '2px solid var(--Focus-Visible)' : '2px solid transparent',
-        outlineOffset: '1px', cursor: 'pointer', flexShrink: 0,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        transition: 'transform 0.1s ease', '&:hover': { transform: 'scale(1.1)' },
-      }}>
-      {selected && (
-        <CheckIcon sx={{ fontSize: 16, color: 'var(--Buttons-' + C + '-Text)', pointerEvents: 'none' }} />
-      )}
-    </Box>
-  );
-}
 
 /* ── Main Showcase ── */
 export function SheetShowcase() {
-  const [surfaceLevel, setSurfaceLevel] = useState('Surface');
-  const [color, setColor]         = useState('default');
-  const [elevated, setElevated]   = useState(false);
+  const [surfaceLevel, setSurfaceLevel] = useState('Container');
+  const [hideBackdrop, setHideBackdrop] = useState(false);
+  const [open, setOpen] = useState(false);
   const [bgTheme, setBgTheme]     = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
 
   const generateCode = () => {
-    const parts = ['surface="' + surfaceLevel + '"'];
-    if (color !== 'default') parts.push('color="' + color + '"');
-    if (elevated) parts.push('elevated');
+    const parts = ['open={open}', 'onClose={() => setOpen(false)}'];
+    if (surfaceLevel !== 'Container') parts.push('surface="' + surfaceLevel + '"');
+    if (hideBackdrop) parts.push('hideBackdrop');
     return (
       '<Sheet ' + parts.join(' ') + '>\n' +
       '  <H5>Sheet Title</H5>\n' +
@@ -120,11 +91,11 @@ export function SheetShowcase() {
 
           <PreviewSurface theme={bgTheme} surface={bgSurface}>
             <Box sx={{ width: '100%', maxWidth: 400 }}>
-              <Sheet surface={surfaceLevel} color={color} elevated={elevated}>
+              <Button onClick={() => setOpen(true)}>Open sheet</Button>
+              <Sheet open={open} onClose={() => setOpen(false)} surface={surfaceLevel} hideBackdrop={hideBackdrop} aria-label="Sheet Title">
                 <H5>Sheet Title</H5>
-                <Body style={{ color: 'var(--Quiet)' }}>
-                  A themed surface container for grouping related content.
-                </Body>
+                <Body color="quiet">A bottom sheet: it rises from the bottom of the screen.</Body>
+                <Button onClick={() => setOpen(false)}>Close</Button>
               </Sheet>
             </Box>
           </PreviewSurface>
@@ -140,41 +111,23 @@ export function SheetShowcase() {
                 <Box sx={{ p: 3 }}>
 
 
-                  {/* Style */}
+                  {/* Surface */}
                   <Box>
-                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</EyebrowSmall>
-                    <Stack direction="row" spacing={1}>
-                      {['Surface-Brightest', 'Surface-Bright', 'Surface', 'Surface-Dim', 'Surface-Dimmest'].map((v) => (
-                        <ControlButton key={v} label={v.replace('Surface-', '') || 'Surface'} selected={surfaceLevel === v} onClick={() => setSurfaceLevel(v)} />
+                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>SURFACE</EyebrowSmall>
+                    <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
+                      {['Container', 'Surface', 'Surface-Bright', 'Surface-Dim'].map((v) => (
+                        <ControlButton key={v} label={v} selected={surfaceLevel === v} onClick={() => setSurfaceLevel(v)} />
                       ))}
                     </Stack>
                   </Box>
 
-                  {/* Color */}
-                  <Box sx={{ mt: 3 }}>
-                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</EyebrowSmall>
-                    <Stack spacing={1.5}>
-                      {COLOR_GROUPS.map((group) => (
-                        <Box key={group.label}>
-                          <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 4, fontWeight: 600 }}>{group.label}</Caption>
-                          <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-                            {group.colors.map((c) => (
-                              <ColorSwatchButton key={c} color={c} selected={color === c} onClick={setColor} />
-                            ))}
-                          </Stack>
-                        </Box>
-                      ))}
-                    </Stack>
-                  </Box>
-
-                  {/* Toggles */}
                   <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box>
-                      <Label>Elevated</Label>
-                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Higher shadow level</Caption>
+                      <Label>No scrim</Label>
+                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>hideBackdrop</Caption>
                     </Box>
-                    <Switch variant="default-outline" checked={elevated} onChange={(e) => setElevated(e.target.checked)}
-                      size="small" aria-label="Elevated" />
+                    <Switch variant="default-outline" checked={hideBackdrop} onChange={(e) => setHideBackdrop(e.target.checked)}
+                      size="small" aria-label="No scrim" />
                   </Box>
 
                 </Box>
@@ -190,11 +143,10 @@ export function SheetShowcase() {
                       <H5>Structure</H5>
                       <Stack spacing={0}>
                         {[
-                          { label: 'Two-layer',   value: 'Outer shell (border + shadow) + inner content (data-theme + data-surface)' },
-                          { label: 'Solid',        value: 'data-theme="{Theme}" data-surface="Surface"' },
-                          { label: 'Light',        value: 'data-theme="{Theme}-Light" data-surface="Surface"' },
-                          { label: 'Dark',         value: 'data-theme="{Theme}" data-surface="Surface-Dimmest"' },
-                          { label: 'Elevation',    value: 'Effect-Level-2 rest, Level-3 hover. Elevated: Level-3 rest, Level-4 hover.' },
+                          { label: 'Role',      value: 'role="dialog" aria-modal="true" — name it with aria-label or aria-labelledby' },
+                          { label: 'Keyboard',  value: 'Escape closes; Tab is trapped inside; focus returns to the opener' },
+                          { label: 'Surface',   value: 'data-surface="Container" (the theme is inherited)' },
+                          { label: 'Elevation', value: 'Level 1 — the "Accordion, Handle, Alert, Bottom-Sheet" style' },
                         ].map(({ label, value }) => (
                           <Box key={label} sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
                             <BodySmall>{label}:</BodySmall>

@@ -231,3 +231,13 @@ describe('Drawer — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+describe('Drawer without a backdrop is not modal', () => {
+  const { render, screen } = require('@testing-library/react');
+  const { Drawer } = require('./Drawer');
+  test('no aria-modal, no scroll lock', () => {
+    render(<Drawer open hideBackdrop aria-label="Filters">x</Drawer>);
+    expect(screen.getByRole('dialog')).not.toHaveAttribute('aria-modal');
+    expect(document.body.style.overflow).not.toBe('hidden');
+  });
+});

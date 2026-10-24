@@ -210,6 +210,9 @@ export { Popover } from './Popover';
 export { Dialog, AlertDialog, FormDialog, DialogShowcase } from './Dialog';
 export { Modal } from './Modal';
 export { Drawer, DrawerClose, DrawerHeader, DrawerContent, DrawerShowcase } from './Drawer';
+/* Sheet — the bottom sheet (Figma's Sheet). It was never exported here, so the
+   package shipped without it while its docs page described it. */
+export { Sheet } from './Sheet';
 export { DropZone } from './DropZone';
 
 // ========== FEEDBACK ==========

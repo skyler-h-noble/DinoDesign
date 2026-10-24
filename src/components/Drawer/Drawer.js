@@ -57,6 +57,9 @@ export function Drawer({
   size = 'medium',
   anchor = 'left',
   hideBackdrop = false,
+  /* The panel's surface level. Surface-Dim, the sidebar pattern, unless a
+     caller (Sheet: Container) says otherwise. */
+  surface = 'Surface-Dim',
   className = '',
   sx = {},
   ...props
@@ -81,8 +84,14 @@ export function Drawer({
     return () => document.removeEventListener('keydown', handler);
   }, [open, onClose]);
 
+  /* Without a backdrop the drawer is NOT modal — what the docs already said
+     ("it stops trapping focus"): the page stays scrollable and focus is not
+     pulled in or trapped. Before, it locked scroll and grabbed focus anyway. */
+  const modal = !hideBackdrop;
+
   // Focus management
   useEffect(() => {
+    if (!modal) return;
     if (open) {
       previousFocus.current = document.activeElement;
       requestAnimationFrame(() => {
@@ -96,20 +105,20 @@ export function Drawer({
       previousFocus.current.focus();
       previousFocus.current = null;
     }
-  }, [open]);
+  }, [open, modal]);
 
   // Lock body scroll
   useEffect(() => {
-    if (open) {
+    if (open && modal) {
       const orig = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
       return () => { document.body.style.overflow = orig; };
     }
-  }, [open]);
+  }, [open, modal]);
 
   // Focus trap
   const handleKeyDown = useCallback((e) => {
-    if (e.key !== 'Tab' || !drawerRef.current) return;
+    if (!modal || e.key !== 'Tab' || !drawerRef.current) return;
     const focusable = drawerRef.current.querySelectorAll(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     );
@@ -121,7 +130,7 @@ export function Drawer({
     } else {
       if (document.activeElement === last) { e.preventDefault(); first.focus(); }
     }
-  }, []);
+  }, [modal]);
 
   if (!open) return null;
 
@@ -144,11 +153,11 @@ export function Drawer({
       <Box
         ref={drawerRef}
         role="dialog"
-        aria-modal="true"
+        aria-modal={modal ? 'true' : undefined}
         tabIndex={-1}
         data-theme={providerTheme}
         data-style={providerStyle}
-        data-surface="Surface-Dim"
+        data-surface={surface}
         onKeyDown={handleKeyDown}
         className={'drawer drawer-' + size + ' drawer-' + anchor + ' ' + className}
         sx={{

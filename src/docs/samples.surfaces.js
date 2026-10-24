@@ -646,29 +646,40 @@ export const SURFACE_SAMPLES = {
   },
 
   Sheet: {
-    /* One theme, five levels, so the only thing changing is the lightness. */
-    surface: () => (
-      <VStack gap="var(--Sizing-2)">
-        {['Surface', 'Surface-Dim', 'Surface-Dimmest',
-          'Surface-Bright', 'Surface-Brightest'].map((lvl) => (
-          <Cell key={lvl} label={lvl} emphasis={lvl === 'Surface'} width={260}>
-            <Sheet surface={lvl} sx={{ padding: 'var(--Sizing-2)', width: 220 }}>
-              <BodySmall>On {lvl}</BodySmall>
-            </Sheet>
-          </Cell>
-        ))}
-      </VStack>
+    open: () => (
+      <OverlayAxis
+        values={[true]} label={() => 'Open sheet'}
+        render={(v, close) => (
+          <Sheet open onClose={close} aria-label="Share">
+            <H3>Share</H3>
+            <Button onClick={close}>Close</Button>
+          </Sheet>
+        )}
+      />
     ),
-    elevated: () => (
-      <HStack gap="var(--Sizing-4)" style={{ flexWrap: 'wrap' }}>
-        {[false, true].map((on) => (
-          <Cell key={String(on)} label={String(on)} emphasis={!on}>
-            <Sheet elevated={on} sx={{ padding: 'var(--Sizing-2)', width: 180 }}>
-              <BodySmall>{on ? 'Lifted off the page' : 'Flat on it'}</BodySmall>
-            </Sheet>
-          </Cell>
-        ))}
-      </HStack>
+    /* The surface the sheet paints. Container by default, as Figma pins it. */
+    surface: () => (
+      <OverlayAxis
+        values={['Container', 'Surface', 'Surface-Bright']} defaultValue="Container"
+        render={(v, close) => (
+          <Sheet open onClose={close} surface={v}>
+            <H3>surface={v}</H3>
+            <Button onClick={close}>Close</Button>
+          </Sheet>
+        )}
+      />
+    ),
+    hideBackdrop: () => (
+      <OverlayAxis
+        values={[false, true]} defaultValue={false}
+        label={(v) => v ? 'true — no scrim' : 'false — scrim'}
+        render={(v, close) => (
+          <Sheet open onClose={close} hideBackdrop={v}>
+            <H3>Share</H3>
+            <Button onClick={close}>Close</Button>
+          </Sheet>
+        )}
+      />
     ),
   },
 

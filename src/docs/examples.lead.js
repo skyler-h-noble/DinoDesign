@@ -187,6 +187,20 @@ const DrawerDemo = () => {
   );
 };
 
+const SheetDemo = () => {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Button onClick={() => setOpen(true)}>Open sheet</Button>
+      <Sheet open={open} onClose={() => setOpen(false)}>
+        <H3>Share</H3>
+        <List items={LIST_ITEMS} clickable />
+        <Button onClick={() => setOpen(false)}>Close</Button>
+      </Sheet>
+    </>
+  );
+};
+
 const SnackbarDemo = () => {
   const [open, setOpen] = useState(false);
   return (
@@ -396,19 +410,7 @@ export const LEAD_EXAMPLES = {
      example does not fail anything — the slot simply renders nothing — so
      these sat empty until someone looked. examples.coverage.test.js now
      fails instead. */
-  Sheet: () => (
-    <Frame w={320}>
-      <Sheet surface="Surface-Bright" elevated sx={{ padding: 'var(--Sizing-3)' }}>
-        <VStack gap="var(--Sizing-1)">
-          <Subtitle color="standard">Export settings</Subtitle>
-          <BodySmall color="quiet">
-            A panel that carries its own surface, for content that should read
-            as sitting above the page rather than on it.
-          </BodySmall>
-        </VStack>
-      </Sheet>
-    </Frame>
-  ),
+  Sheet: () => <SheetDemo />,
   /* Both columns populated: an empty right-hand list looks like a broken
      component rather than a starting state. */
   TransferList: () => (

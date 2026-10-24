@@ -1,108 +1,64 @@
 // src/components/Sheet/Sheet.js
 import React from 'react';
-import { Box } from '@mui/material';
-import { SHADOW_LEVEL_2, SHADOW_LEVEL_3, SHADOW_LEVEL_4 } from '../_shadows';
+import { Drawer } from '../Drawer/Drawer';
+import { SHADOW_LEVEL_1 } from '../_shadows';
 
 /**
- * Sheet Component
+ * Sheet — a bottom sheet. Figma's Sheet (8326:2842): a panel that rises from
+ * the bottom of the screen, centred, no wider than 640px.
  *
- * A generic surface container matching Card/Box two-layer structure.
+ *   surface   Container (Figma pins the Surface mode)
+ *   corners   16px on the top two — the bottom edge sits on the screen's
+ *   padding   Sizing-2 (16), and the same gap between children
+ *   height    var(--Sheet, 540px) — Figma's Component-Size/Other/Sheet
+ *   shadow    Level 1, the "Accordion, Handle, Alert, Bottom-Sheet" style
  *
- * NO VARIANTS. A Sheet is a surface container and nothing else: the caller
- * sets `color` (-> data-theme) and `surface` (-> data-surface) and the cascade
- * supplies --Background / --Text for that pairing.
+ * Built on Drawer (anchor="bottom"): the scrim, Escape, the focus trap and
+ * the slide come from there, so a sheet is a dialog like a drawer is.
  *
- * It used to carry variant="solid|light|dark", which only ever chose between
- * three of the five surface levels — Surface, Surface-Brightest,
- * Surface-Dimmest — under names that said nothing about which. `surface` takes
- * ANY of the five and says so, so the variant axis was a smaller, vaguer
- * version of a prop that already existed.
- *
- * COLORS: default | primary | secondary | tertiary | neutral | info | success | warning | error
- *
- * STRUCTURE:
- *   Outer shell — border, border-radius, box-shadow
- *   Inner content — data-theme + data-surface, background, text
- *
- * Shadow: Effect-Level-2 rest, Effect-Level-3 hover
+ * It used to be a plain surface panel — the same job as Box with `surface`,
+ * under a name the design gives to something else. For that, use
+ * <Box surface="…">. The old props (`elevated`, `color`, `variant`) are
+ * gone; `surface` stays.
  */
-
-const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-
-/* `variant` is accepted and ignored. Deleting the prop outright would let it
-   fall into ...props and reach the DOM as an attribute; warn once instead,
-   the same treatment Badge's removed `size` gets. */
-const warnedVariants = new Set();
-
-function warnRemovedVariant(variant) {
-  if (variant === undefined) return;
-  if (process.env.NODE_ENV === 'production' || warnedVariants.has(variant)) return;
-  warnedVariants.add(variant);
-  console.warn(
-    '[Sheet] variant="' + variant + '" — Sheet has no variants. Set `surface` ' +
-    'directly: light was surface="Surface-Brightest", dark was ' +
-    'surface="Surface-Dimmest", solid was the default surface="Surface".',
-  );
-}
-
 export function Sheet({
+  open = false,
+  onClose,
   children,
-  surface = 'Surface',
-  variant,
-  color = 'default',
-  elevated = false,
-  component = 'div',
+  surface = 'Container',
+  hideBackdrop = false,
   className = '',
   sx = {},
   ...props
 }) {
-  const C = cap(color === 'default' ? 'Default' : color);
-
-  // A light variant is the base theme at its BRIGHTEST surface, not a theme of
-  // its own. Generated design systems stopped emitting *-Light themes, so
-  // `C + '-Light'` matched no rule and --Background resolved to nothing.
-  const dataTheme = color === 'default' ? 'Default' : C;
-
-  warnRemovedVariant(variant);
-  const dataSurface = surface;
-
-  const restShadow = elevated ? SHADOW_LEVEL_3 : SHADOW_LEVEL_2;
-  const hoverShadow = elevated ? SHADOW_LEVEL_4 : SHADOW_LEVEL_3;
-
   return (
-    <Box
-      component={component}
-      className={'sheet sheet-' + color +
-        (elevated ? ' sheet-elevated' : '') +
-        (className ? ' ' + className : '')}
+    <Drawer
+      open={open}
+      onClose={onClose}
+      anchor="bottom"
+      surface={surface}
+      hideBackdrop={hideBackdrop}
+      className={'sheet ' + className}
       sx={{
-        border: '1px solid var(--Border-Variant)',
-        borderRadius: 'var(--Style-Border-Radius)',
-        boxShadow: restShadow,
-        overflow: 'hidden',
-        transition: 'box-shadow 0.2s ease',
-        '&:hover': { boxShadow: hoverShadow },
+        left: 0,
+        right: 0,
+        marginInline: 'auto',
+        width: 'min(640px, 100%)',
+        height: 'var(--Sheet, 540px)',
+        maxHeight: '100%',
+        boxSizing: 'border-box',
+        borderTop: 'none',
+        borderRadius: '16px 16px 0 0',
+        padding: 'var(--Sizing-2, 16px)',
+        gap: 'var(--Sizing-2, 16px)',
+        boxShadow: SHADOW_LEVEL_1,
         ...sx,
       }}
       {...props}
     >
-      <Box
-        data-theme={dataTheme}
-        data-surface={dataSurface}
-        sx={{
-          backgroundColor: 'var(--Background)',
-          color: 'var(--Text)',
-          padding: 'var(--Card-Padding)',
-          borderRadius: 'calc(var(--Style-Border-Radius) - 1px)',
-          fontFamily: 'inherit',
-        }}
-      >
-        {children}
-      </Box>
-    </Box>
+      {children}
+    </Drawer>
   );
 }
-
-/* ─── Convenience Exports ─── */
 
 export default Sheet;

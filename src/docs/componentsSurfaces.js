@@ -828,60 +828,59 @@ export const CONTAINER_DOC = {
 };
 
 
-/* Sheet had no doc entry at all, so its Summary tab opened on an empty page.
-   Not a missing field — a missing ENTRY, which renders as nothing rather
-   than as a gap, which is why it survived. */
+/* Sheet is a BOTTOM SHEET — Figma's Sheet: a panel rising from the bottom
+   of the screen. It was a plain surface panel, the same job as Box with
+   `surface`, under the name the design gives to this. */
 export const SHEET_DOC = {
   name: 'Sheet',
-  summary: 'A plain surface to put things on, when the thing on it is not a Card.',
+  summary: 'A panel that rises from the bottom of the screen and can be dismissed.',
   insteadUse: [{
-    when: 'It has a header, media or actions',
-    use: 'Card'
-  }, {
-    when: 'It only needs to group things for layout',
-    use: 'Box'
-  }, {
-    when: 'It slides in over the page',
+    when: 'It slides in from a side, or is navigation',
     use: 'Drawer'
+  }, {
+    when: 'It must be answered before anything else',
+    use: 'Modal'
+  }, {
+    when: 'It is a surface on the page, not over it',
+    use: 'Box (with `surface`) or Card'
   }],
   props: [{
+    name: 'open',
+    type: 'boolean',
+    default: 'false'
+  }, {
     name: 'surface',
     type: 'string',
-    values: ['Surface', 'Surface-Dim', 'Surface-Dimmest',
-             'Surface-Bright', 'Surface-Brightest'],
-    default: 'Surface',
-    note: 'The LEVEL. This is the whole component \u2014 pick a level and the cascade paints the background, the text and the border to match.'
+    values: ['Container', 'Surface', 'Surface-Bright'],
+    default: 'Container',
+    note: 'The level it paints. Container, as Figma pins it; the theme is inherited.'
   }, {
-    name: 'color',
-    type: 'string',
-    default: 'default',
-    note: 'The THEME, as `data-theme`.'
-  }, {
-    name: 'elevated',
+    name: 'hideBackdrop',
     type: 'boolean',
     default: 'false',
-    note: 'Adds the shadow. A Sheet that is flat on the page needs none; one that reads as lifted off it does.'
+    note: 'No scrim: it reads as part of the layout, and nothing behind it dims.'
   }, {
-    name: 'component',
-    type: 'string',
-    default: 'div',
-    note: 'The element rendered. `section` or `aside` where the region means something.'
+    name: 'onClose',
+    type: 'function',
+    default: 'undefined'
   }],
   states: [{
-    state: 'None',
+    state: 'Open / closed',
     setBy: 'prop',
-    note: 'A Sheet is not interactive. What sits on it is.'
+    note: 'Closed renders nothing. It slides up on open.'
   }],
   tokens: [surfaceToken('--Background', 'the sheet'), surfaceToken('--Text', 'anything in it')],
-  composition: ['Anything. It sets a surface and gets out of the way.'],
+  composition: ['Anything: a heading, a list of actions, a form. Children are spaced Sizing-2 (16px) apart.'],
   accessibility: [
-    'It is a surface, not a landmark. Pass `component="section"` with a heading, or `aria-label`, where the region is one a reader should be able to skip to.',
-    'Nesting sheets stacks surface levels; two levels that land on the same tone leave a border doing all the separating.',
+    'It is a modal dialog: name it with `aria-label` or `aria-labelledby` on the Sheet.',
+    'Escape closes it, Tab stays inside it, and focus goes back to whatever opened it.',
   ],
   gotchas: [
-    'It used to carry variant="solid | light | dark", which only ever chose between three of the five surface levels under names that did not say which. `surface` takes any of the five and names it.',
+    'It used to be a plain surface panel with `surface`, `color` and `elevated`. For that, use Box with `surface`.',
+    'At most 640px wide, centred; on a phone it is the full width.',
   ],
 };
+
 
 /* Same gap as Sheet: no entry, so an empty Summary. */
 export const TRANSFER_LIST_DOC = {
