@@ -153,7 +153,7 @@ export function BadgeShowcase() {
   const [showZero, setShowZero] = useState(false);
   const [contrastData, setContrastData] = useState({});
 
-  const styles = ['solid', 'outline'];
+  const styles = ['solid'];
 
   // Map style + color to variant string
   const getVariant = () => {
@@ -196,12 +196,6 @@ if (style === 'solid') {
       data.badgeBg = getCssVar('--Icons-' + C);
       data.badgeText = getCssVar('--Icons-On-' + C);
       data.badgeBorder = null;
-    } else if (style === 'outline') {
-      data.badgeBg = getCssVar('--Background');
-      data.badgeText = getCssVar('--Text');
-      // Still the Buttons border token: a 1px boundary is what it is held to
-      // 3:1 for, which --Icons-<C> (a fill role) is not.
-      data.badgeBorder = getCssVar('--Buttons-' + C + '-Border');
     }
 
     data.background = getCssVar('--Background');
@@ -217,7 +211,7 @@ if (style === 'solid') {
       </Box>
       <Body color="quiet" style={{ marginBottom: 24 }}>
         Small label attached to an element showing status or count.
-        Solid and outline variants across all 8 colors.
+        A solid count in all 8 colors.
       </Body>
       {/* Layout A: the tab bar spans the page, so Summary, Accessibility and
           Change Log get the full width to read. The preview/controls split

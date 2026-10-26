@@ -341,16 +341,16 @@ function ghostStyles(isTextContent, selected = false) {
   /* Quiet at rest, full-strength when engaged — the same two-step outline
      buttons make, on the Default outline pair:
 
-       rest                      Buttons/Outline-Quiet
+       rest (selected or not)    Buttons/Outline-Quiet
        hover, pressed, focus     Buttons/Outline-Text
-       selected (any state)      Buttons/Outline-Text
 
      Text ghosts used to read like links — --Hotlink, underlined — as a
      deliberate departure from Figma. Decided 2026-10-20 to drop that: the
      Figma set binds Outline-Quiet / Outline-Text with no underline, and a
-     ghost is a button, not a link. Figma rests a SELECTED ghost on
-     Outline-Quiet; here selection stays loud, so the engaged one reads as
-     engaged. (isTextContent no longer changes the color.) */
+     ghost is a button, not a link. A SELECTED ghost rests on Outline-Quiet
+     too, as Figma draws it — its border and ring are what mark it selected.
+     (It stayed on Outline-Text here until 2026-10-26.) (isTextContent no
+     longer changes the color.) */
   void isTextContent;
   const quiet = 'var(--Buttons-Default-Outline-Quiet, var(--Outline-Quiet))';
   const loud = 'var(--Buttons-Default-Outline-Text)';
@@ -358,7 +358,7 @@ function ghostStyles(isTextContent, selected = false) {
     // A selected ghost is painted in its surface, like an outline button —
     // Figma's selected ghost fills Background under its Border stroke.
     backgroundColor: selected ? 'var(--Background)' : 'transparent',
-    color: selected ? loud : quiet,
+    color: quiet,
     /* A SELECTED ghost draws its border — Figma's selected ghost strokes
        Buttons::Border at 1px, inside, as the mark that tells it from an
        unselected one (which has no fill and no stroke). The transparent border

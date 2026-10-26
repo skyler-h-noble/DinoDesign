@@ -11,14 +11,6 @@ export {
   WarningBadge,
   ErrorBadge,
   // Outline
-  PrimaryOutlineBadge,
-  SecondaryOutlineBadge,
-  TertiaryOutlineBadge,
-  NeutralOutlineBadge,
-  InfoOutlineBadge,
-  SuccessOutlineBadge,
-  WarningOutlineBadge,
-  ErrorOutlineBadge,
   // Light
 } from './Badge';
 

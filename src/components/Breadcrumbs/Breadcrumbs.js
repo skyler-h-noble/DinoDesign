@@ -257,8 +257,9 @@ export function BreadcrumbItem({ children, href, className = '', sx = {}, ...pro
              and with no fallback the whole declaration is invalid at computed-
              value time: the color fell back to `inherit`, so hovering a
              breadcrumb link made it stop looking like a link. */
-          '&:hover': { textDecorationThickness: '2px' },
-          '&:active': { textDecorationThickness: '3px' },
+          /* The Link rule: hover and pressed REMOVE the underline (focus
+             keeps it) — Figma's Link set. This thickened it to 2px / 3px. */
+          '&:hover, &:active': { textDecoration: 'none' },
           '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px', borderRadius: '2px' },
         }),
         ...sx,

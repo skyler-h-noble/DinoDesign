@@ -8,7 +8,8 @@ import { Badge as MuiBadge, Box } from '@mui/material';
  *
  * VARIANTS:
  *   SOLID   variant="{color}"           filled badge, all 8 colors
- *   OUTLINE variant="{color}-outline"   bordered badge, all 8 colors
+ *   (No outline: removed — a count is a solid mark. `{color}-outline` renders
+ *   the solid badge of that color and warns once in development.)
  *
  * The LIGHT shape was removed — see normalizeBadgeVariant.
  *
@@ -56,23 +57,10 @@ function solidStyles(color) {
   };
 }
 
-function outlineStyles(color) {
-  const C = cap(color);
-  return {
-    bg:     'var(--Background)',
-    text:   'var(--Text)',
-    // The OUTLINE keeps the Buttons border token. It is a 1px boundary, which
-    // is what --Buttons-<C>-Border is held to 3:1 for; --Icons-<C> is the fill
-    // role and has no boundary contract.
-    border: '1px solid var(--Buttons-' + C + '-Border)',
-  };
-}
-
 function buildVariantMap() {
   const map = {};
   COLORS.forEach((color) => {
     map[color]              = solidStyles(color);
-    map[color + '-outline'] = outlineStyles(color);
   });
   return map;
 }
@@ -86,8 +74,23 @@ function buildVariantMap() {
 const LIGHT_SUFFIX = /-light$/;
 const warnedVariants = new Set();
 
+/* The outline shape is removed too — the Badge Counter set has one shape, a
+   solid count — and normalised the same way, to the solid of the SAME color. */
+const OUTLINE_SUFFIX = /-outline$/;
+
 export function normalizeBadgeVariant(variant) {
   const v = String(variant || 'primary');
+  if (OUTLINE_SUFFIX.test(v)) {
+    const base = v.replace(OUTLINE_SUFFIX, '');
+    if (process.env.NODE_ENV !== 'production' && !warnedVariants.has(v)) {
+      warnedVariants.add(v);
+      console.warn(
+        '[Badge] variant="' + v + '" — the outline shape was removed. ' +
+        'Rendering variant="' + base + '" (solid).',
+      );
+    }
+    return base;
+  }
   if (!LIGHT_SUFFIX.test(v)) return v;
   const base = v.replace(LIGHT_SUFFIX, '');
   if (process.env.NODE_ENV !== 'production' && !warnedVariants.has(v)) {
@@ -253,14 +256,6 @@ export const WarningBadge    = (p) => <Badge variant="warning"    {...p} />;
 export const ErrorBadge      = (p) => <Badge variant="error"      {...p} />;
 
 // Outline
-export const PrimaryOutlineBadge    = (p) => <Badge variant="primary-outline"    {...p} />;
-export const SecondaryOutlineBadge  = (p) => <Badge variant="secondary-outline"  {...p} />;
-export const TertiaryOutlineBadge   = (p) => <Badge variant="tertiary-outline"   {...p} />;
-export const NeutralOutlineBadge    = (p) => <Badge variant="neutral-outline"    {...p} />;
-export const InfoOutlineBadge       = (p) => <Badge variant="info-outline"       {...p} />;
-export const SuccessOutlineBadge    = (p) => <Badge variant="success-outline"    {...p} />;
-export const WarningOutlineBadge    = (p) => <Badge variant="warning-outline"    {...p} />;
-export const ErrorOutlineBadge      = (p) => <Badge variant="error-outline"      {...p} />;
 
 // Light
 

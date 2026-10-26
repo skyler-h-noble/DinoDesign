@@ -5,7 +5,6 @@ import {
   Badge,
   PrimaryBadge,
   ErrorBadge,
-  PrimaryOutlineBadge,
 } from './Badge';
 import { axe } from 'jest-axe';
 
@@ -94,13 +93,17 @@ describe('Badge Component', () => {
     expect(container.querySelector(`.badge-${color}`)).toBeInTheDocument();
   });
 
+  // No outline shape: {color}-outline renders the solid badge of that color.
   test.each([
-    ['primary-outline'], ['error-outline'],
-  ])('applies %s variant class', (variant) => {
+    ['primary-outline', 'primary'], ['error-outline', 'error'],
+  ])('%s renders as the solid %s badge', (variant, base) => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
     const { container } = render(
       <Badge variant={variant} badgeContent={1}><span>Child</span></Badge>
     );
-    expect(container.querySelector(`.badge-${variant}`)).toBeInTheDocument();
+    expect(container.querySelector(`.badge-${base}`)).toBeInTheDocument();
+    expect(container.querySelector(`.badge-${variant}`)).toBeNull();
+    warn.mockRestore();
   });
 
   /* The -light shape was removed. Badge resolves an unknown variant as
@@ -168,13 +171,6 @@ describe('Convenience Exports', () => {
       <ErrorBadge badgeContent={1}><span>Child</span></ErrorBadge>
     );
     expect(container.querySelector('.badge-error')).toBeInTheDocument();
-  });
-
-  test('PrimaryOutlineBadge renders', () => {
-    const { container } = render(
-      <PrimaryOutlineBadge badgeContent={1}><span>Child</span></PrimaryOutlineBadge>
-    );
-    expect(container.querySelector('.badge-primary-outline')).toBeInTheDocument();
   });
 
   /* Color comes from the ICONS palette, matching the design's
