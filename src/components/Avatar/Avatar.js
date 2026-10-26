@@ -355,11 +355,33 @@ export function Avatar({
 /**
  * AvatarGroup — stacks avatars with overlap
  */
+/* AvatarGroup — Figma's Avatar Group.
+ *
+ * OVERLAP is a quarter of the avatar (Figma's Avatar-Group-Gap, −size / 4):
+ * 16 → 4, 24 → 6, 32 → 8, 40 → 10, 56 → 14, 72 → 18. Proportional, so a
+ * small group is not mostly hidden and a large one still reads as a stack.
+ *
+ * TARGET SIZE. When any avatar is its OWN click target (it has onClick or
+ * `clickable`), each one must show at least 24px — WCAG 2.5.8 — so the step
+ * from one avatar to the next is never under 24: the overlap is capped at
+ * size − 24. A 24px group then sits edge to edge, and 16 / 20px groups get a
+ * gap. A display-only group, or one that is a single button as a whole, has no
+ * per-avatar target and keeps the quarter overlap at every size.
+ *
+ * RING. Every avatar wears a 2px ring of the page's Background — outside it,
+ * as a box-shadow, so the ring cuts each avatar out of the one behind without
+ * shrinking its box.
+ *
+ * The group sets every child's `size` (a child's own size wins), and past
+ * `max` the rest fold into a Neutral "+N" initials avatar.
+ */
 export function AvatarGroup({
   children,
   max = 5,
   size = 'medium',
-  spacing = -8,
+  /* An explicit step in px (negative overlaps). Still capped for a clickable
+     group, so it cannot shrink a target under 24. */
+  spacing,
   className = '',
   sx = {},
   ...props
@@ -367,27 +389,29 @@ export function AvatarGroup({
   const childArray = React.Children.toArray(children);
   const visible = childArray.slice(0, max);
   const overflow = childArray.length - max;
+  const px = (SIZE_MAP[resolveSizeName(size)] || SIZE_MAP.medium).size;
+  const interactive = childArray.some((c) => c && c.props && (c.props.onClick || c.props.clickable));
+  const quarter = -(px / 4);
+  let step = spacing !== undefined ? spacing : quarter;
+  // Each avatar shows px + step; it must be at least 24 when it is a target.
+  if (interactive) step = Math.max(step, 24 - px);
 
   return (
     <Box
       role="group"
       aria-label={'Avatar group, ' + childArray.length + ' avatars'}
-      className={'avatar-group ' + className}
+      className={'avatar-group' + (interactive ? ' avatar-group-interactive' : '') + (className ? ' ' + className : '')}
       sx={{
         display: 'inline-flex', alignItems: 'center',
-        '& > *:not(:first-of-type)': { marginLeft: spacing + 'px' },
+        '& > .avatar:not(:first-of-type)': { marginLeft: step + 'px' },
+        '& > .avatar': { boxShadow: '0 0 0 2px var(--Background)' },
         ...sx,
       }}
       {...props}
     >
-      {visible}
+      {visible.map((c) => (React.isValidElement(c) && c.props.size === undefined ? React.cloneElement(c, { size }) : c))}
       {overflow > 0 && (
-        <Avatar
-          initials={'+' + overflow}
-          size={size}
-          color="neutral"
-          sx={{ border: '2px solid var(--Background)', zIndex: 0 }}
-        />
+        <Avatar initials={'+' + overflow} size={size} color="neutral" defaultPhoto={false} />
       )}
     </Box>
   );

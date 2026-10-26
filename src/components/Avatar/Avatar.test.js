@@ -159,3 +159,36 @@ describe('Avatar — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+/* AvatarGroup overlap: a quarter of the avatar; capped so a clickable avatar
+   always shows 24px (WCAG 2.5.8). jsdom drops nothing here — read the rule. */
+describe('AvatarGroup overlap', () => {
+  const stepOf = (container) => {
+    const g = container.querySelector('.avatar-group');
+    const cls = [...g.classList].find((c) => c.startsWith('css-'));
+    const rules = [...document.styleSheets]
+      .flatMap((sheet) => { try { return [...sheet.cssRules]; } catch { return []; } })
+      .map((r) => r.cssText).filter((t) => t.startsWith('.' + cls));
+    const m = rules.join(' ').match(/margin-left:\s*(-?[\d.]+)px/);
+    return m ? Number(m[1]) : null;
+  };
+  const three = (props = {}) => [1, 2, 3].map((i) => <Avatar key={i} initials={'A' + i} {...props} />);
+
+  test('display-only: a quarter of the size (32 → −8, 24 → −6)', () => {
+    expect(stepOf(render(<AvatarGroup size="medium">{three()}</AvatarGroup>).container)).toBe(-8);
+    expect(stepOf(render(<AvatarGroup size="small">{three()}</AvatarGroup>).container)).toBe(-6);
+  });
+
+  test('clickable: each avatar shows at least 24px', () => {
+    // 24px: edge to edge.
+    expect(stepOf(render(<AvatarGroup size="small">{three({ onClick: () => {} })}</AvatarGroup>).container)).toBe(0);
+    // 16px: a gap of 8.
+    expect(stepOf(render(<AvatarGroup size="xxs">{three({ onClick: () => {} })}</AvatarGroup>).container)).toBe(8);
+    // 40px: the quarter (−10) already leaves 30 showing.
+    expect(stepOf(render(<AvatarGroup size="large">{three({ onClick: () => {} })}</AvatarGroup>).container)).toBe(-10);
+  });
+
+  test('an explicit spacing is still capped for a clickable group', () => {
+    expect(stepOf(render(<AvatarGroup size="medium" spacing={-20}>{three({ clickable: true })}</AvatarGroup>).container)).toBe(-8);
+  });
+});
