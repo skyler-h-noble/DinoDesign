@@ -23,7 +23,8 @@ import { Subtitle, Body } from '../Typography';
  *   - Hover or focus shows the person's details — avatar, name (Subtitle),
  *     detail (Body) — in a Popover hover card, and brings the avatar to the
  *     front so it shows whole.
- *   - "+N" is a Neutral letter/number Button; it opens a Popover listing the
+ *   - "+N" is a plain Neutral number Button (contentType="letterNumber") —
+ *     its own states and contrast, no overrides; it opens a Popover listing the
  *     rest as plain rows — the details card's layout, no borders — buttons
  *     with the surface's Hover / Pressed fill when the person is clickable.
  *   - `size` is the BUTTON size (small | medium | large) — an avatar button
@@ -59,8 +60,8 @@ function PersonCard({ person }) {
   );
 }
 
-/* In a group every member is a circle — the +N included — whatever corner
-   the brand gives its buttons, or the stack reads as avatars and one tile. */
+/* The avatar buttons are circles, as the avatars they hold. The "+N" is a
+   plain number Button — its own shape, states and contrast, untouched. */
 const ROUND = { borderRadius: '50%' };
 
 let cardSeq = 0;
@@ -195,8 +196,7 @@ export function AvatarGroup({
           <Button ref={overflowRef} contentType="letterNumber" variant="neutral" size={buttonSize}
             aria-label={overflow + ' more: ' + hidden.map((p) => p.name).filter(Boolean).join(', ')}
             aria-haspopup="dialog" aria-expanded={listOpen}
-            onClick={() => { setListOpen((o) => !o); onOverflowClick?.(hidden); }}
-            sx={ROUND}>
+            onClick={() => { setListOpen((o) => !o); onOverflowClick?.(hidden); }}>
             {'+' + overflow}
           </Button>
           <Popover open={listOpen} onClose={() => setListOpen(false)} anchorEl={overflowRef.current}
