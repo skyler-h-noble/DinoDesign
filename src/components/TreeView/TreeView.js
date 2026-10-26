@@ -35,7 +35,7 @@ import { Checkbox } from '../Checkbox/Checkbox';
  * infer them once `role="group"` is in play.
  *
  * ── Item shape (unchanged) ────────────────────────────────────────────────
- *   { id, label, icon?, swatch?, badge?, sx?, disabled?, children? }
+ *   { id, label, icon?, swatch?, badge?, sx?, className?, disabled?, children? }
  *
  * ── The row is Figma's Menu Item (8007:25355) ─────────────────────────────
  *   height   Button-Height; padding Menu-Level-{n}-Left-Margin | Sizing-1
@@ -150,6 +150,7 @@ function TreeNode({
       tabIndex={focusedId === item.id && focusable ? 0 : -1}
       ref={(el) => registerRef(item.id, el)}
       onFocus={(e) => { e.stopPropagation(); onFocusItem(item.id); }}
+      className={item.className}
       sx={{ outline: 'none', listStyle: 'none', ...(item.sx || {}) }}
     >
       <Box
