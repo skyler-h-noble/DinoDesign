@@ -2,25 +2,30 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { Loader } from './Loader';
 
-/* The design's Loader is 32px at Large — the ICON scale, not CircularProgress's
-   own 24/40/56. These pin the mapping, because "large" meaning 56 elsewhere in
-   the lib makes 32 look like a mistake rather than a decision. */
-describe('Loader sizes follow the icon scale', () => {
-  test.each([['small', 16], ['medium', 24], ['large', 32]])('%s is %ipx', (name, px) => {
+/* The design's Loader binds its diameter to Component-Size Other/Loader —
+   24 / 32 / 56 across small / medium / large. It was mapped to the icon scale
+   (16 / 24 / 32) from the set's lone "Size=Large" variant, which names the
+   frame, not the size mode it is drawn in (medium: 32). */
+/* Figma's Loader: Component-Size Other/Loader, 24 / 32 / 56. */
+describe('Loader sizes follow Figma (Other/Loader)', () => {
+  const ring = (c) => c.querySelector('.loader-ring');
+  test.each([['small', 24], ['medium', 32], ['large', 56]])('%s is %ipx', (name, px) => {
     const { container } = render(<Loader size={name} message="" />);
-    const svg = container.querySelector('svg');
-    expect(svg).toHaveAttribute('width', String(px));
-    expect(svg).toHaveAttribute('height', String(px));
+    const cs = getComputedStyle(ring(container));
+    expect(cs.width).toBe(px + 'px');
+    expect(cs.height).toBe(px + 'px');
   });
 
   test('a number passes straight through', () => {
     const { container } = render(<Loader size={48} message="" />);
-    expect(container.querySelector('svg')).toHaveAttribute('width', '48');
+    expect(getComputedStyle(ring(container)).width).toBe('48px');
   });
 
-  test('color comes from a token, never a raw tone', () => {
+  test('a ring with no track: the sweep runs from the palette border into the background', () => {
     const { container } = render(<Loader color="success" message="" />);
-    expect(container.innerHTML).toContain('--Buttons-Success-Border');
-    expect(container.innerHTML).not.toContain('--Primary-Color-11');
+    const css = Array.from(document.styleSheets).flatMap((sh) => Array.from(sh.cssRules).map((r) => r.cssText)).join('\n');
+    expect(css).toContain('--Buttons-Success-Border');
+    expect(css).not.toContain('--Primary-Color-11');
+    expect(container.querySelector('svg')).toBeNull();
   });
 });

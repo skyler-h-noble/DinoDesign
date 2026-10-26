@@ -8,30 +8,63 @@ import {
   Skeleton,
   Paper,
 } from '@mui/material';
-/* The LIB's CircularProgress, not MUI's.
+
+const LOADER_COLOR = {
+  default: 'Default', primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary',
+  neutral: 'Neutral', info: 'Info', success: 'Success', warning: 'Warning', error: 'Error',
+};
+
+/* The spinner Figma draws (Loader, 5859:1629): a full ring, no track, filled
+ * with an ANGULAR gradient that runs from the palette's --Buttons-{C}-Border
+ * round to the surface's --Background — a comet whose tail fades into the
+ * page. The ring's inner radius is 80% of its outer, so its thickness is a
+ * tenth of the diameter. Position 1–4 are quarter turns, clockwise: it spins.
  *
- * It renders the comet-trail gradient arc the design specifies — a stroke
- * fading from 0 to full alpha as it sweeps — and it reads the brand's own
- * --Buttons-{Color}-Border and --Border-Variant. MUI's has neither, which is
- * why this file used to hardcode a color to compensate. */
-import { CircularProgress } from '../CircularProgress';
+ * It was the lib's CircularProgress, which is a different drawing — a quarter
+ * arc over a --Border-Variant track — and is Progress Dial's job, not this.
+ *
+ * Size is Figma's Component-Size Other/Loader: 24 / 32 / 56. */
+export const LOADER_SIZE_MAP = { small: 24, medium: 32, large: 56 };
+
+export function LoaderRing({ size = 'medium', color = 'primary', className = '', sx = {}, ...props }) {
+  const d = typeof size === 'number' ? size : (LOADER_SIZE_MAP[size] ?? LOADER_SIZE_MAP.medium);
+  const C = LOADER_COLOR[color] || 'Primary';
+  const ring = d * 0.1;
+  return (
+    <Box
+      role="progressbar"
+      className={'loader-ring ' + className}
+      sx={{
+        width: d, height: d, flexShrink: 0, borderRadius: '50%',
+        /* Figma's Position 1: the hard edge at 6 o'clock, the border colour
+           there fading clockwise round to the Background. */
+        background: 'conic-gradient(from 180deg, var(--Buttons-' + C + '-Border), var(--Background))',
+        // Cut the disc to the ring: transparent inside 90% of the radius.
+        WebkitMask: 'radial-gradient(farthest-side, transparent calc(100% - ' + ring + 'px), #000 calc(100% - ' + ring + 'px))',
+        mask: 'radial-gradient(farthest-side, transparent calc(100% - ' + ring + 'px), #000 calc(100% - ' + ring + 'px))',
+        animation: 'loader-ring-spin 1s linear infinite',
+        '@keyframes loader-ring-spin': { to: { transform: 'rotate(360deg)' } },
+        '@media (prefers-reduced-motion: reduce)': { animationDuration: '3s' },
+        ...sx,
+      }}
+      {...props}
+    />
+  );
+}
 
 /**
  * Loader Component
  *
  * Circular progress indicator with an optional message.
  *
- * SIZES: small (16px) | medium (24px) | large (32px), or a number in px.
- *   This is the ICON scale, not CircularProgress's own 24/40/56, because a
- *   loader appears where an icon would — inline in a button, beside a label —
- *   and the design's large is 32px.
+ * SIZES: small (24px) | medium (32px) | large (56px) — Figma's Other/Loader —
+ *   or a number in px.
  *
  * COLORS: the 8 brand colors, via --Buttons-{Color}-Border.
  *   Previously hardcoded to var(--Primary-Color-11): a raw palette TONE rather
  *   than a semantic token, so it ignored the surface it sat on and could not
  *   follow a themed section.
  */
-const LOADER_SIZE_MAP = { small: 16, medium: 24, large: 32 };
 
 /* ZONE PROPS — `theme` and `surface`. They become data-theme / data-surface on
  * the root, so the loader takes its colors from the zone it sits in rather
@@ -67,8 +100,8 @@ export function Loader({
       data-theme={theme || undefined}
       data-surface={surface || undefined}
     >
-      <CircularProgress
-        size={typeof size === 'number' ? size : (LOADER_SIZE_MAP[size] ?? LOADER_SIZE_MAP.medium)}
+      <LoaderRing
+        size={size}
         color={color}
         aria-label={ariaLabelledby ? undefined : ariaLabel}
         aria-labelledby={ariaLabelledby}
