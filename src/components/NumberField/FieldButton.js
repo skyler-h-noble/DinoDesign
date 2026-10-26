@@ -15,14 +15,14 @@ import { SHADOW_LEVEL_1 } from '../_shadows';
  *            48px sliver at small and taller than wide at large
  *   corner   --Input-Radius, the field it belongs to
  *   icon     the in-button size, --Button-Icon (16 / 20 / 32), in --Icons-Default (Figma's Icons/Icon, Default mode)
- *   ghost    no edge
- *   outline  1px --Buttons-<C>-Border, inside
- *   Hover    the surface's --Hover, with the Buttons-Hover lift (Level 1)
- *   Pressed  the surface's --Pressed, no lift
- *   Focus    a 3px ring INSIDE the button (1px in from a ghost's edge, 2px in
- *            from an outline's) — the button sits in a clipped field, where a
- *            ring drawn outside would be cut off
- *   Disabled 38%
+ *   ghost    no edge; rests on the surface's --Hover, --Pressed when pressed
+ *   outline  1px --Buttons-<C>-Border, inside, on --Buttons-<C>-Button;
+ *            --Buttons-<C>-Hover / -Pressed for those states
+ *   Hover    the Buttons-Hover lift (Level 1)
+ *   Focus    the rest fill under a 3px ring INSIDE the button (1px in from a
+ *            ghost's edge, 2px in from an outline's) — the button sits in a
+ *            clipped field, where a ring drawn outside would be cut off
+ *   Disabled the rest fill at 38%
  */
 const PREFIX = { small: 'Sm-', medium: '', large: 'Lg-' };
 
@@ -41,6 +41,8 @@ export const FieldButton = React.forwardRef(function FieldButton({
   const outline = variant === 'outline';
   const height = size === 'small' ? 'var(--Small-Button-Height, 24px)'
     : size === 'large' ? 'var(--Large-Button-Height, 56px)' : 'var(--Button-Height, 32px)';
+  const ring = outline ? 'inset 0 0 0 1px var(--Buttons-' + C + '-Border)' : 'none';
+  const fill = (state) => outline ? 'var(--Buttons-' + C + '-' + state + ')' : 'var(--' + (state === 'Button' ? 'Hover' : state) + ')';
   const fallbackIcon = size === 'small' ? '16px' : size === 'large' ? '32px' : '20px';
   return (
     <Box
@@ -58,9 +60,9 @@ export const FieldButton = React.forwardRef(function FieldButton({
         m: 0, p: 0,
         border: 'none',
         // Figma's stroke is INSIDE: an inset ring, so it takes no layout space.
-        boxShadow: outline ? 'inset 0 0 0 1px var(--Buttons-' + C + '-Border)' : 'none',
+        boxShadow: ring,
         borderRadius: 'var(--' + p + 'Input-Radius, var(--Input-Radius, 4px))',
-        backgroundColor: 'transparent',
+        backgroundColor: fill('Button'),
         color: 'var(--Icons-Default, var(--Text))',
         fontSize: 'var(--' + p + 'Button-Icon, ' + fallbackIcon + ')',
         cursor: disabled ? 'not-allowed' : 'pointer',
@@ -70,16 +72,15 @@ export const FieldButton = React.forwardRef(function FieldButton({
         '& .MuiSvgIcon-root': { fontSize: 'inherit', color: 'inherit' },
         ...(!disabled && {
           '&:hover': {
-            backgroundColor: 'var(--Hover)',
-            boxShadow: (outline ? 'inset 0 0 0 1px var(--Buttons-' + C + '-Border), ' : '') + SHADOW_LEVEL_1,
+            backgroundColor: fill('Hover'),
+            boxShadow: (outline ? ring + ', ' : '') + SHADOW_LEVEL_1,
           },
           '&:active': {
-            backgroundColor: 'var(--Pressed)',
-            boxShadow: outline ? 'inset 0 0 0 1px var(--Buttons-' + C + '-Border)' : 'none',
+            backgroundColor: fill('Pressed'),
+            boxShadow: ring,
           },
-          // Figma's focused button fills the surface's Background under the ring.
           '&:focus-visible, &.Mui-focusVisible': {
-            backgroundColor: 'var(--Background)',
+            backgroundColor: fill('Button'),
             outline: '3px solid var(--Focus-Visible)',
             outlineOffset: outline ? '-5px' : '-4px',
           },
