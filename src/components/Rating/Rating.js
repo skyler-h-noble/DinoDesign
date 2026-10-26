@@ -1,23 +1,28 @@
 // src/components/Rating/Rating.js
 import React, { useState } from 'react';
 import { Box } from '@mui/material';
-import StarIcon from '@mui/icons-material/Star';
-import StarBorderIcon from '@mui/icons-material/StarBorder';
+import StarPurple500Icon from '@mui/icons-material/StarPurple500';
+import StarBorderPurple500Icon from '@mui/icons-material/StarBorderPurple500';
 import StarHalfIcon from '@mui/icons-material/StarHalf';
-import { BodySmall, Caption } from '../Typography';
+import { Caption } from '../Typography/Typography';
+import { FormLabel } from '../FormLabel/FormLabel';
 
 /**
  * Rating Component
  *
- * COLORS: default, primary, secondary, tertiary, info, success, warning, error
- *   Filled star:  var(--Buttons-{C}-Button)
- *   Empty star:   var(--Text-Quiet)
- *   Hover star:   var(--Buttons-{C}-Hover)
+ * Figma's Rating (6780:12693) — five Star instances (6780:12460), no gap.
  *
- * SIZES (Figma-aligned, matched to the Icon scale):
- *   small   icon 16 (Small),  24×24 hit area, internal 3px focus ring, group gap 0
- *   medium  icon 24 (Medium), 24×24 hit area, internal 3px focus ring, group gap 0
- *   large   icon 36 (Large),  natural size,   external 2px focus ring, group gap 2
+ * GLYPHS: Material's star_purple500 (selected), star_border_purple500
+ *   (unselected) and star_half — the same names Figma's Icon types.
+ *
+ * COLOR: the star is an ICON, so it takes --Icons-{C}: `color` is Figma's
+ *   Icons mode (default -> --Icons-Default, which is the surface's Text;
+ *   primary -> --Icons-Primary, ...). An unselected star turns --Text on
+ *   hover. No strokes, no shadows.
+ *
+ * SIZES: the in-button icon (16 / 20 / 32) in a box 4px larger, never under
+ *   Sizing-3 (24) — medium is Figma's 20 in 24. Focus is a 3px ring 1px
+ *   inside the box.
  *
  * MODES:
  *   controlled    value + onChange
@@ -26,6 +31,10 @@ import { BodySmall, Caption } from '../Typography';
  *   no rating     value={null}, shows all empty with "(No rating)" label
  *
  * FEATURES: max stars (default 5), precision (1 or 0.5), hover preview
+ *
+ * LABEL: `label` + labelPosition 'top' (default) | 'bottom' gives Figma's
+ *   RatingField (9574:3354) — a FormLabel above or below the stars,
+ *   Sizing-Half apart. The group is named by it.
  */
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -41,9 +50,9 @@ const COLOR_MAP = {
 // don't punch a hole in the touch surface. focusInset is negative for
 // internal rings (small/medium) and positive for external (large).
 const SIZE_MAP = {
-  small:  { iconSize: 16, minHit: 24, gap: 0, focusInset: -3, focusWidth: 3 },
-  medium: { iconSize: 24, minHit: 24, gap: 0, focusInset: -3, focusWidth: 3 },
-  large:  { iconSize: 36, minHit: undefined, gap: 2, focusInset: 2, focusWidth: 2 },
+  small:  { iconSize: 16, minHit: 24 },
+  medium: { iconSize: 20, minHit: 24 },
+  large:  { iconSize: 32, minHit: 36 },
 };
 
 /* ZONE PROPS — `theme` and `surface`.
@@ -75,6 +84,8 @@ export function Rating({
   readOnly = false,
   disabled = false,
   emptyLabel = 'No rating',
+  label,
+  labelPosition = 'top',  // 'top' | 'bottom'
   className = '',
   sx = {},
   ...props
@@ -90,10 +101,7 @@ export function Rating({
   const C = COLOR_MAP[color] || COLOR_MAP.default;
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
 
-  const filledColor = 'var(--Buttons-' + C + '-Button)';
-  const filledBorder = 'var(--Buttons-' + C + '-Border)';
-  const emptyBorder = 'var(--Quiet)';
-  const hoverBorder = 'var(--Buttons-' + C + '-Border)';
+  const starColor = 'var(--Icons-' + C + ')';
 
   const handleClick = (newValue) => {
     if (!isInteractive) return;
@@ -109,44 +117,12 @@ export function Rating({
     setHoverValue(val);
   };
 
-  // Filter-based drop-shadow recipes — `filter: drop-shadow()` follows the
-  // star's outline (better for SVG than box-shadow's rectangle). var() is
-  // inlined so substitution happens at the star element and picks up the
-  // themed --Dropshadow-Color. Chained drop-shadows on hover give a
-  // Level-2-style multi-layer lift.
-  const FILTER_LEVEL_1 = 'drop-shadow(0 1px 2px rgba(var(--Dropshadow-Color), 0.28))';
-  const FILTER_LEVEL_2 = 'drop-shadow(0 2px 4px rgba(var(--Dropshadow-Color), 0.22)) drop-shadow(0 1px 2px rgba(var(--Dropshadow-Color), 0.28))';
-
-  const getStarStyles = (isFilled, isHalfFilled) => {
-    if (isFilled || isHalfFilled) {
-      return {
-        color: filledColor,
-        filter: FILTER_LEVEL_1,
-        transition: 'filter 0.15s ease',
-        '& .MuiSvgIcon-root': {
-          stroke: filledBorder,
-          strokeWidth: 0.5,
-        },
-      };
-    }
-    return {
-      color: 'transparent',
-      '& .MuiSvgIcon-root': {
-        stroke: emptyBorder,
-        strokeWidth: 1,
-      },
-    };
-  };
-
-  const hoverStarSx = isInteractive ? {
-    '&:hover': {
-      filter: FILTER_LEVEL_2,
-      '& .MuiSvgIcon-root': {
-        stroke: hoverBorder,
-        strokeWidth: 1,
-      },
-    },
-  } : {};
+  const starSx = (isFilled, isHalfFilled) => ({
+    color: starColor,
+    transition: 'color 0.1s ease',
+    // Figma's Hover on an unselected star: the glyph turns Text.
+    ...(isInteractive && !isFilled && !isHalfFilled && { '&:hover': { color: 'var(--Text)' } }),
+  });
 
   const renderStar = (index) => {
     const starValue = index + 1;
@@ -155,42 +131,27 @@ export function Rating({
     const isFilled = displayValue !== null && starValue <= displayValue;
     const isHalfFilled = displayValue !== null && !isFilled && isHalf && halfValue <= displayValue;
 
-    const IconComponent = isHalfFilled ? StarHalfIcon : StarIcon;
-    const starStyles = getStarStyles(isFilled, isHalfFilled);
+    const IconComponent = isHalfFilled ? StarHalfIcon : isFilled ? StarPurple500Icon : StarBorderPurple500Icon;
+    const starStyles = starSx(isFilled, isHalfFilled);
 
-    if (isHalf && isInteractive) {
-      return (
-        <Box
-          key={index}
-          sx={{ position: 'relative', display: 'inline-flex', cursor: 'pointer', ...starStyles, ...hoverStarSx }}
-          onMouseLeave={() => setHoverValue(null)}
-        >
-          <Box
-            sx={{ position: 'absolute', left: 0, top: 0, width: '50%', height: '100%', zIndex: 1, cursor: 'pointer' }}
-            onMouseEnter={() => handleHalf(index, true)}
-            onClick={() => handleClick(halfValue)}
-          />
-          <Box
-            sx={{ position: 'absolute', right: 0, top: 0, width: '50%', height: '100%', zIndex: 1, cursor: 'pointer' }}
-            onMouseEnter={() => handleHalf(index, false)}
-            onClick={() => handleClick(starValue)}
-          />
-          <IconComponent sx={{ fontSize: s.iconSize, transition: 'color 0.1s ease, filter 0.1s ease' }} />
-        </Box>
-      );
-    }
+    /* Half precision: the SAME focusable radio as a whole star, with two
+       invisible halves over it for the pointer. It used to be a plain box —
+       no tab stop, no arrow keys, no focus ring — so a half-star rating could
+       not be used from the keyboard at all. */
+    const halves = isHalf && isInteractive;
 
     return (
       <Box
         key={index}
+        className="rating-star"
         component={isInteractive ? 'button' : 'span'}
         type={isInteractive ? 'button' : undefined}
         role={isInteractive ? 'radio' : undefined}
-        aria-checked={isFilled}
+        aria-checked={isFilled || isHalfFilled}
         aria-label={(starValue) + ' star' + (starValue !== 1 ? 's' : '')}
         tabIndex={isInteractive ? 0 : -1}
-        onClick={() => handleClick(starValue)}
-        onMouseEnter={() => isInteractive && setHoverValue(starValue)}
+        onClick={halves ? undefined : () => handleClick(starValue)}
+        onMouseEnter={() => isInteractive && !halves && setHoverValue(starValue)}
         onMouseLeave={() => isInteractive && setHoverValue(null)}
         onKeyDown={(e) => {
           if (!isInteractive) return;
@@ -205,22 +166,18 @@ export function Rating({
           }
         }}
         sx={{
+          position: 'relative',
           display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
           border: 'none', backgroundColor: 'transparent', padding: 0,
-          ...(s.minHit && {
-            minWidth: s.minHit + 'px',
-            minHeight: s.minHit + 'px',
-          }),
+          minWidth: s.minHit + 'px',
+          minHeight: s.minHit + 'px',
           cursor: disabled ? 'not-allowed' : (isInteractive ? 'pointer' : 'default'),
           outline: 'none',
-          transition: 'transform 0.1s ease',
           ...starStyles,
-          ...hoverStarSx,
-          '&:active': isInteractive ? { transform: 'scale(0.95)' } : {},
+          // Figma's Focus-Visible: a 3px ring, 1px in from the box's edge.
           '&:focus-visible': isInteractive ? {
-            outline: s.focusWidth + 'px solid var(--Focus-Visible)',
-            outlineOffset: s.focusInset + 'px',
-            borderRadius: '2px',
+            outline: '3px solid var(--Focus-Visible)',
+            outlineOffset: '-4px',
           } : {},
           '&:disabled': {
             cursor: 'not-allowed',
@@ -228,15 +185,25 @@ export function Rating({
           },
         }}
       >
-        <IconComponent sx={{ fontSize: s.iconSize, transition: 'color 0.1s ease, filter 0.1s ease' }} />
+        {halves && (
+          <>
+            <Box aria-hidden="true" sx={{ position: 'absolute', left: 0, top: 0, width: '50%', height: '100%', zIndex: 1 }}
+              onMouseEnter={() => handleHalf(index, true)}
+              onClick={() => handleClick(halfValue)} />
+            <Box aria-hidden="true" sx={{ position: 'absolute', right: 0, top: 0, width: '50%', height: '100%', zIndex: 1 }}
+              onMouseEnter={() => handleHalf(index, false)}
+              onClick={() => handleClick(starValue)} />
+          </>
+        )}
+        <IconComponent sx={{ fontSize: s.iconSize }} />
       </Box>
     );
   };
 
-  return (
+  const group = (
     <Box
       role={isInteractive ? 'radiogroup' : 'img'}
-      aria-label={'Rating' + (currentValue !== null ? ': ' + currentValue + ' of ' + max + ' stars' : ': ' + emptyLabel)}
+      aria-label={(label || 'Rating') + (currentValue !== null ? ': ' + currentValue + ' of ' + max + ' stars' : ': ' + emptyLabel)}
       data-theme={theme || undefined}
       data-surface={surface || undefined}
       className={'rating rating-' + color + ' rating-' + size +
@@ -245,7 +212,7 @@ export function Rating({
         (currentValue === null ? ' rating-empty' : '') +
         (className ? ' ' + className : '')}
       sx={{
-        display: 'inline-flex', alignItems: 'center', gap: s.gap + 'px',
+        display: 'inline-flex', alignItems: 'center', gap: 0,
         opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
         fontFamily: 'inherit',
         ...sx,
@@ -253,11 +220,27 @@ export function Rating({
       {...props}
     >
       {Array.from({ length: max }, (_, i) => renderStar(i))}
-      {currentValue === null && !hoverValue && (
+      {currentValue === null && !hoverValue && emptyLabel && (
         <Caption style={{ color: 'var(--Quiet)', marginLeft: 4 }}>
           {emptyLabel}
         </Caption>
       )}
+    </Box>
+  );
+
+  if (!label) return group;
+  const labelEl = (
+    <FormLabel disabled={disabled} aria-hidden="true"
+      sx={disabled ? { opacity: 'var(--Disabled, 0.38)' } : undefined}>
+      {label}
+    </FormLabel>
+  );
+  return (
+    <Box className={'rating-field rating-label-' + labelPosition}
+      sx={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', gap: 'var(--Sizing-Half, 4px)' }}>
+      {labelPosition !== 'bottom' && labelEl}
+      {group}
+      {labelPosition === 'bottom' && labelEl}
     </Box>
   );
 }

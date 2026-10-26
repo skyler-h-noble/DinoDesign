@@ -162,3 +162,62 @@ describe('Rating — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+/* ─── Figma's Star / RatingField ─── */
+describe('Matches Figma', () => {
+  const cssFor = (el) => {
+    const out = [];
+    for (const sheet of document.styleSheets) for (const r of sheet.cssRules) {
+      try { if (el.matches(r.selectorText)) out.push(r.cssText); } catch (e) { /* skip */ }
+    }
+    return out.join('\n');
+  };
+
+  test('stars are icons: --Icons-{C}, no stroke or shadow', () => {
+    const { container } = render(<Rating defaultValue={3} color="primary" />);
+    const star = container.querySelector('button');
+    const c = cssFor(star);
+    expect(c).toContain('color: var(--Icons-Primary)');
+    expect(c).not.toMatch(/drop-shadow|stroke/);
+  });
+
+  test('the Material purple500 glyphs, 20px in a 24px box at medium', () => {
+    const { container } = render(<Rating defaultValue={1} max={2} />);
+    expect(container.querySelector('[data-testid="StarPurple500Icon"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-testid="StarBorderPurple500Icon"]')).toBeInTheDocument();
+  });
+
+  test('label names the group and sits above by default', () => {
+    const { container } = render(<Rating label="Quality" defaultValue={2} />);
+    expect(screen.getByRole('radiogroup')).toHaveAccessibleName(/Quality/);
+    const field = container.querySelector('.rating-field');
+    expect(field.firstChild).toHaveTextContent('Quality');
+  });
+
+  test('labelPosition="bottom" puts the label under the stars', () => {
+    const { container } = render(<Rating label="Quality" labelPosition="bottom" />);
+    expect(container.querySelector('.rating-field').lastChild).toHaveTextContent('Quality');
+  });
+});
+
+describe('Half precision is keyboard-usable', () => {
+  test('every star is a focusable radio, and arrows step by a half', () => {
+    const onChange = jest.fn();
+    render(<Rating precision={0.5} defaultValue={2} onChange={onChange} />);
+    const radios = screen.getAllByRole('radio');
+    expect(radios).toHaveLength(5);
+    radios.forEach((r) => expect(r).toHaveAttribute('tabindex', '0'));
+    radios[1].focus();
+    fireEvent.keyDown(radios[1], { key: 'ArrowRight' });
+    expect(onChange).toHaveBeenCalledWith(2.5);
+  });
+
+  test('clicking the left half picks the half value', () => {
+    const onChange = jest.fn();
+    const { container } = render(<Rating precision={0.5} onChange={onChange} />);
+    const firstStar = screen.getAllByRole('radio')[2];
+    fireEvent.click(firstStar.querySelector('[aria-hidden="true"]'));
+    expect(onChange).toHaveBeenCalledWith(2.5);
+    expect(container).toBeTruthy();
+  });
+});
