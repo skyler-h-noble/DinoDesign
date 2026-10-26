@@ -142,7 +142,7 @@ export function Alert({
   const end = endDecorator && (
     <Box
       className="alert-end-decorator"
-      sx={{ display: 'inline-flex', alignItems: title ? 'center' : 'flex-start', flexShrink: 0, gap: s.gap }}
+      sx={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0, gap: s.gap }}
     >
       {endDecorator}
     </Box>
@@ -192,10 +192,11 @@ export function Alert({
         sx={{
           display: 'flex',
           /* Two rows with a title (header, then body); one row without —
-             icon, body and end top-aligned, as Figma's Title=false (the 24px
-             icon and the 24px body line need no nudge). */
+             icon, body and end CENTRED on the row, as Figma's Title=false:
+             the 24px icon and body line sit in the middle of the 32px close
+             button. */
           flexDirection: title ? 'column' : 'row',
-          alignItems: title ? 'stretch' : 'flex-start',
+          alignItems: title ? 'stretch' : 'center',
           gap: s.gap,
           padding: s.pad,
           fontSize: s.fontSize,
