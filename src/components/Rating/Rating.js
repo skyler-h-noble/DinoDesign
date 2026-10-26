@@ -17,10 +17,10 @@ import { FormLabel } from '../FormLabel/FormLabel';
  *   *_purple500 pair: at 20px those differ only by a tiny inner star, so a
  *   4-of-5 rating read as five identical stars.
  *
- * COLOR: the star is an ICON, so it takes --Icons-{C}: `color` is Figma's
- *   Icons mode (default -> --Icons-Default, which is the surface's Text;
- *   primary -> --Icons-Primary, ...). An unselected star turns --Text on
- *   hover. No strokes, no shadows.
+ * COLOR: a filled star is an ICON, so it takes --Icons-{C}: `color` is
+ *   Figma's Icons mode (default -> --Icons-Default, which is the surface's
+ *   Text; primary -> --Icons-Primary, ...). An unselected star is --Quiet and
+ *   turns --Text on hover. No strokes, no shadows.
  *
  * SIZES: the in-button icon (16 / 20 / 32) in a box 4px larger, never under
  *   Sizing-3 (24) — medium is Figma's 20 in 24. Focus is a 3px ring 1px
@@ -120,7 +120,8 @@ export function Rating({
   };
 
   const starSx = (isFilled, isHalfFilled) => ({
-    color: starColor,
+    // An unselected star is Quiet (Figma's Star), a filled one the icon color.
+    color: isFilled || isHalfFilled ? starColor : 'var(--Quiet)',
     transition: 'color 0.1s ease',
     // Figma's Hover on an unselected star: the glyph turns Text.
     ...(isInteractive && !isFilled && !isHalfFilled && { '&:hover': { color: 'var(--Text)' } }),

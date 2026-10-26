@@ -300,8 +300,10 @@ export function Checkbox({
         '&.Mui-focusVisible .chk-box-icon': {
           outline: '2px solid var(--Focus-Visible)',
           outlineOffset: '1px',
-          // Focus moves the border too, as Hover and Pressed do (Figma).
-          borderColor: 'var(--Buttons-' + styles.color + '-Border)',
+          /* The ring is the focus signal; the border stays where it was —
+             Quiet unchecked, the palette border checked (Figma's Focus-
+             Visible · unchecked keeps Quiet). It used to move to the palette
+             border as Hover does. */
         },
         '&.Mui-disabled': {
           opacity: 'var(--Disabled, 0.38)',
