@@ -1,7 +1,7 @@
 // src/components/List/List.js
 import React from 'react';
 import { Box, Checkbox, Radio } from '@mui/material';
-import { EyebrowSmall, SubtitleLarge, Body, BodySmallSemibold } from '../Typography';
+import { EyebrowSmall, Eyebrow, EyebrowLarge, SubtitleSmall, Subtitle, SubtitleLarge, BodySmall, Body, BodyLarge } from '../Typography';
 import { Ghost } from '../_ghost';
 
 // Default three-layer typography for the text frame. Order is top→bottom:
@@ -10,11 +10,18 @@ import { Ghost } from '../_ghost';
 //   secondary — Body           (supporting description)
 // Single-line consumers (just `children`) render only the SubtitleLarge title
 // so plain "Home" / "Inbox" rows still look like titles, not metadata.
-const DEFAULT_LAYERS = {
-  eyebrow:   EyebrowSmall,
-  title:     Body,                // children / name → Body-Medium
-  secondary: BodySmallSemibold,   // supporting / role → Body-Small-Semibold
+/* Figma's List Item text: Dynamic-Eyebrow, Dynamic-Subtitle, Dynamic Body —
+   one step of each per Component-Size mode. Each keeps its own colour role:
+   the eyebrow in --Eyebrow, title and body in --Text. (It was Eyebrow-Small /
+   Body / Body-Small-Semibold at every size, eyebrow and body in --Quiet.) */
+const LAYERS_BY_SIZE = {
+  small:  { eyebrow: EyebrowSmall, title: SubtitleSmall, secondary: BodySmall },
+  medium: { eyebrow: Eyebrow,      title: Subtitle,      secondary: Body },
+  large:  { eyebrow: EyebrowLarge, title: SubtitleLarge, secondary: BodyLarge },
 };
+/* Component-Size prefix for the List-item tokens. */
+const LI_PREFIX = { small: 'Sm-', medium: '', large: 'Lg-' };
+const liVar = (size, name, fallback) => 'var(--' + (LI_PREFIX[size] ?? '') + 'List-Item-' + name + ', ' + fallback + ')';
 
 /* One map. solid and light are the same PALETTE on different levels, so a
    second map was a second place to keep the same eight names in step — and
@@ -140,9 +147,11 @@ export function ListItem({
         // Include padding in the 100% width so the row fills — not overflows —
         // its parent (without this, width:100% + 16px L/R padding spills 32px).
         boxSizing: 'border-box',
-        gap: 'var(--Sizing-1-and-Half)',
-        py: s.py, px: s.px,
-        minHeight: '32px',
+        /* Figma binds the row's padding, gap and corner to Component-Size
+           List-item/List-Item-Padding / -Gap / -Radius. */
+        gap: liVar(size, 'Gap', '12px'),
+        padding: liVar(size, 'Padding', '12px'),
+        minHeight: 'var(--Sizing-4, 32px)',
         fontSize: s.fontSize, fontFamily: 'inherit', color: 'var(--Text)', listStyle: 'none',
         cursor: isFocusable ? 'pointer' : 'default', opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
         position: 'relative',
@@ -150,19 +159,23 @@ export function ListItem({
         // Card chrome — only when the row is clickable. Non-clickable rows
         // stay bare so they sit flat in a stack; non-clickable dividers
         // (bottomBorder / rightBorder) handle row separation instead.
+        // Card chrome when clickable: Figma's inside 1px --Border stroke (an
+        // inset ring, so it takes no space) at the List-Item-Radius corner.
+        // No resting shadow — Figma's Default row has none.
         ...(isClickable ? {
-          border: '1px solid var(--Border)',
-          boxShadow: 'var(--Effect-Level-1)',
-          padding: 'var(--Sizing-1)',
-          borderRadius: 'var(--Input-Radius)',
+          boxShadow: 'inset 0 0 0 1px var(--Border)',
+          borderRadius: liVar(size, 'Radius', 'var(--Input-Radius)'),
         } : {}),
         // Non-clickable separators — single hairline at the edge the user
         // requested. Mutually exclusive with card chrome above.
-        ...(!isClickable && bottomBorder ? {
-          borderBottom: '1px solid var(--Border-Variant)',
-        } : {}),
-        ...(!isClickable && rightBorder ? {
-          borderRight: '1px solid var(--Border-Variant)',
+        /* Drawn INSIDE the row, as Figma's divider overlays the row's bottom
+           edge: an inset shadow, so it adds no height (a border made every row
+           1px taller than the design and pushed each next row down). */
+        ...(!isClickable && (bottomBorder || rightBorder) ? {
+          boxShadow: [
+            bottomBorder && 'inset 0 -1px 0 var(--Border-Variant)',
+            rightBorder && 'inset -1px 0 0 var(--Border-Variant)',
+          ].filter(Boolean).join(', '),
         } : {}),
         backgroundColor: 'transparent',
         /* Selected is a RING, not a tint.
@@ -194,12 +207,14 @@ export function ListItem({
             position: 'absolute',
             inset: '-1px',
             border: '1px solid var(--Border)',
-            borderRadius: 'var(--Menu-Item-Radius, var(--Input-Radius))',
+            borderRadius: liVar(size, 'Radius', 'var(--Input-Radius)'),
             pointerEvents: 'none',
           },
         } : {}),
-        '&:hover':         isFocusable ? { backgroundColor: 'var(--Hover)',  boxShadow: 'var(--Effect-Level-2)' } : {},
-        '&:active':        isFocusable ? { backgroundColor: 'var(--Pressed)', boxShadow: 'var(--Effect-Level-1)' } : {},
+        // The inset edge rides along with the state shadows, or a hovered row
+        // would lose its border.
+        '&:hover':         isFocusable ? { backgroundColor: 'var(--Hover)',  boxShadow: (isClickable ? 'inset 0 0 0 1px var(--Border), ' : '') + 'var(--Effect-Level-2)' } : {},
+        '&:active':        isFocusable ? { backgroundColor: 'var(--Pressed)', boxShadow: (isClickable ? 'inset 0 0 0 1px var(--Border), ' : '') + 'var(--Effect-Level-1)' } : {},
         // Inset focus ring rendered as a pseudo-element so the corner
         // radius (--Input-Inner-Focus-Visible = Input-Radius minus 1px)
         // can differ from the row's outer radius. A CSS `outline` follows
@@ -210,7 +225,7 @@ export function ListItem({
           position: 'absolute',
           inset: '1px',
           border: '3px solid var(--Focus-Visible)',
-          borderRadius: 'var(--Input-Inner-Focus-Visible)',
+          borderRadius: liVar(size, 'Focus-Radius', 'var(--Input-Inner-Focus-Visible)'),
           pointerEvents: 'none',
         },
         ...sx }}
@@ -239,7 +254,7 @@ export function ListItem({
         // and each line wraps naturally rather than ellipsis-truncating.
         // Order is top→bottom: eyebrow (kicker) → children (title) →
         // secondary (body).
-        const Layers = DEFAULT_LAYERS;
+        const Layers = LAYERS_BY_SIZE[size] || LAYERS_BY_SIZE.medium;
         const kicker = eyebrow ?? overline;
         const lineSx = {
           display: 'block',
@@ -265,17 +280,17 @@ export function ListItem({
             gap: 0,
           }}>
             {kicker && (
-              <Layers.eyebrow style={{ ...lineSx, color: 'var(--Quiet)' }}>
+              <Layers.eyebrow style={lineSx}>
                 {kicker}
               </Layers.eyebrow>
             )}
             {children !== undefined && children !== null && (
-              <Layers.title style={{ ...lineSx, color: 'var(--Text)' }}>
+              <Layers.title style={lineSx}>
                 {children}
               </Layers.title>
             )}
             {secondary && (
-              <Layers.secondary style={{ ...lineSx, color: 'var(--Quiet)' }}>
+              <Layers.secondary style={lineSx}>
                 {secondary}
               </Layers.secondary>
             )}
