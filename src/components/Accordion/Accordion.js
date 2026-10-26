@@ -481,7 +481,9 @@ export function AccordionSummary({
         gap: 'var(--Sizing-Half)',
       }}>
         {(eyebrow ?? overline) && (
-          <EyebrowSmall style={{ ...lineSx, color: 'var(--Text-Quiet)' }}>
+          /* --Eyebrow, not Quiet: the eyebrow is the surface's rotated
+             palette color (Figma's Eyebrow variable). */
+          <EyebrowSmall style={{ ...lineSx, color: 'var(--Eyebrow, var(--Text-Quiet))' }}>
             {eyebrow ?? overline}
           </EyebrowSmall>
         )}
