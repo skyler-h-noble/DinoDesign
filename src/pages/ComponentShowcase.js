@@ -40,7 +40,6 @@ import { BreadcrumbsShowcase } from '../components/Breadcrumbs/BreadcrumbsShowca
 import { MenuShowcase } from '../components/Menu/MenuShowcase';
 import { StepperShowcase } from '../components/Stepper/StepperShowcase';
 import { CardShowcase } from '../components/Card/CardShowcase';
-import { GradientShowcase } from '../components/Gradient/GradientShowcase';
 import { TabsShowcase } from '../components/Tabs/TabsShowcase';
 import { DrawerShowcase } from '../components/Drawer/DrawerShowcase';
 import { SnackbarShowcase } from '../components/Snackbar/SnackbarShowcase';
@@ -229,7 +228,6 @@ const NAV_ITEMS = [
     label: 'Surfaces',
     children: [
       { id: 'card', label: 'Card' },
-      { id: 'gradient', label: 'Gradient' },
       { id: 'box', label: 'Box' },
       { id: 'ratio', label: 'Ratio' },
       { id: 'sheet', label: 'Sheet' },
@@ -506,7 +504,6 @@ function ShowcaseInner() {
 
             {/* ============ SURFACES ============ */}
             {activeSection === 'card' && <CardShowcase />}
-            {activeSection === 'gradient' && <GradientShowcase />}
             {activeSection === 'box' && <BoxShowcase />}
             {activeSection === 'sheet' && <SheetShowcase />}
             {activeSection === 'accordion' && <AccordionShowcase />}

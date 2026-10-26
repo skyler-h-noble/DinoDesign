@@ -69,7 +69,6 @@ import { SwitchInput } from '../components/Switch';
 import { Slider } from '../components/Slider';
 import { CurvedText } from '../components/CurvedText';
 import { BevelText } from '../components/BevelText';
-import { Gradient } from '../components/Gradient';
 import { MiniSwatch } from '../components/MiniSwatch';
 import { Grid } from '../components/Grid';
 import { Tag } from '../components/Tag';
@@ -240,11 +239,6 @@ export const EXAMPLES = {
       <MiniSwatch color="var(--Primary-Color-6)" />
       <Body>Primary</Body>
     </HStack>
-  ),
-  Gradient: () => (
-    <Gradient minHeight={120} style={{ width: 280 }}>
-      <Box style={{ padding: 'var(--Sizing-2)' }}><H3>On brand color</H3></Box>
-    </Gradient>
   ),
   BevelText: () => <BevelText text="Bevel" textStyle="display-small" />,
   CurvedText: () => <CurvedText text="CURVED AROUND" arc={180} radius={60} />,

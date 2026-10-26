@@ -49,7 +49,6 @@ import { DividerShowcase } from '../components/Divider/DividerShowcase';
 import { DrawerShowcase } from '../components/Drawer/DrawerShowcase';
 import { FabShowcase } from '../components/Fab/FabShowcase';
 import { FooterShowcase } from '../components/Footer/FooterShowcase';
-import { GradientShowcase } from '../components/Gradient/GradientShowcase';
 import { IconShowcase } from '../components/Icon/IconShowcase';
 import { IconBadgeShowcase } from '../components/IconBadge/IconBadgeShowcase';
 import { InputShowcase } from '../components/Input/InputShowcase';
@@ -113,7 +112,6 @@ describe('every showcase renders', () => {
   test('Drawer', () => { render(<OmniDesignProvider><DrawerShowcase /></OmniDesignProvider>); });
   test('Fab', () => { render(<OmniDesignProvider><FabShowcase /></OmniDesignProvider>); });
   test('Footer', () => { render(<OmniDesignProvider><FooterShowcase /></OmniDesignProvider>); });
-  test('Gradient', () => { render(<OmniDesignProvider><GradientShowcase /></OmniDesignProvider>); });
   test('Icon', () => { render(<OmniDesignProvider><IconShowcase /></OmniDesignProvider>); });
   test('IconBadge', () => { render(<OmniDesignProvider><IconBadgeShowcase /></OmniDesignProvider>); });
   test('Input', () => { render(<OmniDesignProvider><InputShowcase /></OmniDesignProvider>); });

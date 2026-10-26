@@ -566,51 +566,6 @@ export const MINI_SWATCH_DOC = {
   ]
 };
 
-export const GRADIENT_DOC = {
-  name: 'Gradient',
-  summary: 'A brand gradient as a surface \u2014 a hero backdrop, a card wash, a decorative field.',
-  insteadUse: [{
-    when: 'The region needs a flat surface',
-    use: 'Section'
-  }, {
-    when: 'It is a card with the system\u2019s chrome',
-    use: 'Card'
-  }],
-  props: [{
-    name: 'variant',
-    type: 'string',
-    default: 'undefined',
-    note: 'Which gradient shape \u2014 linear, radial, or the blob field.'
-  }, {
-    name: 'color',
-    type: 'string',
-    default: 'undefined',
-    note: 'The palette it draws from, so a gradient follows the brand rather than naming its own colors.'
-  }, {
-    name: 'angle',
-    type: 'number',
-    default: 'undefined'
-  }, {
-    name: 'stops',
-    type: 'array',
-    default: 'undefined',
-    note: 'Override the generated stops. Rarely right: the defaults come from the palette ramp, and hand-picked stops stop tracking it.'
-  }, {
-    name: 'minHeight',
-    type: 'string | number',
-    default: 'undefined'
-  }],
-  composition: [
-    'Put content inside it rather than beside it. A gradient with nothing on it is decoration; the component exists so text can sit on brand color and stay legible.',
-  ],
-  accessibility: [
-    'Text on a gradient has no single contrast ratio \u2014 it changes across the field. Check the worst point, not the middle, and prefer a flat Section where the text matters.',
-  ],
-  gotchas: [
-    'No Figma component set. Gradients there are fills on frames, so there is nothing to match variant by variant.',
-  ]
-};
-
 export const BEVEL_TEXT_DOC = {
   name: 'BevelText',
   summary: 'Display text with the brand\u2019s bevel \u2014 lit from above, on its own surface.',
@@ -710,7 +665,7 @@ export const CURVED_TEXT_DOC = {
 
 export const REST_DOCS = [SELECT_DOC, MENU_DOC, CODE_BLOCK_DOC, PLAYER_DOC,
   CIRCULAR_PROGRESS_DOC, LINEAR_PROGRESS_DOC, TYPOGRAPHY_DOC,
-  GRID_DOC, MINI_SWATCH_DOC, GRADIENT_DOC, BEVEL_TEXT_DOC, CURVED_TEXT_DOC, undesigned('Autocomplete', 'A text field whose list narrows as the user types.', [{
+  GRID_DOC, MINI_SWATCH_DOC, BEVEL_TEXT_DOC, CURVED_TEXT_DOC, undesigned('Autocomplete', 'A text field whose list narrows as the user types.', [{
   when: 'The list is short and fixed',
   use: 'Select'
 }, {

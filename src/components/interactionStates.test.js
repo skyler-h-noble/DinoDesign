@@ -189,7 +189,6 @@ const EXEMPT = {
   Tooltip: 'a hint attached to another control',
   Typography: 'text',
   BevelText: 'text',
-  Gradient: 'paints a fill',
   DropdownContext: 'context only',
 };
 
