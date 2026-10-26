@@ -88,7 +88,7 @@ import { Breadcrumbs } from '../components/Breadcrumbs';
 import { Pagination } from '../components/Pagination';
 import { Tabs, TabList, Tab, TabPanel } from '../components/Tabs';
 import { ButtonGroup } from '../components/ButtonGroup';
-import { Accordion } from '../components/Accordion';
+import { AccordionGroup, Accordion, AccordionSummary, AccordionDetails } from '../components/Accordion';
 import { Body, H3, H2, Subtitle } from '../components/Typography';
 import { VStack, HStack } from '../components/Stack';
 import { Caption } from '../components/Typography';
@@ -344,9 +344,18 @@ export const EXAMPLES = {
       <Body>Current</Body>
     </Breadcrumbs>,
   Pagination: () => <Pagination count={8} defaultPage={3} />,
-  Accordion: () => <Accordion>
-      <Body>An accordion segment, open.</Body>
-    </Accordion>,
+  /* A segment is Summary + Details. A bare <Accordion> has no header to
+     click and no panel to open, so it renders as an empty pill. */
+  Accordion: () => <AccordionGroup spacing={1}>
+      <Accordion defaultExpanded>
+        <AccordionSummary>Shipping</AccordionSummary>
+        <AccordionDetails>Orders ship within two business days.</AccordionDetails>
+      </Accordion>
+      <Accordion>
+        <AccordionSummary>Returns</AccordionSummary>
+        <AccordionDetails>Return anything within 30 days.</AccordionDetails>
+      </Accordion>
+    </AccordionGroup>,
   Tabs: () => <Tabs defaultValue={0}>
       <TabList>
         <Tab value={0}>Overview</Tab>
