@@ -8,16 +8,17 @@
 // tell from the library listing whether one comes with it. `Input` and
 // `Input Field` split the same way.
 //
-// ── Label-top only, and that is a real constraint ────────────────────────────
-// A text area takes no other placement. FLOATING has nowhere to float: the
-// label would need to move up out of the value's way, but a text area's value
-// starts at the top and grows down, so the label either shoves the content
-// down on focus or lands on the first line. LEFT disconnects: the label sits at
-// the top-left while the field runs four or five lines past it, and by the
-// third line there is nothing beside it.
+// ── Label top, left or none ──────────────────────────────────────────────
+// labelPosition = 'top' (default) | 'left' | 'none' — Figma's Label axis.
+// LEFT keeps the label at the TOP-left, Sizing-1 from the field, so it sits
+// beside the first line however tall the area grows. NONE draws no label; the
+// `label` text still names the control (aria-label), because a field with no
+// name is not optional.
 //
-// So there is no `labelPlacement` prop. A prop with one legal value is a
-// question nobody should be asked.
+// FLOATING is deliberately not offered yet (on the checklist): a text area's
+// value starts at the top and grows down, so a floating label either shoves
+// the content down on focus or lands on the first line — it needs its own
+// design before it gets a prop.
 //
 // ── It does NOT pass `label` to the TextArea ─────────────────────────────────
 // Input renders its own label when given one. Passing it through would draw a
@@ -31,6 +32,7 @@ import { TextArea } from '../TextField/TextField';
 
 export function TextAreaField({
   label,
+  labelPosition = 'top',
   /* Figma's Form-Label Type axis. */
   type = 'default',
   /* { label, text?, href?, onClick? } — forwarded to FormLabel. */
@@ -44,20 +46,26 @@ export function TextAreaField({
   const generatedId = useId();
   const id = idProp || generatedId;
 
+  const isLeft = labelPosition === 'left';
+  const showLabel = labelPosition !== 'none';
   return (
     <Box
-      className={'textarea-field ' + className}
+      className={'textarea-field textarea-field-label-' + labelPosition + (className ? ' ' + className : '')}
       sx={{
         display: 'flex',
-        flexDirection: 'column',
-        /* Figma: the Field is a vertical stack at Sizing-Half. */
-        gap: 'var(--Sizing-Half)',
+        /* Figma: a vertical stack at Sizing-Half; label-left is a row at
+           Sizing-1 with the label held at the top. */
+        flexDirection: isLeft ? 'row' : 'column',
+        alignItems: isLeft ? 'flex-start' : 'stretch',
+        gap: isLeft ? 'var(--Sizing-1)' : 'var(--Sizing-Half)',
         ...sx,
       }}
     >
-      <FormLabel htmlFor={id} type={type} moreInfo={moreInfo} disabled={disabled}>
-        {label}
-      </FormLabel>
+      {showLabel && (
+        <FormLabel htmlFor={id} type={type} moreInfo={moreInfo} disabled={disabled} sx={isLeft ? { flexShrink: 0 } : undefined}>
+          {label}
+        </FormLabel>
+      )}
       <TextArea
         id={id}
         disabled={disabled}
@@ -65,7 +73,9 @@ export function TextAreaField({
            label — that one is aria-hidden precisely so this is the single
            place a screen reader learns it. */
         aria-required={type === 'required' ? true : undefined}
+        {...(!showLabel && typeof label === 'string' ? { 'aria-label': label } : {})}
         {...props}
+        sx={{ ...(isLeft ? { flex: 1, minWidth: 0 } : {}), ...(props.sx || {}) }}
       />
     </Box>
   );

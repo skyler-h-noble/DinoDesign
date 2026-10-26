@@ -85,3 +85,16 @@ describe('TextAreaField', () => {
     expect(ta).toHaveAttribute('rows', '6');
   });
 });
+
+describe('labelPosition', () => {
+  test('left: label and field in a row', () => {
+    const { container } = render(<TextAreaField label="Notes" labelPosition="left" />);
+    expect(container.querySelector('.textarea-field-label-left')).toBeInTheDocument();
+    expect(screen.getByText('Notes')).toBeInTheDocument();
+  });
+  test('none: no visible label, but the field keeps its name', () => {
+    render(<TextAreaField label="Notes" labelPosition="none" />);
+    expect(screen.queryByText('Notes')).toBeNull();
+    expect(screen.getByRole('textbox', { name: 'Notes' })).toBeInTheDocument();
+  });
+});
