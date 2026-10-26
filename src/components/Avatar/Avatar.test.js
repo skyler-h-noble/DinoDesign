@@ -36,13 +36,14 @@ describe('Content', () => {
   // A bare <Avatar /> is the PHOTO variant — the lib ships a default photo and
   // that is the design's default style. The icon fallback is what you get when
   // the photo is explicitly suppressed.
-  test('bare avatar shows the default photo', () => {
+  // A bare avatar is Figma's Default style: the person glyph.
+  test('bare avatar shows the glyph', () => {
     const { container } = renderAvatar();
-    expect(container.querySelector('.avatar-image')).toBeInTheDocument();
-  });
-  test('fallback icon when the default photo is suppressed', () => {
-    const { container } = renderAvatar({ defaultPhoto: false });
     expect(container.querySelector('.avatar-fallback')).toBeInTheDocument();
+  });
+  test('defaultPhoto shows the built-in sample photo', () => {
+    const { container } = renderAvatar({ defaultPhoto: true });
+    expect(container.querySelector('.avatar-image')).toBeInTheDocument();
   });
   test('image class when src provided', () => {
     const { container } = renderAvatar({ src: 'test.jpg' });

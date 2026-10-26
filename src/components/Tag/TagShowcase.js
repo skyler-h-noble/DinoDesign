@@ -115,7 +115,6 @@ function ColorSwatchButton({ color, selected, onClick }) {
 export function TagShowcase() {
   const [color, setColor]               = useState('primary');
   const [labelText, setLabelText]       = useState('New');
-  const [allCaps, setAllCaps]           = useState(false);
   const [bgTheme, setBgTheme]           = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
   const [contrastData, setContrastData] = useState({});
@@ -125,7 +124,6 @@ export function TagShowcase() {
   const generateCode = () => {
     const props = [];
     if (color !== 'primary') props.push('color="' + color + '"');
-    if (allCaps)             props.push('allCaps');
     const propsStr = props.length ? ' ' + props.join(' ') : '';
     return '<Tag' + propsStr + '>' + labelText + '</Tag>';
   };
@@ -167,13 +165,13 @@ export function TagShowcase() {
 
               {/* Single tag preview */}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-                <Tag color={color} allCaps={allCaps}>{labelText}</Tag>
+                <Tag color={color}>{labelText}</Tag>
               </Box>
 
               {/* All colors at a glance */}
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                 {TAG_COLORS.map((c) => (
-                  <Tag key={c} color={c} allCaps={allCaps}>
+                  <Tag key={c} color={c}>
                     {TAG_COLOR_TOKEN_MAP[c]}
                   </Tag>
                 ))}
@@ -241,21 +239,6 @@ export function TagShowcase() {
                     />
                   </Box>
 
-                  {/* All caps toggle */}
-                  <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box>
-                      <BodySmall>All caps</BodySmall>
-                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>
-                        text-transform: uppercase
-                      </Caption>
-                    </Box>
-                    <Switch
-                      checked={allCaps}
-                      onChange={(e) => setAllCaps(e.target.checked)}
-                      size="small"
-                      aria-label="All caps"
-                    />
-                  </Box>
 
                 </Box>
               </Grid>
@@ -335,7 +318,7 @@ export function TagShowcase() {
                       </BodySmall>
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                         {TAG_COLORS.map((c) => (
-                          <Tag key={c} color={c} allCaps={allCaps}>
+                          <Tag key={c} color={c}>
                             {TAG_COLOR_TOKEN_MAP[c]}
                           </Tag>
                         ))}

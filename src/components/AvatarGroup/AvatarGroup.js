@@ -50,7 +50,7 @@ const BUTTON_HEIGHT = {
 function PersonCard({ person }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 'var(--Sizing-2, 16px)', padding: 'var(--Sizing-1, 8px)' }}>
-      <Avatar size="large" src={person.src} initials={person.initials} defaultPhoto={!person.initials} alt="" />
+      <Avatar size="large" src={person.src} initials={person.initials} alt="" />
       <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         {person.name && <Subtitle>{person.name}</Subtitle>}
         {person.detail && <Body>{person.detail}</Body>}
@@ -81,7 +81,7 @@ function GroupItem({ person, onPersonClick, buttonSize, buttonVariant }) {
     ? { onMouseEnter: show, onMouseLeave: hide, onFocus: show, onBlur: hide, onKeyDown: (e) => { if (e.key === 'Escape') setOpen(false); } }
     : {};
 
-  const avatar = <Avatar src={person.src} initials={person.initials} defaultPhoto={!person.initials} alt="" />;
+  const avatar = <Avatar src={person.src} initials={person.initials} alt="" />;
   const describe = hasCard && open ? idRef.current : undefined;
 
   return (
@@ -161,7 +161,7 @@ export function AvatarGroup({
       key: p.key || p.name || i,
       label: p.name,
       secondary: p.detail,
-      startDecorator: <Avatar size="large" src={p.src} initials={p.initials} defaultPhoto={!p.initials} alt="" />,
+      startDecorator: <Avatar size="large" src={p.src} initials={p.initials} alt="" />,
       clickable: !!click,
       onClick: click ? () => { setListOpen(false); click(); } : undefined,
     };

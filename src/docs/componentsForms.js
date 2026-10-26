@@ -778,8 +778,8 @@ export const AVATAR_DOC = {
   }, {
     name: 'defaultPhoto',
     type: 'boolean',
-    default: 'true',
-    note: 'The brand glyph when nothing else resolves. `false` falls back to the icon.'
+    default: 'false',
+    note: 'Shows the built-in sample photo when there is no src or initials. Off, the avatar is the person glyph — Figma\u2019s Default.'
   }, {
     name: 'color',
     type: 'string',
@@ -822,7 +822,7 @@ export const AVATAR_DOC = {
     variesWith: 'theme + surface',
     figma: 'Modes → Theme → Buttons'
   }, surfaceToken('--Text', 'the initials')],
-  composition: ['Content resolves in order: `src` → `initials` → the default photo (`defaultPhoto={false}` for the glyph).', 'Use `AvatarGroup` for a stack; it handles the overlap and the "+n" overflow.'],
+  composition: ['Content resolves in order: `src` → `initials` → the person glyph (Figma\u2019s Default). `defaultPhoto` shows the built-in sample photo.', 'Use `AvatarGroup` for a stack; it handles the overlap and the "+n" overflow.'],
   accessibility: ['An avatar with a photo needs `alt` naming the person.', 'Initials are not a name. `aria-label="JD"` passes every checker and says nothing — give the full name.'],
   gotchas: ['In Figma the variant axis is `Style = Initials | Default | Photo`. Those are content choices; the library derives them from which prop you pass, so there is no `style` prop.']
 };

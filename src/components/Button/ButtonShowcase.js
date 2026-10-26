@@ -247,7 +247,7 @@ export function ButtonShowcase() {
     }
     if (type === 'icon') {
       // The person glyph — Avatar's Default style.
-      return <Avatar color="default" defaultPhoto={false} />;
+      return <Avatar color="default" />;
     }
     // letters (default)
     const letters = (avatarLetters || 'A').slice(0, 2).toUpperCase();
@@ -304,7 +304,7 @@ export function ButtonShowcase() {
     if (slot === 'icon') return '<Icon><' + iconName + 'Icon /></Icon>';
     if (slot === 'avatar') {
       if (avatarType === 'image') return '<Avatar src="' + avatarImageUrl + '" />';
-      if (avatarType === 'icon')  return '<Avatar defaultPhoto={false} />';
+      if (avatarType === 'icon')  return '<Avatar />';
       const letters = (avatarLetters || 'A').slice(0, 2).toUpperCase();
       return '<Avatar initials="' + letters + '" />';
     }

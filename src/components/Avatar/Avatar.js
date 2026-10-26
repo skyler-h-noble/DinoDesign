@@ -10,9 +10,9 @@ import { useGhost, ghostBlockSx } from '../_ghost';
  * Avatar Component
  *
  * CONTENT (priority): real src → initials → DEFAULT PHOTO.
- *   The default avatar IS the photo: a bare <Avatar /> shows the built-in photo.
- *   The three Figma styles map to: bare <Avatar /> (Photo), initials="…"
- *   (Initials), defaultPhoto={false} (Default — the person glyph).
+ *   A bare <Avatar /> is Figma's DEFAULT style: the person glyph. The three
+ *   styles map to: bare <Avatar /> (Default), initials="…" (Initials),
+ *   src="…" — or defaultPhoto for the built-in sample photo — (Photo).
  *   No `icon`: an icon on a disc is not a person — it is an icon button or a
  *   status mark. `icon` still renders (as the photo / glyph) and warns once.
  *
@@ -172,7 +172,7 @@ function warnIconOnce() {
   // eslint-disable-next-line no-console
   console.warn(
     '[Avatar] `icon` is retired — an avatar is a person: a photo, initials or ' +
-    'the Default glyph (defaultPhoto={false}). An icon on a disc is an icon ' +
+    'the Default glyph. An icon on a disc is an icon ' +
     'Button or a status mark. Rendering the avatar without it.',
   );
 }
@@ -182,8 +182,9 @@ export function Avatar({
   // The DEFAULT avatar IS the photo: a bare <Avatar /> shows the lib's built-in
   // photo. `src` (a real URL) always wins; `initials`
   // override the photo (those are the other two variants). Pass
-  // defaultPhoto={false} to suppress the photo and fall back to the Person icon.
-  defaultPhoto = true,
+  // defaultPhoto shows the lib's built-in sample photo (Figma's Photo style
+  // preview); without src, initials or defaultPhoto the avatar is the glyph.
+  defaultPhoto = false,
   alt,
   initials,
   icon: _retiredIcon,

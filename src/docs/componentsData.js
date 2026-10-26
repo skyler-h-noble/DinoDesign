@@ -462,10 +462,6 @@ export const TAG_DOC = {
     type: 'string',
     values: ['hug', 'fill'],
     default: 'hug'
-  }, {
-    name: 'allCaps',
-    type: 'boolean',
-    default: 'false'
   }],
   states: [{
     state: 'None',

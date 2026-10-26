@@ -24,7 +24,8 @@ import { Label } from '../Typography/Typography';
  * PROPS:
  *   color      string    One of the above colors (default: 'default')
  *   width      string    'hug' (default) fits content, 'fill' stretches to container
- *   allCaps    boolean   Transforms text to uppercase (default: true, as Figma's style)
+ *   (No allCaps: a tag is always uppercase, in code and Figma. allCaps={false}
+ *   still renders — in caps — and warns once in development.)
  *   children   node      Tag label text
  *   className  string
  *   sx         object    MUI sx overrides
@@ -52,16 +53,25 @@ const COLOR_TOKEN_MAP = {
   error:     'Error',
 };
 
+let warnedAllCaps = false;
+function warnAllCapsOnce() {
+  if (warnedAllCaps || process.env.NODE_ENV === 'production') return;
+  warnedAllCaps = true;
+  // eslint-disable-next-line no-console
+  console.warn('[Tag] allCaps={false} is retired — a tag is always uppercase, as Figma\'s Tag. Rendering in caps.');
+}
+
 export function Tag({
   color = 'default',
   width = 'hug',
-  // Figma's Tag text style is Label-Medium-All-Caps.
-  allCaps = true,
+  // Retired: Figma's Tag style is Label-Medium-All-Caps, always.
+  allCaps,
   children,
   className = '',
   sx = {},
   ...props
 }) {
+  if (allCaps === false) warnAllCapsOnce();
   const isFill = width === 'fill';
   const C    = COLOR_TOKEN_MAP[color] || 'Primary';
   const bg   = 'var(--Tag-' + C + '-BG)';
@@ -92,7 +102,7 @@ export function Tag({
         sx={{
           color:         'inherit',
           whiteSpace:    'nowrap',
-          textTransform: allCaps ? 'uppercase' : 'none',
+          textTransform: 'uppercase',
         }}
       >
         {children}

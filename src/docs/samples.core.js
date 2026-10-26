@@ -448,10 +448,6 @@ export const CORE_SAMPLES = {
         </VStack>
       </VStack>
     ),
-    allCaps: () => (
-      <Toggle render={(on) => <Tag color="primary" allCaps={on}>Beta</Tag>}
-              offLabel="as written" onLabel="allCaps" />
-    ),
   },
 
   IconBadge: {
