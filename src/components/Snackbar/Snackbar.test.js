@@ -47,7 +47,8 @@ describe('Snackbar', () => {
    node read them off the wrong element. */
 const inner = (container) => container.querySelector('[data-surface]');
 
-/* Snackbar has ONE surface: Surface-Brightest.
+/* Snackbar has ONE surface: Surface — Figma's Snack (it was Surface-Brightest
+ * until the Snack set fixed it at Surface, with a Border edge and Text-Match).
  *
  * It was "always Container-High" — a level Snackbar has never set — then a
  * per-variant default (light -> Surface-Brightest, anything else -> Surface).
@@ -56,8 +57,8 @@ const inner = (container) => container.querySelector('[data-surface]');
  * Why one: a toast carries semantic color, so on a solid fill that color is
  * also the background its label must survive on — the label then flips per
  * theme AND per mode, 18 combinations to verify instead of 9. On
- * Surface-Brightest the color lives in the border and icon while the text
- * sits on a reliable background. Alert is already single-surface, and a toast
+ * the theme's own surface the color lives in Text-Match and the icon while the
+ * text sits on an opaque background its contrast was set against. Alert is already single-surface, and a toast
  * is a floating alert.
  *
  * `surface` remains the way to reach any of the five levels, which is what
@@ -65,10 +66,10 @@ const inner = (container) => container.querySelector('[data-surface]');
  * match the data-surface vocabulary. */
 describe('data-surface', () => {
   test.each([
-    [undefined,   'Surface-Brightest'],
-    ['light',     'Surface-Brightest'],
-    ['solid',     'Surface-Brightest'],   // retired, resolves to light
-    ['standard',  'Surface-Brightest'],   // so does anything else
+    [undefined,   'Surface'],
+    ['light',     'Surface'],
+    ['solid',     'Surface'],   // retired, resolves to light
+    ['standard',  'Surface'],   // so does anything else
   ])('variant=%s → %s', (variant, expected) => {
     const { container } = renderSnackbar(variant ? { variant, color: 'primary' } : {});
     expect(inner(container)).toHaveAttribute('data-surface', expected);
@@ -80,7 +81,7 @@ describe('data-surface', () => {
        happened to survive — and it would be the one nobody tested. */
     for (const variant of ['solid', 'standard', 'dark', 'outlined', '']) {
       const { container } = renderSnackbar({ variant, color: 'error' });
-      expect(inner(container)).toHaveAttribute('data-surface', 'Surface-Brightest');
+      expect(inner(container)).toHaveAttribute('data-surface', 'Surface');
     }
   });
 
@@ -127,8 +128,9 @@ describe('Solid variant data-theme', () => {
        semantic color as its own background — 18 contrast combinations to
        verify instead of 9. */
     const { container } = renderSnackbar({ variant: 'solid', color: 'error' });
-    expect(container.querySelector('[data-surface="Surface-Brightest"]')).toBeInTheDocument();
-    expect(container.querySelector('[data-surface="Surface"]')).not.toBeInTheDocument();
+    const zone = container.querySelector('[data-surface]');
+    expect(zone).toHaveAttribute('data-surface', 'Surface');
+    expect(zone).toHaveAttribute('data-theme', 'Error');
   });
 
   test('an explicit surface still wins over the retirement', () => {
@@ -409,5 +411,43 @@ describe('edge offset', () => {
       const bare = (css.match(/(?:^|[;{]\s*)(top|bottom):\s*[\d.]+px;/g) || []);
       expect(`${anchor}: ${bare.join(' ')}`).toBe(`${anchor}: `);
     }
+  });
+});
+
+/* ─── Figma's Snack and its four anchors ─── */
+describe('Matches Figma', () => {
+  const cssFor = (el) => {
+    const out = [];
+    for (const sheet of document.styleSheets) for (const r of sheet.cssRules) {
+      try { if (el.matches(r.selectorText)) out.push(r.cssText); } catch (e) { /* skip */ }
+    }
+    return out.join('\n');
+  };
+
+  test('520 wide, Dropdown-Frame-Radius corners', () => {
+    const { container } = render(<Snackbar open>Saved</Snackbar>);
+    const c = cssFor(container.querySelector('.snackbar'));
+    expect(c).toContain('520px');
+    expect(c).toContain('var(--Dropdown-Frame-Radius');
+  });
+
+  test('a 1px Border, Text-Match text, Card-Padding x Sizing-1', () => {
+    const { container } = render(<Snackbar open>Saved</Snackbar>);
+    const c = cssFor(container.querySelector('.snackbar-inner'));
+    expect(c).toContain('border: 1px solid var(--Border)');
+    expect(c).toContain('var(--Text-Match');
+    expect(c).toContain('var(--Sizing-1, 8px) var(--Card-Padding');
+  });
+
+  test.each([
+    ['top-right', 'top', 'right'],
+    ['bottom-right', 'bottom', 'right'],
+    ['top-middle', 'top', 'left'],
+    ['bottom', 'bottom', 'left'],
+  ])('anchor=%s sits at %s / %s', (anchor, v, h) => {
+    const { container } = render(<Snackbar open anchor={anchor}>Saved</Snackbar>);
+    const c = cssFor(container.querySelector('.snackbar'));
+    expect(c).toMatch(new RegExp('(^|[;{ ])' + v + ':'));
+    expect(c).toMatch(new RegExp('(^|[;{ ])' + h + ':'));
   });
 });

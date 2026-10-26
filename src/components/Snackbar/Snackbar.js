@@ -3,15 +3,14 @@ import React, { useEffect, useRef, useCallback } from 'react';
 import { Box } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { Button } from '../Button/Button';
-import { Icon } from '../Icon/Icon';
-import { Body, BodySmall } from '../Typography';
+import { Body, BodySmall, BodyLarge } from '../Typography';
 import { SHADOW_LEVEL_3 } from '../_shadows';
 
 /**
  * Snackbar (Toast) Component
  *
  * VARIANTS:
- *   light     data-theme="{Theme}" data-surface="Surface-Brightest"
+ *   light     data-theme="{Theme}" data-surface="Surface"
  *
  *   `solid` was RETIRED 2026-09-28. It still renders — it resolves to light and
  *   warns once in development, the same shim the -light button variants got —
@@ -20,8 +19,8 @@ import { SHADOW_LEVEL_3 } from '../_shadows';
  *   Why: a toast carries semantic color, so on a solid fill that color is
  *   also the background its label must survive on. The label then has to flip
  *   per theme AND per mode, which is 18 combinations to verify instead of 9.
- *   On Surface-Brightest the color lives in the border and icon while the
- *   text sits on a reliable background — the same reasoning that keeps a
+ *   On the theme's Surface the color lives in Text-Match and the icon while
+ *   the text sits on an opaque background — the same reasoning that keeps a
  *   Carousel dot's 3:1 in its border rather than its fill. Alert is already
  *   single-surface, and a toast is a floating alert, so the two now agree.
  *
@@ -29,22 +28,28 @@ import { SHADOW_LEVEL_3 } from '../_shadows';
  *
  * COLORS: default | primary | secondary | tertiary | neutral | info | success | warning | error
  *
- * STRUCTURE:
- *   Outer shell — border var(--Buttons-{C}-Border), Effect-Level-3 shadow
- *   Inner content — data-theme + data-surface, bg var(--Background), color var(--Text)
+ * STRUCTURE — Figma's Snack (9626:16503), placed by Snackbar (8839:28556):
+ *   Shell     520 wide (never wider than the screen less its margins),
+ *             --Dropdown-Frame-Radius corners (a floating frame: never rounder
+ *             than a card, capped at 16), the FAB / Snackbar elevation (Level 3)
+ *   Inner     data-theme + data-surface (Surface by default), a 1px --Border
+ *             that takes layout space (as Figma's stroke does), Sizing-1 x Card-Padding padding, 10px between parts;
+ *             text is --Text-Match and the icon --Icons-Match — the theme's
+ *             own colors, as Alert
+ *   Close     a ghost icon-only Button at the regular button height
  *
- * SIZES: small | medium | large
- * ANCHOR: top | bottom
+ * SIZES: small | medium | large — the message's text size
+ * ANCHOR: top-right | top-middle | bottom-right | bottom-middle (Figma's
+ *   four). 'top' / 'bottom' are the middle ones. Right sits in from the
+ *   device --Margin; top / bottom sit --SnackBar-Top / --SnackBar-Bottom from
+ *   the edge.
  * AUTO-HIDE: optional duration in ms
  */
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
-const SIZE_MAP = {
-  small:  { px: '12px', py: '8px',  fontSize: '13px', gap: '8px',  minWidth: '240px' },
-  medium: { px: '16px', py: '10px', fontSize: '14px', gap: '12px', minWidth: '300px' },
-  large:  { px: '20px', py: '14px', fontSize: '16px', gap: '16px', minWidth: '360px' },
-};
+const RADIUS = 'var(--Dropdown-Frame-Radius, 4px)';
+const MARGIN = 'var(--Margin, 64px)';
 
 /** Warn once per session, not once per render. */
 let warnedSolid = false;
@@ -55,7 +60,7 @@ export function Snackbar({
   onClose,
   variant = 'light',
   surface,
-  color = 'info',
+  color = 'default',
   size = 'medium',
   anchor = 'bottom',
   autoHideDuration,
@@ -68,8 +73,9 @@ export function Snackbar({
 }) {
   const timerRef = useRef(null);
   const C = cap(color === 'default' ? 'Default' : color);
-  const s = SIZE_MAP[size] || SIZE_MAP.medium;
-  const TextComp = size === 'small' ? BodySmall : Body;
+  const TextComp = size === 'small' ? BodySmall : size === 'large' ? BodyLarge : Body;
+  const atTop = String(anchor).startsWith('top');
+  const atRight = String(anchor).endsWith('right');
 
   // A light variant is the base theme at its BRIGHTEST surface, not a theme of
   // its own. Generated design systems stopped emitting *-Light themes — their
@@ -99,9 +105,7 @@ export function Snackbar({
       'Use the default, or pass `surface` to reach a specific level.',
     );
   }
-  const dataSurface = surface || 'Surface-Brightest';
-
-  const borderToken = 'var(--Buttons-' + C + '-Border)';
+  const dataSurface = surface || 'Surface';
 
   // Auto-hide timer
   useEffect(() => {
@@ -135,9 +139,11 @@ export function Snackbar({
     }
   }, [open, autoHideDuration, onClose]);
 
-  const slideKeyframes = anchor === 'top'
-    ? { from: { transform: 'translateX(-50%) translateY(-120%)' }, to: { transform: 'translateX(-50%) translateY(0)' } }
-    : { from: { transform: 'translateX(-50%) translateY(120%)' }, to: { transform: 'translateX(-50%) translateY(0)' } };
+  const x = atRight ? '' : 'translateX(-50%) ';
+  const slideKeyframes = {
+    from: { transform: x + 'translateY(' + (atTop ? '-120%' : '120%') + ')' },
+    to: { transform: x + 'translateY(0)' },
+  };
 
   if (!open) return null;
 
@@ -151,8 +157,9 @@ export function Snackbar({
       className={'snackbar snackbar-' + variant + ' snackbar-' + size + ' snackbar-' + anchor + ' snackbar-' + color + ' ' + className}
       sx={{
         position: 'fixed',
-        left: '50%',
-        transform: 'translateX(-50%)',
+        ...(atRight
+          ? { right: MARGIN }
+          : { left: '50%', transform: 'translateX(-50%)' }),
         /* Offset from the edge the snackbar is anchored to.
          *
          * --SnackBar-Top / --SnackBar-Bottom are per-device: they are the
@@ -174,14 +181,13 @@ export function Snackbar({
          * in this library, so the fallback is what an unthemed consumer
          * actually gets — and it should be the design system's answer for a
          * device with no chrome, not a number that contradicts it. */
-        ...(anchor === 'top'
+        ...(atTop
           ? { top: 'var(--SnackBar-Top, 24px)' }
           : { bottom: 'var(--SnackBar-Bottom, 24px)' }),
         zIndex: 1400,
-        minWidth: s.minWidth,
-        maxWidth: 'min(560px, calc(100vw - 32px))',
-        border: '1px solid ' + borderToken,
-        borderRadius: 'var(--Style-Border-Radius)',
+        width: 'min(520px, calc(100vw - 2 * ' + MARGIN + '))',
+        boxSizing: 'border-box',
+        borderRadius: RADIUS,
         boxShadow: SHADOW_LEVEL_3,
         overflow: 'hidden',
         animation: 'snackbar-slide-in 0.3s ease forwards',
@@ -193,28 +199,36 @@ export function Snackbar({
       <Box
         data-theme={dataTheme}
         data-surface={dataSurface}
+        className="snackbar-inner"
         sx={{
           display: 'flex',
           alignItems: 'center',
-          gap: s.gap,
-          padding: s.py + ' ' + s.px,
-          fontSize: s.fontSize,
-          fontFamily: 'inherit',
-          lineHeight: 1.4,
-          color: 'var(--Text)',
-          backgroundColor: 'var(--Background)',
-          borderRadius: 'calc(var(--Style-Border-Radius) - 1px)',
+          gap: '10px',
+          padding: 'var(--Sizing-1, 8px) var(--Card-Padding, 16px)',
+          fontFamily: 'var(--Font-Family-Body, inherit)',
+          borderRadius: RADIUS,
+          /* A real border: Figma's stroke here is included in the layout, so
+             the content starts 1px further in (31, not 30) and the snack is
+             50 tall, not 48. */
+          border: '1px solid var(--Border)',
+          /* On the element WITH its zone attributes, as Alert: the design
+             system paints [data-theme][data-surface] at (0,2,0). */
+          '&[data-theme][data-surface]': {
+            color: 'var(--Text-Match, var(--Text))',
+            backgroundColor: 'var(--Background)',
+          },
         }}
       >
         {startDecorator && (
-          <Box sx={{ display: 'inline-flex', flexShrink: 0, lineHeight: 1 }}>
+          <Box className="snackbar-icon" sx={{ display: 'inline-flex', flexShrink: 0, lineHeight: 1, fontSize: '24px',
+            color: 'var(--Icons-Match, currentColor)', '& .MuiSvgIcon-root': { fontSize: 'inherit' } }}>
             {startDecorator}
           </Box>
         )}
 
-        <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Box className="snackbar-message" sx={{ flex: 1, minWidth: 0 }}>
           {typeof children === 'string' ? (
-            <TextComp>{children}</TextComp>
+            <TextComp color="inherit">{children}</TextComp>
           ) : children}
         </Box>
 
@@ -234,12 +248,12 @@ export function Snackbar({
           <Button
             iconOnly
             variant="ghost"
-            size="small"
             onClick={(e) => onClose(e, 'closeClick')}
             aria-label="Close notification"
-            sx={{ flexShrink: 0, ml: '4px' }}
+            className="snackbar-close"
+            sx={{ flexShrink: 0 }}
           >
-            <Icon size="small"><CloseIcon /></Icon>
+            <CloseIcon />
           </Button>
         )}
       </Box>
