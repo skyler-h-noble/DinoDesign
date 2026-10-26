@@ -107,13 +107,13 @@ export function NumberField({
   // In the stacked column the buttons are square (Figma); the column's corner clips them.
   const stackedSx = isOutlined ? { borderRadius: 0 } : {};
   const increase = (
-    <FieldButton variant={isOutlined ? 'ghost' : 'outline'} size={size} aria-label="Increase" tabIndex={-1} sx={stackedSx}
+    <FieldButton variant={isOutlined ? 'ghost' : 'outline'} size={size} aria-label="Increase" tabIndex={-1} data-own-state sx={stackedSx}
       disabled={disabled || atMax} onClick={() => commit(num + step)}>
       <KeyboardArrowUpIcon />
     </FieldButton>
   );
   const decrease = (
-    <FieldButton variant={isOutlined ? 'ghost' : 'outline'} size={size} aria-label="Decrease" tabIndex={-1} sx={stackedSx}
+    <FieldButton variant={isOutlined ? 'ghost' : 'outline'} size={size} aria-label="Decrease" tabIndex={-1} data-own-state sx={stackedSx}
       disabled={disabled || atMin} onClick={() => commit(num - step)}>
       <KeyboardArrowDownIcon />
     </FieldButton>
@@ -148,6 +148,8 @@ export function NumberField({
            the stepper column carries them, sharing the field's right edge. */
         height: '100%', flex: 1, minWidth: 0,
         '& .inp-shell': { height: '100%', borderTopRightRadius: 0, borderBottomRightRadius: 0 },
+        // The ring is the whole control's (field + steppers), drawn on the row.
+        '& .inp-shell:focus-within': { outline: 'none' },
         '& .inp-shell > div, & .MuiFormControl-root, & .MuiOutlinedInput-root': { height: '100%' },
       } : { flex: 1, minWidth: 0 }}
     />
@@ -158,6 +160,11 @@ export function NumberField({
       display: 'flex', alignItems: 'stretch',
       height: 'var(--' + p + 'Numberfield, ' + NUMBERFIELD_FALLBACK[size] + 'px)',
       width: '100%',
+      /* One focus ring round field AND steppers — the house 2px ring 1px out,
+         following the field's corner. The steppers are out of the tab order
+         (the arrow keys do their job from the field), so they draw none. */
+      borderRadius: 'var(--' + p + 'Input-Radius, var(--Input-Radius, 4px))',
+      '&:focus-within': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px' },
     }}>
       {field}
       <Box className="numberfield-steppers" sx={{

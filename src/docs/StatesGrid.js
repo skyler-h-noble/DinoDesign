@@ -26,7 +26,9 @@ const OWN = 'forced-own-state';
 const STYLE_ID = 'docs-forced-states';
 
 function guard(sel) {
-  const g = `:not(.${OWN}, .${OWN} *)`;
+  // [data-own-state]: a control that marks ITSELF as keeping its own state
+  // (NumberField's steppers), where the doc cannot wrap it from outside.
+  const g = `:not(.${OWN}, .${OWN} *, [data-own-state], [data-own-state] *)`;
   const m = sel.match(/::?(before|after|placeholder|marker|selection)$/);
   return m ? sel.slice(0, m.index) + g + m[0] : sel + g;
 }
