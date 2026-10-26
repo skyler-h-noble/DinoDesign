@@ -118,7 +118,10 @@ const NO_PAD = { px: 'var(--Sizing-4, 32px)', py: 'var(--Sizing-1-and-Half, 12px
  *  longer exists in the file: it is `Other/ToolBar` now, and it is 80 — with
  *  a new `Other/ToolBarShort` at 64 beside it. Reading the token rather than
  *  restating the number is the point; a literal cannot follow a rename. */
-const TOOLBAR_HEIGHT = 'var(--ToolBar, var(--Nav-Bar-Height, 80px))';
+/* Not var(--Nav-Bar-Height) as a fallback: that is the variable's name from
+   before Figma renamed it ToolBar, and a design system published before the
+   rename still carries its old 83 — which won over the 80 the bar now is. */
+const TOOLBAR_HEIGHT = 'var(--ToolBar, 80px)';
 /** Other/ToolBarShort: the shorter pill of the two FAB styles. */
 const TOOLBAR_SHORT = 'var(--ToolBarShort, 64px)';
 const FLOATING_RADIUS = TOOLBAR_HEIGHT;
