@@ -50,7 +50,9 @@ export const RATIO_NAMES = [
 ];
 
 const PHI = '1.618034'; // golden ratio
-const RATIO_MAP = {
+/* Exported for Box's `ratio` (Figma's Box Fit = Ratio), so the two read one
+   table of proportions. */
+export const RATIO_MAP = {
   '1:1':   '1 / 1',
   '3:4':   '3 / 4',   '4:3':   '4 / 3',
   '16:9':  '16 / 9',  '9:16':  '9 / 16',

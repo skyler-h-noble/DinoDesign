@@ -147,3 +147,27 @@ describe('Box — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+/* Figma's Box Fit = Ratio: a proportion on the bare box. jsdom does not
+   compute aspect-ratio, so read the injected rule. */
+describe('ratio', () => {
+  const ruleOf = (el) => {
+    const cls = [...el.classList].find((c) => c.startsWith('css-'));
+    return [...document.styleSheets]
+      .flatMap((sheet) => { try { return [...sheet.cssRules]; } catch { return []; } })
+      .map((r) => r.cssText)
+      .find((t) => t.startsWith('.' + cls)) || '';
+  };
+  test('a Ratio name sets aspect-ratio', () => {
+    const { container } = render(<Box ratio="16:9" />);
+    expect(ruleOf(container.querySelector('.omni-box'))).toMatch(/aspect-ratio: 16 ?\/ ?9/);
+  });
+  test('a number is width / height', () => {
+    const { container } = render(<Box ratio={2} />);
+    expect(ruleOf(container.querySelector('.omni-box'))).toContain('aspect-ratio: 2');
+  });
+  test('unset is Fit = No Ratio', () => {
+    const { container } = render(<Box />);
+    expect(ruleOf(container.querySelector('.omni-box'))).not.toContain('aspect-ratio');
+  });
+});

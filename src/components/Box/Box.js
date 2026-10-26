@@ -2,6 +2,7 @@
 import React from 'react';
 import { Box as MuiBox } from '@mui/material';
 import { SHADOWS } from '../_shadows';
+import { RATIO_MAP } from '../Ratio/Ratio';
 
 /**
  * Box Component — bare layout primitive.
@@ -29,6 +30,11 @@ import { SHADOWS } from '../_shadows';
  *                resolves from the PARENT surface (the surface the box sits on,
  *                physically where the shadow falls) rather than the box's own.
  *                The inner element paints `surface` and fills the wrapper.
+ *   ratio      — Figma's Fit = Ratio: holds the box to a proportion with CSS
+ *                aspect-ratio. A Ratio name ('16:9', '4:3', 'Golden-Horizontal'
+ *                …) or a number (width / height). Unset is Fit = No Ratio.
+ *                The bare primitive with a proportion — <Ratio> is the same
+ *                proportion with Ratio's shell.
  *   component  — root element tag (default: 'div')
  *   children, className, sx, ...props — forwarded
  *
@@ -54,6 +60,7 @@ export function Box({
   surface,
   radius = 'none',
   elevation = 0,
+  ratio,
   component = 'div',
   className = '',
   sx = {},
@@ -64,6 +71,8 @@ export function Box({
   // Unknown values fall back to bare rather than throwing — a typo should not
   // take a layout down.
   const radiusValue = RADIUS[radius];
+  const aspect = typeof ratio === 'number' ? String(ratio) : (ratio ? RATIO_MAP[ratio] : undefined);
+  const ratioSx = aspect ? { aspectRatio: aspect } : {};
 
   // Flat (no elevation): a single bare element — children are direct, so any
   // flex/gap/padding the caller passes works as-is.
@@ -74,7 +83,7 @@ export function Box({
         data-theme={theme || undefined}
         data-surface={surface || undefined}
         className={'omni-box' + (className ? ' ' + className : '')}
-        sx={{ background: 'var(--Background)', boxSizing: 'border-box', ...(radiusValue ? { borderRadius: radiusValue } : {}), ...sx }}
+        sx={{ background: 'var(--Background)', boxSizing: 'border-box', ...ratioSx, ...(radiusValue ? { borderRadius: radiusValue } : {}), ...sx }}
         style={style}
         {...props}
       >
@@ -117,7 +126,7 @@ export function Box({
       /* Radius goes on the OUTER shell so the shadow follows the corner rather
          than squaring off behind a rounded surface; the inner box already
          inherits it. An explicit sx.borderRadius still wins. */
-      sx={{ boxShadow: SHADOWS[level], boxSizing: 'border-box', width: sxW, height: sxH, borderRadius: sxR !== undefined ? sxR : radiusValue }}
+      sx={{ boxShadow: SHADOWS[level], boxSizing: 'border-box', ...ratioSx, width: sxW, height: sxH, borderRadius: sxR !== undefined ? sxR : radiusValue }}
       style={outerStyle}
       {...props}
     >
