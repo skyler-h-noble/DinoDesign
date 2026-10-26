@@ -11,6 +11,8 @@ import React from 'react';
 import { Box, Stack } from '@mui/material';
 import { COMPONENT_DOCS } from './components';
 import { EXAMPLES, hasExample, PROP_EXAMPLES, hasPropExample } from './examples';
+import { STATES, hasStates } from './states';
+import { StatesGrid } from './StatesGrid';
 import { howToFor } from './figmaHowTo';
 import { HowToSlot } from '../components/Foundations/HowToSlot';
 import { PreviewSurface } from '../components/PreviewSurface';
@@ -182,6 +184,17 @@ export function DocSummary({ component, theme = null, surface = 'Surface' }) {
 
         <Body>{doc.summary}</Body>
 
+        {/* Every state at once — the component itself in each, matched to the
+            Figma set's State axis (see states.js). */}
+        {hasStates(doc.name) && (
+          <Section title="States">
+            <PreviewSurface theme={theme} surface={surface} minHeight={0}>
+              <div style={{ width: '100%', maxWidth: 480, padding: 'var(--Sizing-3, 24px)' }}>
+                <StatesGrid rows={STATES[doc.name]()} />
+              </div>
+            </PreviewSurface>
+          </Section>
+        )}
         {/* No Figma link here. ShowcaseHeader already puts one in the top
             right of every page, so adding a second put two links to the same
             place on one screen — and the one further down looked like it went
