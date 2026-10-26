@@ -131,8 +131,12 @@ const REGISTRY = [
   // Paper itself is a surface with no onClick. InteractivePaper is the
   // clickable export, and its docblock promises hover and focus.
   { control: 'InteractivePaper',    file: 'Paper/Paper.js', within: ['export function InteractivePaper', 'export function ElevatedPaper'] },
-  { control: 'NumberField spinner', file: 'NumberField/NumberField.js' },
+  // The steppers ARE FieldButtons now (registered below); the field is Input.
+  { control: 'NumberField spinner', file: 'NumberField/NumberField.js', delegatesTo: 'NumberField/FieldButton.js', renders: /<FieldButton\b/ },
   { control: 'Field button',        file: 'NumberField/FieldButton.js' },
+  { control: 'Carousel dot',        file: 'CarouselDots/CarouselDots.js' },
+  // The field label is a FormLabel; the control is the Swatch it renders.
+  { control: 'SwatchField swatch',  file: 'SwatchField/SwatchField.js', delegatesTo: 'Swatch/Swatch.js', renders: /<Swatch\b/ },
   {
     control: 'BottomNavItem',
     file: 'BottomNavigation/BottomNavigation.js',

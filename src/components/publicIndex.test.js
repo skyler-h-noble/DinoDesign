@@ -48,7 +48,7 @@ const INTERNAL = ['Showcase', 'shared', 'Foundations'];
  *  API, not a typo. Asserted as MISSING so that exporting one trips this test
  *  and whoever does it removes the line deliberately — the same shape as the
  *  studio's MISSING_FROM_FILE. */
-const KNOWN_GAPS = ['Progress', 'Sheet', 'TransferList'];
+const KNOWN_GAPS = ['Progress', 'TransferList'];
 
 const dirs = fs.readdirSync(DIR, { withFileTypes: true })
   .filter((d) => d.isDirectory())

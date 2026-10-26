@@ -123,8 +123,8 @@ export function Rating({
     // An unselected star is Quiet (Figma's Star), a filled one the icon color.
     color: isFilled || isHalfFilled ? starColor : 'var(--Quiet)',
     transition: 'color 0.1s ease',
-    // Figma's Hover on an unselected star: the glyph turns Text.
-    ...(isInteractive && !isFilled && !isHalfFilled && { '&:hover': { color: 'var(--Text)' } }),
+    // Engaged, an unselected star's glyph turns Text — Hover and Pressed.
+    ...(isInteractive && !isFilled && !isHalfFilled && { '&:hover, &:active': { color: 'var(--Text)' } }),
   });
 
   const renderStar = (index) => {
