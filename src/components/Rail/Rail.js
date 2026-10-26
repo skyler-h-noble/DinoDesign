@@ -238,7 +238,9 @@ export function Rail({
       sx={{
         display: 'flex', flexDirection: 'column',
         width, minHeight: '100%',
-        gap: SLOT_GAP,
+        /* Sizing-1 under the Default rail's brand; none under the expandable
+           rail's toggle row — Figma butts the slot against it. */
+        gap: expandable ? 0 : SLOT_GAP,
         backgroundColor: 'var(--Background)',
         // No edge: Figma's rail draws none — its Surface-Dim level is what
         // separates it (a 1px border also made it 81px against an 80 design).
@@ -264,8 +266,10 @@ export function Rail({
       )}
 
       {brand && !expandable && (
-        <Box className="rail-brand" sx={{ px: RAIL_PAD_X, flexShrink: 0, boxSizing: 'border-box', width: '100%' }}>
-          <Box sx={{ height: TOP_ROW, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{brand}</Box>
+        /* Figma's Top: App-Bar-Height in all, the divider included, inset by
+           the slot's Sizing-1 so it spans the items, not the rail. */
+        <Box className="rail-brand" sx={{ mx: RAIL_PAD_X, flexShrink: 0, boxSizing: 'border-box', alignSelf: 'stretch' }}>
+          <Box sx={{ height: 'calc(' + TOP_ROW + ' - 1px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{brand}</Box>
           <Box aria-hidden="true" sx={{ height: '1px', backgroundColor: 'var(--Border-Variant)' }} />
         </Box>
       )}
