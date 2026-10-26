@@ -4,7 +4,6 @@ import { Box } from '@mui/material';
 import { Avatar, AVATAR_SIZE_MAP, resolveSizeName } from '../Avatar/Avatar';
 import { Button } from '../Button/Button';
 import { Popover } from '../Popover/Popover';
-import { List } from '../List/List';
 import { Subtitle, Body } from '../Typography';
 
 /**
@@ -25,7 +24,8 @@ import { Subtitle, Body } from '../Typography';
  *     detail (Body) — in a Popover hover card, and brings the avatar to the
  *     front so it shows whole.
  *   - "+N" is a Neutral letter/number Button; it opens a Popover listing the
- *     rest (List rows: avatar, name, detail; clickable when the person is).
+ *     rest as plain rows — the details card's layout, no borders — buttons
+ *     with the surface's Hover / Pressed fill when the person is clickable.
  *   - `size` is the BUTTON size (small | medium | large) — an avatar button
  *     is as tall as a button.
  *
@@ -155,17 +155,18 @@ export function AvatarGroup({
     step = n + 'px';
   }
 
-  const listItems = peopleMode ? hidden.map((p, i) => {
-    const click = p.onClick || (onPersonClick && (() => onPersonClick(p)));
-    return {
-      key: p.key || p.name || i,
-      label: p.name,
-      secondary: p.detail,
-      startDecorator: <Avatar size="large" src={p.src} initials={p.initials} alt="" />,
-      clickable: !!click,
-      onClick: click ? () => { setListOpen(false); click(); } : undefined,
-    };
-  }) : [];
+  const rowSx = {
+    display: 'block', width: '100%', textAlign: 'left', border: 'none', background: 'transparent',
+    padding: 0, margin: 0, font: 'inherit', color: 'inherit',
+    borderRadius: 'var(--Menu-Item-Radius, 0px)',
+  };
+  const clickableRowSx = {
+    ...rowSx,
+    cursor: 'pointer',
+    '&:hover': { backgroundColor: 'var(--Hover)' },
+    '&:active': { backgroundColor: 'var(--Pressed)' },
+    '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '-3px' },
+  };
 
   return (
     <Box
@@ -199,8 +200,20 @@ export function AvatarGroup({
             {'+' + overflow}
           </Button>
           <Popover open={listOpen} onClose={() => setListOpen(false)} anchorEl={overflowRef.current}
-            placement="bottom" arrow width={320} theme={null} aria-label={overflow + ' more people'}>
-            <List items={listItems} />
+            placement="bottom" arrow width="auto" theme={null} aria-label={overflow + ' more people'}>
+            {hidden.map((p, i) => {
+              const click = p.onClick || (onPersonClick && (() => onPersonClick(p)));
+              return click ? (
+                <Box key={p.key || p.name || i} component="button" type="button" className="avatar-group-row"
+                  onClick={() => { setListOpen(false); click(); }} sx={clickableRowSx}>
+                  <PersonCard person={p} />
+                </Box>
+              ) : (
+                <Box key={p.key || p.name || i} className="avatar-group-row" sx={rowSx}>
+                  <PersonCard person={p} />
+                </Box>
+              );
+            })}
           </Popover>
         </Box>
       ) : (
