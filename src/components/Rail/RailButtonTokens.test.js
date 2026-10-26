@@ -113,9 +113,10 @@ describe('the selected item paints from the Buttons palette', () => {
     expect(css).toContain('var(--Buttons-Primary-Button)');
   });
 
-  it('label-outside fills only the circle; the caption stays on the surface', () => {
+  it('label-outside fills only the circle: the glyph takes Buttons-Text, the caption stays --Text', () => {
     const css = cssFor({ labelStyle: 'outside' });
     expect(css).toContain('background-color: var(--Buttons-Default-Button)');
-    expect(css).not.toContain('var(--Buttons-Default-Text)');
+    expect(css).toContain('var(--Buttons-Default-Text)'); // the glyph, on the fill
+    expect(css).toContain('color: var(--Text)');           // the caption, on the surface
   });
 });

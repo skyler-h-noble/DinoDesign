@@ -5,7 +5,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import { Button } from '../Button/Button';
 import { Icon } from '../Icon/Icon';
-import { MobileNavLabel } from '../Typography';
+import { MobileNavLabel, Eyebrow } from '../Typography';
 
 /* Figma's Buttons collection names its modes in lower-kebab; the CSS tokens
    are PascalCase, and `black-white` closes up rather than keeping the seam. */
@@ -100,7 +100,9 @@ const ITEM_RADIUS = '8px';
 const CIRCLE = 'var(--Button-Height, 32px)';
 /** The expand/collapse toggle's row. This file's own — the design has no
  *  expandable rail, so there is nothing to match it to. */
-const TOGGLE_HEIGHT = 56;
+/* The toggle row and the brand row are App-Bar-Height (64 at medium) — the
+   rail's top lines up with the app bar beside it. */
+const TOP_ROW = 'var(--App-Bar-Height, 64px)';
 
 export function Rail({
   items = [],
@@ -112,6 +114,10 @@ export function Rail({
   expandedWidth = 'partial',
   defaultExpanded = false,
   fabAction,
+  /* Figma's Top on the Default rail: the brand mark centred in an
+     App-Bar-Height row, with a divider under it. Any node — a logo, an
+     Avatar, an icon. */
+  brand,
   /* Which of the two Styles in the design. They are not decoration — they
      decide what the state paints:
        contained  a rounded block around the icon AND the label
@@ -165,7 +171,12 @@ export function Rail({
       const elements = [];
       let globalIndex = 0;
       sections.forEach((section, si) => {
-        if (si > 0) {
+        /* A titled section opens with Figma's Drawer Title: the eyebrow when
+           the rail is open, a short inset rule when it is closed. It takes
+           the place of the plain divider. */
+        if (section.title) {
+          elements.push(<RailSectionTitle key={'title-' + si} title={section.title} expanded={isExpanded} />);
+        } else if (si > 0) {
           /* Full width of the slot, and Border-VARIANT.
              
              Both were wrong. The rule had its own horizontal margin, so it
@@ -187,7 +198,7 @@ export function Rail({
           const idx = globalIndex;
           elements.push(
             <RailItem key={'item-' + idx} item={item} variant={variant}
-              selected={activeIndex === idx} expanded={isExpanded} labelStyle={labelStyle}
+              selected={activeIndex === idx} expanded={isExpanded} compact={expandable && !isExpanded} labelStyle={labelStyle}
               onClick={() => handleSelect(idx)} />
           );
           globalIndex++;
@@ -197,7 +208,7 @@ export function Rail({
     }
     return items.map((item, i) => (
       <RailItem key={i} item={item} variant={variant}
-        selected={activeIndex === i} expanded={isExpanded} labelStyle={labelStyle}
+        selected={activeIndex === i} expanded={isExpanded} compact={expandable && !isExpanded} labelStyle={labelStyle}
         onClick={() => handleSelect(i)} />
     ));
   };
@@ -227,7 +238,7 @@ export function Rail({
       sx={{
         display: 'flex', flexDirection: 'column',
         width, minHeight: '100%',
-        gap: isExpanded ? 0 : SLOT_GAP,
+        gap: SLOT_GAP,
         backgroundColor: 'var(--Background)',
         // No edge: Figma's rail draws none — its Surface-Dim level is what
         // separates it (a 1px border also made it 81px against an 80 design).
@@ -240,13 +251,22 @@ export function Rail({
     >
       {/* Toggle button */}
       {expandable && (
-        <Box sx={{ display: 'flex', justifyContent: isExpanded ? 'flex-start' : 'center', px: isExpanded ? 1.5 : 0, height: TOGGLE_HEIGHT, alignItems: 'center' }}>
-          <Button iconOnly variant="ghost" size="small"
+        /* Figma's Expand-Collapse: an App-Bar-Height row; the button centred
+           when closed, flush to the trailing edge when open. */
+        <Box className="rail-toggle" sx={{ display: 'flex', justifyContent: isExpanded ? 'flex-end' : 'center', px: 0, height: TOP_ROW, flexShrink: 0, alignItems: 'center' }}>
+          <Button iconOnly variant="ghost" size="medium"
             onClick={toggleExpand} aria-label={isExpanded ? 'Collapse menu' : 'Expand menu'}>
             <Icon size="small" sx={{ color: 'inherit' }}>
               {isExpanded ? <CloseIcon /> : <MenuIcon />}
             </Icon>
           </Button>
+        </Box>
+      )}
+
+      {brand && !expandable && (
+        <Box className="rail-brand" sx={{ px: RAIL_PAD_X, flexShrink: 0, boxSizing: 'border-box', width: '100%' }}>
+          <Box sx={{ height: TOP_ROW, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{brand}</Box>
+          <Box aria-hidden="true" sx={{ height: '1px', backgroundColor: 'var(--Border-Variant)' }} />
         </Box>
       )}
 
@@ -283,8 +303,9 @@ export function Rail({
         sx={{
           flex: 1, overflowY: 'auto', overflowX: 'hidden',
           display: 'flex', flexDirection: 'column', alignItems: 'center',
-          gap: isExpanded ? 0 : ITEM_GAP,
-          px: isExpanded ? 0 : RAIL_PAD_X,
+          // The same slot open or closed: Sizing-1 at the sides, Sizing-1-and-Half between.
+          gap: ITEM_GAP,
+          px: RAIL_PAD_X,
           width: '100%',
           /* The padding has to come OUT of the 100%, not be added to it.
              Without this the list is the rail's width plus 16px of padding,
@@ -295,6 +316,22 @@ export function Rail({
         }}>
         {renderItems()}
       </Box>
+    </Box>
+  );
+}
+
+/* ─── Rail section title — Figma's Drawer Title (8239:5911) ─── */
+/** Open: the section's name, Eyebrow in --Quiet, a 24px row. Closed: the same
+ *  row holding a 1px Border-Variant rule inset by Sizing-2 either side. */
+export function RailSectionTitle({ title, expanded }) {
+  return expanded ? (
+    <Box className="rail-section-title" sx={{ width: '100%', minHeight: 24, display: 'flex', alignItems: 'center' }}>
+      <Eyebrow color="quiet" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</Eyebrow>
+    </Box>
+  ) : (
+    <Box className="rail-section-title rail-section-title-closed" aria-hidden="true"
+      sx={{ width: '100%', height: 24, boxSizing: 'border-box', px: 'var(--Sizing-2, 16px)', display: 'flex', alignItems: 'center' }}>
+      <Box sx={{ height: '1px', width: '100%', backgroundColor: 'var(--Border-Variant)' }} />
     </Box>
   );
 }
@@ -340,7 +377,9 @@ export function Rail({
  *              unlike the collapsed item, which reverses out of --Text
  *   Focus      2px ring, label --Text
  *   Disabled   38% */
-function ExpandedRailItem({ item, selected, variant, onClick }) {
+/* compact: the CLOSED expandable rail — the same 32px row, the icon centred
+   in the slot's width and no label (Figma's Closed-Expandable). */
+function ExpandedRailItem({ item, selected, variant, onClick, compact = false }) {
   const { icon, avatar, label, badge, disabled } = item;
   const C = cap(variant);
   const interactive = !disabled;
@@ -350,9 +389,10 @@ function ExpandedRailItem({ item, selected, variant, onClick }) {
       aria-selected={selected} aria-label={label} aria-disabled={disabled || undefined}
       disabled={disabled || undefined}
       onClick={disabled ? undefined : onClick}
-      className={'rail-item rail-item-expanded' + (selected ? ' rail-item-selected' : '')}
+      className={'rail-item rail-item-expanded' + (compact ? ' rail-item-compact' : '') + (selected ? ' rail-item-selected' : '')}
       sx={{
         display: 'flex', flexDirection: 'row', alignItems: 'center',
+        justifyContent: compact ? 'center' : 'flex-start',
         gap: '2px',
         width: '100%',
         minHeight: CIRCLE,
@@ -394,7 +434,7 @@ function ExpandedRailItem({ item, selected, variant, onClick }) {
           : <Icon size="custom" fontSize={RAIL_ICON} sx={{ color: 'inherit' }}>{icon}</Icon>}
         {badge && <RailBadge value={badge} />}
       </Box>
-      {label && (
+      {label && !compact && (
         <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0, py: ITEM_PAD_Y }}>
           <MobileNavLabel className="rail-item-label" color="inherit"
             style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}>
@@ -408,8 +448,8 @@ function ExpandedRailItem({ item, selected, variant, onClick }) {
 
 /* Exported so one item can be placed on its own — a custom rail, or the
    parity page comparing a single Figma item. Rail renders these itself. */
-export function RailItem({ item, selected, expanded, labelStyle, variant = 'default', onClick }) {
-  if (expanded) return <ExpandedRailItem item={item} selected={selected} variant={variant} onClick={onClick} />;
+export function RailItem({ item, selected, expanded, compact = false, labelStyle, variant = 'default', onClick }) {
+  if (expanded || compact) return <ExpandedRailItem item={item} selected={selected} variant={variant} onClick={onClick} compact={!expanded && compact} />;
   const { icon, avatar, label, badge, disabled } = item;
 
   /* The design's own words: an item is Selected OR it is one of the pointer
@@ -455,16 +495,19 @@ export function RailItem({ item, selected, expanded, labelStyle, variant = 'defa
      Focus-visible is NOT in the exclusion — a selected item still has to show
      where the keyboard is. Only its label recolour is dropped, since the ring
      carries the affordance and the label is already correct. */
+  /* The colour goes on the ITEM, so the icon and the label move together —
+     Figma colours the glyph the same as the label in every state. (Only the
+     label used to brighten, leaving the icon Quiet under the pointer.) */
   const pointerStates = selected ? {} : {
-    '&:hover': { backgroundColor: 'var(--Hover)', '& .rail-item-label': { color: 'var(--Text)' } },
-    '&:active': { backgroundColor: 'var(--Pressed)', '& .rail-item-label': { color: 'var(--Text)' } },
+    '&:hover': { backgroundColor: 'var(--Hover)', color: 'var(--Text)' },
+    '&:active': { backgroundColor: 'var(--Pressed)', color: 'var(--Text)' },
   };
   const stateStyles = disabled ? {} : {
     ...pointerStates,
     // Figma: a 2px ring 1px outside the item (the ring every control wears).
     '&:focus-visible': {
       outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px',
-      ...(selected ? {} : { '& .rail-item-label': { color: 'var(--Text)' } }),
+      ...(selected ? {} : { color: 'var(--Text)' }),
     },
   };
 
@@ -517,7 +560,7 @@ export function RailItem({ item, selected, expanded, labelStyle, variant = 'defa
         /* Outside: the circle takes the state, but the label beneath it still
            brightens to --Text under the pointer, as Figma's Pressed draws it. */
         ...(!onItem && !expanded && !disabled && !selected && {
-          '&:hover .rail-item-label, &:active .rail-item-label': { color: 'var(--Text)' },
+          '&:hover, &:active': { color: 'var(--Text)' },
         }),
       }}
     >
@@ -532,6 +575,9 @@ export function RailItem({ item, selected, expanded, labelStyle, variant = 'defa
           borderRadius: contained ? ITEM_RADIUS : CIRCLE,
           // Outside: the circle rests on the surface's own Background (Figma).
           backgroundColor: contained ? 'transparent' : (selected ? stateBg : 'var(--Background)'),
+          /* Selected, the glyph sits ON the button fill, so it takes the fill's
+             pair (Buttons/Text) while the label below stays --Text. */
+          ...(!contained && selected && { color: ON_FILL }),
           boxShadow: !contained && selected ? 'inset 0 0 0 1px ' + SELECTED_EDGE : undefined,
           transition: 'background-color 0.2s ease',
           ...(contained ? {} : stateStyles),
