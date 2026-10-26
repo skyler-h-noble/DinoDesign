@@ -731,6 +731,9 @@ export function Input({
                     /* Sizing-1 in from the frame's own Sizing-1, so the text
                        lines up with the decorators' icons below it. */
                     padding: 'var(--Input-Padding, 12px) var(--Sizing-1, 8px)',
+                    // Stated: an EMPTY textarea is sized off its placeholder, and
+                    // without the Body line height it came out 1px short.
+                    lineHeight: sizeConfig.lineHeight,
                     color: 'inherit',
                     resize,
                     '&::placeholder': { color: 'var(--Quiet)', opacity: 1 },
