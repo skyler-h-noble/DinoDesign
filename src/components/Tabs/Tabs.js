@@ -483,7 +483,7 @@ export function Tab({
   sx = {},
   ...props
 }) {
-  const { value, setValue, variant, color, size, orientation, tabsId } = useTabsContext();
+  const { value, setValue, variant, color, size, orientation, tabsId, baseline } = useTabsContext();
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
   const isHorizontal = isHorizontalOrientation(orientation);
   const isStandard = variant === 'standard';
@@ -555,8 +555,13 @@ export function Tab({
         minHeight: s.minHeight,
         fontFamily: 'inherit',
         color: isSelected ? 'var(--Text)' : 'var(--Quiet)',
-        // Figma's Button-Contents: the surface's Background in every state.
-        backgroundColor: 'var(--Background)',
+        /* Transparent, over the list's Background. A tab overlaps the
+           baseline by its 1px (below) so the rule runs UNDER the tabs as in
+           Figma — visible through an unselected tab, covered by a selected
+           one's indicator — instead of beside them, where it pushed a
+           Vertical-Left list's tabs 1px in. An opaque tab would hide it. */
+        backgroundColor: 'transparent',
+        ...(baseline && { ['margin' + edgeFor(orientation)]: '-' + BASELINE_THICKNESS }),
         border: 'none',
         /* The indicator sits on ONE edge, chosen by orientation — bottom when
            horizontal, left or right when vertical. Transparent when
