@@ -1,7 +1,7 @@
 // src/components/Tabs/Tabs.js
 import React, { createContext, useContext, useState, useRef, useCallback, useId, useEffect } from 'react';
 import { Box } from '@mui/material';
-import { BodySmall, Caption } from '../Typography';
+import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography, CAP_HEIGHT_TRIM } from '../Typography';
 
 /**
  * Tabs Component Suite
@@ -553,12 +553,10 @@ export function Tab({
            and the two disagree the moment either changes. */
         padding: '0 ' + (iconOnly ? '0' : s.px),
         minHeight: s.minHeight,
-        fontSize: s.fontSize,
         fontFamily: 'inherit',
-        fontWeight: 500,
-        lineHeight: 1.3,
         color: isSelected ? 'var(--Text)' : 'var(--Quiet)',
-        backgroundColor: 'transparent',
+        // Figma's Button-Contents: the surface's Background in every state.
+        backgroundColor: 'var(--Background)',
         border: 'none',
         /* The indicator sits on ONE edge, chosen by orientation — bottom when
            horizontal, left or right when vertical. Transparent when
@@ -567,6 +565,17 @@ export function Tab({
            Selector with an edge constraint, which is why all fifteen of its
            Tab variants measure the same. */
         ...indicatorStyle(orientation, isSelected, s.indicatorThickness, indicatorColor),
+        /* The indicator border takes layout space; Figma's Selector does not
+           (it is positioned over the tab). Give the space back so the content
+           sits where Figma's does: horizontally, the same amount on the top
+           edge, so the content centres in the full height; vertically, out of
+           the bar edge's own padding (an icon-only tab has none, so it goes on
+           the opposite edge). */
+        ...(isHorizontal
+          ? { paddingTop: s.indicatorThickness }
+          : iconOnly
+            ? { ['padding' + (edgeFor(orientation) === 'Left' ? 'Right' : 'Left')]: s.indicatorThickness }
+            : { ['padding' + edgeFor(orientation)]: 'calc(' + s.px + ' - ' + s.indicatorThickness + ')' }),
         cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
         position: 'relative',
@@ -577,14 +586,15 @@ export function Tab({
 
 
         ...(!disabled && {
+          /* Engaged, the label turns Text and the fill stays (Figma's Tab draws
+             no Hover / Pressed fill); hover previews the selector at 50%. */
           '&:hover': {
-            backgroundColor: 'var(--Hover)',
+            color: 'var(--Text)',
             ...hoverIndicatorStyle(orientation, isSelected, s.indicatorThickness, indicatorColor),
           },
-          '&:active': {
-            backgroundColor: 'var(--Pressed)',
-          },
+          '&:active': { color: 'var(--Text)' },
           '&:focus-visible': {
+            color: 'var(--Text)',
             outline: '3px solid var(--Focus-Visible)',
             // 3px ring + 1px gap; see the note on the TabList ring above.
             outlineOffset: '-4px',
@@ -603,7 +613,9 @@ export function Tab({
         </Box>
       )}
       {!iconOnly && children && (() => {
-        const LabelComp = size === 'small' ? Caption : BodySmall;
+        // The Button type style (Figma's Dynamic Button), cap-height trimmed as
+        // Button's own label is — a tab is a button in a row.
+        const LabelComp = size === 'small' ? ButtonSmallTypography : ButtonTypography;
         /* The label's own padding, matching the design's Typography Holder.
            It is what separates the text from an icon beside it without moving
            the icon away from the tab's edge — which a single gap would do. */
@@ -612,7 +624,7 @@ export function Tab({
             className="tab-label"
             sx={{ display: 'inline-flex', alignItems: 'center', padding: '4px ' + s.textPad }}
           >
-            <LabelComp style={{ color: 'inherit', fontWeight: 'inherit' }}>{children}</LabelComp>
+            <LabelComp component="span" sx={{ color: 'inherit', ...CAP_HEIGHT_TRIM }}>{children}</LabelComp>
           </Box>
         );
       })()}
