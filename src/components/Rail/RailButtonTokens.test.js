@@ -89,45 +89,33 @@ function selectedItemCSS(container) {
 
 const cssFor = (props) => selectedItemCSS(renderRail(props));
 
-describe('the selected item paints from the surface', () => {
-  /* Still worth guarding: the ORIGINAL bug was a palette-less var(--Button),
-     which is undefined, and an undefined custom property with no fallback
-     drops the whole declaration — so the item painted nothing at all. */
+/* Figma's Nav Rail Item (8224:5192) binds Selected to Buttons/Button,
+   Buttons/Border and Buttons/Text — the palette, like the expanded item. (An
+   earlier reading took the bottom bar's Nav Item, which binds Surface/Text,
+   for this component.) */
+describe('the selected item paints from the Buttons palette', () => {
   it('never emits the palette-less var(--Button)', () => {
+    expect(cssFor()).not.toMatch(/var\(--Button\)/);
+  });
+
+  it('fills with Buttons-{C}-Button and labels with Buttons-{C}-Text', () => {
     const css = cssFor();
-    expect(css).toContain('var(--Text)');
-    expect(css).not.toMatch(/var\(--Button\)/);
+    expect(css).toContain('background-color: var(--Buttons-Default-Button)');
+    expect(css).toContain('var(--Buttons-Default-Text)');
   });
 
-  it('fills with --Text, the token the design binds', () => {
-    expect(cssFor()).toContain('background-color: var(--Text)');
+  it('edges with Buttons-{C}-Border, as an inside ring', () => {
+    expect(cssFor()).toContain('inset 0 0 0 1px var(--Buttons-Default-Border)');
   });
 
-  /* The whole point of the correction: not one Buttons token on the item. */
-  it('reaches for no Buttons token at all', () => {
-    expect(cssFor()).not.toMatch(/var\(--Buttons-/);
+  it('the variant picks the palette', () => {
+    const css = cssFor({ variant: 'primary' });
+    expect(css).toContain('var(--Buttons-Primary-Button)');
   });
 
-  /* A contained item is filled edge to edge, so its label sits ON --Text and
-     reverses out. Label-outside fills only the circle, leaving the caption on
-     the surface in --Text itself — which is what the design shows. */
-  it('reverses the label out of the fill when the item is filled', () => {
-    expect(cssFor()).toContain('var(--Background)');
-  });
-
-  it('and leaves it on the surface when only the circle is filled', () => {
+  it('label-outside fills only the circle; the caption stays on the surface', () => {
     const css = cssFor({ labelStyle: 'outside' });
-    expect(css).toContain('background-color: var(--Text)');
-    expect(css).not.toContain('var(--Background)');
-  });
-
-  /* The palette prop no longer reaches these two, because they are not
-     palette tokens. It still drives whatever else wants a palette. */
-  it('does not let the variant prop into the fill', () => {
-    for (const variant of ['primary', 'error', 'black-white', 'nonsense']) {
-      const css = cssFor({ variant });
-      expect(css).toContain('background-color: var(--Text)');
-      expect(css).not.toMatch(/var\(--Buttons-/);
-    }
+    expect(css).toContain('background-color: var(--Buttons-Default-Button)');
+    expect(css).not.toContain('var(--Buttons-Default-Text)');
   });
 });

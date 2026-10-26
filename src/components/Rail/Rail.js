@@ -90,8 +90,8 @@ const ICON_SIZE = 'var(--Icon-Size, 24px)';
  *  Button/Button-Icon — 20 at medium. (They used an older 16px font glyph in a
  *  24px frame; the slot keeps ICON_SIZE so the row height does not move.) */
 const RAIL_ICON = 'var(--Button-Icon, 20px)';
-/** Item width, and the icon's breathing room inside a contained item. */
-const ITEM_WIDTH = 44;
+/** The icon's breathing room inside a contained item. (Items FILL the rail's
+ *  slot — 64 in an 80 rail, the full width when open; they were a fixed 44.) */
 const ITEM_PAD_Y = 'var(--Sizing-Half, 4px)';
 /** A contained item's corner. The design draws 8 rather than binding a
  *  variable, so this is the one literal here and it is the design's. */
@@ -205,7 +205,10 @@ export function Rail({
   return (
     <Box
       component="nav" role="navigation" aria-label="Navigation rail"
-      data-theme="Default" data-surface="Surface-Dim"
+      /* Surface-Dim, the level Figma pins on the Nav Rail — and NO theme: the
+         rail takes the theme it is placed in. It used to pin data-theme
+         "Default", which switched a rail inside a Primary zone out of it. */
+      data-surface="Surface-Dim"
       /* Two axes, two classes, because they answer different questions and
          the tests were asking the one that was never answered:
            rail-fixed / rail-expandable   what this rail CAN do
@@ -226,7 +229,8 @@ export function Rail({
         width, minHeight: '100%',
         gap: isExpanded ? 0 : SLOT_GAP,
         backgroundColor: 'var(--Background)',
-        borderRight: '1px solid var(--Border)',
+        // No edge: Figma's rail draws none — its Surface-Dim level is what
+        // separates it (a 1px border also made it 81px against an 80 design).
         fontFamily: 'inherit',
         transition: 'width 0.25s ease',
         overflow: 'hidden', flexShrink: 0,
@@ -412,23 +416,15 @@ export function RailItem({ item, selected, expanded, labelStyle, variant = 'defa
      states, never both. Selected wins, so a selected item does not lose its
      fill to a hover. */
 
-  /* THE SURFACE TABLE, not the Buttons one — resolved in the file rather
-     than reasoned about.
-     This read --Buttons-{C}-Button and --Buttons-{C}-Text, on the argument
-     that Figma's bare `Button` and `Text` on the selected variant must be
-     Buttons-collection names, since that collection is its own namespace and
-     CSS is one flat one. Half of that is right and the conclusion is not: on
-     Nav Item (5670:49999) the selected Icon-Holder's fill and the selected
-     label BOTH bind a variable called `Text` that belongs to the SURFACE
-     collection — modes Surface, Surface-Dim, Surface-Dimmest and so on — as
-     does `Quiet` on the default label. There is no Buttons token anywhere on
-     that component.
-     Which also makes sense of the shape: a nav item is not a button with a
-     palette, it is a mark on the surface. BottomNavigation has drawn it this
-     way all along, with the icon reversed out of the fill, and the two are
-     the same component in two orientations. */
-  const SELECTED_FILL = 'var(--Text)';
-  const ON_FILL = 'var(--Background)';
+  /* THE BUTTONS TABLE. Figma's Nav Rail Item (8224:5192) binds its Selected
+     fill, edge and label to Buttons/Button, Buttons/Border and Buttons/Text —
+     the same palette the expanded item uses. This read the SURFACE pair
+     (--Text reversed with --Background), carried over from the bottom bar's
+     Nav Item, which is a different component that does bind Surface/Text. */
+  const C = cap(variant);
+  const SELECTED_FILL = 'var(--Buttons-' + C + '-Button)';
+  const ON_FILL = 'var(--Buttons-' + C + '-Text)';
+  const SELECTED_EDGE = 'var(--Buttons-' + C + '-Border)';
   const stateBg = selected ? SELECTED_FILL : 'transparent';
 
   /* Contained puts the state on the ITEM; outside puts it on the circle. One
@@ -465,8 +461,9 @@ export function RailItem({ item, selected, expanded, labelStyle, variant = 'defa
   };
   const stateStyles = disabled ? {} : {
     ...pointerStates,
+    // Figma: a 2px ring 1px outside the item (the ring every control wears).
     '&:focus-visible': {
-      outline: '3px solid var(--Focus-Visible)', outlineOffset: '-3px',
+      outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px',
       ...(selected ? {} : { '& .rail-item-label': { color: 'var(--Text)' } }),
     },
   };
@@ -488,15 +485,20 @@ export function RailItem({ item, selected, expanded, labelStyle, variant = 'defa
            goes, which is the point: it has to read as one item next to a 12px
            gap between items. */
         gap: expanded ? 'var(--Sizing-1-and-Half, 12px)' : '2px',
-        width: expanded ? '100%' : ITEM_WIDTH,
+        width: '100%',
+        boxSizing: 'border-box',
         minWidth: expanded ? undefined : ICON_SIZE,
         minHeight: ICON_SIZE,
         px: expanded ? 2.5 : 0,
-        py: onItem ? ITEM_PAD_Y : 0,
-        border: selected && onItem ? '1px solid var(--Border)' : '1px solid transparent',
+        /* No padding of its own: Figma's item is the 28px Rail Button (the
+           icon with Sizing-Half above and below), 2px, then the label — 47 in
+           all. It padded the item AND the button, and drew a 1px border, so it
+           came out 56.5. The edge is an inset ring (an inside stroke). */
+        py: 0,
+        border: 'none',
         borderRadius: expanded ? 0 : ITEM_RADIUS,
         backgroundColor: onItem || expanded ? stateBg : 'transparent',
-        boxShadow: selected && onItem ? 'var(--Shadow-1, none)' : 'none',
+        boxShadow: selected && onItem ? 'inset 0 0 0 1px ' + SELECTED_EDGE : 'none',
         /* The ITEM owns the foreground, so the label and the icon inside it
            both follow the fill without either restating it. */
         color: labelColor,
@@ -512,6 +514,11 @@ export function RailItem({ item, selected, expanded, labelStyle, variant = 'defa
         transition: 'background-color 0.15s ease, color 0.15s ease',
         outline: 'none',
         ...(onItem || expanded ? stateStyles : {}),
+        /* Outside: the circle takes the state, but the label beneath it still
+           brightens to --Text under the pointer, as Figma's Pressed draws it. */
+        ...(!onItem && !expanded && !disabled && !selected && {
+          '&:hover .rail-item-label, &:active .rail-item-label': { color: 'var(--Text)' },
+        }),
       }}
     >
       {/* Rail Button — the circle in Label Outside, a plain row otherwise. */}
@@ -523,8 +530,9 @@ export function RailItem({ item, selected, expanded, labelStyle, variant = 'defa
           height: contained ? 'auto' : CIRCLE,
           py: contained ? ITEM_PAD_Y : 0,
           borderRadius: contained ? ITEM_RADIUS : CIRCLE,
-          backgroundColor: contained ? 'transparent' : stateBg,
-          border: !contained && selected ? '1px solid var(--Border)' : undefined,
+          // Outside: the circle rests on the surface's own Background (Figma).
+          backgroundColor: contained ? 'transparent' : (selected ? stateBg : 'var(--Background)'),
+          boxShadow: !contained && selected ? 'inset 0 0 0 1px ' + SELECTED_EDGE : undefined,
           transition: 'background-color 0.2s ease',
           ...(contained ? {} : stateStyles),
         }),

@@ -41,9 +41,9 @@ describe('Rail', () => {
 
 /* --- Theme attributes --- */
 describe('Theme', () => {
-  test('data-theme="Default"', () => {
+  test('pins no theme — the rail takes the one it sits in (Figma pins only Surface)', () => {
     const { container } = renderRail();
-    expect(container.querySelector('[data-theme="Default"]')).toBeInTheDocument();
+    expect(container.querySelector('nav[data-theme]')).toBeNull();
   });
   test('data-surface="Surface-Dim"', () => {
     const { container } = renderRail();
