@@ -97,7 +97,8 @@ const THEME_MAP = {
 
 /** Item width, and the icon holder inside it. Both from the design. */
 const ITEM_WIDTH = 40;
-const HOLDER_MIN = 32;
+// Figma binds the holder's min size to Button-Height.
+const HOLDER_MIN = 'var(--Button-Height, 32px)';
 const HOLDER_PAD = 'var(--Sizing-1, 8px)';
 /* 40, not 16. The holder is a CIRCLE — a radius at half its height would be a
    rounded square at any larger size, and the design states a radius past the
@@ -316,6 +317,10 @@ function BottomNavItem({ id, icon, label, selected, showLabel, onClick, ariaLabe
       {/* Icon-Holder — the circle that carries the selected state. */}
       <Box sx={{
         display: 'flex', alignItems: 'center', justifyContent: 'center',
+        /* border-box: Figma's holder is the icon plus its padding (24 + 8 + 8
+           = 40), with Button-Height only as a floor. As content-box the padding
+           went on top of the 32 minimum and the circle came out 48. */
+        boxSizing: 'border-box',
         minWidth: HOLDER_MIN, minHeight: HOLDER_MIN,
         padding: HOLDER_PAD,
         borderRadius: HOLDER_RADIUS,
@@ -324,7 +329,9 @@ function BottomNavItem({ id, icon, label, selected, showLabel, onClick, ariaLabe
            selected item ends up dark-on-dark the first time someone changes
            the bar's theme. */
         backgroundColor: selected ? 'var(--Text)' : 'transparent',
-        color: selected ? 'var(--Background)' : 'var(--Quiet)',
+        /* Figma: the icon is Icons/Icon at rest (full strength — only the
+           LABEL is quiet) and Icons/On-Icon on the selected fill. */
+        color: selected ? 'var(--Icons-On-Default, var(--Background))' : 'var(--Icons-Default, var(--Text))',
         fontSize: ICON_SIZE,
         transition: 'background-color 0.2s ease, color 0.15s ease',
         '& .MuiSvgIcon-root': { fontSize: 'inherit', color: 'inherit' },
