@@ -398,38 +398,39 @@ describe('the status ladder', () => {
      so the circle inherits Default — and --Buttons-Primary-Button is a real
      color from the same system, which is why defaulting to primary read as a
      design choice rather than the wrong token. */
-  test('with no color prop the current step fills from the Default palette', () => {
+  test('with no color prop a complete step fills from the Default palette', () => {
     const { container } = render(
       <Stepper activeStep={1}>
         <Step label="One" /><Step label="Two" /><Step label="Three" />
       </Stepper>
     );
-    const now = container.querySelector('.step-indicator-active');
-    expect(cssFor(now)).toContain('background-color: var(--Buttons-Default-Button)');
-    expect(cssFor(now)).toContain('color: var(--Buttons-Default-Text)');
-    expect(cssFor(now)).not.toContain('--Buttons-Primary-');
+    const done = container.querySelector('.step-indicator-completed');
+    expect(cssFor(done)).toContain('background-color: var(--Buttons-Default-Button)');
+    expect(cssFor(done)).toContain('color: var(--Buttons-Default-Text)');
+    expect(cssFor(done)).not.toContain('--Buttons-Primary-');
   });
 
   test('an unrecognised color name falls back to Default, not Primary', () => {
     const { container } = threeSteps({ color: 'nonsense' });
-    const now = container.querySelector('.step-indicator-active');
-    expect(cssFor(now)).toContain('background-color: var(--Buttons-Default-Button)');
+    const done = container.querySelector('.step-indicator-completed');
+    expect(cssFor(done)).toContain('background-color: var(--Buttons-Default-Button)');
   });
 
   /* Background, NOT transparent. The design fills every unselected circle
      with Background, which looks identical on a plain surface and differs the
      moment a step sits on a Container: transparent lets the container tone
      through the ring, Background punches the surface back out. */
-  test('only the CURRENT step is filled; the rest take Background', () => {
+  /* Filled = complete, ring = current (the 2026-10-26 swap). */
+  test('only COMPLETE steps are filled; current and incomplete take Background', () => {
     const { container } = threeSteps();
     const done = container.querySelector('.step-indicator-completed');
     const now  = container.querySelector('.step-indicator-active');
     const todo = container.querySelector('.step-indicator-incomplete');
 
-    expect(cssFor(now)).toContain('background-color: var(--Buttons-Primary-Button)');
-    expect(cssFor(done)).toContain('background-color: var(--Background)');
+    expect(cssFor(done)).toContain('background-color: var(--Buttons-Primary-Button)');
+    expect(cssFor(now)).toContain('background-color: var(--Background)');
     expect(cssFor(todo)).toContain('background-color: var(--Background)');
-    expect(cssFor(done)).not.toContain('background-color: transparent');
+    expect(cssFor(now)).not.toContain('background-color: transparent');
   });
 
   /* The completed circle has no fill, which makes it an outline button, so
@@ -437,10 +438,10 @@ describe('the status ladder', () => {
      --Text. The file binds Outline-Text to the CURRENT one too, where the
      fill is solid — that one stays on the paired token, see the test below
      and docs/figma-parity.md. */
-  test('the completed circle numbers in the outline button text token', () => {
+  test('the current (outline) circle numbers in the outline button text token', () => {
     const { container } = threeSteps();
-    const done = container.querySelector('.step-indicator-completed');
-    expect(cssFor(done)).toContain('color: var(--Buttons-Primary-Outline-Text)');
+    const now = container.querySelector('.step-indicator-active');
+    expect(cssFor(now)).toContain('color: var(--Buttons-Primary-Outline-Text)');
   });
 
   /* Hover and Pressed follow the FILL: the filled current step takes the
@@ -448,10 +449,10 @@ describe('the status ladder', () => {
      Button-Fill binds Surface › Hover / Pressed on complete and incomplete. */
   test('hover and pressed follow the fill', () => {
     const { container } = threeSteps({ clickable: true, onStepClick: jest.fn() });
-    const now = cssFor(container.querySelector('.step-indicator-active'));
-    expect(now).toContain('var(--Buttons-Primary-Hover)');
-    expect(now).toContain('var(--Buttons-Primary-Pressed)');
-    for (const sel of ['.step-indicator-completed', '.step-indicator-incomplete']) {
+    const done = cssFor(container.querySelector('.step-indicator-completed'));
+    expect(done).toContain('var(--Buttons-Primary-Hover)');
+    expect(done).toContain('var(--Buttons-Primary-Pressed)');
+    for (const sel of ['.step-indicator-active', '.step-indicator-incomplete']) {
       const css = cssFor(container.querySelector(sel));
       expect(css).toContain('var(--Hover)');
       expect(css).toContain('var(--Pressed)');
@@ -470,8 +471,8 @@ describe('the status ladder', () => {
     /* Not --Text: per invariant 3 the label is derived from the fill, so a
        palette whose button is light would put light text on a light fill. */
     const { container } = threeSteps();
-    const now = container.querySelector('.step-indicator-active');
-    expect(cssFor(now)).toContain('var(--Buttons-Primary-Text)');
+    const done = container.querySelector('.step-indicator-completed');
+    expect(cssFor(done)).toContain('var(--Buttons-Primary-Text)');
   });
 
   /* THE CONNECTOR MEETS THE CIRCLE. Figma's Step Holder is a horizontal
@@ -572,16 +573,16 @@ describe('the status ladder', () => {
     expect(css).not.toContain('width: 40px');
   });
 
-  test('current and incomplete rings are one border width', () => {
+  test('complete and incomplete rings are one border width', () => {
     const { container } = threeSteps();
-    for (const sel of ['.step-indicator-active', '.step-indicator-incomplete']) {
+    for (const sel of ['.step-indicator-completed', '.step-indicator-incomplete']) {
       expect(cssFor(container.querySelector(sel))).toContain('var(--Button-Border-Width, 1px)');
     }
   });
 
-  test('the completed ring is 2px', () => {
+  test('the current ring is 2px', () => {
     const { container } = threeSteps();
-    const css = cssFor(container.querySelector('.step-indicator-completed'));
+    const css = cssFor(container.querySelector('.step-indicator-active'));
     expect(css).toContain('border: 2px solid var(--Buttons-Primary-Border)');
   });
 

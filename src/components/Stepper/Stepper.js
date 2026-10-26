@@ -216,7 +216,12 @@ export function Step({
      same picture on a plain surface and a different one the moment a step
      sits on a Container: transparent shows the container tone through the
      ring, Background punches the surface back out. */
-  const bgToken     = isActive ? 'var(--Buttons-' + C + '-Button)'
+  /* FILLED = COMPLETE, 2px RING = CURRENT (swapped 2026-10-26, in Figma and
+     here). The steps behind you and the traversed connector share the fill,
+     so the path reads as one solid track and the current step is its leading
+     edge; each status has a non-colour cue — filled, thick ring, thin ring. */
+  const isFilled    = isCompleted;
+  const bgToken     = isFilled ? 'var(--Buttons-' + C + '-Button)'
                     // A dot is an OUTLINE: Figma's No-Count Step draws no fill.
                     : variant === 'noCount' ? 'transparent'
                     : 'var(--Background)';
@@ -227,7 +232,7 @@ export function Step({
      happens to read (dark on pink), but Outline-Text is tuned for text on the
      SURFACE — on a palette whose Button is dark it would be dark on dark. See
      docs/figma-parity.md; this is a file fix, not a lib one. */
-  const textToken   = isActive     ? 'var(--Buttons-' + C + '-Text)'
+  const textToken   = isFilled     ? 'var(--Buttons-' + C + '-Text)'
                     : isIncomplete ? 'var(--Quiet)'
                     : 'var(--Buttons-' + C + '-Outline-Text)';
   /* Hover and Pressed follow the FILL. The current step is a filled button,
@@ -236,8 +241,8 @@ export function Step({
      surface's --Hover / --Pressed — which is what Figma's Button-Fill binds on
      those ten variants. Buttons tokens there tinted an outline step in the
      palette color on hover, a step Figma does not draw. */
-  const hoverToken  = isActive ? 'var(--Buttons-' + C + '-Hover)' : 'var(--Hover)';
-  const activeToken = isActive ? 'var(--Buttons-' + C + '-Pressed)' : 'var(--Pressed)';
+  const hoverToken  = isFilled ? 'var(--Buttons-' + C + '-Hover)' : 'var(--Hover)';
+  const activeToken = isFilled ? 'var(--Buttons-' + C + '-Pressed)' : 'var(--Pressed)';
   const isDot       = variant === 'noCount';
 
   const indicatorEl = (
@@ -283,7 +288,8 @@ export function Step({
            the fill already carries the distinction; that was right about the
            CURRENT step, which is filled, and wrong about the complete one,
            which is an outline and has only its ring to say so. */
-        border: (isCompleted ? '2px' : 'var(--Button-Border-Width, 1px)')
+        // The CURRENT step's ring is 2px — it is the outline that carries "you are here".
+        border: (isActive ? '2px' : 'var(--Button-Border-Width, 1px)')
                 + ' solid ' + borderToken,
         backgroundColor: bgToken,
         color: textToken,
@@ -470,9 +476,10 @@ export function Step({
      it, Text on the one you are on, and the palette's Border tone once it is
      behind you. That last one is a 3:1 token carrying text — see
      docs/figma-parity.md. */
-  const labelToken = isActive     ? 'var(--Text)'
-                   : isIncomplete ? 'var(--Quiet)'
-                   : 'var(--Buttons-' + C + '-Border)';
+  /* The current step's label is --Text; every other step's is --Quiet — the
+     step you are on stands out in words as well as in the mark. (Complete was
+     the palette's Border tone, a 3:1 token carrying text.) */
+  const labelToken = isActive ? 'var(--Text)' : 'var(--Quiet)';
   /* While the step is hovered, pressed or focused its label reads --Text, at
      every status — Figma's Hover / Pressed / Focus-Visible variants all bind
      Surface › Text on the label. The indicator is the button and the label

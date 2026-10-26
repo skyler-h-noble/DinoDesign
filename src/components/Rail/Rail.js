@@ -563,8 +563,17 @@ export function RailItem({ item, selected, expanded, compact = false, labelStyle
         ...(onItem || expanded ? stateStyles : {}),
         /* Outside: the circle takes the state, but the label beneath it still
            brightens to --Text under the pointer, as Figma's Pressed draws it. */
-        ...(!onItem && !expanded && !disabled && !selected && {
-          '&:hover, &:active': { color: 'var(--Text)' },
+        /* Outside: the ITEM is what is hovered, pressed and focused (it is the
+           button); the circle shows it. The circle used to carry these on its
+           own :hover / :focus-visible — and a circle never takes focus, so a
+           keyboard user got no ring at all. Icon and label go --Text. */
+        ...(!onItem && !expanded && !disabled && {
+          ...(!selected && {
+            '&:hover, &:active, &:focus-visible': { color: 'var(--Text)' },
+            '&:hover > :first-child': { backgroundColor: 'var(--Hover)' },
+            '&:active > :first-child': { backgroundColor: 'var(--Pressed)' },
+          }),
+          '&:focus-visible > :first-child': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px' },
         }),
       }}
     >
@@ -584,7 +593,7 @@ export function RailItem({ item, selected, expanded, compact = false, labelStyle
           ...(!contained && selected && { color: ON_FILL }),
           boxShadow: !contained && selected ? 'inset 0 0 0 1px ' + SELECTED_EDGE : undefined,
           transition: 'background-color 0.2s ease',
-          ...(contained ? {} : stateStyles),
+          // (Outside's states are driven from the item — see above.)
         }),
       }}>
         {/* The slot. An avatar goes in it as readily as an icon — an account
