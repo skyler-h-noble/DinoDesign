@@ -477,7 +477,11 @@ export function OmniTreeView({
       }
       sx={{
         backgroundColor: 'var(--Background)',
-        borderRadius: 'var(--Style-Border-Radius)',
+        /* The panel is a list of menu rows, so it takes the menu panel's
+           corner: Dropdown-Frame-Radius (min of Input, Card and 16). Figma's
+           TreeView now binds the same; --Style-Border-Radius drew a 30px
+           pill-cornered panel. */
+        borderRadius: 'var(--Dropdown-Frame-Radius, 4px)',
         overflow: 'hidden',
         ...KEYFRAMES,
         ...sx,

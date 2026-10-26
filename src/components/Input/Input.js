@@ -498,7 +498,9 @@ export function Input({
         border: 'none',
         '&::after': {
           content: '""', position: 'absolute', inset: 0, pointerEvents: 'none',
-          border: '1px solid ' + effectiveBorder, borderRadius: 'inherit',
+          /* A validation state is Figma's Validation Frame: a 2px inside
+             stroke in the state's Buttons Border, over the field's 1px edge. */
+          border: (validationConfig ? '2px' : '1px') + ' solid ' + effectiveBorder, borderRadius: 'inherit',
           transition: 'border-color 0.15s ease-in-out',
         },
         borderRadius: size === 'small'
