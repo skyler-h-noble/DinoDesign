@@ -216,7 +216,10 @@ export function Step({
      same picture on a plain surface and a different one the moment a step
      sits on a Container: transparent shows the container tone through the
      ring, Background punches the surface back out. */
-  const bgToken     = isActive ? 'var(--Buttons-' + C + '-Button)' : 'var(--Background)';
+  const bgToken     = isActive ? 'var(--Buttons-' + C + '-Button)'
+                    // A dot is an OUTLINE: Figma's No-Count Step draws no fill.
+                    : variant === 'noCount' ? 'transparent'
+                    : 'var(--Background)';
   /* The COMPLETE circle has no fill, which makes it an outline button, so its
      digit is the outline button's text token. The CURRENT one is filled, so
      per invariant 3 its digit is the token paired with that fill.
@@ -383,7 +386,10 @@ export function Step({
     <Box sx={{
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       flexShrink: 0,
-      width:  isHorizontal ? (isDot ? s.dot : s.indicator + 'px') : s.indicator + 'px',
+      /* A dot's slot is the dot either way: Figma's No-Count Step is the 12px
+         dot at x 0 with its label 8px beyond, and a rule down a column of
+         dots still passes through their centres. */
+      width:  isDot ? s.dot : s.indicator + 'px',
       height: isHorizontal ? s.indicator + 'px' : (isDot ? s.dot : s.indicator + 'px'),
     }}>
       {indicatorEl}
@@ -535,7 +541,8 @@ export function Step({
               lets it overflow both ways, whatever the child's display. */}
           {labelEl && (
             <Box sx={{
-              mt: 'var(--Sizing-Half)', width: '100%',
+              // A dot's label sits right under its 32px band (Figma: gap 0).
+              mt: isDot ? 0 : 'var(--Sizing-Half)', width: '100%',
               display: 'flex', justifyContent: 'center',
             }}>{labelEl}</Box>
           )}
@@ -557,7 +564,9 @@ export function Step({
       {...props}
     >
       {/* Step and Right Label binds itemSpacing -> Sizing-1. */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 'var(--Sizing-1)' }}>
+      {/* A dot's row is the dot's height and the label overflows it, centred —
+          Figma's Step and Right Label is 12 tall with its 24px label at y -6. */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 'var(--Sizing-1)', ...(isDot && { height: s.dot, overflow: 'visible' }) }}>
         {bandedIndicator}
         {labelEl}
       </Box>
