@@ -46,13 +46,16 @@ describe('BottomNavigation', () => {
 
 /* --- Always present: data-surface --- */
 describe('Data attributes', () => {
-  test('always has data-surface="Surface-Dim"', () => {
+  /* No level of its own: the Nav-Bar theme IS the user's pick (palette and
+     tone), so a forced level would move the bar off what they chose. */
+  test('no data-surface by default — the Nav-Bar pick stands as it is', () => {
     const { container } = renderNav();
-    expect(container.querySelector('[data-surface="Surface-Dim"]')).toBeInTheDocument();
+    expect(container.querySelector('.bottom-nav')).toHaveAttribute('data-theme', 'Nav-Bar');
+    expect(container.querySelector('.bottom-nav')).not.toHaveAttribute('data-surface');
   });
-  test('data-surface present for non-default barColor', () => {
-    const { container } = renderNav({ barColor: 'primary' });
-    expect(container.querySelector('[data-surface="Surface-Dim"]')).toBeInTheDocument();
+  test('surface sets the level when asked', () => {
+    const { container } = renderNav({ barColor: 'primary', surface: 'Surface-Bright' });
+    expect(container.querySelector('.bottom-nav')).toHaveAttribute('data-surface', 'Surface-Bright');
   });
 });
 
@@ -233,91 +236,92 @@ describe('BottomNavigation — Accessibility (jest-axe)', () => {
   });
 });
 
-/* --- Padding belongs to the style, not the orientation --- */
+/* --- Padding: the current Nav-Bar set's, per style --- */
 describe('Padding', () => {
-  /* A floating bar is a pill sitting on the page, and the padding holds its
-     contents off its own rounded ends. A FIXED bar is the edge of the screen:
-     it has nothing to be held off, and the inset only pushed the first and
-     last items away from the corners a thumb actually reaches. */
-  const padOf = (props) => {
+  /* jsdom drops var() from computed padding, so read the injected rule. */
+  const ruleOf = (props) => {
     const { container } = renderNav(props);
     const bar = container.querySelector('.bottom-nav');
-    const cs = getComputedStyle(bar);
-    return { x: cs.paddingLeft, y: cs.paddingTop };
+    const cls = [...bar.classList].find((c) => c.startsWith('css-'));
+    return [...document.styleSheets]
+      .flatMap((sheet) => { try { return [...sheet.cssRules]; } catch { return []; } })
+      .map((r) => r.cssText)
+      .find((t) => t.startsWith('.' + cls)) || '';
   };
 
-  test('fixed has none', () => {
-    const p = padOf({ variant: 'fixed' });
-    expect([p.x, p.y]).toEqual(['0px', '0px']);
+  test('fixed: Sizing-1-and-Half down, Sizing-4 across', () => {
+    const r = ruleOf({ variant: 'fixed' });
+    expect(r).toContain('padding-left: var(--Sizing-4');
+    expect(r).toContain('padding-top: var(--Sizing-1-and-Half');
   });
 
-  test('floating has it', () => {
-    const p = padOf({ variant: 'floating' });
-    expect(p.x).not.toBe('0px');
+  test('floating: Sizing-1-and-Half down, Sizing-3 across', () => {
+    const r = ruleOf({ variant: 'floating' });
+    expect(r).toContain('padding-left: var(--Sizing-3');
+    expect(r).toContain('padding-top: var(--Sizing-1-and-Half');
   });
 
-  test('a vertical FIXED bar has none either — style decides, not direction', () => {
-    const p = padOf({ variant: 'fixed', orientation: 'vertical' });
-    expect([p.x, p.y]).toEqual(['0px', '0px']);
+  test('vertical floating: Sizing-1-and-Half all round', () => {
+    const r = ruleOf({ variant: 'floating', orientation: 'vertical' });
+    expect(r).toContain('padding-left: var(--Sizing-1-and-Half');
+    expect(r).toContain('padding-top: var(--Sizing-1-and-Half');
   });
 });
 
-describe('The FAB is in the bar', () => {
-  /* An action among the items, the way Rail's fabAction is: a ring the size
-     of an item's icon holder, outlined rather than filled. It takes an
-     item's place in the row so it lands where a thumb already goes. */
+describe('The FAB: Raised and Right FAB styles', () => {
+  /* Figma's Nav-Bar has two FAB styles: Floating +Raised FAB (the FAB on the
+     bar's top edge over a gap in the items) and Right FAB (beside the bar).
+     The FAB is the library's Fab, outside the tablist. */
   const fab = { label: 'Create', onClick: jest.fn() };
   const order = (container) =>
-    Array.from(container.querySelectorAll('.bottom-nav-item, .bottom-nav-fab'))
-      .map((el) => (el.classList.contains('bottom-nav-fab') ? 'FAB' : el.getAttribute('aria-label')));
+    Array.from(container.querySelectorAll('.bottom-nav-item, .bottom-nav-fab-gap'))
+      .map((el) => (el.classList.contains('bottom-nav-fab-gap') ? 'GAP' : el.getAttribute('aria-label')));
 
   test('absent unless asked for', () => {
     const { container } = renderNav();
     expect(container.querySelector('.bottom-nav-fab')).toBeNull();
+    expect(container.querySelector('.bottom-nav-wrap')).toBeNull();
   });
 
-  test('at the end by default', () => {
+  test("Right FAB by default: beside the bar, after it, no gap in the items", () => {
     const { container } = renderNav({ items: ITEMS_4, fabAction: fab });
-    expect(order(container)).toEqual(['Home', 'Favorites', 'Profile', 'Stars', 'FAB']);
+    const wrap = container.querySelector('.bottom-nav-wrap-right');
+    expect(wrap).not.toBeNull();
+    expect(wrap.lastElementChild).toHaveClass('bottom-nav-fab');
+    expect(order(container)).toEqual(['Home', 'Favorites', 'Profile', 'Stars']);
   });
 
-  test('centred splits the items either side of it', () => {
+  test('Raised: the items part round a gap, the FAB sits over it', () => {
     const { container } = renderNav({ items: ITEMS_4, fabAction: fab, fabPosition: 'center' });
-    expect(order(container)).toEqual(['Home', 'Favorites', 'FAB', 'Profile', 'Stars']);
+    expect(container.querySelector('.bottom-nav-fab-raised')).not.toBeNull();
+    expect(order(container)).toEqual(['Home', 'Favorites', 'GAP', 'Profile', 'Stars']);
   });
 
-  test('an odd count puts the extra item before it', () => {
+  test('an odd count puts the extra item before the gap', () => {
     const { container } = renderNav({ items: ITEMS_5, fabAction: fab, fabPosition: 'center' });
-    expect(order(container)).toEqual(['Home', 'Favorites', 'Profile', 'FAB', 'Stars', 'Search']);
+    expect(order(container)).toEqual(['Home', 'Favorites', 'Profile', 'GAP', 'Stars', 'Search']);
+  });
+
+  test('a FAB makes the bar a pill — both FAB styles are floating', () => {
+    const { container } = renderNav({ items: ITEMS_4, fabAction: fab, variant: 'fixed' });
+    expect(container.querySelector('.bottom-nav')).toHaveClass('bottom-nav-style-floating');
+  });
+
+  test('the FAB is the library Fab', () => {
+    const { container } = renderNav({ items: ITEMS_4, fabAction: fab });
+    expect(container.querySelector('.bottom-nav-fab .fab')).not.toBeNull();
   });
 
   test('is a button, not a tab — it acts, it is never the value', () => {
     const onChange = jest.fn();
     renderNav({ items: ITEMS_4, fabAction: fab, onChange });
-    const ring = screen.getByRole('button', { name: 'Create' });
-    expect(ring).not.toHaveAttribute('role', 'tab');
-    expect(ring).not.toHaveAttribute('aria-selected');
-    fireEvent.click(ring);
+    const btn = screen.getByRole('button', { name: 'Create' });
+    expect(btn).not.toHaveAttribute('role', 'tab');
+    expect(btn).not.toHaveAttribute('aria-selected');
+    fireEvent.click(btn);
     expect(fab.onClick).toHaveBeenCalled();
     expect(onChange).not.toHaveBeenCalled();
     expect(screen.getAllByRole('tab')).toHaveLength(4);
-  });
-
-  test('outlined in the default button border, on no fill', () => {
-    /* Not a filled circle: the selected item is the filled circle, and two
-       filled circles in one bar say two things are current. */
-    const { container } = renderNav({ items: ITEMS_4, fabAction: fab });
-    const holder = container.querySelector('.bottom-nav-fab > div');
-    /* jsdom drops a var() from a computed border color, so read the
-       injected rule rather than the computed style. */
-    const rule = [...document.styleSheets]
-      .flatMap((sheet) => { try { return [...sheet.cssRules]; } catch { return []; } })
-      .map((r) => r.cssText)
-      .find((t) => t.startsWith('.' + [...holder.classList].find((c) => c.startsWith('css-'))));
-    expect(rule).toContain('border-color: var(--Buttons-Default-Border)');
-    expect(rule).toContain('color: var(--Buttons-Default-Border)');
-    expect(rule).toContain('background-color: transparent');
-    expect(rule).not.toMatch(/background-color: var\(--Text\)/);
   });
 
   test('has no accessibility violations', async () => {

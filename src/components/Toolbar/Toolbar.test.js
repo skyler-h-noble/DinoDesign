@@ -54,8 +54,17 @@ describe('Theme', () => {
       const { container } = renderToolbar({ color });
       const bar = container.querySelector('.toolbar');
       expect(bar).toHaveAttribute('data-theme', theme);
-      expect(bar).toHaveAttribute('data-surface', surface || 'Surface');
+      if (surface) expect(bar).toHaveAttribute('data-surface', surface);
+      else expect(bar).not.toHaveAttribute('data-surface');
     });
+  });
+
+  // Unset, the bar is the user's nav-bar pick (Figma's one Nav-Bar set).
+  test('no color or surface → data-theme="Nav-Bar", no data-surface', () => {
+    const { container } = renderToolbar({});
+    const bar = container.querySelector('.toolbar');
+    expect(bar).toHaveAttribute('data-theme', 'Nav-Bar');
+    expect(bar).not.toHaveAttribute('data-surface');
   });
 
   /* primary-medium and primary-dark were colors once. They are not in

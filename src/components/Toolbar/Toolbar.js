@@ -14,6 +14,7 @@ import { SHADOW_LEVEL_2 } from '../_shadows';
  *   contextual   — standard border-radius, padding 8px, no shadow
  *
  * COLORS: default | primary | primary-light | white | black
+ *   (unset) → data-theme="Nav-Bar": the user's nav-bar pick, no data-surface
  *   default → data-theme="Default"
  *   primary → data-theme="Primary"
  *   primary-light → data-theme="Primary" + data-surface="Surface-Brightest"
@@ -83,7 +84,11 @@ export function Toolbar({
   onChange,
   type = 'floating',
   orientation = 'horizontal',
-  color = 'default',
+  /* Unset, the bar is the Nav-Bar theme: the color the user picked for their
+     nav bar in the studio. Figma's ToolBar page has ONE set, Nav-Bar, for the
+     toolbar and the bottom nav alike, and the import pins every instance to
+     that pick — so code does the same. No level is forced on top of it. */
+  color,
   /* The LEVEL, separate from the theme. `white` and `black` used to be
      colours here, which is how a lightness ended up wearing a colour name. */
   surface,
@@ -102,10 +107,10 @@ export function Toolbar({
     onChange?.(next);
   }, [isControlled, activeIndex, onChange]);
 
-  const barTheme = THEME_MAP[color] || LEGACY_COLORS[color] || THEME_MAP.default;
+  const barTheme = color ? (THEME_MAP[color] || LEGACY_COLORS[color] || THEME_MAP.default) : { theme: 'Nav-Bar' };
   const dataTheme = barTheme.theme;
   /* An explicit surface wins; otherwise a legacy colour's implied one; else
-     the ordinary Surface. */
+     none — the parent's level. */
   const dataSurface = surface || barTheme.surface;
   const isVertical = orientation === 'vertical';
   const isFloating = type === 'floating';
@@ -116,8 +121,8 @@ export function Toolbar({
       aria-orientation={orientation}
       aria-label="Toolbar"
       data-theme={dataTheme}
-      data-surface={dataSurface || 'Surface'}
-      className={'toolbar toolbar-' + type + ' toolbar-' + orientation + ' toolbar-' + color + ' ' + className}
+      data-surface={dataSurface}
+      className={'toolbar toolbar-' + type + ' toolbar-' + orientation + ' toolbar-' + (color || 'nav-bar') + ' ' + className}
       sx={{
         display: 'inline-flex',
         flexDirection: isVertical ? 'column' : 'row',
@@ -183,7 +188,7 @@ export function Toolbar({
             painted the brand's default button on a themed toolbar, which is
             why a green bar came with a pink FAB. */}
         <Fab
-          color={fab.color || color}
+          color={fab.color || color || 'default'}
           size={fab.size || 'medium'}
           onClick={fab.onClick}
           aria-label={fab.label || 'Action'}

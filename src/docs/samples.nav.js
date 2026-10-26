@@ -556,6 +556,37 @@ export const NAV_SAMPLES = {
         </VStack>
       </VStack>
     ),
+    /* Figma's Vertical rows: the floating rail of actions, with and without
+       labels. */
+    orientation: () => (
+      <HStack gap="var(--Sizing-4)" style={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <Cell label="vertical" emphasis>
+          <BottomNavigation fixed={false} orientation="vertical" variant="floating" items={NAV_ITEMS.slice(0, 4)} defaultValue={0} />
+        </Cell>
+        <Cell label="vertical · no labels">
+          <BottomNavigation fixed={false} orientation="vertical" variant="floating" showLabels={false} items={NAV_ITEMS.slice(0, 4)} defaultValue={0} />
+        </Cell>
+      </HStack>
+    ),
+    /* Figma's two FAB styles. */
+    fabPosition: () => (
+      <VStack gap="var(--Sizing-3)">
+        <VStack gap="var(--Sizing-Half)">
+          <Caption color="standard">end — Right FAB, beside the bar</Caption>
+          <Frame w={360}>
+            <BottomNavigation fixed={false} showLabels={false} items={NAV_ITEMS.slice(0, 4)} defaultValue={0}
+                              fabAction={{ label: 'Create' }} />
+          </Frame>
+        </VStack>
+        <VStack gap="var(--Sizing-Half)">
+          <Caption color="quiet">center — Floating +Raised FAB, on the bar&rsquo;s top edge</Caption>
+          <Frame w={360}>
+            <BottomNavigation fixed={false} showLabels={false} items={NAV_ITEMS.slice(0, 4)} defaultValue={0}
+                              fabAction={{ label: 'Create' }} fabPosition="center" />
+          </Frame>
+        </VStack>
+      </VStack>
+    ),
   },
 
   Sidebar: {

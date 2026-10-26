@@ -205,14 +205,32 @@ export const BOTTOMNAV_DOC = {
     values: ['fixed', 'floating'],
     default: 'fixed'
   }, {
+    name: 'orientation',
+    type: 'string',
+    values: ['horizontal', 'vertical'],
+    default: 'horizontal',
+    note: 'The bar\u2019s direction. Vertical is the floating rail of actions in Figma.'
+  }, {
     name: 'barColor',
     type: 'string',
-    default: 'default'
+    default: 'default',
+    note: 'default is the Nav-Bar theme \u2014 the color picked for the nav bar in the studio, the same pick the Figma import sets on every Nav-Bar.'
+  }, {
+    name: 'surface',
+    type: 'string',
+    default: 'undefined',
+    note: 'A level on top of the palette. Unset, the pick stands as it is.'
   }, {
     name: 'fabAction',
     type: 'object',
     default: 'undefined',
-    note: 'Raises a FAB into the bar — the "Floating +Raised FAB" style in Figma.'
+    note: 'Adds the library Fab in one of Figma\u2019s two FAB styles (see fabPosition). Makes the bar a pill.'
+  }, {
+    name: 'fabPosition',
+    type: 'string',
+    values: ['end', 'center'],
+    default: 'end',
+    note: 'end is Figma\u2019s "Right FAB" (beside the bar); center is "Floating +Raised FAB" (on the bar\u2019s top edge).'
   }],
   states: [{
     state: 'Hover',

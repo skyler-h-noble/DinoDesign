@@ -60,10 +60,11 @@ describe('the nav caption reads Mobile-Nav-Label', () => {
  * (80) now, with `Other/ToolBarShort` (64) beside it — so a literal 83 could
  * not follow the rename. */
 describe('the floating bar reads its geometry from tokens', () => {
-  test('padding is Sizing-2, not Button-Height', () => {
+  test('padding is the Sizing scale (Sizing-3 / Sizing-1-and-Half), not Button-Height', () => {
     const src = require('fs').readFileSync(__dirname + '/BottomNavigation.js', 'utf8');
     const pad = src.slice(src.indexOf('const FLOATING_PAD'), src.indexOf('const NO_PAD'));
-    expect(pad).toContain('var(--Sizing-2, 16px)');
+    expect(pad).toContain('var(--Sizing-3, 24px)');
+    expect(pad).toContain('var(--Sizing-1-and-Half, 12px)');
     expect(pad).not.toContain('var(--Button-Height, 32px)');
     expect(pad).not.toContain("py: '12px'");
   });

@@ -3,6 +3,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Box } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { MobileNavLabel, LabelSmall } from '../Typography';
+import { Fab } from '../Fab/Fab';
 
 /**
  * BottomNavigation — the design's Nav-Bar.
@@ -45,39 +46,25 @@ import { MobileNavLabel, LabelSmall } from '../Typography';
  * and it tied the bar's accent to the Primary palette rather than to whatever
  * theme the bar is set to.
  *
- * ── The FAB is IN the bar ────────────────────────────────────────────────
- * `fabAction` renders an action among the items, the way Rail's does: a
- * ring the size of an item's icon holder, outlined rather than filled, with
- * the icon in the outline's color. It takes an item's place in the row —
- * at the end, or in the middle with the items split either side — so it
- * lands where a thumb already goes rather than floating over the content
- * beside the bar. Outlined, because a solid FAB in the bar reads as a
- * selected item: the selected state is a FILLED circle, and two filled
- * circles in one bar say two things are current.
+ * ── The FAB: Floating +Raised FAB and Right FAB ─────────────────────────
+ * `fabAction` adds the library's Fab (medium, 48) in one of the design's two
+ * FAB styles, chosen by `fabPosition`:
  *
- * It is a button, not a tab. It performs an action rather than switching a
- * panel, so it carries no aria-selected and never becomes the value.
+ *   'center'  Floating +Raised FAB — centred on the bar's top edge, inside a
+ *             4px halo of the PAGE's Background that cuts it out of the bar,
+ *             over a 24px gap in the items
+ *   'end'     Right FAB — beside the bar, Sizing-1-and-Half after it
  *
- * With `actions` it is a SPEED DIAL: the ring opens a panel of actions above
- * the bar, each an icon and a label, stacked in the ring's own column so the
- * first action sits directly over the ring and the rest climb from there.
- * Labels flow into the open space — leftward from a ring at the end, rightward
- * from a centred one. The panel is the library's menu shell (the same frame
- * radius, border and surface) rather than the standalone SpeedDial's fan of
- * mini-FABs with tooltip labels: a label that only appears on hover is no
- * label on a phone, which is where a bottom bar is.
+ * Both are pills, so a FAB makes the bar floating. The FAB sits OUTSIDE the
+ * tablist: it performs an action rather than switching a panel, so it carries
+ * no aria-selected and never becomes the value. (It used to be an outlined
+ * ring inside the row, which needed aria-owns to keep the tablist pure; the
+ * design dropped that style.)
  *
- * And a tablist may hold nothing BUT tabs — so with a ring in the row, the row
- * stops being the tablist. An empty tablist beside it OWNS the tabs by id
- * (aria-owns), which gives assistive tech the same list of tabs it had, with
- * the button outside it, while the DOM keeps every control in one flex row
- * where the ring can take an item's place. Without a ring the row is the
- * tablist as it always was.
+ * With `actions` it is a SPEED DIAL: the FAB opens a panel of actions above
+ * it, each an icon and a label, in the library's menu shell. A label that
+ * only appears on hover is no label on a phone, which is where this bar is.
  */
-
-/* Ids for aria-owns. A counter rather than useId, which needs React 18 and
-   this package still peers on 17. */
-let nextBarId = 0;
 
 /* The bar's palette. Nine themes — the -Light / -Medium / -Dark shades are
    gone, and so are White and Black, which were never Theme modes at all. Each
@@ -108,26 +95,20 @@ const ICON_SIZE = 'var(--Icon-Size, 24px)';
 /** Icon to label. 4, and not the 2 the rail uses — a bar has room. */
 const ITEM_GAP = 'var(--Sizing-Half, 4px)';
 
-/** Bar padding — FLOATING only.
+/** Bar padding, per the current Nav-Bar set (7442:31297):
  *
- *  A floating bar is a pill sitting on the page, and the padding is what
- *  holds its contents off its own rounded ends. A FIXED bar is the edge of
- *  the screen: it has nothing to be held off, and the inset only pushed the
- *  first and last items away from the corners a thumb actually reaches.
+ *    fixed      Sizing-1-and-Half down, Sizing-4 across (12 / 32)
+ *    floating   Sizing-1-and-Half down, Sizing-3 across (12 / 24) — the
+ *               pill, the Raised FAB and the Right FAB bars alike
+ *    vertical   Sizing-1-and-Half all round (12)
  *
- *  So it is not "padding per orientation" — it is padding per STYLE, and the
- *  orientation only decides which way round it goes.
- *
- *  ONE VALUE, both axes, both orientations: Sizing-2. The file binds
- *  paddingLeft/Right -> Sizing-2 on the floating horizontal bar and all four
- *  sides -> Sizing-2 on the vertical one, with no vertical padding on the
- *  horizontal bar at all. This had Button-Height (32) across and a literal
- *  12 down, neither of which the design states. */
+ *  This read Sizing-2 across and nothing down on a floating bar, and no
+ *  padding at all on a fixed one, from an earlier version of the file. */
 const FLOATING_PAD = {
-  horizontal: { px: 'var(--Sizing-2, 16px)', py: 0 },
-  vertical: { px: 'var(--Sizing-2, 16px)', py: 'var(--Sizing-2, 16px)' },
+  horizontal: { px: 'var(--Sizing-3, 24px)', py: 'var(--Sizing-1-and-Half, 12px)' },
+  vertical: { px: 'var(--Sizing-1-and-Half, 12px)', py: 'var(--Sizing-1-and-Half, 12px)' },
 };
-const NO_PAD = { px: 0, py: 0 };
+const NO_PAD = { px: 'var(--Sizing-4, 32px)', py: 'var(--Sizing-1-and-Half, 12px)' };
 
 /** A floating bar is a pill, so its radius is its own height — that is what
  *  makes the ends semicircular at any length.
@@ -146,16 +127,24 @@ export function BottomNavigation({
   defaultValue = 0,
   onChange,
   showLabels = true,
-  /** The design's Style: a square band, or a floating pill. */
+  /** The design's Style: a square band, or a floating pill. A FAB makes the
+   *  bar a pill whatever this says — both FAB styles in the design are. */
   variant = 'fixed',
   /** The BAR's direction. */
   orientation = 'horizontal',
+  /** The bar's palette. 'default' is the Nav-Bar theme: the color the user
+   *  picked for their nav bar in the studio, the same pick the Figma import
+   *  sets on every Nav-Bar instance. */
   barColor = 'default',
-  /** An action in the bar: { icon, label, onClick }. Rendered as an outlined
-   *  ring among the items — see the note above. */
+  /** The level, when the bar should sit on a different one. Unset, the
+   *  palette's own (the user's pick) is used as it is. */
+  surface,
+  /** A FAB with the bar: { icon, label, onClick, actions? }. */
   fabAction,
-  /** Where the ring sits: after the last item, or in the middle with the
-   *  items split either side of it. */
+  /** The design's two FAB styles:
+   *    'center'  Floating +Raised FAB — the FAB sits on the bar's top edge,
+   *              centred, over a gap in the items
+   *    'end'     Right FAB — the FAB stands beside the bar, to its right */
   fabPosition = 'end',
   /** Pinned to the viewport. Positioning, not appearance — see the note above. */
   fixed = true,
@@ -174,30 +163,53 @@ export function BottomNavigation({
   }, [isControlled, onChange]);
 
   const isVertical = orientation === 'vertical';
-  const isFloating = variant === 'floating';
+  const hasFab = !!fabAction && !isVertical;
+  const raised = hasFab && fabPosition === 'center';
+  const isFloating = variant === 'floating' || hasFab;
   const dataTheme = THEME_MAP[barColor] || THEME_MAP.default;
   const pad = !isFloating
     ? NO_PAD
     : (isVertical ? FLOATING_PAD.vertical : FLOATING_PAD.horizontal);
 
-  const idBase = useRef(null);
-  if (idBase.current === null) idBase.current = 'bottom-nav-' + (nextBarId++);
-  const tabId = (index) => idBase.current + '-tab-' + index;
-  /* The tablist is the row itself unless a FAB shares the row — see the
-     note above. */
-  const ownsTabs = !!fabAction;
+  const pinned = fixed && {
+    position: 'fixed',
+    zIndex: 1100,
+    ...(isVertical
+      ? { top: '50%', left: 0, transform: 'translateY(-50%)' }
+      : { bottom: 0, left: 0, right: 0 }),
+  };
 
-  return (
+  const itemEls = items.map((item, index) => (
+    <BottomNavItem
+      key={item.key || index}
+      icon={item.icon}
+      label={item.label}
+      selected={index === activeIndex}
+      showLabel={showLabels}
+      onClick={() => handleSelect(index)}
+      ariaLabel={item.label || item.ariaLabel}
+      disabled={item.disabled}
+    />
+  ));
+  /* Raised: the items part round a gap the FAB stands over — Figma's
+     24px "FAB Frame". After the first half: two and two for four items,
+     three and two for five. */
+  if (raised) {
+    itemEls.splice(Math.ceil(itemEls.length / 2), 0,
+      <Box key="fab-gap" role="presentation" className="bottom-nav-fab-gap" sx={{ width: FAB_GAP, flexShrink: 0 }} />);
+  }
+
+  const bar = (
     <Box
       component="nav"
       data-theme={dataTheme}
-      data-surface="Surface-Dim"
+      data-surface={surface}
       aria-label={ariaLabel}
       className={
         'bottom-nav'
         /* Three axes, three class prefixes, and none of them reuses a name
            that used to mean something else.
-           
+
            bottom-nav-fixed stays POSITIONING, which is what it has always
            meant here. The design's Style axis gets bottom-nav-style-* rather
            than taking the bare word, and the bar's direction gets
@@ -210,7 +222,7 @@ export function BottomNavigation({
         + ' bottom-nav-bar-' + orientation
         + (showLabels ? ' bottom-nav-labels' : ' bottom-nav-no-labels')
         + (fixed ? ' bottom-nav-fixed' : '')
-        + (className ? ' ' + className : '')
+        + (hasFab ? '' : (className ? ' ' + className : ''))
       }
       sx={{
         display: 'flex',
@@ -224,30 +236,17 @@ export function BottomNavigation({
         borderRadius: isFloating ? FLOATING_RADIUS : 0,
         fontFamily: 'inherit',
         width: isVertical ? 'fit-content' : '100%',
+        boxSizing: 'border-box',
         px: pad.px,
         py: pad.py,
-        ...(fixed && {
-          position: 'fixed',
-          zIndex: 1100,
-          ...(isVertical
-            ? { top: '50%', left: 0, transform: 'translateY(-50%)' }
-            : { bottom: 0, left: 0, right: 0 }),
-        }),
-        ...sx,
+        ...(hasFab ? { flex: 1, minWidth: 0 } : pinned),
+        ...(hasFab ? {} : sx),
       }}
-      {...props}
+      {...(hasFab ? {} : props)}
     >
-      {ownsTabs && (
-        <Box
-          role="tablist"
-          aria-orientation={isVertical ? 'vertical' : 'horizontal'}
-          aria-owns={items.map((_, i) => tabId(i)).join(' ')}
-          sx={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}
-        />
-      )}
       <Box
-        role={ownsTabs ? undefined : 'tablist'}
-        aria-orientation={ownsTabs ? undefined : (isVertical ? 'vertical' : 'horizontal')}
+        role="tablist"
+        aria-orientation={isVertical ? 'vertical' : 'horizontal'}
         sx={{
           display: 'flex',
           flexDirection: isVertical ? 'column' : 'row',
@@ -262,33 +261,34 @@ export function BottomNavigation({
           maxWidth: isVertical ? undefined : 600,
         }}
       >
-        {items.map((item, index) => (
-          <BottomNavItem
-            key={item.key || index}
-            id={ownsTabs ? tabId(index) : undefined}
-            icon={item.icon}
-            label={item.label}
-            selected={index === activeIndex}
-            showLabel={showLabels}
-            onClick={() => handleSelect(index)}
-            ariaLabel={item.label || item.ariaLabel}
-            disabled={item.disabled}
-          />
-        )).flatMap((el, index, all) => {
-          /* Centred goes after the first half — for four items that is two
-             and two; for five, three and two, because a middle that rounds
-             down leaves the ring nearer the start of a bar whose selected
-             item is usually first. `end` is simply last. */
-          if (!fabAction) return [el];
-          const at = fabPosition === 'center' ? Math.ceil(all.length / 2) : all.length;
-          return index === at - 1
-            ? [el, <BottomNavFab key="fab" {...fabAction} showLabel={showLabels} position={fabPosition} />]
-            : [el];
-        })}
-        {fabAction && items.length === 0 && (
-          <BottomNavFab key="fab" {...fabAction} showLabel={showLabels} position={fabPosition} />
-        )}
+        {itemEls}
       </Box>
+    </Box>
+  );
+
+  if (!hasFab) return bar;
+
+  /* With a FAB the bar sits in a wrapper that carries NO theme, so the FAB's
+     halo paints the PAGE's --Background (Figma's 4px ring in Background
+     around the FAB) rather than the bar's. The wrapper takes the pinning. */
+  return (
+    <Box
+      className={'bottom-nav-wrap bottom-nav-wrap-' + (raised ? 'raised' : 'right') + (className ? ' ' + className : '')}
+      sx={{
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        gap: raised ? 0 : FAB_BESIDE_GAP,
+        width: '100%',
+        boxSizing: 'border-box',
+        ...(raised && { pt: RAISE }),
+        ...pinned,
+        ...sx,
+      }}
+      {...props}
+    >
+      {bar}
+      <BottomNavFab {...fabAction} raised={raised} />
     </Box>
   );
 }
@@ -378,16 +378,24 @@ function BottomNavItem({ id, icon, label, selected, showLabel, onClick, ariaLabe
 /** The small ring inside a speed-dial row: the FAB's own outline at the
  *  item's holder size, so a row reads as "one of the ring's". */
 const DIAL_RING = 32;
+/** Figma's "FAB Frame": the gap in the items under a raised FAB. */
+const FAB_GAP = '24px';
+/** Right FAB: bar to FAB. */
+const FAB_BESIDE_GAP = 'var(--Sizing-1-and-Half, 12px)';
+/** The halo round a raised FAB, in the page's Background. */
+const HALO = 4;
+/** A raised FAB is centred on the bar's top edge: half its halo'd size. */
+const RAISE = (48 + HALO * 2) / 2 + 'px';
 
-/** The action ring. The same column as an item — same width, same holder
- *  size, the same gap to a label below — so it sits on the items' baseline
- *  and takes exactly one item's place. What differs is the holder: an
- *  OUTLINE in the default button's border color, with the glyph in that
- *  color too, on no fill.
+/** The FAB of Figma's two FAB styles — the library's own Fab (medium, 48),
+ *  so its fill, bevel, states and focus ring are the FAB's, not redrawn.
  *
- *  Given `actions`, it opens a speed dial instead of acting — see the note
- *  at the top. */
-function BottomNavFab({ icon, label, onClick, showLabel, actions, position = 'end' }) {
+ *    raised   centred on the bar's top edge inside a 4px halo of the page's
+ *             Background, which cuts it out of the bar
+ *    beside   (Right FAB) standing after the bar
+ *
+ *  Given `actions`, it opens a speed dial: a panel of actions above it. */
+function BottomNavFab({ icon, label, onClick, actions, raised = false }) {
   const isDial = Array.isArray(actions) && actions.length > 0;
   const [open, setOpen] = useState(false);
   const rootRef = useRef(null);
@@ -414,81 +422,35 @@ function BottomNavFab({ icon, label, onClick, showLabel, actions, position = 'en
     onClick?.(e);
   };
 
-  const ringSx = (size) => ({
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    minWidth: size, minHeight: size,
-    boxSizing: 'border-box',
-    borderRadius: HOLDER_RADIUS,
-    /* The outline button's border, which the system holds at 3:1
-       against its surface — the ring is a clickable edge and that is the
-       non-text floor. The glyph takes the same color so ring and plus
-       read as one control rather than a plus inside a decoration. */
-    borderWidth: 'var(--Button-Border-Width, 1px)',
-    borderStyle: 'solid',
-    borderColor: 'var(--Buttons-Default-Border)',
-    color: 'var(--Buttons-Default-Border)',
-    backgroundColor: 'transparent',
-    '& .MuiSvgIcon-root': { fontSize: 'inherit', color: 'inherit' },
-  });
-
-  const atEnd = position !== 'center';
-
   return (
-    <Box ref={rootRef} sx={{ position: 'relative', display: 'flex', flexShrink: 0 }}>
-      <Box
-        component="button" type="button"
-        aria-label={label || 'Action'} onClick={handleClick}
+    <Box
+      ref={rootRef}
+      className={'bottom-nav-fab' + (raised ? ' bottom-nav-fab-raised' : '') + (open ? ' bottom-nav-fab-open' : '')}
+      sx={{
+        display: 'flex', flexShrink: 0,
+        ...(raised && {
+          position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
+          p: HALO + 'px', borderRadius: '50%', backgroundColor: 'var(--Background)',
+        }),
+      }}
+    >
+      <Fab
+        aria-label={label || 'Action'}
+        onClick={handleClick}
         {...(isDial ? { 'aria-haspopup': 'menu', 'aria-expanded': open } : {})}
-        className={'bottom-nav-fab' + (open ? ' bottom-nav-fab-open' : '')}
-        sx={{
-          display: 'flex', flexDirection: 'column', alignItems: 'center',
-          gap: ITEM_GAP,
-          width: ITEM_WIDTH,
-          flexShrink: 0,
-          border: 'none', backgroundColor: 'transparent', cursor: 'pointer',
-          padding: 0, fontFamily: 'inherit', outline: 'none',
-          '&:focus-visible': {
-            outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px',
-            borderRadius: '8px',
-          },
-        }}
-      >
-        <Box sx={{
-          ...ringSx(HOLDER_MIN),
-          padding: HOLDER_PAD,
-          fontSize: ICON_SIZE,
-          transition: 'background-color 0.15s ease, transform 0.2s ease',
+        icon={
           /* The plus turns into a cross by turning, not by swapping icons —
              the same move the standalone SpeedDial makes. */
-          transform: open ? 'rotate(45deg)' : 'none',
-          '.bottom-nav-fab:hover &': { backgroundColor: 'var(--Hover)' },
-          '.bottom-nav-fab:active &': { backgroundColor: 'var(--Pressed)' },
-        }}>
-          {icon || <AddIcon />}
-        </Box>
-
-        {/* A label under the ring only when the items carry theirs, or the ring
-            sits higher than its neighbours. */}
-        {showLabel && label && (
-          <MobileNavLabel
-            className="bottom-nav-label"
-            style={{
-              color: 'var(--Buttons-Default-Border)',
-              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-              maxWidth: '100%',
-            }}
-          >
-            {label}
-          </MobileNavLabel>
-        )}
-      </Box>
+          <Box component="span" sx={{ display: 'inline-flex', transition: 'transform 0.2s ease', transform: open ? 'rotate(45deg)' : 'none' }}>
+            {icon || <AddIcon />}
+          </Box>
+        }
+      />
 
       {isDial && open && (
         /* The menu shell: the same frame radius, border and surface as the
            library's Menu, so a dial in the bar is the same shape as every
-           other panel in the system. Anchored to the ring's column — its
-           rings stack straight up from the FAB — with the labels flowing
-           into the open space. */
+           other panel in the system. */
         <Box
           role="menu"
           aria-label={label || 'Actions'}
@@ -497,10 +459,10 @@ function BottomNavFab({ icon, label, onClick, showLabel, actions, position = 'en
           sx={{
             position: 'absolute',
             bottom: 'calc(100% + var(--Sizing-1, 8px))',
-            ...(atEnd ? { right: 0 } : { left: 0 }),
+            ...(raised ? { left: '50%', transform: 'translateX(-50%)' } : { right: 0 }),
             zIndex: 1,
             display: 'flex',
-            /* Reverse, so the first action is the one nearest the ring. */
+            /* Reverse, so the first action is the one nearest the FAB. */
             flexDirection: 'column-reverse',
             padding: 'var(--Sizing-1, 8px)',
             gap: 'var(--Sizing-1, 8px)',
@@ -521,9 +483,7 @@ function BottomNavFab({ icon, label, onClick, showLabel, actions, position = 'en
               onClick={(e) => { setOpen(false); a.onClick?.(e); }}
               sx={{
                 display: 'flex', alignItems: 'center', gap: 'var(--Sizing-1, 8px)',
-                /* Ring first from a centred FAB, label first from one at the
-                   end — either way the ring lands in the FAB's own column. */
-                flexDirection: atEnd ? 'row-reverse' : 'row',
+                flexDirection: raised ? 'row' : 'row-reverse',
                 border: 'none', backgroundColor: 'transparent', cursor: 'pointer',
                 padding: 0, fontFamily: 'inherit', color: 'inherit', outline: 'none',
                 borderRadius: HOLDER_RADIUS,
@@ -533,12 +493,16 @@ function BottomNavFab({ icon, label, onClick, showLabel, actions, position = 'en
                 '&:disabled': { opacity: 'var(--Disabled, 0.38)', cursor: 'not-allowed' },
               }}
             >
-              {/* The ring column is the FAB column's width, so the small ring
-                  centres on the big one. */}
-              <Box sx={{ width: ITEM_WIDTH, display: 'flex', justifyContent: 'center', flexShrink: 0 }}>
-                <Box sx={{ ...ringSx(DIAL_RING), fontSize: 'var(--Icon-Size-Small, 16px)' }}>
-                  {a.icon || <AddIcon />}
-                </Box>
+              <Box sx={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                width: DIAL_RING, height: DIAL_RING, flexShrink: 0, boxSizing: 'border-box',
+                borderRadius: HOLDER_RADIUS,
+                border: 'var(--Button-Border-Width, 1px) solid var(--Buttons-Default-Border)',
+                color: 'var(--Buttons-Default-Border)',
+                fontSize: 'var(--Icon-Size-Small, 16px)',
+                '& .MuiSvgIcon-root': { fontSize: 'inherit', color: 'inherit' },
+              }}>
+                {a.icon || <AddIcon />}
               </Box>
               <LabelSmall style={{ color: 'inherit' }}>{a.label}</LabelSmall>
             </Box>
