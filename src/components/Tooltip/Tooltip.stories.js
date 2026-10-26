@@ -62,7 +62,7 @@ export const LightColors = {
   render: () => (
     <Stack direction="row" spacing={3} flexWrap="wrap" sx={{ p: 8, justifyContent: 'center', gap: 4 }}>
       {['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'].map((c) => (
-        <Tooltip key={c} title={'Tooltip: ' + c} variant="light" color={c} open>
+        <Tooltip key={c} title={'Tooltip: ' + c} color={c} open>
           <TriggerButton label={c} color={c} />
         </Tooltip>
       ))}
@@ -75,7 +75,7 @@ export const OutlineColors = {
   render: () => (
     <Stack direction="row" spacing={3} flexWrap="wrap" sx={{ p: 8, justifyContent: 'center', gap: 4 }}>
       {['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'].map((c) => (
-        <Tooltip key={c} title={'Tooltip: ' + c} variant="outline" color={c} open>
+        <Tooltip key={c} title={'Tooltip: ' + c} color={c} open>
           <TriggerButton label={c} color={c} />
         </Tooltip>
       ))}
@@ -123,10 +123,10 @@ export const WithArrow = {
       <Tooltip title="Solid with arrow" variant="solid" color="primary" arrow open placement="top">
         <TriggerButton label="Solid" />
       </Tooltip>
-      <Tooltip title="Light with arrow" variant="light" color="info" arrow open placement="top">
+      <Tooltip title="Light with arrow" color="info" arrow open placement="top">
         <TriggerButton label="Light" color="info" />
       </Tooltip>
-      <Tooltip title="Outline with arrow" variant="outline" color="error" arrow open placement="top">
+      <Tooltip title="Outline with arrow" color="error" arrow open placement="top">
         <TriggerButton label="Outline" color="error" />
       </Tooltip>
     </Stack>
@@ -157,10 +157,10 @@ export const IconButtonTrigger = {
       <Tooltip title="Delete" variant="solid" color="error" arrow>
         <IconButton sx={{ color: 'var(--Buttons-Error-Button)' }}><DeleteIcon /></IconButton>
       </Tooltip>
-      <Tooltip title="Add item" variant="light" color="success" arrow>
+      <Tooltip title="Add item" color="success" arrow>
         <IconButton sx={{ color: 'var(--Buttons-Success-Button)' }}><AddIcon /></IconButton>
       </Tooltip>
-      <Tooltip title="More info" variant="outline" color="info" arrow>
+      <Tooltip title="More info" color="info" arrow>
         <IconButton sx={{ color: 'var(--Buttons-Info-Button)' }}><InfoIcon /></IconButton>
       </Tooltip>
     </Stack>

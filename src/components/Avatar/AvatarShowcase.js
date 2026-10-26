@@ -6,7 +6,16 @@ import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
-import { Avatar, AvatarGroup } from './Avatar';
+import { Avatar } from './Avatar';
+import { AvatarGroup } from '../AvatarGroup/AvatarGroup';
+
+const SAMPLE_PEOPLE = [
+  { name: 'Ada Lovelace', detail: 'Mathematician', onClick: () => {} },
+  { name: 'Grace Hopper', detail: 'Rear admiral', initials: 'GH', onClick: () => {} },
+  { name: 'Katherine Johnson', detail: 'NASA', onClick: () => {} },
+  { name: 'Mary Jackson', detail: 'Engineer', initials: 'MJ', onClick: () => {} },
+  { name: 'Dorothy Vaughan', detail: 'Programmer', onClick: () => {} },
+];
 import { Button } from '../Button/Button';
 import { Switch } from '../Switch/Switch';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
@@ -131,7 +140,7 @@ export function AvatarShowcase() {
     if (insideButton) parts.push('insideButton');
 
     if (showGroup) {
-      return '<AvatarGroup max={3}>\n  <Avatar ' + parts.join(' ') + ' />\n  <Avatar initials="AB" />\n  <Avatar initials="CD" />\n  <Avatar initials="EF" />\n</AvatarGroup>';
+      return '<AvatarGroup max={3} people={[\n  { name: \'Ada Lovelace\', detail: \'Mathematician\', initials: \'AL\', onClick },\n  …\n]} />';
     }
     return '<Avatar ' + parts.join(' ') + ' />';
   };
@@ -162,12 +171,9 @@ export function AvatarShowcase() {
 
           <PreviewSurface theme={bgTheme} surface={bgSurface}>
             {showGroup ? (
-              <AvatarGroup max={3} size={size}>
-                <Avatar {...getAvatarProps()} />
-                <Avatar color={color} size={size} initials="AB" />
-                <Avatar color={color} size={size} initials="CD" />
-                <Avatar color={color} size={size} initials="EF" />
-              </AvatarGroup>
+              /* People mode: avatar Buttons, a details card on hover / focus,
+                 and a "+N" Button that lists the rest. */
+              <AvatarGroup max={3} people={SAMPLE_PEOPLE} />
             ) : (
               <Avatar {...getAvatarProps()} />
             )}

@@ -1,7 +1,8 @@
 // src/components/Avatar/Avatar.test.js
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { Avatar, AvatarGroup } from './Avatar';
+import { Avatar } from './Avatar';
+import { AvatarGroup } from '../AvatarGroup/AvatarGroup';
 import { axe } from 'jest-axe';
 
 const renderAvatar = (props = {}) => render(<Avatar {...props} />);

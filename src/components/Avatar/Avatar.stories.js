@@ -1,6 +1,7 @@
 // src/components/Avatar/Avatar.stories.js
 import React from 'react';
-import { Avatar, AvatarGroup } from './Avatar';
+import { Avatar } from './Avatar';
+import { AvatarGroup } from '../AvatarGroup/AvatarGroup';
 import { Box, Stack } from '@mui/material';
 
 export default { title: 'Data Display/Avatar', component: Avatar };

@@ -85,7 +85,8 @@ const COLOR_MAP = {
  * design's range, and that is recorded here rather than left to be rediscovered
  * as a gap.
  */
-const SIZE_MAP = {
+/* Exported for AvatarGroup, which steps by the avatar's diameter. */
+export const AVATAR_SIZE_MAP = {
   xxs:         { size: 16,  iconSize: 9 },
   xs:          { size: 20,  iconSize: 12 },
   small:       { size: 24,  iconSize: 14 },
@@ -104,14 +105,14 @@ const SIZE_MAP = {
 const LEGACY_SIZE_ALIAS = { 'xx-small': 'small', 'x-small': 'medium' };
 let warnedLegacySize = false;
 
-function resolveSizeName(size) {
+export function resolveSizeName(size) {
   const mapped = LEGACY_SIZE_ALIAS[size];
   if (!mapped) return size;
   if (process.env.NODE_ENV !== 'production' && !warnedLegacySize) {
     warnedLegacySize = true;
     // eslint-disable-next-line no-console
     console.warn(
-      `[Avatar] size="${size}" is the old ladder's name for ${SIZE_MAP[mapped].size}px. ` +
+      `[Avatar] size="${size}" is the old ladder's name for ${AVATAR_SIZE_MAP[mapped].size}px. ` +
       `Use size="${mapped}". The ladder was realigned to Figma on 2026-09-28; ` +
       'note that small, medium and large also changed value.',
     );
@@ -205,7 +206,7 @@ export function Avatar({
   // Custom size — pixel diameter from `customSize` prop, icon ~50% of that.
   const s = size === 'custom' && customSize
     ? { size: customSize, iconSize: Math.round(customSize * 0.5) }
-    : (SIZE_MAP[resolveSizeName(size)] || SIZE_MAP.medium);
+    : (AVATAR_SIZE_MAP[resolveSizeName(size)] || AVATAR_SIZE_MAP.medium);
   const C = COLOR_MAP[color] || COLOR_MAP.default;
 
   // Photo source: an explicit src wins; otherwise the built-in default photo —
@@ -355,66 +356,7 @@ export function Avatar({
 /**
  * AvatarGroup — stacks avatars with overlap
  */
-/* AvatarGroup — Figma's Avatar Group.
- *
- * OVERLAP is a quarter of the avatar (Figma's Avatar-Group-Gap, −size / 4):
- * 16 → 4, 24 → 6, 32 → 8, 40 → 10, 56 → 14, 72 → 18. Proportional, so a
- * small group is not mostly hidden and a large one still reads as a stack.
- *
- * TARGET SIZE. When any avatar is its OWN click target (it has onClick or
- * `clickable`), each one must show at least 24px — WCAG 2.5.8 — so the step
- * from one avatar to the next is never under 24: the overlap is capped at
- * size − 24. A 24px group then sits edge to edge, and 16 / 20px groups get a
- * gap. A display-only group, or one that is a single button as a whole, has no
- * per-avatar target and keeps the quarter overlap at every size.
- *
- * RING. Every avatar wears a 2px ring of the page's Background — outside it,
- * as a box-shadow, so the ring cuts each avatar out of the one behind without
- * shrinking its box.
- *
- * The group sets every child's `size` (a child's own size wins), and past
- * `max` the rest fold into a Neutral "+N" initials avatar.
- */
-export function AvatarGroup({
-  children,
-  max = 5,
-  size = 'medium',
-  /* An explicit step in px (negative overlaps). Still capped for a clickable
-     group, so it cannot shrink a target under 24. */
-  spacing,
-  className = '',
-  sx = {},
-  ...props
-}) {
-  const childArray = React.Children.toArray(children);
-  const visible = childArray.slice(0, max);
-  const overflow = childArray.length - max;
-  const px = (SIZE_MAP[resolveSizeName(size)] || SIZE_MAP.medium).size;
-  const interactive = childArray.some((c) => c && c.props && (c.props.onClick || c.props.clickable));
-  const quarter = -(px / 4);
-  let step = spacing !== undefined ? spacing : quarter;
-  // Each avatar shows px + step; it must be at least 24 when it is a target.
-  if (interactive) step = Math.max(step, 24 - px);
-
-  return (
-    <Box
-      role="group"
-      aria-label={'Avatar group, ' + childArray.length + ' avatars'}
-      className={'avatar-group' + (interactive ? ' avatar-group-interactive' : '') + (className ? ' ' + className : '')}
-      sx={{
-        display: 'inline-flex', alignItems: 'center',
-        '& > .avatar:not(:first-of-type)': { marginLeft: step + 'px' },
-        '& > .avatar': { boxShadow: '0 0 0 2px var(--Background)' },
-        ...sx,
-      }}
-      {...props}
-    >
-      {visible.map((c) => (React.isValidElement(c) && c.props.size === undefined ? React.cloneElement(c, { size }) : c))}
-      {overflow > 0 && (
-        <Avatar initials={'+' + overflow} size={size} color="neutral" defaultPhoto={false} />
-      )}
-    </Box>
-  );
-}
+/* AvatarGroup lives in ../AvatarGroup — it composes Button, which imports
+   Avatar, so it cannot sit in this file without a circular import. */
 
 export default Avatar;

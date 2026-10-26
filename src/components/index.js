@@ -237,7 +237,8 @@ export {
 } from './Loader';
 
 // ========== DATA DISPLAY ==========
-export { Avatar, AvatarGroup, AvatarShowcase, DEFAULT_AVATAR_SRC } from './Avatar';
+export { Avatar, AvatarShowcase, DEFAULT_AVATAR_SRC } from './Avatar';
+export { AvatarGroup } from './AvatarGroup';
 export { Badge, BadgeShowcase } from './Badge';
 export { Divider } from './Divider';
 export { List, ListItem, ListItemDecorator } from './List';

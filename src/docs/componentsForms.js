@@ -822,7 +822,7 @@ export const AVATAR_DOC = {
     variesWith: 'theme + surface',
     figma: 'Modes → Theme → Buttons'
   }, surfaceToken('--Text', 'the initials')],
-  composition: ['Content resolves in order: `src` → `initials` → `icon` → the default photo.', 'Use `AvatarGroup` for a stack; it handles the overlap and the "+n" overflow.'],
+  composition: ['Content resolves in order: `src` → `initials` → the default photo (`defaultPhoto={false}` for the glyph).', 'Use `AvatarGroup` for a stack; it handles the overlap and the "+n" overflow.'],
   accessibility: ['An avatar with a photo needs `alt` naming the person.', 'Initials are not a name. `aria-label="JD"` passes every checker and says nothing — give the full name.'],
   gotchas: ['In Figma the variant axis is `Style = Initials | Default | Photo`. Those are content choices; the library derives them from which prop you pass, so there is no `style` prop.']
 };

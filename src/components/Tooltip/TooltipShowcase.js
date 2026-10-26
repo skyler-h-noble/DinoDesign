@@ -287,7 +287,7 @@ export function TooltipShowcase() {
             <Box sx={{ mt: 3 }}>
               <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>STYLE</EyebrowSmall>
               <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1 }}>
-                {['solid', 'light', 'outline'].map((s) => (
+                {['solid'].map((s) => (
                   <ControlButton key={s} label={cap(s)} selected={variant === s} onClick={() => setVariant(s)} />
                 ))}
               </Stack>

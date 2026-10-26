@@ -1,7 +1,7 @@
 // src/components/Tooltip/Tooltip.test.js
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { Tooltip, SolidTooltip, LightTooltip, OutlineTooltip } from './Tooltip';
+import { Tooltip, SolidTooltip } from './Tooltip';
 import { axe } from 'jest-axe';
 
 // MUI Tooltip uses Popper; tests use open={true} for synchronous rendering
@@ -78,39 +78,6 @@ describe('data-theme', () => {
     });
   });
 
-  test('light primary => data-theme=Primary', async () => {
-    render(
-      <Tooltip title="Light" variant="light" color="primary" open={true}>
-        <button>Trigger</button>
-      </Tooltip>
-    );
-    await waitFor(() => {
-      expect(document.querySelector('[data-theme="Primary"]')).toBeInTheDocument();
-    });
-  });
-
-  test('light warning => data-theme=Warning-Light', async () => {
-    render(
-      <Tooltip title="Warn" variant="light" color="warning" open={true}>
-        <button>Trigger</button>
-      </Tooltip>
-    );
-    await waitFor(() => {
-      expect(document.querySelector('[data-theme="Warning"]')).toBeInTheDocument();
-    });
-  });
-
-  test('outline has no data-theme', async () => {
-    render(
-      <Tooltip title="Outline" variant="outline" color="primary" open={true}>
-        <button>Trigger</button>
-      </Tooltip>
-    );
-    await waitFor(() => {
-      expect(screen.getByText('Outline')).toBeInTheDocument();
-    });
-    expect(document.querySelector('.tooltip-content[data-theme]')).not.toBeInTheDocument();
-  });
 });
 
 describe('Variant classes', () => {
@@ -125,27 +92,6 @@ describe('Variant classes', () => {
     });
   });
 
-  test('light class', async () => {
-    render(
-      <Tooltip title="L" variant="light" color="primary" open={true}>
-        <button>T</button>
-      </Tooltip>
-    );
-    await waitFor(() => {
-      expect(document.querySelector('.tooltip-light')).toBeInTheDocument();
-    });
-  });
-
-  test('outline class', async () => {
-    render(
-      <Tooltip title="O" variant="outline" color="primary" open={true}>
-        <button>T</button>
-      </Tooltip>
-    );
-    await waitFor(() => {
-      expect(document.querySelector('.tooltip-outline')).toBeInTheDocument();
-    });
-  });
 });
 
 describe('Size classes', () => {
@@ -222,6 +168,19 @@ describe('Placement', () => {
   });
 });
 
+// light and outline were removed: they render the solid tooltip and warn once.
+describe('One style', () => {
+  test('variant="light" renders solid and warns once', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    render(<Tooltip title="L" variant="light" color="primary" open={true}><button>T</button></Tooltip>);
+    render(<Tooltip title="L2" variant="light" color="primary" open={true}><button>T2</button></Tooltip>);
+    await waitFor(() => { expect(document.querySelector('.tooltip-solid')).toBeInTheDocument(); });
+    expect(document.querySelector('.tooltip-light')).toBeNull();
+    expect(warn.mock.calls.filter((c) => String(c[0]).includes('[Tooltip]'))).toHaveLength(1);
+    warn.mockRestore();
+  });
+});
+
 describe('Convenience Exports', () => {
   test('SolidTooltip', async () => {
     render(
@@ -234,27 +193,6 @@ describe('Convenience Exports', () => {
     });
   });
 
-  test('LightTooltip', async () => {
-    render(
-      <LightTooltip title="LT" color="primary" open={true}>
-        <button>T</button>
-      </LightTooltip>
-    );
-    await waitFor(() => {
-      expect(document.querySelector('.tooltip-light')).toBeInTheDocument();
-    });
-  });
-
-  test('OutlineTooltip', async () => {
-    render(
-      <OutlineTooltip title="OT" color="primary" open={true}>
-        <button>T</button>
-      </OutlineTooltip>
-    );
-    await waitFor(() => {
-      expect(document.querySelector('.tooltip-outline')).toBeInTheDocument();
-    });
-  });
 });
 
 // ─── Accessibility — jest-axe ─────────────────────────────────────────────────

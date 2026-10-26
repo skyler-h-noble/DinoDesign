@@ -10,11 +10,10 @@ import { tokenSegment } from '../_shadows';
  *   solid    data-theme: the bare palette + data-surface="Surface"
  *            bg: var(--Buttons-{C}-Button)  text: var(--Buttons-{C}-Text)
  *
- *   light    data-theme: base theme + data-surface="Surface-Brightest". The
- *            Buttons tokens are surface-aware, so the brighter surface is what
- *            lightens it — not a tint.
- *
- *   outline  No data-theme. border: 1px solid var(--Buttons-{C}-Border)
+ *   One style, as Figma's Tooltip. `light` and `outline` were removed
+ *   (2026-10-26): they render the solid tooltip and warn once in development.
+ *   A rich, light panel on hover is a hover card — the Popover with
+ *   role="tooltip" (see AvatarGroup) — not a tooltip.
  *
  * COLOR defaults to `black-white`, which is the mode Figma pins on
  * `Button-Theme-Tooltip`. Pass another palette to recolor — that is the code
@@ -27,6 +26,14 @@ import { tokenSegment } from '../_shadows';
  */
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+const warnedVariants = new Set();
+function warnVariantOnce(v) {
+  if (process.env.NODE_ENV === 'production' || warnedVariants.has(v)) return;
+  warnedVariants.add(v);
+  // eslint-disable-next-line no-console
+  console.warn('[Tooltip] variant="' + v + '" was removed — a tooltip has one style. Rendering the solid tooltip. For a light panel on hover, use Popover with role="tooltip".');
+}
 
 /* `black-white` capitalises to `Black-white`, which is not a token — the design
    system emits --Buttons-BlackWhite-*. Same shared mapping Button uses, rather
@@ -131,9 +138,10 @@ export function Tooltip({
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
   // Figma's Dynamic Body: the body style at the tooltip's own size.
   const bodyStep = size === 'small' ? 'Body-Small' : size === 'large' ? 'Body-Large' : 'Body-Medium';
-  const isSolid = variant === 'solid';
-  const isLight = variant === 'light';
-  const isOutline = variant === 'outline';
+  if (variant !== 'solid') warnVariantOnce(variant);
+  const isSolid = true;
+  const isLight = false;
+  const isOutline = false;
   const C = seg(color);
   const sideways = isSideways(placement);
 
@@ -176,7 +184,7 @@ export function Tooltip({
           <Box
             data-theme={dataTheme || undefined}
             data-surface={isLight ? 'Surface-Brightest' : isSolid ? 'Surface' : undefined}
-            className={'tooltip-content tooltip-' + variant + ' tooltip-' + color + ' tooltip-' + size + ' ' + className}
+            className={'tooltip-content tooltip-solid tooltip-' + color + ' tooltip-' + size + ' ' + className}
             sx={{
               /* Stated with the zone attributes too: the design system paints
                  every [data-surface] element its Background and Text, which
@@ -302,7 +310,5 @@ export function Tooltip({
 
 // Convenience exports
 export const SolidTooltip   = (p) => <Tooltip variant="solid"   {...p} />;
-export const LightTooltip   = (p) => <Tooltip variant="light"   {...p} />;
-export const OutlineTooltip = (p) => <Tooltip variant="outline" {...p} />;
 
 export default Tooltip;
