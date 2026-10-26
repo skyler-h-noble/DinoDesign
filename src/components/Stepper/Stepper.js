@@ -441,7 +441,12 @@ export function Step({
           : {
               width: s.connectorThickness,
               minHeight: '24px',
-              marginLeft: `calc(${s.indicator / 2}px - ${s.connectorThickness} / 2)`,
+              /* Through the CENTRE of what it joins: a 32px circle's 16, or a
+                 dot's half-width. It used the circle's half for dots too, so a
+                 vertical noCount rule ran 10px right of every dot it joined. */
+              marginLeft: isDot
+                ? `calc(${s.dot} / 2 - ${s.connectorThickness} / 2)`
+                : `calc(${s.indicator / 2}px - ${s.connectorThickness} / 2)`,
             }),
         /* Step-Line binds its stroke to Border when complete and Quiet when
            not. Border is a BUTTONS token and Quiet a SURFACE one, so the two

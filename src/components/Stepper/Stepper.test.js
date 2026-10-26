@@ -693,3 +693,21 @@ describe('the step reads its type and focus from tokens', () => {
     expect(lines.every((l) => l.trim().startsWith('/*') || l.includes('is NOT here'))).toBe(true);
   });
 });
+
+describe('Vertical noCount: the rule runs through the dots', () => {
+  const cssFor = (el) => {
+    const out = [];
+    for (const sheet of document.styleSheets) for (const r of sheet.cssRules) {
+      try { if (el.matches(r.selectorText)) out.push(r.cssText); } catch (e) { /* skip */ }
+    }
+    return out.join('\n');
+  };
+  test('connector is offset by half the DOT, not half the circle', () => {
+    const { container } = render(
+      <Stepper orientation="vertical" variant="noCount" activeStep={1}><Step /><Step /></Stepper>
+    );
+    const c = cssFor(container.querySelector('.step-connector'));
+    expect(c).toContain('var(--No-Count-Step, 12px) / 2');
+    expect(c).not.toContain('16px - ');
+  });
+});

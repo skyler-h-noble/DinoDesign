@@ -181,10 +181,10 @@ describe('Matches Figma', () => {
     expect(c).not.toMatch(/drop-shadow|stroke/);
   });
 
-  test('the Material purple500 glyphs, 20px in a 24px box at medium', () => {
+  test('a solid star when selected, an outline when not', () => {
     const { container } = render(<Rating defaultValue={1} max={2} />);
-    expect(container.querySelector('[data-testid="StarPurple500Icon"]')).toBeInTheDocument();
-    expect(container.querySelector('[data-testid="StarBorderPurple500Icon"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-testid="StarIcon"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-testid="StarBorderIcon"]')).toBeInTheDocument();
   });
 
   test('label names the group and sits above by default', () => {

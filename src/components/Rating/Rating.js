@@ -1,8 +1,8 @@
 // src/components/Rating/Rating.js
 import React, { useState } from 'react';
 import { Box } from '@mui/material';
-import StarPurple500Icon from '@mui/icons-material/StarPurple500';
-import StarBorderPurple500Icon from '@mui/icons-material/StarBorderPurple500';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
 import StarHalfIcon from '@mui/icons-material/StarHalf';
 import { Caption } from '../Typography/Typography';
 import { FormLabel } from '../FormLabel/FormLabel';
@@ -12,8 +12,10 @@ import { FormLabel } from '../FormLabel/FormLabel';
  *
  * Figma's Rating (6780:12693) — five Star instances (6780:12460), no gap.
  *
- * GLYPHS: Material's star_purple500 (selected), star_border_purple500
- *   (unselected) and star_half — the same names Figma's Icon types.
+ * GLYPHS: Material's star (selected, solid), star_border (unselected,
+ *   outline) and star_half — the same names Figma's Icon types. Not the
+ *   *_purple500 pair: at 20px those differ only by a tiny inner star, so a
+ *   4-of-5 rating read as five identical stars.
  *
  * COLOR: the star is an ICON, so it takes --Icons-{C}: `color` is Figma's
  *   Icons mode (default -> --Icons-Default, which is the surface's Text;
@@ -131,7 +133,7 @@ export function Rating({
     const isFilled = displayValue !== null && starValue <= displayValue;
     const isHalfFilled = displayValue !== null && !isFilled && isHalf && halfValue <= displayValue;
 
-    const IconComponent = isHalfFilled ? StarHalfIcon : isFilled ? StarPurple500Icon : StarBorderPurple500Icon;
+    const IconComponent = isHalfFilled ? StarHalfIcon : isFilled ? StarIcon : StarBorderIcon;
     const starStyles = starSx(isFilled, isHalfFilled);
 
     /* Half precision: the SAME focusable radio as a whole star, with two
