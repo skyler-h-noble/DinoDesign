@@ -712,7 +712,8 @@ export function Input({
                   }),
                 }),
                 /* MULTILINE is Figma's TextArea: the text on top (Input-Padding
-                   above and below, the frame's Sizing-1 either side) and an
+                   above and below, Sizing-1 either side inside the frame's own
+                   Sizing-1) and an
                    ACTIONS row under it — the start decorator at the left, the
                    end decorator at the right — inside the same frame, which is
                    never shorter than Text-Area-Min-Height. MUI already renders
@@ -727,7 +728,9 @@ export function Input({
                   '& textarea': {
                     flexBasis: '100%',
                     order: 0,
-                    padding: 'var(--Input-Padding, 12px) 0',
+                    /* Sizing-1 in from the frame's own Sizing-1, so the text
+                       lines up with the decorators' icons below it. */
+                    padding: 'var(--Input-Padding, 12px) var(--Sizing-1, 8px)',
                     color: 'inherit',
                     resize,
                     '&::placeholder': { color: 'var(--Quiet)', opacity: 1 },
