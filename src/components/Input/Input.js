@@ -286,6 +286,8 @@ const VALIDATION_COLORS = {
 
 // --- Component ---------------------------------------------------------------
 
+let warnedResizeWithEnd = false;
+
 export function Input({
   variant = 'default',
   size = 'medium',
@@ -315,8 +317,14 @@ export function Input({
      `none` is deliberately not the default: enlarging a textarea to read back
      what you have typed is a real affordance for low-vision and motor users,
      and removing it without offering auto-grow just makes long input painful.
-     Pair `none` with maxRows if you do set it. Ignored when not multiline. */
-  resize = 'vertical',
+     Pair `none` with maxRows if you do set it. Ignored when not multiline.
+
+     With an ACTIONS ROW (a start or end decorator) the default is no grip and
+     the field GROWS instead — from `rows` up to `maxRows` (8), then scrolls:
+     the composer pattern. The grip sits in the corner the end decorator owns,
+     and auto-grow is the version keyboard users get too. A grip together
+     with an end decorator is refused (dev warning) rather than drawn over it. */
+  resize: resizeProp,
   startAdornment,
   endAdornment,
   fullWidth = false,
@@ -382,6 +390,22 @@ export function Input({
     if (value == null) setTyped(e.target.value !== '');
     if (onChange) onChange(e);
   };
+
+  const hasActions = multiline && !!(startAdornment || endAdornment);
+  let resize = resizeProp ?? (hasActions ? 'none' : 'vertical');
+  if (multiline && endAdornment && resize !== 'none') {
+    if (process.env.NODE_ENV !== 'production' && !warnedResizeWithEnd) {
+      warnedResizeWithEnd = true;
+      // eslint-disable-next-line no-console
+      console.warn('[Input] resize="' + resize + '" with an endAdornment: the grip would sit on the end '
+        + 'decorator, so it is turned off. The field grows with its content instead (rows → maxRows).');
+    }
+    resize = 'none';
+  }
+  // Growing, not fixed: MUI grows a textarea only between minRows and maxRows.
+  const rowProps = hasActions && resize === 'none'
+    ? { minRows: rows ?? 1, maxRows: maxRows ?? 8 }
+    : { rows, maxRows };
 
   const { labelX, padX, restingY, shrunkY } = floatingLabelGeometry(sizeConfig, !!startAdornment);
   const labelStyle = FLOATING_LABEL_STYLE[size] || FLOATING_LABEL_STYLE.medium;
@@ -530,8 +554,7 @@ export function Input({
             placeholder={placeholder}
             id={inputId}
             multiline={multiline}
-            rows={rows}
-            maxRows={maxRows}
+            {...(multiline ? rowProps : {})}
             fullWidth
             label={isFloating ? label : undefined}
             variant="outlined"
@@ -617,6 +640,7 @@ export function Input({
                   '&::placeholder': { color: 'var(--Quiet)', opacity: 1 },
                 },
 
+
                 /* Prefix / suffix text stays Quiet; an ICON is Figma's Icons/Icon (the Default mode → --Icons-Default),
                    the same as every other icon on the surface. */
                 '& .MuiInputAdornment-root': { color: 'var(--Quiet)' },
@@ -686,6 +710,34 @@ export function Input({
                     '& input': { paddingLeft: 0 },
                     '& textarea': { paddingLeft: 0 },
                   }),
+                }),
+                /* MULTILINE is Figma's TextArea: the text on top (Input-Padding
+                   above and below, the frame's Sizing-1 either side) and an
+                   ACTIONS row under it — the start decorator at the left, the
+                   end decorator at the right — inside the same frame, which is
+                   never shorter than Text-Area-Min-Height. MUI already renders
+                   both adornments inside the root; wrapping the row and giving
+                   the text the whole first line puts them on the second. */
+                ...(multiline && {
+                  flexWrap: 'wrap',
+                  alignItems: 'flex-start',
+                  alignContent: 'flex-start',
+                  padding: '0 var(--Sizing-1, 8px)',
+                  minHeight: 'var(--Text-Area-Min-Height, 88px)',
+                  '& textarea': {
+                    flexBasis: '100%',
+                    order: 0,
+                    padding: 'var(--Input-Padding, 12px) 0',
+                    color: 'inherit',
+                    resize,
+                    '&::placeholder': { color: 'var(--Quiet)', opacity: 1 },
+                  },
+                  '& .MuiInputAdornment-root': {
+                    maxHeight: 'none', height: 'var(--Button-Height, 32px)', alignSelf: 'auto',
+                    margin: 0,
+                  },
+                  '& .MuiInputAdornment-positionStart': { order: 1, margin: 0 },
+                  '& .MuiInputAdornment-positionEnd': { order: 2, margin: '0 0 0 auto' },
                 }),
               },
 

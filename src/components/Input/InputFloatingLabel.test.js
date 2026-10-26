@@ -166,11 +166,13 @@ describe('floating label uses design-system text styles', () => {
   test('NumberField shares the map rather than copying it', () => {
     /* Structural, not behavioural: two copies of a mapping drift the first time
        one is edited, and the drift is invisible until the two controls sit side
-       by side. */
+       by side. NumberField now draws its field WITH Input, so it carries Input's
+       floating label (and its map) rather than a copy of either. */
     const src = require('fs').readFileSync(
       require('path').join(__dirname, '../NumberField/NumberField.js'), 'utf8');
-    expect(src).toContain("FLOATING_LABEL_STYLE");
+    expect(src).toMatch(/from '\.\.\/Input\/Input'/);
     expect(src).not.toContain('NF_LABEL_STYLE');
+    expect(src).not.toContain('LABEL_STYLE = {');
   });
 });
 
