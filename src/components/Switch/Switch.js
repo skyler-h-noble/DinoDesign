@@ -3,7 +3,7 @@ import React from 'react';
 import { Switch as MuiSwitch, FormControlLabel } from '@mui/material';
 import { Label, LabelSmall, LabelLarge } from '../Typography';
 import { labelGap } from '../_labelGap';
-import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
+import { SHADOW_LEVEL_2 } from '../_shadows';
 
 /**
  * Switch Component
@@ -51,7 +51,9 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 export function themedStyles() {
   return {
     type: 'themed',
-    trackOff:       'var(--Background)',
+    // No fill: Figma's Off Switch-Body is only its Quiet edge, so the track
+    // shows whatever it sits on.
+    trackOff:       'transparent',
     trackOffBorder: 'var(--Quiet)',
     // ON is a FILLED track with a knockout dot, painted from the ICONS
     // collection — Figma binds Switch-Body's fill AND stroke to Icons::Icon and
@@ -96,7 +98,7 @@ export function outlineStyles(color) {
   return {
     type: 'outline',
     color: C,
-    trackOff:       'var(--Background)',
+    trackOff:       'transparent',
     /* --Border, not --Border-Variant. In the OFF state this edge is the only
        thing drawing the control at all — the track is the page color — so it
        is the control's boundary and carries WCAG 1.4.11's 3:1. Border-Variant
@@ -325,16 +327,17 @@ export function Switch({
         },
       },
 
-      // Hover / pressed lift the TRACK, matching the design's effect style.
-      // The repo's canonical scale stands in for the design's five-layer stack.
+      // Hover lifts the TRACK — Figma's Buttons-Hover effect style (Level 2).
+      // Pressed does not lift, as Button: the toggle is its own feedback.
       '&:hover, &.Mui-checked:hover': { backgroundColor: 'transparent' },
       '&:hover + .MuiSwitch-track': { boxShadow: SHADOW_LEVEL_2 },
-      '&:active + .MuiSwitch-track': { boxShadow: SHADOW_LEVEL_1 },
+      '&:active + .MuiSwitch-track': { boxShadow: 'none' },
 
-      // Focus ring sits OUTSIDE the track, not on the dot.
+      // Focus ring sits OUTSIDE the track, not on the dot: the house 2px ring,
+      // 1px clear (Figma's 48x30 frame at -3 with a 2px inside stroke).
       '&.Mui-focusVisible + .MuiSwitch-track': {
-        outline: '1px solid var(--Focus-Visible)',
-        outlineOffset: THUMB_INSET + 'px',
+        outline: '2px solid var(--Focus-Visible)',
+        outlineOffset: '1px',
       },
 
       '&.Mui-disabled + .MuiSwitch-track': { opacity: 1 },
@@ -399,9 +402,9 @@ export function Switch({
           <LabelComp
             component="span"
             sx={{
+              // Size and weight are the Label style's (Figma's Dynamic-Label),
+              // as Radio and Checkbox — a hard 15px / 500 here overrode it.
               color: disabled ? 'var(--Text-Quiet)' : 'var(--Text)',
-              fontSize: size === 'small' ? '13px' : '15px',
-              fontWeight: 500,
               opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
             }}
           >
