@@ -119,6 +119,8 @@ const NO_PAD = { px: 'var(--Sizing-4, 32px)', py: 'var(--Sizing-1-and-Half, 12px
  *  a new `Other/ToolBarShort` at 64 beside it. Reading the token rather than
  *  restating the number is the point; a literal cannot follow a rename. */
 const TOOLBAR_HEIGHT = 'var(--ToolBar, var(--Nav-Bar-Height, 80px))';
+/** Other/ToolBarShort: the shorter pill of the two FAB styles. */
+const TOOLBAR_SHORT = 'var(--ToolBarShort, 64px)';
 const FLOATING_RADIUS = TOOLBAR_HEIGHT;
 
 export function BottomNavigation({
@@ -233,7 +235,11 @@ export function BottomNavigation({
         /* No top border. The design draws none — the bar's own surface is
            what separates it, and a hairline on a floating pill would trace
            one edge of a shape that has no edges. */
-        borderRadius: isFloating ? FLOATING_RADIUS : 0,
+        borderRadius: isFloating ? (hasFab ? TOOLBAR_SHORT : FLOATING_RADIUS) : 0,
+        /* A horizontal bar is a SET height with its items centred — ToolBar
+           (80), or ToolBarShort (64) for the FAB styles — not its padding
+           plus whatever the items measure. The vertical bar hugs. */
+        ...(!isVertical && { height: hasFab ? TOOLBAR_SHORT : TOOLBAR_HEIGHT }),
         fontFamily: 'inherit',
         width: isVertical ? 'fit-content' : '100%',
         boxSizing: 'border-box',
