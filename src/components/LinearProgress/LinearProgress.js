@@ -7,11 +7,17 @@ import { Box } from '@mui/material';
  *
  * A horizontal bar progress indicator — indeterminate (sliding) or determinate (0–100).
  *
- * COLORS: 8 brand colors (single style, color picker only)
- *   Track:  var(--Border-Variant)
- *   Fill:   var(--Buttons-{Color}-Border)
+ * Figma's Progress Bar (8379:11531):
+ *   Track      no fill, a 1px --Border stroke OUTSIDE (drawn as a spread
+ *              shadow, so it takes no layout space). --Border, not
+ *              --Border-Variant: the bar's extent is meaningful, so it needs
+ *              the 3:1 a non-text graphic carries.
+ *   Indicator  --Buttons-{Color}-Border with a 1px --Background ring INSIDE,
+ *              which parts it from the track's edge
+ *   Corners    full pill
  *
- * SIZES: small (4px), medium (6px), large (8px) — bar height
+ * SIZES: small (4px), medium (6px), large (--Progress-Bar-Width, 8px — Figma's
+ *        only size) — bar height
  * DETERMINATE: value 0–100 sets fill width. Without value, indeterminate slide animation.
  *
  * Accessibility: role="progressbar", aria-valuenow/min/max for determinate,
@@ -24,25 +30,24 @@ const COLOR_LABEL_MAP = {
 };
 
 const SIZE_MAP = {
-  small:  { height: '4px', borderRadius: '2px' },
-  medium: { height: '6px', borderRadius: '3px' },
-  large:  { height: '8px', borderRadius: '4px' },
+  small:  { height: '4px' },
+  medium: { height: '6px' },
+  large:  { height: 'var(--Progress-Bar-Width, 8px)' },
 };
 
 export function LinearProgress({
   value,
-  color = 'primary',
+  color = 'default',
   size = 'medium',
   className = '',
   sx = {},
   ...props
 }) {
-  const C = COLOR_LABEL_MAP[color] || 'Primary';
+  const C = COLOR_LABEL_MAP[color] || 'Default';
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
   const hasValue = value !== undefined && value !== null;
   const clampedValue = hasValue ? Math.min(100, Math.max(0, value)) : 0;
 
-  const trackColor = 'var(--Border-Variant)';
   const fillColor = 'var(--Buttons-' + C + '-Border)';
 
   return (
@@ -65,8 +70,8 @@ export function LinearProgress({
         position: 'relative',
         width: '100%',
         height: s.height,
-        borderRadius: s.borderRadius,
-        backgroundColor: trackColor,
+        borderRadius: '999px',
+        boxShadow: '0 0 0 1px var(--Border)',
         overflow: 'hidden',
         flexShrink: 0,
         ...sx,
@@ -82,6 +87,8 @@ export function LinearProgress({
           height: '100%',
           borderRadius: 'inherit',
           backgroundColor: fillColor,
+          boxShadow: 'inset 0 0 0 1px var(--Background)',
+          boxSizing: 'border-box',
           ...(hasValue
             ? {
                 width: clampedValue + '%',

@@ -145,9 +145,17 @@ describe('SVG structure', () => {
     expect(container.querySelector('.circular-progress-indicator').tagName).toBe('circle');
   });
 
-  test('indicator has strokeLinecap="round"', () => {
+  test('indicator has round ends, as Figma draws it', () => {
     const { container } = renderCP();
     expect(container.querySelector('.circular-progress-indicator')).toHaveAttribute('stroke-linecap', 'round');
+  });
+
+  test('the track is Background with a Border on both edges', () => {
+    const { container } = renderCP({ value: 40 });
+    expect(container.querySelector('.circular-progress-track')).toHaveAttribute('stroke', 'var(--Background)');
+    const edges = container.querySelectorAll('.circular-progress-edge');
+    expect(edges).toHaveLength(2);
+    edges.forEach((e) => expect(e).toHaveAttribute('stroke', 'var(--Border)'));
   });
 });
 
@@ -216,18 +224,18 @@ describe('Custom thickness', () => {
     expect(track).toHaveAttribute('stroke-width', '8');
   });
 
-  test('custom thickness applies to indicator', () => {
+  test('custom thickness applies to indicator, inset 1px each side', () => {
     const { container } = renderCP({ thickness: 8 });
     const indicator = container.querySelector('.circular-progress-indicator');
-    expect(indicator).toHaveAttribute('stroke-width', '8');
+    expect(indicator).toHaveAttribute('stroke-width', '6');
   });
 });
 
 /* ─── Defaults ─── */
 describe('Defaults', () => {
-  test('default color is primary', () => {
+  test('default color is default', () => {
     const { container } = renderCP();
-    expect(container.querySelector('.circular-progress-primary')).toBeInTheDocument();
+    expect(container.querySelector('.circular-progress-default')).toBeInTheDocument();
   });
 
   test('default size is medium', () => {

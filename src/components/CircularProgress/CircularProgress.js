@@ -1,5 +1,5 @@
 // src/components/CircularProgress/CircularProgress.js
-import React, { useId } from 'react';
+import React from 'react';
 import { Box } from '@mui/material';
 
 /**
@@ -7,12 +7,19 @@ import { Box } from '@mui/material';
  *
  * A circular progress indicator — indeterminate (spinning) or with a value (0–100).
  *
- * COLORS: 8 brand colors
- *   Track (back circle): var(--Border-Variant)
- *   Fill (progress arc):  var(--Buttons-{Color}-Border)
+ * Figma's Progress Dial (8379:11570): a ring whose inner radius is 75% of
+ * the outer, so its thickness is an eighth of the diameter.
+ *   Track      the ring in --Background, with a 1px --Border on BOTH edges,
+ *              outside the ring (Figma's outside stroke) — so the dial reads
+ *              as an outlined channel on any surface
+ *   Indicator  --Buttons-{Color}-Border, inset 1px from every edge of the
+ *              channel (Figma's 1px inside --Background stroke), round ends
+ *              (Figma rounds the arc's corners), running clockwise from
+ *              twelve o'clock
  *
- * SIZES: small (24px), medium (40px), large (56px), or a number for a custom
- *        diameter in px — thickness scales with it.
+ * SIZES: small (24px), medium (40px), large (80px — Figma's Progress Dial
+ *        Radius, its only size), or a number for a custom diameter in px —
+ *        thickness scales with it.
  * VALUE: 0–100 — when provided, shows static arc + optional center label.
  *        When omitted, renders indeterminate spinning animation.
  *
@@ -27,14 +34,14 @@ const COLOR_LABEL_MAP = {
 };
 
 const SIZE_MAP = {
-  small:  { diameter: 24, thickness: 3, fontSize: '9px',  labelSize: '0px' },
-  medium: { diameter: 40, thickness: 4, fontSize: '12px', labelSize: '12px' },
-  large:  { diameter: 56, thickness: 5, fontSize: '14px', labelSize: '14px' },
+  small:  { diameter: 24, thickness: 3,  fontSize: '9px' },
+  medium: { diameter: 40, thickness: 5,  fontSize: '12px' },
+  large:  { diameter: 80, thickness: 10, fontSize: '16px' },
 };
 
 export function CircularProgress({
   value,
-  color = 'primary',
+  color = 'default',
   size = 'medium',
   thickness: thicknessOverride,
   showValue = false,
@@ -43,7 +50,7 @@ export function CircularProgress({
   sx = {},
   ...props
 }) {
-  const C = COLOR_LABEL_MAP[color] || 'Primary';
+  const C = COLOR_LABEL_MAP[color] || 'Default';
   /* `size` takes a named step OR a diameter in px.
    *
    * The three named steps are this component's own scale (24/40/56). A number
@@ -52,33 +59,25 @@ export function CircularProgress({
    * Better one component with a diameter escape hatch than a second SVG that
    * has to be kept looking identical.
    *
-   * Thickness scales with the diameter rather than being fixed, so a 16px
-   * spinner does not carry a 40px spinner's stroke: the named steps sit at
-   * about diameter/11, and that ratio is what a numeric size follows. */
+   * Thickness scales with the diameter rather than being fixed: Figma's ring
+   * is an eighth of it, and that ratio is what a numeric size follows. */
   const s = typeof size === 'number'
-    ? { diameter: size, thickness: Math.max(2, Math.round(size / 11)),
-        fontSize: Math.max(8, Math.round(size / 3.3)) + 'px',
-        labelSize: Math.max(8, Math.round(size / 3.3)) + 'px' }
+    ? { diameter: size, thickness: Math.max(3, Math.round(size / 8)),
+        fontSize: Math.max(8, Math.round(size / 5)) + 'px' }
     : (SIZE_MAP[size] || SIZE_MAP.medium);
   const t = thicknessOverride || s.thickness;
   const hasValue = value !== undefined && value !== null;
   const clampedValue = hasValue ? Math.min(100, Math.max(0, value)) : 0;
-  const radius = (s.diameter - t) / 2;
-  const circumference = 2 * Math.PI * radius;
-  // Indeterminate: indicator is the SMALLER arc (~25% visible); the bigger
-  // 75% reveals --Border-Variant track behind it. The spinner rotation
-  // (applied to the outer Box) sweeps that small arc around the circle.
-  const strokeDashoffset = hasValue
-    ? circumference - (clampedValue / 100) * circumference
-    : circumference * 0.75;
-
-  const trackColor = 'var(--Border-Variant)';
+  const D = s.diameter;
+  const mid = (D - t) / 2;                 // the channel's centre line
+  const circumference = 2 * Math.PI * mid;
+  // Indeterminate: a quarter of the ring, swept round by the spin.
+  const fraction = hasValue ? clampedValue / 100 : 0.25;
+  // The indicator stops 1px short of each end, as Figma's inside stroke does,
+  // and its round caps sit INSIDE the span: each adds half the stroke width.
+  const w = Math.max(1, t - 2);
+  const arc = Math.max(0, fraction * circumference - 2 - w);
   const fillColor = 'var(--Buttons-' + C + '-Border)';
-
-  // Unique gradient id per instance — useId guarantees no collisions across
-  // multiple CircularProgress components on the same page.
-  const uid = useId();
-  const gradId = 'cp-grad-' + uid.replace(/:/g, '');
 
   return (
     <Box
@@ -116,49 +115,26 @@ export function CircularProgress({
       {...props}
     >
       <svg
-        viewBox={'0 0 ' + s.diameter + ' ' + s.diameter}
-        width={s.diameter}
-        height={s.diameter}
-        style={{ position: 'absolute', top: 0, left: 0, transform: 'rotate(-90deg)' }}
+        viewBox={'0 0 ' + D + ' ' + D}
+        width={D}
+        height={D}
+        aria-hidden="true"
+        // The outer edge is 1px outside the box, as Figma's outside stroke.
+        style={{ position: 'absolute', top: 0, left: 0, overflow: 'visible', transform: 'rotate(-90deg)' }}
       >
-        {/* Linear gradient for indicator — fades the leading edge to 0
-            alpha and the trailing edge to full color, giving the spinning
-            arc a comet-trail effect. Since SVG only has linear/radial
-            gradients (no conic), we approximate by placing the gradient
-            across the bounding box; combined with the arc's rotation this
-            reads as a directional fade as it sweeps. */}
-        <defs>
-          <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%"   stopColor={fillColor} stopOpacity="0" />
-            <stop offset="100%" stopColor={fillColor} stopOpacity="1" />
-          </linearGradient>
-        </defs>
-        {/* Track circle */}
-        <circle
-          cx={s.diameter / 2}
-          cy={s.diameter / 2}
-          r={radius}
-          fill="none"
-          stroke={trackColor}
-          strokeWidth={t}
-          className="circular-progress-track"
-        />
-        {/* Progress arc */}
-        <circle
-          cx={s.diameter / 2}
-          cy={s.diameter / 2}
-          r={radius}
-          fill="none"
-          stroke={'url(#' + gradId + ')'}
-          strokeWidth={t}
-          strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
-          strokeLinecap="round"
-          className="circular-progress-indicator"
-          style={{
-            transition: hasValue ? 'stroke-dashoffset 0.4s ease' : 'none',
-          }}
-        />
+        <circle className="circular-progress-track" cx={D / 2} cy={D / 2} r={mid}
+          fill="none" stroke="var(--Background)" strokeWidth={t} />
+        {/* The channel's two edges — outside the ring, as Figma strokes it. */}
+        <circle className="circular-progress-edge" cx={D / 2} cy={D / 2} r={D / 2 + 0.5}
+          fill="none" stroke="var(--Border)" strokeWidth={1} />
+        <circle className="circular-progress-edge" cx={D / 2} cy={D / 2} r={D / 2 - t - 0.5}
+          fill="none" stroke="var(--Border)" strokeWidth={1} />
+        {fraction > 0 && (
+          <circle className="circular-progress-indicator" cx={D / 2} cy={D / 2} r={mid}
+            fill="none" stroke={fillColor} strokeWidth={w} strokeLinecap="round"
+            strokeDasharray={arc + ' ' + circumference} strokeDashoffset={-(1 + w / 2)}
+            style={{ transition: hasValue ? 'stroke-dasharray 0.4s ease' : 'none' }} />
+        )}
       </svg>
 
       {/* Center content: value label or children */}

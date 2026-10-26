@@ -156,9 +156,9 @@ describe('Bar element', () => {
 
 /* ─── Defaults ─── */
 describe('Defaults', () => {
-  test('default color is primary', () => {
+  test('default color is default', () => {
     const { container } = renderLP();
-    expect(container.querySelector('.linear-progress-primary')).toBeInTheDocument();
+    expect(container.querySelector('.linear-progress-default')).toBeInTheDocument();
   });
 
   test('default size is medium', () => {
@@ -201,5 +201,30 @@ describe('LinearProgress — Accessibility (jest-axe)', () => {
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();
+  });
+});
+
+/* ─── Figma's Progress Bar drawing ─── */
+describe('Matches Figma', () => {
+  const cssFor = (el) => {
+    const out = [];
+    for (const sheet of document.styleSheets) for (const r of sheet.cssRules) {
+      try { if (el.matches(r.selectorText)) out.push(r.cssText); } catch (e) { /* skip */ }
+    }
+    return out.join('\n');
+  };
+
+  test('the track has no fill and a 1px Border outside', () => {
+    const { container } = render(<LinearProgress value={40} />);
+    const c = cssFor(container.querySelector('.linear-progress'));
+    expect(c).toContain('box-shadow: 0 0 0 1px var(--Border)');
+    expect(c).not.toContain('background-color');
+  });
+
+  test('the indicator is Buttons-Border with a Background ring inside', () => {
+    const { container } = render(<LinearProgress value={40} />);
+    const c = cssFor(container.querySelector('.linear-progress-bar'));
+    expect(c).toContain('background-color: var(--Buttons-Default-Border)');
+    expect(c).toContain('box-shadow: inset 0 0 0 1px var(--Background)');
   });
 });
