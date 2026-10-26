@@ -111,6 +111,10 @@ const isSideways = (placement) =>
 export function Tooltip({
   children,
   title,
+  /* Figma's Tooltip container: Icon · Text · Button. `icon` leads, `action`
+     (e.g. a close button) trails; the label sits in a Sizing-Half pad. */
+  icon,
+  action,
   variant = 'solid',
   color = 'black-white',
   size = 'medium',
@@ -125,6 +129,8 @@ export function Tooltip({
   ...props
 }) {
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
+  // Figma's Dynamic Body: the body style at the tooltip's own size.
+  const bodyStep = size === 'small' ? 'Body-Small' : size === 'large' ? 'Body-Large' : 'Body-Medium';
   const isSolid = variant === 'solid';
   const isLight = variant === 'light';
   const isOutline = variant === 'outline';
@@ -172,8 +178,14 @@ export function Tooltip({
             data-surface={isLight ? 'Surface-Brightest' : isSolid ? 'Surface' : undefined}
             className={'tooltip-content tooltip-' + variant + ' tooltip-' + color + ' tooltip-' + size + ' ' + className}
             sx={{
-              backgroundColor: tooltipBg,
-              color: tooltipText,
+              /* Stated with the zone attributes too: the design system paints
+                 every [data-surface] element its Background and Text, which
+                 beat a single class and turned the black-white bubble the
+                 page's color. Same fix as Alert. */
+              '&, &[data-surface], &[data-theme][data-surface]': {
+                backgroundColor: tooltipBg,
+                color: tooltipText,
+              },
               border: tooltipBorder,
               /* --Tooltip-Radius, not --Style-Border-Radius. The design pins
                  the tooltip's corner FLAT at 8 — same at every size and every
@@ -182,9 +194,13 @@ export function Tooltip({
                  older design systems, which have no Tooltip tokens, on the
                  behaviour they shipped with. */
               borderRadius: 'var(--Tooltip-Radius, var(--Style-Border-Radius))',
-              fontSize: s.fontSize,
-              lineHeight: 1.5,
-              fontFamily: 'inherit',
+              /* The Body style (Figma's Dynamic Body) — not MUI's tooltip
+                 face, which is Roboto at 13 and reached a string title. */
+              fontFamily: 'var(--Body-Font-Family, var(--Font-Family-Body, inherit))',
+              fontSize: 'var(--' + bodyStep + '-Font-Size, ' + s.fontSize + ')',
+              fontWeight: 'var(--' + bodyStep + '-Font-Weight, 400)',
+              lineHeight: 'var(--' + bodyStep + '-Line-Height, 1.5)',
+              letterSpacing: 'var(--' + bodyStep + '-Letter-Spacing, normal)',
               padding: s.py + ' ' + s.px,
               maxWidth: s.maxWidth + 'px',
               /* The design's `Tooltip container` is a horizontal auto-layout with
@@ -209,7 +225,19 @@ export function Tooltip({
               ...sx,
             }}
           >
-            {title}
+            {icon && (
+              <Box className="tooltip-icon" aria-hidden="true"
+                   sx={{ display: 'inline-flex', flexShrink: 0, '& .MuiSvgIcon-root': { fontSize: '24px' } }}>
+                {icon}
+              </Box>
+            )}
+            {/* A string (or anything beside an icon / action) sits in Figma's
+                Text frame: Sizing-Half either side. A bare node is the
+                caller's layout, as before. */}
+            {typeof title === 'string' || icon || action
+              ? <Box component="span" className="tooltip-label" sx={{ padding: '0 var(--Sizing-Half, 4px)' }}>{title}</Box>
+              : title}
+            {action}
           </Box>
         ) : ''
       }
@@ -226,6 +254,13 @@ export function Tooltip({
             padding: 0,
             maxWidth: 'none',
             boxShadow: 'none',
+            /* The arrow TIP touches the anchor: the bubble stands off by the
+               visible arrow and nothing more (MUI's default is 14px). There is
+               no offset token — the distance is the arrow. */
+            '.MuiTooltip-popper[data-popper-placement*="bottom"] &': { marginTop: (arrow ? s.arrowVisible : 0) + ' !important' },
+            '.MuiTooltip-popper[data-popper-placement*="top"] &': { marginBottom: (arrow ? s.arrowVisible : 0) + ' !important' },
+            '.MuiTooltip-popper[data-popper-placement*="left"] &': { marginRight: (arrow ? s.arrowVisible : 0) + ' !important' },
+            '.MuiTooltip-popper[data-popper-placement*="right"] &': { marginLeft: (arrow ? s.arrowVisible : 0) + ' !important' },
           },
         },
         arrow: {
@@ -238,6 +273,16 @@ export function Tooltip({
                Arrow-Holder (Visible-Arrow-Height) and -2px gap express. */
             width: sideways ? s.arrowVisible : s.arrowW,
             height: sideways ? s.arrowW : s.arrowVisible,
+            /* Per placement, at MUI's own specificity — its placement rules set
+               the box to 0.71em x 1em and the margin to -0.71em, which beat a
+               single class: the sideways arrow came out 7.8 x 11, and the
+               margin (sized for MUI's box, not this one) left a ~2px gap
+               between arrow and bubble. The margin is minus the box, so the
+               arrow sits flush on the bubble's edge. */
+            '.MuiTooltip-popper[data-popper-placement*="bottom"] &': { width: s.arrowW, height: s.arrowVisible, marginTop: 'calc(-1 * ' + s.arrowVisible + ')' },
+            '.MuiTooltip-popper[data-popper-placement*="top"] &': { width: s.arrowW, height: s.arrowVisible, marginBottom: 'calc(-1 * ' + s.arrowVisible + ')' },
+            '.MuiTooltip-popper[data-popper-placement*="left"] &': { width: s.arrowVisible, height: s.arrowW, marginRight: 'calc(-1 * ' + s.arrowVisible + ')' },
+            '.MuiTooltip-popper[data-popper-placement*="right"] &': { width: s.arrowVisible, height: s.arrowW, marginLeft: 'calc(-1 * ' + s.arrowVisible + ')' },
             '&::before': {
               border: isOutline ? '1px solid ' + 'var(--Buttons-' + C + '-Border)' : 'none',
               backgroundColor: arrowColor,

@@ -483,3 +483,22 @@ describe('Tooltip — radius is the flat design token', () => {
     expect(line).toContain('--Tooltip-Radius');
   });
 });
+
+describe('Figma Tooltip anatomy', () => {
+  test('icon leads, the label sits in its padded Text frame, action trails', () => {
+    render(
+      <Tooltip open title="Saved" icon={<span data-testid="ic" />} action={<button type="button">Close</button>}>
+        <button type="button">Anchor</button>
+      </Tooltip>
+    );
+    const content = document.querySelector('.tooltip-content');
+    expect(content.firstChild).toHaveClass('tooltip-icon');
+    expect(content.querySelector('.tooltip-label')).toHaveTextContent('Saved');
+    expect(content.lastChild).toHaveTextContent('Close');
+  });
+
+  test('a plain string title still gets the padded label', () => {
+    render(<Tooltip open title="Hi"><button type="button">A</button></Tooltip>);
+    expect(document.querySelector('.tooltip-content .tooltip-label')).toHaveTextContent('Hi');
+  });
+});
