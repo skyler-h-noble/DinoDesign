@@ -355,3 +355,17 @@ describe('the current crumb is semibold', () => {
     expect(cssFor(first)).not.toContain('Semibold-Font-Weight');
   });
 });
+
+describe("Figma's separator shapes", () => {
+  const trail = (sep) => render(
+    <Breadcrumbs separator={sep}><BreadcrumbItem href="#a">A</BreadcrumbItem><BreadcrumbItem>B</BreadcrumbItem></Breadcrumbs>
+  ).container.querySelector('.breadcrumb-separator');
+  test('slanted is the default and draws "/"', () => { expect(trail(undefined)).toHaveTextContent('/'); });
+  test('bar draws "|"', () => { expect(trail('bar')).toHaveTextContent('|'); });
+  test('ellipsis draws a dot, no text', () => {
+    const sep = trail('ellipsis');
+    expect(sep.textContent).toBe('');
+    expect(sep.querySelector('span')).toBeTruthy();
+  });
+  test('a custom string is drawn as given', () => { expect(trail('›')).toHaveTextContent('›'); });
+});

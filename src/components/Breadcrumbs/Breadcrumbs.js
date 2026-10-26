@@ -34,14 +34,19 @@ import { BodySmall, Caption } from '../Typography';
 const GAP = 'var(--Sizing-1)';
 
 const SIZE_MAP = {
-  small:  { fontSize: 'var(--Body-Small-Font-Size)', py: '4px' },
-  medium: { fontSize: 'var(--Body-Font-Size)',       py: '6px' },
-  large:  { fontSize: 'var(--Body-Large-Font-Size)', py: '8px' },
+  small:  { fontSize: 'var(--Body-Small-Font-Size)', py: '4px', line: 'var(--Body-Small-Line-Height, 20px)' },
+  medium: { fontSize: 'var(--Body-Font-Size)',       py: '6px', line: 'var(--Body-Medium-Line-Height, 24px)' },
+  large:  { fontSize: 'var(--Body-Large-Font-Size)', py: '8px', line: 'var(--Body-Large-Line-Height, 28px)' },
 };
+
+/* Figma's .Breadcrumbs-separator Shape axis. A string or node not named here
+   is drawn as given, so existing separator="/" (or a custom icon) keeps
+   working. */
+const SEPARATOR_SHAPES = { slanted: '/', bar: '|' };
 
 export function Breadcrumbs({
   children,
-  separator = '/',
+  separator = 'slanted',  // 'slanted' | 'bar' | 'ellipsis' | any node
   size = 'medium',
   condense = false,
   maxItems = 4,
@@ -98,11 +103,16 @@ export function Breadcrumbs({
       className="breadcrumb-separator"
       sx={{
         display: 'inline-flex', alignItems: 'center',
-        color: 'var(--Quiet)', userSelect: 'none',
-        fontSize: 'inherit', lineHeight: 1, flexShrink: 0,
+        /* Border-Variant, as Figma binds it: the separator is decoration
+           (aria-hidden), so it carries no contrast requirement — the crumbs
+           do. A full Body line tall, as the text-shaped separators are. */
+        color: 'var(--Border-Variant)', userSelect: 'none',
+        fontSize: 'inherit', lineHeight: s.line, flexShrink: 0,
       }}
     >
-      {separator}
+      {separator === 'ellipsis'
+        ? <Box component="span" sx={{ width: 4, height: 4, borderRadius: '50%', backgroundColor: 'currentColor' }} />
+        : (SEPARATOR_SHAPES[separator] ?? separator)}
     </Box>
   );
 
