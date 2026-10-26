@@ -412,6 +412,19 @@ export function Slider({
         backgroundColor: styles.valueLabel,
       },
     },
+    /* Vertical: Figma's thumb shows its label to the RIGHT (Label-Right on by
+       default), 8px clear of the thumb and centred on it, the arrow pointing
+       back at the thumb. MUI puts it on the left. */
+    '&.MuiSlider-vertical .MuiSlider-valueLabel': {
+      right: 'auto',
+      left: 'calc(100% + 8px)',
+      transformOrigin: 'left center',
+      '&::before': {
+        right: 'auto',
+        left: 0,
+        transform: 'translate(-50%, -50%) rotate(45deg)',
+      },
+    },
 
     /* Marks are DOTS, not full-height bars.
        They were `width: 2, height: totalTrack` — the full thickness of the bar
