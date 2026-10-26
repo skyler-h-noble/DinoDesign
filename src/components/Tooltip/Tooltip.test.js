@@ -440,3 +440,13 @@ describe('Figma Tooltip anatomy', () => {
     expect(document.querySelector('.tooltip-content .tooltip-label')).toHaveTextContent('Hi');
   });
 });
+
+describe('Trailing icon', () => {
+  test('renders after the label', async () => {
+    render(<Tooltip title="Tip" open icon={<span data-testid="lead" />} trailingIcon={<span data-testid="trail" />}><button>T</button></Tooltip>);
+    const content = await screen.findByText('Tip');
+    const box = content.closest('.tooltip-content');
+    const kids = [...box.children].map((c) => c.className.includes('tooltip-trailing-icon') ? 'trail' : c.className.includes('tooltip-icon') ? 'lead' : c.className.includes('tooltip-label') ? 'label' : 'other');
+    expect(kids.filter((k) => k !== 'other')).toEqual(['lead', 'label', 'trail']);
+  });
+});

@@ -20,7 +20,10 @@ import { tokenSegment } from '../_shadows';
  * equivalent of re-pinning the Buttons mode on that frame.
  *
  * SIZES: small | medium | large
- * PLACEMENT: 12 positions (top, top-start, top-end, right, etc.)
+ * PLACEMENT: 12 positions — Figma's Location: Top-Middle = top, Top-Left =
+ *   top-start, Top-Right = top-end, Left-Top = left-start … Bottom-Center =
+ *   bottom. The arrow stays on every one.
+ * ICONS: `icon` (Leading Icon) and `trailingIcon` (Trailing Icon), 24px.
  * ARROW: boolean, default TRUE — every Figma variant carries the arrow
  * OPEN: undefined (uncontrolled) | true | false
  */
@@ -118,9 +121,12 @@ const isSideways = (placement) =>
 export function Tooltip({
   children,
   title,
-  /* Figma's Tooltip container: Icon · Text · Button. `icon` leads, `action`
+  /* Figma's Tooltip container: Icon · Text · Icon · Button. `icon` leads
+     (Figma's Leading Icon), `trailingIcon` follows the label (Trailing Icon),
+     `action`
      (e.g. a close button) trails; the label sits in a Sizing-Half pad. */
   icon,
+  trailingIcon,
   action,
   variant = 'solid',
   color = 'black-white',
@@ -242,9 +248,15 @@ export function Tooltip({
             {/* A string (or anything beside an icon / action) sits in Figma's
                 Text frame: Sizing-Half either side. A bare node is the
                 caller's layout, as before. */}
-            {typeof title === 'string' || icon || action
+            {typeof title === 'string' || icon || trailingIcon || action
               ? <Box component="span" className="tooltip-label" sx={{ padding: '0 var(--Sizing-Half, 4px)' }}>{title}</Box>
               : title}
+            {trailingIcon && (
+              <Box className="tooltip-icon tooltip-trailing-icon" aria-hidden="true"
+                   sx={{ display: 'inline-flex', flexShrink: 0, '& .MuiSvgIcon-root': { fontSize: '24px' } }}>
+                {trailingIcon}
+              </Box>
+            )}
             {action}
           </Box>
         ) : ''
