@@ -21,9 +21,9 @@ describe('Tag', () => {
     expect(container.querySelector('span.tag')).toBeInTheDocument();
   });
 
-  test('default color is primary', () => {
+  test('default color is default (Figma\'s first Tag theme)', () => {
     const { container } = render(<Tag>Label</Tag>);
-    expect(container.querySelector('.tag-primary')).toBeInTheDocument();
+    expect(container.querySelector('.tag-default')).toBeInTheDocument();
   });
 
   test('applies correct color class', () => {

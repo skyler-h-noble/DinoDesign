@@ -1,7 +1,7 @@
 // src/components/Tag/Tag.js
 import React from 'react';
 import { Box } from '@mui/material';
-import { BodySmall } from '../Typography';
+import { Label } from '../Typography/Typography';
 
 /**
  * Tag Component
@@ -9,10 +9,11 @@ import { BodySmall } from '../Typography';
  * A compact label used for status, categorization, and metadata.
  *
  * SPECS:
- *   Height:        24px
- *   Padding:       0 8px (left/right only)
+ *   Height:        the label's line plus Sizing-Quarter above and below (28 at medium)
+ *   Padding:       Sizing-Quarter x Sizing-2 (Figma's Tag)
+ *   Corners:       2px
  *   Border-radius: 0 (sharp corners)
- *   Typography:    BodySmall, line-height 24px, weight 600
+ *   Typography:    the Label style (Figma's Label-Medium-All-Caps), uppercase
  *   Background:    var(--Tag-{Theme}-BG)
  *   Text:          var(--Tag-{Theme}-Text)
  *
@@ -21,9 +22,9 @@ import { BodySmall } from '../Typography';
  *   info    | success   | warning  | error
  *
  * PROPS:
- *   color      string    One of the above colors (default: 'primary')
+ *   color      string    One of the above colors (default: 'default')
  *   width      string    'hug' (default) fits content, 'fill' stretches to container
- *   allCaps    boolean   Transforms text to uppercase (default: false)
+ *   allCaps    boolean   Transforms text to uppercase (default: true, as Figma's style)
  *   children   node      Tag label text
  *   className  string
  *   sx         object    MUI sx overrides
@@ -52,9 +53,10 @@ const COLOR_TOKEN_MAP = {
 };
 
 export function Tag({
-  color = 'primary',
+  color = 'default',
   width = 'hug',
-  allCaps = false,
+  // Figma's Tag text style is Label-Medium-All-Caps.
+  allCaps = true,
   children,
   className = '',
   sx = {},
@@ -73,9 +75,9 @@ export function Tag({
         display:         isFill ? 'flex' : 'inline-flex',
         alignItems:      'center',
         justifyContent:  isFill ? 'center' : 'flex-start',
-        height:          '24px',
-        px:              '8px',
-        borderRadius:    0,
+        // Figma's Tag: Sizing-Quarter x Sizing-2 around the label, 2px corners.
+        padding:         'var(--Sizing-Quarter, 2px) var(--Sizing-2, 16px)',
+        borderRadius:    '2px',
         backgroundColor: bg,
         color:           text,
         width:           isFill ? '100%' : 'auto',
@@ -85,18 +87,16 @@ export function Tag({
       }}
       {...props}
     >
-      <BodySmall
+      <Label
         component="span"
         sx={{
           color:         'inherit',
-          lineHeight:    '24px',
           whiteSpace:    'nowrap',
-          fontWeight:    600,
           textTransform: allCaps ? 'uppercase' : 'none',
         }}
       >
         {children}
-      </BodySmall>
+      </Label>
     </Box>
   );
 }
