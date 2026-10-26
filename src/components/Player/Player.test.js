@@ -49,10 +49,27 @@ describe('Player', () => {
     expect(screen.getByRole('button', { name: 'Next track' })).toBeTruthy();
   });
 
-  test('the clock shows elapsed and total, not a bubble on the thumb', () => {
+  test('the clock shows elapsed and time remaining (Figma), not a bubble on the thumb', () => {
     render(<Player duration={195} defaultPosition={42} />);
     expect(screen.getByText('0:42')).toBeTruthy();
-    expect(screen.getByText('3:15')).toBeTruthy();
+    expect(screen.getByText('-2:33')).toBeTruthy();
+  });
+
+  test('back / forward skip by skipSeconds, and only show with onSkip', () => {
+    const onSkip = jest.fn();
+    const { rerender } = render(<Player duration={195} defaultPosition={42} />);
+    expect(screen.queryByRole('button', { name: /Back 10 seconds/ })).toBeNull();
+    rerender(<Player duration={195} defaultPosition={42} onSkip={onSkip} />);
+    screen.getByRole('button', { name: 'Forward 10 seconds' }).click();
+    expect(onSkip).toHaveBeenCalledWith(10);
+    screen.getByRole('button', { name: 'Back 10 seconds' }).click();
+    expect(onSkip).toHaveBeenCalledWith(-10);
+  });
+
+  test('play is the one solid control; the rest are ghost', () => {
+    const { container } = render(<Player duration={60} onPrevious={() => {}} onNext={() => {}} onSkip={() => {}} />);
+    expect(container.querySelector('.player-play')).not.toHaveClass('btn-ghost');
+    for (const k of ['previous', 'back', 'forward', 'next']) expect(container.querySelector('.player-' + k)).toHaveClass('btn-ghost');
   });
 
   /* The scrubber is a position in a track. Reading "42" and leaving the

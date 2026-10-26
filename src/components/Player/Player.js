@@ -1,35 +1,40 @@
 // src/components/Player/Player.js
 //
-// An audio player bar: who is playing, the transport, and where you are in it.
+// Media transport: where you are in it, and the controls to move.
 //
-// COMPOSED, NOT DRAWN. Every part of this is an existing component — Avatar,
-// Button, Slider, Typography — arranged. There is no new primitive here and
-// there should not be: a player that drew its own round button would be a
-// second button, with its own focus ring to keep in step with the real one.
+// Figma's Player (10327:5421), a component now rather than the 400x32 sketch
+// this was first built from:
 //
-// Figma's Player page is a 400x32 sketch rather than a component set: a
-// ToggleButtonGroup, a Slider and an icon Button in a row 554px wide inside a
-// 400px box, with placeholder text. So this is built to the SHAPE that sketch
-// points at rather than matched to it variant by variant, and the pieces it
-// uses are the ones the file reached for.
+//   Scrubber   a small Slider over two times — elapsed at the left, time
+//              REMAINING at the right ("-1:23") — in Mobile Nav Label, Quiet
+//   Controls   previous · back 10s · play / pause · forward 10s · next,
+//              spread across the row; play / pause is the one solid
+//              (default) button, the rest are ghost
+//   Layout     Sizing-1 padding, Sizing-3 between scrubber and controls
 //
-// TIME IS NOT A SLIDER LABEL. MUI's valueLabelDisplay puts a bubble over the
-// thumb, which is right for a value you are choosing and wrong for a clock you
-// are reading: it moves, it covers the track, and it vanishes when you let go.
-// Elapsed and total sit either side of the scrubber, where they stay still and
-// can be read at a glance.
+// COMPOSED, NOT DRAWN. Slider, Button and Typography arranged — no new
+// primitive, so the focus rings, states and colors are the real ones.
+//
+// THE CONTROLS ARE ACTIONS, so they are a plain row of buttons. Figma lays
+// them out in a ToggleButtonGroup, but a toggle group tells a screen reader
+// its buttons are on / off with one selected, which these are not.
+//
+// TIME IS NOT A SLIDER LABEL. A bubble over the thumb is right for a value
+// you are choosing and wrong for a clock you are reading: it moves, covers the
+// track and vanishes when you let go. The times sit still under the scrubber.
 import React, { useState } from 'react';
 import { Box } from '@mui/material';
 import { Avatar } from '../Avatar';
 import { Button } from '../Button';
 import { Slider } from '../Slider';
-import { Body, Caption } from '../Typography';
-import { HStack, VStack } from '../Stack';
+import { Body, Caption, MobileNavLabel } from '../Typography';
 
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
+import Replay10Icon from '@mui/icons-material/Replay10';
+import Forward10Icon from '@mui/icons-material/Forward10';
 
 /**
  * Seconds as m:ss, or h:mm:ss once it runs past an hour.
@@ -49,6 +54,8 @@ export function formatTime(seconds) {
 }
 
 export function Player({
+  /* Optional "now playing" line above the scrubber. Figma's Player has none;
+     kept so callers of the earlier audio bar still get their title. */
   title,
   subtitle,
   avatarSrc,
@@ -71,6 +78,10 @@ export function Player({
      something only the caller can do. */
   onPrevious,
   onNext,
+  /* Back / forward by skipSeconds: onSkip(-10) and onSkip(10). Absent, the
+     two buttons are not there. */
+  onSkip,
+  skipSeconds = 10,
 
   variant = 'default',
   size = 'medium',
@@ -87,13 +98,19 @@ export function Player({
 
   const isControlledPos = position !== undefined;
   const isControlledPlay = playing !== undefined;
-  const pos = isControlledPos ? position : innerPos;
+  const pos = Math.min(Math.max(0, isControlledPos ? position : innerPos), Math.max(duration, 0));
   const isPlaying = isControlledPlay ? playing : innerPlaying;
 
   const seek = (_e, v) => {
     const next = Array.isArray(v) ? v[0] : v;
     if (!isControlledPos) setInnerPos(next);
     onSeek?.(next);
+  };
+
+  const skip = (delta) => {
+    const next = Math.min(Math.max(0, pos + delta), duration);
+    if (!isControlledPos) setInnerPos(next);
+    onSkip?.(delta);
   };
 
   const togglePlay = () => {
@@ -103,93 +120,91 @@ export function Player({
 
   const hasMeta = Boolean(title || subtitle || avatarSrc || avatarInitials);
 
+  const control = (key, name, icon, onClick, solid = false) => (
+    <Button key={key} variant={solid ? variant : 'ghost'} size={size} iconOnly disabled={disabled}
+            onClick={onClick} aria-label={name} className={'player-control player-' + key}>
+      {icon}
+    </Button>
+  );
+
   return (
-    <HStack
+    <Box
       className={'player ' + className}
-      gap="var(--Sizing-2)"
       role="group"
       aria-label={ariaLabel}
-      style={{ alignItems: 'center', width: '100%' }}
-      sx={sx}
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'var(--Sizing-3, 24px)',
+        padding: 'var(--Sizing-1, 8px)',
+        boxSizing: 'border-box',
+        width: '100%',
+        ...sx,
+      }}
       {...props}
     >
       {hasMeta && (
-        <HStack gap="var(--Sizing-1)" style={{ alignItems: 'center', minWidth: 0 }}>
+        <Box className="player-meta" sx={{ display: 'flex', alignItems: 'center', gap: 'var(--Sizing-1, 8px)', minWidth: 0 }}>
           {(avatarSrc || avatarInitials) && (
             <Avatar src={avatarSrc} initials={avatarInitials} size={size}
                     alt={title ? `Artwork for ${title}` : undefined} />
           )}
-          {/* minWidth:0 on both, or a long title refuses to shrink and pushes
-              the scrubber off the end — the default min-width of a flex item is
-              its content, which for text is the whole string. */}
-          <VStack gap="0" style={{ minWidth: 0 }}>
-            {title && (
-              <Body style={{ whiteSpace: 'nowrap', overflow: 'hidden',
-                             textOverflow: 'ellipsis' }}>{title}</Body>
-            )}
-            {subtitle && (
-              <Caption color="quiet" style={{ whiteSpace: 'nowrap', overflow: 'hidden',
-                                              textOverflow: 'ellipsis' }}>{subtitle}</Caption>
-            )}
-          </VStack>
-        </HStack>
+          {/* minWidth:0, or a long title refuses to shrink: a flex item's
+              default min-width is its content, the whole string. */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+            {title && <Body style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</Body>}
+            {subtitle && <Caption color="quiet" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{subtitle}</Caption>}
+          </Box>
+        </Box>
       )}
 
-      <HStack gap="var(--Sizing-Half)" style={{ alignItems: 'center', flexShrink: 0 }}>
-        {onPrevious && (
-          <Button variant={variant} size={size} iconOnly disabled={disabled}
-                  onClick={onPrevious} aria-label="Previous track">
-            <SkipPreviousIcon />
-          </Button>
+      <Box className="player-scrubber" sx={{ display: 'flex', flexDirection: 'column' }}>
+        <Slider
+          variant={variant}
+          size="small"
+          disabled={disabled || !onSeek}
+          min={0}
+          max={Math.max(duration, 1)}
+          value={pos}
+          onChange={seek}
+          valueLabelDisplay="off"
+          aria-label="Seek"
+          /* The slider announces a position in a track, not a number out of
+             186. Without this a screen reader reads "42" and leaves the
+             listener to work out what that is. */
+          getAriaValueText={(v) => formatTime(v) + ' of ' + formatTime(duration)}
+          /* As tall as its thumb (Figma's Slider is 24 here): MUI pads the
+             track 13px a side, which made the scrubber 6px taller. */
+          sx={{ width: '100%', padding: '10px 0' }}
+        />
+        {showTime && (
+          /* tabular-nums, so the times do not shuffle every time a digit
+             changes — the one thing that makes a running clock look broken. */
+          <Box className="player-times" sx={{ display: 'flex', justifyContent: 'space-between', gap: 'var(--Sizing-2, 16px)', fontVariantNumeric: 'tabular-nums' }}>
+            {/* Figma's plain "Mobile Nav Label" style binds Body-Font-Weight;
+                MobileNavLabel is the NAV label, whose weight token is 600. */}
+            <MobileNavLabel component="span" color="quiet" className="player-elapsed"
+                            sx={{ fontWeight: 'var(--Body-Font-Weight, 400)' }}>{formatTime(pos)}</MobileNavLabel>
+            <MobileNavLabel component="span" color="quiet" className="player-remaining"
+                            sx={{ fontWeight: 'var(--Body-Font-Weight, 400)' }}
+                            aria-label={formatTime(duration - pos) + ' remaining'}>
+              {'-' + formatTime(duration - pos)}
+            </MobileNavLabel>
+          </Box>
         )}
-        {/* The one control that is always here, and the only one that says what
-            it will DO rather than what is happening: the label is "Play" when
-            paused. A button named for the current state tells you where you
-            are and not what pressing it gets you. */}
-        <Button variant={variant} size={size} iconOnly disabled={disabled}
-                onClick={togglePlay} aria-label={isPlaying ? 'Pause' : 'Play'}>
-          {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
-        </Button>
-        {onNext && (
-          <Button variant={variant} size={size} iconOnly disabled={disabled}
-                  onClick={onNext} aria-label="Next track">
-            <SkipNextIcon />
-          </Button>
-        )}
-      </HStack>
+      </Box>
 
-      <HStack gap="var(--Sizing-1)" style={{ alignItems: 'center', flex: 1, minWidth: 0 }}>
-        {showTime && (
-          /* tabular-nums, so the track does not shuffle sideways every time a
-             digit changes — the one thing that makes a running clock look
-             broken. */
-          <Caption color="quiet" style={{ fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
-            {formatTime(pos)}
-          </Caption>
-        )}
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Slider
-            variant={variant}
-            size={size}
-            disabled={disabled || !onSeek}
-            min={0}
-            max={Math.max(duration, 1)}
-            value={pos}
-            onChange={seek}
-            aria-label="Seek"
-            /* The slider announces a position in a track, not a number out of
-               186. Without this a screen reader reads "42" and leaves the
-               listener to work out what that is. */
-            getAriaValueText={(v) => formatTime(v) + ' of ' + formatTime(duration)}
-          />
-        </Box>
-        {showTime && (
-          <Caption color="quiet" style={{ fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
-            {formatTime(duration)}
-          </Caption>
-        )}
-      </HStack>
-    </HStack>
+      {/* Spread across the row, each button its own 32 — Figma's group. */}
+      <Box className="player-controls" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        {onPrevious && control('previous', 'Previous track', <SkipPreviousIcon />, onPrevious)}
+        {onSkip && control('back', `Back ${skipSeconds} seconds`, <Replay10Icon />, () => skip(-skipSeconds))}
+        {/* The one control that is always here, and the only one that says what
+            it will DO rather than what is happening: "Play" when paused. */}
+        {control('play', isPlaying ? 'Pause' : 'Play', isPlaying ? <PauseIcon /> : <PlayArrowIcon />, togglePlay, true)}
+        {onSkip && control('forward', `Forward ${skipSeconds} seconds`, <Forward10Icon />, () => skip(skipSeconds))}
+        {onNext && control('next', 'Next track', <SkipNextIcon />, onNext)}
+      </Box>
+    </Box>
   );
 }
 
