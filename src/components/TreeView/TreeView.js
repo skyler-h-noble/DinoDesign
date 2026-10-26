@@ -3,7 +3,8 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Box } from '@mui/material';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Icon } from '../Icon/Icon';
-import { BodySmall, Caption } from '../Typography';
+import { Body, Caption } from '../Typography';
+import { MiniSwatch } from '../MiniSwatch/MiniSwatch';
 import { Checkbox } from '../Checkbox/Checkbox';
 
 /**
@@ -34,7 +35,17 @@ import { Checkbox } from '../Checkbox/Checkbox';
  * infer them once `role="group"` is in play.
  *
  * ── Item shape (unchanged) ────────────────────────────────────────────────
- *   { id, label, icon?, badge?, sx?, disabled?, children? }
+ *   { id, label, icon?, swatch?, badge?, sx?, disabled?, children? }
+ *
+ * ── The row is Figma's Menu Item (8007:25355) ─────────────────────────────
+ *   height   Button-Height; padding Menu-Level-{n}-Left-Margin | Sizing-1
+ *   gap      Sizing-Half; corner Menu-Item-Radius
+ *   twisty / icon   24px; swatch MiniSwatch at Menu-Swatch
+ *   label    Body in --Text (Sizing-Half either side)
+ *   divider  a 1px --Border-Variant line under the row
+ *   selected a 4px --Buttons-Default-Border bar on the leading edge
+ *   focus    a 3px ring 1px inside, Menu-Focus-Radius
+ *   Indent is the ROW's padding per level (8, 36, 64…), not a nested margin.
  *
  * VARIANT (applies to the whole tree container):
  *   default   no data-theme            data-surface="Surface-Dim"
@@ -47,8 +58,11 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 const DENSITY_MAP = {
   compact: { minHeight: '24px', fontSize: '13px', iconSize: 16, gap: '6px' },
-  default: { minHeight: '32px', fontSize: '14px', iconSize: 18, gap: '8px' },
+  default: { minHeight: 'var(--Button-Height, 32px)', iconSize: 24, gap: 'var(--Sizing-Half, 4px)' },
 };
+/* Figma's .Menu-Levels/Left-Margin: 8, 36, 64 … — a level's indent is the row's
+   own leading padding, so a child's twisty sits under its parent's icon. */
+const leftMargin = (level) => 'var(--Menu-Level-' + Math.min(level - 1, 6) + '-Left-Margin, ' + (8 + 28 * (level - 1)) + 'px)';
 
 /* Animation runs on MOUNT, not on height.
  *
@@ -108,7 +122,7 @@ function TreeNode({
   const { item, level, index, siblings } = node;
   const d = DENSITY_MAP[density] || DENSITY_MAP.default;
   const isCompact = density === 'compact';
-  const TextComp = isCompact ? Caption : BodySmall;
+  const TextComp = isCompact ? Caption : Body;
 
   const hasChildren = !!item.children?.length;
   const isExpanded = hasChildren && expanded.includes(item.id);
@@ -153,23 +167,35 @@ function TreeNode({
         sx={{
           display: 'flex', alignItems: 'center', gap: d.gap,
           minHeight: d.minHeight,
-          padding: '0 8px',
-          marginLeft: level > 1 ? 0 : 0,
-          borderRadius: 'var(--Style-Border-Radius)',
-          border: '1px solid transparent',
-          color: isSelected ? 'var(--Text)' : 'var(--Quiet)',
-          fontWeight: isSelected ? 600 : 400,
-          backgroundColor: isSelected ? 'var(--Pressed)' : 'transparent',
+          position: 'relative',
+          boxSizing: 'border-box',
+          padding: isCompact ? '0 8px' : '0 var(--Sizing-1, 8px) 0 ' + leftMargin(level),
+          borderRadius: isCompact ? 'var(--Style-Border-Radius)' : 'var(--Menu-Item-Radius, 0px)',
+          color: 'var(--Text)',
+          // Figma's divider: a 1px Border-Variant line under every row, drawn
+          // inside so it adds no height.
+          boxShadow: isCompact ? 'none' : 'inset 0 -1px 0 var(--Border-Variant)',
+          backgroundColor: 'transparent',
           cursor: disabled ? 'not-allowed' : 'pointer',
           opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
-          transition: 'color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease',
-          ...(disabled ? {} : {
-            '&:hover': { color: 'var(--Text)', backgroundColor: 'var(--Hover)' },
-            '&:active': { color: 'var(--Text)', backgroundColor: 'var(--Pressed)' },
+          transition: 'background-color 0.15s ease',
+          /* Selected: Figma's Selected Indicator, a 4px bar on the leading edge
+             in the button border colour. (It was a --Pressed fill with a bold
+             label, which hover then imitated.) */
+          ...(isSelected && {
+            '&::before': {
+              content: '""', position: 'absolute', left: 0, top: 0, bottom: 0, width: '4px',
+              backgroundColor: 'var(--Buttons-Default-Border)', pointerEvents: 'none',
+            },
           }),
+          ...(disabled ? {} : {
+            '&:hover': { backgroundColor: 'var(--Hover)' },
+            '&:active': { backgroundColor: 'var(--Pressed)' },
+          }),
+          // 3px ring, 1px in from the row's edge (Figma's Focus-Visible frame).
           'li:focus-visible > &': {
             outline: '3px solid var(--Focus-Visible)',
-            outlineOffset: '-3px',
+            outlineOffset: '-4px',
           },
         }}
       >
@@ -177,10 +203,12 @@ function TreeNode({
             8px left of its siblings' and the column stops reading as one. */}
         <Box
           aria-hidden="true"
+          className="omni-tree-twisty"
           sx={{
             width: d.iconSize, height: d.iconSize, flexShrink: 0,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: 'inherit',
+            color: 'var(--Icons-Default, var(--Text))',
+            '& .MuiSvgIcon-root': { fontSize: d.iconSize },
           }}
         >
           {hasChildren && (isExpanded ? collapseIcon : expandIcon)}
@@ -201,15 +229,24 @@ function TreeNode({
         )}
 
         {item.icon && (
-          <Icon size="small" sx={{ color: 'inherit', flexShrink: 0 }}>{item.icon}</Icon>
+          <Box aria-hidden="true" className="omni-tree-icon" sx={{
+            width: d.iconSize, height: d.iconSize, flexShrink: 0, display: 'flex',
+            alignItems: 'center', justifyContent: 'center', color: 'var(--Icons-Default, var(--Text))',
+            '& .MuiSvgIcon-root': { fontSize: d.iconSize },
+          }}>{item.icon}</Box>
         )}
 
-        <TextComp style={{
-          flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-          color: 'inherit', fontWeight: 'inherit',
-        }}>
-          {item.label}
-        </TextComp>
+        {item.swatch && <MiniSwatch color={item.swatch} sx={{ width: 'var(--Menu-Swatch, 24px)', height: 'var(--Menu-Swatch, 24px)' }} />}
+
+        {/* Figma's Menu Slot: the label with Sizing-Half either side. The padding
+            is the slot's, so the text itself starts where Figma's does. */}
+        <Box className="omni-tree-label" sx={{ flex: 1, minWidth: 0, display: 'flex', padding: '0 var(--Sizing-Half, 4px)' }}>
+          <TextComp style={{
+            flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>
+            {item.label}
+          </TextComp>
+        </Box>
 
         {item.badge && <Box sx={{ flexShrink: 0 }}>{item.badge}</Box>}
       </Box>
@@ -230,7 +267,9 @@ function TreeNode({
                decorative tree guide is --Border-Variant's job. The 1px it
                occupied is folded back into the padding so the indent is
                unchanged. */
-            margin: 0, padding: 0, paddingLeft: '9px', marginLeft: '12px',
+            /* The indent is each row's own padding (Menu-Level-n-Left-Margin),
+               so the group adds none. */
+            margin: 0, padding: 0,
             listStyle: 'none',
             animation: ANIMATION_MAP[animation],
           }}

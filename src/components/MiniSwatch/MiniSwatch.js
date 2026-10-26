@@ -10,7 +10,7 @@
 // swatch, and marking it twice would say the same thing in two places.
 //
 //   Swatch       Button-Height (24/32/56)   circle      1px Border   7 states
-//   MiniSwatch   Menu-Swatch (24)           radius 4    no border    none
+//   MiniSwatch   Menu-Swatch (24)           radius 4    1px Background edge (inside)   none
 //
 // It has no gallery page: there is nothing to play with. It appears inside
 // Select and Menu, which is where it is documented.
@@ -36,8 +36,11 @@ export function MiniSwatch({
         // Sizing-Half, which is what Figma binds — not Input-Swatch-Radius.
         borderRadius: 'var(--Sizing-Half, 4px)',
         backgroundColor: color,
-        // No border by design. Selection is shown by the ROW, so the chip has
-        // no edge to recolor — and nothing to mistake for one.
+        /* A 1px --Background edge, inside (Figma's MiniSwatch stroke). It is a
+           gap, not a selection mark: the row's 3px inside focus ring passes
+           close to the chip, and the edge keeps the ring from touching the
+           colour — so the ring's contrast is always against the surface. */
+        boxShadow: 'inset 0 0 0 1px var(--Background)',
         ...sx,
       }}
       {...props}
