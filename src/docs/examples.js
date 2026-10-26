@@ -214,9 +214,9 @@ export const EXAMPLES = {
   /* A Box only shows what it is when it is PAINTING something — a bare div
      with no surface is an empty rectangle and teaches nothing. */
   Box: () => (
-    <Box surface="Container" radius="medium" elevation={2}
+    <Box surface="Container"
          style={{ padding: 'var(--Sizing-3)', width: 280 }}>
-      <Body>Container, medium radius, elevation 2.</Body>
+      <Body>A Container surface: no corner, no shadow.</Body>
       <Caption color="quiet">Nothing here names a color.</Caption>
     </Box>
   ),
