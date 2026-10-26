@@ -585,6 +585,11 @@ export function ButtonGroup({
               ? color
               : color + '-outline'
       ),
+      /* SEPARATED segments are whole buttons, and Figma's selected one is
+         Button's own selected look — the edge thickened to
+         --Button-Selected-Border-Width (2px) with its selected bevel — so the
+         Button draws it. Joined segments share edges and keep theirs at 1px. */
+      ...(separated && hasSelection && isSelected && child.props.selected === undefined && { selected: true }),
       size:    child.props.size ?? size,
       disabled: child.props.disabled ?? disabled,
       onClick: handleClick(childValue, child.props.onClick),
