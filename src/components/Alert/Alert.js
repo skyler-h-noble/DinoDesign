@@ -2,6 +2,11 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import { Typography } from '../Typography';
+import { Icon } from '../Icon/Icon';
+import InfoIcon from '@mui/icons-material/Info';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import WarningIcon from '@mui/icons-material/Warning';
+import ErrorIcon from '@mui/icons-material/Error';
 /* Level from the Figma effect style that NAMES this component.
    The five Effect-Levels are the five styles:
      1  Card / Accordion, Handle, Alert, Bottom-Sheet
@@ -19,7 +24,10 @@ import { SHADOW_LEVEL_1 } from '../_shadows';
  *   solid     data-theme="{Theme}" data-surface="Surface"
  *   light     data-theme="{Theme}"       data-surface="Surface-Brightest"
  *
- * COLORS: default | primary | secondary | tertiary | neutral | info | success | warning | error
+ * COLORS: info | success | warning | error — the four STATES, as Figma's
+ *   State-Theme axis. An alert's color is its meaning, and each state has a
+ *   glyph that carries it without color. A brand-colored notice is a callout,
+ *   not an alert; the old brand values still render, as info, with a warning.
  *
  * STRUCTURE:
  *   Outer shell — border var(--Buttons-{C}-Border), border-radius, Effect-Level-3 shadow
@@ -32,7 +40,8 @@ import { SHADOW_LEVEL_1 } from '../_shadows';
  *                    the Figma Alert (9645:17163) draws it: a header row
  *                    (startDecorator, title, endDecorator) and the body below
  *                    it at the left padding. Without one it stays one row.
- *   startDecorator — icon or avatar before the title / message
+ *   startDecorator — the state's icon by default (Figma's Start Decorator,
+ *                    on); pass a node to replace it, or false for none
  *   endDecorator   — icon, link, or button at the end of the header / row
  *   children       — the body
  *
@@ -40,6 +49,23 @@ import { SHADOW_LEVEL_1 } from '../_shadows';
  */
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+/* The four states and their glyphs — Figma's Message Icons. */
+const STATE_ICONS = { info: InfoIcon, success: CheckCircleIcon, warning: WarningIcon, error: ErrorIcon };
+const warnedColors = new Set();
+function normalizeAlertColor(color) {
+  const c = String(color || 'info');
+  if (STATE_ICONS[c]) return c;
+  if (process.env.NODE_ENV !== 'production' && !warnedColors.has(c)) {
+    warnedColors.add(c);
+    console.warn(
+      '[Alert] color="' + c + '" — an alert is one of the four states ' +
+      '(info, success, warning, error). Rendering color="info". A ' +
+      'brand-colored notice is a callout: a Card in a themed Section.',
+    );
+  }
+  return 'info';
+}
 
 /* Padding is one value on every side, as Figma's Theme-Container binds it
    (Sizing-2 = 16px at medium). It was 12px top and bottom against 16px sides. */
@@ -59,22 +85,29 @@ export function Alert({
   title,
   variant = 'light',
   surface,
-  color = 'info',
+  color: colorProp = 'info',
   size = 'medium',
-  startDecorator,
+  startDecorator: startProp,
   endDecorator,
   className = '',
   sx = {},
   ...props
 }) {
-  const C = cap(color === 'default' ? 'Default' : color);
+  const color = normalizeAlertColor(colorProp);
+  const C = cap(color);
+  const StateGlyph = STATE_ICONS[color];
+  /* Undefined is the state icon, as Figma's Start Decorator is on by default;
+     false (or null) is none. */
+  const startDecorator = startProp === undefined
+    ? <Icon size="small"><StateGlyph /></Icon>
+    : startProp;
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
 
   // A light variant is the base theme at its BRIGHTEST surface, not a theme of
   // its own. Generated design systems stopped emitting *-Light themes — their
   // sheets carry Default, Primary, Secondary, Tertiary, Neutral and the states —
   // so `C + '-Light'` matched no rule and --Background resolved to nothing.
-  const dataTheme = color === 'default' ? 'Default' : C;
+  const dataTheme = C;
 
   /* Explicit surface override.
    *
@@ -101,7 +134,7 @@ export function Alert({
   const start = startDecorator && (
     <Box
       className="alert-start-decorator"
-      sx={{ display: 'inline-flex', alignItems: 'center', fontSize: s.iconSize, lineHeight: 1, flexShrink: 0, ...(title ? {} : { mt: '2px' }) }}
+      sx={{ display: 'inline-flex', alignItems: 'center', fontSize: s.iconSize, lineHeight: 1, flexShrink: 0 }}
     >
       {startDecorator}
     </Box>
@@ -109,7 +142,7 @@ export function Alert({
   const end = endDecorator && (
     <Box
       className="alert-end-decorator"
-      sx={{ display: 'inline-flex', alignItems: title ? 'center' : 'flex-start', flexShrink: 0, gap: s.gap, ...(title ? {} : { paddingTop: '2px' }) }}
+      sx={{ display: 'inline-flex', alignItems: title ? 'center' : 'flex-start', flexShrink: 0, gap: s.gap }}
     >
       {endDecorator}
     </Box>
@@ -158,7 +191,9 @@ export function Alert({
         className="alert-inner"
         sx={{
           display: 'flex',
-          // Two rows with a title (header, then body); one row without.
+          /* Two rows with a title (header, then body); one row without —
+             icon, body and end top-aligned, as Figma's Title=false (the 24px
+             icon and the 24px body line need no nudge). */
           flexDirection: title ? 'column' : 'row',
           alignItems: title ? 'stretch' : 'flex-start',
           gap: s.gap,

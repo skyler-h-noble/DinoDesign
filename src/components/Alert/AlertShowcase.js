@@ -6,13 +6,8 @@ import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { Alert } from './Alert';
 import { Button } from '../Button/Button';
-import { Icon } from '../Icon/Icon';
 import { Switch } from '../Switch/Switch';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
@@ -24,18 +19,10 @@ import {
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
 
+// An alert is one of the four states — its color is its meaning.
 const COLOR_GROUPS = [
-  { label: 'Default', colors: ['default'] },
-  { label: 'Theme', colors: ['primary', 'secondary', 'tertiary', 'neutral'] },
   { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
 ];
-
-const ICON_MAP = {
-  info: <InfoOutlinedIcon />,
-  success: <CheckCircleOutlineIcon />,
-  warning: <WarningAmberIcon />,
-  error: <ErrorOutlineIcon />,
-};
 
 /* ── Helpers ── */
 function CopyButton({ code }) {
@@ -95,15 +82,14 @@ export function AlertShowcase() {
   const [bgTheme, setBgTheme]     = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
 
-  const alertIcon = showIcon && ICON_MAP[color]
-    ? <Icon size="small" sx={{ color: 'inherit' }}>{ICON_MAP[color]}</Icon>
-    : undefined;
+  // The state's icon is the Alert's own default; off is startDecorator={false}.
+  const alertIcon = showIcon ? undefined : false;
 
   const generateCode = () => {
     const parts = ['variant="' + variant + '"'];
     if (color !== 'info') parts.push('color="' + color + '"');
     if (size !== 'medium') parts.push('size="' + size + '"');
-    if (showIcon && ICON_MAP[color]) parts.push('startDecorator={<Icon><' + cap(color) + 'Icon /></Icon>}');
+    if (!showIcon) parts.push('startDecorator={false}');
     return '<Alert ' + parts.join(' ') + '>\n  This is an alert message.\n</Alert>';
   };
 

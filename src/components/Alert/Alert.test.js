@@ -106,15 +106,13 @@ describe('Light variant', () => {
     expect(screen.getByRole('alert')).not.toHaveAttribute('data-theme');
   });
 
-  test('alert-inner has data-theme for primary', () => {
-    const { container } = renderAlert({ variant: 'light', color: 'primary' });
-    expect(container.querySelector('.alert-inner')).toHaveAttribute('data-theme', 'Primary');
+  test('alert-inner has data-theme for success', () => {
+    const { container } = renderAlert({ variant: 'light', color: 'success' });
+    expect(container.querySelector('.alert-inner')).toHaveAttribute('data-theme', 'Success');
   });
 
   const lightCases = [
-    ['primary', 'Primary'], ['secondary', 'Secondary'], ['tertiary', 'Tertiary'],
-    ['neutral', 'Neutral'], ['info', 'Info'], ['success', 'Success'],
-    ['warning', 'Warning'], ['error', 'Error'],
+    ['info', 'Info'], ['success', 'Success'], ['warning', 'Warning'], ['error', 'Error'],
   ];
   lightCases.forEach(([color, theme]) => {
     test('light ' + color + ' → data-theme="' + theme + '"', () => {
@@ -147,9 +145,7 @@ describe('Solid variant', () => {
   });
 
   const solidCases = [
-    ['primary', 'Primary'], ['secondary', 'Secondary'], ['tertiary', 'Tertiary'],
-    ['neutral', 'Neutral'], ['info', 'Info'], ['success', 'Success'],
-    ['warning', 'Warning'], ['error', 'Error'],
+    ['info', 'Info'], ['success', 'Success'], ['warning', 'Warning'], ['error', 'Error'],
   ];
   solidCases.forEach(([color, theme]) => {
     test('solid ' + color + ' → data-theme="' + theme + '"', () => {
@@ -171,7 +167,7 @@ describe('Size classes', () => {
 
 /* ─── Color classes ─── */
 describe('Color classes', () => {
-  const colors = ['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+  const colors = ['info', 'success', 'warning', 'error'];
   colors.forEach((c) => {
     test(c + ' color class on outline', () => {
       const { container } = renderAlert({ variant: 'outline', color: c });
@@ -190,9 +186,31 @@ describe('Start decorator', () => {
     expect(screen.getByTestId('start')).toBeInTheDocument();
   });
 
-  test('no start decorator when omitted', () => {
+  // Figma's Start Decorator is on by default: the state's icon.
+  test("the state's icon when omitted", () => {
     const { container } = renderAlert();
+    expect(container.querySelector('.alert-start-decorator svg')).toBeInTheDocument();
+  });
+
+  test('none when startDecorator={false}', () => {
+    const { container } = renderAlert({ startDecorator: false });
     expect(container.querySelector('.alert-start-decorator')).not.toBeInTheDocument();
+  });
+});
+
+/* ─── States only ─── */
+describe('Colors are the four states', () => {
+  /* An alert's color is its meaning. A brand color still renders — as
+     info — and says why, once, in development. */
+  test('a brand color renders as info and warns once', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    // neutral: no earlier test in this file has passed it, so its warning is still unspent.
+    const { container } = renderAlert({ color: 'neutral' });
+    expect(container.querySelector('.alert-inner')).toHaveAttribute('data-theme', 'Info');
+    expect(container.querySelector('.alert-info')).toBeInTheDocument();
+    renderAlert({ color: 'neutral' });
+    expect(warn.mock.calls.filter((c) => String(c[0]).includes('[Alert]'))).toHaveLength(1);
+    warn.mockRestore();
   });
 });
 
