@@ -222,7 +222,7 @@ function solidStyles(color, elevated = false, selected = false, size = 'medium')
       backgroundColor: `var(--Buttons-${C}-Button)`,
       color: activeText,
       outline: '2px solid var(--Focus-Visible)',
-      outlineOffset: '2px',
+      outlineOffset: '1px',
     },
     '& .MuiTouchRipple-root': { zIndex: -1 },
     '& .MuiTypography-root': { zIndex: 1 },
@@ -332,7 +332,7 @@ function outlineStyles(color, elevated = false, selected = false, size = 'medium
         ? `var(--Buttons-${C}-Text)`
         : `var(--Buttons-${C}-Outline-Text)`,
       outline: '2px solid var(--Focus-Visible)',
-      outlineOffset: '2px',
+      outlineOffset: '1px',
     },
   };
 }
@@ -396,7 +396,7 @@ function ghostStyles(isTextContent, selected = false) {
     '&.Mui-focusVisible': {
       backgroundColor: selected ? 'var(--Background)' : 'transparent',
       outline: '2px solid var(--Focus-Visible)',
-      outlineOffset: '2px',
+      outlineOffset: '1px',
       /* Focus-Visible takes the interaction label too. Figma treats it as one
          of the three active states. */
       color: loud,
@@ -1060,7 +1060,7 @@ export const Button = React.forwardRef(function Button({
 
         '&:focus-visible, &.Mui-focusVisible': {
           outline: '2px solid var(--Focus-Visible)',
-          outlineOffset: '2px',
+          outlineOffset: '1px',
         },
 
         /* Disabled is the RESTING button with opacity applied, and nothing

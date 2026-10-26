@@ -306,7 +306,7 @@ describe('the current page is distinguishable', () => {
 
   // The others are painted in the surface's own color (--Background), so an
   // outline button's elevation reads; they used to be transparent.
-  test('selected takes the button fill; the others take the surface', () => {
+  test('selected takes the button fill; the others are ghost, with no fill or edge', () => {
     const { container } = render(<Pagination count={6} defaultPage={3} color="info" />);
     const current = container.querySelector('[aria-current="page"]');
     const others = [...container.querySelectorAll('button')]
@@ -314,7 +314,8 @@ describe('the current page is distinguishable', () => {
 
     expect(cssFor(current)).toContain('background-color: var(--Buttons-Info-Button)');
     for (const o of others) {
-      expect(cssFor(o)).toContain('background-color: var(--Background)');
+      expect(o).toHaveClass('btn-ghost');
+      expect(cssFor(o)).not.toContain('var(--Buttons-Info-Button)');
     }
   });
 

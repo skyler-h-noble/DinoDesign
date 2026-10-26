@@ -12,8 +12,9 @@ import { Caption } from '../Typography';
 /**
  * Pagination Component
  *
- * Solid only. Selected page: var(--Buttons-{C}-Button/Text/Border).
- * Unselected: outlined with var(--Quiet).
+ * Figma's Pagination Number (8400:33345). The current page is the outline
+ * button, selected (Pressed fill, Border, Outline-Text); the others are ghost
+ * buttons. The previous / next arrows stay outline.
  *
  * COLORS: default | primary | secondary | tertiary | neutral | info | success | warning | error
  * SIZES: small | medium | large
@@ -145,16 +146,15 @@ export function Pagination({
           const isSelected = item === currentPage;
           return (
             <Box component="li" key={item}>
-              {/* BOTH are the outline variant; `selected` is what separates
-                  them. They used to be the SOLID variant against the outline
-                  one, which works on a neutral surface and collapses on a
-                  themed one: --Buttons-{C}-Button resolves to the same tone
-                  as --Background there, so the filled current page was
-                  painted in the surface's own color and the whole row looked
-                  identical. Selected now carries the Pressed fill, which is
-                  derived to sit against the surface rather than to be it. */}
+              {/* Unselected pages are GHOST (Figma's Pagination Number):
+                  Outline-Quiet at rest, Outline-Text when engaged, no edge,
+                  so the current page is the only one with chrome. The
+                  current page is the OUTLINE button with the Pressed fill —
+                  not the solid one, whose --Buttons-{C}-Button resolves to
+                  the surface's own tone on a themed surface and would vanish
+                  into it. */}
               <Button
-                variant={effectiveColor + '-outline'}
+                variant={isSelected ? effectiveColor + '-outline' : 'ghost'}
                 selected={isSelected}
                 size={s.btnSize}
                 disabled={disabled}
