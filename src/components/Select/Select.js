@@ -51,9 +51,10 @@ const SIZE_MAP = {
 };
 
 const FLOATING_SIZE_MAP = {
-  small:  { height: 48, fontSize: '13px', padding: '20px 12px 4px', labelSize: '11px', leftPad: 12 },
-  medium: { height: 56, fontSize: '14px', padding: '22px 14px 6px', labelSize: '12px', leftPad: 14 },
-  large:  { height: 64, fontSize: '16px', padding: '24px 16px 6px', labelSize: '14px', leftPad: 16 },
+  // No right padding: the chevron's own box is the inset (as Input's end decorator).
+  small:  { height: 48, fontSize: '13px', padding: '20px 0 4px 12px', labelSize: '11px', leftPad: 12 },
+  medium: { height: 56, fontSize: '14px', padding: '22px 0 6px 14px', labelSize: '12px', leftPad: 14 },
+  large:  { height: 64, fontSize: '16px', padding: '24px 0 6px 16px', labelSize: '14px', leftPad: 16 },
 };
 
 const DROPDOWN_MAX_HEIGHT = 240;
@@ -509,7 +510,9 @@ export function Select({
           gap: isFloating ? 1 : 'var(--Sizing-1-and-Half, 12px)',
           width: '100%', minWidth,
           height: isFloating ? sizeConfig.height : sizeConfig.height,
-          padding: isFloating ? sizeConfig.padding : '0 ' + sizeConfig.pad + ' 0 ' + sizeConfig.pad,
+          /* Flush right: Figma's Select, like Input, has no right padding — the
+             chevron's own box is the inset. */
+          padding: isFloating ? sizeConfig.padding : '0 0 0 ' + sizeConfig.pad,
           backgroundColor: 'transparent',
           border: 'none',
           borderRadius: 0,
