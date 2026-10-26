@@ -9,9 +9,9 @@
 import React, { createContext, useContext, useState, useRef, useEffect, useCallback, useId } from 'react';
 import { Box } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Icon } from '../Icon/Icon';
-import { BodySmall, Body, BodyLarge, SubtitleSmall, Subtitle, SubtitleLarge } from '../Typography';
-import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3 } from '../_shadows';
+import { Button } from '../Button/Button';
+import { BodySmall, Body, BodyLarge } from '../Typography';
+import { SHADOW_LEVEL_2 } from '../_shadows';
 
 /**
  * Menu Component Suite
@@ -30,35 +30,14 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3 } from '../_shadows';
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
-// Menu metrics per size mode.
-//
-// The label size reads --Button-Text (14 / 16 / 20). A menu item is a control
-// label like a button's, and that is the ladder the design system generates for
-// one — there is no separate --Menu-Text. It steps with the brand's button
-// heights, where these were three literals (13 / 14 / 16) that did not.
-//
-// Padding is on the --Sizing-* scale. Medium's 6px is the one value the scale
-// cannot express (it falls between --Sizing-Half and --Sizing-1), the same gap
-// Badge's medium row has.
-/* Menu type, by component size. Subtitle IS Body at 700 — same face, size and
-   leading — which is how a selected row gets its weight without an inline
-   fontWeight override on a lib component. */
+/* Menu type, by component size: the row's label is Body at the size's step.
+   Selection is the leading bar, not a weight change. */
 const MENU_TEXT          = { small: BodySmall,     medium: Body,     large: BodyLarge };
-const MENU_TEXT_SELECTED = { small: SubtitleSmall, medium: Subtitle, large: SubtitleLarge };
 
 const SIZE_MAP = {
-  small:  {
-    py: 'var(--Sizing-Half)',  itemPx: 'var(--Sizing-1)',
-    itemPy: 'var(--Sizing-Half)', fontSize: 'var(--Sm-Button-Text)', minWidth: '140px',
-  },
-  medium: {
-    py: '6px', itemPx: 'var(--Sizing-1-and-Half)',
-    itemPy: '6px', fontSize: 'var(--Button-Text)', minWidth: '160px',
-  },
-  large:  {
-    py: 'var(--Sizing-1)', itemPx: 'var(--Sizing-2)',
-    itemPy: 'var(--Sizing-1)', fontSize: 'var(--Lg-Button-Text)', minWidth: '180px',
-  },
+  small:  { minWidth: '140px' },
+  medium: { minWidth: '160px' },
+  large:  { minWidth: '180px' },
 };
 
 /* ─── Context ─── */
@@ -98,49 +77,31 @@ export function Dropdown({
 }
 
 /* ─── MenuButton ─── */
-export function MenuButton({ children, className = '', sx = {}, ...props }) {
+/* The trigger IS a Button — Figma has no Menu Button, a menu opens from an
+   ordinary outline Button with a chevron. It was a hand-drawn pill (its own
+   padding, 600 weight, border) that matched nothing in the design file. */
+export function MenuButton({ children, className = '', variant: buttonVariant, sx = {}, ...props }) {
   const { open, setOpen, anchorRef, menuId, buttonId, size, color } = useDropdown();
-  const s = SIZE_MAP[size] || SIZE_MAP.medium;
-  const C = cap(color === 'default' ? 'Default' : color);
-
   return (
-    <Box
-      component="button" ref={anchorRef} id={buttonId}
+    <Button
+      ref={anchorRef} id={buttonId}
+      variant={buttonVariant || (color === 'default' ? 'default-outline' : color + '-outline')}
+      size={size}
       aria-haspopup="true" aria-expanded={open} aria-controls={open ? menuId : undefined}
       onClick={() => setOpen((prev) => !prev)}
-      className={'menu-button ' + className}
-      sx={{
-        display: 'inline-flex', alignItems: 'center', gap: '6px',
-        padding: s.itemPy + ' ' + s.itemPx,
-        fontSize: s.fontSize, fontFamily: 'inherit', fontWeight: 600,
-        color: 'var(--Text)',
-        backgroundColor: 'var(--Background)',
-        border: '1px solid var(--Buttons-' + C + '-Border)',
-        borderRadius: 'var(--Style-Border-Radius)',
-        cursor: 'pointer',
-        boxShadow: 'none',
-        transition: 'box-shadow 0.15s ease',
-        '&:focus-visible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '2px' },
-        ...sx,
-      }}
       onKeyDown={(e) => {
-        if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault(); setOpen(true);
-        }
+        // preventDefault stops the native click that would toggle it shut again.
+        if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpen(true); }
       }}
+      endDecorator={
+        <ExpandMoreIcon sx={{ transition: 'transform 0.2s ease', transform: open ? 'rotate(180deg)' : 'none' }} />
+      }
+      className={'menu-button ' + className}
+      sx={sx}
       {...props}
     >
-      {typeof children === 'string' ? (
-        React.createElement(
-          MENU_TEXT[size] || MENU_TEXT.medium,
-          { style: { color: 'inherit', fontWeight: 600 } },
-          children,
-        )
-      ) : children}
-      <Icon size="small" sx={{ color: 'var(--Quiet)', transition: 'transform 0.2s ease', transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}>
-        <ExpandMoreIcon />
-      </Icon>
-    </Box>
+      {children}
+    </Button>
   );
 }
 
@@ -151,7 +112,6 @@ export function Menu({ children, className = '', placement = 'bottom-start', sx 
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
 
   const C = cap(color === 'default' ? 'Default' : color);
-  const isOutline = variant === 'outline';
   const borderToken = 'var(--Buttons-' + C + '-Border)';
 
   // A light variant is the base theme at its BRIGHTEST surface, not a theme of
@@ -216,10 +176,14 @@ export function Menu({ children, className = '', placement = 'bottom-start', sx 
         data-theme={dataTheme} data-surface={dataSurface}
         sx={{
           minWidth: s.minWidth,
-          backgroundColor: isOutline ? 'var(--Background)' : 'var(--Background)',
+          backgroundColor: 'var(--Background)',
           color: 'var(--Text)',
-          fontSize: s.fontSize, fontFamily: 'inherit',
-          padding: s.py + ' 0',
+          fontFamily: 'inherit',
+          textAlign: 'left',
+          // The TreeView panel's padding: a menu is a list of Menu Item rows.
+          padding: 'var(--Sizing-1, 8px)',
+          // A MenuDivider replaces the row's own line rather than doubling it.
+          '& .menu-item:has(+ .menu-divider)': { boxShadow: 'none' },
           outline: 'none',
           // Inner surface sits 1px inside the frame above, so it has to
           // track the SAME token or the two corners disagree.
@@ -244,21 +208,20 @@ export function Menu({ children, className = '', placement = 'bottom-start', sx 
 }
 
 /* ─── MenuItem ─── */
-export function MenuItem({ children, onClick, selected = false, disabled = false, className = '', sx = {}, ...props }) {
+/* The row is Figma's Menu Item (8007:25355) — the same row TreeView draws,
+   which the parity page checks:
+     height   Button-Height; padding Menu-Level-0-Left-Margin | Sizing-1
+     label    Body in --Text, left-aligned, Sizing-Half either side
+     divider  1px --Border-Variant under the row (MenuItem `divider={false}`)
+     selected a 4px --Buttons-Default-Border bar on the leading edge
+     hover / pressed   --Hover / --Pressed
+     focus    a 3px ring 1px inside
+     disabled 38%
+   It drew centered Quiet labels with a bold Hover-filled selected row, which
+   is in nothing in the design file. */
+export function MenuItem({ children, onClick, selected = false, disabled = false, divider = true, startDecorator, className = '', sx = {}, ...props }) {
   const { setOpen, size } = useDropdown();
-  const s = SIZE_MAP[size] || SIZE_MAP.medium;
-  // Body ships standard and semibold only — there is no bold Body — so the
-  // selected row steps to Subtitle, which IS Body at 700 (same face, size and
-  // leading). That replaces an inline fontWeight override on a lib component.
-  /* Three sizes, not two. `large` used to fall through to Body because the
-     ternary only asked about small — so a large menu rendered at medium type
-     while every other component in the row grew. Figma has three
-     Component-Size modes, and a mode the code silently ignores is worse than
-     one it does not offer: the design file and the build disagree and neither
-     says so. */
-  const TextComp = selected
-    ? (MENU_TEXT_SELECTED[size] || MENU_TEXT_SELECTED.medium)
-    : (MENU_TEXT[size] || MENU_TEXT.medium);
+  const TextComp = MENU_TEXT[size] || MENU_TEXT.medium;
 
   const handleClick = () => {
     if (disabled) return;
@@ -268,54 +231,46 @@ export function MenuItem({ children, onClick, selected = false, disabled = false
   return (
     <Box
       role="menuitem" tabIndex={disabled ? -1 : 0}
-      aria-disabled={disabled || undefined} aria-selected={selected || undefined}
+      aria-disabled={disabled || undefined} aria-current={selected || undefined}
       onClick={handleClick}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } }}
       className={'menu-item' + (selected ? ' menu-item-selected' : '') + ' ' + className}
       sx={{
-        /* Sizing-Half, not Sizing-1. Figma's Menu Item sets `itemSpacing` to
-           Sizing-Half on BOTH the row and the slot inside it, so the gap
-           between a leading icon, a swatch, a checkbox and the label is 4px.
-           This had 8 and so ran wider than the drawing at every size. */
-        display: 'flex', alignItems: 'center', gap: 'var(--Sizing-Half)',
-        padding: s.itemPy + ' ' + s.itemPx,
-        // No fontSize here: TextComp below owns it. Setting both is how the
-        // Accordion ended up rendering bare strings at a different size from
-        // the same text passed through its slot.
-        fontSize: s.fontSize,
-        color: disabled ? 'var(--Quiet)' : (selected ? 'var(--Text)' : 'var(--Quiet)'),
-        backgroundColor: selected ? 'var(--Hover)' : 'transparent',
+        display: 'flex', alignItems: 'center', gap: 'var(--Sizing-Half, 4px)',
+        position: 'relative', boxSizing: 'border-box',
+        minHeight: 'var(--' + ({ small: 'Sm-', large: 'Lg-' }[size] || '') + 'Button-Height, 32px)',
+        padding: '0 var(--Sizing-1, 8px) 0 var(--Menu-Level-0-Left-Margin, 8px)',
+        borderRadius: 'var(--Menu-Item-Radius, 0px)',
+        color: 'var(--Text)',
+        boxShadow: divider ? 'inset 0 -1px 0 var(--Border-Variant)' : 'none',
+        backgroundColor: 'transparent',
         cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
-        outline: 'none', transition: 'background-color 0.1s ease, color 0.1s ease',
+        outline: 'none', transition: 'background-color 0.15s ease',
         userSelect: 'none',
-        ...(!disabled && {
-          '&:hover': { backgroundColor: 'var(--Hover)', color: 'var(--Text)' },
-          '&:active': { backgroundColor: 'var(--Pressed)', color: 'var(--Text)' },
-          '&:focus-visible': { backgroundColor: 'var(--Hover)', color: 'var(--Text)', outline: '3px solid var(--Focus-Visible)', outlineOffset: '-3px' },
+        ...(selected && {
+          '&::before': {
+            content: '""', position: 'absolute', left: 0, top: 0, bottom: 0, width: '4px',
+            backgroundColor: 'var(--Buttons-Default-Border)', pointerEvents: 'none',
+          },
         }),
+        ...(!disabled && {
+          '&:hover': { backgroundColor: 'var(--Hover)' },
+          '&:active': { backgroundColor: 'var(--Pressed)' },
+        }),
+        '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '-4px' },
         ...sx,
       }}
       {...props}
     >
-      {/* The slot's own padding. Figma nests the icon and the label inside a
-          `Menu Slot` that carries Sizing-Half left and right, INSIDE the row's
-          padding — so the label sits 4px in from whatever precedes it rather
-          than hard against it. The lib's row is flat, so the slot is this
-          wrapper. */}
-      <Box
-        className="menu-item-slot"
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 'var(--Sizing-Half)',
-          paddingLeft: 'var(--Sizing-Half)',
-          paddingRight: 'var(--Sizing-Half)',
-          minWidth: 0,
-          flex: 1,
-        }}
-      >
-        <TextComp color="standard" style={{ color: 'inherit' }}>{children}</TextComp>
+      {startDecorator && (
+        <Box aria-hidden="true" sx={{ width: 24, height: 24, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', '& .MuiSvgIcon-root': { fontSize: 24 } }}>
+          {startDecorator}
+        </Box>
+      )}
+      {/* Figma's Menu Slot: the label with Sizing-Half either side. */}
+      <Box className="menu-item-slot" sx={{ flex: 1, minWidth: 0, display: 'flex', padding: '0 var(--Sizing-Half, 4px)' }}>
+        <TextComp color="standard">{children}</TextComp>
       </Box>
     </Box>
   );
@@ -325,7 +280,7 @@ export function MenuItem({ children, onClick, selected = false, disabled = false
 export function MenuDivider({ className = '', sx = {}, ...props }) {
   return (
     <Box component="hr" role="separator" className={'menu-divider ' + className}
-      sx={{ border: 'none', borderTop: '1px solid var(--Border)', margin: '4px 0', ...sx }} {...props} />
+      sx={{ border: 'none', borderTop: '1px solid var(--Border-Variant)', margin: 0, ...sx }} {...props} />
   );
 }
 

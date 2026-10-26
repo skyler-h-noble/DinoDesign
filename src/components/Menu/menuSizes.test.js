@@ -60,19 +60,16 @@ describe('Menu renders all three sizes distinctly', () => {
     expect(seen.size).toBe(3);
   });
 
-  it('a selected row steps to the matching Subtitle, at every size', () => {
-    /* Body ships standard and semibold only — there is no bold Body — so the
-       selected row steps to Subtitle, which IS Body at 700. The large branch
-       has to step too, or a selected large row loses its weight. */
-    const seen = new Set();
+  it('a selected row keeps Body and marks itself with the leading bar', () => {
+    /* Figma's Menu Item shows selection as a 4px leading bar, not a weight
+       change, so the label stays Body at every size. */
     for (const size of sizes) {
-      const { container } = openMenu(size, { selected: true });
+      const { container, unmount } = openMenu(size, { selected: true });
       const el = itemText(container);
-      const styleClass = [...el.classList].find((c) => /^typography-subtitle/.test(c));
-      if (!styleClass) throw new Error(`size="${size}" selected row is not a Subtitle style`);
-      seen.add(styleClass);
+      expect([...el.classList].some((c) => /^typography-subtitle/.test(c))).toBe(false);
+      expect(container.querySelector('.menu-item-selected')).toBeInTheDocument();
+      unmount();
     }
-    expect(seen.size).toBe(3);
   });
 
   it('an unknown size falls back to medium rather than rendering nothing', () => {

@@ -349,7 +349,7 @@ export const LEAD_EXAMPLES = {
 
   BottomNavigation: () => (
     <Frame w={360}>
-      <BottomNavigation items={NAV_ITEMS.slice(0, 4)} defaultValue={0} />
+      <BottomNavigation fixed={false} items={NAV_ITEMS.slice(0, 4)} defaultValue={0} />
     </Frame>
   ),
 

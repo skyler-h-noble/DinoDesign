@@ -532,12 +532,12 @@ export const NAV_SAMPLES = {
       <VStack gap="var(--Sizing-3)">
         <VStack gap="var(--Sizing-Half)">
           <Caption color="standard">true</Caption>
-          <Frame w={360}><BottomNavigation items={NAV_ITEMS.slice(0, 4)} defaultValue={0} /></Frame>
+          <Frame w={360}><BottomNavigation fixed={false} items={NAV_ITEMS.slice(0, 4)} defaultValue={0} /></Frame>
         </VStack>
         <VStack gap="var(--Sizing-Half)">
           <Caption color="quiet">false — icons only, so each needs a name</Caption>
           <Frame w={360}>
-            <BottomNavigation items={NAV_ITEMS.slice(0, 4)} showLabels={false} defaultValue={0} />
+            <BottomNavigation fixed={false} items={NAV_ITEMS.slice(0, 4)} showLabels={false} defaultValue={0} />
           </Frame>
         </VStack>
       </VStack>
@@ -546,12 +546,12 @@ export const NAV_SAMPLES = {
       <VStack gap="var(--Sizing-3)">
         <VStack gap="var(--Sizing-Half)">
           <Caption color="standard">fixed — edge to edge</Caption>
-          <Frame w={360}><BottomNavigation items={NAV_ITEMS.slice(0, 4)} defaultValue={0} /></Frame>
+          <Frame w={360}><BottomNavigation fixed={false} items={NAV_ITEMS.slice(0, 4)} defaultValue={0} /></Frame>
         </VStack>
         <VStack gap="var(--Sizing-Half)">
           <Caption color="quiet">floating — inset, with its own elevation</Caption>
           <Frame w={360}>
-            <BottomNavigation items={NAV_ITEMS.slice(0, 4)} variant="floating" defaultValue={0} />
+            <BottomNavigation fixed={false} items={NAV_ITEMS.slice(0, 4)} variant="floating" defaultValue={0} />
           </Frame>
         </VStack>
       </VStack>

@@ -125,14 +125,15 @@ describe('MenuItem ARIA', () => {
     expect(items.length).toBe(3);
   });
 
-  test('selected item has aria-selected', () => {
+  // aria-selected is not a menuitem state; aria-current is.
+  test('selected item has aria-current', () => {
     renderMenu({ open: true }, (
       <>
         <MenuItem selected>Selected</MenuItem>
         <MenuItem>Other</MenuItem>
       </>
     ));
-    expect(screen.getByRole('menuitem', { name: 'Selected' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('menuitem', { name: 'Selected' })).toHaveAttribute('aria-current', 'true');
   });
 
   test('disabled item has aria-disabled', () => {
