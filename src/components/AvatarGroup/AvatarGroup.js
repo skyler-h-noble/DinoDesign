@@ -10,16 +10,21 @@ import { Subtitle, Body } from '../Typography';
  * AvatarGroup — Figma's Avatar Group.
  *
  * TWO WAYS TO FILL IT
- *   people   [{ src, initials, name, detail, onClick }] — the group draws
+ *   people   [{ src, initials, name, detail, href, onClick }] — the group draws
  *            everything: the avatars, a details card on hover / focus, and a
  *            "+N" Button that opens a list of everyone not shown.
  *   children Avatars you build yourself — display only, no card or list.
  *
  * WITH `people`
- *   - A person with onClick (or the group's onPersonClick) is an avatar
- *     BUTTON (Button contentType="avatar"), so hover, pressed, focus and
- *     disabled are Button's own. Without one it is a focusable avatar, so the
- *     details card is still reachable by keyboard.
+ *   - A person with `href` is a LINK (it goes somewhere: their profile), one
+ *     with onClick (or the group's onPersonClick) a BUTTON (it does something
+ *     on the page). Either way it is Button contentType="avatar", so hover,
+ *     pressed, focus and disabled are Button's own — `href` just makes the
+ *     element an <a>, so open-in-new-tab and copy-link work. With neither it
+ *     is a focusable avatar, so the details card is still reachable.
+ *   - One target per person: the avatar in the group, the whole row in the
+ *     "+N" list. Never an avatar button AND a name link to the same place —
+ *     that is two tab stops and two announcements for one choice.
  *   - Hover or focus shows the person's details — avatar, name (Subtitle),
  *     detail (Body) — in a Popover hover card, and brings the avatar to the
  *     front so it shows whole.
@@ -74,6 +79,7 @@ function GroupItem({ person, onPersonClick, buttonSize, buttonVariant }) {
   const idRef = useRef(null);
   if (idRef.current === null) idRef.current = 'avatar-card-' + (++cardSeq);
   const click = person.onClick || (onPersonClick && (() => onPersonClick(person)));
+  const target = click || person.href;
   const hasCard = !!(person.name || person.detail);
 
   const show = () => { clearTimeout(leaveTimer.current); setOpen(true); };
@@ -87,8 +93,8 @@ function GroupItem({ person, onPersonClick, buttonSize, buttonVariant }) {
 
   return (
     <Box component="span" className="avatar-group-item" {...handlers}>
-      {click ? (
-        <Button ref={ref} contentType="avatar" variant={buttonVariant} size={buttonSize}
+      {target ? (
+        <Button ref={ref} contentType="avatar" variant={buttonVariant} size={buttonSize} href={person.href}
           aria-label={person.name || 'Person'} aria-describedby={describe} onClick={click} disabled={person.disabled}
           sx={ROUND}>
           {avatar}
@@ -143,7 +149,7 @@ export function AvatarGroup({
   let interactive;
   const buttonSize = BUTTON_HEIGHT[size] ? size : 'medium';
   if (peopleMode) {
-    interactive = !!onPersonClick || people.some((p) => p.onClick) || overflow > 0;
+    interactive = !!onPersonClick || people.some((p) => p.onClick || p.href) || overflow > 0;
     const H = BUTTON_HEIGHT[buttonSize];
     const quarter = 'calc(' + H + ' / -4)';
     step = spacing !== undefined ? spacing + 'px' : quarter;
@@ -203,6 +209,12 @@ export function AvatarGroup({
             placement="bottom" arrow width="auto" theme={null} aria-label={overflow + ' more people'}>
             {hidden.map((p, i) => {
               const click = p.onClick || (onPersonClick && (() => onPersonClick(p)));
+              if (p.href) return (
+                <Box key={p.key || p.name || i} component="a" href={p.href} className="avatar-group-row"
+                  onClick={() => { setListOpen(false); click?.(); }} sx={{ ...clickableRowSx, textDecoration: 'none' }}>
+                  <PersonCard person={p} />
+                </Box>
+              );
               return click ? (
                 <Box key={p.key || p.name || i} component="button" type="button" className="avatar-group-row"
                   onClick={() => { setListOpen(false); click(); }} sx={clickableRowSx}>

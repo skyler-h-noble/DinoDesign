@@ -961,7 +961,9 @@ export const Button = React.forwardRef(function Button({
       // `btn-ghost` (on a solid button) into the DOM for consumer CSS and
       // tests to match on.
       className={`btn-${effectiveVariant} ${className}`}
-      role="button"
+      /* A button with href renders an <a>: it is a LINK, and saying
+         role="button" on it told a screen reader the opposite. */
+      role={props.href ? undefined : 'button'}
       sx={{
         // Size-aware radius — pulls the Sm/Lg variant so each button size
         // gets the percent-of-its-own-height pixel value. Falls back to the

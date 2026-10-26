@@ -62,3 +62,18 @@ describe('AvatarGroup with people', () => {
     expect(css).toContain('24px');
   });
 });
+
+describe('AvatarGroup href', () => {
+  const LINKS = [
+    { name: 'Ada Lovelace', detail: 'Mathematician', href: '/people/ada' },
+    { name: 'Grace Hopper', detail: 'Rear admiral', href: '/people/grace' },
+    { name: 'Mary Jackson', detail: 'Engineer', href: '/people/mary' },
+  ];
+  test('a person with href is a link, avatar and row alike', () => {
+    render(<AvatarGroup people={LINKS} max={2} />);
+    expect(screen.getByRole('link', { name: 'Ada Lovelace' })).toHaveAttribute('href', '/people/ada');
+    fireEvent.click(screen.getByRole('button', { name: /^1 more/ }));
+    const row = screen.getByRole('link', { name: /Mary Jackson/ });
+    expect(row).toHaveAttribute('href', '/people/mary');
+  });
+});
