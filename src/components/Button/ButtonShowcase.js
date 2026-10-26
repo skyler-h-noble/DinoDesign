@@ -246,8 +246,8 @@ export function ButtonShowcase() {
       return <Avatar src={avatarImageUrl} alt="Avatar" color="default" />;
     }
     if (type === 'icon') {
-      // Fixed User (Person) icon — no input needed
-      return <Avatar color="default" icon={<MuiIcons.Person />} />;
+      // The person glyph — Avatar's Default style.
+      return <Avatar color="default" defaultPhoto={false} />;
     }
     // letters (default)
     const letters = (avatarLetters || 'A').slice(0, 2).toUpperCase();
@@ -304,7 +304,7 @@ export function ButtonShowcase() {
     if (slot === 'icon') return '<Icon><' + iconName + 'Icon /></Icon>';
     if (slot === 'avatar') {
       if (avatarType === 'image') return '<Avatar src="' + avatarImageUrl + '" />';
-      if (avatarType === 'icon')  return '<Avatar icon={<PersonIcon />} />';
+      if (avatarType === 'icon')  return '<Avatar defaultPhoto={false} />';
       const letters = (avatarLetters || 'A').slice(0, 2).toUpperCase();
       return '<Avatar initials="' + letters + '" />';
     }

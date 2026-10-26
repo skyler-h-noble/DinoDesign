@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Box } from '@mui/material';
 import { AvatarGlyph } from './AvatarGlyph';
-import { Icon } from '../Icon/Icon';
 import { NumberSmall, NumberMedium, NumberLarge, CAP_HEIGHT_TRIM } from '../Typography';
 import { DEFAULT_AVATAR_SRC } from './defaultAvatar';
 import { useGhost, ghostBlockSx } from '../_ghost';
@@ -10,11 +9,12 @@ import { useGhost, ghostBlockSx } from '../_ghost';
 /**
  * Avatar Component
  *
- * CONTENT (priority): real src → initials → explicit icon → DEFAULT PHOTO.
+ * CONTENT (priority): real src → initials → DEFAULT PHOTO.
  *   The default avatar IS the photo: a bare <Avatar /> shows the built-in photo.
- *   The three Figma variants map to: bare <Avatar /> (photo), initials="…"
- *   (initials), icon={…} (icon). defaultPhoto={false} restores the brand glyph
- *   fallback for a bare avatar.
+ *   The three Figma styles map to: bare <Avatar /> (Photo), initials="…"
+ *   (Initials), defaultPhoto={false} (Default — the person glyph).
+ *   No `icon`: an icon on a disc is not a person — it is an icon button or a
+ *   status mark. `icon` still renders (as the photo / glyph) and warns once.
  *
  * SIZES (Figma-aligned):
  *   xx-small   24   |  x-small   32   |  small     40
@@ -164,16 +164,28 @@ const initialsFontSize = (diameter, sizeName) =>
 // heights; only READ here).
 const BORDER_WIDTH = 'var(--Button-Border-Width, 1px)';
 
+let warnedIcon = false;
+function warnIconOnce() {
+  if (warnedIcon || process.env.NODE_ENV === 'production') return;
+  warnedIcon = true;
+  // eslint-disable-next-line no-console
+  console.warn(
+    '[Avatar] `icon` is retired — an avatar is a person: a photo, initials or ' +
+    'the Default glyph (defaultPhoto={false}). An icon on a disc is an icon ' +
+    'Button or a status mark. Rendering the avatar without it.',
+  );
+}
+
 export function Avatar({
   src,
   // The DEFAULT avatar IS the photo: a bare <Avatar /> shows the lib's built-in
-  // photo. `src` (a real URL) always wins; `initials` or an explicit `icon`
+  // photo. `src` (a real URL) always wins; `initials`
   // override the photo (those are the other two variants). Pass
   // defaultPhoto={false} to suppress the photo and fall back to the Person icon.
   defaultPhoto = true,
   alt,
   initials,
-  icon,
+  icon: _retiredIcon,
   color = 'default',
   /* 32px, which the realigned ladder calls `medium` — it was `x-small` under
      the old names. The pixel value is unchanged; only the word moved. */
@@ -199,7 +211,8 @@ export function Avatar({
   // Photo source: an explicit src wins; otherwise the built-in default photo —
   // but only when there's no initials and no explicit icon, so those two
   // variants still take precedence over the default photo.
-  const effectiveSrc = src || (defaultPhoto && !initials && !icon ? DEFAULT_AVATAR_SRC : undefined);
+  if (_retiredIcon !== undefined) warnIconOnce();
+  const effectiveSrc = src || (defaultPhoto && !initials ? DEFAULT_AVATAR_SRC : undefined);
   const hasSrc = effectiveSrc && !imgError;
   const hasInitials = !hasSrc && initials;
   const isFallback = !hasSrc && !hasInitials;
@@ -208,8 +221,8 @@ export function Avatar({
   /* The Default style is the person glyph ALONE: Figma's Button-Theme-Avatar
      frame has no fill, and its glyph — which carries its own disc — is filled
      with Buttons::Border. Painting --Buttons-{C}-Button behind it put a pale
-     disc where the design has none. An explicit `icon` keeps the filled disc. */
-  const glyphOnly = isFallback && !icon;
+     disc where the design has none. */
+  const glyphOnly = isFallback;
   const bg = hasSrc || glyphOnly ? 'transparent' : 'var(--Buttons-' + C + '-Button)';
   const borderColor = 'var(--Buttons-' + C + '-Border)';
   // The lone glyph is drawn in currentColor, so the root carries its color.
@@ -334,9 +347,6 @@ export function Avatar({
             display: 'block',
           }}
         />
-      )}
-      {isFallback && icon && (
-        <Icon size={size} sx={{ color: 'inherit' }}>{icon}</Icon>
       )}
     </Box>
   );
