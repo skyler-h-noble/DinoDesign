@@ -112,7 +112,9 @@ export function Menu({ children, className = '', placement = 'bottom-start', sx 
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
 
   const C = cap(color === 'default' ? 'Default' : color);
-  const borderToken = 'var(--Buttons-' + C + '-Border)';
+  /* Edges are the neutral --Border: the color marks the SELECTION, not the
+     frame, so field and panel read as one control at the 3:1 an edge needs. */
+  const borderToken = 'var(--Border)';
 
   // A light variant is the base theme at its BRIGHTEST surface, not a theme of
   // its own. Generated design systems stopped emitting *-Light themes, so

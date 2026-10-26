@@ -100,7 +100,9 @@ export function Autocomplete({
     );
   }
   const effectiveVariant = variant === 'light' ? 'outline' : variant;
-  const borderToken = 'var(--Buttons-' + C + '-Border)';
+  /* Edges are the neutral --Border: the color marks the SELECTION, not the
+     frame, so field and panel read as one control at the 3:1 an edge needs. */
+  const borderToken = 'var(--Border)';
   const activeTextColor = color === 'default' ? 'var(--Text)' : 'var(--Text-' + C + ')';
 
   const [internalValue, setInternalValue] = useState(defaultValue);
@@ -349,8 +351,9 @@ export function Autocomplete({
         <Box role="listbox" aria-label={label || 'Options'} sx={{
           position: 'absolute', top: '100%', left: 0, right: 0, mt: 0.5,
           backgroundColor: 'var(--Hover)',
-          border: '1px solid var(--Buttons-Default-Border)',
-          borderRadius: 'var(--Style-Border-Radius)',
+          border: '1px solid var(--Border)',
+          // The floating panel's corner, as Select's: min(Input, Card, 16px).
+          borderRadius: 'var(--Dropdown-Frame-Radius, var(--Input-Radius, var(--Style-Border-Radius, 4px)))',
           boxShadow: 'none',
           zIndex: 9999, maxHeight: 240, overflowY: 'auto', py: 0.5,
         }}>

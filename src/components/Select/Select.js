@@ -306,7 +306,8 @@ export function Select({
         left: dropdownPos.left,
         width: dropdownPos.width + 'px',
         backgroundColor: 'var(--Hover)',
-        border: '1px solid var(--Buttons-Default-Border)',
+        // The trigger's edge: the color marks the selection, not the frame.
+        border: '1px solid var(--Border)',
         // The floating PANEL, not the trigger. It followed --Input-Radius
         // uncapped, so a pill-shaped field gave the dropdown 22px+ corners —
         // and the panel scrolls with full-bleed rows, so a large corner clips
