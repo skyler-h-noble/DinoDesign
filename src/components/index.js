@@ -74,6 +74,7 @@ export { Icon, IconShowcase } from './Icon';
 export { BrandIcon } from './BrandIcon';
 export { Swatch } from './Swatch';
 export { SwatchField } from './SwatchField';
+export { CarouselDots, CarouselDot } from './CarouselDots';
 /* No showcase: MiniSwatch has nothing to play with on its own. It is the chip
    inside a menu row, documented where it appears — Select and Menu. */
 export { MiniSwatch } from './MiniSwatch';
