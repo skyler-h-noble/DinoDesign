@@ -5,8 +5,9 @@
 // Figma's Player (10327:5421), a component now rather than the 400x32 sketch
 // this was first built from:
 //
-//   Scrubber   a small Slider over two times — elapsed at the left, time
-//              REMAINING at the right ("-1:23") — in Mobile Nav Label, Quiet
+//   Scrubber   a small Slider (the 4px track, its thumb overflowing) directly
+//              over two times — elapsed at the left, time REMAINING at the
+//              right ("-1:23") — in Mobile Nav Label, Quiet
 //   Controls   previous · back 10s · play / pause · forward 10s · next,
 //              spread across the row; play / pause is the one solid
 //              (default) button, the rest are ghost
@@ -173,9 +174,10 @@ export function Player({
              186. Without this a screen reader reads "42" and leaves the
              listener to work out what that is. */
           getAriaValueText={(v) => formatTime(v) + ' of ' + formatTime(duration)}
-          /* As tall as its thumb (Figma's Slider is 24 here): MUI pads the
-             track 13px a side, which made the scrubber 6px taller. */
-          sx={{ width: '100%', padding: '10px 0' }}
+          /* Just the track (4px), as Figma's Player draws the slider: the
+             thumb (still a 24px target) overflows it, and the times sit
+             directly under the track. MUI pads the track 13px a side. */
+          sx={{ width: '100%', padding: '0 !important' }}
         />
         {showTime && (
           /* tabular-nums, so the times do not shuffle every time a digit

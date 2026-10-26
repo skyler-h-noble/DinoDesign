@@ -10,7 +10,8 @@ import { Swatch } from '../Swatch/Swatch';
  * Swatch's own `label` is the COLOR's name inside the swatch — a different
  * thing — so the field label lives here.
  *
- *   labelPosition  'top' (default) | 'bottom' — stacked, Sizing-Half apart
+ *   labelPosition  'top' (default) | 'bottom' — stacked, Sizing-Half apart,
+ *                                               the label centred on the swatch
  *                  'left' | 'right'           — side by side, Sizing-1 apart,
  *                                               the swatch filling the rest
  *   No `label` is Figma's `none`: the swatch alone.
@@ -44,7 +45,7 @@ export function SwatchField({
   if (!label) return swatch;
 
   const labelEl = (
-    <FormLabel id={labelId} disabled={disabled} sx={{ flexShrink: 0 }}>{label}</FormLabel>
+    <FormLabel id={labelId} disabled={disabled} sx={{ flexShrink: 0, ...(!sideways && { alignSelf: 'stretch', justifyContent: 'center' }) }}>{label}</FormLabel>
   );
 
   return (
