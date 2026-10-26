@@ -39,6 +39,11 @@ import { Fab } from '../Fab/Fab';
  * WCAG 2.5.8 still clears at the bottom of the ramp: 32 is comfortably past
  * the 24px minimum, which is what made the flat-32 floor unnecessary.
  *
+ * The FIRST action sits Sizing-1-and-Half (12) from the dial at every size —
+ * Figma's Child Container puts a dial-sized spacer, then 12, then the slot —
+ * and the actions after it are SpeedDial-Gap apart. At large that is 12 then
+ * 16, which is what the file draws (actions at 68, 140, 212 from the dial).
+ *
  * The GAP is `SpeedDial-Gap`, 8 / 12 / 16: three consecutive steps of the
  * sizing scale (--Sizing-1, -1-and-Half, -2) rather than a ramp invented for
  * this component. Medium is 12, which is what the single constant held before
@@ -77,6 +82,9 @@ export function SpeedDial({
   onClose,
   icon,
   ariaLabel = 'Speed Dial',
+  /* Figma's Disabled state: the dial at 38% (Fab's own disabled look), and it
+     cannot open. */
+  disabled = false,
   className = '',
   sx = {},
   ...props
@@ -95,10 +103,11 @@ export function SpeedDial({
   const FAB_SIZE = sc.fab;
   const ACTION_SIZE = sc.action;
   const GAP = sc.gap;
+  const FIRST_GAP = 12; // Sizing-1-and-Half, at every size
 
   const [internalOpen, setInternalOpen] = useState(false);
   const isControlled = controlledOpen !== undefined;
-  const isOpen = isControlled ? controlledOpen : internalOpen;
+  const isOpen = !disabled && (isControlled ? controlledOpen : internalOpen);
   const containerRef = useRef(null);
 
   // Fab handles its own tokens and states; we thread the color only.
@@ -152,12 +161,12 @@ export function SpeedDial({
   }, []);
 
   const handleHoverOpen = useCallback(() => {
-    if (!openOnHover || !pointerCanHover()) return;
+    if (disabled || !openOnHover || !pointerCanHover()) return;
     cancelHoverClose();
     if (isOpen) return;
     if (!isControlled) setInternalOpen(true);
     onOpen?.();
-  }, [openOnHover, isOpen, isControlled, onOpen, cancelHoverClose]);
+  }, [disabled, openOnHover, isOpen, isControlled, onOpen, cancelHoverClose]);
 
   const handleHoverClose = useCallback(() => {
     if (!openOnHover || !pointerCanHover()) return;
@@ -208,7 +217,7 @@ export function SpeedDial({
   const isVertical = direction === 'up' || direction === 'down';
 
   const getActionOffset = (index) => {
-    const distance = FAB_SIZE / 2 + GAP + ACTION_SIZE / 2 + index * (ACTION_SIZE + GAP);
+    const distance = FAB_SIZE / 2 + FIRST_GAP + ACTION_SIZE / 2 + index * (ACTION_SIZE + GAP);
     switch (direction) {
       case 'up': return { bottom: distance + 'px', left: (FAB_SIZE - ACTION_SIZE) / 2 + 'px' };
       case 'down': return { top: distance + 'px', left: (FAB_SIZE - ACTION_SIZE) / 2 + 'px' };
@@ -277,6 +286,7 @@ export function SpeedDial({
         variant={fabVariant}
         color={color}
         onClick={handleToggle}
+        disabled={disabled}
         aria-label={ariaLabel}
         aria-expanded={isOpen}
         aria-haspopup="menu"
@@ -300,6 +310,7 @@ export function SpeedDial({
               variant={fabVariant}
               color={color}
               role="menuitem"
+              className={action.className}
               aria-label={action.name || 'Action ' + (index + 1)}
               onClick={() => handleActionClick(action, index)}
               sx={{

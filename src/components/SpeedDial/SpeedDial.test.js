@@ -241,3 +241,29 @@ describe('SpeedDial — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+/* ─── Figma's SpeedDial geometry and Disabled state ─── */
+describe('Matches Figma', () => {
+  const cssFor = (el) => {
+    const out = [];
+    for (const sheet of document.styleSheets) for (const r of sheet.cssRules) {
+      try { if (el.matches(r.selectorText)) out.push(r.cssText); } catch (e) { /* skip */ }
+    }
+    return out.join('\n');
+  };
+  const acts = [{ name: 'A' }, { name: 'B' }, { name: 'C' }];
+
+  test('first action 12 from the dial, then SpeedDial-Gap (large: 68, 140, 212)', () => {
+    render(<SpeedDial size="large" open actions={acts} showTooltips={false} />);
+    const items = screen.getAllByRole('menuitem');
+    expect(cssFor(items[0])).toContain('bottom: 68px');
+    expect(cssFor(items[1])).toContain('bottom: 140px');
+    expect(cssFor(items[2])).toContain('bottom: 212px');
+  });
+
+  test('disabled: the dial is disabled and the fan stays shut', () => {
+    render(<SpeedDial disabled open actions={acts} showTooltips={false} ariaLabel="Add" />);
+    expect(screen.getByRole('button', { name: 'Add' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Add' })).toHaveAttribute('aria-expanded', 'false');
+  });
+});
