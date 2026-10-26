@@ -77,11 +77,11 @@ describe('Badge Component', () => {
 
   // --- Variants ---
 
-  test('defaults to primary variant', () => {
+  test("defaults to error, Figma's Badge Counter mode", () => {
     const { container } = render(
       <Badge badgeContent={1}><span>Child</span></Badge>
     );
-    expect(container.querySelector('.badge-primary')).toBeInTheDocument();
+    expect(container.querySelector('.badge-error')).toBeInTheDocument();
   });
 
   test.each([

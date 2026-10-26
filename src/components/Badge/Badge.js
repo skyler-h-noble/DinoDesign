@@ -141,7 +141,9 @@ function warnRemovedSize(size) {
 // --- Component ---------------------------------------------------------------
 
 export function Badge({
-  variant = 'primary',
+  /* 'error' — Figma's Badge Counter resolves in the Icons Error mode: the red
+     notification badge. It defaulted to primary. */
+  variant = 'error',
   size,
   type = 'standard',
   badgeContent,
