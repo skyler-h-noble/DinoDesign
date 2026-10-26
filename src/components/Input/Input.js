@@ -650,8 +650,9 @@ export function Input({
 
                 /* Standard field: Figma insets the start icon by the input
                    padding and leaves Sizing-1-and-Half (12) before the text;
-                   the end decorator sits the same padding in from the right at
-                   full field height, so an icon button fits its own 32. */
+                   the end decorator sits flush right at full field height (the
+                   Inner Frame has no right padding), so an icon button fits its
+                   own 32. */
                 ...(!isFloating && {
                   '& .MuiInputAdornment-root': { maxHeight: 'none', height: 'auto', alignSelf: 'stretch', alignItems: 'center' },
                   '& .MuiInputAdornment-positionStart': {
@@ -659,7 +660,9 @@ export function Input({
                     marginRight: 'var(--Sizing-1-and-Half, 12px)',
                     '& .MuiSvgIcon-root': { fontSize: sizeConfig.iconSize },
                   },
-                  '& .MuiInputAdornment-positionEnd': { marginLeft: 0, marginRight: 'var(--Input-Padding, 12px)' },
+                  /* Flush to the right edge: Figma's Inner Frame has no right
+                     padding, so the end decorator's own 32px box is the inset. */
+                  '& .MuiInputAdornment-positionEnd': { marginLeft: 0, marginRight: 0 },
                 }),
 
                 // Start adornment positioning when floating — gives it some
@@ -700,10 +703,10 @@ export function Input({
                     justifyContent: 'center',
                     '& .MuiSvgIcon-root': { fontSize: sizeConfig.iconSize + 'px' },
                   },
-                  // The input padding from the right, as the standard field.
+                  // Flush right, as the standard field (no right padding in Figma).
                   '& .MuiInputAdornment-positionEnd': {
                     marginLeft: 0,
-                    marginRight: padX,
+                    marginRight: 0,
                   },
                   /* The gap is the adornment's marginRight alone. Splitting it
                      with an input paddingLeft is what let the two halves drift
