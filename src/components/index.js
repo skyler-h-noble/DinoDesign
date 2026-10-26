@@ -73,6 +73,7 @@ export { Icon, IconShowcase } from './Icon';
    bundler ships only the marks used rather than all 610. */
 export { BrandIcon } from './BrandIcon';
 export { Swatch } from './Swatch';
+export { SwatchField } from './SwatchField';
 /* No showcase: MiniSwatch has nothing to play with on its own. It is the chip
    inside a menu row, documented where it appears — Select and Menu. */
 export { MiniSwatch } from './MiniSwatch';
