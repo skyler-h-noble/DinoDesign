@@ -228,3 +228,33 @@ describe('Loader — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+describe('Loader styles (Figma Loader Styles)', () => {
+  const types = ['spinner', 'orbit', 'bounce', 'ripple', 'dual-ring', 'bars'];
+  test.each(types)('%s is a named progressbar', (t) => {
+    render(<Loader type={t} message="" />);
+    expect(screen.getByRole('progressbar', { name: 'Loading' })).toBeInTheDocument();
+  });
+  const cssFor = (el) => [...document.styleSheets].flatMap((sh) => { try { return [...sh.cssRules]; } catch (e) { return []; } })
+    .filter((r) => r.selectorText && [...el.classList].some((c) => r.selectorText.includes('.' + c))).map((r) => r.cssText).join('\n');
+  const piecesCss = (c) => [...c.querySelectorAll('.loader-graphic *')].map(cssFor).join('\n');
+  test('multicolor paints Primary, Secondary and Tertiary', () => {
+    const { container } = render(<Loader type="orbit" multicolor message="" />);
+    const css = piecesCss(container);
+    ['Primary', 'Secondary', 'Tertiary'].forEach((p) => expect(css).toContain('--Buttons-' + p + '-Border'));
+  });
+  test('single paints every piece in the color palette', () => {
+    const { container } = render(<Loader type="bars" color="success" message="" />);
+    const css = piecesCss(container);
+    expect(css).toContain('--Buttons-Success-Border');
+    expect(css).not.toContain('--Buttons-Secondary-Border');
+  });
+  test('spinner stays one colour even with multicolor', () => {
+    const { container } = render(<Loader type="spinner" multicolor message="" />);
+    expect(container.querySelector('.loader-ring')).toBeTruthy();
+  });
+  test('an unknown type falls back to the spinner', () => {
+    const { container } = render(<Loader type="nope" message="" />);
+    expect(container.querySelector('.loader-ring')).toBeTruthy();
+  });
+});

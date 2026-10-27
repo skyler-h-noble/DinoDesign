@@ -334,6 +334,17 @@ export const LOADER_DOC = {
     use: 'CircularProgress inside it'
   }],
   props: [...zoneProps, {
+    name: 'type',
+    type: 'string',
+    values: ['spinner', 'orbit', 'bounce', 'ripple', 'dual-ring', 'bars'],
+    default: 'spinner',
+    note: 'Figma\u2019s Style (Loader Styles set). Spinner is the comet ring; the others are three pieces in motion.'
+  }, {
+    name: 'multicolor',
+    type: 'boolean',
+    default: 'false',
+    note: 'Figma\u2019s Color = Multicolor: the brand\u2019s Primary / Secondary / Tertiary Border, one per piece. Off, every piece is the `color` palette. Spinner is always one colour.'
+  }, {
     name: 'size',
     type: 'string',
     values: ['small', 'medium', 'large'],

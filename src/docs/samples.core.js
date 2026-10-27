@@ -517,6 +517,17 @@ export const CORE_SAMPLES = {
   },
 
   Loader: {
+    type: () => (
+      <Axis values={['spinner', 'orbit', 'bounce', 'ripple', 'dual-ring', 'bars']} defaultValue="spinner"
+            render={(v) => <Loader type={v} message="" />} />
+    ),
+    multicolor: () => (
+      <Toggle render={(on) => (
+        <HStack gap="var(--Sizing-3)">
+          {['orbit', 'bounce', 'ripple', 'dual-ring', 'bars'].map((t) => <Loader key={t} type={t} multicolor={on} message="" />)}
+        </HStack>
+      )} />
+    ),
     color: () => (
       <Axis values={['default', ...PALETTES]} defaultValue="primary"
             render={(v) => <Loader color={v} size="small" message="" />} />

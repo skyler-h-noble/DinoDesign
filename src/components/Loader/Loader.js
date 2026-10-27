@@ -53,6 +53,116 @@ export function LoaderRing({ size = 'medium', color = 'primary', className = '',
   );
 }
 
+/* ─── Loader styles ───────────────────────────────────────────────────────
+ * Figma's Loader Styles set (10553:82): Spinner, Orbit, Bounce, Ripple,
+ * Dual Ring, Bars — Spinner in one colour, the rest Multicolor or Single.
+ *
+ *   single  every piece in the palette's --Buttons-{C}-Border (the `color`
+ *           prop; Figma: the Buttons mode on the instance)
+ *   multi   the brand's Primary / Secondary / Tertiary Border, one per piece
+ *
+ * Border, not Button: these are the 3:1 tones — a loader is a graphic that
+ * has to read on every surface, light and dark (Progress uses them too).
+ *
+ * Figma steps through four poses with Smart Animate; here the motion is
+ * continuous. Reduced motion keeps every loader moving — a still loader reads
+ * as frozen — but three times slower.
+ *
+ * Geometry is drawn at Figma's 32 and scaled: k = size / 32. */
+export const LOADER_TYPES = ['spinner', 'orbit', 'bounce', 'ripple', 'dual-ring', 'bars'];
+const MULTI = ['var(--Buttons-Primary-Border)', 'var(--Buttons-Secondary-Border)', 'var(--Buttons-Tertiary-Border)'];
+const KEYFRAMES = {
+  '@keyframes omni-loader-turn': { to: { transform: 'rotate(360deg)' } },
+  '@keyframes omni-loader-turn-back': { to: { transform: 'rotate(-360deg)' } },
+  '@keyframes omni-loader-pop': { '0%, 100%': { transform: 'scale(.6)' }, '50%': { transform: 'scale(1)' } },
+  '@keyframes omni-loader-hop': {
+    '0%, 60%, 100%': { transform: 'translateY(0)', animationTimingFunction: 'cubic-bezier(.3, 0, .2, 1)' },
+    '30%': { transform: 'translateY(calc(var(--omni-loader-k) * -9px))', animationTimingFunction: 'cubic-bezier(.6, 0, .8, 1)' },
+  },
+  /* Grows the ring's box, not its scale: scaling thinned the 2px stroke to a
+     hairline on the small rings, which is where the ripple starts. */
+  '@keyframes omni-loader-ripple': {
+    '0%': { inset: 'calc(var(--omni-loader-k) * 13px)', opacity: 1 },
+    '70%': { opacity: 0.6 },
+    '100%': { inset: 'calc(var(--omni-loader-k) * 1px)', opacity: 0 },
+  },
+  '@keyframes omni-loader-bar': { '0%, 100%': { transform: 'scaleY(.3)' }, '50%': { transform: 'scaleY(1)' } },
+};
+const SLOW = { '@media (prefers-reduced-motion: reduce)': { '&, & *': { animationDuration: '3s !important' } } };
+
+function LoaderGraphic({ type, d, color, multicolor, ...rest }) {
+  const C = LOADER_COLOR[color] || 'Primary';
+  const tone = (i) => (multicolor ? MULTI[i] : 'var(--Buttons-' + C + '-Border)');
+  const k = d / 32;
+  const px = (n) => n * k + 'px';
+  const root = {
+    position: 'relative', width: d, height: d, flexShrink: 0,
+    '--omni-loader-k': k, ...KEYFRAMES, ...SLOW,
+  };
+  const piece = { position: 'absolute', boxSizing: 'border-box' };
+
+  if (type === 'orbit') {
+    return (
+      <Box className="loader-graphic loader-orbit" sx={root} {...rest}>
+        <Box aria-hidden="true" sx={{ ...piece, inset: 0, animation: 'omni-loader-turn 1.2s linear infinite' }}>
+          {[0, 1, 2].map((i) => {
+            const a = (-90 + i * 120) * Math.PI / 180;
+            return <Box key={i} sx={{ ...piece, width: px(8), height: px(8), borderRadius: '50%', backgroundColor: tone(i),
+              left: px(16 + 11 * Math.cos(a) - 4), top: px(16 + 11 * Math.sin(a) - 4),
+              animation: 'omni-loader-pop 1.2s ease-in-out ' + (i * -0.4) + 's infinite' }} />;
+          })}
+        </Box>
+      </Box>
+    );
+  }
+  if (type === 'bounce') {
+    return (
+      <Box className="loader-graphic loader-bounce" sx={root} {...rest}>
+        {[0, 1, 2].map((i) => (
+          <Box key={i} aria-hidden="true" sx={{ ...piece, width: px(8), height: px(8), borderRadius: '50%', backgroundColor: tone(i),
+            left: px(i * 12), top: px(12), animation: 'omni-loader-hop .9s ' + (i * 0.12) + 's infinite' }} />
+        ))}
+      </Box>
+    );
+  }
+  if (type === 'ripple') {
+    return (
+      <Box className="loader-graphic loader-ripple" sx={root} {...rest}>
+        {[0, 1, 2].map((i) => (
+          <Box key={i} aria-hidden="true" sx={{ ...piece, inset: px(13), borderRadius: '50%', border: px(2) + ' solid ' + tone(i),
+            opacity: 0, animation: 'omni-loader-ripple 1.8s linear ' + (i * -0.6) + 's infinite' }} />
+        ))}
+      </Box>
+    );
+  }
+  if (type === 'dual-ring') {
+    const arcs = (c) => ({ borderTopColor: c, borderBottomColor: c, borderLeftColor: 'transparent', borderRightColor: 'transparent' });
+    return (
+      <Box className="loader-graphic loader-dual-ring" sx={root} {...rest}>
+        <Box aria-hidden="true" sx={{ ...piece, inset: 0, borderRadius: '50%', borderWidth: px(3), borderStyle: 'solid', ...arcs(tone(0)),
+          animation: 'omni-loader-turn 1.1s linear infinite' }} />
+        <Box aria-hidden="true" sx={{ ...piece, inset: px(6), borderRadius: '50%', borderWidth: px(3), borderStyle: 'solid', ...arcs(tone(1)),
+          transform: 'rotate(45deg)', animation: 'omni-loader-turn-back .9s linear infinite' }} />
+        <Box aria-hidden="true" sx={{ ...piece, left: px(13), top: px(13), width: px(6), height: px(6), borderRadius: '50%', backgroundColor: tone(2),
+          animation: 'omni-loader-pop 1.1s ease-in-out infinite' }} />
+      </Box>
+    );
+  }
+  if (type === 'bars') {
+    return (
+      <Box className="loader-graphic loader-bars" sx={root} {...rest}>
+        {[0, 1, 2].map((i) => (
+          <Box key={i} aria-hidden="true" sx={{ ...piece, left: px(2 + i * 11), top: px(3), width: px(6), height: px(26), borderRadius: px(3),
+            backgroundColor: tone(i), transformOrigin: 'center', transform: 'scaleY(.3)',
+            animation: 'omni-loader-bar .9s ease-in-out ' + (i * 0.15) + 's infinite' }} />
+        ))}
+      </Box>
+    );
+  }
+  // spinner — one colour, always (Figma has no Multicolor Spinner)
+  return <LoaderRing size={d} color={color} {...rest} />;
+}
+
 /**
  * Loader Component
  *
@@ -77,6 +187,11 @@ export function LoaderRing({ size = 'medium', color = 'primary', className = '',
 export function Loader({
   theme,
   surface,
+  /* Figma's Style: spinner | orbit | bounce | ripple | dual-ring | bars. */
+  type = 'spinner',
+  /* Figma's Color = Multicolor: Primary / Secondary / Tertiary, one per piece.
+     Off, every piece is the `color` palette. Spinner is always one colour. */
+  multicolor = false,
   size = 'medium',
   color = 'primary',
   message = 'Loading...',
@@ -101,9 +216,12 @@ export function Loader({
       data-theme={theme || undefined}
       data-surface={surface || undefined}
     >
-      <LoaderRing
-        size={size}
+      <LoaderGraphic
+        type={LOADER_TYPES.includes(type) ? type : 'spinner'}
+        d={typeof size === 'number' ? size : (LOADER_SIZE_MAP[size] ?? LOADER_SIZE_MAP.medium)}
         color={color}
+        multicolor={multicolor && type !== 'spinner'}
+        role="progressbar"
         aria-label={ariaLabelledby ? undefined : ariaLabel}
         aria-labelledby={ariaLabelledby}
       />
