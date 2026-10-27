@@ -31,17 +31,20 @@ import { SHADOW_LEVEL_1 } from '../_shadows';
  * LABEL DISPLAY: off | on | auto (show on hover/focus)
  *
  * ORIENTATION: horizontal (default) | vertical
- * FILL: standard | inverted | false
+ * FILL: standard | inverted
  *   Which side of the thumb the fill sits on. Figma's Slider `Type` combines
  *   this with the thumb count (single / single-inverted / double /
  *   double-inverted); here the thumb count comes from `value` being an array,
  *   so `fill` carries only the direction. `track` is MUI's name for it and is
- *   still accepted, including its `normal`.
+ *   still accepted, including its `normal`. There is no "no fill": the
+ *   filled side must look different from the rail, or the slider shows no
+ *   value. `false` renders standard and warns.
  * RANGE: pass value={[20, 80]} for a two-thumb range slider
  */
 
 const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+let warnedNoFill = false;
 
 // --- Style Builder -----------------------------------------------------------
 
@@ -264,11 +267,21 @@ export function Slider({
   // Figma's hover / pressed halo: the fill color at 20%.
   const halo = 'color-mix(in srgb, ' + styles.track + ' 20%, transparent)';
   /* `fill` wins when both are given; `normal` is accepted as a synonym for
-     `standard` so a MUI-shaped call still reads correctly. `false` stays
-     meaningful — it is MUI's "draw no fill at all", which is neither. */
+     `standard` so a MUI-shaped call still reads correctly.
+     No fill is retired: with nothing filled the bar is all rail, so the
+     slider no longer shows where its value is — only the thumb does, and
+     Figma has no such Type. MUI's `false` renders standard and warns. */
   const fillMode = fill !== undefined ? fill : track;
   const isInverted = fillMode === 'inverted';
-  const noFill = fillMode === false;
+  if (process.env.NODE_ENV !== 'production' && fillMode === false && !warnedNoFill) {
+    warnedNoFill = true;
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[OmniDesign] <Slider fill={false}> is retired — the filled side has to look ' +
+      'different from the rail. Rendering the standard fill. Use fill="standard" ' +
+      'or fill="inverted".',
+    );
+  }
   /* The label names the slider through aria-labelledby: a range has two
      inputs, which one <label for> cannot reach. */
   const labelId = useId();
@@ -508,7 +521,7 @@ export function Slider({
       marks={safeMarks}
       valueLabelDisplay={valueLabelDisplay}
       orientation={orientation}
-      track={isInverted ? 'inverted' : noFill ? false : 'normal'}
+      track={isInverted ? 'inverted' : 'normal'}
       disabled={disabled}
       name={name}
       aria-label={ariaLabel}

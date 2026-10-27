@@ -1,5 +1,6 @@
 /**
- * Slider fill direction: `standard` | `inverted` | `false`.
+ * Slider fill direction: `standard` | `inverted`. No fill is retired —
+ * the filled side has to look different from the rail.
  *
  * Figma folds this into the Slider's `Type` axis together with the thumb
  * count — single / single-inverted / double / double-inverted — because a
@@ -43,8 +44,12 @@ describe('Slider fill direction', () => {
     expect(isInverted(renderSlider({ fill: 'inverted' }))).toBe(true);
   });
 
-  it('draws no fill at all on fill={false}', () => {
-    expect(hasTrack(renderSlider({ fill: false }))).toBe(false);
+  it('fill={false} is retired: renders the standard fill', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const c = renderSlider({ fill: false });
+    expect(hasTrack(c)).toBe(true);
+    expect(isInverted(c)).toBe(false);
+    warn.mockRestore();
   });
 
   // --- MUI's name for the same prop ---
@@ -58,8 +63,10 @@ describe('Slider fill direction', () => {
     expect(hasTrack(renderSlider({ track: 'normal' }))).toBe(true);
   });
 
-  it('still honours track={false}', () => {
-    expect(hasTrack(renderSlider({ track: false }))).toBe(false);
+  it('track={false} is retired the same way', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    expect(hasTrack(renderSlider({ track: false }))).toBe(true);
+    warn.mockRestore();
   });
 
   it('lets fill win when both are passed', () => {

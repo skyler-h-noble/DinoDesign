@@ -74,9 +74,6 @@ export const SLIDER_SAMPLES = {
           <Cell label="inverted" width={W}>
             {box(<Slider defaultValue={60} fill="inverted" aria-label="inverted" />)}
           </Cell>
-          <Cell label="false — no fill" width={W}>
-            {box(<Slider defaultValue={60} fill={false} aria-label="no fill" />)}
-          </Cell>
         </HStack>
       </VStack>
       <VStack gap="var(--Sizing-1)">
