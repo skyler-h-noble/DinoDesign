@@ -256,3 +256,13 @@ describe('one look for the field; color only for the list', () => {
     expect(css).not.toContain('--Buttons-Primary-');
   });
 });
+
+describe('Select color mode', () => {
+  test('trigger and rows draw the library Swatch', () => {
+    const opts = [{ value: 'a', label: 'Sea', color: '#2f6f5e' }, { value: 'b', label: 'Clay', color: '#b0603a' }];
+    const { container } = render(<Select mode="color" options={opts} value="a" onChange={() => {}} label="Color" />);
+    expect(container.querySelector('.swatch-chip, .swatch')).toBeTruthy();
+    fireEvent.click(container.querySelector('[role="combobox"], button'));
+    expect(document.querySelectorAll('[role="option"] .swatch-chip').length).toBe(2);
+  });
+});

@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect, useCallback, useId } from 'react';
 import ReactDOM from 'react-dom';
 import { Box } from '@mui/material';
+import { Swatch } from '../Swatch/Swatch';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CheckIcon from '@mui/icons-material/Check';
 import { Icon } from '../Icon/Icon';
@@ -177,6 +178,9 @@ export function Select({
   const isLeft = labelPosition === 'left';
   const isTop = labelPosition === 'top' || isLeft;
   const isColor = mode === 'color';
+  /* The Swatch one step under the field: a 32px field holds the 24px chip,
+     a 56px field the 32px one, as the old height − 8 square did. */
+  const swatchSize = size === 'large' ? 'medium' : 'small';
   const sizeConfig = isFloating
     ? (FLOATING_SIZE_MAP[size] || FLOATING_SIZE_MAP.medium)
     : (SIZE_MAP[size] || SIZE_MAP.medium);
@@ -368,24 +372,10 @@ export function Select({
                 }}
               >
                 {isColor && optColor && (
-                  <Box sx={{
-                    // Swatch scales with the Select's own height (-8px
-                    // gives a generous gap on top/bottom for the option
-                    // row's vertical padding to breathe).
-                    height: 'calc(' + sizeConfig.height + ' - 8px)',
-                    width: 'calc(' + sizeConfig.height + ' - 8px)',
-                    // Radius follows the input swatch token so the swatch
-                    // scales independently of the button radius (the input
-                    // can have a different roundness from buttons).
-                    borderRadius: 'var(--Input-Swatch-Radius, var(--Button-Radius))',
-                    backgroundColor: optColor,
-                    // Always 1px so the selected ring doesn't read as a
-                    // double border next to the swatch's own outline.
-                    // Selected uses the accent border color, unselected
-                    // uses --Border — same stroke width either way.
-                    border: '1px solid ' + (isSelected ? 'var(--Buttons-' + C + '-Border)' : 'var(--Border)'),
-                    flexShrink: 0,
-                  }} />
+                  /* The library's Swatch — the chip Figma's color dropdown
+                     puts in each row (it was a hand-made square here). The row
+                     marks selection with its check, so the chip stays plain. */
+                  <Swatch color={optColor} size={swatchSize} aria-hidden="true" />
                 )}
                 {(!isColor || showColorLabels) && (
                   <BodySmall style={{ flex: 1, color: 'inherit', fontWeight: 'inherit' }}>{optLabel}</BodySmall>
@@ -564,18 +554,10 @@ export function Select({
         }}>
           {isColor && hasValue ? (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Box sx={{
-                height: 'calc(' + sizeConfig.height + ' - 8px)',
-                width: 'calc(' + sizeConfig.height + ' - 8px)',
-                borderRadius: 'var(--Input-Swatch-Radius, var(--Button-Radius))',
-                // selectedOption holds the option object (label, value,
-                // color). The trigger swatch needs the option's `color`
-                // — not currentValue, which is just the value string
-                // (e.g. "primary") and isn't a valid CSS color.
-                backgroundColor: (selectedOption && typeof selectedOption !== 'string' && selectedOption.color) || 'transparent',
-                border: '1px solid var(--Border)',
-                flexShrink: 0,
-              }} />
+              {/* selectedOption holds the option object; the trigger shows
+                  its color as the same library Swatch the rows use. */}
+              <Swatch color={(selectedOption && typeof selectedOption !== 'string' && selectedOption.color) || 'transparent'}
+                size={swatchSize} aria-hidden="true" />
               {showColorLabels && <BodySmall style={{ color: 'inherit', padding: 0 }}>{selectedLabel}</BodySmall>}
             </Box>
           ) : (
