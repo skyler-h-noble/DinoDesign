@@ -1,6 +1,7 @@
 // src/components/LinearProgress/LinearProgress.js
 import React from 'react';
 import { Box } from '@mui/material';
+import { MobileNavLabel } from '../Typography/Typography';
 
 /**
  * LinearProgress Component
@@ -19,6 +20,9 @@ import { Box } from '@mui/material';
  * SIZES: small (4px), medium (6px), large (--Progress-Bar-Width, 8px — Figma's
  *        only size) — bar height
  * DETERMINATE: value 0–100 sets fill width. Without value, indeterminate slide animation.
+ * showValue: Figma's Progress Text — the percentage under a determinate bar,
+ *   Mobile Nav Label in --Text, Sizing-Half below. Decorative to a screen
+ *   reader (the bar already announces aria-valuenow).
  *
  * Accessibility: role="progressbar", aria-valuenow/min/max for determinate,
  *   aria-label for screen readers.
@@ -39,6 +43,7 @@ export function LinearProgress({
   value,
   color = 'default',
   size = 'medium',
+  showValue = false,
   className = '',
   sx = {},
   ...props
@@ -50,7 +55,7 @@ export function LinearProgress({
 
   const fillColor = 'var(--Buttons-' + C + '-Border)';
 
-  return (
+  const bar = (
     <Box
       role="progressbar"
       aria-valuenow={hasValue ? Math.round(clampedValue) : undefined}
@@ -105,6 +110,19 @@ export function LinearProgress({
               }),
         }}
       />
+    </Box>
+  );
+
+  if (!(showValue && hasValue)) return bar;
+  return (
+    <Box className="linear-progress-field" sx={{ display: 'flex', flexDirection: 'column', gap: 'var(--Sizing-Half, 4px)', width: '100%' }}>
+      {bar}
+      {/* Figma's plain "Mobile Nav Label" binds Body-Font-Weight; MobileNavLabel
+          is the NAV label at 600, so the weight is stated (as Player's times). */}
+      <MobileNavLabel component="span" aria-hidden="true" className="linear-progress-value"
+        sx={{ color: 'var(--Text)', fontWeight: 'var(--Body-Font-Weight, 400)', fontVariantNumeric: 'tabular-nums' }}>
+        {Math.round(clampedValue) + '%'}
+      </MobileNavLabel>
     </Box>
   );
 }

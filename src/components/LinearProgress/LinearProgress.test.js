@@ -228,3 +228,19 @@ describe('Matches Figma', () => {
     expect(c).toContain('box-shadow: inset 0 0 0 1px var(--Background)');
   });
 });
+
+describe('showValue (Figma Progress Text)', () => {
+  test('shows the rounded percentage under a determinate bar, hidden from screen readers', () => {
+    const { container } = render(<LinearProgress value={47.6} showValue />);
+    const v = container.querySelector('.linear-progress-value');
+    expect(v).toHaveTextContent('48%');
+    expect(v).toHaveAttribute('aria-hidden', 'true');
+    expect(container.querySelector('[role="progressbar"]')).toHaveAttribute('aria-valuenow', '48');
+  });
+  test('no value text when indeterminate or off', () => {
+    const a = render(<LinearProgress showValue />).container;
+    expect(a.querySelector('.linear-progress-value')).toBeNull();
+    const b = render(<LinearProgress value={40} />).container;
+    expect(b.querySelector('.linear-progress-value')).toBeNull();
+  });
+});
