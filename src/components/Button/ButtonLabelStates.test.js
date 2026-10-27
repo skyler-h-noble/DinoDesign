@@ -163,10 +163,14 @@ describe('ghost button label', () => {
     });
   }
 
-  // Figma rests a selected ghost on Outline-Quiet; its border marks it selected.
-  it('rests a selected text ghost on Outline-Quiet, as Figma', () => {
-    const { base } = probe(<Button variant="ghost" selected>Save</Button>);
-    expect(colorIn(base)).toContain('--Buttons-Default-Outline-Quiet');
+  // Figma rests a selected ghost on Outline-Text: the chosen one reads heavier.
+  it('rests a selected ghost on Outline-Text, as Figma — text and number alike', () => {
+    for (const el of [<Button variant="ghost" selected>Save</Button>,
+                      <Button variant="ghost" contentType="letterNumber" selected aria-label="Page 3">3</Button>]) {
+      const { base } = probe(el);
+      expect(colorIn(base)).toContain('--Buttons-Default-Outline-Text');
+      expect(colorIn(base)).not.toContain('Outline-Quiet');
+    }
   });
 
   /* An icon-only ghost had the right shape already, muted at rest and
