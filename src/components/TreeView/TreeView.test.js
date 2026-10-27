@@ -272,3 +272,11 @@ describe('TreeView — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+/* Figma's Menu Item Toggle and Divider booleans, per row. */
+describe('per-row toggle and divider', () => {
+  test('toggle: false drops the chevron space', () => {
+    const { container } = render(<OmniTreeView items={[{ id: 'a', label: 'A', toggle: false }, { id: 'b', label: 'B' }]} />);
+    expect(container.querySelectorAll('.omni-tree-twisty')).toHaveLength(1);
+  });
+});

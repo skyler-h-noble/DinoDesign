@@ -35,7 +35,9 @@ import { Checkbox } from '../Checkbox/Checkbox';
  * infer them once `role="group"` is in play.
  *
  * ── Item shape (unchanged) ────────────────────────────────────────────────
- *   { id, label, icon?, swatch?, badge?, sx?, className?, disabled?, children? }
+ *   { id, label, icon?, swatch?, badge?, toggle?, divider?, sx?, className?, disabled?, children? }
+ *   toggle: false drops the chevron space (Figma's Toggle); divider: false the
+ *   line under the row (Figma's Divider). badge is the trailing slot (Badge).
  *
  * ── The row is Figma's Menu Item (8007:25355) ─────────────────────────────
  *   height   Button-Height; padding Menu-Level-{n}-Left-Margin | Sizing-1
@@ -175,7 +177,8 @@ function TreeNode({
           color: 'var(--Text)',
           // Figma's divider: a 1px Border-Variant line under every row, drawn
           // inside so it adds no height.
-          boxShadow: isCompact ? 'none' : 'inset 0 -1px 0 var(--Border-Variant)',
+          // item.divider === false drops it — Figma's per-row Divider boolean.
+          boxShadow: isCompact || item.divider === false ? 'none' : 'inset 0 -1px 0 var(--Border-Variant)',
           backgroundColor: 'transparent',
           cursor: disabled ? 'not-allowed' : 'pointer',
           opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
@@ -200,9 +203,11 @@ function TreeNode({
           },
         }}
       >
-        {/* The twisty. A fixed box even on a leaf, or every leaf's label sits
-            8px left of its siblings' and the column stops reading as one. */}
-        <Box
+        {/* The twisty — Figma's Toggle. A fixed box even on a leaf, or every
+            leaf's label sits 8px left of its siblings' and the column stops
+            reading as one. item.toggle === false (Toggle off) drops it, for a
+            flat list with no branches. */}
+        {item.toggle !== false && <Box
           aria-hidden="true"
           className="omni-tree-twisty"
           sx={{
@@ -213,7 +218,7 @@ function TreeNode({
           }}
         >
           {hasChildren && (isExpanded ? collapseIcon : expandIcon)}
-        </Box>
+        </Box>}
 
         {checkboxSelection && !disableSelection && (
           <Checkbox
