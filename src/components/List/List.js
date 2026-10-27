@@ -3,6 +3,7 @@ import React from 'react';
 import { Box, Checkbox, Radio } from '@mui/material';
 import { EyebrowSmall, Eyebrow, EyebrowLarge, SubtitleSmall, Subtitle, SubtitleLarge, BodySmall, Body, BodyLarge } from '../Typography';
 import { Ghost } from '../_ghost';
+import { ImagePlaceholder } from '../ImagePlaceholder';
 
 // Default three-layer typography for the text frame. Order is top→bottom:
 //   eyebrow   — EyebrowSmall  (optional metadata kicker on top)
@@ -91,6 +92,11 @@ export function ListItem({
   // on top (EyebrowSmall). Vstacked with no gap (line-height carries rhythm).
   // `overline` is the former name for `eyebrow`, still accepted.
   eyebrow, overline, secondary,
+  /* Figma's Image boolean: an 80px square (List-Item-Default-Image-Width) at
+     the start of the row. A URL draws it cropped to fill, a node is drawn as
+     given, true draws the Image Placeholder. imageAlt names it; leave it empty
+     when the image is decoration. */
+  image, imageAlt = '',
   clickable = false, disabled = false, selected = false,
   selectionMode = 'none', onSelect, onClick,
   // Non-clickable mode dividers. Apply only when !clickable — the clickable
@@ -242,6 +248,17 @@ export function ListItem({
           sx={{ p: 0, mr: 0, color: 'inherit', '&.Mui-checked': { color: 'inherit' } }}
           inputProps={{ 'aria-label': 'Select ' + (typeof children === 'string' ? children : 'item') }} />
       )}
+      {image && (
+        <Box className="list-item-image" sx={{
+          width: 'var(--List-Item-Default-Image-Width, 80px)', aspectRatio: '1 / 1', flexShrink: 0, overflow: 'hidden',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          '& > img': { width: '100%', height: '100%', objectFit: 'cover', display: 'block' },
+        }}>
+          {typeof image === 'string'
+            ? <img src={image} alt={imageAlt} />
+            : image === true ? <ImagePlaceholder sx={{ width: '100%', height: '100%' }} /> : image}
+        </Box>
+      )}
       {startDecorator && (
         <ListItemDecorator size={size} isButton={startDecoratorIsButton}
           onAction={onStartDecoratorAction} ariaLabel={startDecoratorAriaLabel}>
@@ -379,6 +396,7 @@ export function List({
       items.forEach((item, index) => {
         elements.push(
           <ListItem key={'item-' + index} size={size} variant={variant} color={color}
+            image={item.image} imageAlt={item.imageAlt}
             startDecorator={item.startDecorator} endDecorator={item.endDecorator}
             startDecoratorIsButton={item.startDecoratorIsButton}
             endDecoratorIsButton={item.endDecoratorIsButton}

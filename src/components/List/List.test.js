@@ -231,3 +231,17 @@ describe('List — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+/* Figma's Image boolean: an 80px square at the row's start. */
+describe('ListItem image', () => {
+  test('a URL renders an image with its alt', () => {
+    const { container } = render(<List items={[{ label: 'Row', image: '/x.png', imageAlt: 'A photo' }]} />);
+    const img = container.querySelector('.list-item-image img');
+    expect(img).toHaveAttribute('src', '/x.png');
+    expect(img).toHaveAttribute('alt', 'A photo');
+  });
+  test('no image by default', () => {
+    const { container } = render(<List items={[{ label: 'Row' }]} />);
+    expect(container.querySelector('.list-item-image')).toBeNull();
+  });
+});

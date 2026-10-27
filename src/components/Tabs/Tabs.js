@@ -179,7 +179,7 @@ const TabsContext = createContext({
   value: 0,
   setValue: () => {},
   variant: 'standard',
-  color: 'primary',
+  color: 'default',
   size: 'medium',
   orientation: 'horizontal',
   scrollable: false,
@@ -195,7 +195,7 @@ export function Tabs({
   value: controlledValue,
   onChange,
   variant = 'standard',
-  color = 'primary',
+  color = 'default',  // the brand's default, as Figma's Tabs — never primary
   size = 'medium',
   orientation = 'horizontal',
   scrollable = false,

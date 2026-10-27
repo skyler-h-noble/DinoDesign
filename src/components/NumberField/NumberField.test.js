@@ -205,3 +205,16 @@ describe('Stepper minimum target area', () => {
     }
   });
 });
+
+describe('validation and label type', () => {
+  test('error marks the spinbutton invalid and shows the message', () => {
+    render(<NumberField label="Qty" validation="error" validationMessage="Too many" />);
+    const input = screen.getByRole('spinbutton');
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByText('Too many')).toBeInTheDocument();
+  });
+  test('required passes to the label and the input', () => {
+    render(<NumberField label="Qty" type="required" />);
+    expect(screen.getByRole('spinbutton')).toHaveAttribute('aria-required', 'true');
+  });
+});

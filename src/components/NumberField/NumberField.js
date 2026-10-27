@@ -56,6 +56,14 @@ export function NumberField({
   labelPosition = 'top',  // 'top' | 'left' | 'floating' | 'none'
   placeholder,
   helperText,
+  /* Figma's Form-Label Type axis and More Info, passed to the FormLabel. */
+  type = 'default',
+  moreInfo,
+  /* Validation: 'error' | 'warning' | 'success' | 'info' — the field's 2px
+     validation edge (Input's), the message under it (FormHelper), and
+     aria-invalid for an error. */
+  validation,
+  validationMessage,
   disabled = false,
   fullWidth = false,
   className = '',
@@ -67,6 +75,8 @@ export function NumberField({
   const isControlled = controlledValue !== undefined;
   const current = isControlled ? controlledValue : internalValue;
   const inputId = useId();
+  const helperId = inputId + '-helper';
+  const hasHelper = !!(helperText || (validation && validationMessage));
   const p = PREFIX[size] ?? '';
 
   const isOutlined = variant !== 'spinner';
@@ -133,6 +143,7 @@ export function NumberField({
         commit(raw);
       }}
       labelPosition={isFloating ? 'floating' : 'standard'}
+      validation={validation}
       label={isFloating ? label : undefined}
       aria-label={isFloating ? undefined : (ariaLabel || label)}
       inputProps={{
@@ -142,6 +153,9 @@ export function NumberField({
         ...(min !== undefined && { 'aria-valuemin': min }),
         ...(max !== undefined && { 'aria-valuemax': max }),
         onKeyDown: handleKeyDown,
+        ...(validation === 'error' && { 'aria-invalid': true }),
+        ...(type === 'required' && { 'aria-required': true }),
+        ...(hasHelper && { 'aria-describedby': helperId }),
       }}
       sx={isOutlined ? {
         /* The field fills the row's height and gives up its trailing corners:
@@ -205,13 +219,17 @@ export function NumberField({
       {...props}
     >
       {showLabel && (
-        <FormLabel htmlFor={inputId} disabled={disabled}
+        <FormLabel htmlFor={inputId} disabled={disabled} type={type} moreInfo={moreInfo}
           sx={disabled ? { opacity: 'var(--Disabled, 0.38)' } : undefined}>
           {label}
         </FormLabel>
       )}
       {row}
-      {helperText && <FormHelper helperText={helperText} sx={labelPosition === 'left' && showLabel ? { gridColumn: 2 } : undefined} />}
+      {hasHelper && (
+        <FormHelper helperText={helperText} validation={validation || 'none'} validationMessage={validationMessage}
+          helperId={helperId} messageId={helperId}
+          sx={labelPosition === 'left' && showLabel ? { gridColumn: 2 } : undefined} />
+      )}
     </Box>
   );
 }
