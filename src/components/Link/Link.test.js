@@ -81,13 +81,16 @@ describe('Colors', () => {
     expect(container.querySelector('.link-color-standard')).toBeInTheDocument();
   });
 
-  test('quiet color class', () => {
+  // quiet was removed: it renders as standard and warns once.
+  test('quiet renders as standard', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
     const { container } = renderLink({ color: 'quiet' });
-    expect(container.querySelector('.link-color-quiet')).toBeInTheDocument();
+    expect(container.querySelector('.link-color-standard')).toBeInTheDocument();
+    warn.mockRestore();
   });
 
   test('LINK_COLORS exports match expected', () => {
-    expect(LINK_COLORS).toEqual(['primary', 'standard', 'quiet']);
+    expect(LINK_COLORS).toEqual(['primary', 'standard']);
   });
 });
 

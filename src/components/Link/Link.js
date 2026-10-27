@@ -15,7 +15,8 @@ import { Box } from '@mui/material';
  * COLORS:
  *   primary    var(--Link, --Hotlink)   — default link color
  *   standard   var(--Text)              — blends with body text
- *   quiet      var(--Text-Quiet)        — subdued links
+ *   (No quiet: removed — a subdued link is hard to find. color="quiet"
+ *   renders as standard and warns once in development.)
  *
  * STATES: hover / pressed → the underline goes away, color unchanged. Focus
  *   keeps it: the ring is added to the resting link, not swapped for it. visited →
@@ -118,11 +119,18 @@ const LINK_VISITED = 'var(--Link-Visited, var(--Hotlink-Visited))';
 const COLOR_MAP = {
   primary:  { base: LINK_BASE,           visited: LINK_VISITED },
   standard: { base: 'var(--Text)',       visited: LINK_VISITED },
-  quiet:    { base: 'var(--Text-Quiet)', visited: LINK_VISITED },
 };
 
 export const LINK_STYLES = Object.keys(STYLE_MAP);
 export const LINK_COLORS = Object.keys(COLOR_MAP);
+
+let warnedQuiet = false;
+function warnQuietOnce() {
+  if (warnedQuiet || process.env.NODE_ENV === 'production') return;
+  warnedQuiet = true;
+  // eslint-disable-next-line no-console
+  console.warn('[Link] color="quiet" was removed — a subdued link is hard to find. Rendering color="standard".');
+}
 
 export function Link({
   children,
@@ -137,8 +145,10 @@ export function Link({
   sx = {},
   ...props
 }) {
+  if (color === 'quiet') warnQuietOnce();
   const typo   = STYLE_MAP[textStyle] || STYLE_MAP.body;
-  const colors = COLOR_MAP[color]     || COLOR_MAP.primary;
+  const effColor = color === 'quiet' ? 'standard' : color;
+  const colors = COLOR_MAP[effColor]  || COLOR_MAP.primary;
 
   const resolvedRel = target === '_blank'
     ? (rel || 'noopener noreferrer')
@@ -154,7 +164,7 @@ export function Link({
       aria-disabled={disabled || undefined}
       tabIndex={disabled ? -1 : undefined}
       className={
-        'link link-' + textStyle + ' link-color-' + color +
+        'link link-' + textStyle + ' link-color-' + effColor +
         (disabled ? ' link-disabled' : '') +
         ' ' + className
       }

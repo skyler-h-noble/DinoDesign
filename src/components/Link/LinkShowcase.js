@@ -24,11 +24,10 @@ const STYLE_LABELS = {
   'body-semibold': 'Body Semibold', 'body-bold': 'Body Bold',
   button: 'Button', label: 'Label', caption: 'Caption',
 };
-const COLOR_LABELS = { primary: 'Primary', standard: 'Standard', quiet: 'Quiet' };
+const COLOR_LABELS = { primary: 'Primary', standard: 'Standard' };
 const COLOR_TOKENS = {
   primary: 'var(--Link)',
   standard: 'var(--Text)',
-  quiet: 'var(--Text-Quiet)',
 };
 
 function ContrastBadge({ ratio, threshold }) {
