@@ -211,7 +211,9 @@ export function NumberField({
       sx={{
         display: labelPosition === 'left' && showLabel ? 'grid' : 'flex',
         ...(labelPosition === 'left' && showLabel
-          ? { gridTemplateColumns: 'auto minmax(0, 1fr)', columnGap: 'var(--Sizing-1, 8px)', alignItems: 'center' }
+          /* Figma's label-left is a 2x2 grid: label | field, the helper under
+             the field Sizing-Half down, the label centred on the field's row. */
+          ? { gridTemplateColumns: 'auto minmax(0, 1fr)', columnGap: 'var(--Sizing-1, 8px)', rowGap: 'var(--Sizing-Half, 4px)', alignItems: 'center' }
           : { flexDirection: 'column', gap: 'var(--Sizing-Half, 4px)' }),
         width: fullWidth ? '100%' : 'auto',
         ...sx,
