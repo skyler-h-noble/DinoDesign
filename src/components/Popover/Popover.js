@@ -37,6 +37,10 @@ import { SHADOW_LEVEL_2 } from '../_shadows';
  *   autoFocus   true (default): focus moves in on open and back on close.
  *               false for a hover card, which must not steal focus.
  *   id          for aria-describedby on the trigger
+ *   disablePortal  render in place instead of on document.body, with no
+ *               anchor positioning — the panel sits where it is put and the
+ *               arrow takes its placement's start / centre / end. For docs,
+ *               samples and the parity page; a real popover keeps the portal.
  *   children    ReactNode
  *   sx          object
  *
@@ -51,6 +55,11 @@ import { SHADOW_LEVEL_2 } from '../_shadows';
 const RADIUS = 'var(--Dropdown-Frame-Radius, var(--Input-Radius, var(--Style-Border-Radius, 4px)))';
 const GAP = 6;
 const ARROW = 7;
+/* The arrow is Figma's 10px square turned 45° (14.1px across, so it stands
+   ARROW = 7 clear of the panel), its 1px stroke inside, its centre on the
+   panel's inner edge. Start / end sit 12px plus half its diagonal in. */
+const ARROW_BOX = 10;
+const ARROW_INSET = 12 + ARROW_BOX * Math.SQRT1_2;
 const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])';
 
 export function Popover({
@@ -74,6 +83,7 @@ export function Popover({
   id,
   onMouseEnter,
   onMouseLeave,
+  disablePortal = false,
 }) {
   const popoverRef = useRef(null);
   const wasOpen = useRef(false);
@@ -84,8 +94,16 @@ export function Popover({
      inside the viewport. Measured after render so the panel's own size is
      known; re-measured on scroll and resize so it stays attached. */
   const place = useCallback(() => {
-    const a = getAnchor();
     const p = popoverRef.current;
+    if (disablePortal) {
+      if (!p) return;
+      const pw = p.offsetWidth;
+      const side = placement.startsWith('top') ? 'top' : 'bottom';
+      const arrowX = placement.endsWith('-start') ? ARROW_INSET : placement.endsWith('-end') ? pw - ARROW_INSET : pw / 2;
+      setPos({ top: 0, left: 0, side, arrowX });
+      return;
+    }
+    const a = getAnchor();
     if (!a || !p) return;
     const r = a.getBoundingClientRect();
     const pw = p.offsetWidth, ph = p.offsetHeight;
@@ -99,9 +117,9 @@ export function Popover({
     left = Math.max(8, Math.min(left, vw - pw - 8));
     const top = side === 'bottom' ? r.bottom + off : r.top - off - ph;
     // The arrow points at the anchor's centre, wherever the panel had to sit.
-    const arrowX = Math.max(12, Math.min(r.left + r.width / 2 - left, pw - 12));
+    const arrowX = Math.max(ARROW_INSET, Math.min(r.left + r.width / 2 - left, pw - ARROW_INSET));
     setPos({ top, left, side, arrowX });
-  }, [getAnchor, placement, arrow]);
+  }, [getAnchor, placement, arrow, disablePortal]);
 
   useLayoutEffect(() => {
     if (!open) { setPos(null); return undefined; }
@@ -164,7 +182,7 @@ export function Popover({
 
   if (!open) return null;
 
-  return ReactDOM.createPortal(
+  const panel = (
     <Box
       ref={popoverRef}
       role={role}
@@ -180,11 +198,10 @@ export function Popover({
       data-side={pos?.side}
       className={'popover' + (className ? ' ' + className : '')}
       sx={{
-        position: 'fixed',
-        top: pos ? pos.top : -9999,
-        left: pos ? pos.left : -9999,
+        position: disablePortal ? 'relative' : 'fixed',
+        ...(disablePortal ? {} : { top: pos ? pos.top : -9999, left: pos ? pos.left : -9999 }),
         visibility: pos ? 'visible' : 'hidden',
-        zIndex: 2000000000,
+        zIndex: disablePortal ? 'auto' : 2000000000,
         width,
         boxSizing: 'border-box',
         backgroundColor: 'var(--Background)',
@@ -194,15 +211,17 @@ export function Popover({
         boxShadow: SHADOW_LEVEL_2,  // the Menus / Tooltip step
         outline: 'none',
         '& > .popover-arrow': {
-          position: 'absolute', width: ARROW * 2, height: ARROW * 2,
-          left: (pos?.arrowX ?? 0) - ARROW,
+          position: 'absolute', width: ARROW_BOX, height: ARROW_BOX, boxSizing: 'border-box',
+          // arrowX is measured from the panel's outer edge; the arrow sits in
+          // its padding box, 1px in.
+          left: (pos?.arrowX ?? 0) - 1 - ARROW_BOX / 2,
           backgroundColor: 'var(--Background)',
           border: '1px solid var(--Border)',
           transform: 'rotate(45deg)',
           pointerEvents: 'none',
         },
-        '&[data-side="bottom"] > .popover-arrow': { top: -ARROW - 1, borderRight: 'none', borderBottom: 'none' },
-        '&[data-side="top"] > .popover-arrow': { bottom: -ARROW - 1, borderLeft: 'none', borderTop: 'none' },
+        '&[data-side="bottom"] > .popover-arrow': { top: -ARROW_BOX / 2, borderRight: 'none', borderBottom: 'none' },
+        '&[data-side="top"] > .popover-arrow': { bottom: -ARROW_BOX / 2, borderLeft: 'none', borderTop: 'none' },
         ...sx,
       }}
     >
@@ -212,9 +231,9 @@ export function Popover({
       <Box className="popover-body" sx={{ maxHeight, overflowY: 'auto', borderRadius: 'inherit' }}>
         {children}
       </Box>
-    </Box>,
-    document.body
+    </Box>
   );
+  return disablePortal ? panel : ReactDOM.createPortal(panel, document.body);
 }
 
 export default Popover;

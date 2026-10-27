@@ -799,5 +799,51 @@ export const SURFACE_SAMPLES = {
 
   Popover: {
     open: () => <PopoverDemo />,
+    /* Figma's Placement axis, drawn in place (disablePortal) so all six sit
+       on the page at once; a real popover portals and anchors itself. */
+    placement: () => (
+      <Axis values={['bottom-start', 'bottom', 'bottom-end', 'top-start', 'top', 'top-end']} defaultValue="bottom-end"
+            render={(v) => (
+              <Box sx={{ pt: v.startsWith('top') ? 0 : '7px', pb: v.startsWith('top') ? '7px' : 0 }}>
+                <Popover open disablePortal arrow placement={v} width={200} aria-label={v}>
+                  <Box sx={{ p: 'var(--Sizing-2)' }}><BodySmall>{v}</BodySmall></Box>
+                </Popover>
+              </Box>
+            )} />
+    ),
+    arrow: () => (
+      <Toggle render={(on) => (
+        <Box sx={{ pt: '7px' }}>
+          <Popover open disablePortal arrow={on} placement="bottom-start" width={160} aria-label="arrow">
+            <Box sx={{ p: 'var(--Sizing-2)' }}><BodySmall>{on ? 'arrow' : 'no arrow'}</BodySmall></Box>
+          </Popover>
+        </Box>
+      )} />
+    ),
+    /* Behaviour, not appearance: both draw the same panel. */
+    role: () => (
+      <Axis values={['dialog', 'tooltip']} defaultValue="dialog"
+            render={(v) => (
+              <Popover open disablePortal role={v} autoFocus={v === 'dialog'} width={200} aria-label={v}>
+                <Box sx={{ p: 'var(--Sizing-2)' }}><BodySmall>{v === 'tooltip' ? 'Hover card — no focus move' : 'Dialog — focus moves in'}</BodySmall></Box>
+              </Popover>
+            )} />
+    ),
+    autoFocus: () => (
+      <Toggle render={(on) => (
+        <Popover open disablePortal autoFocus={false} width={200} aria-label="autoFocus">
+          <Box sx={{ p: 'var(--Sizing-2)' }}><BodySmall>{on ? 'Focus moves into the panel on open' : 'Focus stays on the anchor'}</BodySmall></Box>
+        </Popover>
+      )} />
+    ),
+    disablePortal: () => (
+      <Toggle offLabel="false — portals to the page" onLabel="true — drawn in place" render={(on) => (
+        on ? (
+          <Popover open disablePortal width={200} aria-label="in place">
+            <Box sx={{ p: 'var(--Sizing-2)' }}><BodySmall>Drawn where it is placed</BodySmall></Box>
+          </Popover>
+        ) : <PopoverDemo />
+      )} />
+    ),
   },
 };

@@ -66,6 +66,7 @@ export const FIGMA_PAGES = {
   TextField: '8574:17760',
   Toolbar: '7446:33121',
   Tooltip: '8829:25532',
+  Popover: '10430:9244',
   TreeView: '6896:32593',
   BottomNavigation: '7446:33043',
 };

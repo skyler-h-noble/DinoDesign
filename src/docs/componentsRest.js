@@ -819,9 +819,35 @@ export const REST_DOCS = [SELECT_DOC, MENU_DOC, CODE_BLOCK_DOC, PLAYER_DOC,
   type: 'ref',
   default: 'undefined'
 }, {
+  name: 'anchorEl',
+  type: 'Element',
+  default: 'undefined',
+  note: 'The anchor itself, when there is no ref.'
+}, {
   name: 'placement',
   type: 'string',
-  default: 'bottom-end'
+  default: 'bottom-end',
+  note: 'Figma\u2019s Placement: bottom-start | bottom | bottom-end | top-start | top | top-end. Flips at the viewport edge.'
+}, {
+  name: 'arrow',
+  type: 'boolean',
+  default: 'false',
+  note: 'A 10px square turned 45\u00b0, pointing at the anchor.'
+}, {
+  name: 'role',
+  type: "'dialog' | 'tooltip'",
+  default: "'dialog'",
+  note: 'A hover card is a tooltip, with autoFocus={false}.'
+}, {
+  name: 'autoFocus',
+  type: 'boolean',
+  default: 'true',
+  note: 'Focus moves in on open and back to the anchor on close.'
+}, {
+  name: 'disablePortal',
+  type: 'boolean',
+  default: 'false',
+  note: 'Render in place, unanchored \u2014 for samples and docs. A real popover keeps the portal.'
 }, {
   name: 'theme',
   type: 'string',

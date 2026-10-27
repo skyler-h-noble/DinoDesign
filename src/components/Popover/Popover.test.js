@@ -51,3 +51,15 @@ describe('Popover', () => {
     expect(document.querySelector('.popover-arrow')).not.toBeNull();
   });
 });
+
+describe('Popover disablePortal', () => {
+  test('renders in place, not on document.body', () => {
+    const { container } = render(
+      <div data-testid="host"><Popover open disablePortal arrow placement="bottom-start" aria-label="p"><span>hi</span></Popover></div>
+    );
+    const panel = container.querySelector('.popover');
+    expect(panel).toBeTruthy();
+    expect(panel.parentElement.getAttribute('data-testid')).toBe('host');
+    expect(panel.querySelector('.popover-arrow')).toBeTruthy();
+  });
+});
