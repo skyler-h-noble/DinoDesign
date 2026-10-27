@@ -43,6 +43,7 @@ import { CardShowcase } from '../components/Card/CardShowcase';
 import { TabsShowcase } from '../components/Tabs/TabsShowcase';
 import { DrawerShowcase } from '../components/Drawer/DrawerShowcase';
 import { SnackbarShowcase } from '../components/Snackbar/SnackbarShowcase';
+import { LoaderShowcase } from '../components/Loader/LoaderShowcase';
 import { CircularProgressShowcase } from '../components/CircularProgress/CircularProgressShowcase';
 import { LinearProgressShowcase } from '../components/LinearProgress/LinearProgressShowcase';
 import { AlertShowcase } from '../components/Alert/AlertShowcase';
@@ -242,6 +243,7 @@ const NAV_ITEMS = [
       { id: 'alert', label: 'Alert' },
       { id: 'circularprogress', label: 'Circular Progress' },
       { id: 'linearprogress', label: 'Linear Progress' },
+      { id: 'loader', label: 'Loader' },
       { id: 'snackbar', label: 'Snackbar' },
       { id: 'dialog', label: 'Dialog' },
       { id: 'modal', label: 'Modal' },
@@ -513,6 +515,7 @@ function ShowcaseInner() {
             {activeSection === 'alert' && <AlertShowcase />}
             {activeSection === 'circularprogress' && <CircularProgressShowcase />}
             {activeSection === 'linearprogress' && <LinearProgressShowcase />}
+            {activeSection === 'loader' && <LoaderShowcase />}
             {activeSection === 'snackbar' && <SnackbarShowcase />}
             {activeSection === 'dialog' && <DialogShowcase />}
             {activeSection === 'modal' && <ModalShowcase />}
