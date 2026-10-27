@@ -59,13 +59,10 @@ describe('elevation matches the Figma effect styles', () => {
     expect(offenders).toEqual([]);
   });
 
-  it('Card and Ratio share the same pair', () => {
-    /* Ratio is a themed surface with Box's shell, so it rests where Card does.
-       It carried Card's OLD pair, which is how one wrong rung became two. */
-    for (const f of ['Card/Card.js', 'Ratio/Ratio.js']) {
-      const src = read(f);
-      expect(`${f} rest: ${/elevated \? SHADOW_LEVEL_2 : SHADOW_LEVEL_1/.test(src)}`)
-        .toBe(`${f} rest: true`);
-    }
+  it('Card rests on the Card pair; Ratio draws no shadow at all', () => {
+    /* Ratio used to share Card's pair. It is a bare media slot now — no frame,
+       no states — so it must not import a shadow level at all. */
+    expect(/elevated \? SHADOW_LEVEL_2 : SHADOW_LEVEL_1/.test(read('Card/Card.js'))).toBe(true);
+    expect(/SHADOW_LEVEL_/.test(read('Ratio/Ratio.js'))).toBe(false);
   });
 });

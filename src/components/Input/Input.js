@@ -552,7 +552,9 @@ export function Input({
            a control that cannot be used. */
         ...(!disabled && {
           '&:hover::after': { borderColor: stateSource.hoverBorder },
-          '&:active::after': { borderColor: stateSource.pressedBorder },
+          /* Pressed and focused, the edge is 2px — Figma's Input draws its
+             Inner Frame stroke at 2 in those two states, 1 at rest and hover. */
+          '&:active::after': { borderColor: stateSource.pressedBorder, borderWidth: '2px' },
           /* Figma's Hover, Pressed and Focus-Visible fields draw their text in
              --Text, placeholder included; only the resting field is --Quiet. */
           '&:hover .MuiOutlinedInput-root, &:active .MuiOutlinedInput-root, &:focus-within .MuiOutlinedInput-root': { color: activeTextColor },
@@ -568,6 +570,7 @@ export function Input({
           outline: '2px solid var(--Focus-Visible)',
           outlineOffset: '1px',
         },
+        '&:focus-within::after': { borderWidth: '2px' },
         // Disabled dims the WHOLE field (Figma's variant opacity), edge included.
         ...(disabled && { opacity: 'var(--Disabled, 0.38)' }),
       }}>

@@ -7,12 +7,11 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import { Ratio, RATIO_NAMES } from './Ratio';
 import { Button } from '../Button/Button';
-import { Switch } from '../Switch/Switch';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
-import { H3, H5, Body, BodySmall, Caption, Label, EyebrowSmall } from '../Typography';
+import { H3, H5, Body, BodySmall, Caption, EyebrowSmall } from '../Typography';
 import { CodeBlock } from '../CodeBlock/CodeBlock';
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
@@ -79,8 +78,6 @@ export function RatioShowcase() {
   const [ratio, setRatio]         = useState('1:1');
   const [color, setColor]         = useState('primary');
   const [padding, setPadding]     = useState('none');
-  const [elevated, setElevated]   = useState(false);
-  const [clickable, setClickable] = useState(false);
   const [bgTheme, setBgTheme]     = useState('Default');
   const [bgSurface, setBgSurface] = useState('Surface');
 
@@ -88,8 +85,6 @@ export function RatioShowcase() {
     const parts = ['ratio="' + ratio + '"'];
     if (color !== 'default')   parts.push('color="' + color + '"');
     if (padding !== 'none')    parts.push('padding="' + padding + '"');
-    if (elevated)              parts.push('elevated');
-    if (clickable)             parts.push('clickable onClick={handleClick}');
     return '<Ratio ' + parts.join(' ') + '>\n' +
            '  {/* your content */}\n' +
            '</Ratio>';
@@ -125,8 +120,6 @@ export function RatioShowcase() {
                 ratio={ratio}
                 color={color}
                 padding={padding}
-                elevated={elevated}
-                clickable={clickable}
               />
             </Box>
           </PreviewSurface>
@@ -179,22 +172,6 @@ export function RatioShowcase() {
                         <ControlButton key={r} label={r} selected={ratio === r} onClick={() => setRatio(r)} />
                       ))}
                     </Stack>
-                  </Box>
-
-                  {/* Toggles */}
-                  <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box>
-                      <Label>Elevated</Label>
-                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Bumps the shadow up one level</Caption>
-                    </Box>
-                    <Switch checked={elevated} onChange={(e) => setElevated(e.target.checked)} size="small" aria-label="Elevated" />
-                  </Box>
-                  <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box>
-                      <Label>Clickable</Label>
-                      <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Adds hover, press, and focus-visible</Caption>
-                    </Box>
-                    <Switch checked={clickable} onChange={(e) => setClickable(e.target.checked)} size="small" aria-label="Clickable" />
                   </Box>
 
                 </Box>

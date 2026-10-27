@@ -60,7 +60,7 @@ export const STEPPER_DOC = {
     name: 'clickable',
     type: 'boolean',
     default: 'false',
-    note: 'Lets the user jump back. Only sensible where steps can be revisited.'
+    note: 'Lets the user jump back. Only sensible where steps can be revisited. Count steps only — a No-Count dot is progress, not navigation, so clickable is ignored there (and warns).'
   }, {
     name: 'dashedIncomplete',
     type: 'boolean',

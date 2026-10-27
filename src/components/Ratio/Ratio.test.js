@@ -75,3 +75,16 @@ describe('Ratio scope inheritance', () => {
     expect(container.querySelector('img[alt="real"]')).not.toBeNull();
   });
 });
+
+describe('no states', () => {
+  test('clickable / onClick / elevated are retired: no role, no tab stop, warns once', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const onClick = jest.fn();
+    const { container } = render(<><Ratio clickable onClick={onClick} /><Ratio elevated /></>);
+    const r = container.querySelector('.ratio');
+    expect(r).not.toHaveAttribute('role');
+    expect(r).not.toHaveAttribute('tabindex');
+    expect(warn.mock.calls.filter((c) => String(c[0]).includes('clickable')).length).toBe(1);
+    warn.mockRestore();
+  });
+});

@@ -9,7 +9,6 @@ import { ImagePlaceholder } from '../ImagePlaceholder';
      3  FAB, Snackbar
      4  FAB-Hover
      5  Dialog & Modal */
-import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3 } from '../_shadows';
 
 /**
  * Ratio Component
@@ -33,11 +32,14 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3 } from '../_shadows';
  * COLORS:   default | primary | secondary | tertiary | neutral |
  *           info | success | warning | error
  * PADDING:  none | xs | sm | md | lg | xl
- * ELEVATION: Level 2 rest, Level 3 hover (Level 3→4 when elevated)
+ * NO STATES. Ratio is a slot, not a control: clickable / onClick / elevated
+ *   were retired (they warn once). A clickable media block is a Card, or a
+ *   Ratio inside a Button / link — the control carries the states.
  */
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 let warnedVariant = false;
+let warnedClickable = false;
 
 export const RATIO_NAMES = [
   '1:1',
@@ -113,6 +115,12 @@ export function Ratio({
     console.warn('[Ratio] variant="' + variant + '" was removed — Ratio has one style, the bare media slot. '
       + 'For a framed block use Card, or Box with radius / elevation.');
   }
+  if ((clickable || onClick || elevated) && process.env.NODE_ENV !== 'production' && !warnedClickable) {
+    warnedClickable = true;
+    // eslint-disable-next-line no-console
+    console.warn('[Ratio] clickable / onClick / elevated were removed — Ratio is a slot with no states. '
+      + 'Wrap it in a Card (clickable) or a Button / Link so the control carries hover, pressed and focus.');
+  }
   const aspect = RATIO_MAP[ratio] || RATIO_MAP['1:1'];
   const C = cap(color === 'default' ? 'Default' : color);
 
@@ -140,24 +148,11 @@ export function Ratio({
   const dataSurface = 'Surface-Dim';
 
   const p = PADDING_MAP[padding] !== undefined ? PADDING_MAP[padding] : PADDING_MAP.none;
-  const isClickable = clickable || !!onClick;
-  const isDefault = true; // one style — see the header
-
-  // Level 2 rest / Level 3 hover; bump to 3→4 when elevated, matching Box.
-  /* The Card pair. Ratio is a themed surface with the same shell as Box, so
-     it rests where Card rests; it carried Card's OLD, one-too-heavy pair. */
-  const restShadow = elevated ? SHADOW_LEVEL_2 : SHADOW_LEVEL_1;
-  const hoverShadow = elevated ? SHADOW_LEVEL_3 : SHADOW_LEVEL_2;
-
   return (
     <MuiBox
       component={component}
-      onClick={isClickable ? onClick : undefined}
-      role={isClickable ? 'button' : undefined}
-      tabIndex={isClickable ? 0 : undefined}
       className={'ratio ratio-' + ratio.toLowerCase() + ' ratio-default' +
-        (isClickable ? ' ratio-clickable' : '') +
-        (elevated ? ' ratio-elevated' : '') +
+
         (className ? ' ' + className : '')}
       sx={{
         // CSS aspect-ratio holds the proportion regardless of container
@@ -177,29 +172,13 @@ export function Ratio({
           : { width: '100%', height: 'auto', minWidth: 24 }),
         ...(maxWidth !== undefined && { maxWidth }),
         ...(maxHeight !== undefined && { maxHeight }),
-        border: isDefault ? 'none' : '1px solid var(--Border-Variant)',
+        border: 'none',
         // Default variant is a bare, SQUARE media slot (no radius) — matches a
         // plain Ratio in the design. Styled variants (solid/light/dark) keep
         // the brand radius for their card-like chrome.
-        borderRadius: isDefault ? 0 : 'var(--Style-Border-Radius)',
-        boxShadow: isDefault ? 'none' : restShadow,
+        borderRadius: 0,
+        boxShadow: 'none',
         overflow: 'hidden',
-        transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
-        ...(isClickable && {
-          cursor: 'pointer',
-          '&:hover': {
-            borderColor: 'var(--Buttons-Default-Border)',
-            boxShadow: hoverShadow,
-          },
-          '&:active': { transform: 'scale(0.995)' },
-          '&:focus-visible': {
-            outline: '3px solid var(--Focus-Visible)',
-            outlineOffset: '3px',
-          },
-        }),
-        ...(!isClickable && !isDefault && {
-          '&:hover': { boxShadow: hoverShadow },
-        }),
         ...sx,
       }}
       {...props}
@@ -217,7 +196,7 @@ export function Ratio({
           backgroundColor: showPlaceholder ? 'transparent' : 'var(--Background)',
           color: 'var(--Text)',
           fontFamily: 'inherit',
-          borderRadius: isDefault ? 0 : 'calc(var(--Style-Border-Radius) - 1px)',
+          borderRadius: 0,
           // Center the placeholder icon; otherwise let a single child fill.
           '& > *': { width: '100%', height: '100%' },
         }}
