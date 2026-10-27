@@ -711,3 +711,27 @@ describe('Vertical noCount: the rule runs through the dots', () => {
     expect(c).not.toContain('16px - ');
   });
 });
+
+describe('labelPosition', () => {
+  const wrapperOf = (container) => container.querySelector('.step-label').closest('.step > *');
+  const direction = (el) => window.getComputedStyle(el).flexDirection;
+
+  it('follows the orientation when unset', () => {
+    const h = render(<Stepper><Step label="A" /></Stepper>);
+    expect(direction(wrapperOf(h.container))).toBe('column');
+    const v = render(<Stepper orientation="vertical"><Step label="A" /></Stepper>);
+    expect(direction(wrapperOf(v.container))).not.toBe('column');
+  });
+
+  it('puts the label beside the circle in a horizontal stepper', () => {
+    const { container } = render(<Stepper labelPosition="right"><Step label="A" /><Step label="B" /></Stepper>);
+    expect(direction(wrapperOf(container))).not.toBe('column');
+    expect(container.querySelector('.step-label').style.textAlign).toBe('left');
+  });
+
+  it('puts the label under the circle in a vertical stepper', () => {
+    const { container } = render(<Stepper orientation="vertical" labelPosition="bottom"><Step label="A" /></Stepper>);
+    expect(direction(wrapperOf(container))).toBe('column');
+    expect(container.querySelector('.step-label').style.textAlign).toBe('center');
+  });
+});

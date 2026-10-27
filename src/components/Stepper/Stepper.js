@@ -124,6 +124,11 @@ export function Stepper({
      the inline-style prop, so the Figma property name cannot be used verbatim
      here. The VALUES match exactly, which is what a converter reads. */
   variant = 'count',
+  /* Where each step's label sits: 'bottom' (under the circle) or 'right'
+     (beside it) — Figma's Count Step Bottom Label / Right Label booleans.
+     Unset, it follows the orientation: under in a horizontal stepper, beside
+     in a vertical one. */
+  labelPosition,
   className = '',
   sx = {},
   ...props
@@ -133,7 +138,7 @@ export function Stepper({
   const isHorizontal = orientation === 'horizontal';
 
   return (
-    <StepperContext.Provider value={{ orientation, size, color, activeStep, clickable, onStepClick, dashedIncomplete, totalSteps, variant }}>
+    <StepperContext.Provider value={{ orientation, size, color, activeStep, clickable, onStepClick, dashedIncomplete, totalSteps, variant, labelPosition }}>
       <Box
         component="ol"
         role="list"
@@ -173,7 +178,7 @@ export function Step({
   sx = {},
   ...props
 }) {
-  const { orientation, size, color, activeStep, clickable: groupClickable, onStepClick, dashedIncomplete, totalSteps, variant } = useStepperContext();
+  const { orientation, size, color, activeStep, clickable: groupClickable, onStepClick, dashedIncomplete, totalSteps, variant, labelPosition } = useStepperContext();
   /* `clickable` is a Stepper-level switch, so before this a step you cannot
      reach yet was styled and announced exactly like one you can. Folding
      disabled into it here drops the role, tabIndex, key handler and onClick
@@ -182,6 +187,7 @@ export function Step({
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
   const C = COLOR_LABEL_MAP[color] || 'Default';
   const isHorizontal = orientation === 'horizontal';
+  const labelBelow = labelPosition ? labelPosition === 'bottom' : isHorizontal;
   const isActive = _index === activeStep;
   const isCompleted = _index < activeStep;
   const isIncomplete = _index > activeStep;
@@ -501,7 +507,7 @@ export function Step({
          file binds Dynamic-Label on all fifteen variants; bolding only the
          current step, and dropping the rest to 400, was this file's idea. */
       color: labelToken,
-      textAlign: isHorizontal ? 'center' : 'left',
+      textAlign: labelBelow ? 'center' : 'left',
       whiteSpace: 'nowrap',
       /* A flex item, and one that must not be squeezed: the column it sits in
          is one circle wide and the label is routinely wider. */
@@ -510,6 +516,39 @@ export function Step({
       {displayLabel}
     </Label>
   ) : null;
+
+  /* The circle and its label, laid out by labelPosition — under it or beside
+     it — independently of which way the steps run. */
+  const indicatorAndLabel = labelBelow ? (
+    <Box sx={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      flexShrink: 0,
+      width: isDot ? s.dot : s.indicator + 'px',
+    }}>
+      {bandedIndicator}
+      {/* width 100% so the nowrap label centres on the circle and spills
+          evenly both ways; it adds height to the column but never width. */}
+      {/* CENTRED BY FLEX, not by text-align. The wrapper is one circle
+          wide and the label is wider, so `text-align: center` only
+          centres it if the label is a block that fills the wrapper —
+          Label is not, so it sat against the left edge and the whole
+          caption read as shifted right of its circle. A flex container
+          with justify-content: center centres the item on the box and
+          lets it overflow both ways, whatever the child's display. */}
+      {labelEl && (
+        <Box sx={{
+          // A dot's label sits right under its 32px band (Figma: gap 0).
+          mt: isDot ? 0 : 'var(--Sizing-Half)', width: '100%',
+          display: 'flex', justifyContent: 'center',
+        }}>{labelEl}</Box>
+      )}
+    </Box>
+  ) : (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 'var(--Sizing-1)', flexShrink: 0, ...(isDot && { height: s.dot, overflow: 'visible' }) }}>
+      {bandedIndicator}
+      {labelEl}
+    </Box>
+  );
 
   if (isHorizontal) {
     return (
@@ -536,29 +575,7 @@ export function Step({
             long one pushed the connector away from the circle. That is the
             rest of the gap: removing the 8px margins was necessary and not
             sufficient, because the column itself was too wide. */}
-        <Box sx={{
-          display: 'flex', flexDirection: 'column', alignItems: 'center',
-          flexShrink: 0,
-          width: isDot ? s.dot : s.indicator + 'px',
-        }}>
-          {bandedIndicator}
-          {/* width 100% so the nowrap label centres on the circle and spills
-              evenly both ways; it adds height to the column but never width. */}
-          {/* CENTRED BY FLEX, not by text-align. The wrapper is one circle
-              wide and the label is wider, so `text-align: center` only
-              centres it if the label is a block that fills the wrapper —
-              Label is not, so it sat against the left edge and the whole
-              caption read as shifted right of its circle. A flex container
-              with justify-content: center centres the item on the box and
-              lets it overflow both ways, whatever the child's display. */}
-          {labelEl && (
-            <Box sx={{
-              // A dot's label sits right under its 32px band (Figma: gap 0).
-              mt: isDot ? 0 : 'var(--Sizing-Half)', width: '100%',
-              display: 'flex', justifyContent: 'center',
-            }}>{labelEl}</Box>
-          )}
-        </Box>
+        {indicatorAndLabel}
         {/* Connector — centered to circle via negative margin for label height */}
         {connectorEl}
       </Box>
@@ -578,10 +595,7 @@ export function Step({
       {/* Step and Right Label binds itemSpacing -> Sizing-1. */}
       {/* A dot's row is the dot's height and the label overflows it, centred —
           Figma's Step and Right Label is 12 tall with its 24px label at y -6. */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 'var(--Sizing-1)', ...(isDot && { height: s.dot, overflow: 'visible' }) }}>
-        {bandedIndicator}
-        {labelEl}
-      </Box>
+      {indicatorAndLabel}
       {connectorEl}
     </Box>
   );
