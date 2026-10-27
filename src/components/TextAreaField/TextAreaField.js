@@ -8,23 +8,24 @@
 // tell from the library listing whether one comes with it. `Input` and
 // `Input Field` split the same way.
 //
-// ── Label top, left or none ──────────────────────────────────────────────
-// labelPosition = 'top' (default) | 'left' | 'none' — Figma's Label axis.
-// LEFT keeps the label at the TOP-left, Sizing-1 from the field, so it sits
-// beside the first line however tall the area grows. NONE draws no label; the
-// `label` text still names the control (aria-label), because a field with no
-// name is not optional.
+// ── Label top, left, floating or none ───────────────────────────────────
+// labelPosition = 'top' (default) | 'left' | 'floating' | 'none' — Figma's
+// Label axis. LEFT keeps the label at the TOP-left, Sizing-1 from the field,
+// so it sits beside the first line however tall the area grows. NONE draws no
+// label; the `label` text still names the control (aria-label), because a
+// field with no name is not optional.
 //
-// FLOATING is deliberately not offered yet (on the checklist): a text area's
-// value starts at the top and grows down, so a floating label either shoves
-// the content down on focus or lands on the first line — it needs its own
-// design before it gets a prop.
-//
+// FLOATING is the TextArea's own Style=Floating: the label rests on the first
+// line, where a placeholder would be, and rises to the top edge on focus or
+// once there is a value. Input draws it (MUI owns the association), so there
+// is no FormLabel and no placeholder — the label IS the placeholder at rest.
+
 // ── It does NOT pass `label` to the TextArea ─────────────────────────────────
 // Input renders its own label when given one. Passing it through would draw a
 // second label, and the one it draws reads Body/BodySmall at a literal 13px
 // rather than the Label type style. The FormLabel here is the only label, and
-// `htmlFor` ties it to the control by id.
+// `htmlFor` ties it to the control by id. Floating is the one exception: that
+// label lives inside the field, so Input draws it.
 import React, { useId } from 'react';
 import { Box } from '@mui/material';
 import { FormLabel } from '../FormLabel';
@@ -47,7 +48,8 @@ export function TextAreaField({
   const id = idProp || generatedId;
 
   const isLeft = labelPosition === 'left';
-  const showLabel = labelPosition !== 'none';
+  const isFloating = labelPosition === 'floating';
+  const showLabel = labelPosition !== 'none' && !isFloating;
   return (
     <Box
       className={'textarea-field textarea-field-label-' + labelPosition + (className ? ' ' + className : '')}
@@ -73,8 +75,9 @@ export function TextAreaField({
            label — that one is aria-hidden precisely so this is the single
            place a screen reader learns it. */
         aria-required={type === 'required' ? true : undefined}
-        {...(!showLabel && typeof label === 'string' ? { 'aria-label': label } : {})}
+        {...(labelPosition === 'none' && typeof label === 'string' ? { 'aria-label': label } : {})}
         {...props}
+        {...(isFloating ? { labelPosition: 'floating', label, placeholder: undefined } : {})}
         sx={{ ...(isLeft ? { flex: 1, minWidth: 0 } : {}), ...(props.sx || {}) }}
       />
     </Box>

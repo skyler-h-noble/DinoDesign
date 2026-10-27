@@ -412,7 +412,18 @@ export function Input({
     ? { minRows: rows ?? 1, maxRows: maxRows ?? 8 }
     : { rows, maxRows };
 
-  const { labelX, padX, restingY, shrunkY } = floatingLabelGeometry(sizeConfig, !!startAdornment);
+  const geo = floatingLabelGeometry(sizeConfig, !!startAdornment && !multiline);
+  const { padX, shrunkY } = geo;
+  /* A TEXT AREA's floating label sits on the first line, not centred in a
+     field: Figma's TextArea Style=Floating rests it where the text starts
+     (Input-Padding down, Sizing-1 in from the frame's own Sizing-1) and never
+     moves it for a decorator — those live in the actions row underneath. */
+  /* The Body line, whatever the label does: the floating size map is a
+     single-line field's and carries none, which left an empty floating
+     textarea on MUI's 1.4375em — 23px, a pixel short of Figma's 24. */
+  const textAreaLine = (SIZE_MAP[size] || SIZE_MAP.medium).lineHeight;
+  const labelX = multiline ? 'calc(var(--Sizing-1, 8px) * 2)' : geo.labelX;
+  const restingY = multiline ? 'var(--Input-Padding, 12px)' : geo.restingY + 'px';
   const labelStyle = FLOATING_LABEL_STYLE[size] || FLOATING_LABEL_STYLE.medium;
 
   // Extract color name from variant (e.g. "primary-outline" → "primary")
@@ -760,7 +771,7 @@ export function Input({
                     padding: 'var(--Input-Padding, 12px) var(--Sizing-1, 8px)',
                     // Stated: an EMPTY textarea is sized off its placeholder, and
                     // without the Body line height it came out 1px short.
-                    lineHeight: sizeConfig.lineHeight,
+                    lineHeight: textAreaLine,
                     color: 'inherit',
                     resize,
                     '&::placeholder': { color: 'var(--Quiet)', opacity: 1 },
@@ -771,6 +782,18 @@ export function Input({
                   },
                   '& .MuiInputAdornment-positionStart': { order: 1, margin: 0 },
                   '& .MuiInputAdornment-positionEnd': { order: 2, margin: '0 0 0 auto' },
+                  /* Floating with a value, the text drops to Sizing-2 top and
+                     bottom to make room for the raised label (Figma: 48 → 56).
+                     Focus does the same — below. Hover raises the label but
+                     keeps the padding, so the field doesn't jump under the
+                     pointer. */
+                  ...(isFloating && filled && {
+                    '& textarea': {
+                      flexBasis: '100%', order: 0, lineHeight: textAreaLine, color: 'inherit', resize,
+                      padding: 'var(--Sizing-2, 16px) var(--Sizing-1, 8px)',
+                      '&::placeholder': { color: 'var(--Quiet)', opacity: 1 },
+                    },
+                  }),
                 }),
               },
 
@@ -798,7 +821,7 @@ export function Input({
                  * Y — the resting label is vertically CENTRED in the field.
                  * A constant 16px centred the small field and left large 4px
                  * high, which is why the error grew with the size. */
-                transform: 'translate(' + labelX + ', ' + restingY + 'px)',
+                transform: 'translate(' + labelX + ', ' + restingY + ')',
                 '&.MuiInputLabel-shrink': {
                   /* Shrunk, it sits in the field's top padding, bottom-aligned
                      to where the text begins. No scale() — it becomes a real
@@ -816,6 +839,9 @@ export function Input({
                  flag, so the raised label is a property of :focus-within — the
                  same selector the ring uses, and one a forced-state preview can
                  reach without real focus. */
+              ...(isFloating && multiline && !disabled && {
+                '&:focus-within textarea': { paddingTop: 'var(--Sizing-2, 16px)', paddingBottom: 'var(--Sizing-2, 16px)' },
+              }),
               ...(isFloating && {
                 /* Figma raises it on HOVER too: the empty field clears its
                    resting label out of the way as the pointer arrives, ready

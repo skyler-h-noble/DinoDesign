@@ -98,3 +98,22 @@ describe('labelPosition', () => {
     expect(screen.getByRole('textbox', { name: 'Notes' })).toBeInTheDocument();
   });
 });
+
+describe('TextAreaField floating', () => {
+  it('names the control with the label inside the field, and draws no Form-Label', () => {
+    const { container } = render(<TextAreaField label="About you" labelPosition="floating" />);
+    expect(screen.getByRole('textbox', { name: 'About you' })).toBeInTheDocument();
+    expect(container.querySelector('.form-label')).toBeNull();
+    expect(container.querySelector('.MuiInputLabel-root')).not.toBeNull();
+  });
+
+  it('drops the placeholder: at rest the label is the placeholder', () => {
+    render(<TextAreaField label="About you" labelPosition="floating" placeholder="Type here" />);
+    expect(screen.getByRole('textbox').getAttribute('placeholder')).toBeNull();
+  });
+
+  it('marks the floating class on the wrapper', () => {
+    const { container } = render(<TextAreaField label="About you" labelPosition="floating" />);
+    expect(container.querySelector('.textarea-field-label-floating')).not.toBeNull();
+  });
+});
