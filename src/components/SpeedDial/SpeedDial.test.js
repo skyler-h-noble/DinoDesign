@@ -267,3 +267,15 @@ describe('Matches Figma', () => {
     expect(screen.getByRole('button', { name: 'Add' })).toHaveAttribute('aria-expanded', 'false');
   });
 });
+
+describe('action labels use the lib Tooltip', () => {
+  it('shows the action name in a tooltip when the action is hovered', async () => {
+    const { findByRole } = render(
+      <SpeedDial open actions={[{ name: 'Share', icon: <span /> }]} onOpen={() => {}} onClose={() => {}} />
+    );
+    const action = screen.getByRole('menuitem', { name: 'Share' });
+    fireEvent.mouseOver(action);
+    const tip = await findByRole('tooltip');
+    expect(tip).toHaveTextContent('Share');
+  });
+});

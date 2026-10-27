@@ -1,6 +1,7 @@
 // src/components/SpeedDial/SpeedDial.js
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Box, Tooltip as MuiTooltip } from '@mui/material';
+import { Box } from '@mui/material';
+import { Tooltip } from '../Tooltip/Tooltip';
 import AddIcon from '@mui/icons-material/Add';
 import { Fab } from '../Fab/Fab';
 
@@ -328,19 +329,24 @@ export function SpeedDial({
 
           if (showTooltips && action.name) {
             return (
-              <MuiTooltip
+              /* The lib's Tooltip — its one solid style, as Figma's SpeedDial
+                 draws beside each action. This was a raw MUI tooltip painted
+                 Container + a Border + a hardcoded shadow: the light / outline
+                 tooltip the system retired. */
+              <Tooltip
                 key={action.key || index}
                 title={action.name}
                 placement={tooltipPlacement}
-                arrow
-                open={isOpen ? undefined : false}
-                slotProps={{
-                  tooltip: { sx: { backgroundColor: 'var(--Container)', color: 'var(--Text)', fontSize: '12px', fontWeight: 500, border: '1px solid var(--Border)', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' } },
-                  arrow: { sx: { color: 'var(--Container)' } },
-                }}
+                /* Not open={isOpen ? undefined : false}: MUI fixes controlled vs
+                   uncontrolled on the first render, so flipping between the two
+                   left the popper with open={undefined}. A closed dial just has
+                   nothing to trigger its labels. */
+                disableHoverListener={!isOpen}
+                disableFocusListener={!isOpen}
+                disableTouchListener={!isOpen}
               >
                 {actionEl}
-              </MuiTooltip>
+              </Tooltip>
             );
           }
           return actionEl;

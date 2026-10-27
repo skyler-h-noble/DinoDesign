@@ -97,7 +97,10 @@ const pulseKeyframes = `
 }
 `;
 
-export function Fab({
+/* forwardRef, so a Tooltip (SpeedDial's action labels) can anchor to the
+   button. It returned a fragment with no ref, so MUI's Tooltip had nothing to
+   measure and warned "Expected an element that can hold a ref". */
+export const Fab = React.forwardRef(function Fab({
   children,
   icon,
   label,
@@ -116,7 +119,7 @@ export function Fab({
   className = '',
   sx = {},
   ...props
-}) {
+}, ref) {
   /* `variant` stays as a prop so an existing variant="solid" keeps working and
      does not fall through ...props onto the <button> as an unknown attribute.
      Anything else normalises to solid — there is only one variant now. */
@@ -144,6 +147,7 @@ export function Fab({
     <>
       {animate && <style>{pulseKeyframes}</style>}
       <Box
+        ref={ref}
         component="button"
         type="button"
         role="button"
@@ -253,6 +257,6 @@ export function Fab({
       </Box>
     </>
   );
-}
+});
 
 export default Fab;
