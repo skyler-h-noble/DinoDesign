@@ -225,9 +225,16 @@ export const TABS_DOC = {
     values: ['small', 'medium', 'large'],
     default: 'medium'
   }, {
+    name: 'overflow',
+    type: 'string',
+    values: ['none', 'scroll', 'more'],
+    default: 'none',
+    note: 'Figma\u2019s Overflow: what happens when the tabs don\u2019t fit. scroll adds ghost arrow Buttons at the ends (up / down when vertical); more (horizontal only) shows the tabs that fit and a ghost \u2026 Button opening a Popover of the rest.'
+  }, {
     name: 'scrollable',
     type: 'boolean',
-    default: 'false'
+    default: 'false',
+    note: 'The old name for overflow="scroll"; still works.'
   }],
   states: [{
     state: 'Hover',

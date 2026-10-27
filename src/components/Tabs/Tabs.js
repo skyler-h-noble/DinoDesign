@@ -1,7 +1,15 @@
 // src/components/Tabs/Tabs.js
-import React, { createContext, useContext, useState, useRef, useCallback, useId, useEffect } from 'react';
+import React, { createContext, useContext, useState, useRef, useCallback, useId, useEffect, useLayoutEffect } from 'react';
 import { Box } from '@mui/material';
-import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography, CAP_HEIGHT_TRIM } from '../Typography';
+import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography, CAP_HEIGHT_TRIM, Body } from '../Typography';
+import { Button } from '../Button/Button';
+import { Popover } from '../Popover/Popover';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import CheckIcon from '@mui/icons-material/Check';
 
 /**
  * Tabs Component Suite
@@ -34,6 +42,14 @@ import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography, CAP_H
  * ORIENTATION: horizontal | vertical-left | vertical-right ('vertical' = right)
  * DECORATORS: startDecorator / endDecorator per tab
  * ICON ONLY: tabs show only icon, no text
+ * OVERFLOW (Figma's Overflow axis) — what happens when the tabs don't fit:
+ *   none    nothing; the tabs are expected to fit (default)
+ *   scroll  the row scrolls, with ghost icon Buttons at either end — ‹ › when
+ *           horizontal, up / down when vertical (`scrollable` is the old name)
+ *   more    horizontal only: the tabs that fit, then a ghost … Button opening
+ *           a Popover of the rest. Picking one selects it; while the selected
+ *           tab is in the list, the … shows selected. Vertical tabs can just
+ *           scroll, so `more` on a vertical list falls back to scroll and warns.
  */
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -183,10 +199,16 @@ const TabsContext = createContext({
   size: 'medium',
   orientation: 'horizontal',
   scrollable: false,
+  overflow: 'none',
   baseline: true,
   tabsId: '',
 });
 export const useTabsContext = () => useContext(TabsContext);
+
+let warnedVerticalMore = false;
+/* The … Button's square, per size — what the More measurement reserves before
+   the button exists. Button-Height, as Button's own icon-only square. */
+const MORE_SIZE = { small: 24, medium: 32, large: 40 };
 
 /* ─── Tabs ─── */
 export function Tabs({
@@ -199,6 +221,9 @@ export function Tabs({
   size = 'medium',
   orientation = 'horizontal',
   scrollable = false,
+  /* 'none' | 'scroll' | 'more' — see OVERFLOW above. Unset follows the old
+     `scrollable` (true = 'scroll'). */
+  overflow: overflowProp,
   /* The rule the tabs sit on. Default true, matching the Figma component's
      Baseline boolean, which also defaults on. Turned off where the container
      already provides the separation — an AppBar's own edge, for instance. */
@@ -211,6 +236,16 @@ export function Tabs({
   const controlled = controlledValue !== undefined;
   const value = controlled ? controlledValue : internalValue;
   const tabsId = useId();
+  let overflow = overflowProp || (scrollable ? 'scroll' : 'none');
+  if (overflow === 'more' && !isHorizontalOrientation(orientation)) {
+    if (process.env.NODE_ENV !== 'production' && !warnedVerticalMore) {
+      warnedVerticalMore = true;
+      // eslint-disable-next-line no-console
+      console.warn('[OmniDesign] <Tabs overflow="more"> is horizontal only — a vertical list scrolls. Rendering overflow="scroll".');
+    }
+    overflow = 'scroll';
+  }
+  const isScroll = overflow === 'scroll';
 
   const setValue = useCallback((val) => {
     if (controlled) {
@@ -222,11 +257,11 @@ export function Tabs({
   }, [controlled, onChange]);
 
   return (
-    <TabsContext.Provider value={{ value, setValue, variant, color, size, orientation, scrollable, baseline, tabsId }}>
+    <TabsContext.Provider value={{ value, setValue, variant, color, size, orientation, scrollable: isScroll, overflow, baseline, tabsId }}>
       <Box
         className={'tabs tabs-' + orientation + ' tabs-' + size + ' tabs-' + variant
           + (variant !== 'standard' ? ' tabs-' + color : '')
-          + (scrollable ? ' tabs-scrollable' : '') + ' ' + className}
+          + (isScroll ? ' tabs-scrollable' : '') + (overflow === 'more' ? ' tabs-more' : '') + ' ' + className}
         sx={{
           display: 'flex',
           flexDirection: isHorizontalOrientation(orientation) ? 'column' : 'row',
@@ -253,12 +288,17 @@ export function TabList({
   sx = {},
   ...props
 }) {
-  const { variant, color, size, orientation, scrollable, baseline, tabsId } = useTabsContext();
+  const { value, setValue, variant, color, size, orientation, scrollable, overflow, baseline, tabsId } = useTabsContext();
   const tabListRef = useRef(null);
   const scrollContainerRef = useRef(null);
+  const moreRef = useRef(null);
+  const widthsRef = useRef([]);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(null); // null = all
+  const [moreOpen, setMoreOpen] = useState(false);
   const isHorizontal = isHorizontalOrientation(orientation);
+  const isMore = overflow === 'more' && isHorizontal;
   const isStandard = variant === 'standard';
   const isSolid = variant === 'solid';
   const isLight = variant === 'light';
@@ -285,11 +325,14 @@ export function TabList({
     : 'Surface';
 
   // Scroll state detection
+  // Back / forward: left / right when horizontal, up / down when vertical.
   const updateScrollState = useCallback(() => {
     const el = scrollContainerRef.current;
-    if (!el || !scrollable || !isHorizontal) return;
-    setCanScrollLeft(el.scrollLeft > 1);
-    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 1);
+    if (!el || !scrollable) return;
+    const pos = isHorizontal ? el.scrollLeft : el.scrollTop;
+    const max = isHorizontal ? el.scrollWidth - el.clientWidth : el.scrollHeight - el.clientHeight;
+    setCanScrollLeft(pos > 1);
+    setCanScrollRight(pos < max - 1);
   }, [scrollable, isHorizontal]);
 
   useEffect(() => {
@@ -308,14 +351,15 @@ export function TabList({
   const scrollBy = (direction) => {
     const el = scrollContainerRef.current;
     if (!el) return;
-    const amount = el.clientWidth * 0.6;
-    el.scrollBy({ left: direction * amount, behavior: 'smooth' });
+    if (isHorizontal) el.scrollBy({ left: direction * el.clientWidth * 0.6, behavior: 'smooth' });
+    else el.scrollBy({ top: direction * el.clientHeight * 0.6, behavior: 'smooth' });
   };
 
   // Keyboard navigation within tab list
   const handleKeyDown = (e) => {
     const container = scrollable ? scrollContainerRef.current : tabListRef.current;
-    const tabs = container?.querySelectorAll('[role="tab"]:not([aria-disabled="true"])');
+    // Tabs folded into More are not in the row, so arrows skip them.
+    const tabs = container?.querySelectorAll('[role="tab"]:not([aria-disabled="true"]):not(.tab-overflowed)');
     if (!tabs?.length) return;
     const current = Array.from(tabs).indexOf(document.activeElement);
     if (current < 0) return;
@@ -344,41 +388,73 @@ export function TabList({
     }
   };
 
-  const items = React.Children.toArray(children).filter(React.isValidElement);
+  /* More: measure which tabs fit. Widths are read while every tab is shown
+     and cached, so hiding the overflow never changes what is measured. The …
+     Button's square is reserved first whenever anything has to fold. */
+  const measure = useCallback(() => {
+    if (!isMore) return;
+    const root = tabListRef.current, list = scrollContainerRef.current;
+    if (!root || !list) return;
+    const tabs = Array.from(list.querySelectorAll('[role="tab"]'));
+    if (!tabs.some((t) => t.classList.contains('tab-overflowed'))) widthsRef.current = tabs.map((t) => t.offsetWidth);
+    const widths = widthsRef.current;
+    if (!widths.length) return;
+    const avail = root.clientWidth;
+    const total = widths.reduce((a, b) => a + b, 0);
+    if (!avail || total <= avail) { setVisibleCount(null); return; }
+    let used = moreRef.current?.offsetWidth || MORE_SIZE[size] || MORE_SIZE.medium;
+    let n = 0;
+    while (n < widths.length && used + widths[n] <= avail) { used += widths[n]; n += 1; }
+    setVisibleCount(Math.max(1, n));
+  }, [isMore, size]);
 
-  const scrollBtnSx = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '28px',
-    minWidth: '28px',
-    border: 'none',
-    backgroundColor: 'transparent',
-    color: 'var(--Text-Quiet)',
-    cursor: 'pointer',
-    fontSize: '16px',
-    fontFamily: 'inherit',
-    lineHeight: 1,
-    flexShrink: 0,
-    transition: 'color 0.15s ease, background-color 0.15s ease',
-    '&:hover': { color: 'var(--Text)', backgroundColor: 'var(--Hover)' },
-    '&:active': { backgroundColor: 'var(--Pressed)' },
-    /* The ring sits 1px IN from the edge, not flush against it.
-     *
-     * outline-offset is measured to the outline's INNER edge, so a 3px outline at
-     * -3px lands its outer edge exactly on the border — flush. -4px moves it one
-     * more pixel in, leaving the 1px gap Figma draws: the Focus-Visible frame is
-     * 129x30 at (1,1) inside a 131x32 tab, with a 3px INSIDE stroke.
-     *
-     * The arithmetic is why this is easy to get wrong in either direction: the
-     * number is the ring's thickness PLUS the gap, not the gap. */
-    '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '-4px' },
-    '&:disabled': { opacity: 'var(--Disabled, 0.38)', cursor: 'default', '&:hover': { backgroundColor: 'transparent', color: 'var(--Text-Quiet)' } },
-  };
+  const childCount = React.Children.toArray(children).filter(React.isValidElement).length;
+  useLayoutEffect(() => { if (isMore) { setVisibleCount(null); widthsRef.current = []; } }, [isMore, childCount]);
+  useLayoutEffect(() => { measure(); });
+  useEffect(() => {
+    if (!isMore || typeof ResizeObserver === 'undefined' || !tabListRef.current) return undefined;
+    const ro = new ResizeObserver(() => measure());
+    ro.observe(tabListRef.current);
+    return () => ro.disconnect();
+  }, [isMore, measure]);
+
+  const items = React.Children.toArray(children).filter(React.isValidElement);
+  const shown = isMore && visibleCount != null ? visibleCount : items.length;
+  const overflowed = items.slice(shown).map((child, i) => {
+    const index = shown + i;
+    return { index, value: child.props.value !== undefined ? child.props.value : index,
+      label: child.props.children, icon: child.props.startDecorator, disabled: child.props.disabled };
+  });
+  const selectedHidden = overflowed.find((o) => o.value === value);
+
+  /* The arrows are the library's icon-only ghost Button (Figma: a ghost
+     iconOnly Button at either end). They were raw buttons with a hand-drawn
+     glyph, hover and focus ring. */
+  const btnSize = size === 'large' ? 'large' : size === 'small' ? 'small' : 'medium';
+  const scrollButton = (dir) => (
+    <Button iconOnly variant="ghost" size={btnSize}
+      aria-label={isHorizontal ? (dir < 0 ? 'Scroll tabs left' : 'Scroll tabs right') : (dir < 0 ? 'Scroll tabs up' : 'Scroll tabs down')}
+      onClick={() => scrollBy(dir)} disabled={dir < 0 ? !canScrollLeft : !canScrollRight}
+      className={'tab-list-scroll-btn tab-list-scroll-btn-' + (dir < 0 ? (isHorizontal ? 'left' : 'up') : (isHorizontal ? 'right' : 'down'))}
+      sx={{ flexShrink: 0, alignSelf: 'center' }}>
+      {isHorizontal ? (dir < 0 ? <ChevronLeftIcon /> : <ChevronRightIcon />) : (dir < 0 ? <ExpandLessIcon /> : <ExpandMoreIcon />)}
+    </Button>
+  );
 
   const tabListContent = items.map((child, index) =>
-    React.cloneElement(child, { _index: index, key: child.key || index })
+    React.cloneElement(child, { _index: index, _overflowed: index >= shown, key: child.key || index })
   );
+
+  const rowSx = {
+    display: 'flex', alignItems: 'center', gap: 'var(--Sizing-1, 8px)', width: '100%',
+    border: 'none', background: 'transparent', font: 'inherit', color: 'var(--Text)', textAlign: 'left',
+    padding: 'var(--Sizing-1, 8px) var(--Sizing-1-and-Half, 12px)', cursor: 'pointer',
+    borderRadius: 'var(--Menu-Item-Radius, 0px)',
+    '&:hover': { backgroundColor: 'var(--Hover)' },
+    '&:active': { backgroundColor: 'var(--Pressed)' },
+    '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '-3px' },
+    '&:disabled': { opacity: 'var(--Disabled, 0.38)', cursor: 'not-allowed' },
+  };
 
   return (
     <Box
@@ -387,7 +463,7 @@ export function TabList({
       data-surface={dataSurface || undefined}
       className={
         'tab-list tab-list-' + variant + ' tab-list-' + size + ' tab-list-' + orientation
-        + (scrollable ? ' tab-list-scrollable' : '')
+        + (scrollable ? ' tab-list-scrollable' : '') + (isMore ? ' tab-list-more' : '')
         + ' ' + className
       }
       onKeyDown={handleKeyDown}
@@ -410,22 +486,11 @@ export function TabList({
       }}
       {...props}
     >
-      {/* Scroll left button */}
-      {scrollable && isHorizontal && (
-        <Box
-          component="button"
-          aria-label="Scroll tabs left"
-          onClick={() => scrollBy(-1)}
-          disabled={!canScrollLeft}
-          className="tab-list-scroll-btn tab-list-scroll-btn-left"
-          sx={scrollBtnSx}
-        >
-          ‹
-        </Box>
-      )}
+      {/* Scroll back button */}
+      {scrollable && scrollButton(-1)}
 
       {/* Scrollable container or static list */}
-      {scrollable && isHorizontal ? (
+      {scrollable ? (
         <Box
           ref={scrollContainerRef}
           role="tablist"
@@ -433,8 +498,8 @@ export function TabList({
           className="tab-list-scroll-container"
           sx={{
             display: 'flex',
-            flexDirection: 'row',
-            overflowX: 'auto',
+            flexDirection: isHorizontal ? 'row' : 'column',
+            ...(isHorizontal ? { overflowX: 'auto' } : { overflowY: 'auto', minHeight: 0 }),
             scrollbarWidth: 'none',
             '&::-webkit-scrollbar': { display: 'none' },
             flex: 1,
@@ -458,18 +523,34 @@ export function TabList({
         </Box>
       )}
 
-      {/* Scroll right button */}
-      {scrollable && isHorizontal && (
-        <Box
-          component="button"
-          aria-label="Scroll tabs right"
-          onClick={() => scrollBy(1)}
-          disabled={!canScrollRight}
-          className="tab-list-scroll-btn tab-list-scroll-btn-right"
-          sx={scrollBtnSx}
-        >
-          ›
-        </Box>
+      {/* Scroll forward button */}
+      {scrollable && scrollButton(1)}
+
+      {/* More: a ghost … Button after the tablist (outside it — it is not a
+          tab), opening a Popover of the tabs that did not fit. */}
+      {isMore && overflowed.length > 0 && (
+        <>
+          <Button ref={moreRef} iconOnly variant="ghost" size={btnSize} selected={!!selectedHidden}
+            className="tab-list-more-btn" aria-haspopup="dialog" aria-expanded={moreOpen}
+            aria-label={overflowed.length + ' more tabs' + (selectedHidden && typeof selectedHidden.label === 'string' ? ', ' + selectedHidden.label + ' selected' : '')}
+            onClick={() => setMoreOpen((o) => !o)} sx={{ flexShrink: 0, alignSelf: 'center' }}>
+            <MoreHorizIcon />
+          </Button>
+          <Popover open={moreOpen} onClose={() => setMoreOpen(false)} anchorEl={moreRef.current}
+            placement="bottom-end" arrow width="auto" theme={null} aria-label="More tabs">
+            <Box className="tab-list-more-menu" sx={{ display: 'flex', flexDirection: 'column', p: 'var(--Sizing-1, 8px)', minWidth: 160 }}>
+              {overflowed.map((o) => (
+                <Box key={'more-' + o.index} component="button" type="button" className="tab-list-more-item"
+                  aria-current={o.value === value ? 'true' : undefined} disabled={o.disabled}
+                  onClick={() => { setValue(o.value); setMoreOpen(false); }} sx={rowSx}>
+                  {o.icon && <Box component="span" sx={{ display: 'inline-flex', flexShrink: 0 }}>{o.icon}</Box>}
+                  <Body component="span" sx={{ flex: 1, color: 'inherit', fontWeight: o.value === value ? 600 : undefined }}>{o.label}</Body>
+                  {o.value === value && <CheckIcon aria-hidden="true" sx={{ fontSize: 'var(--Button-Icon, 20px)' }} />}
+                </Box>
+              ))}
+            </Box>
+          </Popover>
+        </>
       )}
     </Box>
   );
@@ -480,6 +561,8 @@ export function Tab({
   children,
   value: tabValue,
   _index = 0,
+  /* Folded into the TabList's More list — not drawn in the row. */
+  _overflowed = false,
   disabled = false,
   startDecorator,
   endDecorator,
@@ -545,10 +628,11 @@ export function Tab({
         + (isSelected ? ' tab-selected' : '')
         + (disabled ? ' tab-disabled' : '')
         + (iconOnly ? ' tab-icon-only' : '')
+        + (_overflowed ? ' tab-overflowed' : '')
         + ' ' + className
       }
       sx={{
-        display: 'inline-flex',
+        display: _overflowed ? 'none' : 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
         gap: TAB_CONTENT_GAP,

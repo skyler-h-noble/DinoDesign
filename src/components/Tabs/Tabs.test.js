@@ -542,3 +542,78 @@ describe('TabList rounded (retired)', () => {
     warn.mockRestore();
   });
 });
+
+describe('Tabs overflow', () => {
+  /* jsdom has no layout: give the list 200px and each tab 80px. */
+  let restore;
+  beforeEach(() => {
+    const ow = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetWidth');
+    const cw = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'clientWidth');
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', { configurable: true, get() {
+      if (this.getAttribute('role') === 'tab') return 80;
+      if (this.classList.contains('tab-list-more-btn')) return 32;
+      return 0;
+    } });
+    Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, get() {
+      return this.classList.contains('tab-list') ? 200 : 0;
+    } });
+    restore = () => {
+      if (ow) Object.defineProperty(HTMLElement.prototype, 'offsetWidth', ow);
+      if (cw) Object.defineProperty(HTMLElement.prototype, 'clientWidth', cw);
+    };
+  });
+  afterEach(() => restore());
+
+  const four = (props = {}) => render(
+    <Tabs defaultValue={0} overflow="more" {...props}>
+      <TabList><Tab>One</Tab><Tab>Two</Tab><Tab>Three</Tab><Tab>Four</Tab></TabList>
+    </Tabs>
+  );
+
+  test('more: shows the tabs that fit, folds the rest behind a … button', () => {
+    const { container } = four();
+    // 200 - 32 (the … button) = 168 → two 80px tabs fit.
+    expect(container.querySelectorAll('[role="tab"]:not(.tab-overflowed)').length).toBe(2);
+    const more = container.querySelector('.tab-list-more-btn');
+    expect(more).toBeTruthy();
+    expect(more.getAttribute('aria-label')).toMatch(/^2 more tabs/);
+    expect(more.closest('[role="tablist"]')).toBeNull();
+  });
+
+  test('more: picking a folded tab selects it and marks the … selected', () => {
+    const { container } = four();
+    fireEvent.click(container.querySelector('.tab-list-more-btn'));
+    const rows = document.querySelectorAll('.tab-list-more-item');
+    expect(rows.length).toBe(2);
+    fireEvent.click(rows[1]); // "Four"
+    expect(container.querySelector('#' + CSS.escape(container.querySelectorAll('[role="tab"]')[3].id)).getAttribute('aria-selected')).toBe('true');
+    expect(container.querySelector('.tab-list-more-btn').getAttribute('aria-label')).toMatch(/Four selected/);
+  });
+
+  test('more on a vertical list falls back to scroll and warns', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const { container } = render(
+      <Tabs overflow="more" orientation="vertical-left"><TabList><Tab>A</Tab><Tab>B</Tab></TabList></Tabs>
+    );
+    expect(container.querySelector('.tab-list-more-btn')).toBeNull();
+    expect(container.querySelector('.tab-list-scroll-btn-up')).toBeTruthy();
+    expect(container.querySelector('.tab-list-scroll-btn-down')).toBeTruthy();
+    warn.mockRestore();
+  });
+
+  test('scroll arrows are the library ghost Button', () => {
+    const { container } = render(
+      <Tabs overflow="scroll"><TabList><Tab>A</Tab><Tab>B</Tab></TabList></Tabs>
+    );
+    const left = container.querySelector('.tab-list-scroll-btn-left');
+    expect(left.className).toMatch(/MuiButton-root/);
+    expect(left.getAttribute('aria-label')).toBe('Scroll tabs left');
+  });
+
+  test('scrollable still means scroll', () => {
+    const { container } = render(
+      <Tabs scrollable><TabList><Tab>A</Tab><Tab>B</Tab></TabList></Tabs>
+    );
+    expect(container.querySelector('.tab-list-scroll-btn-right')).toBeTruthy();
+  });
+});

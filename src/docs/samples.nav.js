@@ -126,6 +126,26 @@ export const NAV_SAMPLES = {
     /* Only observable when the tabs overflow, so the sample needs a frame
        narrower than its own tab strip — otherwise both values look identical
        and the sample teaches that the prop does nothing. */
+    /* Figma's Overflow axis, in a frame too narrow for four tabs. */
+    overflow: () => (
+      <VStack gap="var(--Sizing-3)">
+        {['none', 'scroll', 'more'].map((o) => (
+          <VStack key={o} gap="var(--Sizing-Half)">
+            <Caption color="standard">{o}</Caption>
+            <Frame w={260}>
+              <Tabs defaultValue={0} overflow={o}>
+                <TabList>
+                  <Tab value={0}>Overview</Tab>
+                  <Tab value={1}>Details</Tab>
+                  <Tab value={2}>History</Tab>
+                  <Tab value={3}>Settings</Tab>
+                </TabList>
+              </Tabs>
+            </Frame>
+          </VStack>
+        ))}
+      </VStack>
+    ),
     scrollable: () => (
       <VStack gap="var(--Sizing-3)">
         <VStack gap="var(--Sizing-Half)">
