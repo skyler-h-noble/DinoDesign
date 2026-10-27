@@ -408,3 +408,16 @@ describe('labelPlacement', () => {
       expect(container.querySelector('.MuiFormControlLabel-root')).toHaveClass(cls);
     });
 });
+
+/* Figma's Validation boolean: an error border over the box; aria-invalid. */
+describe('error (Validation)', () => {
+  test('marks the input invalid and adds the error class', () => {
+    const { container } = render(<Checkbox aria-label="Agree" error />);
+    expect(container.querySelector('input')).toHaveAttribute('aria-invalid', 'true');
+    expect(container.querySelector('.chk-error')).toBeInTheDocument();
+  });
+  test('no aria-invalid without it', () => {
+    const { container } = render(<Checkbox aria-label="Agree" />);
+    expect(container.querySelector('input')).not.toHaveAttribute('aria-invalid');
+  });
+});

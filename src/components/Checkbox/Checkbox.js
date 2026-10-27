@@ -232,6 +232,10 @@ export function Checkbox({
   defaultChecked,
   indeterminate = false,
   disabled = false,
+  /* Figma's Validation boolean: a 2px error border over the box in every
+     state (.CheckboxValidation, Icons = Error). Also sets aria-invalid; pair
+     it with a message (FormHelper) and aria-describedby. */
+  error = false,
   onChange,
   name,
   value,
@@ -258,6 +262,7 @@ export function Checkbox({
     ...(ariaLabel      && { 'aria-label': ariaLabel }),
     ...(ariaLabelledBy && { 'aria-labelledby': ariaLabelledBy }),
     ...(ariaDescribedBy && { 'aria-describedby': ariaDescribedBy }),
+    ...(error && { 'aria-invalid': true }),
   };
 
   const checkboxElement = (
@@ -272,7 +277,7 @@ export function Checkbox({
       icon={<UncheckedIcon size={size} variant={variant} />}
       checkedIcon={<CheckedIcon size={size} variant={variant} />}
       indeterminateIcon={<IndeterminateIcon size={size} variant={variant} />}
-      className={'chk-' + variant + ' ' + className}
+      className={'chk-' + variant + (error ? ' chk-error' : '') + ' ' + className}
       inputProps={mergedInputProps}
       disableRipple
       sx={{
@@ -311,6 +316,13 @@ export function Checkbox({
           pointerEvents: 'none',
         },
         ...sx,
+        /* Validation wins over hover / pressed / focus border moves, as
+           Figma's overlay sits on top in every state. */
+        ...(error && {
+          '& .chk-box-icon, &:hover .chk-box-icon, &:active .chk-box-icon, &.Mui-focusVisible .chk-box-icon': {
+            borderColor: 'var(--Icons-Error)',
+          },
+        }),
       }}
       {...props}
     />
