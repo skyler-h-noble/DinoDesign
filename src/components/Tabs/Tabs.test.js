@@ -529,3 +529,16 @@ describe('Tabs — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+describe('TabList rounded (retired)', () => {
+  test('renders square and does not leak the prop', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const { container } = render(
+      <Tabs defaultValue={0}><TabList rounded><Tab>A</Tab><Tab>B</Tab></TabList></Tabs>
+    );
+    const list = container.querySelector('.tab-list');
+    expect(list.getAttribute('rounded')).toBeNull();
+    expect(getComputedStyle(list).borderRadius).toMatch(/^0(px)?$/);
+    warn.mockRestore();
+  });
+});

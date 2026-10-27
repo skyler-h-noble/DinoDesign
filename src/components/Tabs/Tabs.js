@@ -243,9 +243,12 @@ export function Tabs({
 }
 
 /* ─── TabList ─── */
+let warnedRounded = false;
 export function TabList({
   children,
-  rounded = false,
+  /* Retired: Figma's Tabs frame is square and flush. Accepted so an old call
+     doesn't leak `rounded` onto the DOM; renders square and warns once. */
+  rounded,
   className = '',
   sx = {},
   ...props
@@ -260,6 +263,11 @@ export function TabList({
   const isSolid = variant === 'solid';
   const isLight = variant === 'light';
   const isDark = variant === 'dark';
+  if (process.env.NODE_ENV !== 'production' && rounded && !warnedRounded) {
+    warnedRounded = true;
+    // eslint-disable-next-line no-console
+    console.warn('[OmniDesign] <TabList rounded> is retired — the tab list is square and flush, as Figma. Rendering it square.');
+  }
 
   /* The baseline goes on the same edge the indicator does, so the 2px
      indicator lands on top of the 1px rule rather than beside it. */
@@ -395,12 +403,9 @@ export function TabList({
            paint a surface behind the tabs, where a selected tab's background
            would otherwise touch the container's edge. Standard has no such
            background, so it takes Figma's zero. */
-        padding: (isStandard && !rounded) ? 0 : '4px',
-        // overflow: hidden so the active Tab's square-cornered background gets
-        // clipped by the parent's border radius when `rounded` is on. Harmless
-        // when rounded is off (nothing pokes out of a square container).
+        padding: isStandard ? 0 : '4px',
         overflow: 'hidden',
-        borderRadius: rounded ? 'var(--Style-Border-Radius)' : 0,
+        borderRadius: 0,
         ...sx,
       }}
       {...props}
