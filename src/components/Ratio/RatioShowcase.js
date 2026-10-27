@@ -23,7 +23,6 @@ const COLOR_GROUPS = [
   { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
 ];
 
-const VARIANTS = ['default', 'solid', 'light', 'dark'];
 const PADDINGS = ['none', 'xs', 'sm', 'md', 'lg', 'xl'];
 
 function CopyButton({ code }) {
@@ -78,7 +77,6 @@ function ColorSwatchButton({ color, selected, onClick, variant }) {
 
 export function RatioShowcase() {
   const [ratio, setRatio]         = useState('1:1');
-  const [variant, setVariant]     = useState('solid');
   const [color, setColor]         = useState('primary');
   const [padding, setPadding]     = useState('none');
   const [elevated, setElevated]   = useState(false);
@@ -88,7 +86,6 @@ export function RatioShowcase() {
 
   const generateCode = () => {
     const parts = ['ratio="' + ratio + '"'];
-    if (variant !== 'default') parts.push('variant="' + variant + '"');
     if (color !== 'default')   parts.push('color="' + color + '"');
     if (padding !== 'none')    parts.push('padding="' + padding + '"');
     if (elevated)              parts.push('elevated');
@@ -126,7 +123,6 @@ export function RatioShowcase() {
             <Box sx={{ width: '100%', maxWidth: 480 }}>
               <Ratio
                 ratio={ratio}
-                variant={variant}
                 color={color}
                 padding={padding}
                 elevated={elevated}
@@ -148,18 +144,8 @@ export function RatioShowcase() {
                   <Box sx={{ mb: 3 }}>
                   </Box>
 
-                  {/* Variant */}
-                  <Box>
-                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>VARIANT</EyebrowSmall>
-                    <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-                      {VARIANTS.map((v) => (
-                        <ControlButton key={v} label={cap(v)} selected={variant === v} onClick={() => setVariant(v)} />
-                      ))}
-                    </Stack>
-                  </Box>
-
                   {/* Color */}
-                  <Box sx={{ mt: 3 }}>
+                  <Box>
                     <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>COLOR</EyebrowSmall>
                     <Stack spacing={1.5}>
                       {COLOR_GROUPS.map((group) => (
@@ -167,7 +153,7 @@ export function RatioShowcase() {
                           <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 4, fontWeight: 600 }}>{group.label}</Caption>
                           <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
                             {group.colors.map((c) => (
-                              <ColorSwatchButton key={c} color={c} selected={color === c} onClick={setColor} variant={variant === 'default' ? 'solid' : variant} />
+                              <ColorSwatchButton key={c} color={c} selected={color === c} onClick={setColor} variant="solid" />
                             ))}
                           </Stack>
                         </Box>
@@ -241,10 +227,10 @@ export function RatioShowcase() {
                     </Box>
 
                     <Body color="quiet">
-                      Built on native CSS <code>aspect-ratio</code>. The
-                      themed shell mirrors Box — pick a variant + color to
-                      paint the frame, or keep <code>variant="default"</code>
-                      for a borderless ratio container.
+                      Built on native CSS <code>aspect-ratio</code>. One style:
+                      the bare media slot, square and unframed, as Figma draws
+                      it. For a framed block use Card, or Box with radius /
+                      elevation.
                     </Body>
                   </Stack>
                 </Box>

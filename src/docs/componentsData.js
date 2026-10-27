@@ -584,10 +584,6 @@ export const RATIO_DOC = {
     default: 'width',
     note: 'Which axis is driven; the other follows from the ratio.'
   }, {
-    name: 'variant',
-    type: 'string',
-    default: 'default'
-  }, {
     name: 'padding',
     type: 'string',
     default: 'none'

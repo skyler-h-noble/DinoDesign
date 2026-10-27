@@ -25,7 +25,11 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3 } from '../_shadows';
  * Golden = phi (1.618033988…). Horizontal is wider-than-tall, Vertical is
  * the inverse. Stored at 6 decimal places for sub-pixel accuracy.
  *
- * VARIANTS: default | solid | light | dark   (mirrors Box)
+ * ONE STYLE — the bare media slot Figma draws (square, no edge, no shadow,
+ *   Surface-Dim). solid / light / dark were RETIRED: Figma has no styled
+ *   frame for Ratio, and a framed media block is a Card or a Box with its
+ *   opt-in radius / elevation. They still render (as the one style) and warn
+ *   once in development.
  * COLORS:   default | primary | secondary | tertiary | neutral |
  *           info | success | warning | error
  * PADDING:  none | xs | sm | md | lg | xl
@@ -33,6 +37,7 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3 } from '../_shadows';
  */
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+let warnedVariant = false;
 
 export const RATIO_NAMES = [
   '1:1',
@@ -102,6 +107,12 @@ export function Ratio({
   sx = {},
   ...props
 }) {
+  if (variant !== 'default' && process.env.NODE_ENV !== 'production' && !warnedVariant) {
+    warnedVariant = true;
+    // eslint-disable-next-line no-console
+    console.warn('[Ratio] variant="' + variant + '" was removed — Ratio has one style, the bare media slot. '
+      + 'For a framed block use Card, or Box with radius / elevation.');
+  }
   const aspect = RATIO_MAP[ratio] || RATIO_MAP['1:1'];
   const C = cap(color === 'default' ? 'Default' : color);
 
@@ -126,14 +137,11 @@ export function Ratio({
   const dataTheme = color === 'default' ? undefined : C;
   /* Default: Surface-Dim, as Figma pins on the Ratio — a level, not a theme,
      so a Ratio inside a Primary card is Primary's Surface-Dim. */
-  const dataSurface = variant === 'dark' ? 'Surface-Dimmest'
-    : variant === 'light' ? 'Surface-Brightest'
-    : variant === 'default' ? 'Surface-Dim'
-    : undefined;
+  const dataSurface = 'Surface-Dim';
 
   const p = PADDING_MAP[padding] !== undefined ? PADDING_MAP[padding] : PADDING_MAP.none;
   const isClickable = clickable || !!onClick;
-  const isDefault = variant === 'default';
+  const isDefault = true; // one style — see the header
 
   // Level 2 rest / Level 3 hover; bump to 3→4 when elevated, matching Box.
   /* The Card pair. Ratio is a themed surface with the same shell as Box, so
@@ -147,7 +155,7 @@ export function Ratio({
       onClick={isClickable ? onClick : undefined}
       role={isClickable ? 'button' : undefined}
       tabIndex={isClickable ? 0 : undefined}
-      className={'ratio ratio-' + ratio.toLowerCase() + ' ratio-' + variant +
+      className={'ratio ratio-' + ratio.toLowerCase() + ' ratio-default' +
         (isClickable ? ' ratio-clickable' : '') +
         (elevated ? ' ratio-elevated' : '') +
         (className ? ' ' + className : '')}

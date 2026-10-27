@@ -43,11 +43,14 @@ describe('Ratio scope inheritance', () => {
     expect(container.querySelector('[data-theme="Secondary"]')).not.toBeNull();
   });
 
-  test('still honours the dark and light variants', () => {
+  test('the retired dark / light / solid variants render the one style and warn once', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
     const dark = render(<Ratio variant="dark" />).container;
-    expect(dark.querySelector('[data-surface="Surface-Dimmest"]')).not.toBeNull();
+    expect(dark.querySelector('[data-surface="Surface-Dim"]')).not.toBeNull();
     const light = render(<Ratio variant="light" />).container;
-    expect(light.querySelector('[data-surface="Surface-Brightest"]')).not.toBeNull();
+    expect(light.querySelector('[data-surface="Surface-Dim"]')).not.toBeNull();
+    expect(warn.mock.calls.filter((c) => String(c[0]).includes('[Ratio]')).length).toBe(1);
+    warn.mockRestore();
   });
 
   test('renders the placeholder icon when the slot is empty', () => {
