@@ -191,3 +191,18 @@ describe('Color: Default vs Colored (Figma Color axis)', () => {
     warn.mockRestore();
   });
 });
+
+describe('Pill (Figma Divider-Pill)', () => {
+  it('draws one pill style and warns once for the retired light style', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const { container } = render(<><Divider indicatorText="OR" indicatorStyle="light" /><Divider indicatorText="OR" indicatorStyle="light" /></>);
+    expect(container.querySelectorAll('.divider-pill').length).toBe(2);
+    expect(warn.mock.calls.filter((c) => String(c[0]).includes('indicatorStyle')).length).toBe(1);
+    warn.mockRestore();
+  });
+  it.each([['start', 0], ['left', 0], ['end', 1], ['right', 1]])('textAlign=%s is flush at that end', (a, idx) => {
+    const { container } = render(<Divider indicatorText="OR" textAlign={a} />);
+    const lines = [...container.querySelector('[role="separator"]').children].filter((c) => !c.classList.contains('divider-pill'));
+    expect(window.getComputedStyle(lines[idx]).flex).toMatch(/^0 0 0/);
+  });
+});

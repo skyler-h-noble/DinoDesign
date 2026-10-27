@@ -34,23 +34,18 @@ import { Box } from '@mui/material';
  * the design assigns to the STEP BAR (the stepper's connector), not to a
  * divider. The two had effectively been swapped.
  *
- * INDICATOR (optional text label centered on the divider):
- *   Works on both horizontal and vertical orientations.
+ * PILL (Figma's Pill boolean + the Divider-Pill set) — optional text on the
+ * line. One style: --Background fill, an edge in the LINE's color
+ * (Border-Variant, or Buttons › Border when colored), --Text in Mobile Nav
+ * Label Semibold, Sizing-1 either side, Sizing-2 corners. The line runs right
+ * up to the pill on both sides, as Figma's line runs behind it.
  *
- *   The pill's border always matches the divider line color (see COLORS above).
- *   For border / border-variant / unset divider colors, the pill falls back
- *   to the Default Tag tokens so it reads as a neutral chip.
+ *   textAlign (Figma Alignment): start | center | end — also left / right
+ *   (horizontal) and top / bottom (vertical). Start and end put the pill
+ *   flush at that end of the rule.
  *
- *   indicatorStyle="outline"
- *     BG:     var(--Background)
- *     Text:   var(--Text)
- *
- *   indicatorStyle="light"
- *     BG:     var(--Tag-{Color}-BG)
- *     Text:   var(--Tag-{Color}-Text)
- *
- *   textAlign (horizontal): left | center | right
- *   textAlign (vertical):   top  | center | bottom
+ *   indicatorStyle="light" (a Tag-tinted pill) has no Figma side: it renders
+ *   the one style and warns once.
  */
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -69,24 +64,38 @@ function getLineColor(color, colored) {
   return 'var(--Buttons-' + C + '-Border)';
 }
 
+let warnedLight = false;
 function getIndicatorStyles(color, indicatorStyle, colored) {
-  // A colored rule's pill takes that palette's Tag tokens; a Default rule's
-  // falls back to the Default Tag color so it reads as a neutral chip.
-  const C = isColored(color, colored) && color && !NOT_A_PALETTE.includes(color) ? cap(color) : 'Default';
-  const borderColor = getLineColor(color, colored);
-  if (indicatorStyle === 'light') {
-    return {
-      bg:     'var(--Tag-' + C + '-BG)',
-      text:   'var(--Tag-' + C + '-Text)',
-      border: '1px solid ' + borderColor,
-    };
+  if (indicatorStyle === 'light' && process.env.NODE_ENV !== 'production' && !warnedLight) {
+    warnedLight = true;
+    // eslint-disable-next-line no-console
+    console.warn('[Divider] indicatorStyle="light" was removed: the pill has one style (Figma Divider-Pill).');
   }
-  return {
-    bg:     'var(--Background)',
-    text:   'var(--Text)',
-    border: '1px solid ' + borderColor,
-  };
+  return { bg: 'var(--Background)', text: 'var(--Text)', border: '1px solid ' + getLineColor(color, colored) };
 }
+
+/* Figma's Divider-Pill: Mobile Nav Label Semibold, Sizing-1 sides, Sizing-2 corners. */
+const pillSx = (ind) => ({
+  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+  flexShrink: 0, px: 'var(--Sizing-1, 8px)', py: 0,
+  borderRadius: 'var(--Sizing-2, 16px)',
+  fontFamily: 'var(--Body-Font-Family, inherit)',
+  fontSize: 'var(--Mobile-Nav-Label-Font-Size, 11px)',
+  lineHeight: 'var(--Mobile-Nav-Label-Line-Height, 16.5px)',
+  letterSpacing: 'var(--Mobile-Nav-Label-Letter-Spacing, 0)',
+  fontWeight: 'var(--Body-Semibold-Font-Weight, 600)',
+  whiteSpace: 'nowrap',
+  backgroundColor: ind.bg, color: ind.text, border: ind.border,
+  boxSizing: 'border-box',
+});
+
+/* Start / end: flush, no line before (after) the pill. */
+const alignOf = (a) => (a === 'left' || a === 'top' || a === 'start' ? 'start' : a === 'right' || a === 'bottom' || a === 'end' ? 'end' : 'center');
+const flexes = (a) => {
+  const k = alignOf(a);
+  return [k === 'start' ? '0 0 0' : '1 1 auto', k === 'end' ? '0 0 0' : '1 1 auto'];
+};
+
 
 /* One per Component-Size mode, read from the token with the DESIGN's number
  * as the fallback — the same idiom Rail uses for Rail-Width. An unbound token
@@ -158,8 +167,7 @@ export function Divider({
   // --- Vertical with indicator ---
   if (isVertical && hasIndicator) {
     const indStyles = getIndicatorStyles(color, indicatorStyle, colored);
-    const topFlex = textAlign === 'top' ? '0 0 10%' : textAlign === 'bottom' ? '1 1 auto' : '1 1 auto';
-    const bottomFlex = textAlign === 'top' ? '1 1 auto' : textAlign === 'bottom' ? '0 0 10%' : '1 1 auto';
+    const [topFlex, bottomFlex] = flexes(textAlign);
 
     return (
       <Box
@@ -178,16 +186,7 @@ export function Divider({
         {...props}
       >
         <Box sx={{ flex: topFlex, width: thickness, backgroundColor: lineColor }} />
-        <Box
-          sx={{
-            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0, my: 1, px: 0.75, py: 0.5,
-            borderRadius: '12px', fontSize: '11px', fontWeight: 500,
-            fontFamily: 'inherit', lineHeight: 1.2, whiteSpace: 'nowrap',
-            backgroundColor: indStyles.bg, color: indStyles.text, border: indStyles.border,
-            boxSizing: 'border-box',
-          }}
-        >
+        <Box className="divider-pill" sx={pillSx(indStyles)}>
           {displayText}
         </Box>
         <Box sx={{ flex: bottomFlex, width: thickness, backgroundColor: lineColor }} />
@@ -216,8 +215,7 @@ export function Divider({
 
   // --- Horizontal with indicator ---
   const indStyles = getIndicatorStyles(color, indicatorStyle, colored);
-  const leftFlex = textAlign === 'left' ? '0 0 10%' : textAlign === 'right' ? '1 1 auto' : '1 1 auto';
-  const rightFlex = textAlign === 'left' ? '1 1 auto' : textAlign === 'right' ? '0 0 10%' : '1 1 auto';
+  const [leftFlex, rightFlex] = flexes(textAlign);
 
   return (
     <Box
@@ -228,16 +226,7 @@ export function Divider({
       {...props}
     >
       <Box sx={{ flex: leftFlex, height: thickness, backgroundColor: lineColor }} />
-      <Box
-        sx={{
-          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-          flexShrink: 0, mx: 2, px: 1.5, py: 0.5,
-          borderRadius: '12px', fontSize: '12px', fontWeight: 500,
-          fontFamily: 'inherit', lineHeight: 1.2, whiteSpace: 'nowrap',
-          backgroundColor: indStyles.bg, color: indStyles.text, border: indStyles.border,
-          boxSizing: 'border-box',
-        }}
-      >
+      <Box className="divider-pill" sx={pillSx(indStyles)}>
         {displayText}
       </Box>
       <Box sx={{ flex: rightFlex, height: thickness, backgroundColor: lineColor }} />
