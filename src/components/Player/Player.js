@@ -197,7 +197,10 @@ export function Player({
       </Box>
 
       {/* Spread across the row, each button its own 32 — Figma's group. */}
-      <Box className="player-controls" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      {/* Spread when there are several; a lone play / pause sits centred
+          (Figma's Controls = 1) — space-between would pin it to the left. */}
+      <Box className="player-controls" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        '& > :only-child': { marginInline: 'auto' } }}>
         {onPrevious && control('previous', 'Previous track', <SkipPreviousIcon />, onPrevious)}
         {onSkip && control('back', `Back ${skipSeconds} seconds`, <Replay10Icon />, () => skip(-skipSeconds))}
         {/* The one control that is always here, and the only one that says what
