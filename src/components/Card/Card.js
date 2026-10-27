@@ -145,11 +145,11 @@ export function Card({
      The five Effect-Levels ARE the five named effect styles, and the mapping
      is exact once you line up the alphas and radii in a published bundle:
 
-       Level 1  a=0.145 r=1.6   Card / Accordion, Handle, Alert, Bottom-Sheet
-       Level 2  a=0.169 r=3.6   Card-Hover / App bars, Toolbars, Menus, Tooltip
-       Level 3  a=0.200 r=8.1   FAB, Snackbar
-       Level 4  a=0.184 r=18.1  FAB-Hover
-       Level 5  a=0.251 r=40.4  Dialog & Modal
+       Level 1  a=0.145 r=1.6   Elevations/Level-1 (Card, Accordion, Handle, Alert, Bottom-Sheet)
+       Level 2  a=0.169 r=3.6   Elevations/Level-2 (Card-Hover, App bars, Toolbars, Menus, Tooltip, Popover)
+       Level 3  a=0.200 r=8.1   Elevations/Level-3 (FAB, Snackbar, Card-Drag, Elevated-Card-Hover)
+       Level 4  a=0.184 r=18.1  Elevations/Level-4 (FAB-Hover, Elevated-Card-Drag)
+       Level 5  a=0.251 r=40.4  Elevations/Level-5 (Dialog & Modal)
 
      So Figma's `Card` style is Level ONE. This sat at Level 2, which is the
      App-bar step — every card in every brand wore a shadow a full level too

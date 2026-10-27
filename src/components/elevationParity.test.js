@@ -4,11 +4,11 @@
  * The five Effect-Levels are the five styles. Lining alphas and radii up from a
  * published bundle against the Figma effect styles makes the mapping exact:
  *
- *   1  a=0.145 r=1.6   Card / Accordion, Handle, Alert, Bottom-Sheet
- *   2  a=0.169 r=3.6   Card-Hover / App bars, Toolbars, Menus, Tooltip
- *   3  a=0.200 r=8.1   FAB, Snackbar
- *   4  a=0.184 r=18.1  FAB-Hover
- *   5  a=0.251 r=40.4  Dialog & Modal
+ *   1  a=0.145 r=1.6   Elevations/Level-1 (Card, Accordion, Handle, Alert, Bottom-Sheet)
+ *   2  a=0.169 r=3.6   Elevations/Level-2 (Card-Hover, App bars, Toolbars, Menus, Tooltip, Popover)
+ *   3  a=0.200 r=8.1   Elevations/Level-3 (FAB, Snackbar, Card-Drag, Elevated-Card-Hover)
+ *   4  a=0.184 r=18.1  Elevations/Level-4 (FAB-Hover, Elevated-Card-Drag)
+ *   5  a=0.251 r=40.4  Elevations/Level-5 (Dialog & Modal)
  *
  * The constants are named SHADOW_LEVEL_N, so nothing in the source says that
  * level 2 is the app-bar step. Every component picked a number that looked
@@ -25,15 +25,15 @@ import path from 'path';
 
 /** component file → the level its Figma style names, and which style that is. */
 const EXPECTED = [
-  ['AppBar/AppBar.js',       2, 'App bars'],
-  ['Toolbar/Toolbar.js',     2, 'Toolbars'],
-  ['Menu/Menu.js',           2, 'Menus'],
-  ['Popover/Popover.js',     2, 'the Menus / Tooltip step'],
-  ['Alert/Alert.js',         1, 'Alert'],
-  ['Accordion/Accordion.js', 1, 'Accordion'],
-  ['Snackbar/Snackbar.js',   3, 'Snackbar'],
-  ['Modal/Modal.js',         5, 'Dialog & Modal'],
-  ['Dialog/Dialog.js',       5, 'Dialog & Modal'],
+  ['AppBar/AppBar.js',       2, 'Elevations/Level-2 — App bars'],
+  ['Toolbar/Toolbar.js',     2, 'Elevations/Level-2 — Toolbars'],
+  ['Menu/Menu.js',           2, 'Elevations/Level-2 — Menus'],
+  ['Popover/Popover.js',     2, 'Elevations/Level-2 — Popover'],
+  ['Alert/Alert.js',         1, 'Elevations/Level-1 — Alert'],
+  ['Accordion/Accordion.js', 1, 'Elevations/Level-1 — Accordion'],
+  ['Snackbar/Snackbar.js',   3, 'Elevations/Level-3 — Snackbar'],
+  ['Modal/Modal.js',         5, 'Elevations/Level-5 — Dialog & Modal'],
+  ['Dialog/Dialog.js',       5, 'Elevations/Level-5 — Dialog & Modal'],
 ];
 
 const read = (f) => fs.readFileSync(path.join(__dirname, f), 'utf8');

@@ -8,12 +8,12 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import WarningIcon from '@mui/icons-material/Warning';
 import ErrorIcon from '@mui/icons-material/Error';
 /* Level from the Figma effect style that NAMES this component.
-   The five Effect-Levels are the five styles:
-     1  Card / Accordion, Handle, Alert, Bottom-Sheet
-     2  Card-Hover / App bars, Toolbars, Menus, Tooltip, Bottom-Sheet-Hover
-     3  FAB, Snackbar
-     4  FAB-Hover
-     5  Dialog & Modal
+   The five Effect-Levels are the five Figma effect styles, Elevations/Level-1 … Level-5:
+     1  Elevations/Level-1 (Card, Accordion, Handle, Alert, Bottom-Sheet)
+     2  Elevations/Level-2 (Card-Hover, App bars, Toolbars, Menus, Tooltip, Popover, Bottom-Sheet-Hover)
+     3  Elevations/Level-3 (FAB, Snackbar, Card-Drag, Elevated-Card-Hover)
+     4  Elevations/Level-4 (FAB-Hover, Elevated-Card-Drag)
+     5  Elevations/Level-5 (Dialog & Modal)
    The Figma Alert carries it on the component ROOT, not on Theme-Container. */
 import { SHADOW_LEVEL_1 } from '../_shadows';
 

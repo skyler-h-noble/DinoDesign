@@ -146,7 +146,7 @@ export function SheetShowcase() {
                           { label: 'Role',      value: 'role="dialog" aria-modal="true" — name it with aria-label or aria-labelledby' },
                           { label: 'Keyboard',  value: 'Escape closes; Tab is trapped inside; focus returns to the opener' },
                           { label: 'Surface',   value: 'data-surface="Container" (the theme is inherited)' },
-                          { label: 'Elevation', value: 'Level 1 — the "Accordion, Handle, Alert, Bottom-Sheet" style' },
+                          { label: 'Elevation', value: 'Level 1 — the Elevations/Level-1 style' },
                         ].map(({ label, value }) => (
                           <Box key={label} sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
                             <BodySmall>{label}:</BodySmall>

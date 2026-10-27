@@ -11,7 +11,7 @@ import { SHADOW_LEVEL_1 } from '../_shadows';
  *   corners   16px on the top two — the bottom edge sits on the screen's
  *   padding   Sizing-2 (16), and the same gap between children
  *   height    var(--Sheet, 540px) — Figma's Component-Size/Other/Sheet
- *   shadow    Level 1, the "Accordion, Handle, Alert, Bottom-Sheet" style
+ *   shadow    Level 1, the Elevations/Level-1 style
  *
  * Built on Drawer (anchor="bottom"): the scrim, Escape, the focus trap and
  * the slide come from there, so a sheet is a dialog like a drawer is.

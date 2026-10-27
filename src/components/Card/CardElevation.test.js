@@ -5,11 +5,11 @@
  * radii from a published bundle against the Figma effect styles makes the
  * mapping exact:
  *
- *   Level 1  a=0.145 r=1.6   Card / Accordion, Handle, Alert, Bottom-Sheet
- *   Level 2  a=0.169 r=3.6   Card-Hover / App bars, Toolbars, Menus, Tooltip
- *   Level 3  a=0.200 r=8.1   FAB, Snackbar
- *   Level 4  a=0.184 r=18.1  FAB-Hover
- *   Level 5  a=0.251 r=40.4  Dialog & Modal
+ *   Level 1  a=0.145 r=1.6   Elevations/Level-1 (Card, Accordion, Handle, Alert, Bottom-Sheet)
+ *   Level 2  a=0.169 r=3.6   Elevations/Level-2 (Card-Hover, App bars, Toolbars, Menus, Tooltip, Popover)
+ *   Level 3  a=0.200 r=8.1   Elevations/Level-3 (FAB, Snackbar, Card-Drag, Elevated-Card-Hover)
+ *   Level 4  a=0.184 r=18.1  Elevations/Level-4 (FAB-Hover, Elevated-Card-Drag)
+ *   Level 5  a=0.251 r=40.4  Elevations/Level-5 (Dialog & Modal)
  *
  * Card rested at Level 2 — the App-bar step — so every card in every brand wore
  * a shadow a full level too heavy, and a card nested in a card wore it twice.
@@ -49,7 +49,7 @@ describe('Card elevation', () => {
   });
 
   it('never rests on the App-bar step', () => {
-    /* Level 2 is "Card-Hover / App bars, Toolbars, Menus". A card wearing it at
+    /* Level 2 is Elevations/Level-2 (Card-Hover, App bars, Toolbars, Menus). A card wearing it at
        REST is the bug this file exists for. It may appear in a hover rule. */
     const { container } = render(<Card>hi</Card>);
     const css = shadowRulesFor(container.firstChild);

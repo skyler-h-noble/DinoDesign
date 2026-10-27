@@ -10,12 +10,12 @@ import { Drawer } from '../Drawer/Drawer';
 import { H3 } from '../Typography';
 import { Button } from '../Button/Button';
 /* Level from the Figma effect style that NAMES this component.
-   The five Effect-Levels are the five styles:
-     1  Card / Accordion, Handle, Alert, Bottom-Sheet
-     2  Card-Hover / App bars, Toolbars, Menus, Tooltip, Bottom-Sheet-Hover
-     3  FAB, Snackbar
-     4  FAB-Hover
-     5  Dialog & Modal */
+   The five Effect-Levels are the five Figma effect styles, Elevations/Level-1 … Level-5:
+     1  Elevations/Level-1 (Card, Accordion, Handle, Alert, Bottom-Sheet)
+     2  Elevations/Level-2 (Card-Hover, App bars, Toolbars, Menus, Tooltip, Popover, Bottom-Sheet-Hover)
+     3  Elevations/Level-3 (FAB, Snackbar, Card-Drag, Elevated-Card-Hover)
+     4  Elevations/Level-4 (FAB-Hover, Elevated-Card-Drag)
+     5  Elevations/Level-5 (Dialog & Modal) */
 import { SHADOW_LEVEL_2 } from '../_shadows';
 
 /**
