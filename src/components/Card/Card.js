@@ -1,7 +1,7 @@
 // src/components/Card/Card.js
 import React, { createContext, useContext } from 'react';
 import { Box } from '@mui/material';
-import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3 } from '../_shadows';
+import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3, SHADOW_LEVEL_4 } from '../_shadows';
 
 /**
  * Card Component
@@ -25,8 +25,9 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3 } from '../_shadows';
  *   clickable + selected         -> 2px solid var(--Buttons-Default-Border)
  *
  * ELEVATION SHADOWS:
- *   default:   Level 2 rest, Level 3 hover (if clickable)
- *   elevated:  Level 3 rest, Level 4 hover (if clickable)
+ *   default:   Level 1 rest, Level 2 hover, Level 3 drag   (Figma's Card)
+ *   elevated:  Level 2 rest, Level 3 hover, Level 4 drag   (Elevated=true:
+ *              one level up in every state)
  *   active:    one level down from rest
  *
  * SIZES: small | medium | large  (padding: var(--Card-Padding) for all, gap + font-size scale)
@@ -160,6 +161,7 @@ export function Card({
      keeps `Card` and `Card-Hover` one step apart at either setting. */
   const restShadow  = elevated ? SHADOW_LEVEL_2 : SHADOW_LEVEL_1;
   const hoverShadow = elevated ? SHADOW_LEVEL_3 : SHADOW_LEVEL_2;
+  const dragShadow  = elevated ? SHADOW_LEVEL_4 : SHADOW_LEVEL_3;
   /* Pressed keeps the RESTING elevation: Figma's Pressed card wears the same
      Card style as Default. It used to drop a level and shrink to 99.5%. */
   const activeShadow = restShadow;
@@ -229,13 +231,9 @@ export function Card({
             '&:active': {
               cursor: 'grabbing',
               zIndex: 10,
-              /* Level 3 — FAB, Snackbar: the step for something floating free
-                 of the page. It was 4 (FAB-Hover) when rest was 2, so moving
-                 rest to the level the design names would have widened the lift
-                 from two steps to three and made dragging feel heavier, with
-                 nobody deciding that. The design has no drag state, so the
-                 RELATIONSHIP is the thing to preserve, not the number. */
-              boxShadow: SHADOW_LEVEL_3,
+              /* Figma's State=Drag: two levels above rest — Level 3 (FAB,
+                 Snackbar), Level 4 (FAB-Hover) for an elevated card. */
+              boxShadow: dragShadow,
               transform: 'scale(1.02)',
               // Thicker border on active so the outer shell visually grows
               // along with the scale (a 1px border at 1.02x is imperceptible).
