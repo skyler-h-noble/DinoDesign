@@ -155,7 +155,9 @@ export function ListItem({
         boxSizing: 'border-box',
         /* Figma binds the row's padding, gap and corner to Component-Size
            List-item/List-Item-Padding / -Gap / -Radius. */
-        gap: liVar(size, 'Gap', '12px'),
+        /* Gap is the space INSIDE the row (image, text, decorators), a fixed
+           4 / 8 / 12 — the fallback matches, for a system made before it. */
+        gap: liVar(size, 'Gap', ({ small: '4px', large: '12px' })[size] || '8px'),
         padding: liVar(size, 'Padding', '12px'),
         minHeight: 'var(--Sizing-4, 32px)',
         fontSize: s.fontSize, fontFamily: 'inherit', color: 'var(--Text)', listStyle: 'none',
