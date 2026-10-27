@@ -20,13 +20,14 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
  * --- SURFACE -----------------------------------------------------------------
  *   data-surface="Surface-Bright" on wrapper and input root (light variant: Surface-Dim)
  *
- * --- VARIANTS ----------------------------------------------------------------
+ * --- ONE EDGE ---------------------------------------------------------------
  *
- * OUTLINE — variant="{color}-outline"  (default)
- *   BG:         var(--Background)
- *   Border:     2px solid var(--Buttons-{Color}-Border)
- *   Text:       var(--Text)
- *   Focus:      border intensifies
+ * The field's own --Border (the 3:1 role for a clickable outline), as Figma's
+ * Input — 1px at rest and hover, 2px pressed and focused. There is no colour
+ * axis: a coloured edge is how a field shows VALIDATION (error / warning /
+ * success / info), so a palette edge on a valid field read as a state it was
+ * not in. variant="{color}-outline" / "outline" were RETIRED: they render the
+ * one edge and warn once in development.
  *
  * --- PLACEHOLDER / HELPER TEXT -----------------------------------------------
  *   Placeholder: var(--Quiet)
@@ -52,8 +53,6 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
  *   element directly per WCAG 1.3.1. Always provide label or aria-label.
  */
 
-const COLORS = ['primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
-const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // --- Variant Style Builders --------------------------------------------------
 
@@ -78,21 +77,8 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
    nowhere to go here; painting --Hover over --Hover is a no-op, which is
    exactly why this component had no hover state at all. The border is the one
    channel still free, and it is where a text field conventionally shows it. */
-function outlineStyles(color) {
-  const C = cap(color);
-  return {
-    bg: 'var(--Hover)',
-    border: 'var(--Buttons-' + C + '-Border)',
-    hoverBorder: 'var(--Buttons-' + C + '-Hover)',
-    pressedBorder: 'var(--Buttons-' + C + '-Pressed)',
-    text: 'var(--Text)',
-    focusBg: 'var(--Hover)',
-  };
-}
-
 /* The DEFAULT field is Figma's Input: the surface's own --Border edge (the 3:1
-   role for a clickable outline), unchanged by hover and press. The palette
-   variants ({color}-outline) stay for a field that wants a coloured edge. */
+   role for a clickable outline), unchanged by hover and press. */
 function defaultStyles() {
   return {
     bg: 'var(--Hover)',
@@ -104,14 +90,6 @@ function defaultStyles() {
   };
 }
 
-function buildVariantMap() {
-  const map = { default: defaultStyles() };
-  COLORS.forEach((color) => {
-    map[color + '-outline'] = outlineStyles(color);
-  });
-  map['outline'] = outlineStyles('primary');
-  return map;
-}
 
 // --- Sizing ------------------------------------------------------------------
 
@@ -287,6 +265,7 @@ const VALIDATION_COLORS = {
 // --- Component ---------------------------------------------------------------
 
 let warnedResizeWithEnd = false;
+let warnedVariant = false;
 
 export function Input({
   variant = 'default',
@@ -346,23 +325,15 @@ export function Input({
   onBlur,
   ...props
 }) {
-  const variantMap = buildVariantMap();
-  const styles = variantMap[variant] || variantMap['default'];
+  const styles = defaultStyles();
   const isFloating = labelPosition === 'floating';
   const isLeft = labelPosition === 'left';
 
-  /* A *-light variant now falls through to primary-outline via the || above,
-     which is the right rendering but a silent one — so say so once in dev.
-     There was also an `isLight` here, read by no code path: the same dead
-     flag Select had, and the same reason the variant looked supported. */
-  if (process.env.NODE_ENV !== 'production' && /-light$|^light$/.test(variant)) {
+  if (process.env.NODE_ENV !== 'production' && variant !== 'default' && !warnedVariant) {
+    warnedVariant = true;
     // eslint-disable-next-line no-console
-    console.warn(
-      '[Input] variant="' + variant + '" was removed. It differed from '
-      + '"' + variant.replace(/-?light$/, '') + '-outline" only by a token no '
-      + 'design system publishes, so the two rendered identically. For a '
-      + 'lighter field use data-surface="Surface-Brightest" on its container.',
-    );
+    console.warn('[Input] variant="' + variant + '" was removed — a field has one edge, the surface\'s Border. '
+      + 'Colour on a field edge means validation; use validation="error | warning | success | info".');
   }
   const sizeConfig = isFloating
     ? (FLOATING_SIZE_MAP[size] || FLOATING_SIZE_MAP.medium)
@@ -503,7 +474,7 @@ export function Input({
 
   return (
     <Box
-      className={'inp-' + variant + ' ' + className}
+      className={'inp-default ' + className}
       sx={{
         width: fullWidth ? '100%' : 'auto',
         /* Left label: the label in its own column, centred on the field, and
@@ -884,20 +855,9 @@ export function Input({
 }
 
 // --- Convenience Exports -----------------------------------------------------
-
-export const PrimaryOutlineInput   = (p) => <Input variant="primary-outline"   {...p} />;
-export const SecondaryOutlineInput = (p) => <Input variant="secondary-outline" {...p} />;
-export const TertiaryOutlineInput  = (p) => <Input variant="tertiary-outline"  {...p} />;
-export const NeutralOutlineInput   = (p) => <Input variant="neutral-outline"   {...p} />;
-export const InfoOutlineInput      = (p) => <Input variant="info-outline"      {...p} />;
-export const SuccessOutlineInput   = (p) => <Input variant="success-outline"   {...p} />;
-export const WarningOutlineInput   = (p) => <Input variant="warning-outline"   {...p} />;
-export const ErrorOutlineInput     = (p) => <Input variant="error-outline"     {...p} />;
-
-/* The five *LightInput convenience exports are gone with the variant. None of
-   them was in src/components/index.js, so none was reachable from the package
-   and none can be a breaking change for a consumer. */
-export const OutlineInput = (p) => <Input variant="primary-outline" {...p} />;
-export const PrimaryInput = (p) => <Input variant="primary-outline" {...p} />;
+/* The colour-named exports (PrimaryOutlineInput … ErrorOutlineInput,
+   OutlineInput, PrimaryInput) are DELETED with the colour edges, so a stale
+   import fails at build rather than rendering something other than its name.
+   None was exported from the package root (only Input, as TextInput). */
 
 export default Input;

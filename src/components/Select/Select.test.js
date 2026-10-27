@@ -238,3 +238,21 @@ describe('Select label positions (Figma SelectField)', () => {
     expect(getComputedStyle(container.firstChild).display).toMatch(/grid/);
   });
 });
+
+describe('one look for the field; color only for the list', () => {
+  const cssFor = (el) => {
+    const out = [];
+    for (const sheet of document.styleSheets) for (const r of sheet.cssRules) {
+      try { if (el.matches(r.selectorText)) out.push(r.cssText); } catch (e) { /* skip */ }
+    }
+    return out.join('\n');
+  };
+  test('the selected row defaults to the Default buttons, not Primary', () => {
+    render(<Select options={['One', 'Two']} defaultValue="One" aria-label="Pick" />);
+    fireEvent.click(screen.getByRole('combobox'));
+    const selected = screen.getAllByRole('option').find((o) => o.getAttribute('aria-selected') === 'true');
+    const css = cssFor(selected);
+    expect(css).toContain('--Buttons-Default-');
+    expect(css).not.toContain('--Buttons-Primary-');
+  });
+});

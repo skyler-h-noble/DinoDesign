@@ -843,10 +843,6 @@ export const INPUT_DOC = {
     use: 'NumberField'
   }],
   props: [{
-    name: 'variant',
-    type: 'string',
-    default: 'primary-outline'
-  }, {
     name: 'size',
     type: 'string',
     values: ['small', 'medium', 'large'],

@@ -94,7 +94,11 @@ export function Select({
   labelPosition = 'top',
   size = 'medium',
   variant = 'outline',        // 'outline' — see the note on `light` above
-  color = 'primary',          // 'default' | 'primary' | 'secondary' | ...
+  /* The palette of the SELECTED and hovered rows in the open list — the
+     field itself has one look (the Border edge, --Text value) whatever this
+     is. 'default' (the brand's Default buttons), not primary: it used to be
+     primary, and 'default' was quietly forced to primary too. */
+  color = 'default',          // 'default' | 'primary' | 'secondary' | ...
   selectionStyle = 'default',
   mode = 'standard',
   placeholder = 'Select\u2026',
@@ -111,7 +115,7 @@ export function Select({
   sx = {},
   ...props
 }) {
-  const effectiveColor = color === 'default' ? 'primary' : color;
+  const effectiveColor = color;
   const C = cap(effectiveColor);
   /* There was an `isLight = variant === 'light'` here, read by nothing. So
      variant="light" never changed a color, a token or a style — its ONLY
@@ -143,7 +147,8 @@ export function Select({
   }
   const effectiveVariant = variant === 'light' ? 'outline' : variant;
   const effectiveSelectionStyle = selectionStyle === 'light' ? 'default' : selectionStyle;
-  const activeTextColor = color === 'default' ? 'var(--Text)' : 'var(--Text-' + C + ')';
+  // The trigger is never tinted — a coloured value reads as a state (see Input).
+  const activeTextColor = 'var(--Text)';
   const triggerId = useId();
   const [internalValue, setInternalValue] = useState(defaultValue);
   const [open, setOpen] = useState(false);
@@ -479,6 +484,8 @@ export function Select({
         ...(!disabled && {
           '&:hover': { backgroundColor: 'var(--Pressed)' },
           '&:active': { backgroundColor: 'var(--Hover)' },
+          // Pressed, the edge is 2px — Figma's Select (as Input) draws its stroke at 2 there.
+          '&:active::after': { borderWidth: '2px' },
           '&:hover .select-trigger, &:active .select-trigger, &:focus-within .select-trigger': { color: 'var(--Text)' },
         }),
         '&:focus-within': {

@@ -28,20 +28,15 @@ describe('Input Component', () => {
   });
 
   // Variant tests
-  test('applies variant class for outline', () => {
-    const { container } = render(<Input variant="primary-outline" aria-label="test" />);
-    expect(container.querySelector('.inp-primary-outline')).toBeInTheDocument();
+  test('the colour edges are retired: any variant renders the one edge and warns once', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const { container } = render(<><Input variant="primary-outline" aria-label="a" /><Input variant="error-outline" aria-label="b" /></>);
+    expect(container.querySelectorAll('.inp-default').length).toBe(2);
+    expect(container.querySelector('.inp-primary-outline')).toBeNull();
+    expect(warn.mock.calls.filter((c) => String(c[0]).includes('[Input] variant')).length).toBe(1);
+    warn.mockRestore();
   });
 
-  test('applies variant class for secondary outline', () => {
-    const { container } = render(<Input variant="secondary-outline" aria-label="test" />);
-    expect(container.querySelector('.inp-secondary-outline')).toBeInTheDocument();
-  });
-
-  test('applies variant class for error outline', () => {
-    const { container } = render(<Input variant="error-outline" aria-label="test" />);
-    expect(container.querySelector('.inp-error-outline')).toBeInTheDocument();
-  });
 
   // Value tests
   test('renders with defaultValue', () => {
@@ -180,15 +175,15 @@ describe('the light variant is gone', () => {
       // It still renders a usable field — the fallback is the point.
       expect(container.querySelector('input')).toBeInTheDocument();
     }
-    expect(warn).toHaveBeenCalled();
+    // (The one-time variant warning may already have fired in an earlier test.)
     warn.mockRestore();
   });
 
-  test('an outline variant warns about nothing', () => {
-    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
-    render(<Input variant="primary-outline" label="Amount" />);
-    expect(warn).not.toHaveBeenCalled();
-    warn.mockRestore();
+  test('the colour-named convenience exports are gone with the colour edges', () => {
+    const mod = require('./Input');
+    for (const name of ['PrimaryOutlineInput', 'ErrorOutlineInput', 'OutlineInput', 'PrimaryInput']) {
+      expect(mod[name]).toBeUndefined();
+    }
   });
 
   test('the light convenience exports are gone', () => {

@@ -275,20 +275,6 @@ export const FORM_SAMPLES = {
   },
 
   Input: {
-    /* Eight palettes, each with an `-outline` suffix, plus a bare `outline`
-       that resolves to primary.
-
-       There is no solid or ghost input. The `light` variant was removed
-       because it was byte-identical to its `-outline` twin apart from the
-       background — for a lighter field, set data-surface="Surface-Brightest"
-       on an ancestor and keep the outline variant. */
-    variant: () => (
-      <AxisStack
-        values={PALETTES.map(c => c + '-outline')}
-        defaultValue="primary-outline"
-        render={(v) => box(<TextInput variant={v} label="Name" placeholder="Value" />)}
-      />
-    ),
     size: () => (
       <AxisStack values={SIZES} defaultValue="medium"
                  render={(v) => box(<TextInput size={v} label="Name" placeholder="Value" />)} />
