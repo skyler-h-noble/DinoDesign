@@ -1,7 +1,8 @@
 // src/components/Chip/Chip.js
 import React, { forwardRef } from 'react';
 import { Chip as MuiChip, Avatar as MuiAvatar, Box } from '@mui/material';
-import CancelIcon from '@mui/icons-material/Cancel';
+import CloseIcon from '@mui/icons-material/Close';
+import { Button } from '../Button/Button';
 import { SHADOW_LEVEL_1 } from '../_shadows';
 
 /**
@@ -32,8 +33,8 @@ import { SHADOW_LEVEL_1 } from '../_shadows';
  * FEATURES:
  *   clickable:       onClick handler, cursor pointer, hover/active states
  *   disabled:        reduced opacity, no interactions
- *   onDelete:        shows a 16px delete glyph; its 24x24 target is the
- *                    pseudo-element, not the chip's height
+ *   onDelete:        Figma's Deletable — a small ghost icon-only Button
+ *                    (close) after the label, named "Remove {label}"
  *   startDecorator:  icon or avatar before label
  *   endDecorator:    icon or avatar after label (before delete if present)
  *   selectionMode:   'radio' | 'checkbox' -- adds aria role, visual selected state
@@ -170,82 +171,46 @@ function warnRemovedSize(size) {
 
 // --- Delete Icon Button ------------------------------------------------------
 
-const ChipDeleteButton = forwardRef(function ChipDeleteButton({ onClick, ...props }, ref) {
-  /* 16px glyph, 24x24 touch area (the `deleteSize < 24` branch below). This was
-     a ladder off the chip's size; there is one chip size now, so the glyph is
-     fixed and the TARGET is what carries the WCAG 2.5.8 minimum — the two are
-     different things, and conflating them is what pushed a deletable chip to
-     40px to fit a 24px icon. */
-  const deleteSize = 16;
+/* Figma's Deletable: a SMALL GHOST ICON-ONLY Button (close) after the label.
+   It was a hand-rolled <button> with a Cancel glyph, an rgba hover and its
+   own focus ring — states the lib Button already has, drawn from the
+   design's tokens. Small is 24px, the chip's own height, so it is its own
+   WCAG 2.5.8 target. Named for what it removes. */
+const ChipDeleteButton = forwardRef(function ChipDeleteButton({ onClick, label, disabled, ...props }, ref) {
   return (
-    <Box
+    <Button
       ref={ref}
-      component="button"
+      iconOnly
+      variant="ghost"
+      size="small"
+      disabled={disabled}
+      aria-label={typeof label === 'string' && label ? 'Remove ' + label : 'Remove'}
+      className="chip-delete"
       onClick={(e) => {
         e.stopPropagation();
         if (onClick) onClick(e);
       }}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === 'Backspace' || e.key === 'Delete') {
+        if (e.key === 'Backspace' || e.key === 'Delete') {
           e.stopPropagation();
           if (onClick) onClick(e);
         }
       }}
-      aria-label="Remove"
-      role="button"
-      tabIndex={0}
-      sx={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minWidth: 24,
-        minHeight: 24,
-        width: deleteSize,
-        height: deleteSize,
-        padding: 0,
-        margin: 0,
-        marginLeft: '2px',
-        marginRight: 0,
-        border: 'none',
-        borderRadius: '50%',
-        backgroundColor: 'transparent',
-        color: 'inherit',
-        opacity: 0.7,
-        cursor: 'pointer',
-        position: 'relative',
-        flexShrink: 0,
-        transition: 'opacity 0.15s ease, background-color 0.15s ease',
-        '&:hover': {
-          opacity: 1,
-          backgroundColor: 'rgba(0,0,0,0.08)',
-        },
-        '&:focus-visible': {
-          outline: '2px solid var(--Focus-Visible)',
-          outlineOffset: '1px',
-        },
-        ...(deleteSize < 24 && {
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            minWidth: 24,
-            minHeight: 24,
-          },
-        }),
-      }}
+      onMouseDown={(e) => e.stopPropagation()}
+      sx={{ flexShrink: 0 }}
       {...props}
     >
-      <CancelIcon sx={{ fontSize: deleteSize, pointerEvents: 'none' }} />
-    </Box>
+      <CloseIcon />
+    </Button>
   );
 });
 
 // --- Component ---------------------------------------------------------------
 
 export function Chip({
-  variant = 'primary',
+  /* Neutral, as Figma's Chip draws it unpinned — a chip is a quiet surface;
+     a palette is a choice. It defaulted to primary. */
+  variant = 'neutral',
   size: sizeProp,
   label,
   clickable = false,
@@ -490,7 +455,7 @@ export function Chip({
         </Box>
       )}
       {onDelete && (
-        <ChipDeleteButton onClick={onDelete} />
+        <ChipDeleteButton onClick={onDelete} label={typeof displayLabel === 'string' ? displayLabel : undefined} disabled={disabled} />
       )}
     </Box>
   );

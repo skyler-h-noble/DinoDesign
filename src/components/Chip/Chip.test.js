@@ -25,9 +25,9 @@ describe('Chip Component', () => {
     expect(screen.getByText('Child Label')).toBeInTheDocument();
   });
 
-  test('defaults to primary variant', () => {
+  test('defaults to neutral (Figma draws the chip unpinned)', () => {
     const { container } = render(<Chip label="Test" />);
-    expect(container.querySelector('.chip-primary')).toBeInTheDocument();
+    expect(container.querySelector('.chip-neutral')).toBeInTheDocument();
   });
 
   test.each([
@@ -138,14 +138,16 @@ describe('Chip Component', () => {
 
   test('renders delete button when onDelete provided', () => {
     const { container } = render(<Chip label="Deletable" onDelete={() => {}} />);
-    const deleteBtn = container.querySelector('[aria-label="Remove"]');
+    const deleteBtn = container.querySelector('[aria-label="Remove Deletable"]');
     expect(deleteBtn).toBeInTheDocument();
+    // The lib Button, not a hand-rolled control — it brings the states.
+    expect(deleteBtn.classList.contains('chip-delete')).toBe(true);
   });
 
   test('fires onDelete when delete button clicked', () => {
     const handleDelete = jest.fn();
     const { container } = render(<Chip label="Delete" onDelete={handleDelete} />);
-    const deleteBtn = container.querySelector('[aria-label="Remove"]');
+    const deleteBtn = container.querySelector('[aria-label="Remove Delete"]');
     fireEvent.click(deleteBtn);
     expect(handleDelete).toHaveBeenCalledTimes(1);
   });
