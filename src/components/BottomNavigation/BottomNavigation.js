@@ -316,11 +316,12 @@ function BottomNavItem({ id, icon, label, selected, showLabel, onClick, ariaLabe
         flexShrink: 0,
         border: 'none', backgroundColor: 'transparent', cursor: 'pointer',
         padding: 0, fontFamily: 'inherit', outline: 'none',
-        '&:focus-visible': {
-          outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px',
-          borderRadius: '8px',
-        },
+        // The ring is drawn on the icon circle (below), not round the item.
+        '&:focus-visible': { outline: 'none' },
         '&:disabled': { opacity: 'var(--Disabled, 0.38)', cursor: 'not-allowed' },
+        /* Figma's Nav Item Hover: the label goes Quiet → Text; nothing else
+           moves. Pressed follows it (the set draws no pressed of its own). */
+        '&:hover:not(:disabled) .bottom-nav-label, &:active:not(:disabled) .bottom-nav-label': { color: 'var(--Text) !important' },
       }}
     >
       {/* Icon-Holder — the circle that carries the selected state. */}
@@ -353,13 +354,13 @@ function BottomNavItem({ id, icon, label, selected, showLabel, onClick, ariaLabe
            column containing the icon circle and the label, so a scrim on it
            would paint a rectangle behind the text as well. Selected keeps its
            --Text fill and moves the scrim on top of it. */
-        '.bottom-nav-item:hover &': selected
-          ? { backgroundColor: 'var(--Text)' }
-          : { color: 'var(--Text)', backgroundColor: 'var(--Hover)' },
-        '.bottom-nav-item:active &': selected
-          ? { backgroundColor: 'var(--Text)' }
-          : { color: 'var(--Text)', backgroundColor: 'var(--Pressed)' },
-        '.bottom-nav-item:disabled:hover &': { backgroundColor: 'transparent' },
+        /* Hover / pressed change the LABEL (see the button above) — Figma
+           puts no fill on the circle. Focus is a 2px ring 1px outside the
+           circle (Figma's 46px Focus-Visible frame round the 40px holder),
+           not a box round the whole item. */
+        '.bottom-nav-item:focus-visible &': {
+          outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px',
+        },
       }}>
         {icon}
       </Box>
