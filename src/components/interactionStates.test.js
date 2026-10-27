@@ -143,11 +143,7 @@ const REGISTRY = [
     // The control this test was redesigned around — see the header note.
     within: ['function BottomNavItem', 'function BottomNavFab'],
   },
-  {
-    control: 'BottomNav FAB menu row',
-    file: 'BottomNavigation/BottomNavigation.js',
-    within: ['function BottomNavFab', null],
-  },
+  // The FAB's actions are the library's SpeedDial now — its states are SpeedDial's / Fab's.
 ];
 
 /** Directories with no control of their own, and why. */

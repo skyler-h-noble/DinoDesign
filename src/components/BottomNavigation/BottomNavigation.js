@@ -1,8 +1,9 @@
 // src/components/BottomNavigation/BottomNavigation.js
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Box } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { MobileNavLabel, LabelSmall } from '../Typography';
+import { MobileNavLabel } from '../Typography';
+import { SpeedDial } from '../SpeedDial/SpeedDial';
 import { Fab } from '../Fab/Fab';
 
 /**
@@ -61,9 +62,9 @@ import { Fab } from '../Fab/Fab';
  * ring inside the row, which needed aria-owns to keep the tablist pure; the
  * design dropped that style.)
  *
- * With `actions` it is a SPEED DIAL: the FAB opens a panel of actions above
- * it, each an icon and a label, in the library's menu shell. A label that
- * only appears on hover is no label on a phone, which is where this bar is.
+ * With `actions` it is the library's SPEED DIAL (medium, opening up), as
+ * Figma's Nav-Bar now draws it: the + turns to an ×, the actions fan out
+ * above, and their labels show while the dial is open — on a phone too.
  */
 
 /* The bar's palette. Nine themes — the -Light / -Medium / -Dark shades are
@@ -385,9 +386,6 @@ function BottomNavItem({ id, icon, label, selected, showLabel, onClick, ariaLabe
   );
 }
 
-/** The small ring inside a speed-dial row: the FAB's own outline at the
- *  item's holder size, so a row reads as "one of the ring's". */
-const DIAL_RING = 32;
 /** Figma's "FAB Frame": the gap in the items under a raised FAB. */
 const FAB_GAP = '24px';
 /** Right FAB: bar to FAB. */
@@ -404,38 +402,15 @@ const RAISE = (48 + HALO * 2) / 2 + 'px';
  *             Background, which cuts it out of the bar
  *    beside   (Right FAB) standing after the bar
  *
- *  Given `actions`, it opens a speed dial: a panel of actions above it. */
+ *  Given `actions`, it is the library's SpeedDial (medium, opening up) —
+ *  Figma's Nav-Bar now holds a SpeedDial where the FAB was, so the + turns
+ *  into an × and the actions fan out with their labels, as everywhere else.
+ *  It used to open a menu-style panel of its own. */
 function BottomNavFab({ icon, label, onClick, actions, raised = false }) {
   const isDial = Array.isArray(actions) && actions.length > 0;
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef(null);
-
-  /* Outside click and Escape close it — the same two exits the standalone
-     SpeedDial and the Menu have, so a dial in the bar dismisses the way every
-     other floating thing in the system does. */
-  useEffect(() => {
-    if (!open) return undefined;
-    const onDown = (e) => {
-      if (rootRef.current && !rootRef.current.contains(e.target)) setOpen(false);
-    };
-    const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
-    document.addEventListener('mousedown', onDown);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('mousedown', onDown);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [open]);
-
-  const handleClick = (e) => {
-    if (isDial) setOpen((o) => !o);
-    onClick?.(e);
-  };
-
   return (
     <Box
-      ref={rootRef}
-      className={'bottom-nav-fab' + (raised ? ' bottom-nav-fab-raised' : '') + (open ? ' bottom-nav-fab-open' : '')}
+      className={'bottom-nav-fab' + (raised ? ' bottom-nav-fab-raised' : '')}
       sx={{
         display: 'flex', flexShrink: 0,
         ...(raised && {
@@ -444,80 +419,11 @@ function BottomNavFab({ icon, label, onClick, actions, raised = false }) {
         }),
       }}
     >
-      <Fab
-        aria-label={label || 'Action'}
-        onClick={handleClick}
-        {...(isDial ? { 'aria-haspopup': 'menu', 'aria-expanded': open } : {})}
-        icon={
-          /* The plus turns into a cross by turning, not by swapping icons —
-             the same move the standalone SpeedDial makes. */
-          <Box component="span" sx={{ display: 'inline-flex', transition: 'transform 0.2s ease', transform: open ? 'rotate(45deg)' : 'none' }}>
-            {icon || <AddIcon />}
-          </Box>
-        }
-      />
-
-      {isDial && open && (
-        /* The menu shell: the same frame radius, border and surface as the
-           library's Menu, so a dial in the bar is the same shape as every
-           other panel in the system. */
-        <Box
-          role="menu"
-          aria-label={label || 'Actions'}
-          className="bottom-nav-dial"
-          data-surface="Surface-Brightest"
-          sx={{
-            position: 'absolute',
-            bottom: 'calc(100% + var(--Sizing-1, 8px))',
-            ...(raised ? { left: '50%', transform: 'translateX(-50%)' } : { right: 0 }),
-            zIndex: 1,
-            display: 'flex',
-            /* Reverse, so the first action is the one nearest the FAB. */
-            flexDirection: 'column-reverse',
-            padding: 'var(--Sizing-1, 8px)',
-            gap: 'var(--Sizing-1, 8px)',
-            backgroundColor: 'var(--Background)',
-            color: 'var(--Text)',
-            border: '1px solid var(--Border)',
-            borderRadius: 'var(--Dropdown-Frame-Radius, var(--Input-Radius, var(--Style-Border-Radius, 4px)))',
-            boxShadow: 'var(--Effect-Level-3, none)',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {actions.map((a, i) => (
-            <Box
-              key={a.key || i}
-              component="button" type="button" role="menuitem"
-              aria-label={a.label}
-              className="bottom-nav-dial-item"
-              onClick={(e) => { setOpen(false); a.onClick?.(e); }}
-              sx={{
-                display: 'flex', alignItems: 'center', gap: 'var(--Sizing-1, 8px)',
-                flexDirection: raised ? 'row' : 'row-reverse',
-                border: 'none', backgroundColor: 'transparent', cursor: 'pointer',
-                padding: 0, fontFamily: 'inherit', color: 'inherit', outline: 'none',
-                borderRadius: HOLDER_RADIUS,
-                '&:hover': { backgroundColor: 'var(--Hover)' },
-                '&:active': { backgroundColor: 'var(--Pressed)' },
-                '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px' },
-                '&:disabled': { opacity: 'var(--Disabled, 0.38)', cursor: 'not-allowed' },
-              }}
-            >
-              <Box sx={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                width: DIAL_RING, height: DIAL_RING, flexShrink: 0, boxSizing: 'border-box',
-                borderRadius: HOLDER_RADIUS,
-                border: 'var(--Button-Border-Width, 1px) solid var(--Buttons-Default-Border)',
-                color: 'var(--Buttons-Default-Border)',
-                fontSize: 'var(--Icon-Size-Small, 16px)',
-                '& .MuiSvgIcon-root': { fontSize: 'inherit', color: 'inherit' },
-              }}>
-                {a.icon || <AddIcon />}
-              </Box>
-              <LabelSmall style={{ color: 'inherit' }}>{a.label}</LabelSmall>
-            </Box>
-          ))}
-        </Box>
+      {isDial ? (
+        <SpeedDial size="medium" direction="up" icon={icon} ariaLabel={label || 'Actions'}
+          actions={actions.map((a, i) => ({ key: a.key || i, icon: a.icon, name: a.label, onClick: () => a.onClick?.() }))} />
+      ) : (
+        <Fab aria-label={label || 'Action'} onClick={onClick} icon={icon || <AddIcon />} />
       )}
     </Box>
   );

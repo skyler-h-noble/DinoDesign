@@ -331,10 +331,9 @@ describe('The FAB: Raised and Right FAB styles', () => {
 });
 
 describe('The ring as a speed dial', () => {
-  /* Given actions, the ring opens a panel of them above the bar — each an
-     icon and a label, stacked in the ring's own column. The library's menu
-     shell rather than the standalone SpeedDial's fan of tooltip-labelled
-     mini-FABs: a label that only appears on hover is no label on a phone. */
+  /* Given actions, the ring is the library's SpeedDial — Figma's Nav-Bar
+     holds a SpeedDial where the FAB was. The + turns to an ×, the actions
+     fan out above it, each a FAB named by its label. */
   const actions = [
     { label: 'New post', onClick: jest.fn() },
     { label: 'Upload', onClick: jest.fn() },
@@ -342,50 +341,40 @@ describe('The ring as a speed dial', () => {
   ];
   const dial = { label: 'Create', actions };
 
-  test('closed until the ring is pressed, then a menu of the actions', () => {
-    renderNav({ items: ITEMS_4, fabAction: dial });
+  test('closed until the ring is pressed, then its actions', () => {
+    const { container } = renderNav({ items: ITEMS_4, fabAction: dial });
+    expect(container.querySelector('.bottom-nav-fab .speed-dial')).toBeTruthy();
     const ring = screen.getByRole('button', { name: 'Create' });
     expect(ring).toHaveAttribute('aria-haspopup', 'menu');
     expect(ring).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.queryByRole('menu')).toBeNull();
     fireEvent.click(ring);
     expect(ring).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getAllByRole('menuitem').map((m) => m.getAttribute('aria-label')))
       .toEqual(['New post', 'Upload', 'Record']);
   });
 
-  test('an action closes it and fires', () => {
+  test('an action fires and closes it', () => {
     renderNav({ items: ITEMS_4, fabAction: dial });
-    fireEvent.click(screen.getByRole('button', { name: 'Create' }));
+    const ring = screen.getByRole('button', { name: 'Create' });
+    fireEvent.click(ring);
     fireEvent.click(screen.getByRole('menuitem', { name: 'Upload' }));
     expect(actions[1].onClick).toHaveBeenCalled();
-    expect(screen.queryByRole('menu')).toBeNull();
+    expect(ring).toHaveAttribute('aria-expanded', 'false');
   });
 
   test('Escape closes it', () => {
     renderNav({ items: ITEMS_4, fabAction: dial });
-    fireEvent.click(screen.getByRole('button', { name: 'Create' }));
+    const ring = screen.getByRole('button', { name: 'Create' });
+    fireEvent.click(ring);
     fireEvent.keyDown(document, { key: 'Escape' });
-    expect(screen.queryByRole('menu')).toBeNull();
+    expect(ring).toHaveAttribute('aria-expanded', 'false');
   });
 
-  test('without actions it is a plain action, not a menu', () => {
-    renderNav({ items: ITEMS_4, fabAction: { label: 'Create', onClick: jest.fn() } });
+  test('without actions it is a plain action, not a dial', () => {
+    const { container } = renderNav({ items: ITEMS_4, fabAction: { label: 'Create', onClick: jest.fn() } });
     const ring = screen.getByRole('button', { name: 'Create' });
     expect(ring).not.toHaveAttribute('aria-haspopup');
-    fireEvent.click(ring);
-    expect(screen.queryByRole('menu')).toBeNull();
-  });
-
-  test('labels flow away from the ring: leftward at the end, rightward when centred', () => {
-    const { container, unmount } = renderNav({ items: ITEMS_4, fabAction: dial, fabPosition: 'end' });
-    fireEvent.click(screen.getByRole('button', { name: 'Create' }));
-    const first = container.querySelector('.bottom-nav-dial-item');
-    expect(getComputedStyle(first).flexDirection).toBe('row-reverse');
-    unmount();
-    const c2 = renderNav({ items: ITEMS_4, fabAction: dial, fabPosition: 'center' }).container;
-    fireEvent.click(screen.getByRole('button', { name: 'Create' }));
-    expect(getComputedStyle(c2.querySelector('.bottom-nav-dial-item')).flexDirection).toBe('row');
+    expect(container.querySelector('.speed-dial')).toBeNull();
   });
 
   test('has no accessibility violations open', async () => {
