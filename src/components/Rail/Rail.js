@@ -4,6 +4,7 @@ import { Box } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import { Button } from '../Button/Button';
+import { Fab } from '../Fab/Fab';
 import { Icon } from '../Icon/Icon';
 import { MobileNavLabel, Eyebrow } from '../Typography';
 
@@ -274,24 +275,15 @@ export function Rail({
         </Box>
       )}
 
-      {/* FAB action */}
+      {/* FAB action — the library's Fab, as Figma's FAB (6778:17180): the
+          large 56px circle on a closed rail, Extended (icon + label pill) on
+          an open one. It was a Button on primary-light, a shade that no
+          longer exists, sized and rounded by hand. */}
       {fabAction && (
-        <Box sx={{ px: isExpanded ? 2 : 1, py: 1, flexShrink: 0 }}>
-          <Button
-            variant="primary-light"
-            size="medium"
-            onClick={fabAction.onClick}
-            aria-label={fabAction.label || 'Action'}
-            startIcon={fabAction.icon ? <Icon size="small" sx={{ color: 'inherit' }}>{fabAction.icon}</Icon> : undefined}
-            sx={{
-              width: isExpanded ? '100%' : 56,
-              borderRadius: isExpanded ? '28px' : 'var(--Style-Border-Radius)',
-              justifyContent: isExpanded ? 'flex-start' : 'center',
-              transition: 'all 0.2s ease',
-            }}
-          >
-            {isExpanded ? fabAction.label : null}
-          </Button>
+        <Box className="rail-fab" sx={{ px: RAIL_PAD_X, py: 1, flexShrink: 0, display: 'flex', justifyContent: isExpanded ? 'flex-start' : 'center' }}>
+          <Fab size="large" extended={isExpanded}
+            icon={fabAction.icon} label={isExpanded ? fabAction.label : undefined}
+            ariaLabel={fabAction.label || 'Action'} onClick={fabAction.onClick} />
         </Box>
       )}
 
