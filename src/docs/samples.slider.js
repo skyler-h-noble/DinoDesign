@@ -185,6 +185,23 @@ export const SLIDER_SAMPLES = {
     />
   ),
 
+  /* Figma's thumb booleans: Label-Top / Label-Bottom across, Label-Right /
+     Label-Left upright. */
+  valueLabelPosition: () => (
+    <HStack gap="var(--Sizing-6)" style={{ alignItems: 'center', flexWrap: 'wrap', padding: 'var(--Sizing-5) var(--Sizing-6)' }}>
+      {[['horizontal', 'top'], ['horizontal', 'bottom']].map(([o, p]) => (
+        <Cell key={p} label={p} emphasis={p === 'top'} width={W}>
+          <div style={{ width: W, padding: '32px 0' }}><Slider valueLabelDisplay="on" valueLabelPosition={p} defaultValue={60} aria-label={p} /></div>
+        </Cell>
+      ))}
+      {[['vertical', 'right'], ['vertical', 'left']].map(([o, p]) => (
+        <Cell key={p} label={p} emphasis={p === 'right'} width={120}>
+          <div style={{ height: 140, padding: '0 40px' }}><Slider orientation="vertical" valueLabelDisplay="on" valueLabelPosition={p} defaultValue={60} aria-label={p} /></div>
+        </Cell>
+      ))}
+    </HStack>
+  ),
+
   label: () => (
     <VStack gap="var(--Sizing-3)" style={{ width: '100%', maxWidth: 420 }}>
       <VStack gap="var(--Sizing-Half)">

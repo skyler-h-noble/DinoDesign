@@ -367,3 +367,15 @@ describe('Slider label (Figma SliderField)', () => {
     expect(field.lastChild).toHaveClass('form-label-row');
   });
 });
+
+describe('valueLabelPosition (Figma thumb Label-Top / Bottom / Left / Right)', () => {
+  it('renders with each position without dropping the label', () => {
+    for (const [orientation, pos] of [['horizontal', 'top'], ['horizontal', 'bottom'], ['vertical', 'right'], ['vertical', 'left']]) {
+      const { container, unmount } = render(
+        <Slider aria-label="Volume" defaultValue={30} orientation={orientation} valueLabelPosition={pos} valueLabelDisplay="on" />
+      );
+      expect(container.querySelector('.MuiSlider-valueLabel')).not.toBeNull();
+      unmount();
+    }
+  });
+});

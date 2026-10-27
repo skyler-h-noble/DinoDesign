@@ -176,6 +176,10 @@ export function Slider({
      is hovered, dragged or focused — the label is there when the value is
      changing, without a row of bubbles over every resting slider. */
   valueLabelDisplay = 'auto',
+  /* Which side of the thumb its value label sits — Figma's thumb booleans:
+     horizontal 'top' (default, Label-Top) | 'bottom' (Label-Bottom);
+     vertical 'right' (default, Label-Right) | 'left' (Label-Left). */
+  valueLabelPosition,
   orientation = 'horizontal',
   /* Which side of the thumb the fill sits on.
      `standard` fills from the start of the rail to the thumb; `inverted`
@@ -415,16 +419,43 @@ export function Slider({
     /* Vertical: Figma's thumb shows its label to the RIGHT (Label-Right on by
        default), 8px clear of the thumb and centred on it, the arrow pointing
        back at the thumb. MUI puts it on the left. */
-    '&.MuiSlider-vertical .MuiSlider-valueLabel': {
-      right: 'auto',
-      left: 'calc(100% + 8px)',
-      transformOrigin: 'left center',
-      '&::before': {
+    ...(orientation === 'vertical' && valueLabelPosition !== 'left' && {
+      '&.MuiSlider-vertical .MuiSlider-valueLabel': {
         right: 'auto',
-        left: 0,
-        transform: 'translate(-50%, -50%) rotate(45deg)',
+        left: 'calc(100% + 8px)',
+        transformOrigin: 'left center',
+        '&::before': {
+          right: 'auto',
+          left: 0,
+          transform: 'translate(-50%, -50%) rotate(45deg)',
+        },
       },
-    },
+    }),
+    /* Label-Left: 8px clear on the thumb's left, the arrow pointing right. */
+    ...(orientation === 'vertical' && valueLabelPosition === 'left' && {
+      '&.MuiSlider-vertical .MuiSlider-valueLabel': {
+        left: 'auto',
+        right: 'calc(100% + 8px)',
+        transformOrigin: 'right center',
+        '&::before': {
+          left: 'auto',
+          right: 0,
+          transform: 'translate(50%, -50%) rotate(45deg)',
+        },
+      },
+    }),
+    /* Label-Bottom: under the thumb, the arrow pointing up at it. */
+    ...(orientation !== 'vertical' && valueLabelPosition === 'bottom' && {
+      // Its own selector: a second '& .MuiSlider-valueLabel' key would REPLACE
+      // the styled one above rather than merge with it.
+      '& .MuiSlider-thumb .MuiSlider-valueLabel': {
+        top: 'calc(100% + 10px)',
+        transformOrigin: 'top center',
+        transform: 'translateY(0) scale(0)',
+        '&.MuiSlider-valueLabelOpen': { transform: 'translateY(0) scale(1)' },
+        '&::before': { bottom: 'auto', top: 0, transform: 'translate(-50%, -50%) rotate(45deg)' },
+      },
+    }),
 
     /* Marks are DOTS, not full-height bars.
        They were `width: 2, height: totalTrack` — the full thickness of the bar

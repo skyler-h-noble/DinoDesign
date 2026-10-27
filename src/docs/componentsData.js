@@ -175,6 +175,11 @@ export const SLIDER_DOC = {
     default: "'off'",
     note: "`auto` shows the bubble on hover and focus. Its ground is --Text with --Background text — the surface pair inverted, which is legible on any surface by definition where a palette color would not be."
   }, {
+    name: 'valueLabelPosition',
+    type: "'top' | 'bottom' | 'right' | 'left'",
+    default: "top (horizontal) / right (vertical)",
+    note: "Which side of the thumb the value bubble sits — Figma's thumb booleans Label-Top / Label-Bottom (horizontal) and Label-Right / Label-Left (vertical)."
+  }, {
     name: 'min',
     type: 'number',
     default: '0'
