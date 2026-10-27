@@ -134,13 +134,14 @@ describe('Ellipsis', () => {
      asserted an attribute on it. Matching the character is what the reader
      actually sees; aria-hidden is what a screen reader relies on to skip it. */
   test('renders ellipsis for large page counts', () => {
-    renderPagination({ count: 20, defaultPage: 10 });
-    expect(screen.getAllByText('\u2026').length).toBeGreaterThanOrEqual(1);
+    const { container } = renderPagination({ count: 20, defaultPage: 10 });
+    // Figma's Pagination Ellipsis: a quiet more_horiz cell, two of them mid-range.
+    expect(container.querySelectorAll('.pagination-ellipsis').length).toBe(2);
   });
 
   test('ellipsis is hidden from assistive tech', () => {
-    renderPagination({ count: 20, defaultPage: 10 });
-    expect(screen.getAllByText('\u2026')[0]).toHaveAttribute('aria-hidden', 'true');
+    const { container } = renderPagination({ count: 20, defaultPage: 10 });
+    expect(container.querySelector('.pagination-ellipsis')).toHaveAttribute('aria-hidden', 'true');
   });
 
   test('no ellipsis when count is small', () => {
@@ -314,7 +315,7 @@ describe('the current page is distinguishable', () => {
 
     expect(cssFor(current)).toContain('background-color: var(--Buttons-Info-Button)');
     for (const o of others) {
-      expect(o).toHaveClass('btn-ghost');
+      expect(o.className).toMatch(/btn-(info-)?ghost/);
       expect(cssFor(o)).not.toContain('var(--Buttons-Info-Button)');
     }
   });
@@ -337,5 +338,19 @@ describe('the current page is distinguishable', () => {
   test('black-white is a usable color', () => {
     const { container } = render(<Pagination count={6} defaultPage={3} color="black-white" />);
     expect(container.querySelector('[aria-current="page"]')).toBeInTheDocument();
+  });
+});
+
+describe('the strip keeps one width as you page', () => {
+  const cells = (container) => [...container.querySelectorAll('ul > li')]
+    .map((li) => li.querySelector('.pagination-ellipsis') ? '…' : li.textContent.trim())
+    .filter((t) => t === '…' || /^\d+$/.test(t));
+  test.each([
+    [1, ['1', '2', '3', '4', '5', '…', '10']],
+    [5, ['1', '…', '4', '5', '6', '…', '10']],
+    [10, ['1', '…', '6', '7', '8', '9', '10']],
+  ])('page %i of 10', (page, expected) => {
+    const { container } = render(<Pagination count={10} page={page} onChange={() => {}} />);
+    expect(cells(container)).toEqual(expected);
   });
 });

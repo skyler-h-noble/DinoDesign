@@ -1,20 +1,23 @@
 // src/components/Pagination/Pagination.js
 import React, { useState, useCallback } from 'react';
 import { Box } from '@mui/material';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import FirstPageIcon from '@mui/icons-material/FirstPage';
-import LastPageIcon from '@mui/icons-material/LastPage';
+import ChevronLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import ChevronRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import FirstPageIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
+import LastPageIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { Button } from '../Button/Button';
 import { Icon } from '../Icon/Icon';
-import { Caption } from '../Typography';
 
 /**
  * Pagination Component
  *
- * Figma's Pagination Number (8400:33345). The current page is the outline
- * button, selected (Pressed fill, Border, Outline-Text); the others are ghost
- * buttons. The previous / next arrows stay outline.
+ * Figma's Pagination Strip (Ellipsis = None | End | Both | Start, First and
+ * Last) of Pagination Numbers. The current page is the outline button,
+ * selected (Pressed fill, Border, Outline-Text); the other pages and every
+ * arrow are ghost buttons in the palette ({color}-ghost). First / last are the
+ * double arrows. A gap is the Pagination Ellipsis cell — a quiet more_horiz in
+ * a Button-Height square, not a control.
  *
  * COLORS: default | primary | secondary | tertiary | neutral | info | success | warning | error
  * SIZES: small | medium | large
@@ -39,12 +42,18 @@ function usePaginationRange({ count, page, siblingCount = 1, boundaryCount = 1 }
   const showLeftEllipsis = leftSiblingIndex > boundaryCount + 2;
   const showRightEllipsis = rightSiblingIndex < count - boundaryCount - 1;
 
+  /* The same number of cells wherever you are — 1 2 3 4 5 … 10 at the start,
+     1 … 4 5 6 … 10 in the middle, 1 … 6 7 8 9 10 at the end (Figma's
+     Pagination Strip). The edge ranges counted the boundary pages twice, so
+     the start and end showed one page more than the middle and the strip
+     changed width as you paged. */
+  const edgeCount = totalPageNumbers - boundaryCount - 1;
   if (!showLeftEllipsis && showRightEllipsis) {
-    const leftRange = range(1, Math.min(3 + 2 * siblingCount + boundaryCount, count));
+    const leftRange = range(1, Math.min(edgeCount, count));
     return [...leftRange, 'ellipsis-right', ...range(count - boundaryCount + 1, count)];
   }
   if (showLeftEllipsis && !showRightEllipsis) {
-    const rightRange = range(Math.max(count - (3 + 2 * siblingCount + boundaryCount) + 1, 1), count);
+    const rightRange = range(Math.max(count - edgeCount + 1, 1), count);
     return [...range(1, boundaryCount), 'ellipsis-left', ...rightRange];
   }
   if (showLeftEllipsis && showRightEllipsis) {
@@ -119,7 +128,7 @@ export function Pagination({
       >
         {showFirstButton && (
           <Box component="li">
-            <Button iconOnly variant={effectiveColor + '-outline'} size={s.btnSize}
+            <Button iconOnly variant={effectiveColor + '-ghost'} size={s.btnSize}
               disabled={disabled || currentPage === 1}
               onClick={() => setPage(1)} aria-label="Go to first page">
               <Icon size="small"><FirstPageIcon /></Icon>
@@ -128,7 +137,7 @@ export function Pagination({
         )}
 
         <Box component="li">
-          <Button iconOnly variant={effectiveColor + '-outline'} size={s.btnSize}
+          <Button iconOnly variant={effectiveColor + '-ghost'} size={s.btnSize}
             disabled={disabled || currentPage === 1}
             onClick={() => setPage(currentPage - 1)} aria-label="Go to previous page">
             <Icon size="small"><ChevronLeftIcon /></Icon>
@@ -139,7 +148,14 @@ export function Pagination({
           if (typeof item === 'string') {
             return (
               <Box component="li" key={item + '-' + idx}>
-                <Caption style={{ color: 'var(--Quiet)', padding: '0 4px' }} aria-hidden="true">…</Caption>
+                {/* Figma's Pagination Ellipsis: not a control, so no states. */}
+                <Box className="pagination-ellipsis" aria-hidden="true" sx={{
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  width: 'var(--Button-Height, 32px)', height: 'var(--Button-Height, 32px)',
+                  color: 'var(--Quiet)',
+                }}>
+                  <Icon size="small"><MoreHorizIcon /></Icon>
+                </Box>
               </Box>
             );
           }
@@ -154,7 +170,7 @@ export function Pagination({
                   the surface's own tone on a themed surface and would vanish
                   into it. */}
               <Button
-                variant={isSelected ? effectiveColor + '-outline' : 'ghost'}
+                variant={isSelected ? effectiveColor + '-outline' : effectiveColor + '-ghost'}
                 selected={isSelected}
                 size={s.btnSize}
                 disabled={disabled}
@@ -170,7 +186,7 @@ export function Pagination({
         })}
 
         <Box component="li">
-          <Button iconOnly variant={effectiveColor + '-outline'} size={s.btnSize}
+          <Button iconOnly variant={effectiveColor + '-ghost'} size={s.btnSize}
             disabled={disabled || currentPage === count}
             onClick={() => setPage(currentPage + 1)} aria-label="Go to next page">
             <Icon size="small"><ChevronRightIcon /></Icon>
@@ -179,7 +195,7 @@ export function Pagination({
 
         {showLastButton && (
           <Box component="li">
-            <Button iconOnly variant={effectiveColor + '-outline'} size={s.btnSize}
+            <Button iconOnly variant={effectiveColor + '-ghost'} size={s.btnSize}
               disabled={disabled || currentPage === count}
               onClick={() => setPage(count)} aria-label="Go to last page">
               <Icon size="small"><LastPageIcon /></Icon>
