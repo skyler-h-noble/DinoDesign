@@ -337,7 +337,13 @@ function outlineStyles(color, elevated = false, selected = false, size = 'medium
   };
 }
 
-function ghostStyles(isTextContent, selected = false) {
+function ghostStyles(isTextContent, selected = false, color = 'default') {
+  /* The PALETTE is the Buttons mode, as solid and outline take it:
+     variant="ghost" is the Default palette, "{color}-ghost" any other. It used
+     to be Default whatever the mode — Figma's ghost binds Buttons ›
+     Outline-Quiet / Outline-Text / Border, so a ghost inside a Primary
+     Buttons mode was primary in the design and default in code. */
+  const C = seg(color);
   /* Quiet at rest, full-strength when engaged — the same two-step outline
      buttons make, on the Default outline pair:
 
@@ -352,8 +358,8 @@ function ghostStyles(isTextContent, selected = false) {
      (It stayed on Outline-Text here until 2026-10-26.) (isTextContent no
      longer changes the color.) */
   void isTextContent;
-  const quiet = 'var(--Buttons-Default-Outline-Quiet, var(--Outline-Quiet))';
-  const loud = 'var(--Buttons-Default-Outline-Text)';
+  const quiet = `var(--Buttons-${C}-Outline-Quiet, var(--Outline-Quiet))`;
+  const loud = `var(--Buttons-${C}-Outline-Text)`;
   return {
     // A selected ghost is painted in its surface, like an outline button —
     // Figma's selected ghost fills Background under its Border stroke.
@@ -364,13 +370,13 @@ function ghostStyles(isTextContent, selected = false) {
        unselected one (which has no fill and no stroke). The transparent border
        otherwise holds the same box, so selecting it never moves anything. */
     border: selected
-      ? 'var(--Button-Border-Width) solid var(--Buttons-Default-Border)'
+      ? `var(--Button-Border-Width) solid var(--Buttons-${C}-Border)`
       : 'var(--Button-Border-Width) solid transparent',
     boxShadow: 'none',
     textDecoration: 'none',
     // A selected ghost draws the selected border width like every selected
     // button: its border at the rest width plus the inner ring (2px or 3px).
-    ...(selected && { boxShadow: selectedRing('Default') }),
+    ...(selected && { boxShadow: selectedRing(C) }),
     '& .MuiTouchRipple-rippleVisible': {
       color: 'var(--Hover)',
     },
@@ -383,13 +389,13 @@ function ghostStyles(isTextContent, selected = false) {
       /* Lifts like an outline button: Figma's ghost Hover variants (selected
          and not) carry the Level 1 elevation on Button-Effect. The hover fill
          is the opaque --Hover, so the shadow has a body to sit under. */
-      boxShadow: withRing(selected, 'Default', SHADOW_LEVEL_1),
+      boxShadow: withRing(selected, C, SHADOW_LEVEL_1),
       color: loud,
       ...(!selected && { transform: 'translateY(-1px)' }),
     },
     '&:active': {
       backgroundColor: 'var(--Pressed)',
-      boxShadow: withRing(selected, 'Default', 'none'),
+      boxShadow: withRing(selected, C, 'none'),
       color: loud,
       ...(!selected && { transform: 'translateY(0)' }),
     },
@@ -504,9 +510,8 @@ function warnUnknownVariant(variant, map) {
     // eslint-disable-next-line no-console
     console.warn(
       '[Button] variant="' + variant + '" is not a variant. Rendering the ' +
-      'default. Shape is solid / {color}-outline / ghost / text — ghost and ' +
-      'text take NO color prefix, because a ghost takes its color from the ' +
-      'text role (--Hotlink for text, --Quiet for icon-only), not a palette.',
+      'default. Shape is {color} (solid) / {color}-outline / {color}-ghost — ' +
+      'ghost and text alone are the Default palette.',
     );
   }
   return map.default;
@@ -517,6 +522,7 @@ function buildVariantMap(isTextContent, elevated = false, selected = false, size
   COLORS.forEach((color) => {
     map[color]                = solidStyles(color, elevated, selected, size);
     map[`${color}-outline`]   = outlineStyles(color, elevated, selected, size);
+    map[`${color}-ghost`]     = ghostStyles(isTextContent, selected, color);
   });
   // Black/white — solid and outline.
   //
@@ -530,6 +536,7 @@ function buildVariantMap(isTextContent, elevated = false, selected = false, size
   // white on a dark one wherever it is placed, with no prop change.
   map['black-white']         = solidStyles('black-white', elevated, selected, size);
   map['black-white-outline'] = outlineStyles('black-white', elevated, selected, size);
+  map['black-white-ghost']   = ghostStyles(isTextContent, selected, 'black-white');
 
   map['danger']         = solidStyles('error', elevated, selected, size);
   map['outline']        = outlineStyles('default', elevated, selected, size);
@@ -782,11 +789,10 @@ export const Button = React.forwardRef(function Button({
 
   const variantMap     = buildVariantMap(isTextContent, elevated, selected, size);
   /* An unknown variant used to fall through to solid default SILENTLY, which
-     is how `primary-ghost` — never a real variant — rendered as a filled pink
-     button in the gallery's own example and nobody noticed. Ghost and text are
-     deliberately color-agnostic (see ghostStyles: a text ghost reads as a link,
-     an icon ghost as --Quiet), so there is no {color}-ghost to look up. Warn
-     rather than paint something plausible. */
+     is how `primary-ghost` — not yet a variant then — rendered as a filled pink
+     button in the gallery's own example and nobody noticed. {color}-ghost is
+     real now (the Buttons palette, as solid / outline take it); anything else
+     still warns rather than painting something plausible. */
   const variantStyles  = variantMap[effectiveVariant] || warnUnknownVariant(effectiveVariant, variantMap);
   const sizingStyles   = getSizingStyles({ size, iconOnly: isIconOnly, letterNumber, avatar, swatch });
 

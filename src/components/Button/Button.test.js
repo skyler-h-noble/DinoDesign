@@ -261,3 +261,26 @@ describe('Button variant -light removal', () => {
     expect(getByRole('button')).toBeInTheDocument();
   });
 });
+
+describe('ghost takes the Buttons palette', () => {
+  const cssFor = (el) => {
+    const out = [];
+    for (const sheet of document.styleSheets) for (const r of sheet.cssRules) {
+      try { if (el.matches(r.selectorText)) out.push(r.cssText); } catch (e) { /* skip */ }
+    }
+    return out.join('\n');
+  };
+  test('variant="ghost" is the Default palette', () => {
+    const { container } = render(<Button variant="ghost">Go</Button>);
+    expect(cssFor(container.querySelector('button'))).toContain('--Buttons-Default-Outline-Quiet');
+  });
+  test('variant="primary-ghost" is the Primary palette, and does not warn', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const { container } = render(<Button variant="primary-ghost">Go</Button>);
+    const css = cssFor(container.querySelector('button'));
+    expect(css).toContain('--Buttons-Primary-Outline-Quiet');
+    expect(css).not.toContain('--Buttons-Default-Outline-Quiet');
+    expect(warn.mock.calls.filter((c) => String(c[0]).includes('is not a variant')).length).toBe(0);
+    warn.mockRestore();
+  });
+});

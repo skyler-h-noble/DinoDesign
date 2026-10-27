@@ -34,8 +34,8 @@ export const BUTTON_DOC = {
     sample: 'variant',
     type: 'string',
     default: 'default',
-    values: ['solid (bare)', '{color}-outline', 'ghost'],
-    note: 'Color and SHAPE are separate axes, and only `-outline` is a suffix. Every color takes `{color}` and `{color}-outline`; `ghost` is written BARE, with no color prefix, because it reads from the text role (`--Hotlink` for text, `--Quiet` for icon-only) rather than a palette. `text` is an ALIAS of `ghost`, not a fourth shape — Figma\'s Style axis is solid / outline / ghost. There is no `primary-ghost`: an unknown variant warns and renders the default. **The default is `default`, not `primary`** — use `primary` only where the design explicitly marks it.'
+    values: ['solid (bare)', '{color}-outline', '{color}-ghost'],
+    note: 'Color and SHAPE are separate axes, and only `-outline` is a suffix. Every color takes `{color}`, `{color}-outline` and `{color}-ghost` — the ghost reads its palette\'s Outline-Quiet / Outline-Text / Border, as Figma\'s ghost takes the Buttons mode. Bare `ghost` (and its alias `text`) is the Default palette. Figma\'s Style axis is solid / outline / ghost; an unknown variant warns and renders the default. **The default is `default`, not `primary`** — use `primary` only where the design explicitly marks it.'
   }, {
     name: 'size',
     type: 'string',
@@ -52,7 +52,7 @@ export const BUTTON_DOC = {
     type: 'string',
     default: 'default',
     values: ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error', 'black-white'],
-    note: 'The same prop as the shape above — a color on its own is the solid button, and `{color}-outline` is that color as an outline. **The default is `default`, not `primary`.** `ghost` takes no color prefix, so there is no `primary-ghost`.'
+    note: 'The same prop as the shape above — a color on its own is the solid button, and `{color}-outline` is that color as an outline. **The default is `default`, not `primary`.** `{color}-ghost` is that color as a ghost; bare `ghost` is Default.'
   }, {
     name: 'iconOnly',
     type: 'boolean — one value of Figma\'s Type axis',
