@@ -57,15 +57,15 @@ describe('Size classes', () => {
 });
 
 /* ─── Disabled ─── */
-describe('Disabled', () => {
-  test('adds icon-disabled class', () => {
+// An icon is not interactive: disabled is retired (an icon Button disables).
+describe('Disabled (retired)', () => {
+  test('renders at full strength and warns once', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
     const { container } = renderIcon({ disabled: true });
-    expect(container.querySelector('.icon-disabled')).toBeInTheDocument();
-  });
-
-  test('no icon-disabled class when not disabled', () => {
-    const { container } = renderIcon({ disabled: false });
-    expect(container.querySelector('.icon-disabled')).not.toBeInTheDocument();
+    renderIcon({ disabled: true });
+    expect(container.querySelector('.icon-disabled')).toBeNull();
+    expect(warn.mock.calls.filter((c) => String(c[0]).includes('[Icon]'))).toHaveLength(1);
+    warn.mockRestore();
   });
 });
 

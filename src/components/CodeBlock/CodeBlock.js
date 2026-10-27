@@ -78,16 +78,22 @@ export function CodeBlock({
   language = 'JSX',
   showCopy = true,
   showHeader = true,
+  /* Figma's Copy In Header / Copy In Body, independently. By default the copy
+     button follows the header — in it when there is one (Figma's defaults:
+     header on, Copy In Header on, Copy In Body off), in the body when not, so
+     hiding the header never removes the only way to copy. Set either to
+     place it explicitly; showCopy={false} still hides both. */
+  copyInHeader,
+  copyInBody,
   maxHeight,
   wrap = false,
   sx = {},
   ...rest
 }) {
-  /* Exactly one copy button, and it follows the header. Rendering it in both
-     places when the header is on would give a panel two controls that do the
-     same thing, which reads as two different things. */
-  const headerCopy = showHeader && showCopy && !!code;
-  const bodyCopy = !showHeader && showCopy && !!code;
+  const inHeader = copyInHeader !== undefined ? copyInHeader : showHeader;
+  const inBody = copyInBody !== undefined ? copyInBody : !showHeader;
+  const headerCopy = showHeader && inHeader && showCopy && !!code;
+  const bodyCopy = inBody && showCopy && !!code;
   return (
     <Box
       // The pair that makes this region dark. Never a literal color.
@@ -105,7 +111,7 @@ export function CodeBlock({
       }}
       {...rest}
     >
-      {showHeader && (language || showCopy) && (
+      {showHeader && (language || headerCopy) && (
         <Box
           sx={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -168,6 +174,8 @@ CodeBlock.propTypes = {
   showCopy: PropTypes.bool,
   /** Show the header row at all. */
   showHeader: PropTypes.bool,
+  copyInHeader: PropTypes.bool,
+  copyInBody: PropTypes.bool,
   /** Cap the code area's height and scroll past it. */
   maxHeight: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   /** Wrap long lines instead of scrolling horizontally. */

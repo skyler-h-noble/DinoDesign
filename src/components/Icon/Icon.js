@@ -95,18 +95,30 @@ const SIZE_MAP = ICON_SIZE_MAP;
 /** Colors/Icon-Variant-Opacity in the Modes collection — 50 in both modes. */
 const ICON_VARIANT_OPACITY = 50;
 
+let warnedDisabled = false;
+function warnDisabledOnce() {
+  if (warnedDisabled || process.env.NODE_ENV === 'production') return;
+  warnedDisabled = true;
+  // eslint-disable-next-line no-console
+  console.warn('[Icon] disabled is retired — an icon is not interactive. Disable the Button that holds it.');
+}
+
 export function Icon({
   children,
   color = 'default',
   size = 'medium',
   fontSize: customFontSize,
-  disabled = false,
+  // Retired: an Icon is not interactive, so it has no disabled state — an
+  // icon Button does. disabled still renders the icon at full strength and
+  // warns once.
+  disabled,
   twoTone = false,
   className = '',
   sx = {},
   'aria-label': ariaLabel,
   ...props
 }) {
+  if (disabled) warnDisabledOnce();
   const ghost = useGhost();
   const C = COLOR_LABEL_MAP[color] || 'Default';
 
@@ -140,7 +152,6 @@ export function Icon({
       component="span"
       className={
         'icon icon-' + color + ' icon-' + size +
-        (disabled ? ' icon-disabled' : '') +
         (twoTone ? ' icon-twotone' : '') +
         (className ? ' ' + className : '')
       }
@@ -153,8 +164,6 @@ export function Icon({
         justifyContent: 'center',
         fontSize: resolvedSize,
         color: colorToken,
-        opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
-        cursor: disabled ? 'not-allowed' : 'inherit',
         lineHeight: 1,
         flexShrink: 0,
         // Two-tone: set CSS variable for the secondary fill
