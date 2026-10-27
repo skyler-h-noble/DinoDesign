@@ -177,10 +177,10 @@ describe('Back only mobile', () => {
     expect(backEl.textContent).toContain('Laptops');
   });
 
-  test('mobile back contains ← arrow', () => {
+  test('mobile back leads with the arrow_back icon', () => {
     const { container } = renderBreadcrumbs({ backOnlyMobile: true });
     const backEl = container.querySelector('.breadcrumbs-back-mobile');
-    expect(backEl.textContent).toContain('←');
+    expect(backEl.querySelector('[data-testid="ArrowBackIcon"]')).toBeInTheDocument();
   });
 });
 

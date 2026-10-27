@@ -4,6 +4,8 @@ import { Box } from '@mui/material';
 import { Popover } from '../Popover/Popover';
 import { Button } from '../Button/Button';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { Icon } from '../Icon/Icon';
 import { BodySmall, Caption } from '../Typography';
 
 /**
@@ -233,17 +235,14 @@ export function Breadcrumbs({
               alignItems: 'center',
               gap: 'var(--Sizing-Half)',
               fontSize: s.fontSize,
-              color: 'var(--Link)',
+              /* --Link is not emitted by the generator; --Hotlink is. A bare
+                 var(--Link) left the arrow the surrounding text's color. */
+              color: 'var(--Link, var(--Hotlink))',
             },
           }}
         >
-          <Box
-            component="span"
-            aria-hidden="true"
-            sx={{ fontSize: '1.1em', lineHeight: 1 }}
-          >
-            ←
-          </Box>
+          {/* arrow_back, as Figma's Mobile breadcrumb: "← Parent". */}
+          <Icon size="small" aria-hidden="true" sx={{ color: 'inherit' }}><ArrowBackIcon /></Icon>
           {React.cloneElement(parentItem, {
             style: {
               ...(parentItem.props?.style || {}),
