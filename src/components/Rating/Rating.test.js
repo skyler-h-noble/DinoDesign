@@ -18,10 +18,6 @@ describe('Rating', () => {
     const stars = screen.getAllByRole('radio');
     expect(stars).toHaveLength(5);
   });
-  test('custom max', () => {
-    renderRating({ value: 2, max: 10 });
-    expect(screen.getAllByRole('radio')).toHaveLength(10);
-  });
 });
 
 /* --- Colors --- */
@@ -182,7 +178,7 @@ describe('Matches Figma', () => {
   });
 
   test('a solid star when selected, an outline when not', () => {
-    const { container } = render(<Rating defaultValue={1} max={2} />);
+    const { container } = render(<Rating defaultValue={1} />);
     expect(container.querySelector('[data-testid="StarIcon"]')).toBeInTheDocument();
     expect(container.querySelector('[data-testid="StarBorderIcon"]')).toBeInTheDocument();
   });
@@ -219,5 +215,16 @@ describe('Half precision is keyboard-usable', () => {
     fireEvent.click(firstStar.querySelector('[aria-hidden="true"]'));
     expect(onChange).toHaveBeenCalledWith(2.5);
     expect(container).toBeTruthy();
+  });
+});
+
+describe('five stars, always', () => {
+  test('max is retired: renders five and warns once', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const { container } = render(<><Rating defaultValue={3} max={10} /><Rating defaultValue={3} max={3} /></>);
+    const groups = container.querySelectorAll('[role="radiogroup"]');
+    groups.forEach((g) => expect(g.querySelectorAll('[role="radio"]').length).toBe(5));
+    expect(warn.mock.calls.filter((c) => String(c[0]).includes('[Rating]')).length).toBe(1);
+    warn.mockRestore();
   });
 });

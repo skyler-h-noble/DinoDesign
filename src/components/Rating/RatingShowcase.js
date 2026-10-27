@@ -79,7 +79,6 @@ export function RatingShowcase() {
   const [color, setColor]         = useState('default');
   const [size, setSize]           = useState('medium');
   const [value, setValue]         = useState(3);
-  const [maxStars, setMaxStars]   = useState(5);
   const [precision, setPrecision] = useState(1);
   const [readOnly, setReadOnly]   = useState(false);
   const [disabled, setDisabled]   = useState(false);
@@ -90,7 +89,6 @@ export function RatingShowcase() {
     const parts = [];
     if (color !== 'default') parts.push('color="' + color + '"');
     if (size !== 'medium') parts.push('size="' + size + '"');
-    if (maxStars !== 5) parts.push('max={' + maxStars + '}');
     if (precision !== 1) parts.push('precision={' + precision + '}');
     if (readOnly) parts.push('readOnly');
     if (disabled) parts.push('disabled');
@@ -129,7 +127,6 @@ export function RatingShowcase() {
               size={size}
               value={value}
               onChange={setValue}
-              max={maxStars}
               precision={precision}
               readOnly={readOnly}
               disabled={disabled}
@@ -180,16 +177,6 @@ export function RatingShowcase() {
                     <Stack direction="row" spacing={1}>
                       <ControlButton label="Full" selected={precision === 1} onClick={() => setPrecision(1)} />
                       <ControlButton label="Half" selected={precision === 0.5} onClick={() => setPrecision(0.5)} />
-                    </Stack>
-                  </Box>
-
-                  {/* Max Stars */}
-                  <Box sx={{ mt: 3 }}>
-                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>MAX STARS</EyebrowSmall>
-                    <Stack direction="row" spacing={1}>
-                      {[3, 4, 5, 7, 10].map((m) => (
-                        <ControlButton key={m} label={String(m)} selected={maxStars === m} onClick={() => { setMaxStars(m); if (value > m) setValue(m); }} />
-                      ))}
                     </Stack>
                   </Box>
 

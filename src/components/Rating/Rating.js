@@ -32,7 +32,9 @@ import { FormLabel } from '../FormLabel/FormLabel';
  *   readOnly      display only, no interaction
  *   no rating     value={null}, shows all empty with "(No rating)" label
  *
- * FEATURES: max stars (default 5), precision (1 or 0.5), hover preview
+ * FIVE STARS, always — as Figma's Rating. `max` was retired: any other
+ *   value renders five and warns once in development.
+ * FEATURES: precision (1 or 0.5), hover preview
  *
  * LABEL: `label` + labelPosition 'top' (default) | 'bottom' gives Figma's
  *   RatingField (9574:3354) — a FormLabel above or below the stars,
@@ -73,13 +75,15 @@ const SIZE_MAP = {
  * Both undefined when not passed, so the component INHERITS its ancestor's
  * zone. An empty string would match [data-theme] selectors and pin it to
  * nothing, which is worse than absent. */
+let warnedMax = false;
+
 export function Rating({
   theme,
   surface,
   value: controlledValue,
   defaultValue,
   onChange,
-  max = 5,
+  max: maxProp,
   precision = 1,
   color = 'default',
   size = 'medium',
@@ -92,6 +96,12 @@ export function Rating({
   sx = {},
   ...props
 }) {
+  const max = 5;
+  if (maxProp !== undefined && maxProp !== 5 && process.env.NODE_ENV !== 'production' && !warnedMax) {
+    warnedMax = true;
+    // eslint-disable-next-line no-console
+    console.warn('[Rating] max={' + maxProp + '} was removed — a rating is always five stars, as Figma draws it.');
+  }
   const [internalValue, setInternalValue] = useState(defaultValue ?? null);
   const [hoverValue, setHoverValue] = useState(null);
   const isControlled = controlledValue !== undefined;
@@ -224,7 +234,8 @@ export function Rating({
     >
       {Array.from({ length: max }, (_, i) => renderStar(i))}
       {currentValue === null && !hoverValue && emptyLabel && (
-        <Caption style={{ color: 'var(--Quiet)', marginLeft: 4 }}>
+        /* Figma's Value = Empty: Dynamic Caption in Quiet, Sizing-Half after the stars. */
+        <Caption color="quiet" className="rating-empty-label" style={{ marginLeft: 'var(--Sizing-Half, 4px)' }}>
           {emptyLabel}
         </Caption>
       )}

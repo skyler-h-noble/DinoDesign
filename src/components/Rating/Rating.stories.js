@@ -49,10 +49,6 @@ export const NoRating = {
   render: () => <Box sx={{ p: 4 }}><Rating value={null} /></Box>,
 };
 
-export const TenStars = {
-  render: () => <Box sx={{ p: 4 }}><Rating defaultValue={7} max={10} size="small" /></Box>,
-};
-
 export const Disabled = {
   render: () => <Box sx={{ p: 4 }}><Rating value={3} disabled /></Box>,
 };

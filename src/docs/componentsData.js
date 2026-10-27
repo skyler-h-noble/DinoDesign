@@ -262,10 +262,6 @@ export const RATING_DOC = {
     type: 'number',
     default: 'undefined'
   }, {
-    name: 'max',
-    type: 'number',
-    default: '5'
-  }, {
     name: 'precision',
     type: 'number',
     default: '1',
