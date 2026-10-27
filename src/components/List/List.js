@@ -3,6 +3,7 @@ import React from 'react';
 import { Box, Checkbox, Radio } from '@mui/material';
 import { EyebrowSmall, Eyebrow, EyebrowLarge, SubtitleSmall, Subtitle, SubtitleLarge, BodySmall, Body, BodyLarge } from '../Typography';
 import { Ghost } from '../_ghost';
+import { Button } from '../Button/Button';
 import { ImagePlaceholder } from '../ImagePlaceholder';
 
 // Default three-layer typography for the text frame. Order is top→bottom:
@@ -51,26 +52,24 @@ const SIZE_MAP = {
   large:  { py: 1.5, px: 2.5, fontSize: '16px', iconSize: 24, decoratorSize: 40, gap: 2, checkSize: 'medium' },
 };
 
-export function ListItemDecorator({ children, size = 'medium', isButton = false, onAction, ariaLabel }) {
+export function ListItemDecorator({ children, size = 'medium', isButton = false, onAction, ariaLabel, disabled = false }) {
   // Both decorator paths now hug their content — no forced width/height. The
   // consumer passes a sized child (Icon size="small", Avatar size="medium",
   // Ratio ratio="1:1" with maxWidth, etc.) and the slot wraps it tightly.
+  /* A decorator that is a control is the library's icon-only ghost Button —
+     its own hover / pressed / focus / disabled, on the surface's tokens. It
+     was a raw <button> here with hardcoded grey hover fills, no disabled
+     state and a hand-drawn focus ring. Clicks and keys stop at the button so
+     the row behind it does not also fire. */
   if (isButton) {
     return (
-      <Box component="button" role="button" tabIndex={0}
-        aria-label={ariaLabel || 'Action'}
+      <Button iconOnly variant="ghost" size={size} className="list-item-decorator-button"
+        aria-label={ariaLabel || 'Action'} disabled={disabled}
         onClick={(e) => { e.stopPropagation(); onAction?.(e); }}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onAction?.(e); } }}
-        className="list-item-decorator-button"
-        sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-          padding: 0,
-          border: 'none', backgroundColor: 'transparent', borderRadius: '50%', cursor: 'pointer', color: 'inherit',
-          transition: 'background-color 0.15s ease',
-          '&:hover': { backgroundColor: 'rgba(128,128,128,0.15)' },
-          '&:active': { backgroundColor: 'rgba(128,128,128,0.25)' },
-          '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '-3px' } }}>
+        onKeyDown={(e) => e.stopPropagation()}
+        sx={{ flexShrink: 0 }}>
         {children}
-      </Box>
+      </Button>
     );
   }
   return (
@@ -257,7 +256,7 @@ export function ListItem({
       )}
       {startDecorator && (
         <ListItemDecorator size={size} isButton={startDecoratorIsButton}
-          onAction={onStartDecoratorAction} ariaLabel={startDecoratorAriaLabel}>
+          onAction={onStartDecoratorAction} ariaLabel={startDecoratorAriaLabel} disabled={disabled}>
           {startDecorator}
         </ListItemDecorator>
       )}
@@ -312,7 +311,7 @@ export function ListItem({
       })()}
       {endDecorator && (
         <ListItemDecorator size={size} isButton={endDecoratorIsButton}
-          onAction={onEndDecoratorAction} ariaLabel={endDecoratorAriaLabel}>
+          onAction={onEndDecoratorAction} ariaLabel={endDecoratorAriaLabel} disabled={disabled}>
           {endDecorator}
         </ListItemDecorator>
       )}

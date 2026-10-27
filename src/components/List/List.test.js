@@ -183,6 +183,25 @@ describe('Icon Button Decorators', () => {
     expect(btnFn).toHaveBeenCalledTimes(1);
     expect(rowFn).not.toHaveBeenCalled();
   });
+  test('is the library Button (ghost, icon-only), not a raw button with grey fills', () => {
+    const { container } = render(
+      <List items={[{ label: 'Test', endDecorator: <span>X</span>,
+        endDecoratorIsButton: true, endDecoratorAriaLabel: 'Remove' }]} />
+    );
+    const btn = container.querySelector('.list-item-decorator-button');
+    expect(btn.tagName).toBe('BUTTON');
+    expect(btn.className).toMatch(/MuiButton-root/);
+    const css = [...document.styleSheets].flatMap((sh) => { try { return [...sh.cssRules]; } catch (e) { return []; } })
+      .map((r) => r.cssText).join('\n');
+    expect(css).not.toMatch(/rgba\(128,\s*128,\s*128/);
+  });
+  test('a disabled row disables its decorator button', () => {
+    const { container } = render(
+      <List items={[{ label: 'Test', disabled: true, endDecorator: <span>X</span>,
+        endDecoratorIsButton: true, endDecoratorAriaLabel: 'Remove' }]} />
+    );
+    expect(container.querySelector('.list-item-decorator-button')).toBeDisabled();
+  });
 });
 
 describe('Convenience Exports', () => {
