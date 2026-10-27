@@ -17,7 +17,8 @@ import { Box } from '@mui/material';
  * The 3:1 lives in the RING, not the fill — an unselected dot is only its
  * edge, so it reads on any surface.
  *
- * CarouselDots is what a carousel uses: `count` dots, `value` the current
+ * CarouselDots — Figma's Carousel Dot Group (8379:11694), dots Sizing-Half
+ * apart — is what a carousel uses: `count` dots, `value` the current
  * slide, `onChange(index)`. Each dot is a button named "Slide 3 of 5", the
  * current one aria-current; the row is a roving tab stop — Tab lands on the
  * current dot and ←/→ (Home / End) move along it.
@@ -93,7 +94,8 @@ export function CarouselDots({
   return (
     <Box role="group" aria-label={ariaLabel} className={'carousel-dots' + (className ? ' ' + className : '')}
       onKeyDown={onKeyDown}
-      sx={{ display: 'inline-flex', alignItems: 'center', ...sx }} {...props}>
+      /* Sizing-Half between the 24px dots, as Figma's Carousel Dot Group. */
+      sx={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--Sizing-Half, 4px)', ...sx }} {...props}>
       {Array.from({ length: count }, (_, i) => (
         <CarouselDot key={i} ref={(el) => { refs.current[i] = el; }} color={color} disabled={disabled}
           selected={i === value} aria-current={i === value ? 'true' : undefined}
