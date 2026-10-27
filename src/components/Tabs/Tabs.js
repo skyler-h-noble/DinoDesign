@@ -431,12 +431,16 @@ export function TabList({
      iconOnly Button at either end). They were raw buttons with a hand-drawn
      glyph, hover and focus ring. */
   const btnSize = size === 'large' ? 'large' : size === 'small' ? 'small' : 'medium';
+  /* Overlap the baseline by its 1px, as a Tab does, so the arrows and the …
+     sit on the rule instead of adding a pixel to the bar (33 against Figma's 32)
+     and centre across the whole width of a vertical list. */
+  const btnSx = { flexShrink: 0, alignSelf: 'center', ...(baseline && { ['margin' + edgeFor(orientation)]: '-' + BASELINE_THICKNESS }) };
   const scrollButton = (dir) => (
     <Button iconOnly variant="ghost" size={btnSize}
       aria-label={isHorizontal ? (dir < 0 ? 'Scroll tabs left' : 'Scroll tabs right') : (dir < 0 ? 'Scroll tabs up' : 'Scroll tabs down')}
       onClick={() => scrollBy(dir)} disabled={dir < 0 ? !canScrollLeft : !canScrollRight}
       className={'tab-list-scroll-btn tab-list-scroll-btn-' + (dir < 0 ? (isHorizontal ? 'left' : 'up') : (isHorizontal ? 'right' : 'down'))}
-      sx={{ flexShrink: 0, alignSelf: 'center' }}>
+      sx={btnSx}>
       {isHorizontal ? (dir < 0 ? <ChevronLeftIcon /> : <ChevronRightIcon />) : (dir < 0 ? <ExpandLessIcon /> : <ExpandMoreIcon />)}
     </Button>
   );
@@ -533,7 +537,7 @@ export function TabList({
           <Button ref={moreRef} iconOnly variant="ghost" size={btnSize} selected={!!selectedHidden}
             className="tab-list-more-btn" aria-haspopup="dialog" aria-expanded={moreOpen}
             aria-label={overflowed.length + ' more tabs' + (selectedHidden && typeof selectedHidden.label === 'string' ? ', ' + selectedHidden.label + ' selected' : '')}
-            onClick={() => setMoreOpen((o) => !o)} sx={{ flexShrink: 0, alignSelf: 'center' }}>
+            onClick={() => setMoreOpen((o) => !o)} sx={btnSx}>
             <MoreHorizIcon />
           </Button>
           <Popover open={moreOpen} onClose={() => setMoreOpen(false)} anchorEl={moreRef.current}
