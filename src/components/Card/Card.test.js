@@ -326,3 +326,16 @@ describe('Card selected ring', () => {
     expect(allRules()).not.toMatch(/calc\(var\(--Card-Radius\) \+ 3px\)/);
   });
 });
+
+describe('Card drag (Figma State=Drag)', () => {
+  const rulesFor = (el) => [...document.styleSheets].flatMap((sh) => { try { return [...sh.cssRules]; } catch (e) { return []; } })
+    .filter((r) => r.selectorText && [...el.classList].some((c) => r.selectorText.includes('.' + c)))
+    .map((r) => r.cssText).join('\n');
+  test('lifts 1px like hover — no scale, no Primary border', () => {
+    const { container } = render(<Card draggable>x</Card>);
+    const css = rulesFor(container.querySelector('.card'));
+    expect(css).toMatch(/:active[^}]*translateY\(-1px\)/);
+    expect(css).not.toContain('scale(1.02)');
+    expect(css).not.toContain('--Buttons-Primary-Border');
+  });
+});

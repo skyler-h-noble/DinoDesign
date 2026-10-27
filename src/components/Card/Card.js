@@ -227,18 +227,18 @@ export function Card({
             '&:hover': {
               borderColor: 'var(--Buttons-Default-Border)',
               boxShadow: hoverShadow,
+              transform: 'translateY(-1px)',
             },
             '&:active': {
               cursor: 'grabbing',
               zIndex: 10,
-              /* Figma's State=Drag: two levels above rest — Level 3 (FAB,
-                 Snackbar), Level 4 (FAB-Hover) for an elevated card. */
+              /* Figma's State=Drag: lifted 1px like Hover (the variant loses
+                 its 1px padding), two shadow levels above rest — Level 3, or
+                 Level 4 for an elevated card. Same edge as rest: it used to
+                 scale to 102% and swap to a 2px Primary border, neither of
+                 which the design has. */
               boxShadow: dragShadow,
-              transform: 'scale(1.02)',
-              // Thicker border on active so the outer shell visually grows
-              // along with the scale (a 1px border at 1.02x is imperceptible).
-              borderWidth: '2px',
-              borderColor: 'var(--Buttons-Primary-Border)',
+              transform: 'translateY(-1px)',
             },
             '&:focus-visible': {
               // Figma: a 2px ring, 1px outside the card.
