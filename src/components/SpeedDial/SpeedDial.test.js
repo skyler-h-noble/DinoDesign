@@ -269,13 +269,18 @@ describe('Matches Figma', () => {
 });
 
 describe('action labels use the lib Tooltip', () => {
-  it('shows the action name in a tooltip when the action is hovered', async () => {
-    const { findByRole } = render(
-      <SpeedDial open actions={[{ name: 'Share', icon: <span /> }]} onOpen={() => {}} onClose={() => {}} />
+  it('shows every action name while the dial is open — no hover needed', async () => {
+    const { findAllByRole } = render(
+      <SpeedDial open actions={[{ name: 'Share', icon: <span /> }, { name: 'Print', icon: <span /> }]} onOpen={() => {}} onClose={() => {}} />
     );
-    const action = screen.getByRole('menuitem', { name: 'Share' });
-    fireEvent.mouseOver(action);
-    const tip = await findByRole('tooltip');
-    expect(tip).toHaveTextContent('Share');
+    const tips = await findAllByRole('tooltip');
+    expect(tips.map((t) => t.textContent)).toEqual(expect.arrayContaining(['Share', 'Print']));
+  });
+
+  it('shows no labels while closed, and none with showTooltips={false}', () => {
+    const { rerender } = render(<SpeedDial open={false} actions={[{ name: 'Share', icon: <span /> }]} onOpen={() => {}} onClose={() => {}} />);
+    expect(screen.queryByRole('tooltip')).toBeNull();
+    rerender(<SpeedDial open showTooltips={false} actions={[{ name: 'Share', icon: <span /> }]} onOpen={() => {}} onClose={() => {}} />);
+    expect(screen.queryByRole('tooltip')).toBeNull();
   });
 });

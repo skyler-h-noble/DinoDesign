@@ -17,7 +17,8 @@ import { Fab } from '../Fab/Fab';
  * COLORS: default | primary | secondary | tertiary | neutral | info | success | warning | error
  *
  * DIRECTION: up | down | left | right
- * TOOLTIPS: Optional labels shown beside actions
+ * TOOLTIPS: each action's name beside it, shown while the dial is open
+ *   (showTooltips={false} drops them)
  *
  * Accessibility: role="menu", FAB has aria-expanded/aria-haspopup, actions are role="menuitem"
  */
@@ -337,13 +338,11 @@ export function SpeedDial({
                 key={action.key || index}
                 title={action.name}
                 placement={tooltipPlacement}
-                /* Not open={isOpen ? undefined : false}: MUI fixes controlled vs
-                   uncontrolled on the first render, so flipping between the two
-                   left the popper with open={undefined}. A closed dial just has
-                   nothing to trigger its labels. */
-                disableHoverListener={!isOpen}
-                disableFocusListener={!isOpen}
-                disableTouchListener={!isOpen}
+                /* Shown for as long as the dial is open — as Figma draws them —
+                   not on hover: a phone has no hover, so the labels never
+                   appeared where speed dials are used most. Always a boolean,
+                   so the tooltip stays controlled from its first render. */
+                open={isOpen}
               >
                 {actionEl}
               </Tooltip>
