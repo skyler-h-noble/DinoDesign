@@ -119,7 +119,7 @@ const REGISTRY = [
   { control: 'DropZone',            file: 'DropZone/DropZone.js' },
   { control: 'SpeedDial action',    file: 'SpeedDial/SpeedDial.js', delegatesTo: 'Fab/Fab.js', renders: /<Fab\b/ },
   { control: 'DrawerClose',         file: 'Drawer/Drawer.js', delegatesTo: 'Button/Button.js', renders: /<Button\b/ },
-  { control: 'Modal close',         file: 'Modal/Modal.js' },
+  { control: 'Modal close',         file: 'Modal/Modal.js', delegatesTo: 'Button/Button.js', renders: /<Button\b/ },
   { control: 'Dialog close',        file: 'Dialog/Dialog.js', delegatesTo: 'Button/Button.js', renders: /<IconButton\b/ },
   { control: 'Dialog buttons',      file: 'Dialog/Dialog.js' },
   { control: 'CodeBlock copy',      file: 'CodeBlock/CodeBlock.js', delegatesTo: 'Button/Button.js', renders: /<IconButton\b/ },

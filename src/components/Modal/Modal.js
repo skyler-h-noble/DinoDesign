@@ -11,6 +11,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Box } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useOmniDesign } from '../../OmniDesignProvider';
+import { Button } from '../Button/Button';
+import { Body, Eyebrow, H3 } from '../Typography/Typography';
 
 /**
  * Modal Component
@@ -57,16 +59,21 @@ const THEME_MAP = {
 /** Where each variant sits. Solid stays a raised container; soft is the same
  *  palette at the brightest surface, which is what {Color}-Light meant. */
 const VARIANT_SURFACE = {
-  default: 'Container-High',
-  solid: 'Container-High',
+  /* Figma's Modal Content sits at Container-Highest — the raised tone itself. */
+  default: 'Container-Highest',
+  solid: 'Container-Highest',
   soft: 'Surface-Brightest',
 };
 
+/* Figma's Modal is Modal-Max wide (960). small / large stay as narrower and
+   in-between widths for code; the padding is the design's Modal-Padding at
+   every size, so it is no longer per size. */
 const SIZE_MAP = {
-  small:  { maxWidth: 400, padding: '24px' },
-  medium: { maxWidth: 560, padding: '32px' },
-  large:  { maxWidth: 720, padding: '40px' },
+  small:  { maxWidth: '400px' },
+  medium: { maxWidth: 'var(--Modal-Max, 960px)' },
+  large:  { maxWidth: '720px' },
 };
+const PAD = 'var(--Modal-Padding, 45px)';
 
 const TRANSITION_KEYFRAMES = {
   fade: {
@@ -102,6 +109,10 @@ export function Modal({
   onClose,
   children,
   title,
+  /* Figma's title slot: an Eyebrow line over the H3 title. */
+  eyebrow,
+  /* Figma's Modal Footer slot — typically a ButtonGroup. */
+  actions,
   variant = 'default',
   color = 'primary',
   size = 'medium',
@@ -187,25 +198,15 @@ export function Modal({
         }}
       />
 
-      {/* Modal container */}
+      {/* Modal — Figma's frame: the 1px edge in the PAGE's Background, the
+          Modal-Radius corners and the Level 5 shadow (neutral: it always sits
+          over the black backdrop). The content inside is its own zone. */}
       <Box
         role="dialog"
         aria-modal="true"
         aria-label={title || 'Modal'}
         ref={modalRef}
         tabIndex={-1}
-        data-surface={dataSurface}
-        /* No data-theme on `default` — INHERIT, do not pin.
-           
-           This was `dataTheme || providerTheme`, which is never empty, so a
-           default modal always stamped the app-level theme onto itself. Inside
-           a themed section that overrides the section: open a default modal
-           from a Primary region and it snaps back to whatever the provider is
-           set to, which reads as the modal ignoring its surroundings.
-           
-           Default means "whatever is around me". Omitting the attribute is how
-           the cascade is asked for; naming a theme is how it is refused. */
-        data-theme={dataTheme || undefined}
         data-style={providerStyle}
         className={'modal modal-' + variant + ' modal-' + size + ' modal-' + layout +
           (isSoft || isSolid ? ' modal-' + color : '') +
@@ -214,29 +215,22 @@ export function Modal({
           position: 'fixed',
           zIndex: 10000001,
           outline: 'none',
-          fontFamily: 'inherit',
-          // Layout
+          boxSizing: 'border-box',
           ...(isFullscreen ? {
             inset: 0,
             borderRadius: 0,
           } : {
             top: '50%', left: '50%',
             transform: 'translate(-50%, -50%)',
-            maxWidth: s.maxWidth + 'px',
+            maxWidth: s.maxWidth,
             width: 'calc(100% - 32px)',
             maxHeight: 'calc(100vh - 64px)',
             borderRadius: 'var(--Modal-Radius, var(--Style-Border-Radius))',
+            border: '1px solid var(--Background)',
           }),
-          // Visual
-          backgroundColor: 'var(--Background)',
-          color: 'var(--Text)',
-          /* "Dialog & Modal" is the Level 5 style — the brand's geometry, in
-             NEUTRAL: the modal always sits over the black backdrop, where the
-             surface tint read as a coloured glow. */
           boxShadow: SHADOW_SCRIM_LEVEL_5,
           display: 'flex', flexDirection: 'column',
           overflow: 'hidden',
-          // Animation
           ...(animationName && {
             animation: animationName + ' ' + speed + ' ease-out forwards',
           }),
@@ -244,59 +238,52 @@ export function Modal({
         }}
         {...props}
       >
-        {/* Header */}
-        {(title || showCloseButton) && (
-          <Box sx={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            px: isFullscreen ? 4 : s.padding,
-            pt: isFullscreen ? 3 : s.padding,
-            pb: 0,
-            flexShrink: 0,
-          }}>
-            {title && (
-              /* The header face and color, not the page's. Without a family of
-                 its own the title inherited the host page's, and the generated
-                 CSS deliberately gives the page none — so it came out in the
-                 browser's serif. Same chain as the lib headings use. */
-              <Box className="modal-title" sx={{ fontSize: size === 'small' ? '18px' : size === 'large' ? '24px' : '20px', fontWeight: 'var(--H4-Font-Weight, 700)', fontFamily: 'var(--H4-Font-Family, var(--Font-Family-Header, var(--Header-Font-Family, inherit)))', color: 'var(--Header, var(--Text))', flex: 1 }}>
-                {title}
+        {/* Modal Content — Container-Highest (No data-theme on `default`:
+            inherit, do not pin. Naming the provider's theme here made a
+            default modal opened from a themed section snap back to the app's
+            theme.) */}
+        <Box
+          className="modal-content"
+          data-surface={dataSurface}
+          data-theme={dataTheme || undefined}
+          sx={{
+            '&[data-surface]': { backgroundColor: 'var(--Background)', color: 'var(--Text)' },
+            display: 'flex', flexDirection: 'column',
+            flex: 1, minHeight: 'var(--Card-Min-Height, auto)',
+            overflowY: 'auto',
+            borderRadius: 'inherit',
+          }}
+        >
+          {/* Header: the title slot and the close Button, Modal-Padding round. */}
+          {(title || eyebrow || showCloseButton) && (
+            <Box className="modal-header" sx={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--Sizing-1, 8px)', padding: PAD, flexShrink: 0 }}>
+              <Box className="modal-title" sx={{ display: 'flex', flexDirection: 'column', gap: 'var(--Sizing-Half, 4px)', flex: 1, minWidth: 0 }}>
+                {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
+                {title && <H3 component="h2">{title}</H3>}
               </Box>
-            )}
-            {showCloseButton && (
-              <Box
-                component="button" type="button"
-                aria-label="Close modal"
-                onClick={onClose}
-                sx={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  width: 32, height: 32, borderRadius: '50%',
-                  border: 'none', backgroundColor: 'transparent',
-                  color: 'var(--Text-Quiet)', cursor: 'pointer',
-                  flexShrink: 0, ml: 1,
-                  transition: 'background-color 0.15s ease, color 0.15s ease',
-                  '&:hover': { backgroundColor: 'var(--Hover)', color: 'var(--Text)' },
-                  '&:active': { backgroundColor: 'var(--Pressed)', color: 'var(--Text)' },
-                  '&:focus-visible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '2px' },
-                  '&:disabled': { opacity: 'var(--Disabled, 0.38)', cursor: 'not-allowed' },
-                }}
-              >
-                <CloseIcon sx={{ fontSize: 20 }} />
-              </Box>
-            )}
-          </Box>
-        )}
+              {showCloseButton && (
+                <Button iconOnly variant="ghost" aria-label="Close modal" onClick={onClose} className="modal-close" sx={{ flexShrink: 0 }}>
+                  <CloseIcon />
+                </Button>
+              )}
+            </Box>
+          )}
 
-        {/* Body */}
-        <Box sx={{
-          flex: 1, overflowY: 'auto',
-          px: isFullscreen ? 4 : s.padding,
-          pt: isFullscreen ? 3 : '16px',
-          pb: isFullscreen ? 3 : s.padding,
-          color: 'var(--Text)',
-          fontSize: size === 'small' ? '13px' : '14px',
-          lineHeight: 1.6,
-        }}>
-          {children}
+          {/* Body slot: Sizing-2 above and below, Modal-Padding either side. */}
+          <Box className="modal-body" sx={{
+            display: 'flex', flexDirection: 'column', gap: 'var(--Sizing-Half, 4px)',
+            padding: 'var(--Sizing-2, 16px) ' + PAD,
+            flex: 1,
+          }}>
+            {typeof children === 'string' ? <Body>{children}</Body> : children}
+          </Box>
+
+          {/* Footer slot: Modal-Padding round. */}
+          {actions && (
+            <Box className="modal-footer" sx={{ display: 'flex', flexDirection: 'column', gap: 'var(--Sizing-Half, 4px)', padding: PAD, flexShrink: 0 }}>
+              {actions}
+            </Box>
+          )}
         </Box>
       </Box>
     </>

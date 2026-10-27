@@ -199,9 +199,17 @@ describe('FormDialog', () => {
 
 /* ─── Defaults ─── */
 describe('Defaults', () => {
-  test('default maxWidth is sm', () => {
+  test('default width is Figma\'s Dialog-Width', () => {
     const { baseElement } = renderDialog();
-    expect(baseElement.querySelector('.dialog-sm')).toBeInTheDocument();
+    expect(baseElement.querySelector('.dialog-dialog')).toBeInTheDocument();
+  });
+
+  test('title is the Subtitle style, body the Body style, in a Container zone', () => {
+    const { baseElement } = renderDialog({ title: 'Hello' });
+    const content = baseElement.querySelector('.dialog-content');
+    expect(content).toHaveAttribute('data-surface', 'Container');
+    expect(baseElement.querySelector('.MuiDialog-paper')).toHaveAttribute('data-surface', 'Container-Highest');
+    expect(content.querySelector('h2')).toHaveTextContent('Hello');
   });
 
   test('not fullscreen by default', () => {

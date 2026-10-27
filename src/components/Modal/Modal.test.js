@@ -29,9 +29,12 @@ describe('Modal', () => {
 
 /* --- data-surface --- */
 describe('Surface', () => {
-  test('has data-surface="Container-High"', () => {
+  /* The zone is on the inner content, not the dialog: the frame's 1px edge
+     is the PAGE's Background (Figma's Modal Container), the content inside it
+     Container-Highest (Figma's Modal Content). */
+  test('content has data-surface="Container-Highest"', () => {
     renderModal();
-    expect(screen.getByRole('dialog')).toHaveAttribute('data-surface', 'Container-High');
+    expect(document.querySelector('.modal-content')).toHaveAttribute('data-surface', 'Container-Highest');
   });
 });
 
@@ -39,7 +42,7 @@ describe('Surface', () => {
 describe('Variants', () => {
   test('default — no data-theme', () => {
     renderModal({ variant: 'default' });
-    expect(screen.getByRole('dialog')).not.toHaveAttribute('data-theme');
+    expect(document.querySelector('.modal-content')).not.toHaveAttribute('data-theme');
   });
   test('soft — the bare theme on the brightest surface', () => {
     /* soft asked for Primary-Light, and there is no such theme. It bound
@@ -47,28 +50,28 @@ describe('Variants', () => {
        looked like the page. The palette is the same as solid now; the LEVEL
        is what differs. */
     renderModal({ variant: 'soft', color: 'primary' });
-    const dialog = screen.getByRole('dialog');
+    const dialog = document.querySelector('.modal-content');
     expect(dialog).toHaveAttribute('data-theme', 'Primary');
     expect(dialog).toHaveAttribute('data-surface', 'Surface-Brightest');
   });
   test('solid — data-theme Primary', () => {
     renderModal({ variant: 'solid', color: 'primary' });
-    expect(screen.getByRole('dialog')).toHaveAttribute('data-theme', 'Primary');
+    expect(document.querySelector('.modal-content')).toHaveAttribute('data-theme', 'Primary');
   });
   test('solid info → Info', () => {
     renderModal({ variant: 'solid', color: 'info' });
-    expect(screen.getByRole('dialog')).toHaveAttribute('data-theme', 'Info');
+    expect(document.querySelector('.modal-content')).toHaveAttribute('data-theme', 'Info');
   });
   test('soft success → Success, and a solid one differs only by level', () => {
     renderModal({ variant: 'soft', color: 'success' });
-    const soft = screen.getByRole('dialog');
+    const soft = document.querySelector('.modal-content');
     expect(soft).toHaveAttribute('data-theme', 'Success');
     expect(soft).toHaveAttribute('data-surface', 'Surface-Brightest');
   });
 
   test('solid stays a raised container', () => {
     renderModal({ variant: 'solid', color: 'success' });
-    expect(screen.getByRole('dialog')).toHaveAttribute('data-surface', 'Container-High');
+    expect(document.querySelector('.modal-content')).toHaveAttribute('data-surface', 'Container-Highest');
   });
 });
 
@@ -197,5 +200,19 @@ describe('Modal — Accessibility (jest-axe)', () => {
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();
+  });
+});
+
+describe('Figma structure', () => {
+  test('eyebrow over the title, a lib close Button, and an actions footer', () => {
+    render(<Modal open onClose={() => {}} eyebrow="Step 2" title="Confirm" actions={<button type="button">OK</button>}>Body</Modal>);
+    expect(screen.getByText('Step 2')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Confirm' })).toBeInTheDocument();
+    expect(document.querySelector('.modal-close')).not.toBeNull();
+    expect(document.querySelector('.modal-footer')).toHaveTextContent('OK');
+  });
+  test('no footer without actions', () => {
+    render(<Modal open onClose={() => {}} title="T">Body</Modal>);
+    expect(document.querySelector('.modal-footer')).toBeNull();
   });
 });

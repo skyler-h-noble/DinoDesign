@@ -9,14 +9,14 @@
 import { SHADOW_LEVEL_5, SHADOW_SCRIM_LEVEL_5 } from '../_shadows';
 import React, { forwardRef } from 'react';
 import {
-  Dialog as MuiDialog, DialogTitle as MuiDialogTitle, DialogContent as MuiDialogContent,
-  DialogContentText as MuiDialogContentText, DialogActions as MuiDialogActions,
+  Dialog as MuiDialog,
   Slide, Grow, Fade, Zoom,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { Box } from '@mui/material';
 import { useOmniDesign } from '../../OmniDesignProvider';
 import { IconButton } from '../Button/Button';
+import { Body, Subtitle } from '../Typography/Typography';
 /* The lib's own icon button — <Button iconOnly> — not MUI's, so hover,
    pressed, focus-visible and disabled all come from Button rather than
    being re-derived at each call site. */
@@ -69,44 +69,29 @@ const TRANSITION_MAP = {
 };
 
 /* ─── Styled tokens ─── */
+/* Figma's Dialog: Dialog-Width wide, Card-Radius corners, a 1px edge in the
+   Background of its Container-Highest zone, the Level 5 shadow. The content
+   inside is its own Container zone (see the render). */
 const paperSx = {
   backgroundColor: 'var(--Background)',
   color: 'var(--Text)',
-  border: '1px solid var(--Border)',
-  borderRadius: 'var(--Style-Border-Radius)',
-  /* "Dialog & Modal" is the Level 5 style. Hardcoded black before, so it
-     took neither the brand's tint nor its shadow settings. */
+  border: '1px solid var(--Background)',
+  borderRadius: 'var(--Card-Radius, var(--Style-Border-Radius))',
   boxShadow: SHADOW_LEVEL_5,
+  overflow: 'hidden',
+  // The 1px edge is INSIDE the width, as Figma's stroke is: 560 overall, not 562.
+  boxSizing: 'border-box',
 };
 
-const titleSx = {
-  color: 'var(--Text)',
-  fontWeight: 600,
-  fontSize: '18px',
-  fontFamily: 'inherit',
-  borderBottom: '1px solid var(--Border)',
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  py: 1.5,
-  px: 3,
-};
-
+/* One padded slot: Card-Padding round, Sizing-Half between title and body. */
 const contentSx = {
-  color: 'var(--Text)',
-  fontFamily: 'inherit',
-  fontSize: '14px',
-  lineHeight: 1.6,
-  py: 3,
-  px: 3,
+  display: 'flex', flexDirection: 'column',
+  gap: 'var(--Sizing-Half, 4px)',
+  padding: 'var(--Card-Padding, 30px)',
+  '&[data-surface]': { backgroundColor: 'var(--Background)', color: 'var(--Text)' },
 };
 
-const actionsSx = {
-  borderTop: '1px solid var(--Border)',
-  px: 3,
-  py: 1.5,
-  gap: 1,
-};
+const DIALOG_WIDTH = 'var(--Dialog-Width, 560px)';
 
 const btnBase = {
   fontFamily: 'inherit',
@@ -148,7 +133,9 @@ export function Dialog({
   title,
   children,
   actions,
-  maxWidth = 'sm',
+  /* 'dialog' (default) is Figma's Dialog-Width (560); xs / sm / md / lg / xl
+     are MUI's wider breakpoints for code that needs them. */
+  maxWidth = 'dialog',
   fullScreen = false,
   scroll = 'body',
   alert = false,
@@ -169,7 +156,6 @@ export function Dialog({
   try { omniCtx = useOmniDesign(); } catch { omniCtx = null; }
   const currentTheme = omniCtx?.theme || 'Default';
   const currentStyle = omniCtx?.style || 'Modern';
-  const currentSurface = omniCtx?.surface || 'Surface';
 
   const handleClose = (event, reason) => {
     if (alert && reason === 'backdropClick') return;
@@ -181,7 +167,7 @@ export function Dialog({
     <MuiDialog
       open={open}
       onClose={handleClose}
-      maxWidth={fullScreen ? false : maxWidth}
+      maxWidth={fullScreen || maxWidth === 'dialog' ? false : maxWidth}
       fullScreen={fullScreen}
       fullWidth={!fullScreen}
       scroll={scroll}
@@ -203,11 +189,12 @@ export function Dialog({
         ...PaperProps,
         'data-theme': currentTheme,
         'data-style': currentStyle,
-        'data-surface': currentSurface,
+        'data-surface': 'Container-Highest',
         sx: {
           ...paperSx,
           // Neutral over the backdrop; a non-modal dialog sits on the page and keeps its tint.
           boxShadow: nonModal ? SHADOW_LEVEL_5 : SHADOW_SCRIM_LEVEL_5,
+          ...(maxWidth === 'dialog' && !fullScreen && { maxWidth: DIALOG_WIDTH }),
           ...(fullScreen && { borderRadius: 0, border: 'none' }),
           ...PaperProps.sx,
         },
@@ -215,51 +202,31 @@ export function Dialog({
       }}
       {...props}
     >
-      {/* Title */}
-      {title && (
-        <MuiDialogTitle id={titleId} sx={titleSx}>
-          {title}
-          {!alert && onClose && (
-            <IconButton
-              aria-label="Close dialog"
-              onClick={(e) => onClose(e, 'closeButton')}
-              size="small"
-              variant="ghost"
-              sx={{ color: 'var(--Text-Quiet)' }}
-            >
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          )}
-        </MuiDialogTitle>
-      )}
-
-      {/* Content */}
-      <MuiDialogContent
-        dividers={scroll === 'paper'}
-        sx={{
-          ...contentSx,
-          ...(scroll === 'paper' && {
-            maxHeight: fullScreen ? 'none' : '400px',
-            overflowY: 'auto',
-            borderColor: 'var(--Border)',
-          }),
-        }}
-      >
-        {alert ? (
-          <MuiDialogContentText id={contentId} sx={{ color: 'var(--Text)', fontFamily: 'inherit', fontSize: '14px', lineHeight: 1.6 }}>
-            {children}
-          </MuiDialogContentText>
-        ) : (
-          <Box id={contentId}>{children}</Box>
+      {/* Dialog Content — the Container zone, one padded slot. */}
+      <Box className="dialog-content" data-surface="Container" sx={{
+        ...contentSx,
+        ...(scroll === 'paper' && { maxHeight: fullScreen ? 'none' : '400px', overflowY: 'auto' }),
+      }}>
+        {title && (
+          <Box className="dialog-title" sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 'var(--Sizing-1, 8px)' }}>
+            {/* Figma: Dynamic Subtitle — bold body, in --Text. */}
+            <Subtitle component="h2" id={titleId} sx={{ m: 0 }}>{title}</Subtitle>
+            {!alert && onClose && (
+              <IconButton aria-label="Close dialog" onClick={(e) => onClose(e, 'closeButton')} size="small" variant="ghost">
+                <CloseIcon />
+              </IconButton>
+            )}
+          </Box>
         )}
-      </MuiDialogContent>
-
-      {/* Actions */}
-      {actions && (
-        <MuiDialogActions sx={actionsSx}>
-          {actions}
-        </MuiDialogActions>
-      )}
+        <Box id={contentId} className="dialog-body">
+          {typeof children === 'string' ? <Body>{children}</Body> : children}
+        </Box>
+        {actions && (
+          <Box className="dialog-actions" sx={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--Sizing-1, 8px)', mt: 'var(--Sizing-2, 16px)' }}>
+            {actions}
+          </Box>
+        )}
+      </Box>
     </MuiDialog>
   );
 }
