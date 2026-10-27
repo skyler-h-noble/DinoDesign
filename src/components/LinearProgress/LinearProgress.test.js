@@ -156,9 +156,9 @@ describe('Bar element', () => {
 
 /* ─── Defaults ─── */
 describe('Defaults', () => {
-  test('default color is default', () => {
+  test('default color is match (the theme\'s own palette)', () => {
     const { container } = renderLP();
-    expect(container.querySelector('.linear-progress-default')).toBeInTheDocument();
+    expect(container.querySelector('.linear-progress-match')).toBeInTheDocument();
   });
 
   test('default size is medium', () => {
@@ -224,7 +224,8 @@ describe('Matches Figma', () => {
   test('the indicator is Buttons-Border with a Background ring inside', () => {
     const { container } = render(<LinearProgress value={40} />);
     const c = cssFor(container.querySelector('.linear-progress-bar'));
-    expect(c).toContain('background-color: var(--Buttons-Default-Border)');
+    // Buttons › Match by default, falling back to Default for an older system.
+    expect(c).toContain('background-color: var(--Buttons-Match-Border, var(--Buttons-Default-Border))');
     expect(c).toContain('box-shadow: inset 0 0 0 1px var(--Background)');
   });
 });
@@ -242,5 +243,16 @@ describe('showValue (Figma Progress Text)', () => {
     expect(a.querySelector('.linear-progress-value')).toBeNull();
     const b = render(<LinearProgress value={40} />).container;
     expect(b.querySelector('.linear-progress-value')).toBeNull();
+  });
+});
+
+describe('color', () => {
+  test('a palette name still pins one', () => {
+    const { container } = render(<LinearProgress value={40} color="success" />);
+    const sheets = [...document.styleSheets].flatMap((sh) => [...sh.cssRules]);
+    const bar = container.querySelector('.linear-progress-bar');
+    const css = sheets.filter((r) => { try { return bar.matches(r.selectorText); } catch (e) { return false; } }).map((r) => r.cssText).join('\n');
+    expect(css).toContain('var(--Buttons-Success-Border)');
+    expect(css).not.toContain('Buttons-Match');
   });
 });
