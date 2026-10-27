@@ -1,8 +1,8 @@
 /**
  * A selected row's ring is the SURFACE border, not a button's.
  *
- * Figma draws it as a sibling frame 2px larger than the row, stroked with
- * Border at Menu/Menu-Item-Radius — a 1px outline sitting just outside. The
+ * Figma draws it as a 2px ring INSIDE the row, stroked with Border at the
+ * row's own corner (resting edge 1px, selected 2px, focus 3px). The
  * stroke in the file was bound to the BUTTONS collection's `Border` rather
  * than Surface's: same variable name, different collection, which is as easy
  * to pick wrong as it sounds and reads as correct in every panel afterwards.
@@ -51,6 +51,12 @@ const selectedRow = () => {
 describe('the selected row ring', () => {
   test('is painted with --Border', () => {
     expect(beforeRulesFor(selectedRow())).toMatch(/border:[^;}]*var\(--Border\)/);
+  });
+
+  test('is 2px and sits inside the row — one step heavier than the 1px resting edge', () => {
+    const css = beforeRulesFor(selectedRow());
+    expect(css).toMatch(/border:\s*2px solid var\(--Border\)/);
+    expect(css).toMatch(/inset:\s*0(px)?[;\s]/);
   });
 
   /* Asserted as an ABSENCE, which is usually a weak test — here it is the

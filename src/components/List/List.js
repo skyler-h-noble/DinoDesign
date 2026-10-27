@@ -186,35 +186,29 @@ export function ListItem({
           ].filter(Boolean).join(', '),
         } : {}),
         backgroundColor: 'transparent',
-        /* Selected is a RING, not a tint.
-           Figma draws it (7022:49393, Selected#9250:94) as a sibling frame 2px
-           larger than the row — 454x142 against 452x140 — with strokes bound to
-           Border and the corner at Menu/Menu-Item-Radius. So: a 1px Border-
-           colored outline sitting just outside the row.
+        /* Selected is a RING, not a tint: a 2px Border ring INSIDE the row
+           (Figma 7022:49393 — the Selected frame, stroke 2 Inside, Surface
+           Border, the row's own corner). The edges step 1 → 2 → 3: resting
+           1px Border, selected 2px Border, focus a 3px Focus-Visible ring —
+           the same 1 → 2 thickening Input and Select use, so selection reads
+           without relying on color, and stays distinct from focus.
 
-           Border from SURFACE, not from Buttons. The file had it bound to the
-           Buttons collection's `Border` for a while — same variable name, a
-           different collection — which reads as correct in every panel and is
-           only visible where the two palettes differ. Fixed in Figma; held
-           here by ListSelectedRing.test.js, because the lib being right by
-           luck is not the same as it being right on purpose.
+           It drew a 1px outline OUTSIDE the row until Figma settled the ring.
 
-           It used to paint `backgroundColor: var(--Hover)`, which conflated two
-           different things: hovering a selected row then looked identical to
-           selecting it, and a selected row under the pointer gave no feedback
-           at all. A ring and a tint can coexist; two tints cannot.
+           Border from SURFACE, not from Buttons — held by
+           ListSelectedRing.test.js.
 
-           ::before rather than `outline`, because the focus ring already sets
-           `outline: none` on :focus-visible — a selected row that was also
-           focused would have lost its ring. ::after is taken by focus, so
-           selection takes ::before and the two can show together, which is
-           exactly when you need both. */
+           A tint would conflate hover with selection; a ring and a tint can
+           coexist, two tints cannot.
+
+           ::before, because focus owns ::after and `outline: none`, so a row
+           that is both selected and focused shows both rings. */
         ...(selected ? {
           '&::before': {
             content: '""',
             position: 'absolute',
-            inset: '-1px',
-            border: '1px solid var(--Border)',
+            inset: 0,
+            border: '2px solid var(--Border)',
             borderRadius: liVar(size, 'Radius', 'var(--Input-Radius)'),
             pointerEvents: 'none',
           },
