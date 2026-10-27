@@ -6,10 +6,21 @@ import { Box } from '@mui/material';
  * Divider Component
  * Visual separator with optional text indicator
  *
- * COLORS:
- *   border            var(--Border)
- *   border-variant    var(--Border-Variant)   (also the default if no color is set)
- *   {color}           var(--Icons-{Color}) for all 8 brand colors
+ * COLOR — Figma's Color axis, Default | Colored:
+ *   Default   var(--Border-Variant). Decorative: no contrast requirement.
+ *   Colored   var(--Buttons-{C}-Border), the palette picked by the Buttons
+ *             mode (Button-Theme) — in code, `color`. There is no palette
+ *             axis in Figma; the mode is the palette.
+ *
+ *   <Divider />                          Default
+ *   <Divider colored />                  Colored, Buttons default palette
+ *   <Divider colored color="primary" />  Colored, primary
+ *   <Divider color="primary" />          the same — a palette name implies
+ *                                        colored, as it always has
+ *
+ * `color="border"` (the 3:1 clickable-edge token) has no Figma side and was
+ * the wrong token for a decorative rule: it renders Default and warns once.
+ * Colored used to read --Icons-{C}; Figma binds Buttons › Border.
  *
  * ORIENTATION: horizontal | vertical
  *
@@ -42,22 +53,27 @@ import { Box } from '@mui/material';
  *   textAlign (vertical):   top  | center | bottom
  */
 
-const COLORS = ['border', 'border-variant', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+const NOT_A_PALETTE = ['default', 'border', 'border-variant'];
+let warnedBorder = false;
 
-function getLineColor(color) {
-  if (!color || color === 'default' || color === 'border-variant') return 'var(--Border-Variant)';
-  if (color === 'border') return 'var(--Border)';
-  return 'var(--Icons-' + cap(color) + ')';
+/* Colored when asked, or when given a palette name (the old API). */
+function isColored(color, colored) {
+  if (colored !== undefined) return !!colored;
+  return !!color && !NOT_A_PALETTE.includes(color);
 }
 
-function getIndicatorStyles(color, indicatorStyle) {
-  // Brand colors get their Tag/Icons tokens; surface colors (border /
-  // border-variant / unset) fall back to the Default Tag color so the
-  // pill still reads as a neutral chip.
-  const isBrand = color && !['default', 'border', 'border-variant'].includes(color);
-  const C = isBrand ? cap(color) : 'Default';
-  const borderColor = getLineColor(color);
+function getLineColor(color, colored) {
+  if (!isColored(color, colored)) return 'var(--Border-Variant)';
+  const C = !color || NOT_A_PALETTE.includes(color) ? 'Default' : cap(color);
+  return 'var(--Buttons-' + C + '-Border)';
+}
+
+function getIndicatorStyles(color, indicatorStyle, colored) {
+  // A colored rule's pill takes that palette's Tag tokens; a Default rule's
+  // falls back to the Default Tag color so it reads as a neutral chip.
+  const C = isColored(color, colored) && color && !NOT_A_PALETTE.includes(color) ? cap(color) : 'Default';
+  const borderColor = getLineColor(color, colored);
   if (indicatorStyle === 'light') {
     return {
       bg:     'var(--Tag-' + C + '-BG)',
@@ -94,6 +110,8 @@ const SIZE_MAP = {
 
 export function Divider({
   color = 'default',
+  /* Figma's Color = Colored. Unset, a palette name in `color` implies it. */
+  colored,
   orientation = 'horizontal',
   size = 'small',
   children,
@@ -104,7 +122,13 @@ export function Divider({
   sx = {},
   ...props
 }) {
-  const lineColor = getLineColor(color);
+  if (color === 'border' && process.env.NODE_ENV !== 'production' && !warnedBorder) {
+    warnedBorder = true;
+    // eslint-disable-next-line no-console
+    console.warn('[Divider] color="border" was removed: a divider is decorative, so it draws Border-Variant '
+      + '(Figma Color = Default). For a colored rule use colored + color="<palette>".');
+  }
+  const lineColor = getLineColor(color, colored);
   const thickness = SIZE_MAP[size] || SIZE_MAP.small;
   const hasIndicator = !!(children || indicatorText);
   const displayText = children || indicatorText;
@@ -116,7 +140,7 @@ export function Divider({
       <Box
         role="separator"
         aria-orientation="vertical"
-        className={'divider-vertical divider-' + color + ' ' + className}
+        className={'divider-vertical divider-' + color + (isColored(color, colored) ? ' divider-colored' : '') + ' ' + className}
         sx={{
           display: 'inline-block',
           width: thickness,
@@ -133,7 +157,7 @@ export function Divider({
 
   // --- Vertical with indicator ---
   if (isVertical && hasIndicator) {
-    const indStyles = getIndicatorStyles(color, indicatorStyle);
+    const indStyles = getIndicatorStyles(color, indicatorStyle, colored);
     const topFlex = textAlign === 'top' ? '0 0 10%' : textAlign === 'bottom' ? '1 1 auto' : '1 1 auto';
     const bottomFlex = textAlign === 'top' ? '1 1 auto' : textAlign === 'bottom' ? '0 0 10%' : '1 1 auto';
 
@@ -141,7 +165,7 @@ export function Divider({
       <Box
         role="separator"
         aria-orientation="vertical"
-        className={'divider-vertical divider-' + color + ' divider-indicator ' + className}
+        className={'divider-vertical divider-' + color + (isColored(color, colored) ? ' divider-colored' : '') + ' divider-indicator ' + className}
         sx={{
           display: 'inline-flex',
           flexDirection: 'column',
@@ -177,7 +201,7 @@ export function Divider({
       <Box
         role="separator"
         aria-orientation="horizontal"
-        className={'divider-horizontal divider-' + color + ' ' + className}
+        className={'divider-horizontal divider-' + color + (isColored(color, colored) ? ' divider-colored' : '') + ' ' + className}
         sx={{
           width: '100%',
           height: thickness,
@@ -191,7 +215,7 @@ export function Divider({
   }
 
   // --- Horizontal with indicator ---
-  const indStyles = getIndicatorStyles(color, indicatorStyle);
+  const indStyles = getIndicatorStyles(color, indicatorStyle, colored);
   const leftFlex = textAlign === 'left' ? '0 0 10%' : textAlign === 'right' ? '1 1 auto' : '1 1 auto';
   const rightFlex = textAlign === 'left' ? '1 1 auto' : textAlign === 'right' ? '0 0 10%' : '1 1 auto';
 
@@ -199,7 +223,7 @@ export function Divider({
     <Box
       role="separator"
       aria-orientation="horizontal"
-      className={'divider-horizontal divider-' + color + ' divider-indicator ' + className}
+      className={'divider-horizontal divider-' + color + (isColored(color, colored) ? ' divider-colored' : '') + ' divider-indicator ' + className}
       sx={{ display: 'flex', alignItems: 'center', width: '100%', ...sx }}
       {...props}
     >

@@ -478,15 +478,14 @@ export const CORE_SAMPLES = {
   },
 
   Divider: {
-    /* Ten values: the eight palettes plus the two border roles. `border` is
-       the 3:1 one that outlines clickable things; `border-variant` is
-       decorative and carries no contrast requirement, which is why a divider
-       defaults to it. */
+    /* Figma's Color axis: Default (Border-Variant — decorative, no contrast
+       requirement) or Colored (Buttons › Border). Colored's palette is the
+       Buttons mode, which in code is `color`. */
     color: () => (
       <AxisStack
-        values={['border', 'border-variant', ...PALETTES]}
-        defaultValue="border-variant"
-        render={(v) => <Divider color={v} />}
+        values={['default', ...PALETTES]}
+        defaultValue="default"
+        render={(v) => (v === 'default' ? <Divider /> : <Divider colored color={v} />)}
       />
     ),
     orientation: () => (

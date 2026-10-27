@@ -165,3 +165,29 @@ describe('thickness follows the Divider ramp, not the step bar ramp', () => {
     expect(cssFor(el)).toContain('width: var(--Lg-Divider, 2px)');
   });
 });
+
+describe('Color: Default vs Colored (Figma Color axis)', () => {
+  it('Default draws Border-Variant', () => {
+    const { container } = render(<Divider />);
+    expect(container.querySelector('.divider-colored')).toBeNull();
+  });
+  it('colored alone takes the Buttons default palette border', () => {
+    const { container } = render(<Divider colored />);
+    expect(container.querySelector('.divider-colored')).not.toBeNull();
+  });
+  it('a palette name implies colored', () => {
+    const { container } = render(<Divider color="primary" />);
+    expect(container.querySelector('.divider-colored')).not.toBeNull();
+  });
+  it('colored={false} wins over a palette name', () => {
+    const { container } = render(<Divider color="primary" colored={false} />);
+    expect(container.querySelector('.divider-colored')).toBeNull();
+  });
+  it('color="border" renders Default and warns once', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const { container } = render(<><Divider color="border" /><Divider color="border" /></>);
+    expect(container.querySelector('.divider-colored')).toBeNull();
+    expect(warn.mock.calls.filter((c) => String(c[0]).includes('[Divider]')).length).toBe(1);
+    warn.mockRestore();
+  });
+});
