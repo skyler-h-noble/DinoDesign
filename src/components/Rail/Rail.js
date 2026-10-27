@@ -5,6 +5,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import { Button } from '../Button/Button';
 import { Fab } from '../Fab/Fab';
+import { Badge } from '../Badge/Badge';
 import { Icon } from '../Icon/Icon';
 import { MobileNavLabel, Eyebrow } from '../Typography';
 
@@ -436,10 +437,9 @@ function ExpandedRailItem({ item, selected, variant, onClick, compact = false })
         position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center',
         width: CIRCLE, height: CIRCLE, flexShrink: 0, borderRadius: ITEM_RADIUS,
       }}>
-        {avatar
+        {withBadge(badge, avatar
           ? <Box sx={{ display: 'flex', width: ICON_SIZE, height: ICON_SIZE }}>{avatar}</Box>
-          : <Icon size="custom" fontSize={RAIL_ICON} sx={{ color: 'inherit' }}>{icon}</Icon>}
-        {badge && <RailBadge value={badge} />}
+          : <Icon size="custom" fontSize={RAIL_ICON} sx={{ color: 'inherit' }}>{icon}</Icon>)}
       </Box>
       {label && !compact && (
         <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0, py: ITEM_PAD_Y }}>
@@ -604,10 +604,9 @@ export function RailItem({ item, selected, expanded, compact = false, labelStyle
             so an avatar is passed through UNWRAPPED. Wrapping it in <Icon>
             would hand it the icon's color and sizing rules, which is right
             for a glyph and wrong for a picture. */}
-        {avatar
+        {withBadge(badge, avatar
           ? <Box sx={{ display: 'flex', width: ICON_SIZE, height: ICON_SIZE }}>{avatar}</Box>
-          : <Icon size="custom" fontSize={RAIL_ICON} sx={{ color: 'inherit' }}>{icon}</Icon>}
-        {badge && <RailBadge value={badge} />}
+          : <Icon size="custom" fontSize={RAIL_ICON} sx={{ color: 'inherit' }}>{icon}</Icon>)}
       </Box>
 
       {/* Label */}
@@ -650,19 +649,12 @@ export function RailItem({ item, selected, expanded, compact = false, labelStyle
 }
 
 /* ─── Badge ─── */
-function RailBadge({ value }) {
-  return (
-    <Box sx={{
-      position: 'absolute', top: -4, right: -6,
-      minWidth: 16, height: 16, borderRadius: '8px',
-      backgroundColor: 'var(--Tags-Error-BG)',
-      color: 'var(--Tags-Error-Text)',
-      fontSize: '10px', fontWeight: 700, px: 0.5,
-      display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1,
-    }}>
-      {value}
-    </Box>
-  );
+/* Figma's Badge switch on a rail item: the library's Badge (Badge Counter,
+   Error) on the icon's top-right corner, as Button draws its badge. It was a
+   hand-drawn 10px pill on the Tags colors. */
+function withBadge(badge, glyph) {
+  if (badge === undefined || badge === null || badge === false) return glyph;
+  return <Badge badgeContent={badge === true ? undefined : badge} dot={badge === true} variant="error">{glyph}</Badge>;
 }
 
 export default Rail;
