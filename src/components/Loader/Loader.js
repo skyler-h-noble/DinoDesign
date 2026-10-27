@@ -8,6 +8,7 @@ import {
   Skeleton,
   Paper,
 } from '@mui/material';
+import { Body } from '../Typography';
 
 const LOADER_COLOR = {
   default: 'Default', primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary',
@@ -90,8 +91,8 @@ export function Loader({
     <Stack
       alignItems="center"
       justifyContent="center"
-      spacing={2}
       sx={{
+        gap: 'var(--Sizing-2, 16px)',
         py: 4,
         ...sx,
       }}
@@ -106,16 +107,10 @@ export function Loader({
         aria-label={ariaLabelledby ? undefined : ariaLabel}
         aria-labelledby={ariaLabelledby}
       />
-      {message && (
-        <Typography
-          sx={{
-            color: 'var(--Text-Secondary)',
-            fontWeight: 500,
-          }}
-        >
-          {message}
-        </Typography>
-      )}
+      {/* Figma's Message: Body in --Text, Sizing-2 under the ring. It was
+          --Text-Secondary (the secondary palette's text, not a muted one) at
+          a literal 500 weight. */}
+      {message && <Body>{message}</Body>}
     </Stack>
   );
 }
@@ -250,16 +245,10 @@ export function DotsLoader({
           />
         ))}
       </Box>
-      {message && (
-        <Typography
-          sx={{
-            color: 'var(--Text-Secondary)',
-            fontWeight: 500,
-          }}
-        >
-          {message}
-        </Typography>
-      )}
+      {/* Figma's Message: Body in --Text, Sizing-2 under the ring. It was
+          --Text-Secondary (the secondary palette's text, not a muted one) at
+          a literal 500 weight. */}
+      {message && <Body>{message}</Body>}
     </Stack>
   );
 }
