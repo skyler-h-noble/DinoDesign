@@ -235,7 +235,10 @@ export function Rating({
       {Array.from({ length: max }, (_, i) => renderStar(i))}
       {currentValue === null && !hoverValue && emptyLabel && (
         /* Figma's Value = Empty: Dynamic Caption in Quiet, Sizing-Half after the stars. */
-        <Caption color="quiet" className="rating-empty-label" style={{ marginLeft: 'var(--Sizing-Half, 4px)' }}>
+        /* --Quiet, the Surface token Figma binds — not Typography's
+           color="quiet", which resolves to --Text-Quiet (a different, darker
+           tone in a themed zone). */
+        <Caption className="rating-empty-label" style={{ color: 'var(--Quiet)', marginLeft: 'var(--Sizing-Half, 4px)' }}>
           {emptyLabel}
         </Caption>
       )}
