@@ -41,10 +41,7 @@ const SIZE_MAP = {
 
 export function LinearProgress({
   value,
-  /* 'match' — Buttons › Match, the palette of the theme it sits in, so a
-     progress indicator takes its zone's colour (Primary in a Primary
-     section). Any palette name still pins one. */
-  color = 'match',
+  color = 'default',
   size = 'medium',
   showValue = false,
   className = '',
@@ -56,11 +53,7 @@ export function LinearProgress({
   const hasValue = value !== undefined && value !== null;
   const clampedValue = hasValue ? Math.min(100, Math.max(0, value)) : 0;
 
-  /* Match falls back to Default for a design system published before
-     --Buttons-Match-* existed. */
-  const fillColor = color === 'match'
-    ? 'var(--Buttons-Match-Border, var(--Buttons-Default-Border))'
-    : 'var(--Buttons-' + C + '-Border)';
+  const fillColor = 'var(--Buttons-' + C + '-Border)';
 
   const bar = (
     <Box

@@ -41,10 +41,7 @@ const SIZE_MAP = {
 
 export function CircularProgress({
   value,
-  /* 'match' — Buttons › Match, the palette of the theme it sits in, so a
-     progress indicator takes its zone's colour (Primary in a Primary
-     section). Any palette name still pins one. */
-  color = 'match',
+  color = 'default',
   size = 'medium',
   thickness: thicknessOverride,
   showValue = false,
@@ -80,11 +77,7 @@ export function CircularProgress({
   // and its round caps sit INSIDE the span: each adds half the stroke width.
   const w = Math.max(1, t - 2);
   const arc = Math.max(0, fraction * circumference - 2 - w);
-  /* Match falls back to Default for a design system published before
-     --Buttons-Match-* existed. */
-  const fillColor = color === 'match'
-    ? 'var(--Buttons-Match-Border, var(--Buttons-Default-Border))'
-    : 'var(--Buttons-' + C + '-Border)';
+  const fillColor = 'var(--Buttons-' + C + '-Border)';
 
   return (
     <Box

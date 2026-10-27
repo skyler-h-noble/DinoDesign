@@ -233,9 +233,9 @@ describe('Custom thickness', () => {
 
 /* ─── Defaults ─── */
 describe('Defaults', () => {
-  test('default color is match (the theme\'s own palette)', () => {
+  test('default color is default', () => {
     const { container } = renderCP();
-    expect(container.querySelector('.circular-progress-match')).toBeInTheDocument();
+    expect(container.querySelector('.circular-progress-default')).toBeInTheDocument();
   });
 
   test('default size is medium', () => {
