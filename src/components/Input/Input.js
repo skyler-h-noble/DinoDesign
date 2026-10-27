@@ -327,6 +327,11 @@ export function Input({
   resize: resizeProp,
   startAdornment,
   endAdornment,
+  /* Figma's Prefix and Suffix: text set tight against the value ("$" 100,
+     100 "%"), Body in --Text — distinct from the Start Icon (startAdornment)
+     and End Decorator (endAdornment), which sit 12px away. Single-line. */
+  prefix,
+  suffix,
   fullWidth = false,
   className = '',
   sx = {},
@@ -457,12 +462,31 @@ export function Input({
   };
 
   // Build end adornment
+  const affixSx = { color: 'var(--Text)', font: 'inherit', whiteSpace: 'nowrap', flexShrink: 0 };
   const renderEndAdornment = () => {
-    if (!endAdornment) return undefined;
+    const suffixEl = !multiline && suffix != null && suffix !== '' ? (
+      <Box component="span" className="inp-suffix" sx={affixSx}>{suffix}</Box>
+    ) : null;
+    if (!endAdornment && !suffixEl) return undefined;
     return (
-      <InputAdornment position="end">
-        {endAdornment}
-      </InputAdornment>
+      <>
+        {/* No gap before the suffix: it belongs to the value. */}
+        {suffixEl && <InputAdornment position="end" sx={{ ml: 0 }}>{suffixEl}</InputAdornment>}
+        {endAdornment && <InputAdornment position="end">{endAdornment}</InputAdornment>}
+      </>
+    );
+  };
+  const renderStartAdornment = () => {
+    const prefixEl = !multiline && prefix != null && prefix !== '' ? (
+      <Box component="span" className="inp-prefix" sx={affixSx}>{prefix}</Box>
+    ) : null;
+    if (!startAdornment && !prefixEl) return undefined;
+    return (
+      <>
+        {startAdornment && <InputAdornment position="start">{startAdornment}</InputAdornment>}
+        {/* No gap after the prefix: it belongs to the value. */}
+        {prefixEl && <InputAdornment position="start" sx={{ mr: 0 }}>{prefixEl}</InputAdornment>}
+      </>
     );
   };
 
@@ -563,9 +587,7 @@ export function Input({
             size={size === 'small' ? 'small' : 'medium'}
             inputProps={mergedInputProps}
             InputProps={{
-              startAdornment: startAdornment ? (
-                <InputAdornment position="start">{startAdornment}</InputAdornment>
-              ) : undefined,
+              startAdornment: renderStartAdornment(),
               endAdornment: renderEndAdornment(),
             }}
             sx={{

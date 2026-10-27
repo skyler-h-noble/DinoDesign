@@ -204,3 +204,14 @@ describe('the light variant is gone', () => {
     }
   });
 });
+
+/* Figma's Prefix and Suffix: text tight against the value. */
+describe('prefix / suffix', () => {
+  test('render beside the value, with the icon and decorator still in place', () => {
+    const { container } = render(<Input aria-label="Price" prefix="$" suffix="USD" startAdornment={<span data-testid="ico" />} endAdornment={<span data-testid="end" />} />);
+    expect(container.querySelector('.inp-prefix')).toHaveTextContent('$');
+    expect(container.querySelector('.inp-suffix')).toHaveTextContent('USD');
+    expect(screen.getByTestId('ico')).toBeInTheDocument();
+    expect(screen.getByTestId('end')).toBeInTheDocument();
+  });
+});
