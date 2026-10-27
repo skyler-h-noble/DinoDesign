@@ -45,3 +45,29 @@ if (typeof globalThis.ResizeObserver === 'undefined') {
 const { TextEncoder, TextDecoder } = require('util');
 if (typeof globalThis.TextEncoder === 'undefined') globalThis.TextEncoder = TextEncoder;
 if (typeof globalThis.TextDecoder === 'undefined') globalThis.TextDecoder = TextDecoder;
+
+/* jsdom's selector engine (nwsapi) cannot parse a relative selector inside
+   :has() — `:has(> .accordion-summary:hover)` in Accordion, valid in every
+   browser. getComputedStyle walks EVERY stylesheet rule and throws on that
+   one, so any test that computes a style while an Accordion's CSS is in the
+   document fails with "is not a valid selector". It surfaced when SpeedDial's
+   labels became open tooltips: MUI's Popper calls getComputedStyle to place
+   them, and the docs suites render an Accordion sample alongside.
+
+   Retry once against the element alone with no stylesheet in play rather
+   than crash: the components do not depend on computed values in jsdom (it
+   has no layout), and swallowing the error here keeps the real selector in
+   the component instead of weakening it for a test engine. */
+{
+  const realGCS = window.getComputedStyle.bind(window);
+  window.getComputedStyle = (el, pseudo) => {
+    try {
+      return realGCS(el, pseudo);
+    } catch (e) {
+      if (e && e.name === 'SyntaxError' && /not a valid selector|unknown pseudo-class selector/.test(e.message)) {
+        return el && el.style ? el.style : realGCS(document.createElement('div'));
+      }
+      throw e;
+    }
+  };
+}
