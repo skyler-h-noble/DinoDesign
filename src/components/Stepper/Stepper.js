@@ -167,6 +167,8 @@ export function Stepper({
   );
 }
 
+let warnedDotClick = false;
+
 /* ─── Step ─── */
 export function Step({
   children,
@@ -183,7 +185,16 @@ export function Step({
      reach yet was styled and announced exactly like one you can. Folding
      disabled into it here drops the role, tabIndex, key handler and onClick
      together rather than only dimming the indicator. */
-  const clickable = groupClickable && !disabled;
+  /* A No-Count step (a dot) is NEVER clickable — Figma's No-Count Step has no
+     interactive states by design: the dot is progress, not navigation. A
+     stepper that lets you jump between steps uses Count steps. */
+  const clickable = groupClickable && !disabled && variant !== 'noCount';
+  if (groupClickable && variant === 'noCount' && process.env.NODE_ENV !== 'production' && !warnedDotClick) {
+    warnedDotClick = true;
+    // eslint-disable-next-line no-console
+    console.warn('[Stepper] clickable is ignored with variant="noCount": dots are progress, not navigation. '
+      + 'Use variant="count" for a stepper you can jump around in.');
+  }
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
   const C = COLOR_LABEL_MAP[color] || 'Default';
   const isHorizontal = orientation === 'horizontal';

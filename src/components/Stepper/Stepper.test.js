@@ -735,3 +735,19 @@ describe('labelPosition', () => {
     expect(container.querySelector('.step-label').style.textAlign).toBe('center');
   });
 });
+
+describe('noCount dots are never clickable', () => {
+  it('ignores clickable on a noCount stepper and warns once', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const onStepClick = jest.fn();
+    const { container } = render(
+      <Stepper variant="noCount" clickable onStepClick={onStepClick}><Step label="A" /><Step label="B" /></Stepper>
+    );
+    expect(container.querySelector('[role="button"]')).toBeNull();
+    expect(container.querySelector('.step-indicator-clickable')).toBeNull();
+    fireEvent.click(container.querySelectorAll('.step-indicator')[1]);
+    expect(onStepClick).not.toHaveBeenCalled();
+    expect(warn.mock.calls.filter((c) => String(c[0]).includes('noCount')).length).toBe(1);
+    warn.mockRestore();
+  });
+});
