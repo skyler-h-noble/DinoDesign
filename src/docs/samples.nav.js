@@ -496,15 +496,15 @@ export const NAV_SAMPLES = {
     ),
     expandedWidth: () => (
       <HStack gap="var(--Sizing-3)" style={{ flexWrap: 'wrap', alignItems: 'flex-start' }}>
-        <Cell label="partial" emphasis width={240}>
+        <Cell label="240 — default" emphasis width={240}>
           <Frame w={240} h={260}>
             <Rail items={NAV_ITEMS.slice(0, 4)} expandable defaultExpanded defaultValue={0} />
           </Frame>
         </Cell>
-        <Cell label="full" width={300}>
+        <Cell label="{300} — your own" width={300}>
           <Frame w={300} h={260}>
             <Rail items={NAV_ITEMS.slice(0, 4)} expandable defaultExpanded
-                  expandedWidth="full" defaultValue={0} />
+                  expandedWidth={300} defaultValue={0} />
           </Frame>
         </Cell>
       </HStack>

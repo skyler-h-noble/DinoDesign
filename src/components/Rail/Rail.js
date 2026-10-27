@@ -75,8 +75,14 @@ const RAIL_WIDTH = {
   medium: 'var(--Rail-Width, 80px)',
   large: 'var(--Lg-Rail-Width, 96px)',
 };
-const PARTIAL_WIDTH = 240;
-const FULL_WIDTH = 320;
+/* ONE open width, 240 — inside Material's 220–360 expanded rail, and what
+   Figma's Open-Expandable rail draws. A product with long labels sets its own
+   (expandedWidth={280}); there are no presets. 'partial' / 'full' were two
+   presets the standards don't have; both still render (240 / 320) and warn. */
+const EXPANDED_WIDTH = 240;
+const LEGACY_WIDTH = { partial: 240, full: 320 };
+let warnedLegacyWidth = false;
+const cssWidth = (w) => (typeof w === 'number' ? w + 'px' : w);
 
 /** Gap between items, and between an item and a divider. */
 const ITEM_GAP = 'var(--Sizing-1-and-Half, 12px)';
@@ -112,7 +118,8 @@ export function Rail({
   defaultValue = 0,
   onChange,
   expandable = false,
-  expandedWidth = 'partial',
+  /* The open width: a number (px) or any CSS length. Default 240. */
+  expandedWidth = EXPANDED_WIDTH,
   defaultExpanded = false,
   fabAction,
   /* Figma's Top on the Default rail: the brand mark centred in an
@@ -160,11 +167,15 @@ export function Rail({
   const toggleExpand = () => setExpanded((prev) => !prev);
 
   const isExpanded = expandable && expanded;
-  /* A token when collapsed, a number when expanded — the expanded widths are
-     this file's own and have no variable behind them. Kept as a plain string
-     either way so the style below does not have to know which it got. */
+  if (process.env.NODE_ENV !== 'production' && expandedWidth in LEGACY_WIDTH && !warnedLegacyWidth) {
+    warnedLegacyWidth = true;
+    // eslint-disable-next-line no-console
+    console.warn('[OmniDesign] <Rail expandedWidth="' + expandedWidth + '"> — the presets are retired. '
+      + 'The open rail is 240 by default; pass a width (expandedWidth={280}) to change it.');
+  }
+  /* A token when collapsed, a length when expanded. */
   const width = isExpanded
-    ? (expandedWidth === 'full' ? FULL_WIDTH : PARTIAL_WIDTH) + 'px'
+    ? cssWidth(LEGACY_WIDTH[expandedWidth] ?? expandedWidth)
     : (RAIL_WIDTH[size] || RAIL_WIDTH.medium);
 
   const renderItems = () => {

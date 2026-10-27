@@ -20,10 +20,9 @@ import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
 import { CodeBlock } from '../CodeBlock/CodeBlock';
 import {
-  H3, H5, BodySmall, Caption, Label, EyebrowSmall,
+  H3, H5, BodySmall, Caption, Label,
 } from '../Typography';
 
-const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
 
 const SAMPLE_ITEMS = [
   { icon: <HomeIcon />, label: 'Home' },
@@ -49,18 +48,9 @@ function CopyButton({ code }) {
   );
 }
 
-function ControlButton({ label, selected, onClick }) {
-  return (
-    <Button selected={selected} variant={selected ? 'default' : 'default-outline'} size="small" onClick={onClick}>
-      {label}
-    </Button>
-  );
-}
-
 /* ── Main Showcase ── */
 export function RailShowcase() {
   const [expandable, setExpandable]       = useState(true);
-  const [expandedWidth, setExpandedWidth] = useState('partial');
   const [showFab, setShowFab]             = useState(false);
   const [bgTheme, setBgTheme]             = useState('Default');
   const [bgSurface, setBgSurface]         = useState('Surface');
@@ -69,7 +59,6 @@ export function RailShowcase() {
     const parts = ['items={items}'];
     if (expandable) {
       parts.push('expandable');
-      if (expandedWidth !== 'partial') parts.push('expandedWidth="full"');
     }
     if (showFab) parts.push('fabAction={{ icon: <AddIcon />, label: "Create", onClick: handleCreate }}');
     parts.push('value={activeIndex}');
@@ -105,7 +94,6 @@ export function RailShowcase() {
             <Rail
               items={SAMPLE_ITEMS}
               expandable={expandable}
-              expandedWidth={expandedWidth}
               fabAction={showFab ? { icon: <AddIcon />, label: 'Create', onClick: () => {} } : undefined}
             />
             <Box sx={{ flex: 1, p: 3 }}>
@@ -124,18 +112,8 @@ export function RailShowcase() {
                 <Box sx={{ p: 3 }}>
 
 
-                  {/* Expanded Width */}
-                  <Box>
-                    <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>EXPANDED WIDTH</EyebrowSmall>
-                    <Stack direction="row" spacing={1}>
-                      {['partial', 'full'].map((w) => (
-                        <ControlButton key={w} label={cap(w)} selected={expandedWidth === w} onClick={() => setExpandedWidth(w)} />
-                      ))}
-                    </Stack>
-                  </Box>
-
                   {/* Options */}
-                  <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box>
                       <Label>Expandable</Label>
                       <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>Toggle between collapsed and expanded</Caption>

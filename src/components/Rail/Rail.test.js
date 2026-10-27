@@ -266,3 +266,24 @@ describe('the items are centred in the rail', () => {
     expect(getComputedStyle(list).width).toBe('100%');
   });
 });
+
+describe('Rail expanded width', () => {
+  const widthOf = (c) => {
+    const el = c.querySelector('.rail') || c.firstChild;
+    const rules = [...document.styleSheets].flatMap((sh) => { try { return [...sh.cssRules]; } catch (e) { return []; } })
+      .filter((r) => r.selectorText && [...el.classList].some((k) => r.selectorText.includes('.' + k)));
+    return rules.map((r) => r.style.width).filter(Boolean).pop();
+  };
+  test('one width: 240 by default, any width when given', () => {
+    const items = [{ icon: <span />, label: 'A' }];
+    expect(widthOf(render(<Rail items={items} expandable defaultExpanded />).container)).toBe('240px');
+    expect(widthOf(render(<Rail items={items} expandable defaultExpanded expandedWidth={300} />).container)).toBe('300px');
+    expect(widthOf(render(<Rail items={items} expandable defaultExpanded expandedWidth="18rem" />).container)).toBe('18rem');
+  });
+  test('the old presets still render, and warn', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const items = [{ icon: <span />, label: 'A' }];
+    expect(widthOf(render(<Rail items={items} expandable defaultExpanded expandedWidth="full" />).container)).toBe('320px');
+    warn.mockRestore();
+  });
+});

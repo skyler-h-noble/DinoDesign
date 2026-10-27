@@ -129,9 +129,9 @@ export const RAIL_DOC = {
     default: 'false'
   }, {
     name: 'expandedWidth',
-    type: 'string',
-    values: ['partial', 'full'],
-    default: 'partial'
+    type: 'number | string',
+    default: '240',
+    note: 'The open width — one width, 240 by default; pass any number (px) or CSS length to change it. The old `partial` / `full` presets still render (240 / 320) and warn.'
   }, {
     name: 'labelStyle',
     type: 'string',

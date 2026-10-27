@@ -33,14 +33,14 @@ export const Fixed = {
   render: () => wrap(<Rail items={ITEMS} />),
 };
 
-export const ExpandablePartial = {
-  name: 'Expandable — Partial Width',
-  render: () => wrap(<Rail items={ITEMS} expandable expandedWidth="partial" />),
+export const Expandable = {
+  name: 'Expandable — 240 (default)',
+  render: () => wrap(<Rail items={ITEMS} expandable />),
 };
 
-export const ExpandableFull = {
-  name: 'Expandable — Full Width',
-  render: () => wrap(<Rail items={ITEMS} expandable expandedWidth="full" />),
+export const ExpandableCustomWidth = {
+  name: 'Expandable — your own width',
+  render: () => wrap(<Rail items={ITEMS} expandable expandedWidth={300} />),
 };
 
 export const WithFabAction = {
