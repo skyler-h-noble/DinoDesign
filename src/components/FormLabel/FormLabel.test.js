@@ -118,3 +118,28 @@ describe('the More Info affordance', () => {
     warn.mockRestore();
   });
 });
+
+describe('legend with More Info', () => {
+  test('More Info sits beside the legend, which stays the fieldset’s first child and names it', () => {
+    const { container } = render(
+      <fieldset>
+        <FormLabel as="legend" moreInfo={{ label: 'More about delivery', text: 'More information', href: '#d' }}>Delivery</FormLabel>
+        <input type="radio" aria-label="Standard" />
+      </fieldset>
+    );
+    const fieldset = container.querySelector('fieldset');
+    const legend = fieldset.firstElementChild;
+    expect(legend.tagName).toBe('LEGEND');
+    expect(legend).toHaveTextContent('Delivery');
+    expect(legend).not.toHaveTextContent('More information');
+    expect(legend.style.float).toBe('left');
+    expect(screen.getByRole('group', { name: 'Delivery' })).toBeInTheDocument();
+    expect(fieldset.querySelector('.form-label-clear')).not.toBeNull();
+  });
+
+  test('the info icon comes before the More Info text', () => {
+    const { container } = render(<FormLabel htmlFor="x" moreInfo={{ label: 'More about x', text: 'More information', href: '#' }}>X</FormLabel>);
+    const link = container.querySelector('.form-label-more-info');
+    expect(link.firstElementChild.querySelector('svg')).not.toBeNull();
+  });
+});

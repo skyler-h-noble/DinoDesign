@@ -102,9 +102,13 @@ export function FormLabel({
    * So the legend is returned BARE, with More Info as a sibling rather than a
    * child. Inside the legend it would join the group's accessible name
    * ("Delivery More about delivery") — the same reason it stays out of a
-   * <label>. The consequence is that a group's More Info stacks under its
-   * legend rather than sitting beside it: a row wrapper is precisely the thing
-   * that cannot exist here. */
+   * <label>.
+   *
+   * BESIDE, WITHOUT A WRAPPER. A row wrapper is the one thing that cannot
+   * exist, so the legend FLOATS: a floated legend stays the fieldset's first
+   * child (and keeps naming it) but lays out like any block, so the More Info
+   * link that follows sits on its line, Sizing-Half after it — Figma's
+   * Form-Label. A zero-height clear after the two puts the fields below. */
   const labelEl = (
     <Label
       component={isLegend ? 'legend' : 'label'}
@@ -151,18 +155,21 @@ export function FormLabel({
       aria-label={moreInfo.label}
       sx={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--Sizing-Half)' }}
     >
-      {moreInfo.text}
-      {/* aria-hidden by default in this library unless given its own label,
+      {/* Icon first, as Figma's Form-Label draws it: ⓘ More information.
+          aria-hidden by default in this library unless given its own label,
           so the Link's name is the only one announced. */}
       <Icon size="small"><InfoOutlinedIcon /></Icon>
+      {moreInfo.text}
     </Link>
   ) : null;
 
   if (isLegend) {
+    if (!moreInfoEl) return labelEl;
     return (
       <>
-        {labelEl}
+        {React.cloneElement(labelEl, { style: { ...labelEl.props.style, float: 'left', padding: 0, marginRight: 'var(--Sizing-Half, 4px)' } })}
         {moreInfoEl}
+        <span aria-hidden="true" className="form-label-clear" style={{ display: 'block', clear: 'both', height: 0 }} />
       </>
     );
   }

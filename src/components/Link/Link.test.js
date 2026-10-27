@@ -201,3 +201,16 @@ describe('Link — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+describe('visited (Figma Status = Visited)', () => {
+  test('visited states the visited color and keeps the underline', () => {
+    const { container } = render(<Link href="#" visited>Read</Link>);
+    const a = container.querySelector('a');
+    expect(a).toHaveClass('link-visited');
+    const css = [];
+    for (const sheet of document.styleSheets) for (const r of sheet.cssRules) {
+      try { if (a.matches(r.selectorText)) css.push(r.cssText); } catch (e) { /* skip */ }
+    }
+    expect(css.join('\n')).toMatch(/color: var\(--Link-Visited, var\(--Hotlink-Visited\)\)/);
+  });
+});

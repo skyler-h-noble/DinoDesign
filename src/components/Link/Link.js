@@ -140,6 +140,11 @@ export function Link({
   textStyle = 'body',
   color = 'primary',
   disabled = false,
+  /* Figma's Status = Visited, stated rather than left to the browser: for a
+     visited state the APP tracks (an article read, a step done), and because
+     a page cannot force or read :visited. Hover, pressed, focus and disabled
+     apply on top, as in the Figma set. */
+  visited = false,
   onClick,
   className = '',
   sx = {},
@@ -166,6 +171,7 @@ export function Link({
       className={
         'link link-' + textStyle + ' link-color-' + effColor +
         (disabled ? ' link-disabled' : '') +
+        (visited ? ' link-visited' : '') +
         ' ' + className
       }
       sx={{
@@ -182,7 +188,7 @@ export function Link({
         textDecorationThickness: '1px',
 
         // ── Color ────────────────────────────────────────────────
-        color:         colors.base,
+        color:         visited ? colors.visited : colors.base,
         cursor:        disabled ? 'not-allowed' : 'pointer',
         opacity:       disabled ? 'var(--Disabled, 0.38)' : 1,
         pointerEvents: disabled ? 'none' : 'auto',
