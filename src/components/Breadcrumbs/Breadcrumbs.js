@@ -1,6 +1,9 @@
 // src/components/Breadcrumbs/Breadcrumbs.js
 import React, { Children, isValidElement } from 'react';
 import { Box } from '@mui/material';
+import { Popover } from '../Popover/Popover';
+import { Button } from '../Button/Button';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { BodySmall, Caption } from '../Typography';
 
 /**
@@ -63,32 +66,51 @@ export function Breadcrumbs({
   const total = items.length;
 
   // ── Condensed items ──
+  /* The middle crumbs fold into a "…" button that opens a Popover listing
+     them — the hidden pages in order, one link per row — the same pattern as
+     AvatarGroup's "+N". It used to expand the trail inline, which reflowed
+     the whole line and could wrap it onto two. */
   const shouldCondense = condense && total > maxItems;
   let visibleItems = items;
-  const [expanded, setExpanded] = React.useState(false);
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  const ellipsisRef = React.useRef(null);
+  const hiddenItems = shouldCondense ? items.slice(itemsBeforeCollapse, total - itemsAfterCollapse) : [];
 
-  if (shouldCondense && !expanded) {
+  if (shouldCondense) {
     const before = items.slice(0, itemsBeforeCollapse);
     const after = items.slice(total - itemsAfterCollapse);
     const ellipsis = (
-      <Box
-        key="__breadcrumb-ellipsis"
-        component="button"
-        onClick={() => { setExpanded(true); onExpand?.(); }}
-        aria-label="Show full breadcrumb trail"
-        className="breadcrumb-ellipsis"
-        sx={{
-          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-          background: 'none', border: 'none', padding: '2px 4px',
-          cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit',
-          color: 'var(--Quiet)', borderRadius: '4px',
-          '&:hover': { backgroundColor: 'var(--Hover)', color: 'var(--Text)' },
-          '&:active': { backgroundColor: 'var(--Pressed)', color: 'var(--Text)' },
-          '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '1px' },
-        }}
-      >
-        …
-      </Box>
+      <React.Fragment key="__breadcrumb-ellipsis">
+        {/* The lib's ghost icon Button, so the "…" has Button's own
+            hover, pressed and focus states (Figma: a ghost iconOnly Button
+            with more_horiz). */}
+        <Button
+          ref={ellipsisRef}
+          variant="ghost"
+          contentType="iconOnly"
+          size="small"
+          onClick={() => { setMenuOpen((o) => !o); onExpand?.(); }}
+          aria-label={'Show ' + hiddenItems.length + ' hidden pages'}
+          aria-haspopup="dialog"
+          aria-expanded={menuOpen}
+          className="breadcrumb-ellipsis"
+        >
+          <MoreHorizIcon />
+        </Button>
+        <Popover open={menuOpen} onClose={() => setMenuOpen(false)} anchorEl={ellipsisRef.current}
+          placement="bottom-start" arrow width="auto" theme={null} aria-label="Hidden pages">
+          <Box component="ul" className="breadcrumb-menu"
+            sx={{ listStyle: 'none', m: 0, p: 'var(--Sizing-1, 8px)', display: 'flex', flexDirection: 'column' }}>
+            {hiddenItems.map((item, i) => (
+              <Box key={'hidden-' + i} component="li" className="breadcrumb-menu-item"
+                onClick={() => setMenuOpen(false)}
+                sx={{ padding: 'var(--Sizing-Half, 4px) var(--Sizing-1, 8px)', lineHeight: s.line, fontSize: 'inherit' }}>
+                {item}
+              </Box>
+            ))}
+          </Box>
+        </Popover>
+      </React.Fragment>
     );
     visibleItems = [...before, ellipsis, ...after];
   }
@@ -119,7 +141,7 @@ export function Breadcrumbs({
   // ── Build interleaved list ──
   const interleaved = [];
   visibleItems.forEach((item, i) => {
-    const isLast = (shouldCondense && !expanded)
+    const isLast = shouldCondense
       ? i === visibleItems.length - 1
       : i === total - 1;
 

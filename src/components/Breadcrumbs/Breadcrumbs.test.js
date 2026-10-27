@@ -127,38 +127,35 @@ describe('Condense', () => {
     expect(screen.getByText('Home')).toBeInTheDocument();
     expect(screen.getByText('Products')).toBeInTheDocument();
     expect(screen.getByText('Detail')).toBeInTheDocument();
-    expect(screen.queryByLabelText('Show full breadcrumb trail')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /hidden pages/ })).not.toBeInTheDocument();
   });
 
   test('condenses when items > maxItems', () => {
     renderBreadcrumbs({ condense: true, maxItems: 4 });
-    // First item visible
     expect(screen.getByText('Home')).toBeInTheDocument();
-    // Last item visible
     expect(screen.getByText('MacBook Pro')).toBeInTheDocument();
-    // Middle items hidden
     expect(screen.queryByText('Electronics')).not.toBeInTheDocument();
     expect(screen.queryByText('Computers')).not.toBeInTheDocument();
-    // Ellipsis button present
-    expect(screen.getByLabelText('Show full breadcrumb trail')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Show \d+ hidden pages$/ })).toBeInTheDocument();
   });
 
-  test('clicking ellipsis expands all items', () => {
+  // The "…" opens a Popover listing the hidden crumbs, as AvatarGroup's +N.
+  test('clicking the ellipsis opens a panel of the hidden pages', () => {
     renderBreadcrumbs({ condense: true, maxItems: 4 });
-    expect(screen.queryByText('Electronics')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByLabelText('Show full breadcrumb trail'));
-    // All items now visible
-    CRUMBS.forEach((label) => {
-      expect(screen.getByText(label)).toBeInTheDocument();
-    });
-    // Ellipsis gone
-    expect(screen.queryByLabelText('Show full breadcrumb trail')).not.toBeInTheDocument();
+    const btn = screen.getByRole('button', { name: /hidden pages/ });
+    expect(btn).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(btn);
+    const panel = screen.getByRole('dialog', { name: 'Hidden pages' });
+    expect(panel).toHaveTextContent('Electronics');
+    expect(panel).toHaveTextContent('Computers');
+    expect(panel).not.toHaveTextContent('Home');
+    // The trail itself stays condensed.
+    expect(screen.getByRole('button', { name: /hidden pages/ })).toHaveAttribute('aria-expanded', 'true');
   });
 
-  test('ellipsis has aria-label', () => {
+  test('the ellipsis is a button', () => {
     renderBreadcrumbs({ condense: true, maxItems: 4 });
-    const btn = screen.getByLabelText('Show full breadcrumb trail');
-    expect(btn.tagName).toBe('BUTTON');
+    expect(screen.getByRole('button', { name: /hidden pages/ }).tagName).toBe('BUTTON');
   });
 });
 
