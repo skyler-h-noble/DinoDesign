@@ -373,3 +373,17 @@ describe('Switch — the -light shape is removed', () => {
     }
   });
 });
+
+/* Figma's Icon boolean is on by default: a check when on, a close when off. */
+describe('Default icons', () => {
+  test('check on, close off, by default', () => {
+    const { container, rerender } = render(<Switch checked onChange={() => {}} inputProps={{ 'aria-label': 'x' }} />);
+    expect(container.querySelector('[data-testid="CheckIcon"]')).toBeInTheDocument();
+    rerender(<Switch checked={false} onChange={() => {}} inputProps={{ 'aria-label': 'x' }} />);
+    expect(container.querySelector('[data-testid="CloseIcon"]')).toBeInTheDocument();
+  });
+  test('icon={false} hides them', () => {
+    const { container } = render(<Switch checked icon={false} onChange={() => {}} inputProps={{ 'aria-label': 'x' }} />);
+    expect(container.querySelector('svg')).toBeNull();
+  });
+});

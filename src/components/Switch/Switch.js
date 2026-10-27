@@ -4,6 +4,8 @@ import { Switch as MuiSwitch, FormControlLabel } from '@mui/material';
 import { Label, LabelSmall, LabelLarge } from '../Typography';
 import { labelGap } from '../_labelGap';
 import { SHADOW_LEVEL_2 } from '../_shadows';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
 
 /**
  * Switch Component
@@ -24,10 +26,11 @@ import { SHADOW_LEVEL_2 } from '../_shadows';
  *   The ROOT keeps a 24×24 box for the WCAG 2.2 AA touch target even where the
  *   track is smaller.
  *
- * ICON: pass a node to `icon` to put a glyph inside the dot (8px on
- *   small/medium, 16px on large), painted in the track's own fill. Use
- *   `iconOn` / `iconOff` for a different glyph either side of the toggle —
- *   each falls back to `icon`.
+ * ICON: on by default, as Figma's Icon boolean — a check when ON, a close (×)
+ *   when OFF, inside the dot and painted in the track's own fill. icon={false}
+ *   hides both. Pass a node to `icon` for the same glyph both ways, or
+ *   `iconOn` / `iconOff` for one side — each falls back to `icon`, then to the
+ *   default.
  *
  * STATES: checked | unchecked | disabled | hover | active | focus-visible
  *   Hover and press lift the TRACK. Focus draws a 1px --Focus-Visible ring
@@ -86,7 +89,8 @@ export function themedStyles() {
     trackOnBorder:  'var(--Icons-Primary)',
     dotOff:         'var(--Quiet)',
     dotOn:          'var(--Icons-On-Primary)',
-    iconOff:        'var(--Background)',
+    // Off: the glyph sits on the Quiet dot in On-Icon (Figma's Icons::On-Icon).
+    iconOff:        'var(--Icons-On-Primary)',
     // An icon inside the dot sits ON On-Icon, so it returns to Icon — the same
     // alternation the collection is built around.
     iconOn:         'var(--Icons-Primary)',
@@ -113,7 +117,7 @@ export function outlineStyles(color) {
     trackOnBorder:  'var(--Icons-' + C + ')',
     dotOff:         'var(--Quiet)',
     dotOn:          'var(--Icons-On-' + C + ')',
-    iconOff:        'var(--Background)',
+    iconOff:        'var(--Icons-On-' + C + ')',
     iconOn:         'var(--Icons-' + C + ')',
   };
 }
@@ -363,8 +367,10 @@ export function Switch({
   // MUI renders the thumb from its icon / checkedIcon props. Supplying our own
   // span keeps the .MuiSwitch-thumb class — and therefore every style above —
   // while giving the glyph somewhere to live.
-  const glyphOff = iconOff !== undefined ? iconOff : icon;
-  const glyphOn  = iconOn  !== undefined ? iconOn  : icon;
+  const showIcons = icon !== false && icon !== null;
+  const pickGlyph = (side, fallback) => (side !== undefined ? side : (icon !== undefined && icon !== true ? icon : fallback));
+  const glyphOff = showIcons ? pickGlyph(iconOff, <CloseIcon />) : undefined;
+  const glyphOn  = showIcons ? pickGlyph(iconOn, <CheckIcon />) : undefined;
   const hasGlyph = glyphOff !== undefined || glyphOn !== undefined;
   const thumbNode = (glyph) => <span className="MuiSwitch-thumb">{glyph}</span>;
 
