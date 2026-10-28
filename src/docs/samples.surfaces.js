@@ -17,6 +17,7 @@ import { Card } from '../components/Card';
 import { Accordion } from '../components/Accordion';
 import { Paper } from '../components/Paper';
 import { Ratio } from '../components/Ratio';
+import { Section } from '../components/Section';
 import { Table } from '../components/Table';
 import { Modal } from '../components/Modal';
 import { Dialog } from '../components/Dialog';
@@ -408,6 +409,27 @@ export const SURFACE_SAMPLES = {
           </Cell>
         ))}
       </HStack>
+    ),
+  },
+
+  /* Two sections meeting, so the edge has something to reach into. */
+  Section: {
+    edgeTop: () => (
+      <AxisStack values={['wave', 'scallop', 'zigzag', 'steps', 'curve', 'slant']} defaultValue="wave"
+        render={(v) => (
+          <div style={{ width: '100%' }}>
+            <Section surface="Surface" padding="24px 16px 48px"><Caption color="quiet">The section above</Caption></Section>
+            <Section theme="Primary" surface="Surface" edgeTop={v} edgeHeight={24} padding="12px 16px 20px"><Caption>{v}</Caption></Section>
+          </div>
+        )} />
+    ),
+    edgeAnimate: () => (
+      <Toggle render={(on) => (
+        <div style={{ width: 280 }}>
+          <Section surface="Surface" padding="24px 16px 40px" />
+          <Section theme="Primary" surface="Surface" edgeTop="wave" edgeHeight={24} edgeAnimate={on} padding="12px 16px" />
+        </div>
+      )} offLabel="still" onLabel="drifting" />
     ),
   },
 

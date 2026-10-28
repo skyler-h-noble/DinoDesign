@@ -735,6 +735,23 @@ export const SECTION_DOC = {
     type: 'string',
     default: 'undefined',
     note: 'A CSS padding value. Not on the sizing scale by accident: a page region\u2019s inset is a layout decision, not a token.'
+  }, {
+    name: 'edgeTop / edgeBottom',
+    sample: 'edgeTop',
+    type: 'string',
+    values: ['wave', 'scallop', 'zigzag', 'steps', 'curve', 'slant'],
+    default: 'undefined',
+    note: 'The shape where this section meets the one above (or below). The section reaches into its neighbour by `edgeHeight` in its own color, so the edge follows any theme and surface. Wave, scallop, zigzag and steps repeat across the width; curve and slant stretch.'
+  }, {
+    name: 'edgeHeight',
+    type: 'number',
+    default: '48',
+    note: 'How far the edge reaches, in px. Leave that much room in the neighbour\u2019s content.'
+  }, {
+    name: 'edgeAnimate',
+    type: 'boolean',
+    default: 'false',
+    note: 'The repeating edges drift slowly sideways. Never runs for someone whose device asks to reduce motion.'
   }],
   composition: [
     'This is what the rule "never write `background: var(--Surface)`" points at. Setting theme and surface exposes the whole matched set \u2014 background, text, quiet, border, hover, link \u2014 all tuned for that level, so nothing inside has to be told what it is sitting on.',
@@ -745,7 +762,7 @@ export const SECTION_DOC = {
     'Changing the surface changes contrast for everything inside, and the paired tokens are what keep it legible. Painting a background by hand is what breaks that.',
   ],
   gotchas: [
-    'No Figma counterpart, and there should not be one: a section in Figma is a frame with a theme and surface mode set on it. This component is that, expressed in CSS.',
+    'A section in Figma is a frame with a theme and surface mode set on it. Its edge is the Section Edge component (Shapes page): place it at the top of the section frame, overhanging the one above, and it takes the section\u2019s modes.',
   ]
 };
 

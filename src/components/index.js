@@ -191,7 +191,7 @@ export {
 export { Box, BoxShowcase } from './Box';
 export { Container } from './Container';
 export { Grid } from './Grid';
-export { Section, SectionShowcase } from './Section';
+export { Section, SectionShowcase, EDGE_NAMES, REPEATING_EDGES, edgePath } from './Section';
 export { Ratio, RatioShowcase, RATIO_NAMES } from './Ratio';
 
 // ========== NAVIGATION ==========
