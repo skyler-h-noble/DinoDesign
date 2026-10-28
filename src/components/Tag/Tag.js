@@ -61,11 +61,25 @@ function warnAllCapsOnce() {
   console.warn('[Tag] allCaps={false} is retired — a tag is always uppercase, as Figma\'s Tag. Rendering in caps.');
 }
 
+/* A tag's corner — the brand's one tag shape. --Tag-Radius is set once per
+   brand (Figma: Component-Size::Tag/Tag-Radius, bound to every Tag variant);
+   `shape` overrides it for one tag. Only shapes a hug-width label can keep:
+   corners, not cut or pointed ends, which Figma cannot hold while it grows. */
+export const TAG_SHAPES = ['square', 'rounded', 'squircle', 'pill'];
+const TAG_RADIUS = {
+  square: { borderRadius: '2px' },
+  rounded: { borderRadius: '6px' },
+  squircle: { borderRadius: '10px', '@supports (corner-shape: squircle)': { cornerShape: 'squircle' } },
+  pill: { borderRadius: '999px' },
+};
+
 export function Tag({
   color = 'default',
   width = 'hug',
   // Retired: Figma's Tag style is Label-Medium-All-Caps, always.
   allCaps,
+  /* square | rounded | squircle | pill — unset follows --Tag-Radius. */
+  shape,
   children,
   className = '',
   sx = {},
@@ -85,9 +99,10 @@ export function Tag({
         display:         isFill ? 'flex' : 'inline-flex',
         alignItems:      'center',
         justifyContent:  isFill ? 'center' : 'flex-start',
-        // Figma's Tag: Sizing-Quarter x Sizing-2 around the label, 2px corners.
+        // Figma's Tag: Sizing-Quarter x Sizing-2 around the label; the corner is
+        // the brand's --Tag-Radius (2px when unset), or `shape`.
         padding:         'var(--Sizing-Quarter, 2px) var(--Sizing-2, 16px)',
-        borderRadius:    '2px',
+        ...(TAG_RADIUS[shape] || { borderRadius: 'var(--Tag-Radius, 2px)' }),
         backgroundColor: bg,
         color:           text,
         width:           isFill ? '100%' : 'auto',

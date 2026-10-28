@@ -6,6 +6,7 @@ export {
   Tag,
   TAG_COLORS,
   TAG_COLOR_TOKEN_MAP,
+  TAG_SHAPES,
   PrimaryTag,
   SecondaryTag,
   TertiaryTag,

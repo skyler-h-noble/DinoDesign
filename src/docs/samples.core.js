@@ -455,6 +455,10 @@ export const CORE_SAMPLES = {
   },
 
   Tag: {
+    shape: () => (
+      <Axis values={['square', 'rounded', 'squircle', 'pill']} defaultValue="square"
+            render={(v) => <Tag color="primary" shape={v}>Beta</Tag>} />
+    ),
     color: () => (
       <Axis values={['default', ...PALETTES]} defaultValue="primary"
             render={(v) => <Tag color={v}>{v}</Tag>} />

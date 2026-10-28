@@ -474,6 +474,12 @@ export const TAG_DOC = {
     type: 'string',
     values: ['hug', 'fill'],
     default: 'hug'
+  }, {
+    name: 'shape',
+    type: 'string',
+    values: ['square', 'rounded', 'squircle', 'pill'],
+    default: 'square',
+    note: 'The corner: 2 / 6 / 10 (smoothed) / 999px. Set it ONCE per brand with --Tag-Radius (Figma: Component-Size::Tag/Tag-Radius, bound to every Tag) \u2014 a row of tags in mixed shapes reads as broken. `shape` overrides it for one tag. Only corner shapes: a cut or pointed end cannot hold its size while a Figma tag grows with its label.'
   }],
   states: [{
     state: 'None',

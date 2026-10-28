@@ -174,3 +174,13 @@ describe('Tag — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+describe('Tag shape', () => {
+  test('unset follows the brand --Tag-Radius; shape overrides it', () => {
+    const css = () => [...document.styleSheets].flatMap((sh) => [...sh.cssRules].map((r) => r.cssText)).join('');
+    render(<Tag>Beta</Tag>);
+    expect(css()).toContain('var(--Tag-Radius, 2px)');
+    const { container } = render(<Tag shape="pill">Beta</Tag>);
+    expect(container.firstChild).toHaveStyle({ borderRadius: '999px' });
+  });
+});
