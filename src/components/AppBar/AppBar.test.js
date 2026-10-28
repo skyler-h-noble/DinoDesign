@@ -188,3 +188,15 @@ describe('AppBar — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+describe('AppBar size', () => {
+  const cssFor = (el) => [...document.styleSheets].flatMap((sh) => { try { return [...sh.cssRules]; } catch (e) { return []; } })
+    .filter((r) => r.selectorText && [...el.classList].some((c) => r.selectorText.includes('.' + c))).map((r) => r.cssText).join('\n');
+  test.each([['small', '--Sm-App-Bar-Height'], ['medium', '--App-Bar-Height'], ['large', '--Lg-App-Bar-Height']])(
+    '%s takes %s and sizes its own buttons to match', (size, token) => {
+      const { container } = render(<AppBar layout="left-brand" brand="Brand" size={size} />);
+      expect(cssFor(container.querySelector('.appbar'))).toContain(token);
+      const menu = screen.getByRole('button', { name: 'Open navigation menu' });
+      expect(menu.className).toMatch(new RegExp('MuiButton-size' + size.charAt(0).toUpperCase() + size.slice(1)));
+    });
+});

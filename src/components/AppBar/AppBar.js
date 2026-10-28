@@ -52,10 +52,24 @@ const THEME_MAP = {
   'black':          { theme: 'Neutral', surface: 'Surface-Dimmest' },
 };
 
+/* --- Size ---
+   small | medium | large — the Component-Size mode. The bar is that size's
+   App-Bar-Height (Button-Height + 2 × Sizing-2: 56 / 64 / 88 at the default
+   buttons), so it always holds that size's buttons and tabs; the bar's own
+   icon buttons take the same size. */
+const BAR_HEIGHT = {
+  small: 'var(--Sm-App-Bar-Height, 56px)',
+  medium: 'var(--App-Bar-Height, 64px)',
+  large: 'var(--Lg-App-Bar-Height, 88px)',
+};
+const AppBarSizeContext = React.createContext('medium');
+const barHeight = (size) => BAR_HEIGHT[size] || BAR_HEIGHT.medium;
+
 /* --- Icon Button (uses Button component) --- */
 function AppBarIconButton({ children, onClick, ariaLabel }) {
+  const size = React.useContext(AppBarSizeContext);
   return (
-    <Button iconOnly variant="ghost" size="medium" onClick={onClick} aria-label={ariaLabel}>
+    <Button iconOnly variant="ghost" size={size} onClick={onClick} aria-label={ariaLabel}>
       {children}
     </Button>
   );
@@ -100,6 +114,7 @@ function DesktopAppBar({
   children,
   className = '', sx = {},
 }) {
+  const barSize = React.useContext(AppBarSizeContext);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const barTheme = THEME_MAP[barColor] || THEME_MAP.default;
   const dataTheme = barTheme.theme;
@@ -153,7 +168,7 @@ function DesktopAppBar({
           // The Margin padding sits INSIDE the bar's width, as in Figma: a bar
           // given 1920px is 1920px, not 1920 plus 128 of padding.
           boxSizing: 'border-box',
-          height: 'var(--App-Bar-Height, 64px)',
+          height: barHeight(barSize),
           paddingLeft: layout === 'title' ? 'var(--Sizing-2, 16px)' : 'var(--Margin, 64px)',
           paddingRight: 'var(--Margin, 64px)',
           backgroundColor: 'var(--Background)', color: 'var(--Text)',
@@ -215,7 +230,7 @@ function DesktopAppBar({
       data-surface={dataSurface}
       className={'appbar appbar-desktop appbar-' + barColor + (className ? ' ' + className : '')}
       sx={{
-        display: 'flex', alignItems: 'center', height: 64,
+        display: 'flex', alignItems: 'center', height: barHeight(barSize),
         px: 2, gap: 2,
         backgroundColor: 'var(--Background)', color: 'var(--Text)',
         boxShadow: SHADOW_LEVEL_2,  // App bars
@@ -295,7 +310,7 @@ function DesktopAppBar({
               {searchPosition === 'left' && searchField}
 
               {effectiveMenu === 'expanded' && (
-                <Tabs defaultValue={0} variant="standard" color="default" sx={{ ml: 2, minHeight: 0 }}>
+                <Tabs defaultValue={0} variant="standard" color="default" size={barSize} sx={{ ml: 2, minHeight: 0 }}>
                   <TabList aria-label="Main navigation">
                     {navLinks.map((link) => (
                       <Tab key={link}>{link}</Tab>
@@ -376,6 +391,7 @@ function MobileAppBar({
   navLinks = ['Home', 'Products', 'About'],
   className = '', sx = {},
 }) {
+  const barSize = React.useContext(AppBarSizeContext);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const barTheme = THEME_MAP[barColor] || THEME_MAP.default;
   const dataTheme = barTheme.theme;
@@ -417,7 +433,7 @@ function MobileAppBar({
       <>
       <Box component="header" role="banner" className={'appbar appbar-mobile appbar-mobile-search appbar-' + barColor + ' ' + className}
         {...commonProps}
-        sx={{ ...containerSx, display: 'flex', alignItems: 'center', height: 64, px: 1.5, gap: 1.5 }}>
+        sx={{ ...containerSx, display: 'flex', alignItems: 'center', height: barHeight(barSize), px: 1.5, gap: 1.5 }}>
         <AppBarIconButton ariaLabel="Open navigation menu" onClick={() => setDrawerOpen(true)}>
           <MenuIcon sx={{ fontSize: 'inherit' }} />
         </AppBarIconButton>
@@ -439,7 +455,7 @@ function MobileAppBar({
     return (
       <Box component="header" role="banner" className={'appbar appbar-mobile appbar-mobile-small appbar-' + barColor + ' ' + className}
         {...commonProps}
-        sx={{ ...containerSx, display: 'flex', alignItems: 'center', height: 64, px: 1.5, gap: 1 }}>
+        sx={{ ...containerSx, display: 'flex', alignItems: 'center', height: barHeight(barSize), px: 1.5, gap: 1 }}>
         <AppBarIconButton ariaLabel="Back">
           <ArrowBackIcon sx={{ fontSize: 'inherit' }} />
         </AppBarIconButton>
@@ -504,9 +520,13 @@ function MobileAppBar({
   );
 }
 
-export function AppBar({ mode = 'desktop', ...props }) {
-  if (mode === 'mobile') return <MobileAppBar {...props} />;
-  return <DesktopAppBar {...props} />;
+export function AppBar({ mode = 'desktop', size = 'medium', ...props }) {
+  const s = BAR_HEIGHT[size] ? size : 'medium';
+  return (
+    <AppBarSizeContext.Provider value={s}>
+      {mode === 'mobile' ? <MobileAppBar {...props} /> : <DesktopAppBar {...props} />}
+    </AppBarSizeContext.Provider>
+  );
 }
 
 export { DesktopAppBar, MobileAppBar };

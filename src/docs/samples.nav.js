@@ -454,6 +454,16 @@ export const NAV_SAMPLES = {
   },
 
   AppBar: {
+    size: () => (
+      <VStack gap="var(--Sizing-3)">
+        {['small', 'medium', 'large'].map((s) => (
+          <VStack key={s} gap="var(--Sizing-Half)">
+            <Caption color={s === 'medium' ? 'standard' : 'quiet'}>{s}</Caption>
+            <Frame w="100%"><AppBar layout="left-brand" brand="Brand" size={s} /></Frame>
+          </VStack>
+        ))}
+      </VStack>
+    ),
     /* Not a breakpoint — a prop. The bar a product wants is a decision about
        the product, and a dense tool may want the mobile bar at every width. */
     mode: () => (

@@ -31,6 +31,12 @@ export const APPBAR_DOC = {
     values: ['desktop', 'mobile'],
     default: 'desktop'
   }, {
+    name: 'size',
+    type: 'string',
+    values: ['small', 'medium', 'large'],
+    default: 'medium',
+    note: 'The Component-Size mode. The bar is that size\u2019s App-Bar-Height \u2014 its Button-Height + 16 above and below (56 / 64 / 88 at the default buttons) \u2014 so it holds that size\u2019s buttons and tabs; its own icon buttons take the same size.'
+  }, {
     name: 'barColor',
     type: 'string',
     default: 'default'

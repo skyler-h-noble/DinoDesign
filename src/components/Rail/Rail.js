@@ -108,9 +108,14 @@ const ITEM_RADIUS = '8px';
 const CIRCLE = 'var(--Button-Height, 32px)';
 /** The expand/collapse toggle's row. This file's own — the design has no
  *  expandable rail, so there is nothing to match it to. */
-/* The toggle row and the brand row are App-Bar-Height (64 at medium) — the
+/* Per size, so a small or large rail lines up with a small or large app bar.
+   The toggle row and the brand row are App-Bar-Height (64 at medium) — the
    rail's top lines up with the app bar beside it. */
-const TOP_ROW = 'var(--App-Bar-Height, 64px)';
+const TOP_ROW = {
+  small: 'var(--Sm-App-Bar-Height, 56px)',
+  medium: 'var(--App-Bar-Height, 64px)',
+  large: 'var(--Lg-App-Bar-Height, 88px)',
+};
 
 export function Rail({
   items = [],
@@ -268,7 +273,7 @@ export function Rail({
       {expandable && (
         /* Figma's Expand-Collapse: an App-Bar-Height row; the button centred
            when closed, flush to the trailing edge when open. */
-        <Box className="rail-toggle" sx={{ display: 'flex', justifyContent: isExpanded ? 'flex-end' : 'center', px: 0, height: TOP_ROW, flexShrink: 0, alignItems: 'center' }}>
+        <Box className="rail-toggle" sx={{ display: 'flex', justifyContent: isExpanded ? 'flex-end' : 'center', px: 0, height: TOP_ROW[size] || TOP_ROW.medium, flexShrink: 0, alignItems: 'center' }}>
           <Button iconOnly variant="ghost" size="medium"
             onClick={toggleExpand} aria-label={isExpanded ? 'Collapse menu' : 'Expand menu'}>
             <Icon size="small" sx={{ color: 'inherit' }}>
@@ -282,7 +287,7 @@ export function Rail({
         /* Figma's Top: App-Bar-Height in all, the divider included, inset by
            the slot's Sizing-1 so it spans the items, not the rail. */
         <Box className="rail-brand" sx={{ mx: RAIL_PAD_X, flexShrink: 0, boxSizing: 'border-box', alignSelf: 'stretch' }}>
-          <Box sx={{ height: 'calc(' + TOP_ROW + ' - 1px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{brand}</Box>
+          <Box sx={{ height: 'calc(' + (TOP_ROW[size] || TOP_ROW.medium) + ' - 1px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{brand}</Box>
           <Box aria-hidden="true" sx={{ height: '1px', backgroundColor: 'var(--Border-Variant)' }} />
         </Box>
       )}
