@@ -44,6 +44,13 @@ describe('Section edges', () => {
     expect(Math.abs(nums[3] - nums[nums.length - 3])).toBeLessThan(0.2);
   });
 
+  test('the wide gentle edges default taller', () => {
+    const { container } = render(<Section edgeTop="curve">x</Section>);
+    expect(container.querySelector('.section-edge-top')).toHaveStyle({ height: '96px' });
+    const { container: w } = render(<Section edgeTop="wave">x</Section>);
+    expect(w.querySelector('.section-edge-top')).toHaveStyle({ height: '48px' });
+  });
+
   test('no edge leaves the section exactly as it was', () => {
     const { container } = render(<Section>x</Section>);
     expect(container.firstChild.style.position).toBe('');

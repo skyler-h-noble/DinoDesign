@@ -13,11 +13,13 @@
  *   stretched  curve, slant — one shape across the whole width. These cannot
  *              slide, so when animated they swell and settle instead.
  *
- * `random-wave` is three waves of different lengths added together: it
- * reads as irregular, but it is FIXED for a given seed — the same in code and
- * in Figma, and the same on every load. A different seed per section keeps
- * stacked sections from matching. Its tile is long (16 x the height) and the
- * three lengths divide it exactly, so it still repeats without a seam.
+ * `random-wave` is three ROLLING swells added together — one long, one
+ * medium, one small ripple (1, 2 and 3 cycles per tile), with the long one
+ * carrying most of the height so it reads as swell rather than chop. It is
+ * irregular but FIXED for a given seed — the same in code and in Figma, and
+ * the same on every load. A different seed per section keeps stacked sections
+ * from matching. Its tile is long (12 x its 96px height) and the three
+ * lengths divide it exactly, so it repeats without a seam.
  *
  * The Figma Section Edge component (Shapes page) is built from these same
  * formulas.
@@ -41,7 +43,7 @@ function randomWave(seed = 0) {
   const p1 = ph(1); const p2 = ph(2); const p3 = ph(3);
   return toPath(sampled((x) => {
     const t = (x / 100) * 2 * Math.PI;
-    return 50 - (22 * Math.sin(2 * t + p1) + 14 * Math.sin(3 * t + p2) + 8 * Math.sin(5 * t + p3));
+    return 50 - (30 * Math.sin(t + p1) + 11 * Math.sin(2 * t + p2) + 4 * Math.sin(3 * t + p3));
   }, 160));
 }
 
@@ -51,12 +53,20 @@ const DEFS = {
   scallop: [toPath(sampled((x) => 100 - 100 * Math.sqrt(Math.max(0, 1 - Math.pow((x - 50) / 50, 2))))), 2],
   zigzag: [toPath([[0, 100], [50, 0], [100, 100]]), 2],
   steps: [toPath([[0, 100], [0, 20], [50, 20], [50, 80], [100, 80], [100, 100]]), 2],
-  'random-wave': [randomWave(0), 16],
+  'random-wave': [randomWave(0), 12],
   curve: [toPath(sampled((x) => 100 - 100 * Math.sin((x / 100) * Math.PI))), 0],
   slant: [toPath([[0, 100], [100, 0], [100, 100]]), 0],
 };
 
 export const EDGE_NAMES = Object.keys(DEFS);
+
+/* How tall each edge is unless edgeHeight says otherwise. The gentle, wide
+   edges — random-wave, curve, slant — need the height to read at all; at
+   48px a swell or a slope across a 1440px section is a hairline. */
+const DEFAULT_HEIGHT = { 'random-wave': 96, curve: 96, slant: 96 };
+export function edgeDefaultHeight(name) {
+  return DEFAULT_HEIGHT[name] || 48;
+}
 /** Edges built from a repeating tile — the ones that can drift. */
 export const REPEATING_EDGES = EDGE_NAMES.filter((n) => DEFS[n][1] > 0);
 

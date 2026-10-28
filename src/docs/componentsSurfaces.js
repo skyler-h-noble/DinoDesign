@@ -745,7 +745,7 @@ export const SECTION_DOC = {
   }, {
     name: 'edgeHeight',
     type: 'number',
-    default: '48',
+    default: '48 · 96 for random-wave, curve, slant',
     note: 'How far the edge reaches, in px. Leave that much room in the neighbour\u2019s content.'
   }, {
     name: 'edgeAnimate',

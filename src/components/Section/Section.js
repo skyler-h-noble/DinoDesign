@@ -2,7 +2,7 @@
 import React from 'react';
 import { keyframes } from '@mui/system';
 import { Box } from '@mui/material';
-import { EDGE_NAMES, edgeMaskURL, edgeTile } from './edges';
+import { EDGE_NAMES, edgeMaskURL, edgeTile, edgeDefaultHeight } from './edges';
 
 /**
  * Section Component
@@ -38,7 +38,8 @@ import { EDGE_NAMES, edgeMaskURL, edgeTile } from './edges';
  *              own color, so the edge needs no colors of its own and follows
  *              any theme and surface. The neighbour's content should leave
  *              that much room.
- *   edgeHeight — px, default 48.
+ *   edgeHeight — px. Default 48, and 96 for the wide gentle edges
+ *              (random-wave, curve, slant), which need the height to read.
  *   edgeAnimate — the repeating edges (wave, random-wave, scallop, zigzag,
  *              steps) drift slowly sideways; curve and slant, which cannot
  *              slide, swell and settle. Off by default; never runs for someone
@@ -111,7 +112,7 @@ export function Section({
   padding,
   edgeTop,
   edgeBottom,
-  edgeHeight = 48,
+  edgeHeight,
   edgeAnimate = false,
   edgeSeed = 0,
   className,
@@ -134,9 +135,9 @@ export function Section({
       }}
       {...rest}
     >
-      {edgeTop && <SectionEdge name={edgeTop} side="top" height={edgeHeight} animate={edgeAnimate} seed={edgeSeed} />}
+      {edgeTop && <SectionEdge name={edgeTop} side="top" height={edgeHeight ?? edgeDefaultHeight(edgeTop)} animate={edgeAnimate} seed={edgeSeed} />}
       {children}
-      {edgeBottom && <SectionEdge name={edgeBottom} side="bottom" height={edgeHeight} animate={edgeAnimate} seed={edgeSeed} />}
+      {edgeBottom && <SectionEdge name={edgeBottom} side="bottom" height={edgeHeight ?? edgeDefaultHeight(edgeBottom)} animate={edgeAnimate} seed={edgeSeed} />}
     </Tag>
   );
 }
