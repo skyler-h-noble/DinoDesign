@@ -420,7 +420,10 @@ function BottomNavFab({ icon, label, onClick, actions, raised = false }) {
       }}
     >
       {isDial ? (
-        <SpeedDial size="medium" direction="up" icon={icon} ariaLabel={label || 'Actions'}
+        /* Tap only. The bar is phone chrome, where nothing hovers — and with
+           hover on, a desktop click landed just after the hover had opened the
+           dial, toggled it shut, and the dial looked broken. */
+        <SpeedDial size="medium" direction="up" icon={icon} ariaLabel={label || 'Actions'} openOnHover={false}
           actions={actions.map((a, i) => ({ key: a.key || i, icon: a.icon, name: a.label, onClick: () => a.onClick?.() }))} />
       ) : (
         <Fab aria-label={label || 'Action'} onClick={onClick} icon={icon || <AddIcon />} />
