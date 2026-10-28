@@ -70,3 +70,12 @@ describe('IconBadge shape', () => {
     warn.mockRestore();
   });
 });
+
+describe('Shape content stays inside the shape', () => {
+  test('text is padded into the safe area; an image is not', () => {
+    const { container: t } = render(<Shape shape="soft-burst" color="warning">NEW</Shape>);
+    expect(t.firstChild).toHaveStyle({ padding: '25.5%' });
+    const { container: i } = render(<Shape shape="soft-burst"><img src="/a.jpg" alt="" /></Shape>);
+    expect(i.firstChild.style.padding || getComputedStyle(i.firstChild).padding).not.toBe('25.5%');
+  });
+});

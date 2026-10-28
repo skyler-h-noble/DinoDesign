@@ -473,7 +473,7 @@ export const CORE_SAMPLES = {
        known contrast against it. */
     color: () => (
       <Axis values={['primary', 'secondary', 'tertiary', 'neutral', 'warning']} defaultValue="primary"
-            render={(v) => <Shape shape="burst" color={v} width={64}><Caption component="span" style={{ fontWeight: 700 }}>NEW</Caption></Shape>} />
+            render={(v) => <Shape shape="soft-burst" color={v} width={64}><Caption component="span" style={{ fontWeight: 700 }}>NEW</Caption></Shape>} />
     ),
     variant: () => (
       <Axis values={['solid', 'light', 'dark']} defaultValue="solid"

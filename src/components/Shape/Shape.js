@@ -1,7 +1,7 @@
 // src/components/Shape/Shape.js
 import React from 'react';
 import { Box } from '@mui/material';
-import { shapeStyle, SHAPE_NAMES } from './shapes';
+import { shapeStyle, shapeSafeArea, SHAPE_NAMES } from './shapes';
 
 /**
  * Shape — a box cut to one of the system's shapes.
@@ -9,7 +9,7 @@ import { shapeStyle, SHAPE_NAMES } from './shapes';
  * WHAT IT IS FOR
  *   image frames   <Shape shape="arch"><img src="…" alt="…" /></Shape>
  *   accents        <Shape shape="cookie-9" color="tertiary" decorative />
- *   a sticker      <Shape shape="burst" color="warning" width={64}>NEW</Shape>
+ *   a sticker      <Shape shape="soft-burst" color="warning" width={64}>NEW</Shape>
  *
  * WHAT IT IS NOT FOR
  *   Buttons, inputs, chips, avatars and cards keep the shape their radius
@@ -23,6 +23,11 @@ import { shapeStyle, SHAPE_NAMES } from './shapes';
  *
  * SIZE. `width` (and `height`, or the square default) in px or any CSS
  * length. Round shapes are drawn for a square box; on a wide one they stretch.
+ *
+ * CONTENT. An image, video or picture fills the shape. Anything else —
+ * a sticker's label — is kept inside the shape's safe area (shapeSafeArea):
+ * the largest centred square that fits in it. Pick a shape with room for
+ * the words: a soft-burst holds "NEW" at 64px, a sharp burst barely does.
  *
  * COLOR. With `color`, the shape is a themed surface — data-theme +
  * data-surface, painted --Background, its text --Text — so a sticker's label
@@ -61,6 +66,8 @@ export function Shape({
     console.warn('[Shape] "' + shape + '" is not a shape. Use one of: ' + SHAPE_NAMES.join(', ') + '.');
   }
   const themed = Boolean(color);
+  const first = React.Children.toArray(children)[0];
+  const framesMedia = React.isValidElement(first) && ['img', 'video', 'picture'].includes(first.type);
   const theme = themed ? (THEME[color] || THEME.primary) : undefined;
   const css = (n) => (typeof n === 'number' ? n + 'px' : n);
 
@@ -82,6 +89,15 @@ export function Shape({
         ...(height !== undefined ? { height: css(height) } : { aspectRatio: '1 / 1' }),
         overflow: 'hidden',
         ...(themed && { backgroundColor: 'var(--Background)', color: 'var(--Text)' }),
+        /* Content that is not an image stays inside the shape's safe area —
+           the largest centred square that fits in it — so a sticker's label
+           cannot run out past a burst's spikes. Percent padding is measured
+           against the width, which on a square box is the side. */
+        ...(!framesMedia && {
+          padding: ((1 - shapeSafeArea(shape)) / 2 * 100).toFixed(1) + '%',
+          textAlign: 'center',
+          lineHeight: 1.1,
+        }),
         /* An image, video or picture fills the shape edge to edge. */
         '& > img, & > video, & > picture, & > picture > img': {
           width: '100%', height: '100%', objectFit: 'cover', display: 'block',

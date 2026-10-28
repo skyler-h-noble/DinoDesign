@@ -211,9 +211,17 @@ const DEFS = [
 
 const PATHS = {};
 const GROUPS = {};
+const SAFE = {};
 DEFS.forEach(([name, group, make]) => {
-  PATHS[name] = toPath(make());
+  const pts = make();
+  PATHS[name] = toPath(pts);
   GROUPS[name] = group;
+  /* The safe area: the largest centred square inside the shape, as a fraction
+     of the box. The nearest point to the centre bounds a circle the shape
+     contains; its inscribed square is that radius times root 2. A burst's
+     spikes are mostly empty — text sized to the box runs out past them. */
+  const minR = Math.min(...pts.map(([x, y]) => Math.hypot(x - C, y - C)));
+  SAFE[name] = Math.round(Math.min(1, (minR * Math.SQRT2) / 100) * 100) / 100;
 });
 
 /** Every drawn shape, in display order. `rounded` and `squircle` are added
@@ -233,6 +241,13 @@ export const ICON_SHAPES = [
   'cookie-4', 'cookie-6', 'cookie-7', 'cookie-9', 'cookie-12', 'sunny', 'flower', 'puffy',
   'arch', 'cut-corners', 'octagon',
 ];
+
+/** How much of the box content may use: the side of the largest centred
+ *  square inside the shape, 0–1. Radius shapes are a whole box. */
+export function shapeSafeArea(name) {
+  if (name === 'rounded' || name === 'squircle') return 0.86;
+  return SAFE[name] ?? 1;
+}
 
 /** The path (0–100 box), or null for a radius shape or an unknown name. */
 export function shapePath(name) {

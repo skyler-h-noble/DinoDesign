@@ -334,7 +334,7 @@ export const LEAD_EXAMPLES = {
   Shape: () => (
     <div style={{ position: 'relative', display: 'inline-block' }}>
       <Shape shape="arch" width={120} height={150}><img src={SAMPLE_PHOTO} alt="Hills under a pale sky" /></Shape>
-      <Shape shape="burst" color="warning" width={56} style={{ position: 'absolute', right: -20, top: -12 }}>
+      <Shape shape="soft-burst" color="warning" width={64} style={{ position: 'absolute', right: -24, top: -16 }}>
         <Caption component="span" style={{ fontWeight: 700 }}>NEW</Caption>
       </Shape>
     </div>
