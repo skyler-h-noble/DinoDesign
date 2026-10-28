@@ -44,6 +44,12 @@ export default [
         format: 'cjs',
         sourcemap: true,
         exports: 'named',
+        /* 'auto': an external compiled from ES modules (every @mui/icons-material
+           icon) keeps its component under .default. The default interop used
+           the module object itself as the component, so under require() —
+           server rendering, Jest, older Next.js — SearchField and every other
+           icon import threw "Element type is invalid … got: object". */
+        interop: 'auto',
       },
       {
         file: 'dist/index.esm.js',
@@ -64,6 +70,12 @@ export default [
         format: 'cjs',
         sourcemap: true,
         exports: 'named',
+        /* 'auto': an external compiled from ES modules (every @mui/icons-material
+           icon) keeps its component under .default. The default interop used
+           the module object itself as the component, so under require() —
+           server rendering, Jest, older Next.js — SearchField and every other
+           icon import threw "Element type is invalid … got: object". */
+        interop: 'auto',
       },
       {
         file: 'dist/OmniDesignProvider.esm.js',
