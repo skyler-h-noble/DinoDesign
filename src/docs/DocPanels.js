@@ -249,7 +249,10 @@ export function DocSummary({ component, theme = null, surface = 'Surface' }) {
                    for something the reader had not seen yet. */
                 const how = howTo && howTo.after === key ? howTo : null;
                 const sub = [pr.values && pr.values.length ? pr.values.join(' | ') : null,
-                             pr.default ? `default: ${pr.default}` : null,
+                             /* "undefined" is code for "not set", which is what
+                                readers need told. Shown as plain words; the
+                                note beside it says what happens when it is. */
+                             pr.default ? `default: ${pr.default === 'undefined' ? 'not set' : pr.default}` : null,
                              pr.note].filter(Boolean).join('  ·  ');
                 return (
                   <Box key={i} sx={{ py: 1 }}>

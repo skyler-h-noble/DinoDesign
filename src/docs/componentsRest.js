@@ -696,7 +696,7 @@ export const SHAPE_DOC = {
     type: 'string',
     values: ['primary', 'secondary', 'tertiary', 'neutral', 'warning'],
     default: 'undefined',
-    note: 'Makes the shape a themed surface (data-theme + data-surface), so text inside has a known contrast. Unset paints nothing \u2014 an image frame is the image.'
+    note: 'Not set: the shape paints no fill of its own, so an image frame shows just the image. Set: the shape becomes a colored surface in that palette (data-theme + data-surface), so text inside has a known contrast \u2014 a sticker.'
   }, {
     name: 'variant',
     type: 'string',
