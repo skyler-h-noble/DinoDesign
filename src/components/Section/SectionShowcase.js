@@ -6,10 +6,16 @@ import { H3, Body, BodySmall } from '../Typography';
 import { Button } from '../Button/Button';
 import { Switch } from '../Switch/Switch';
 import { DocSummary } from '../../docs/DocPanels';
-import { EDGE_NAMES } from './edges';
+import { ButtonGroup } from '../ButtonGroup/ButtonGroup';
+import { EDGE_NAMES, EDGE_SIZES, SIZED_EDGES, edgeDefaultHeight } from './edges';
 
 export function SectionShowcase() {
   const [animate, setAnimate] = useState(false);
+  const [size, setSize] = useState('large');
+  const [seed, setSeed] = useState(0);
+  /* Each section's bottom padding clears the NEXT section's edge, which
+     reaches up into it — otherwise a 96px curve covers the label above. */
+  const heightOf = (name) => (SIZED_EDGES.includes(name) ? EDGE_SIZES[size] : edgeDefaultHeight(name));
   return (
     <div>
       <H3 style={{ marginBottom: 12 }}>Section</H3>
@@ -44,18 +50,34 @@ export function SectionShowcase() {
       <H3 style={{ marginTop: 32, marginBottom: 12 }}>Edges</H3>
       <BodySmall color="quiet" style={{ marginBottom: 16, display: 'block' }}>
         <code>edgeTop</code> / <code>edgeBottom</code>: the section reaches into its neighbour in its
-        own color. Wave, scallop, zigzag and steps repeat; curve and slant stretch.
+        own color. Wave, scallop, zigzag, steps and random-wave repeat; curve and slant stretch.
+        Scallop, zigzag and steps take <code>edgeSize</code>; random-wave, curve and slant default to 96px.
       </BodySmall>
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 16, marginBottom: 16 }}>
         <Switch checked={animate} onChange={(e) => setAnimate(e.target.checked)} label="Drift (edgeAnimate)" />
+        <ButtonGroup value={size} onChange={setSize} size="small">
+          {Object.keys(EDGE_SIZES).map((s) => <Button key={s} value={s} size="small">{s}</Button>)}
+        </ButtonGroup>
+        <Button size="small" variant="default-outline" onClick={() => setSeed((n) => n + 1)}>New random wave</Button>
       </div>
       <div style={{ borderRadius: 8, overflow: 'hidden' }}>
-        {EDGE_NAMES.map((name, i) => (
-          <Section key={name} theme={i % 2 ? 'Secondary' : 'Primary'} surface="Surface"
-                   edgeTop={name} edgeHeight={32} edgeAnimate={animate} padding="20px 32px 52px">
-            <BodySmall>edgeTop="{name}"</BodySmall>
-          </Section>
-        ))}
+        {/* A plain strip first, so the first edge has something to reach into. */}
+        <Section theme="Neutral" surface="Surface" padding={'16px 32px ' + (heightOf(EDGE_NAMES[0]) + 16) + 'px'}>
+          <BodySmall>edgeSize="{size}"{seed ? ` · edgeSeed={${seed}}` : ''}</BodySmall>
+        </Section>
+        {EDGE_NAMES.map((name, i) => {
+          const sized = SIZED_EDGES.includes(name);
+          const props = ['edgeTop="' + name + '"'];
+          if (sized && size !== 'large') props.push('edgeSize="' + size + '"');
+          if (name === 'random-wave' && seed) props.push('edgeSeed={' + seed + '}');
+          return (
+            <Section key={name} theme={i % 2 ? 'Secondary' : 'Primary'} surface="Surface"
+                     edgeTop={name} edgeSize={size} edgeSeed={seed} edgeAnimate={animate}
+                     padding={'16px 32px ' + ((EDGE_NAMES[i + 1] ? heightOf(EDGE_NAMES[i + 1]) : 0) + 24) + 'px'}>
+              <BodySmall>{props.join(' ')}</BodySmall>
+            </Section>
+          );
+        })}
       </div>
 
       <H3 style={{ marginTop: 32, marginBottom: 12 }}>Reference</H3>
