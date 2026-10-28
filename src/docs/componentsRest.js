@@ -34,7 +34,8 @@ export const SELECT_DOC = {
   props: [{
     name: 'options',
     type: 'array',
-    default: '[]'
+    default: '[]',
+    note: 'Strings, or { value, label, icon?, color? }. `icon` is any small picture before the label \u2014 shown in the closed field too once chosen. `shapeOptions(names)` builds a shape picker this way, each shape drawn beside its name. Groups: { label, options: [...] }.'
   }, {
     name: 'defaultValue',
     type: 'string',

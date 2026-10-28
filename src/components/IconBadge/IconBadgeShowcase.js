@@ -12,13 +12,13 @@ import { Button } from '../Button/Button';
 import { H5, BodySmall, Caption, EyebrowSmall } from '../Typography';
 import { IconBadge } from './IconBadge';
 import { ICON_SHAPES } from '../Shape/shapes';
+import { shapeOptions } from '../Shape/shapeOptions';
+import { Select } from '../Select/Select';
 import HomeIcon from '@mui/icons-material/Home';
 
 const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
 const VARIANTS = ['solid', 'light', 'dark'];
 const SIZES = ['small', 'medium', 'large'];
-/* "tile" is the drawn 8px tile — no `shape` prop at all. */
-const SHAPES = ['tile', ...ICON_SHAPES.filter((s) => s !== 'rounded')];
 
 export function IconBadgeShowcase() {
   const [bgTheme, setBgTheme] = useState('Default');
@@ -93,7 +93,8 @@ export function IconBadgeShowcase() {
               <Grid item sx={{ width: { xs: '100%', md: '45%' }, flexShrink: 0, minWidth: 0 }}>
                 <Box sx={{ p: 3 }}>
                   <Stack spacing={3}>
-                    {choice('SHAPE', SHAPES, shape, setShape)}
+                    <Select label="Shape" fullWidth value={shape} onChange={setShape}
+                            options={shapeOptions(ICON_SHAPES.filter((s) => s !== 'rounded'), { extra: [{ value: 'tile', label: 'tile — the drawn 8px tile' }] })} />
                     {choice('COLOR', COLORS, color, setColor)}
                     {choice('VARIANT', VARIANTS, variant, setVariant)}
                     {choice('SIZE', SIZES, size, setSize)}

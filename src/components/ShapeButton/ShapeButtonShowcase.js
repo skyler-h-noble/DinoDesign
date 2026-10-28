@@ -12,6 +12,8 @@ import { Button } from '../Button/Button';
 import { H5, BodySmall, Caption, EyebrowSmall } from '../Typography';
 import { ShapeButton } from './ShapeButton';
 import { MORPHABLE_SHAPES } from '../Shape/shapes';
+import { shapeOptions } from '../Shape/shapeOptions';
+import { Select } from '../Select/Select';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 
 const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral'];
@@ -91,8 +93,9 @@ export function ShapeButtonShowcase() {
               <Grid item sx={{ width: { xs: '100%', md: '50%' }, flexShrink: 0, minWidth: 0 }}>
                 <Box sx={{ p: 3 }}>
                   <Stack spacing={3}>
-                    {choice('SHAPE', MORPHABLE_SHAPES, shape, setShape)}
-                    {choice('MORPHS TO', ['none', ...MORPHABLE_SHAPES], morphTo, setMorphTo)}
+                    <Select label="Shape" fullWidth value={shape} onChange={setShape} options={shapeOptions(MORPHABLE_SHAPES)} />
+                    <Select label="Morphs to" fullWidth value={morphTo} onChange={setMorphTo}
+                            options={shapeOptions(MORPHABLE_SHAPES, { extra: [{ value: 'none', label: 'none — no morph' }] })} />
                     {morphTo !== 'none' && choice('WHEN', TRIGGERS, morphOn, setMorphOn)}
                     {choice('COLOR', COLORS, color, setColor)}
                     {choice('SIZE', SIZES, size, setSize)}

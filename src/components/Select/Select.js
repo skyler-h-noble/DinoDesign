@@ -34,6 +34,8 @@ import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
  * DIVIDERS: optional divider between each option
  * COLOR LABELS: show/hide text labels next to color swatches (aria-label always present)
  * START DECORATION: icon or avatar
+ * OPTION ICONS: { value, label, icon } — a small picture before the label,
+ *   shown in the closed field once chosen (e.g. a Shape for a shape picker)
  *
  * Dropdown renders via React portal so it escapes parent overflow:hidden.
  * Smart positioning: opens downward if space allows, upward otherwise.
@@ -172,6 +174,11 @@ export function Select({
   const flatOptions = options.flatMap((o) => (o && Array.isArray(o.options)) ? o.options : [o]);
   const selectedOption = flatOptions.find((o) => (typeof o === 'string' ? o : o.value) === currentValue);
   const selectedLabel = selectedOption ? (typeof selectedOption === 'string' ? selectedOption : selectedOption.label) : '';
+  /* An option may carry an `icon` — any small picture: a shape, a glyph, a
+     logo. It sits before the label in the list and, once chosen, in the
+     closed field too, unless the field has its own startDecoration. */
+  const selectedIcon = selectedOption && typeof selectedOption === 'object' ? selectedOption.icon : null;
+  const fieldDecoration = startDecoration || selectedIcon;
   const hasValue = currentValue !== '' && currentValue != null;
 
   const isFloating = labelPosition === 'floating';
@@ -339,6 +346,7 @@ export function Select({
           const optValue = typeof opt === 'string' ? opt : opt.value;
           const optLabel = typeof opt === 'string' ? opt : opt.label;
           const optColor = typeof opt === 'object' ? opt.color : null;
+          const optIcon = typeof opt === 'object' ? opt.icon : null;
           const isSelected = optValue === currentValue;
           const styles = getSelectedStyles(effectiveSelectionStyle, isSelected, effectiveColor);
           const isLast = idx === total - 1;
@@ -376,6 +384,9 @@ export function Select({
                      puts in each row (it was a hand-made square here). The row
                      marks selection with its check, so the chip stays plain. */
                   <Swatch color={optColor} size={swatchSize} aria-hidden="true" />
+                )}
+                {optIcon && (
+                  <Box aria-hidden="true" sx={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0 }}>{optIcon}</Box>
                 )}
                 {(!isColor || showColorLabels) && (
                   <BodySmall style={{ flex: 1, color: 'inherit', fontWeight: 'inherit' }}>{optLabel}</BodySmall>
@@ -524,9 +535,10 @@ export function Select({
           transition: 'color 0.15s ease',
         }}
       >
-        {startDecoration && (
-          <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0, color: 'var(--Text-Quiet)' }}>
-            {startDecoration}
+        {fieldDecoration && (
+          <Box aria-hidden={startDecoration ? undefined : true}
+               sx={{ display: 'flex', alignItems: 'center', flexShrink: 0, color: startDecoration ? 'var(--Text-Quiet)' : 'inherit' }}>
+            {fieldDecoration}
           </Box>
         )}
 
@@ -535,7 +547,7 @@ export function Select({
           <Box sx={{
             position: 'absolute',
             top: hasValue || open ? '6px' : '50%',
-            left: (sizeConfig.leftPad || 14) + (startDecoration ? 32 : 0) + 'px',
+            left: (sizeConfig.leftPad || 14) + (fieldDecoration ? 32 : 0) + 'px',
             transform: hasValue || open ? 'scale(0.75)' : 'translateY(-50%)',
             transformOrigin: 'top left',
             color: open ? activeTextColor : 'var(--Quiet)',

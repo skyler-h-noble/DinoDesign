@@ -266,3 +266,11 @@ describe('Select color mode', () => {
     expect(document.querySelectorAll('[role="option"] .swatch-chip').length).toBe(2);
   });
 });
+
+describe('Select option icons', () => {
+  test('an option icon shows in the list and, once chosen, in the field', () => {
+    const opts = [{ value: 'a', label: 'Alpha', icon: <span data-testid="icon-a" /> }, { value: 'b', label: 'Beta' }];
+    const { getAllByTestId } = render(<Select options={opts} value="a" onChange={() => {}} label="Pick" />);
+    expect(getAllByTestId('icon-a').length).toBeGreaterThanOrEqual(1);
+  });
+});

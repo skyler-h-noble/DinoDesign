@@ -11,7 +11,9 @@ import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { Button } from '../Button/Button';
 import { H5, BodySmall, Caption, EyebrowSmall } from '../Typography';
 import { Shape } from './Shape';
-import { SHAPE_NAMES, SHAPE_GROUPS } from './shapes';
+import { SHAPE_NAMES } from './shapes';
+import { shapeOptions } from './shapeOptions';
+import { Select } from '../Select/Select';
 
 /* A stand-in photo: image CONTENT, so its colors are its own. */
 const SAMPLE_PHOTO = 'data:image/svg+xml;utf8,' + encodeURIComponent(
@@ -20,10 +22,6 @@ const SAMPLE_PHOTO = 'data:image/svg+xml;utf8,' + encodeURIComponent(
   + '<rect width="96" height="96" fill="url(#g)"/><circle cx="68" cy="28" r="10" fill="#f6d58a"/>'
   + '<path d="M0 62 L30 40 L52 58 L70 46 L96 64 V96 H0Z" fill="#5e8f7c"/><path d="M0 78 Q40 66 96 80 V96 H0Z" fill="#2f5a4c"/></svg>');
 
-const GROUP_LABEL = {
-  radius: 'Radius — follow the brand', round: 'Round', polygon: 'Soft polygons',
-  cookie: 'Cookies, suns and flowers — these morph', burst: 'Bursts', pixel: 'Pixel', cut: 'Cut',
-};
 const COLORS = ['image', 'primary', 'secondary', 'tertiary', 'neutral', 'warning'];
 const VARIANTS = ['solid', 'light', 'dark'];
 
@@ -38,7 +36,6 @@ export function ShapeShowcase() {
   const code = '<Shape shape="' + shape + '"'
     + (themed ? ' color="' + color + '"' + (variant !== 'solid' ? ' variant="' + variant + '"' : '') : '')
     + ' width={120}>\n  ' + (themed ? 'NEW' : '<img src="…" alt="…" />') + '\n</Shape>';
-  const groups = Object.keys(GROUP_LABEL).map((g) => [g, SHAPE_NAMES.filter((n) => SHAPE_GROUPS[n] === g)]);
 
   return (
     <Box sx={{ pb: 8 }}>
@@ -99,20 +96,9 @@ export function ShapeShowcase() {
                 </Box>
               </Grid>
 
-              {/* Every shape, grouped — pick one to try it. */}
               <Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, minWidth: 0 }}>
-                <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
-                  {groups.map(([g, names]) => (
-                    <Box key={g}>
-                      <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>{GROUP_LABEL[g]}</EyebrowSmall>
-                      <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
-                        {names.map((n) => (
-                          <Button key={n} size="small" selected={shape === n} variant={shape === n ? 'default' : 'default-outline'}
-                                  onClick={() => setShape(n)}>{n}</Button>
-                        ))}
-                      </Stack>
-                    </Box>
-                  ))}
+                <Box sx={{ p: 3 }}>
+                  <Select label="Shape" fullWidth value={shape} onChange={setShape} options={shapeOptions(SHAPE_NAMES)} />
                 </Box>
               </Grid>
             </Grid>
