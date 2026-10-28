@@ -109,7 +109,7 @@ Every surface-rendering component sets two HTML attributes:
 
 | Attribute | Purpose | Example values |
 |---|---|---|
-| `data-theme` | Which color theme | `Default`, `Primary`, `Primary-Light`, `Neutral-Dark` |
+| `data-theme` | Which color theme | `Default`, `Primary`, `Neutral`, `App-Bar` |
 | `data-surface` | Which surface type | `Surface`, `Container`, `Container-High` |
 
 These two attributes together determine which CSS variables are in scope for all
@@ -117,29 +117,28 @@ child components.
 
 ### Available Themes
 
-| Theme | Background level | Use case |
-|---|---|---|
-| `Default` | 13 (lightest) | App default, white/near-white backgrounds |
-| `Primary-Light` | 13 | Light tinted primary background |
-| `Primary` | 11 | Medium primary background |
-| `Secondary-Light` | 13 | Light tinted secondary background |
-| `Secondary` | 11 | Medium secondary background |
-| `Tertiary-Light` | 13 | Light tinted tertiary background |
-| `Tertiary` | 11 | Medium tertiary background |
-| `Neutral-Light` | 13 | Light neutral background |
-| `Neutral` | 11 | Medium neutral background |
-| `Primary-Dark` | 3 | Dark primary background |
-| `Secondary-Dark` | 3 | Dark secondary background |
-| `Tertiary-Dark` | 3 | Dark tertiary background |
-| `Neutral-Dark` | 3 | Dark neutral background |
+| Theme | Use case |
+|---|---|
+| `Default` | The app's default — inherits the brand's page background |
+| `Primary` / `Secondary` / `Tertiary` / `Neutral` | A region in that palette |
+| `Info` / `Success` / `Warning` / `Error` | State regions (alerts, banners) |
+| `App-Bar` | Top app bars and side rails — the chrome color the design system chose |
+| `Nav-Bar` | A phone's bottom navigation bar |
+| `Status` | The status bar area on devices |
+
+There are no `-Light` / `-Dark` themes. Light or dark is the SURFACE on the
+same theme: `data-theme="Primary" data-surface="Surface-Brightest"` for a
+light primary region, `data-surface="Surface-Dimmest"` for a dark one.
 
 ### Available Surfaces
 
 | Surface | Effect level | Use case |
 |---|---|---|
-| `Surface` | Level 1 | Base page/section background |
+| `Surface-Dimmest` | Level 1 | The darkest step — a "dark" region on a theme |
 | `Surface-Dim` | Level 1 | Slightly dimmed surface |
+| `Surface` | Level 1 | Base page/section background |
 | `Surface-Bright` | Level 1 | Slightly brightened surface |
+| `Surface-Brightest` | Level 1 | The lightest step — a "light" region on a theme |
 | `Container` | Level 2 | Cards, panels, dialogs |
 | `Container-Low` | Level 2 | Slightly recessed container |
 | `Container-Lowest` | Level 2 | Most recessed container |

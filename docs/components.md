@@ -71,8 +71,11 @@ import { Button } from '@omni-design/components';
 // Outline
 <Button color="secondary" variant="outline">Cancel</Button>
 
-// Light — tinted background, useful on colored surfaces
-<Button color="success" variant="light">Confirm</Button>
+// There is no "light" shape. Shape is solid / outline / ghost / text; a
+// lighter look is the same button on a brighter surface:
+<Box data-theme="Success" data-surface="Surface-Brightest">
+  <Button color="success">Confirm</Button>
+</Box>
 
 // Ghost — no background, no border; acts like a hotlink
 <Button variant="ghost">Learn more</Button>
@@ -657,10 +660,10 @@ const [tab, setTab] = useState('overview');
 // With panels
 <Tabs tabs={tabs} value={tab} onChange={setTab} />
 <TabPanel value="overview" activeValue={tab}>
-  <p>Overview content</p>
+  <Body>Overview content</Body>
 </TabPanel>
 <TabPanel value="analytics" activeValue={tab}>
-  <p>Analytics content</p>
+  <Body>Analytics content</Body>
 </TabPanel>
 
 // With icons
@@ -730,8 +733,8 @@ import { Card } from '@omni-design/components';
 |---|---|---|
 | `solid` | `primary` | `Primary` |
 | `solid` | `secondary` | `Secondary` |
-| `light` | `primary` | `Primary-Light` |
-| `light` | `secondary` | `Secondary-Light` |
+| `light` | `primary` | `Primary` + `data-surface="Surface-Brightest"` |
+| `light` | `secondary` | `Secondary` + `data-surface="Surface-Brightest"` |
 | `default` | any | Inherited from nearest ancestor |
 
 ### CSS variables consumed
@@ -751,7 +754,7 @@ import { Card } from '@omni-design/components';
 ```jsx
 // Default — inherits theme from parent
 <Card>
-  <p>Simple content card</p>
+  <Body>Simple content card</Body>
 </Card>
 
 // Solid Primary — sets its own theme context
@@ -769,26 +772,26 @@ import { Card } from '@omni-design/components';
 
 // Elevated
 <Card elevation={4}>
-  <p>Floating card</p>
+  <Body>Floating card</Body>
 </Card>
 
 // With header and footer slots
 <Card
-  header={<HStack spacing={1}><Avatar /><span>Jane Smith</span></HStack>}
+  header={<HStack spacing={1}><Avatar /><Subtitle>Jane Smith</Subtitle></HStack>}
   footer={<HStack spacing={1}><Button variant="outline" color="neutral">Dismiss</Button><Button color="primary">Reply</Button></HStack>}
 >
-  <p>Card body content goes here.</p>
+  <Body>Card body content goes here.</Body>
 </Card>
 
 // Clickable / selectable card
 <Card onClick={() => setSelected(id)} selected={selectedId === id}>
-  <p>Click to select</p>
+  <Body>Click to select</Body>
 </Card>
 
 // Nested themes — inner card gets its own context
 <Card variant="solid" color="primary">
   <Card variant="default" surface="Container-High">
-    <Button color="primary">Inherits Primary-Light context</Button>
+    <Button color="primary">Inherits the Primary context</Button>
   </Card>
 </Card>
 ```

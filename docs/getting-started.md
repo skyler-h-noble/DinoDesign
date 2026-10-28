@@ -175,7 +175,7 @@ import { Card, CardContent, Button } from '@omni-design/components';
 // Card sets the surface context — Button inherits it automatically
 <Card variant="solid" color="primary">
   <CardContent>
-    <p>Everything inside this card reads Primary theme variables.</p>
+    <Body>Everything inside this card reads Primary theme variables.</Body>
     <Button color="primary">Confirm</Button>
   </CardContent>
 </Card>
@@ -335,14 +335,18 @@ function App() {
 
 ```
 Default
-Primary-Light    Primary    Primary-Dark
-Secondary-Light  Secondary  Secondary-Dark
-Tertiary-Light   Tertiary   Tertiary-Dark
-Neutral-Light    Neutral    Neutral-Dark
-Info-Light       Success-Light   Warning-Light   Error-Light
-Info-Dark        Success-Dark    Warning-Dark    Error-Dark
-App-Bar          Nav-Bar         Status
+Primary    Secondary    Tertiary    Neutral
+Info       Success      Warning     Error
+App-Bar    Nav-Bar      Status
 ```
+
+There are no `-Light` / `-Dark` themes. Lighter or darker is a SURFACE on the
+same theme: `data-theme="Primary" data-surface="Surface-Brightest"` for light,
+`data-surface="Surface-Dimmest"` for dark.
+
+`App-Bar` is for top bars and side rails, `Nav-Bar` for a phone's bottom bar —
+the colors the design system chose for its chrome. Do not pick a palette for
+navigation.
 
 ## Available Surfaces
 

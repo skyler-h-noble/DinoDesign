@@ -1,21 +1,48 @@
 This project uses the @omni-design/components design system.
 
-Read these docs before writing any code:
-- node_modules/@omni-design/components/docs/getting-started.md
-- node_modules/@omni-design/components/docs/token-system.md
-- node_modules/@omni-design/components/docs/components.md
+Read node_modules/@omni-design/components/CLAUDE.md before writing any UI.
+It is the full contract; the rules below are the ones most often broken.
+Also: docs/getting-started.md, docs/token-system.md, docs/components.md.
 
-ALWAYS import components from '@omni-design/components'
-ALWAYS import CSS at the top of App.js:
-  import '@omni-design/components/public/styles/foundation.css'
-  import '@omni-design/components/public/styles/core.css'
-  import '@omni-design/components/public/styles/Light-Mode.css'
-  import '@omni-design/components/public/styles/base.css'
+SETUP
+- Import the CSS at the top of App.js:
+    import '@omni-design/components/public/styles/foundation.css'
+    import '@omni-design/components/public/styles/core.css'
+    import '@omni-design/components/public/styles/Light-Mode.css'
+    import '@omni-design/components/public/styles/base.css'
+- Wrap content in an element with data-theme, data-surface and data-style.
 
-ALWAYS wrap content in a div with data-theme, data-surface, and data-style attributes.
+COMPONENTS
+- Import every UI element from '@omni-design/components'. No raw <button>,
+  <input>, <select>, <input type="range">, <h1>-<h6>, <p>, or <a href>, and
+  no '@mui/material' imports (MUI icons are fine).
+- Missing component? Tag it — // MISSING-LIB-COMPONENT: <Name> — never fake
+  one with a styled <div>.
+- Anything that floats (menus, account panels, hover cards) is <Popover>.
 
-Available themes: Default, Primary, Primary-Light, Primary-Dark, Secondary, Tertiary, Neutral, Success-Light, Warning-Light, Error-Light, Info-Light
-Available surfaces: Surface, Surface-Dim, Container, Container-Low, Container-Lowest, Container-High
-Available styles: Professional, Modern, Bold, Playful
-Available colors: primary, secondary, tertiary, neutral, info, success, warning, error
-Available components: Button, ButtonGroup, Chip, Input, TextField, Card, Tabs, Stack, Checkbox
+COLOR AND SURFACES
+- Never write hex colors or hard-coded radii. Use tokens.
+- To paint a region, set data-theme + data-surface (or use <Section>);
+  never background: var(--Surface) / var(--Container).
+- Themes: Default, Primary, Secondary, Tertiary, Neutral, Info, Success,
+  Warning, Error, App-Bar, Nav-Bar, Status. There are NO -Light / -Dark
+  themes or button variants — lighter/darker is a surface level
+  (Surface-Brightest / Surface-Dimmest).
+- Surfaces: Surface-Dimmest, Surface-Dim, Surface, Surface-Bright,
+  Surface-Brightest, and the Container levels.
+- Styles: Professional, Modern, Bold, Playful.
+- Navigation bars and rails use data-theme="App-Bar"; a phone bottom bar
+  uses "Nav-Bar". Never pick a palette for navigation.
+- Never pass style={{ color, background }} to a library component; use its
+  variant or color prop.
+
+DEVICES
+- Set data-device on the root: IOS-Mobile, IOS-Tablet, Android-Mobile or
+  Android-Tablet (Desktop is the default — set nothing). Type sizes switch on
+  it, not on width.
+- For responsive navigation use the Adaptive Nav add-on's exported file
+  rather than assembling AppBar + Rail + BottomNavigation by hand.
+
+LAYOUT
+- Never center a container's text to center components inside it —
+  text-align is inherited and centers their text too. Center the box.

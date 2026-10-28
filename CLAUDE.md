@@ -268,13 +268,10 @@ var(--Buttons-{Color}-Text)     /* label color */
 var(--Buttons-{Color}-Border)   /* border + thumb color */
 var(--Buttons-{Color}-Hover)    /* hover fill */
 var(--Buttons-{Color}-Active)   /* pressed fill */
-
-/* Light variants */
-var(--Buttons-{Color}-Light-Button)
-var(--Buttons-{Color}-Light-Text)
-var(--Buttons-{Color}-Light-Hover)
-var(--Buttons-{Color}-Light-Active)
 ```
+
+There are no `-Light` button tokens. A lighter button is the same family on a
+brighter surface (`data-surface="Surface-Brightest"`), not a separate color.
 
 ### Icons
 ```css
@@ -910,6 +907,116 @@ are the components the library still needs to grow.
 
 ---
 
+## Devices, navigation and floating panels
+
+Four rules an agent gets wrong without being told, because each failure renders
+something plausible rather than an error.
+
+### Type switches on `data-device`, not on width
+
+Omni has four device types — **Desktop, Tablet Horizontal, Tablet Vertical,
+Mobile** — and the tablets and phones each have an iOS and an Android
+platform. Type sizes differ per platform, not just per width: the bottom-nav
+label is 11px / 600 on Desktop, **10px / 500 on iOS** (Apple's tab bar) and
+**12px / 500 on Android** (Material's Label Medium).
+
+The CSS switches those on the root's `data-device`, never on a media query:
+
+```jsx
+// Set once, on the app root, from the platform you are running on.
+<html data-device="IOS-Mobile">      // IOS-Mobile | IOS-Tablet | Android-Mobile | Android-Tablet
+                                     // Desktop is the default — set nothing.
+```
+
+A width breakpoint cannot stand in for it: an iPad and an Android tablet are
+the same width and want different type. Without `data-device` every phone
+draws Desktop's type, which looks *almost* right — that is the trap. Layout
+(which parts of a nav show) still switches on width; type switches on device.
+
+### Navigation chrome wears `App-Bar` and `Nav-Bar` — never a palette you pick
+
+The design system already chose what its bars look like. Use those themes:
+
+| Part | Theme |
+| --- | --- |
+| Top app bar, and a side rail beside it | `data-theme="App-Bar"` |
+| Phone bottom navigation bar | `data-theme="Nav-Bar"` (the component sets it) |
+
+```jsx
+// ✅ the system's own bar color
+<ThemedZone theme="App-Bar" surface="Surface" as="header">…</ThemedZone>
+
+// ❌ inventing one — it will disagree with every other screen
+<ThemedZone theme="Primary" surface="Surface-Dim" as="header">…</ThemedZone>
+```
+
+The rail takes **App-Bar**, the same as the bar: on a desktop they are one
+piece of chrome around the page, and two colors made them read as two.
+
+### Anything that floats is a `Popover`
+
+Account menus, hover cards, a panel that opens from a button: render them in
+`<Popover>`. It portals (a clipping or sticky ancestor cannot cut it off),
+places itself and flips at the viewport edge, closes on Escape, outside click
+and Tab-out, moves focus in and back to the anchor, and draws the one floating
+frame the system has — Dropdown-Frame-Radius, the `--Border` edge, the Level 2
+shadow.
+
+```jsx
+const avatarRef = useRef(null);
+<Button ref={avatarRef} avatar variant="ghost" aria-label="Your account"
+        aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+  <Avatar src={user.avatarUrl} alt="" />
+</Button>
+<Popover open={open} onClose={() => setOpen(false)} anchorRef={avatarRef}
+         placement="bottom-end" width="auto" aria-label="Your account">
+  <MenuItem onClick={…}>Profile</MenuItem>
+  <MenuDivider />
+  <MenuItem onClick={…}>Sign out</MenuItem>
+</Popover>
+```
+
+Never hand-draw the panel (`position: absolute` + a border + a shadow). A
+hover card is `role="tooltip"` + `autoFocus={false}`. `Dropdown` + `Menu`
+works too, but does not portal — use it only where nothing clips.
+
+### A responsive nav comes from the Adaptive Nav add-on
+
+Do not assemble a responsive navigation from AppBar + Rail + BottomNavigation
+by hand. The studio's **Adaptive Nav** add-on (omni-design.netlify.app →
+Add-ons → Adaptive Nav) designs it per device and exports one React file — the
+parts switch at the breakpoints, the menu button opens a Drawer, the account
+menu is a Popover, the hero condenses on scroll — plus the matching Figma spec.
+Use that file. Its header carries a link back to the studio; paste the file
+into the add-on's Import tab to change it.
+
+### Text alignment belongs to the component
+
+Never centre a container's text to centre the components in it.
+`text-align` is inherited: an Accordion's body, an Autocomplete's label, a
+TransferList's rows all centre with it, which no design draws. Centre the BOX
+(`alignItems: 'center'`, `margin: 0 auto`, `justifyContent`) and leave text
+alone.
+
+### Component specifics that are easy to get wrong
+
+- **Player** — the cover is `imageSrc` (+ `imageAlt`): a rounded square, not
+  an avatar; a track is not a person. `title` and `subtitle` are optional; with
+  none, the player is a bare transport.
+- **SpeedDial** — labels show for as long as the dial is open (a phone has no
+  hover). In a `BottomNavigation`, pass `fabAction={{ icon, label, actions }}`
+  and the bar draws the dial; it opens on tap.
+- **Scaled previews** — anything drawn inside a CSS `transform: scale()` must
+  not portal, or it escapes the scale and draws full-size. `Tooltip inline`,
+  `SpeedDial disablePortal` and `fabAction.disablePortal` keep labels inside.
+  Real pages keep the portal.
+- **Autocomplete** — keeps its width while typing; the clear button's space is
+  reserved. Do not wrap it in something that sizes it to its content.
+- **TransferList** — each pane is at least 200px; give the row room rather
+  than squeezing it.
+
+---
+
 ## Rules for AI-Generated Code
 
 ### ✅ DO
@@ -945,6 +1052,15 @@ style={{ background: 'var(--Background)' }}
 
 // Import components from the library
 import { Button, Card, Alert, H2, Body, HStack } from './components';
+
+// Set the device on the root so type matches the platform
+<html data-device="IOS-Mobile">
+
+// Bars wear the system's own chrome themes
+<ThemedZone theme="App-Bar" surface="Surface" as="header">
+
+// Floating panels are Popovers
+<Popover open={open} onClose={close} anchorRef={ref} placement="bottom-end">
 ```
 
 ### ❌ NEVER DO
@@ -981,6 +1097,20 @@ className="bg-teal-600 text-white"
 
 // Never import MUI components directly without wrapping in OmniDesign tokens
 import Button from '@mui/material/Button'; // ← bypasses the token system
+
+// Never use a browser control where the library has one
+<input type="range">                    // ← <Slider>
+<input type="text">                     // ← <TextInput> / <TextField>
+<select>                                // ← <Select>
+
+// Never centre a container's text to centre components — it centres THEIR text
+<div style={{ textAlign: 'center' }}><Accordion …/></div>  // ← alignItems / margin auto
+
+// Never hand-draw a floating panel
+<div style={{ position: 'absolute', border: '…', boxShadow: '…' }}>  // ← <Popover>
+
+// Never pick a palette for navigation bars
+<ThemedZone theme="Primary" as="header">   // ← theme="App-Bar"
 ```
 
 ---
