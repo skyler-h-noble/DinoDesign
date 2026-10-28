@@ -137,6 +137,13 @@ export function Tooltip({
   enterDelay = 100,
   leaveDelay = 0,
   describeChild = false,
+  /* Draw the bubble IN PLACE, beside the child, with CSS — no portal and no
+     Popper. For a tooltip inside a scaled preview: portalled it escapes the
+     transform and draws at full size, and Popper in place measures in screen
+     pixels, so it lands far from a scaled anchor. Placed by CSS, it scales
+     with everything around it. Shown when `open`; a real page keeps the
+     portal, so no clipped ancestor can cut the bubble off. */
+  inline = false,
   className = '',
   sx = {},
   ...props
@@ -183,9 +190,7 @@ export function Tooltip({
   // Controlled vs uncontrolled
   const openProp = open === undefined ? {} : { open };
 
-  return (
-    <MuiTooltip
-      title={
+  const bubble = (
         title ? (
           <Box
             data-theme={dataTheme || undefined}
@@ -260,7 +265,48 @@ export function Tooltip({
             {action}
           </Box>
         ) : ''
-      }
+  );
+
+  if (inline) {
+    /* The bubble at the placement's side of the child, centred on it, standing
+       off by the visible arrow — the same gap the Popper version keeps. The
+       arrow is a triangle in the bubble's fill on the facing edge. */
+    const side = placement.split('-')[0];
+    const across = side === 'left' || side === 'right';
+    const at = {
+      left: { right: 'calc(100% + ' + s.arrowVisible + ')', top: '50%', transform: 'translateY(-50%)' },
+      right: { left: 'calc(100% + ' + s.arrowVisible + ')', top: '50%', transform: 'translateY(-50%)' },
+      top: { bottom: 'calc(100% + ' + s.arrowVisible + ')', left: '50%', transform: 'translateX(-50%)' },
+      bottom: { top: 'calc(100% + ' + s.arrowVisible + ')', left: '50%', transform: 'translateX(-50%)' },
+    }[side] || {};
+    const tip = {
+      left: { left: '100%', top: '50%', transform: 'translateY(-50%)', clipPath: 'polygon(0 0, 100% 50%, 0 100%)' },
+      right: { right: '100%', top: '50%', transform: 'translateY(-50%)', clipPath: 'polygon(100% 0, 0 50%, 100% 100%)' },
+      top: { top: '100%', left: '50%', transform: 'translateX(-50%)', clipPath: 'polygon(0 0, 100% 0, 50% 100%)' },
+      bottom: { bottom: '100%', left: '50%', transform: 'translateX(-50%)', clipPath: 'polygon(0 100%, 100% 100%, 50% 0)' },
+    }[side] || {};
+    return (
+      <Box component="span" sx={{ position: 'relative', display: 'inline-flex' }}>
+        {children}
+        {open && title ? (
+          <Box role="tooltip" sx={{ position: 'absolute', zIndex: 1, pointerEvents: 'none', whiteSpace: 'nowrap', ...at }}>
+            {bubble}
+            {arrow && (
+              <Box component="span" aria-hidden="true" sx={{
+                position: 'absolute', backgroundColor: arrowColor,
+                width: across ? s.arrowVisible : s.arrowW, height: across ? s.arrowW : s.arrowVisible,
+                ...tip,
+              }} />
+            )}
+          </Box>
+        ) : null}
+      </Box>
+    );
+  }
+
+  return (
+    <MuiTooltip
+      title={bubble}
       placement={placement}
       arrow={arrow}
       enterDelay={enterDelay}

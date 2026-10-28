@@ -145,7 +145,8 @@ export function BottomNavigation({
   /** The level, when the bar should sit on a different one. Unset, the
    *  palette's own (the user's pick) is used as it is. */
   surface,
-  /** A FAB with the bar: { icon, label, onClick, actions? }. */
+  /** A FAB with the bar: { icon, label, onClick, actions?, disablePortal? }.
+   *  disablePortal keeps a speed dial's labels in place, for scaled previews. */
   fabAction,
   /** The design's two FAB styles:
    *    'center'  Floating +Raised FAB — the FAB sits on the bar's top edge,
@@ -406,7 +407,7 @@ const RAISE = (48 + HALO * 2) / 2 + 'px';
  *  Figma's Nav-Bar now holds a SpeedDial where the FAB was, so the + turns
  *  into an × and the actions fan out with their labels, as everywhere else.
  *  It used to open a menu-style panel of its own. */
-function BottomNavFab({ icon, label, onClick, actions, raised = false }) {
+function BottomNavFab({ icon, label, onClick, actions, disablePortal = false, raised = false }) {
   const isDial = Array.isArray(actions) && actions.length > 0;
   return (
     <Box
@@ -423,7 +424,7 @@ function BottomNavFab({ icon, label, onClick, actions, raised = false }) {
         /* Tap only. The bar is phone chrome, where nothing hovers — and with
            hover on, a desktop click landed just after the hover had opened the
            dial, toggled it shut, and the dial looked broken. */
-        <SpeedDial size="medium" direction="up" icon={icon} ariaLabel={label || 'Actions'} openOnHover={false}
+        <SpeedDial size="medium" direction="up" icon={icon} ariaLabel={label || 'Actions'} openOnHover={false} disablePortal={disablePortal}
           actions={actions.map((a, i) => ({ key: a.key || i, icon: a.icon, name: a.label, onClick: () => a.onClick?.() }))} />
       ) : (
         <Fab aria-label={label || 'Action'} onClick={onClick} icon={icon || <AddIcon />} />

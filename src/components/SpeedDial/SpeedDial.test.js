@@ -284,3 +284,24 @@ describe('action labels use the lib Tooltip', () => {
     expect(screen.queryByRole('tooltip')).toBeNull();
   });
 });
+
+describe('SpeedDial — labels in a scaled preview', () => {
+  test('portal the labels to the body by default', () => {
+    const { container } = renderDial({ open: true });
+    expect(container.querySelector('[role="tooltip"]')).toBeNull();
+    expect(document.body.querySelector('[role="tooltip"]')).not.toBeNull();
+  });
+
+  test('disablePortal keeps them inside the dial, so a transform scales them', () => {
+    const { container } = renderDial({ open: true, disablePortal: true });
+    const tips = container.querySelectorAll('[role="tooltip"]');
+    expect(tips.length).toBe(ACTIONS.length);
+    // Placed by CSS beside the action, not by Popper in screen pixels.
+    expect(tips[0].closest('.MuiPopper-root')).toBeNull();
+  });
+
+  test('in place, closed, shows no labels', () => {
+    const { container } = renderDial({ open: false, disablePortal: true });
+    expect(container.querySelector('[role="tooltip"]')).toBeNull();
+  });
+});

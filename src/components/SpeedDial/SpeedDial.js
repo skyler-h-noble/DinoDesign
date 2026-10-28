@@ -79,6 +79,10 @@ export function SpeedDial({
    * design asks for true. Click keeps working either way. */
   openOnHover = true,
   showTooltips = true,
+  /** The action labels render in place rather than on document.body — for a
+   *  dial shown inside a scaled preview, where portalled labels escape the
+   *  scale and draw at full size. */
+  disablePortal = false,
   open: controlledOpen,
   onOpen,
   onClose,
@@ -316,7 +320,9 @@ export function SpeedDial({
               aria-label={action.name || 'Action ' + (index + 1)}
               onClick={() => handleActionClick(action, index)}
               sx={{
-                position: 'absolute', ...offset,
+                /* In place, the offset moves to the wrapper below so the
+                   label can sit beside the action with CSS. */
+                ...(disablePortal ? {} : { position: 'absolute', ...offset }),
                 opacity: isOpen ? 1 : 0,
                 transform: isOpen ? 'scale(1)' : 'scale(0.3)',
                 transition: 'opacity 0.2s ease, transform 0.2s ease',
@@ -329,7 +335,7 @@ export function SpeedDial({
           );
 
           if (showTooltips && action.name) {
-            return (
+            const label = (
               /* The lib's Tooltip — its one solid style, as Figma's SpeedDial
                  draws beside each action. This was a raw MUI tooltip painted
                  Container + a Border + a hardcoded shadow: the light / outline
@@ -343,12 +349,21 @@ export function SpeedDial({
                    appeared where speed dials are used most. Always a boolean,
                    so the tooltip stays controlled from its first render. */
                 open={isOpen}
+                inline={disablePortal}
               >
                 {actionEl}
               </Tooltip>
             );
+            if (!disablePortal) return label;
+            return (
+              <Box key={action.key || index} sx={{ position: 'absolute', ...offset, display: 'flex' }}>
+                {label}
+              </Box>
+            );
           }
-          return actionEl;
+          return disablePortal
+            ? <Box key={action.key || index} sx={{ position: 'absolute', ...offset, display: 'flex' }}>{actionEl}</Box>
+            : actionEl;
         })}
       </Box>
     </Box>
