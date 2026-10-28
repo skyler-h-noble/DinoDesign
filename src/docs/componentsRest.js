@@ -673,7 +673,7 @@ export const SHAPE_DOC = {
     use: 'the component itself \u2014 its shape comes from the radius tokens'
   }, {
     when: 'It is a person',
-    use: 'Avatar \u2014 people stay circles'
+    use: 'Avatar \u2014 it takes the avatar shapes itself (`shape`), with the right initials size and border'
   }, {
     when: 'It is an icon on a tile',
     use: 'IconBadge with `shape`'
@@ -757,7 +757,7 @@ export const QUOTE_DOC = {
     name: 'avatarSrc / avatarInitials',
     type: 'string',
     default: 'undefined',
-    note: 'The person. An Avatar \u2014 a person stays a circle.'
+    note: 'The person, as an Avatar \u2014 round, or in the brand\u2019s avatar shape.'
   }, {
     name: 'size',
     type: 'string',

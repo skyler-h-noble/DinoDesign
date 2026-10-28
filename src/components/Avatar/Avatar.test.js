@@ -194,3 +194,32 @@ describe('AvatarGroup overlap', () => {
     expect(stepOf(render(<AvatarGroup size="medium" spacing={-20}>{three({ clickable: true })}</AvatarGroup>).container)).toBe(-8);
   });
 });
+
+describe('Avatar shape', () => {
+  test('a shaped photo fills the shape, with an outline for its border', () => {
+    const { container } = render(<Avatar shape="cookie-9" src="/me.jpg" alt="Lise" />);
+    expect(container.querySelector('.avatar-shaped .avatar-shape-fill img')).toHaveAttribute('src', '/me.jpg');
+    expect(container.querySelector('.avatar-shaped svg path')).toHaveAttribute('fill', 'none');
+  });
+
+  test('shaped initials are smaller than round ones', () => {
+    const { container } = render(<Avatar shape="cookie-9" initials="LN" size="xs" />);
+    expect(container.querySelector('.avatar-initials').textContent).toBe('LN');
+    // 8px at xs (round initials are 12) — read from the emitted CSS, since
+    // jsdom does not resolve var().
+    const css = [...document.styleSheets].flatMap((sh) => [...sh.cssRules].map((r) => r.cssText)).join('');
+    expect(css).toContain('var(--Avatar-Shape-Initials, 8px)');
+  });
+
+  test('the default style is a person knocked out of the filled shape', () => {
+    const { container } = render(<Avatar shape="flower" />);
+    expect(container.querySelector('.avatar-fallback svg[data-testid="PersonIcon"]')).not.toBeNull();
+  });
+
+  test('circle, or an unknown shape, is the round avatar', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const { container } = render(<Avatar shape="burst" initials="LN" />);
+    expect(container.querySelector('.avatar-shaped')).toBeNull();
+    warn.mockRestore();
+  });
+});

@@ -1,5 +1,7 @@
 // src/components/Avatar/Avatar.js
 import React, { useState } from 'react';
+import PersonIcon from '@mui/icons-material/Person';
+import { shapePath, shapeStyle, AVATAR_SHAPES } from '../Shape/shapes';
 import { Box } from '@mui/material';
 import { AvatarGlyph } from './AvatarGlyph';
 import { NumberSmall, NumberMedium, NumberLarge, CAP_HEIGHT_TRIM } from '../Typography';
@@ -165,6 +167,14 @@ const initialsFontSize = (diameter, sizeName) =>
 // heights; only READ here).
 const BORDER_WIDTH = 'var(--Button-Border-Width, 1px)';
 
+/* Initials inside a SHAPE are about two-thirds of the round size — a cookie
+   or a flower has less room than a circle. Figma: Icons & Avatars::
+   Avatar-Shape-Initials (6 / 8 / 9 / 12 / 15 / 19 / 27). */
+const SHAPE_INITIALS_PX = { xxs: 6, xs: 8, small: 9, medium: 12, large: 15, xl: 19, xxl: 27 };
+const shapeInitialsFontSize = (diameter, sizeName) =>
+  'var(--Avatar-Shape-Initials, ' + (SHAPE_INITIALS_PX[sizeName] ?? Math.round((diameter * 7) / 18)) + 'px)';
+let warnedShape = false;
+
 let warnedIcon = false;
 function warnIconOnce() {
   if (warnedIcon || process.env.NODE_ENV === 'production') return;
@@ -198,6 +208,10 @@ export function Avatar({
   // When true, adds 2px horizontal margin so an Avatar inside a Button has
   // breathing room without needing a wrapping spacer.
   insideButton = false,
+  /* One of AVATAR_SHAPES (circle, squircle, rounded, cookies, flower, gem,
+     puffy, bun). Unset or 'circle' is the round avatar. One avatar shape per
+     brand — a list of people in mixed shapes reads as broken. */
+  shape,
   className = '',
   sx = {},
   ...props
@@ -231,6 +245,21 @@ export function Avatar({
   const textColor = glyphOnly ? borderColor : 'var(--Buttons-' + C + '-Text)';
 
   const component = isClickable ? 'button' : 'div';
+
+  if (shape && !AVATAR_SHAPES.includes(shape) && process.env.NODE_ENV !== 'production' && !warnedShape) {
+    warnedShape = true;
+    // eslint-disable-next-line no-console
+    console.warn('[Avatar] "' + shape + '" is not an avatar shape — drawn round. Use one of: ' + AVATAR_SHAPES.join(', ') + '.');
+  }
+  const shaped = Boolean(shape) && shape !== 'circle' && AVATAR_SHAPES.includes(shape);
+  if (shaped) {
+    return (
+      <ShapedAvatar shape={shape} s={s} size={size} C={C} component={component}
+        isClickable={isClickable} onClick={onClick} alt={alt} initials={initials}
+        effectiveSrc={hasSrc ? effectiveSrc : null} onImgError={() => setImgError(true)}
+        hasInitials={hasInitials} insideButton={insideButton} className={className} sx={sx} {...props} />
+    );
+  }
 
   return (
     <Box
@@ -349,6 +378,86 @@ export function Avatar({
             display: 'block',
           }}
         />
+      )}
+    </Box>
+  );
+}
+
+/**
+ * A shaped avatar — the same three styles, cut to one of AVATAR_SHAPES, as the
+ * Figma Avatar's Container=Shape draws them:
+ *   Photo     the photo fills the shape
+ *   Initials  the initials' button color fills it; the initials are smaller
+ *             (about two-thirds) because a shape has less room than a circle
+ *   Default   the shape filled in Buttons::Border, a person knocked out of it
+ *             in the surface's --Background
+ * Every one carries the button border (--Buttons-{C}-Border at
+ * --Button-Border-Width), drawn as an outline over the shape so the mask never
+ * clips it. The root is not masked, so a clickable avatar's focus ring is whole.
+ */
+function ShapedAvatar({ shape, s, size, C, component, isClickable, onClick, alt, initials, effectiveSrc,
+  onImgError, hasInitials, insideButton, className, sx, ...props }) {
+  const d = shapePath(shape);
+  const edge = 'var(--Buttons-' + C + '-Border)';
+  const fill = effectiveSrc ? 'transparent' : hasInitials ? 'var(--Buttons-' + C + '-Button)' : edge;
+  return (
+    <Box
+      component={component}
+      type={isClickable ? 'button' : undefined}
+      role={isClickable ? 'button' : 'img'}
+      aria-label={alt || initials || 'Avatar'}
+      tabIndex={isClickable ? 0 : undefined}
+      onClick={isClickable ? onClick : undefined}
+      className={'avatar avatar-shaped avatar-shape-' + shape + ' avatar-' + size +
+        (effectiveSrc ? ' avatar-image' : hasInitials ? ' avatar-initials' : ' avatar-fallback') +
+        (isClickable ? ' avatar-clickable' : '') + (className ? ' ' + className : '')}
+      sx={{
+        position: 'relative', display: 'inline-grid', placeItems: 'center', flexShrink: 0,
+        width: s.size + 'px', height: s.size + 'px', boxSizing: 'border-box',
+        p: 0, border: 'none', background: 'transparent', fontFamily: 'inherit',
+        color: hasInitials ? 'var(--Buttons-' + C + '-Text)' : 'var(--Background)',
+        ...(insideButton && { marginLeft: '2px', marginRight: '2px' }),
+        ...(isClickable && {
+          cursor: 'pointer', outline: 'none', borderRadius: 'var(--Button-Focus-Radius, 8px)',
+          '&:hover .avatar-shape-fill::after': { backgroundColor: 'var(--Hover)' },
+          '&:active .avatar-shape-fill::after': { backgroundColor: 'var(--Pressed)' },
+          '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px' },
+        }),
+        ...sx,
+      }}
+      {...props}
+    >
+      <Box className="avatar-shape-fill" aria-hidden="true" sx={{
+        position: 'absolute', inset: 0, backgroundColor: fill, ...shapeStyle(shape),
+        /* Radius shapes keep a CSS border; path shapes get the outline below. */
+        ...(d ? {} : { border: BORDER_WIDTH + ' solid ' + edge, boxSizing: 'border-box' }),
+        '&::after': { content: '""', position: 'absolute', inset: 0 },
+      }}>
+        {effectiveSrc && (
+          <Box component="img" src={effectiveSrc} alt="" referrerPolicy="no-referrer" onError={onImgError}
+               sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+        )}
+      </Box>
+      {hasInitials && (() => {
+        const TextComp = getInitialsComp(size);
+        return (
+          <TextComp aria-hidden="true" sx={{
+            position: 'relative', color: 'inherit', lineHeight: 1, textAlign: 'center',
+            fontSize: shapeInitialsFontSize(s.size, size === 'custom' ? null : resolveSizeName(size)),
+            ...CAP_HEIGHT_TRIM,
+          }}>
+            {initials.slice(0, 2).toUpperCase()}
+          </TextComp>
+        );
+      })()}
+      {!effectiveSrc && !hasInitials && (
+        <PersonIcon aria-hidden="true" sx={{ position: 'relative', width: '60%', height: '60%', color: 'inherit' }} />
+      )}
+      {d && (
+        <svg aria-hidden="true" focusable="false" viewBox="0 0 100 100" preserveAspectRatio="none"
+             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible', pointerEvents: 'none' }}>
+          <path d={d} fill="none" stroke={edge} strokeWidth={BORDER_WIDTH} vectorEffect="non-scaling-stroke" />
+        </svg>
       )}
     </Box>
   );

@@ -5,6 +5,7 @@ import { Avatar, AVATAR_SIZE_MAP, resolveSizeName } from '../Avatar/Avatar';
 import { Button } from '../Button/Button';
 import { Popover } from '../Popover/Popover';
 import { Subtitle, Body } from '../Typography';
+import { shapeStyle, AVATAR_SHAPES } from '../Shape/shapes';
 
 /**
  * AvatarGroup — Figma's Avatar Group.
@@ -53,10 +54,10 @@ const BUTTON_HEIGHT = {
 };
 
 /** The details card: a large avatar, the name, the detail line. */
-function PersonCard({ person }) {
+function PersonCard({ person, shape }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 'var(--Sizing-2, 16px)', padding: 'var(--Sizing-1, 8px)' }}>
-      <Avatar size="large" src={person.src} initials={person.initials} alt="" />
+      <Avatar size="large" src={person.src} initials={person.initials} alt="" shape={shape} />
       <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         {person.name && <Subtitle>{person.name}</Subtitle>}
         {person.detail && <Body>{person.detail}</Body>}
@@ -72,7 +73,7 @@ const ROUND = { borderRadius: '50%' };
 let cardSeq = 0;
 
 /** One avatar in the group, with its ring, its front-on-hover and its card. */
-function GroupItem({ person, onPersonClick, buttonSize, buttonVariant }) {
+function GroupItem({ person, onPersonClick, buttonSize, buttonVariant, shape }) {
   const ref = useRef(null);
   const [open, setOpen] = useState(false);
   const leaveTimer = useRef(null);
@@ -88,7 +89,7 @@ function GroupItem({ person, onPersonClick, buttonSize, buttonVariant }) {
     ? { onMouseEnter: show, onMouseLeave: hide, onFocus: show, onBlur: hide, onKeyDown: (e) => { if (e.key === 'Escape') setOpen(false); } }
     : {};
 
-  const avatar = <Avatar src={person.src} initials={person.initials} alt="" />;
+  const avatar = <Avatar src={person.src} initials={person.initials} alt="" shape={shape} />;
   const describe = hasCard && open ? idRef.current : undefined;
 
   return (
@@ -113,7 +114,7 @@ function GroupItem({ person, onPersonClick, buttonSize, buttonVariant }) {
         <Popover open={open} onClose={() => setOpen(false)} anchorEl={ref.current} placement="bottom-start" arrow
           width="auto" role="tooltip" autoFocus={false} id={idRef.current} theme={null}
           onMouseEnter={show} onMouseLeave={hide}>
-          <PersonCard person={person} />
+          <PersonCard person={person} shape={shape} />
         </Popover>
       )}
     </Box>
@@ -130,6 +131,8 @@ export function AvatarGroup({
   /** Called with the hidden people when "+N" is pressed, after the list opens. */
   onOverflowClick,
   buttonVariant = 'ghost',
+  /* Every avatar's shape (AVATAR_SHAPES); the separating ring follows it. */
+  shape,
   className = '',
   sx = {},
   ...props
@@ -137,6 +140,7 @@ export function AvatarGroup({
   const overflowRef = useRef(null);
   const [listOpen, setListOpen] = useState(false);
   const peopleMode = Array.isArray(people);
+  const shaped = Boolean(shape) && shape !== 'circle' && AVATAR_SHAPES.includes(shape);
   const all = peopleMode ? people : React.Children.toArray(children);
   const visible = all.slice(0, max);
   const hidden = all.slice(max);
@@ -184,6 +188,16 @@ export function AvatarGroup({
         display: 'inline-flex', alignItems: 'center',
         '& > *:not(:first-of-type)': { marginLeft: step },
         '& > *': { position: 'relative', borderRadius: '50%', boxShadow: '0 0 0 2px var(--Background)', display: 'inline-flex' },
+        /* A shaped group: the ring is a halo of the page's --Background cut to
+           the same shape, 2px larger, behind each avatar — a round ring
+           around a cookie would show the circle the shape replaced. */
+        ...(shaped && {
+          '& > *': { position: 'relative', display: 'inline-flex', isolation: 'isolate', boxShadow: 'none', borderRadius: 0 },
+          '& > *::before': {
+            content: '""', position: 'absolute', inset: '-2px', zIndex: -1,
+            backgroundColor: 'var(--Background)', ...shapeStyle(shape),
+          },
+        }),
         // Hover or focus brings an avatar to the front, so it shows whole.
         '& > *:hover, & > *:focus-within': { zIndex: 1 },
         ...sx,
@@ -193,9 +207,11 @@ export function AvatarGroup({
       {peopleMode
         ? visible.map((p, i) => (
             <GroupItem key={p.key || p.name || i} person={p} onPersonClick={onPersonClick}
-              buttonSize={buttonSize} buttonVariant={buttonVariant} />
+              buttonSize={buttonSize} buttonVariant={buttonVariant} shape={shaped ? shape : undefined} />
           ))
-        : visible.map((c) => (React.isValidElement(c) && c.props.size === undefined ? React.cloneElement(c, { size }) : c))}
+        : visible.map((c) => (React.isValidElement(c)
+            ? React.cloneElement(c, { ...(c.props.size === undefined && { size }), ...(shaped && c.props.shape === undefined && { shape }) })
+            : c))}
 
       {overflow > 0 && (peopleMode ? (
         <Box component="span" className="avatar-group-item avatar-group-overflow">
@@ -212,24 +228,24 @@ export function AvatarGroup({
               if (p.href) return (
                 <Box key={p.key || p.name || i} component="a" href={p.href} className="avatar-group-row"
                   onClick={() => { setListOpen(false); click?.(); }} sx={{ ...clickableRowSx, textDecoration: 'none' }}>
-                  <PersonCard person={p} />
+                  <PersonCard person={p} shape={shaped ? shape : undefined} />
                 </Box>
               );
               return click ? (
                 <Box key={p.key || p.name || i} component="button" type="button" className="avatar-group-row"
                   onClick={() => { setListOpen(false); click(); }} sx={clickableRowSx}>
-                  <PersonCard person={p} />
+                  <PersonCard person={p} shape={shaped ? shape : undefined} />
                 </Box>
               ) : (
                 <Box key={p.key || p.name || i} className="avatar-group-row" sx={rowSx}>
-                  <PersonCard person={p} />
+                  <PersonCard person={p} shape={shaped ? shape : undefined} />
                 </Box>
               );
             })}
           </Popover>
         </Box>
       ) : (
-        <Avatar initials={'+' + overflow} size={size} color="neutral" defaultPhoto={false} />
+        <Avatar initials={'+' + overflow} size={size} color="neutral" defaultPhoto={false} shape={shaped ? shape : undefined} />
       ))}
     </Box>
   );

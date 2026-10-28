@@ -790,6 +790,12 @@ export const AVATAR_DOC = {
     values: ['small', 'medium', 'large'],
     default: 'medium'
   }, {
+    name: 'shape',
+    type: 'string',
+    values: ['circle', 'squircle', 'cookie-9', 'flower', 'gem', 'bun'],
+    default: 'circle',
+    note: 'One of AVATAR_SHAPES: circle, squircle, rounded, cookies 4/6/7/9/12, flower, gem, puffy, bun. The photo fills the shape; initials sit on the fill at about two-thirds of the round size (--Avatar-Shape-Initials); the Default style is a person knocked out of the filled shape. All keep the button border. One avatar shape per brand \u2014 a list of people in mixed shapes reads as broken. Figma: Avatar Container=Shape, its shape from the Avatar Shape component.'
+  }, {
     name: 'customSize',
     type: 'number',
     default: 'undefined'
@@ -822,7 +828,7 @@ export const AVATAR_DOC = {
     variesWith: 'theme + surface',
     figma: 'Modes → Theme → Buttons'
   }, surfaceToken('--Text', 'the initials')],
-  composition: ['Content resolves in order: `src` → `initials` → the person glyph (Figma\u2019s Default). `defaultPhoto` shows the built-in sample photo.', 'Use `AvatarGroup` for a stack; it handles the overlap and the "+n" overflow.'],
+  composition: ['Content resolves in order: `src` → `initials` → the person glyph (Figma\u2019s Default). `defaultPhoto` shows the built-in sample photo.', 'Use `AvatarGroup` for a stack; it handles the overlap and the "+n" overflow. Give the group `shape` and every avatar, and the ring between them, takes it.'],
   accessibility: ['An avatar with a photo needs `alt` naming the person.', 'Initials are not a name. `aria-label="JD"` passes every checker and says nothing — give the full name.'],
   gotchas: ['In Figma the variant axis is `Style = Initials | Default | Photo`. Those are content choices; the library derives them from which prop you pass, so there is no `style` prop.']
 };

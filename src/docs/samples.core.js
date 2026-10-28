@@ -343,6 +343,17 @@ export const CORE_SAMPLES = {
   },
 
   Avatar: {
+    /* One shape per brand; shown across the set, each style in it. */
+    shape: () => (
+      <Axis values={['circle', 'squircle', 'cookie-9', 'flower', 'gem', 'bun']} defaultValue="circle"
+            render={(v) => (
+              <HStack gap="var(--Sizing-1)">
+                <Avatar shape={v} defaultPhoto size="large" alt="Sample person" />
+                <Avatar shape={v} initials="LN" size="large" />
+                <Avatar shape={v} size="large" />
+              </HStack>
+            )} />
+    ),
     /* The default IS the photo — a bare <Avatar /> shows it, and `initials`
        or `icon` are the overrides. Turning it off leaves the fallback. */
     defaultPhoto: () => (
