@@ -808,7 +808,7 @@ export const SHAPE_BUTTON_DOC = {
     type: 'string',
     values: ['circle', 'squircle', 'cookie-9', 'flower', 'gem', 'puffy'],
     default: 'circle',
-    note: 'The same eleven as an Avatar (AVATAR_SHAPES): circle, squircle, rounded, cookies 4/6/7/9/12, flower, gem, puffy. Anything else draws a circle and warns. Circle, the cookies, flower and puffy can morph into each other; squircle, rounded and gem are fixed.'
+    note: 'The same twelve as an Avatar (AVATAR_SHAPES): circle, squircle, rounded, cookies 4/6/7/9/12, flower, gem, puffy, bun. Anything else draws a circle and warns. Circle, the cookies, flower and puffy can morph into each other; squircle, rounded, gem and bun are fixed.'
   }, {
     name: 'morphTo',
     type: 'string',

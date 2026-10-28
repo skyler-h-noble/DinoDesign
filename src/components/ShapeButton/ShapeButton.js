@@ -25,8 +25,8 @@ import { shapePath, shapeStyle, MORPHABLE_SHAPES, AVATAR_SHAPES } from '../Shape
  * clipped: an inline SVG path (which can morph), and for an image a mask on
  * the IMAGE only — the button around it still carries the ring.
  *
- * SHAPES — the same eleven as an Avatar (AVATAR_SHAPES): circle, squircle,
- * rounded, the cookies, flower, gem, puffy. Anything else draws a circle and
+ * SHAPES — the same twelve as an Avatar (AVATAR_SHAPES): circle, squircle,
+ * rounded, the cookies, flower, gem, puffy, bun. Anything else draws a circle and
  * warns. Pointed or busy shapes (bursts, hearts, arrows) do not read as a
  * button and do not hold an icon.
  *
