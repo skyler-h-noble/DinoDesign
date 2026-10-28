@@ -201,9 +201,25 @@ export function BottomNavigation({
   /* Raised: the items part round a gap the FAB stands over — Figma's
      24px "FAB Frame". After the first half: two and two for four items,
      three and two for five. */
+  /* Each side of the gap is its OWN equal half, and the items spread evenly
+     within it. Spread across the whole bar, two items went to its far ends
+     while the FAB sat in the middle — Home hard left, the + a long way from
+     either. Halves keep the FAB on the centre line whatever the count, and
+     put each item in the middle of the space it has. */
+  let rowEls = itemEls;
   if (raised) {
-    itemEls.splice(Math.ceil(itemEls.length / 2), 0,
-      <Box key="fab-gap" role="presentation" className="bottom-nav-fab-gap" sx={{ width: FAB_GAP, flexShrink: 0 }} />);
+    const cut = Math.ceil(itemEls.length / 2);
+    const half = (key, els) => (
+      <Box key={key} role="none" className={'bottom-nav-half bottom-nav-half-' + key}
+        sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-evenly' }}>
+        {els}
+      </Box>
+    );
+    rowEls = [
+      half('start', itemEls.slice(0, cut)),
+      <Box key="fab-gap" role="presentation" className="bottom-nav-fab-gap" sx={{ width: FAB_GAP, flexShrink: 0 }} />,
+      half('end', itemEls.slice(cut)),
+    ];
   }
 
   const bar = (
@@ -272,7 +288,7 @@ export function BottomNavigation({
           maxWidth: isVertical ? undefined : 600,
         }}
       >
-        {itemEls}
+        {rowEls}
       </Box>
     </Box>
   );

@@ -383,3 +383,18 @@ describe('The ring as a speed dial', () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 });
+
+describe('BottomNavigation — items around a centred FAB', () => {
+  const two = [{ label: 'Home', icon: <span /> }, { label: 'Products', icon: <span /> }];
+  test('each side of the FAB is its own half, holding its share of the items', () => {
+    const { container } = render(
+      <BottomNavigation items={two} fabAction={{ icon: <span />, label: 'Create' }} fabPosition="center" fixed={false} />
+    );
+    const start = container.querySelector('.bottom-nav-half-start');
+    const end = container.querySelector('.bottom-nav-half-end');
+    expect(start.querySelectorAll('[role="tab"]')).toHaveLength(1);
+    expect(end.querySelectorAll('[role="tab"]')).toHaveLength(1);
+    // The FAB's gap sits between the halves.
+    expect(start.nextElementSibling).toHaveClass('bottom-nav-fab-gap');
+  });
+});
