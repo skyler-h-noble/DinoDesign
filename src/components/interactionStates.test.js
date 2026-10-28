@@ -82,6 +82,7 @@ const STATES = {
 const REGISTRY = [
   { control: 'Button',              file: 'Button/Button.js' },
   { control: 'Fab',                 file: 'Fab/Fab.js' },
+  { control: 'ShapeButton',         file: 'ShapeButton/ShapeButton.js' },
   { control: 'Chip',                file: 'Chip/Chip.js' },
   { control: 'Link',                file: 'Link/Link.js' },
   { control: 'Tabs',                file: 'Tabs/Tabs.js' },
