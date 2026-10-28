@@ -248,12 +248,12 @@ export const PLAYER_DOC = {
     name: 'title / subtitle',
     type: 'string',
     default: 'undefined',
-    note: 'Both optional. With neither, and no avatar, the meta block is not rendered at all \u2014 a bare transport is a real shape.'
+    note: 'Both optional. With neither, and no artwork, the meta block is not rendered at all \u2014 a bare transport is a real shape.'
   }, {
-    name: 'avatarSrc / avatarInitials',
+    name: 'imageSrc / imageAlt',
     type: 'string',
     default: 'undefined',
-    note: 'Artwork, through the lib\u2019s Avatar. Its alt text is derived from `title`.'
+    note: 'The artwork: a rounded square as tall as the title and subtitle (40 / 48 / 56 by size), its corner the brand\u2019s capped at 8 so a pill brand does not round it into a circle. Not an Avatar \u2014 a cover is not a person. `imageAlt` describes it; with none it is \u201cArtwork for {title}\u201d. `avatarSrc` is the old name and still works; `avatarInitials` is retired (ignored, warns once in development).'
   }, {
     name: 'position / defaultPosition',
     type: 'number',
@@ -304,7 +304,7 @@ export const PLAYER_DOC = {
     default: 'false'
   }],
   composition: [
-    'Every part is an existing component \u2014 Avatar, Button, Slider, Typography \u2014 arranged. There is no new primitive, and there should not be: a player that drew its own round button would be a second button with its own focus ring to keep in step.',
+    'Every part is an existing component \u2014 Button, Slider, Typography \u2014 arranged, plus the cover image. There is no new primitive, and there should not be: a player that drew its own round button would be a second button with its own focus ring to keep in step.',
     'The meta block, the transport and the scrubber each disappear when they have nothing to show, so one component covers a full bar and a bare transport without a `variant` for each.',
   ],
   accessibility: [

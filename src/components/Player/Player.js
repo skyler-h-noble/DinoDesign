@@ -25,7 +25,6 @@
 // track and vanishes when you let go. The times sit still under the scrubber.
 import React, { useState } from 'react';
 import { Box } from '@mui/material';
-import { Avatar } from '../Avatar';
 import { Button } from '../Button';
 import { Slider } from '../Slider';
 import { Body, Caption, MobileNavLabel } from '../Typography';
@@ -54,12 +53,23 @@ export function formatTime(seconds) {
   return h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${m}:${pad(sec)}`;
 }
 
+/* Artwork per size: the height of the title and subtitle it sits beside. */
+const ARTWORK = { small: 40, medium: 48, large: 56 };
+let warnedInitials = false;
+
 export function Player({
   /* Optional "now playing" line above the scrubber. Figma's Player has none;
      kept so callers of the earlier audio bar still get their title. */
   title,
   subtitle,
+  /* ARTWORK, not a person: a rounded square, as every music and podcast
+     player draws the cover. `imageAlt` describes it; with none it is named
+     from the title. `avatarSrc` is the old name and still works. */
+  imageSrc,
+  imageAlt,
   avatarSrc,
+  /* RETIRED. Initials say "a person"; a track has no initials. Ignored, with
+     a one-time warning in development. */
   avatarInitials,
 
   /* Controlled or not, the same as every other input here. `position` with no
@@ -119,7 +129,13 @@ export function Player({
     onPlayPause?.(!isPlaying);
   };
 
-  const hasMeta = Boolean(title || subtitle || avatarSrc || avatarInitials);
+  const artwork = imageSrc || avatarSrc;
+  if (avatarInitials && process.env.NODE_ENV !== 'production' && !warnedInitials) {
+    warnedInitials = true;
+    // eslint-disable-next-line no-console
+    console.warn('[Player] avatarInitials is retired: the player shows artwork, not a person. Pass imageSrc.');
+  }
+  const hasMeta = Boolean(title || subtitle || artwork);
 
   const control = (key, name, icon, onClick, solid = false) => (
     <Button key={key} variant={solid ? variant : 'ghost'} size={size} iconOnly disabled={disabled}
@@ -146,13 +162,23 @@ export function Player({
     >
       {hasMeta && (
         <Box className="player-meta" sx={{ display: 'flex', alignItems: 'center', gap: 'var(--Sizing-1, 8px)', minWidth: 0 }}>
-          {(avatarSrc || avatarInitials) && (
-            <Avatar src={avatarSrc} initials={avatarInitials} size={size}
-                    alt={title ? `Artwork for ${title}` : undefined} />
+          {artwork && (
+            <Box component="img" className="player-artwork" src={artwork}
+                 alt={imageAlt ?? (title ? `Artwork for ${title}` : '')}
+                 sx={{
+                   /* As tall as the title and subtitle beside it, per size. */
+                   width: ARTWORK[size] || ARTWORK.medium, height: ARTWORK[size] || ARTWORK.medium,
+                   flexShrink: 0, objectFit: 'cover', display: 'block',
+                   /* The brand's corner, capped: a pill brand's 34px would
+                      round a 48px cover into a circle — an avatar again. */
+                   borderRadius: 'min(var(--Style-Border-Radius, 4px), 8px)',
+                 }} />
           )}
           {/* minWidth:0, or a long title refuses to shrink: a flex item's
               default min-width is its content, the whole string. */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+          {/* Start-aligned whatever the page's text-align: in a centred
+              container the title and subtitle centred against each other. */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 0, textAlign: 'start' }}>
             {title && <Body style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</Body>}
             {subtitle && <Caption color="quiet" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{subtitle}</Caption>}
           </Box>

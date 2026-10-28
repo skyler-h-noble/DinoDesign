@@ -12,6 +12,16 @@ import { Box, Stack, Grid } from '@mui/material';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs';
 import { Player } from './Player';
 import { CodeBlock } from '../CodeBlock';
+
+/* A stand-in cover: an image, as a real one would be. It is image CONTENT, so
+   its colors are its own rather than tokens. */
+const SAMPLE_ARTWORK = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">'
+  + '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">'
+  + '<stop offset="0" stop-color="#3d6b5a"/><stop offset="1" stop-color="#c8a96a"/></linearGradient></defs>'
+  + '<rect width="96" height="96" fill="url(#g)"/>'
+  + '<circle cx="64" cy="34" r="14" fill="#f4e7c5" opacity=".9"/>'
+  + '<path d="M0 72 Q24 56 48 70 T96 64 V96 H0Z" fill="#1f3a31" opacity=".8"/></svg>');
 import { BodySmall, Caption, EyebrowSmall } from '../Typography';
 
 const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral',
@@ -53,7 +63,7 @@ export function PlayerShowcase() {
     if (disabled) parts.push('disabled');
     if (withMeta) {
       parts.push('title="Weather Report"', 'subtitle="The Mercury Lamps"',
-                 'avatarInitials="ML"');
+                 'imageSrc="/covers/weather-report.jpg"');
     }
     parts.push('duration={195}', 'position={position}', 'onSeek={setPosition}',
                'playing={playing}', 'onPlayPause={setPlaying}');
@@ -98,7 +108,7 @@ export function PlayerShowcase() {
                     variant={variant} size={size} showTime={showTime} disabled={disabled}
                     title={withMeta ? 'Weather Report' : undefined}
                     subtitle={withMeta ? 'The Mercury Lamps' : undefined}
-                    avatarInitials={withMeta ? 'ML' : undefined}
+                    imageSrc={withMeta ? SAMPLE_ARTWORK : undefined}
                     duration={195} position={pos} onSeek={setPos}
                     playing={playing} onPlayPause={setPlaying}
                     onPrevious={withSkip ? () => setPos(0) : undefined}

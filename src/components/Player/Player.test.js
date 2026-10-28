@@ -92,3 +92,18 @@ describe('Player', () => {
     expect(screen.getByRole('group', { name: 'Episode player' })).toBeTruthy();
   });
 });
+
+describe('Player — artwork', () => {
+  test('imageSrc draws a cover image, not an avatar', () => {
+    const { container } = render(<Player title="Weather Report" imageSrc="/cover.jpg" duration={10} />);
+    const img = container.querySelector('img.player-artwork');
+    expect(img).not.toBeNull();
+    expect(img).toHaveAttribute('alt', 'Artwork for Weather Report');
+    expect(container.querySelector('.avatar')).toBeNull();
+  });
+
+  test('avatarSrc still works as the old name', () => {
+    const { container } = render(<Player title="T" avatarSrc="/cover.jpg" duration={10} />);
+    expect(container.querySelector('img.player-artwork')).toHaveAttribute('src', '/cover.jpg');
+  });
+});
