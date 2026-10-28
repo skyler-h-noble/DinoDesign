@@ -10,7 +10,7 @@ import { CodeBlock } from '../CodeBlock/CodeBlock';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { Button } from '../Button/Button';
 import { H5, BodySmall, Caption, EyebrowSmall } from '../Typography';
-import { ShapeButton, WIDE_SHAPES } from './ShapeButton';
+import { ShapeButton } from './ShapeButton';
 import { Input as TextInput } from '../Input/Input';
 import { Switch } from '../Switch/Switch';
 import { MORPHABLE_SHAPES } from '../Shape/shapes';
@@ -35,28 +35,19 @@ export function ShapeButtonShowcase() {
   const [color, setColor] = useState('primary');
   const [size, setSize] = useState('large');
   const [selected, setSelected] = useState(false);
-  const [labelPosition, setLabelPosition] = useState('none');
+  const [showLabel, setShowLabel] = useState(false);
   const [label, setLabel] = useState('Favourites');
   const [image, setImage] = useState(false);
-  const inside = labelPosition === 'inside';
-  const shapeList = inside ? WIDE_SHAPES : MORPHABLE_SHAPES;
-  const pickShape = (v) => setShape(v);
-  /* Switching to a label inside needs a wide shape; back out, a round one. */
-  const pickPosition = (p) => {
-    setLabelPosition(p);
-    if (p === 'inside' && !WIDE_SHAPES.includes(shape)) { setShape('pill'); setMorphTo('none'); }
-    if (p !== 'inside' && !MORPHABLE_SHAPES.includes(shape)) setShape('circle');
-  };
+
 
   const parts = [`shape="${shape}"`];
-  if (labelPosition !== 'none') parts.push(`label="${label}"`);
-  if (labelPosition === 'inside') parts.push('labelPosition="inside"');
+  if (showLabel) parts.push(`label="${label}"`);
   if (image) parts.push('imageSrc="/me.jpg"');
   if (morphTo !== 'none') parts.push(`morphTo="${morphTo}"`, `morphOn="${morphOn}"`);
   if (morphOn === 'selected' && morphTo !== 'none') parts.push('selected={on}', 'onClick={() => setOn(!on)}');
   if (color !== 'primary') parts.push(`color="${color}"`);
   if (size !== 'medium') parts.push(`size="${size}"`);
-  if (labelPosition === 'none') parts.push('aria-label="Add to favourites"');
+  if (!showLabel) parts.push('aria-label="Add to favourites"');
   const code = '<ShapeButton\n  ' + parts.join('\n  ') + '\n>\n  <FavoriteIcon />\n</ShapeButton>';
 
   const choice = (label, values, value, set) => (
@@ -101,11 +92,10 @@ export function ShapeButtonShowcase() {
                   <Box sx={{ p: 5, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                     <ShapeButton shape={shape} morphTo={morphTo === 'none' ? undefined : morphTo} morphOn={morphOn}
                                  selected={selected} onClick={() => setSelected((v) => !v)}
-                                 label={labelPosition === 'none' ? undefined : label}
-                                 labelPosition={labelPosition === 'inside' ? 'inside' : 'below'}
+                                 label={showLabel ? label : undefined}
                                  imageSrc={image ? SAMPLE_PHOTO : undefined}
-                                 color={color} size={size} aria-label={labelPosition === 'none' ? 'Add to favourites' : undefined}>
-                      <FavoriteIcon />
+                                 color={color} size={size} aria-label={showLabel ? undefined : 'Add to favourites'}>
+                      {image ? null : <FavoriteIcon />}
                     </ShapeButton>
                     <Caption color="quiet">
                       {morphTo === 'none' ? 'No morph' : morphOn === 'selected' ? 'Click to toggle selected' : morphOn === 'hover' ? 'Hover it' : 'Press and hold'}
@@ -117,17 +107,15 @@ export function ShapeButtonShowcase() {
               <Grid item sx={{ width: { xs: '100%', md: '50%' }, flexShrink: 0, minWidth: 0 }}>
                 <Box sx={{ p: 3 }}>
                   <Stack spacing={3}>
-                    {choice('LABEL', ['none', 'below', 'inside'], labelPosition, pickPosition)}
-                    {labelPosition !== 'none' && (
+                    <Switch checked={showLabel} onChange={(e) => setShowLabel(e.target.checked)} label="Label under the shape" />
+                    {showLabel && (
                       <TextInput label="Label" fullWidth value={label} onChange={(e) => setLabel(e.target.value)} />
                     )}
-                    <Select label="Shape" fullWidth value={shape} onChange={pickShape} options={shapeOptions(shapeList)} />
-                    {!inside && (
-                      <Select label="Morphs to" fullWidth value={morphTo} onChange={setMorphTo}
-                              options={shapeOptions(MORPHABLE_SHAPES, { extra: [{ value: 'none', label: 'none — no morph' }] })} />
-                    )}
-                    {!inside && <Switch checked={image} onChange={(e) => setImage(e.target.checked)} label="Image instead of a color" />}
-                    {!inside && morphTo !== 'none' && choice('WHEN', TRIGGERS, morphOn, setMorphOn)}
+                    <Select label="Shape" fullWidth value={shape} onChange={setShape} options={shapeOptions(MORPHABLE_SHAPES)} />
+                    <Select label="Morphs to" fullWidth value={morphTo} onChange={setMorphTo}
+                            options={shapeOptions(MORPHABLE_SHAPES, { extra: [{ value: 'none', label: 'none — no morph' }] })} />
+                    <Switch checked={image} onChange={(e) => setImage(e.target.checked)} label="Image instead of the icon" />
+                    {morphTo !== 'none' && choice('WHEN', TRIGGERS, morphOn, setMorphOn)}
                     {choice('COLOR', COLORS, color, setColor)}
                     {choice('SIZE', SIZES, size, setSize)}
                   </Stack>

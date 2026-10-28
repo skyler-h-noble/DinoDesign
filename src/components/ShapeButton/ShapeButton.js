@@ -15,20 +15,15 @@ import { shapePath, shapeStyle, MORPHABLE_SHAPES, SHAPE_NAMES } from '../Shape/s
  * CONTENT — an icon (children), or an image that fills the shape (imageSrc:
  * a profile photo, a product), or both (the icon over the image).
  *
- * LABEL — `label` with labelPosition:
- *   none    icon-only; aria-label is required (it warns without one)
- *   below   the label under the shape, as an app icon or a nav item has it.
- *           The shape keeps its morph and the text never fights the outline.
- *   inside  the shape is the label's background. Only WIDE shapes hold text
- *           (pill, rounded, squircle, square, slanted, clamshell,
- *           cut-corners); the button hugs the label. Wide shapes cannot
- *           blend into each other — a morph between them snaps.
- * With a visible label, that label is the name; aria-label is optional.
+ * LABEL — `label` sits under the shape, as an app icon or a nav item has it:
+ * the shape keeps its morph and the text never fights the outline. With a
+ * label, that text is the button's name; without one, aria-label is required
+ * (it warns). There is no label INSIDE the shape — text in a shape is what a
+ * Button is for.
  *
  * THE SHAPE is drawn, never a mask on the button, so the focus ring is never
- * clipped: an inline SVG path for icon buttons (which can morph), CSS radius
- * or clip-path on an inner layer for wide shapes, and a mask on the IMAGE
- * only — the button around it still carries the ring.
+ * clipped: an inline SVG path (which can morph), and for an image a mask on
+ * the IMAGE only — the button around it still carries the ring.
  *
  * MORPHING. The path's `d` transitions between two ROUND shapes
  * (MORPHABLE_SHAPES), which share 120 points. Other pairs, images and
@@ -41,10 +36,7 @@ import { shapePath, shapeStyle, MORPHABLE_SHAPES, SHAPE_NAMES } from '../Shape/s
  *
  * BORDER — every button has one: --Button-Border-Width (1px) in
  * --Buttons-{C}-Border. On a path it is a non-scaling stroke, so it stays
- * 1px at every size; over an image, an outline drawn on top; on a wide shape,
- * an edge layer in the border color with the fill inset inside it — so the
- * angled sides of a slanted or cut tag keep their border, which a clip-path
- * border would cut off.
+ * 1px at every size; over an image, an outline drawn on top.
  *
  * The Morph Button add-on in the studio builds the pair and the code.
  */
@@ -55,18 +47,6 @@ const SIZES = {
   large: { box: 96, icon: 36, font: 'var(--Body-Large-Font-Size, 18px)' },
 };
 
-/* Shapes that can hold a label inside, drawn so their ends stay true however
-   wide the label makes the button: px, not a stretched 0-100 path. */
-const WIDE = {
-  pill: () => ({ borderRadius: '9999px' }),
-  rounded: () => ({ borderRadius: 'var(--Button-Radius, var(--Style-Border-Radius, 8px))' }),
-  squircle: (h) => ({ borderRadius: Math.round(h * 0.42) + 'px', '@supports (corner-shape: squircle)': { cornerShape: 'squircle', borderRadius: Math.round(h * 0.5) + 'px' } }),
-  square: (h) => ({ borderRadius: Math.round(h * 0.28) + 'px' }),
-  slanted: (h) => ({ clipPath: `polygon(${Math.round(h * 0.25)}px 0, 100% 0, calc(100% - ${Math.round(h * 0.25)}px) 100%, 0 100%)` }),
-  clamshell: (h) => ({ clipPath: `polygon(${Math.round(h * 0.35)}px 0, calc(100% - ${Math.round(h * 0.35)}px) 0, 100% 50%, calc(100% - ${Math.round(h * 0.35)}px) 100%, ${Math.round(h * 0.35)}px 100%, 0 50%)` }),
-  'cut-corners': (h) => ({ clipPath: `polygon(${Math.round(h * 0.25)}px 0, calc(100% - ${Math.round(h * 0.25)}px) 0, 100% ${Math.round(h * 0.25)}px, 100% calc(100% - ${Math.round(h * 0.25)}px), calc(100% - ${Math.round(h * 0.25)}px) 100%, ${Math.round(h * 0.25)}px 100%, 0 calc(100% - ${Math.round(h * 0.25)}px), 0 ${Math.round(h * 0.25)}px)` }),
-};
-export const WIDE_SHAPES = Object.keys(WIDE);
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const warned = new Set();
@@ -88,8 +68,6 @@ export const ShapeButton = React.forwardRef(function ShapeButton({
   morphOn = 'selected',
   selected = false,
   label,
-  /* none | below | inside — 'none' unless a label is given, then 'below' */
-  labelPosition,
   imageSrc,
   imageAlt = '',
   color = 'primary',
@@ -102,14 +80,10 @@ export const ShapeButton = React.forwardRef(function ShapeButton({
 }, ref) {
   const [hover, setHover] = useState(false);
   const [press, setPress] = useState(false);
-  const pos = label ? (labelPosition === 'inside' ? 'inside' : 'below') : 'none';
-  const inside = pos === 'inside';
+  const pos = label ? 'below' : 'none';
 
   if (!SHAPE_NAMES.includes(shape)) warnOnce('shape:' + shape, '"' + shape + '" is not a shape.');
-  if (inside && !WIDE[shape]) {
-    warnOnce('wide:' + shape, '"' + shape + '" cannot hold a label inside — drawn as a pill. Wide shapes: ' + WIDE_SHAPES.join(', ') + '.');
-  }
-  if (morphTo && !inside && !imageSrc && !(MORPHABLE_SHAPES.includes(shape) && MORPHABLE_SHAPES.includes(morphTo))) {
+  if (morphTo && !imageSrc && !(MORPHABLE_SHAPES.includes(shape) && MORPHABLE_SHAPES.includes(morphTo))) {
     warnOnce('morph:' + shape + morphTo, shape + ' → ' + morphTo + ' will snap rather than blend. '
       + 'Both ends must be round shapes (MORPHABLE_SHAPES): ' + MORPHABLE_SHAPES.join(', ') + '.');
   }
@@ -131,10 +105,10 @@ export const ShapeButton = React.forwardRef(function ShapeButton({
     </svg>
   );
 
-  /* The shape layer: an SVG path (icon buttons), a CSS shape (inside a label),
-     or the image masked to the shape. */
+  /* The shape layer: an SVG path, or the image masked to the shape with its
+     outline drawn over it. */
   let shapeLayer;
-  if (imageSrc && !inside) {
+  if (imageSrc) {
     shapeLayer = (
       <Box className="shape-button-image" aria-hidden={imageAlt ? undefined : true}
            sx={{ position: 'absolute', inset: 0, ...shapeStyle(current) }}>
@@ -143,13 +117,6 @@ export const ShapeButton = React.forwardRef(function ShapeButton({
       </Box>
     );
     shapeLayer = <>{shapeLayer}{outline(pathFor(current), false)}</>;
-  } else if (inside) {
-    const css = (WIDE[current] || WIDE.pill)(s.box);
-    shapeLayer = (
-      <Box className="shape-button-edge" aria-hidden="true" sx={{ position: 'absolute', inset: 0, backgroundColor: edge, ...css }}>
-        <Box className="shape-button-bg" sx={{ position: 'absolute', inset: bw, backgroundColor: fill, ...css }} />
-      </Box>
-    );
   } else {
     shapeLayer = outline(pathFor(current), true);
   }
@@ -158,17 +125,14 @@ export const ShapeButton = React.forwardRef(function ShapeButton({
   const shapeBox = (
     <Box className="shape-button-box" sx={{
       position: 'relative', display: 'inline-grid', placeItems: 'center', flexShrink: 0,
-      ...(inside
-        ? { height: s.box, px: (s.box * 0.4) + 'px', gridAutoFlow: 'column', gap: '8px' }
-        : { width: s.box, height: s.box }),
+      width: s.box, height: s.box,
     }}>
       {shapeLayer}
       {hasIcon && <span className="shape-button-icon" aria-hidden="true">{children}</span>}
-      {inside && <span className="shape-button-label shape-button-label-inside">{label}</span>}
     </Box>
   );
 
-  const ringRadius = pos === 'none' && !imageSrc ? '50%' : inside && current === 'pill' ? '9999px' : 'var(--Button-Focus-Radius, 8px)';
+  const ringRadius = pos === 'none' ? '50%' : 'var(--Button-Focus-Radius, 8px)';
 
   return (
     <Box
@@ -198,8 +162,8 @@ export const ShapeButton = React.forwardRef(function ShapeButton({
         font: 'inherit',
         cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
-        /* The ring hugs what is there: a circle round an icon button, the
-           pill round a pill, a rounded box round a shape and its label. */
+        /* The ring hugs what is there: a circle round an icon button, a
+           rounded box round a shape and its label. */
         borderRadius: ringRadius,
         outline: 'none',
         '&:focus-visible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '2px' },
@@ -219,8 +183,8 @@ export const ShapeButton = React.forwardRef(function ShapeButton({
            them for the morph trigger. */
         /* Over an image the path is only the edge. */
         '& svg.shape-button-shape path.shape-button-outline': { fill: 'none' },
-        '&:hover:not(:disabled) svg.shape-button-shape path.shape-button-fill, &:hover:not(:disabled) .shape-button-bg': { fill: 'var(--Buttons-' + C + '-Hover)', backgroundColor: 'var(--Buttons-' + C + '-Hover)' },
-        '&:active:not(:disabled) svg.shape-button-shape path.shape-button-fill, &:active:not(:disabled) .shape-button-bg': { fill: 'var(--Buttons-' + C + '-Pressed)', backgroundColor: 'var(--Buttons-' + C + '-Pressed)' },
+        '&:hover:not(:disabled) svg.shape-button-shape path.shape-button-fill': { fill: 'var(--Buttons-' + C + '-Hover)' },
+        '&:active:not(:disabled) svg.shape-button-shape path.shape-button-fill': { fill: 'var(--Buttons-' + C + '-Pressed)' },
         /* An image has no fill to change, so hover and press lay the surface's
            own scrim over it. */
         '&:hover:not(:disabled) .shape-button-scrim': { backgroundColor: 'var(--Hover)' },

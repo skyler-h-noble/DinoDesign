@@ -54,15 +54,6 @@ describe('ShapeButton', () => {
     warn.mockRestore();
   });
 
-  test('a label inside draws a wide shape behind it and hugs the text', () => {
-    const { container } = render(<ShapeButton shape="pill" label="Save" labelPosition="inside">i</ShapeButton>);
-    expect(container.querySelector('.shape-button-bg')).toHaveStyle({ borderRadius: '9999px' });
-    expect(container.querySelector('.shape-button-label-inside')).toHaveTextContent('Save');
-    expect(container.querySelector('svg.shape-button-shape')).toBeNull();
-    // The border: an edge layer, the fill inset inside it.
-    expect(container.querySelector('.shape-button-edge .shape-button-bg')).not.toBeNull();
-  });
-
   test('an image fills the shape instead of a color', () => {
     const { container } = render(<ShapeButton shape="cookie-9" imageSrc="/me.jpg" label="Profile" />);
     const img = container.querySelector('.shape-button-image img');

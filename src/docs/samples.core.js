@@ -503,12 +503,6 @@ export const CORE_SAMPLES = {
       <Axis values={['default', 'primary', 'secondary', 'tertiary', 'neutral']} defaultValue="primary"
             render={(v) => <ShapeButton shape="cookie-9" color={v} aria-label="Add to favourites"><FavoriteIcon /></ShapeButton>} />
     ),
-    labelPosition: () => (
-      <Axis values={['below', 'inside']} defaultValue="below"
-            render={(v) => v === 'below'
-              ? <ShapeButton shape="cookie-9" label="Favourites"><FavoriteIcon /></ShapeButton>
-              : <ShapeButton shape="pill" label="Favourite" labelPosition="inside"><FavoriteIcon /></ShapeButton>} />
-    ),
     'imageSrc / imageAlt': () => (
       <ShapeButton shape="cookie-9" imageSrc={SAMPLE_PHOTO} label="Profile" size="large" />
     ),
