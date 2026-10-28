@@ -57,6 +57,12 @@ describe('Shape', () => {
 });
 
 describe('IconBadge shape', () => {
+  test('a shaped badge draws its shape 2px beyond each edge, so the icon clears it', () => {
+    render(<IconBadge shape="cookie-9"><span /></IconBadge>);
+    const css = [...document.styleSheets].flatMap((sh) => [...sh.cssRules].map((r) => r.cssText)).join('');
+    expect(css).toMatch(/::before\s*\{[^}]*inset:\s*-2px/);
+  });
+
   test('takes a shape and drops its corner for it', () => {
     const { container } = render(<IconBadge shape="cookie-9"><span /></IconBadge>);
     expect(container.firstChild).toHaveStyle({ borderRadius: '0' });

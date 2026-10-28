@@ -114,7 +114,20 @@ export function IconBadge({
         width: s.size,
         height: s.size,
         borderRadius: s.borderRadius,
-        ...(shape && { borderRadius: 0, ...shapeStyle(shape) }),
+        /* A shaped badge paints its shape on a layer 2px beyond each edge
+           (Figma: IconBadge/Shape-Size = BadgeHeight + 4): a cookie or flower
+           fills about 88% of its box, so drawn at the badge's own size it
+           crowded the 24px icon — at 32px it was 28 across. */
+        ...(shape && {
+          borderRadius: 0,
+          position: 'relative',
+          isolation: 'isolate',
+          '&::before': {
+            content: '""', position: 'absolute', inset: '-2px', zIndex: -1,
+            backgroundColor: variant === 'solid' ? 'var(--Icons-' + cap(color) + ', var(--Background))' : 'var(--Background)',
+            ...shapeStyle(shape),
+          },
+        }),
         /* SOLID is Figma's IconBadge: the tile is Icons/Icon in the color's
            Icons mode and the glyph reverses out on Icons/On-Icon — the same
            pair Switch's track and knob use. It was the theme's --Background
@@ -126,7 +139,8 @@ export function IconBadge({
            plain class and kept the tile the surface color. Same fix as
            Tooltip and Alert. */
         '&, &[data-surface], &[data-theme][data-surface]': {
-          backgroundColor: variant === 'solid' ? 'var(--Icons-' + cap(color) + ', var(--Background))' : 'var(--Background)',
+          /* Shaped: the tile itself is clear — its ::before is the shape. */
+          backgroundColor: shape ? 'transparent' : variant === 'solid' ? 'var(--Icons-' + cap(color) + ', var(--Background))' : 'var(--Background)',
           color: variant === 'solid' ? 'var(--Icons-On-' + cap(color) + ', var(--Text))' : 'var(--Text)',
         },
         display: 'flex',
