@@ -24,6 +24,7 @@ import { Tag } from '../components/Tag';
 import { IconBadge } from '../components/IconBadge';
 import { Shape } from '../components/Shape';
 import { Quote } from '../components/Quote';
+import { ShapeButton } from '../components/ShapeButton/ShapeButton';
 import { Link } from '../components/Link';
 import { Divider } from '../components/Divider';
 import { Loader } from '../components/Loader';
@@ -482,6 +483,29 @@ export const CORE_SAMPLES = {
     decorative: () => (
       <Toggle render={(on) => <Shape shape="flower" color="tertiary" width={64} decorative={on} />}
               offLabel="announced" onLabel="aria-hidden" />
+    ),
+  },
+
+  ShapeButton: {
+    shape: () => (
+      <Axis values={['circle', 'cookie-9', 'sunny', 'flower', 'clover-4', 'soft-burst']} defaultValue="circle"
+            render={(v) => <ShapeButton shape={v} aria-label="Add to favourites"><FavoriteIcon /></ShapeButton>} />
+    ),
+    morphOn: () => (
+      <Axis values={['selected', 'hover', 'press']} defaultValue="selected"
+            render={(v) => <ShapeButton shape="circle" morphTo="cookie-9" morphOn={v} selected={v === 'selected'} aria-label="Add to favourites"><FavoriteIcon /></ShapeButton>} />
+    ),
+    selected: () => (
+      <Toggle render={(on) => <ShapeButton shape="circle" morphTo="cookie-9" selected={on} aria-label="Add to favourites"><FavoriteIcon /></ShapeButton>}
+              offLabel="rest" onLabel="selected — morphed" />
+    ),
+    color: () => (
+      <Axis values={['default', 'primary', 'secondary', 'tertiary', 'neutral']} defaultValue="primary"
+            render={(v) => <ShapeButton shape="cookie-9" color={v} aria-label="Add to favourites"><FavoriteIcon /></ShapeButton>} />
+    ),
+    size: () => (
+      <Axis values={SIZES} defaultValue="medium"
+            render={(v) => <ShapeButton shape="cookie-9" size={v} aria-label="Add to favourites"><FavoriteIcon /></ShapeButton>} />
     ),
   },
 

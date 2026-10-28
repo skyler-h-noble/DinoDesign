@@ -791,7 +791,90 @@ export const QUOTE_DOC = {
   ]
 };
 
-export const REST_DOCS = [SELECT_DOC, MENU_DOC, CODE_BLOCK_DOC, PLAYER_DOC, SHAPE_DOC, QUOTE_DOC,
+
+export const SHAPE_BUTTON_DOC = {
+  name: 'ShapeButton',
+  summary: 'An icon button on one of the system\u2019s shapes, which can morph into another on hover, press or while selected.',
+  insteadUse: [{
+    when: 'It has a text label',
+    use: 'Button \u2014 text buttons keep the radius-token corners, so the label always fits'
+  }, {
+    when: 'It is the one primary action on a screen',
+    use: 'Fab'
+  }],
+  props: [{
+    name: 'shape',
+    type: 'string',
+    values: ['circle', 'cookie-9', 'sunny', 'flower', 'clover-4', 'soft-burst'],
+    default: 'circle',
+    note: 'Any shape works; the round family (MORPHABLE_SHAPES) is what can morph.'
+  }, {
+    name: 'morphTo',
+    type: 'string',
+    default: 'undefined',
+    note: 'The shape it becomes. Both ends round, or it snaps instead of blending (and warns).'
+  }, {
+    name: 'morphOn',
+    type: 'string',
+    values: ['selected', 'hover', 'press'],
+    default: 'selected',
+    note: '`selected` makes it a toggle with aria-pressed.'
+  }, {
+    name: 'selected',
+    type: 'boolean',
+    default: 'false'
+  }, {
+    name: 'color',
+    type: 'string',
+    values: ['default', 'primary', 'secondary', 'tertiary', 'neutral'],
+    default: 'primary',
+    note: 'The Buttons tokens, as Fab: -Button fill, -Text icon, -Hover / -Pressed.'
+  }, {
+    name: 'size',
+    type: 'string',
+    values: ['small', 'medium', 'large'],
+    default: 'medium',
+    note: '40 / 56 / 96, with a 20 / 24 / 36 icon.'
+  }],
+  states: [{
+    state: 'Hover',
+    setBy: 'interaction',
+    note: '--Buttons-{C}-Hover fill.'
+  }, {
+    state: 'Pressed',
+    setBy: 'interaction',
+    note: '--Buttons-{C}-Pressed fill.'
+  }, {
+    state: 'Focus-visible',
+    setBy: 'interaction',
+    note: '2px ring, 2px outside the button.'
+  }, {
+    state: 'Selected',
+    setBy: 'prop',
+    note: 'With morphOn="selected": the morphTo shape, and aria-pressed.'
+  }, {
+    state: 'Disabled',
+    setBy: 'prop',
+    note: '--Disabled opacity; it does not morph.'
+  }],
+  theming: inherits(),
+  tokens: [surfaceToken('--Buttons-{C}-Button', 'the shape'), surfaceToken('--Buttons-{C}-Text', 'the icon'), surfaceToken('--Focus-Visible', 'the ring')],
+  composition: [
+    'The shape is an inline SVG path behind the icon, not a mask \u2014 a mask would clip the focus ring.',
+    'The Morph Button add-on in the studio picks a pair that blends, the trigger, and writes the code and the Figma steps.',
+  ],
+  accessibility: [
+    'Needs an aria-label naming the action; it warns without one.',
+    'The morph is never the only sign of state: aria-pressed carries it.',
+    'Under reduced motion the morph snaps.',
+  ],
+  gotchas: [
+    'Morphing blends only between round shapes \u2014 they share 120 points. Safari does not animate path changes and snaps.',
+    'In Figma, the blend is Smart Animate between the Rest and Morphed variants in a prototype.',
+  ]
+};
+
+export const REST_DOCS = [SELECT_DOC, MENU_DOC, CODE_BLOCK_DOC, PLAYER_DOC, SHAPE_DOC, QUOTE_DOC, SHAPE_BUTTON_DOC,
   CIRCULAR_PROGRESS_DOC, LINEAR_PROGRESS_DOC, TYPOGRAPHY_DOC,
   GRID_DOC, MINI_SWATCH_DOC, BEVEL_TEXT_DOC, CURVED_TEXT_DOC, undesigned('Autocomplete', 'A text field whose list narrows as the user types.', [{
   when: 'The list is short and fixed',

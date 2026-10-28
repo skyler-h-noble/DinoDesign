@@ -38,6 +38,8 @@ import { Rail } from '../components/Rail';
 import { Player } from '../components/Player';
 import { Shape } from '../components/Shape';
 import { Quote } from '../components/Quote';
+import { ShapeButton } from '../components/ShapeButton/ShapeButton';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { Ratio } from '../components/Ratio';
 import { SearchField } from '../components/SearchField';
 import { Select } from '../components/Select';
@@ -319,6 +321,17 @@ function PlayerExample() {
 
 /* Stateful and ICON-ONLY, because that is the shape a toggle almost always
    takes — and it is the shape that needs the aria-label the doc insists on. */
+/* Stateful: the morph IS the point, and it happens when it is selected. */
+function ShapeButtonExample() {
+  const [on, setOn] = useState(false);
+  return (
+    <ShapeButton shape="circle" morphTo="cookie-9" selected={on} onClick={() => setOn(!on)}
+                 size="large" aria-label="Add to favourites">
+      {on ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+    </ShapeButton>
+  );
+}
+
 function ToggleButtonExample() {
   const [bold, setBold] = useState(true);
   return (
@@ -329,6 +342,7 @@ function ToggleButtonExample() {
 }
 
 export const LEAD_EXAMPLES = {
+  ShapeButton: () => <ShapeButtonExample />,
   /* The job it is best at: a photo framed in the brand's shape, with a
      sticker in a second one. */
   Shape: () => (

@@ -73,6 +73,7 @@ import { SectionShowcase } from '../components/Section/SectionShowcase';
 import { RatioShowcase } from '../components/Ratio/RatioShowcase';
 import { IconBadgeShowcase } from '../components/IconBadge/IconBadgeShowcase';
 import { ShapeShowcase } from '../components/Shape/ShapeShowcase';
+import { ShapeButtonShowcase } from '../components/ShapeButton/ShapeButtonShowcase';
 import { QuoteShowcase } from '../components/Quote/QuoteShowcase';
 import { FooterShowcase } from '../components/Footer/FooterShowcase';
 import { CopyrightShowcase } from '../components/Copyright/CopyrightShowcase';
@@ -191,6 +192,7 @@ const NAV_ITEMS = [
     children: [
       { id: 'buttons', label: 'Button' },
       { id: 'fab', label: 'FAB' },
+      { id: 'shapebutton', label: 'Shape Button' },
       { id: 'buttongroup', label: 'Button Group' },
       /* Listed again, and the delisting note it replaces was wrong in an
          instructive way. It said ToggleButtonGroup "is ButtonGroup built a
@@ -512,6 +514,7 @@ function ShowcaseInner() {
             {activeSection === 'section' && <SectionShowcase />}
             {activeSection === 'ratio' && <RatioShowcase />}
             {activeSection === 'shape' && <ShapeShowcase />}
+            {activeSection === 'shapebutton' && <ShapeButtonShowcase />}
             {activeSection === 'iconbadge' && <IconBadgeShowcase />}
             {activeSection === 'quote' && <QuoteShowcase />}
 

@@ -81,6 +81,7 @@ export { MiniSwatch } from './MiniSwatch';
 export { IconBadge } from './IconBadge';
 export { Shape, SHAPE_NAMES, SHAPE_GROUPS, MORPHABLE_SHAPES, ICON_SHAPES, shapePath, shapeStyle, shapeSafeArea } from './Shape';
 export { Quote } from './Quote';
+export { ShapeButton, ShapeButtonShowcase } from './ShapeButton';
 export { ShapeShowcase } from './Shape/ShapeShowcase';
 export { QuoteShowcase } from './Quote/QuoteShowcase';
 export { IconBadgeShowcase } from './IconBadge/IconBadgeShowcase';
