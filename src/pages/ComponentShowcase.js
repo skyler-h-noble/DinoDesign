@@ -71,6 +71,7 @@ import { StackShowcase } from '../components/Stack/StackShowcase';
 import { TagShowcase } from '../components/Tag/TagShowcase';
 import { SectionShowcase } from '../components/Section/SectionShowcase';
 import { RatioShowcase } from '../components/Ratio/RatioShowcase';
+import { IconBadgeShowcase } from '../components/IconBadge/IconBadgeShowcase';
 import { ShapeShowcase } from '../components/Shape/ShapeShowcase';
 import { QuoteShowcase } from '../components/Quote/QuoteShowcase';
 import { FooterShowcase } from '../components/Footer/FooterShowcase';
@@ -262,6 +263,7 @@ const NAV_ITEMS = [
       { id: 'chip', label: 'Chip' },
       { id: 'tag', label: 'Tag' },
       { id: 'divider', label: 'Divider' },
+      { id: 'iconbadge', label: 'Icon Badge' },
       { id: 'quote', label: 'Quote' },
       { id: 'codeblock', label: 'Code Block' },
       { id: 'list', label: 'List' },
@@ -510,6 +512,7 @@ function ShowcaseInner() {
             {activeSection === 'section' && <SectionShowcase />}
             {activeSection === 'ratio' && <RatioShowcase />}
             {activeSection === 'shape' && <ShapeShowcase />}
+            {activeSection === 'iconbadge' && <IconBadgeShowcase />}
             {activeSection === 'quote' && <QuoteShowcase />}
 
             {/* ============ SURFACES ============ */}

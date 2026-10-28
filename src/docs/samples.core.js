@@ -509,6 +509,10 @@ export const CORE_SAMPLES = {
       <Axis values={['solid', 'light', 'dark']} defaultValue="solid"
             render={(v) => <IconBadge color="primary" variant={v}><MailIcon /></IconBadge>} />
     ),
+    size: () => (
+      <Axis values={SIZES} defaultValue="medium"
+            render={(v) => <IconBadge color="primary" size={v}><MailIcon /></IconBadge>} />
+    ),
     /* One shape for every tile on a page — that is what makes it the brand's.
        Shown across the icon-safe set, the drawn 8px corner first. */
     shape: () => (

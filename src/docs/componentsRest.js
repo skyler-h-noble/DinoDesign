@@ -1096,7 +1096,7 @@ export const REST_DOCS = [SELECT_DOC, MENU_DOC, CODE_BLOCK_DOC, PLAYER_DOC, SHAP
 }, {
   state: 'Selected',
   setBy: 'prop'
-}], [surfaceToken('--Background', 'the bar'), surfaceToken('--Hover', 'item hover')], ['Items are data. A FAB comes from `fab` rather than being nested.'], ['Icon-only items each need a name saying the action.', 'A toolbar is a `toolbar` role with arrow-key navigation between items, and one tab stop for the whole thing.'], ['No Figma drawing. `AppBar` shares its elevation group — AppBar, Toolbars and Menus are one row in the elevation table.']), undesigned('IconBadge', 'An icon on a themed tile — the feature-list and empty-state icon, 40px with a 24px glyph.', [{
+}], [surfaceToken('--Background', 'the bar'), surfaceToken('--Hover', 'item hover')], ['Items are data. A FAB comes from `fab` rather than being nested.'], ['Icon-only items each need a name saying the action.', 'A toolbar is a `toolbar` role with arrow-key navigation between items, and one tab stop for the whole thing.'], ['No Figma drawing. `AppBar` shares its elevation group — AppBar, Toolbars and Menus are one row in the elevation table.']), undesigned('IconBadge', 'An icon on a themed tile — the feature-list and empty-state icon, 32 / 40 / 48px with a 24px glyph.', [{
   when: 'You are badging something else (a count on an icon)',
   use: 'Badge around it'
 }, {
@@ -1113,6 +1113,12 @@ export const REST_DOCS = [SELECT_DOC, MENU_DOC, CODE_BLOCK_DOC, PLAYER_DOC, SHAP
   values: ['solid', 'light', 'dark'],
   default: 'solid',
   note: 'The surface level of its theme: Surface, Surface-Brightest, Surface-Dimmest. There are no -Light themes.'
+}, {
+  name: 'size',
+  type: 'string',
+  values: ['small', 'medium', 'large'],
+  default: 'medium',
+  note: '32 / 40 / 48 \u2014 Figma\u2019s Component-Size modes on the IconBadge (IconBadge/BadgeHeight). The icon stays 24.'
 }, {
   name: 'shape',
   type: 'string',

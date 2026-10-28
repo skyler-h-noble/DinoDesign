@@ -64,19 +64,10 @@ describe('IconBadge', () => {
   /* One size, so there is no size class to assert. IconBadge is 40px with a
      24px icon and an 8px radius, matching the single Figma component; a `size`
      is accepted, ignored and warned about once. */
-  test('takes no size prop, and says so once if given one', () => {
-    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
-    try {
-      const { container: plain } = render(<IconBadge><HomeIcon /></IconBadge>);
-      expect(plain.querySelector('.icon-badge')).toBeInTheDocument();
-      expect(warn.mock.calls.filter(([f]) => String(f).startsWith('[IconBadge]'))).toHaveLength(0);
-
-      render(<IconBadge size="large"><HomeIcon /></IconBadge>);
-      const hits = warn.mock.calls.filter(([f]) => String(f).startsWith('[IconBadge]'));
-      expect(hits).toHaveLength(1);
-      expect(hits[0][0]).toMatch(/IconBadge has one size \(40px\)/);
-    } finally {
-      warn.mockRestore();
+  test('sizes are Figma\'s Component-Size modes: 32 / 40 / 48', () => {
+    for (const [size, px] of [['small', 32], ['medium', 40], ['large', 48]]) {
+      const { container } = render(<IconBadge size={size}><HomeIcon /></IconBadge>);
+      expect(container.firstChild).toHaveStyle({ width: px + 'px', height: px + 'px' });
     }
   });
 
