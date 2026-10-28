@@ -28,6 +28,7 @@ import { CodeBlockShowcase } from '../components/CodeBlock/CodeBlockShowcase';
 import { ChartsShowcase } from '../components/Charts/ChartsShowcase';
 import { HeroGeneratorShowcase } from '../components/AddOns/HeroGeneratorShowcase';
 import { BentoGridShowcase } from '../components/AddOns/BentoGridShowcase';
+import { AdaptiveNavShowcase } from '../components/AddOns/AdaptiveNavShowcase';
 import { SwatchShowcase } from '../components/Swatch/SwatchShowcase';
 import { TableShowcase } from '../components/Table/TableShowcase';
 import { ListShowcase } from '../components/List/ListShowcase';
@@ -294,6 +295,7 @@ const NAV_ITEMS = [
       { id: 'charts', label: 'Charts' },
       { id: 'hero-generator', label: 'Hero Generator' },
       { id: 'bento-grid', label: 'Bento Grid' },
+      { id: 'adaptive-nav', label: 'Adaptive Nav' },
     ],
   },
   /* Decorative (Curved and Bevel Display Text) is out of the nav while it
@@ -530,6 +532,7 @@ function ShowcaseInner() {
             {activeSection === 'charts' && <ChartsShowcase />}
             {activeSection === 'hero-generator' && <HeroGeneratorShowcase />}
             {activeSection === 'bento-grid' && <BentoGridShowcase />}
+            {activeSection === 'adaptive-nav' && <AdaptiveNavShowcase />}
             {activeSection === 'swatch' && <SwatchShowcase />}
             {activeSection === 'list' && <ListShowcase />}
             {activeSection === 'table' && <TableShowcase />}
