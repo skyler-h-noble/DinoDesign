@@ -685,7 +685,7 @@ export const SHAPE_DOC = {
     type: 'string',
     values: ['circle', 'arch', 'cookie-9', 'flower', 'gem', 'burst', 'cut-corners', 'scallop'],
     default: 'circle',
-    note: 'Any of SHAPE_NAMES: 42 shapes in seven groups \u2014 radius (rounded, squircle), round, polygon, cookie, burst, pixel, cut. Every one is a path in ./shapes, the same list the Figma plugin builds the Shapes component from.'
+    note: 'Any of SHAPE_NAMES: 42 shapes in seven groups \u2014 radius (rounded, squircle), round, polygon, cookie, burst, pixel, cut. Every one is a path in ./shapes; the Figma Shape component (Shapes page) is built from the same formulas.'
   }, {
     name: 'width / height',
     type: 'number | string',
@@ -728,7 +728,7 @@ export const SHAPE_DOC = {
   gotchas: [
     'It is a CSS mask, not clip-path: path(). path() takes pixels only, so the shape would not resize with its box.',
     'A mask clips box-shadow too. For a shadow that follows the shape, put `filter: drop-shadow(...)` on a wrapper.',
-    '`rounded` follows --Style-Border-Radius; every other shape is fixed geometry and looks the same in every brand.',
+    '`rounded` follows --Card-Radius (as the Figma Shape component does); every other shape is fixed geometry and looks the same in every brand.',
   ]
 };
 

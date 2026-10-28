@@ -14,7 +14,7 @@
  * transition between two paths needs the same commands in the same order.
  *
  * Two names are not paths:
- *   rounded   the brand's own corner (--Style-Border-Radius) — it follows the
+ *   rounded   the brand's own corner (--Card-Radius) — it follows the
  *             design system, so it is a radius, not a fixed drawing
  *   squircle  Figma's corner smoothing — CSS corner-shape where supported,
  *             a rounded corner elsewhere
@@ -114,30 +114,34 @@ function heart() {
   return pts;
 }
 
-function pixelCircle() {
-  const rows = [[34, 66], [22, 78], [14, 86], [8, 92], [6, 94], [6, 94], [6, 94], [8, 92], [14, 86], [22, 78], [34, 66]];
-  const h = 88 / rows.length;
-  const left = [];
+/* A shape made of whole rows of pixels: each row is [left, right], drawn as
+   a staircase down the right edge and back up the left. */
+function pixelRows(rows, top = 6, bottom = 94) {
+  const h = (bottom - top) / rows.length;
   const right = [];
+  const left = [];
   rows.forEach(([l, r], i) => {
-    const y0 = 6 + i * h;
-    const y1 = y0 + h;
-    right.push([r, y0], [r, y1]);
-    left.push([l, y1], [l, y0]);
+    const y0 = top + i * h;
+    right.push([r, y0], [r, y0 + h]);
   });
-  return right.concat(left.reverse());
+  for (let i = rows.length - 1; i >= 0; i--) {
+    const y0 = top + i * h;
+    left.push([rows[i][0], y0 + h], [rows[i][0], y0]);
+  }
+  return right.concat(left);
 }
 
+function pixelCircle() {
+  return pixelRows([[34, 66], [22, 78], [14, 86], [8, 92], [6, 94], [6, 94], [6, 94], [8, 92], [14, 86], [22, 78], [34, 66]]);
+}
+
+/* Pointing right: every row starts at the left edge, and the rows lengthen to
+   the middle and shorten again. */
 function pixelTriangle() {
-  const steps = 8;
-  const w = 88 / steps;
-  const top = [[6, 4]];
-  for (let i = 0; i < steps; i++) {
-    const x = 6 + (i + 1) * w;
-    const y = 4 + (i + 1) * (46 / steps);
-    top.push([x - w, y], [x, y]);
-  }
-  return top.concat(top.map(([x, y]) => [x, 100 - y]).reverse());
+  const n = 9;
+  const rows = [];
+  for (let i = 0; i < n; i++) rows.push([8, 8 + 86 * (1 - Math.abs((2 * (i + 0.5)) / n - 1))]);
+  return pixelRows(rows, 4, 96);
 }
 
 function scallop(bumps = 6) {
@@ -239,7 +243,9 @@ export function shapePath(name) {
  *  radius shapes. Spread into sx / style. */
 export function shapeStyle(name) {
   if (!name || name === 'none') return {};
-  if (name === 'rounded') return { borderRadius: 'var(--Style-Border-Radius, 8px)' };
+  /* Card-Radius, as the Figma Shape component binds it — the brand's corner
+     for a surface, which is what a framed image is. */
+  if (name === 'rounded') return { borderRadius: 'var(--Card-Radius, var(--Style-Border-Radius, 8px))' };
   if (name === 'squircle') {
     return { borderRadius: '28%', '@supports (corner-shape: squircle)': { borderRadius: '40%', cornerShape: 'squircle' } };
   }

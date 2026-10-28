@@ -21,7 +21,7 @@ describe('shape source', () => {
   });
 
   test('rounded follows the brand radius; squircle uses corner-shape where supported', () => {
-    expect(shapeStyle('rounded')).toEqual({ borderRadius: 'var(--Style-Border-Radius, 8px)' });
+    expect(shapeStyle('rounded')).toEqual({ borderRadius: 'var(--Card-Radius, var(--Style-Border-Radius, 8px))' });
     expect(JSON.stringify(shapeStyle('squircle'))).toContain('squircle');
   });
 
