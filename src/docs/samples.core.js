@@ -488,7 +488,7 @@ export const CORE_SAMPLES = {
 
   ShapeButton: {
     shape: () => (
-      <Axis values={['circle', 'cookie-9', 'sunny', 'flower', 'clover-4', 'soft-burst']} defaultValue="circle"
+      <Axis values={['circle', 'squircle', 'cookie-9', 'flower', 'gem', 'puffy']} defaultValue="circle"
             render={(v) => <ShapeButton shape={v} aria-label="Add to favourites"><FavoriteIcon /></ShapeButton>} />
     ),
     morphOn: () => (

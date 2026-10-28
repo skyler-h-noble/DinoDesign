@@ -37,7 +37,7 @@ describe('ShapeButton', () => {
 
   test('warns once for a pair that cannot blend, and for a missing name', () => {
     const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
-    render(<ShapeButton shape="circle" morphTo="triangle" aria-label="Fav">i</ShapeButton>);
+    render(<ShapeButton shape="circle" morphTo="gem" aria-label="Fav">i</ShapeButton>);
     render(<ShapeButton shape="circle">i</ShapeButton>);
     const msgs = warn.mock.calls.map((c) => String(c[0]));
     expect(msgs.some((m) => m.includes('will snap'))).toBe(true);
@@ -61,6 +61,14 @@ describe('ShapeButton', () => {
     // Only the edge is drawn over it.
     expect(container.querySelector('svg.shape-button-shape path.shape-button-outline')).not.toBeNull();
     expect(container.querySelector('path.shape-button-fill')).toBeNull();
+  });
+
+  test('limits itself to the avatar shapes: anything else draws a circle and warns', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const { container } = render(<ShapeButton shape="burst" aria-label="Fav">i</ShapeButton>);
+    expect(d(container)).toBe(shapePath('circle'));
+    expect(warn.mock.calls.some((c) => String(c[0]).includes('not a button shape'))).toBe(true);
+    warn.mockRestore();
   });
 
   test('has no axe violations', async () => {

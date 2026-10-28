@@ -806,9 +806,9 @@ export const SHAPE_BUTTON_DOC = {
   props: [{
     name: 'shape',
     type: 'string',
-    values: ['circle', 'cookie-9', 'sunny', 'flower', 'clover-4', 'soft-burst'],
+    values: ['circle', 'squircle', 'cookie-9', 'flower', 'gem', 'puffy'],
     default: 'circle',
-    note: 'Any shape works; the round family (MORPHABLE_SHAPES) is what can morph.'
+    note: 'The same eleven as an Avatar (AVATAR_SHAPES): circle, squircle, rounded, cookies 4/6/7/9/12, flower, gem, puffy. Anything else draws a circle and warns. Circle, the cookies, flower and puffy can morph into each other; squircle, rounded and gem are fixed.'
   }, {
     name: 'morphTo',
     type: 'string',

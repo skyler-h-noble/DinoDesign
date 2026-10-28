@@ -13,7 +13,7 @@ import { H5, BodySmall, Caption, EyebrowSmall } from '../Typography';
 import { ShapeButton } from './ShapeButton';
 import { Input as TextInput } from '../Input/Input';
 import { Switch } from '../Switch/Switch';
-import { MORPHABLE_SHAPES } from '../Shape/shapes';
+import { MORPHABLE_SHAPES, AVATAR_SHAPES } from '../Shape/shapes';
 import { shapeOptions } from '../Shape/shapeOptions';
 import { Select } from '../Select/Select';
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -111,9 +111,9 @@ export function ShapeButtonShowcase() {
                     {showLabel && (
                       <TextInput label="Label" fullWidth value={label} onChange={(e) => setLabel(e.target.value)} />
                     )}
-                    <Select label="Shape" fullWidth value={shape} onChange={setShape} options={shapeOptions(MORPHABLE_SHAPES)} />
+                    <Select label="Shape" fullWidth value={shape} onChange={setShape} options={shapeOptions(AVATAR_SHAPES)} />
                     <Select label="Morphs to" fullWidth value={morphTo} onChange={setMorphTo}
-                            options={shapeOptions(MORPHABLE_SHAPES, { extra: [{ value: 'none', label: 'none — no morph' }] })} />
+                            options={shapeOptions(AVATAR_SHAPES.filter((n) => MORPHABLE_SHAPES.includes(n)), { extra: [{ value: 'none', label: 'none — no morph' }] })} />
                     <Switch checked={image} onChange={(e) => setImage(e.target.checked)} label="Image instead of the icon" />
                     {morphTo !== 'none' && choice('WHEN', TRIGGERS, morphOn, setMorphOn)}
                     {choice('COLOR', COLORS, color, setColor)}

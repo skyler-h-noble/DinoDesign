@@ -250,6 +250,14 @@ export const MORPHABLE_SHAPES = DEFS
   .filter(([name, group]) => ['cookie', 'burst'].includes(group) || name === 'circle' || name === 'heart')
   .map(([n]) => n);
 
+/** The shapes a person — an Avatar — or a ShapeButton may take: the ones
+ *  with room for a face, initials or an icon, and calm enough to repeat down
+ *  a list. The Figma Avatar Shape component holds exactly these. */
+export const AVATAR_SHAPES = [
+  'circle', 'squircle', 'rounded', 'cookie-4', 'cookie-6', 'cookie-7', 'cookie-9', 'cookie-12',
+  'flower', 'gem', 'puffy',
+];
+
 /** Shapes an icon still reads inside at IconBadge's 40px with a 24px glyph:
  *  nothing pointed enough to clip the icon's corners. */
 export const ICON_SHAPES = [

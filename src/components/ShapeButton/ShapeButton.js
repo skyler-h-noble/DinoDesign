@@ -1,7 +1,7 @@
 // src/components/ShapeButton/ShapeButton.js
 import React, { useState } from 'react';
 import { Box } from '@mui/material';
-import { shapePath, shapeStyle, MORPHABLE_SHAPES, SHAPE_NAMES } from '../Shape/shapes';
+import { shapePath, shapeStyle, MORPHABLE_SHAPES, AVATAR_SHAPES } from '../Shape/shapes';
 
 /**
  * ShapeButton — a button whose background is one of the system's shapes, and
@@ -24,6 +24,11 @@ import { shapePath, shapeStyle, MORPHABLE_SHAPES, SHAPE_NAMES } from '../Shape/s
  * THE SHAPE is drawn, never a mask on the button, so the focus ring is never
  * clipped: an inline SVG path (which can morph), and for an image a mask on
  * the IMAGE only — the button around it still carries the ring.
+ *
+ * SHAPES — the same eleven as an Avatar (AVATAR_SHAPES): circle, squircle,
+ * rounded, the cookies, flower, gem, puffy. Anything else draws a circle and
+ * warns. Pointed or busy shapes (bursts, hearts, arrows) do not read as a
+ * button and do not hold an icon.
  *
  * MORPHING. The path's `d` transitions between two ROUND shapes
  * (MORPHABLE_SHAPES), which share 120 points. Other pairs, images and
@@ -82,7 +87,11 @@ export const ShapeButton = React.forwardRef(function ShapeButton({
   const [press, setPress] = useState(false);
   const pos = label ? 'below' : 'none';
 
-  if (!SHAPE_NAMES.includes(shape)) warnOnce('shape:' + shape, '"' + shape + '" is not a shape.');
+  const ok = (n) => AVATAR_SHAPES.includes(n);
+  if (!ok(shape)) warnOnce('shape:' + shape, '"' + shape + '" is not a button shape — drawn as a circle. Use one of: ' + AVATAR_SHAPES.join(', ') + '.');
+  if (morphTo && !ok(morphTo)) warnOnce('shape:' + morphTo, '"' + morphTo + '" is not a button shape — drawn as a circle.');
+  shape = ok(shape) ? shape : 'circle';
+  morphTo = morphTo && !ok(morphTo) ? 'circle' : morphTo;
   if (morphTo && !imageSrc && !(MORPHABLE_SHAPES.includes(shape) && MORPHABLE_SHAPES.includes(morphTo))) {
     warnOnce('morph:' + shape + morphTo, shape + ' → ' + morphTo + ' will snap rather than blend. '
       + 'Both ends must be round shapes (MORPHABLE_SHAPES): ' + MORPHABLE_SHAPES.join(', ') + '.');

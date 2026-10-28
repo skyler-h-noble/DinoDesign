@@ -79,7 +79,7 @@ export { CarouselDots, CarouselDot } from './CarouselDots';
    inside a menu row, documented where it appears — Select and Menu. */
 export { MiniSwatch } from './MiniSwatch';
 export { IconBadge } from './IconBadge';
-export { Shape, shapeOptions, SHAPE_NAMES, SHAPE_GROUPS, MORPHABLE_SHAPES, ICON_SHAPES, shapePath, shapeStyle, shapeSafeArea } from './Shape';
+export { Shape, shapeOptions, SHAPE_NAMES, SHAPE_GROUPS, MORPHABLE_SHAPES, ICON_SHAPES, AVATAR_SHAPES, shapePath, shapeStyle, shapeSafeArea } from './Shape';
 export { Quote } from './Quote';
 export { ShapeButton, ShapeButtonShowcase } from './ShapeButton';
 export { ShapeShowcase } from './Shape/ShapeShowcase';
