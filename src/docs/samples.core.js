@@ -413,18 +413,22 @@ export const CORE_SAMPLES = {
        drawn on --Background and never on the color, because the color is
        arbitrary and its contrast cannot be known. */
     selected: () => (
-      <Toggle render={(on) => <Swatch color="#70947b" label="Primary" selected={on} />}
+      <Toggle render={(on) => <Swatch color="#70947b" label="Primary" selected={on} onClick={() => {}} />}
               offLabel="unselected" onLabel="selected" />
     ),
     disabled: () => (
-      <Toggle render={(on) => <Swatch color="#70947b" label="Primary" disabled={on} />}
+      <Toggle render={(on) => <Swatch color="#70947b" label="Primary" disabled={on} onClick={() => {}} />}
               offLabel="enabled" onLabel="disabled" />
     ),
     /* With a radio every state is delegated to the radio, so the chip stays a
        plain color. Without one the chip carries the state itself. The two
-       mark selection differently, and that IS the design. */
+       mark selection differently, and that IS the design.
+       
+       Clickable, or neither shows: a swatch with no onClick is a plain color
+       sample, which draws no radio and no check — so this sample, and
+       `selected` above, rendered two identical bare circles. */
     radio: () => (
-      <Toggle render={(on) => <Swatch color="#70947b" label="Primary" radio={on} selected />}
+      <Toggle render={(on) => <Swatch color="#70947b" label="Primary" radio={on} selected onClick={() => {}} />}
               offLabel="chip carries it" onLabel="radio carries it" />
     ),
   },
