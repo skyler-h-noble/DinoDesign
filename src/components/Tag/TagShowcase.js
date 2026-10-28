@@ -16,6 +16,7 @@ const COLOR_GROUPS = [
   { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
 ];
 import { Button } from '../Button/Button';
+import { Input } from '../Input/Input';
 import { Switch } from '../Switch/Switch';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
@@ -215,27 +216,12 @@ export function TagShowcase() {
                   {/* Text input */}
                   <Box sx={{ mt: 3 }}>
                     <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>LABEL TEXT</EyebrowSmall>
-                    <Box
-                      component="input"
-                      type="text"
+                    {/* The library's TextInput, not a browser input. */}
+                    <Input fullWidth
                       value={labelText}
                       onChange={(e) => setLabelText(e.target.value)}
                       placeholder="Tag label…"
-                      sx={{
-                        width: '100%',
-                        height: '40px',
-                        px: '12px',
-                        backgroundColor: 'var(--Background)',
-                        border: '1px solid var(--Border)',
-                        borderRadius: 'var(--Style-Border-Radius)',
-                        color: 'var(--Text)',
-                        fontSize: '14px',
-                        fontFamily: 'inherit',
-                        outline: 'none',
-                        boxSizing: 'border-box',
-                        '&:focus': { borderColor: 'var(--Buttons-Default-Border)' },
-                        '&::placeholder': { color: 'var(--Text-Quiet)' },
-                      }}
+                      aria-label="Tag label text"
                     />
                   </Box>
 

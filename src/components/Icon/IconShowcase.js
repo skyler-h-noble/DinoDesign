@@ -74,6 +74,8 @@ import InfoSharpIcon from '@mui/icons-material/InfoSharp';
 
 import { Icon } from './Icon';
 import { Button } from '../Button/Button';
+import { Input } from '../Input/Input';
+import { NumberField } from '../NumberField/NumberField';
 import { Switch } from '../Switch/Switch';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { H3, H5, BodySmall, Caption, Label, EyebrowSmall } from '../Typography';
@@ -252,16 +254,11 @@ export function IconShowcase() {
                   {/* Icon name */}
                   <Box>
                     <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ICON</EyebrowSmall>
-                    <Box component="input" type="text" value={selectedIcon}
+                    {/* The library's TextInput, not a browser input. */}
+                    <Input size="small" fullWidth value={selectedIcon}
                       onChange={(e) => setSelectedIcon(e.target.value)}
                       placeholder="e.g. Home, Favorite, Delete"
-                      sx={{
-                        width: '100%', padding: '6px 10px', fontSize: '13px', fontFamily: 'inherit',
-                        border: '1px solid var(--Border)', borderRadius: '4px',
-                        backgroundColor: 'var(--Background)', color: 'var(--Text)',
-                        boxSizing: 'border-box',
-                        '&:focus': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px', borderColor: 'var(--Focus-Visible)' },
-                      }} />
+                      aria-label="Icon name" />
                     <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
                       Enter a MUI icon name.{' '}
                       <Box component="a" href="https://mui.com/material-ui/material-icons/"
@@ -328,12 +325,11 @@ export function IconShowcase() {
                     </Stack>
                     {size === 'custom' && (
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1.5 }}>
-                        <Box component="input" type="number" value={customSize} onChange={(e) => setCustomSize(e.target.value)}
+                        {/* The library's NumberField, not a browser input. */}
+                        <NumberField size="small" min={1} value={customSize}
+                          onChange={(v) => setCustomSize(String(v))}
                           aria-label="Custom font size in pixels"
-                          sx={{ width: 72, padding: '4px 8px', fontSize: '13px', fontFamily: 'inherit',
-                            border: '1px solid var(--Border)', borderRadius: '4px',
-                            backgroundColor: 'var(--Background)', color: 'var(--Text)', outline: 'none',
-                            '&:focus': { borderColor: 'var(--Focus-Visible)' } }} />
+                          sx={{ width: 96 }} />
                         <Caption style={{ color: 'var(--Text-Quiet)' }}>px</Caption>
                       </Box>
                     )}
@@ -342,16 +338,11 @@ export function IconShowcase() {
                   {/* aria-label */}
                   <Box sx={{ mt: 3 }}>
                     <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>ARIA LABEL</EyebrowSmall>
-                    <Box component="input" type="text" value={ariaLabel}
+                    {/* The library's TextInput, not a browser input. */}
+                    <Input size="small" fullWidth value={ariaLabel}
                       onChange={(e) => setAriaLabel(e.target.value)}
                       placeholder={'Leave empty for decorative (aria-hidden)'}
-                      sx={{
-                        width: '100%', padding: '6px 10px', fontSize: '13px', fontFamily: 'inherit',
-                        border: '1px solid var(--Border)', borderRadius: '4px',
-                        backgroundColor: 'var(--Background)', color: 'var(--Text)',
-                        boxSizing: 'border-box',
-                        '&:focus': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px', borderColor: 'var(--Focus-Visible)' },
-                      }} />
+                      aria-label="Icon aria-label" />
                     <Caption style={{ color: isMeaningful ? 'var(--Tags-Success-Text)' : 'var(--Text-Quiet)', display: 'block', marginTop: 6 }}>
                       {isMeaningful
                         ? '✓ Meaningful — role="img" aria-label="' + ariaLabel.trim() + '"'

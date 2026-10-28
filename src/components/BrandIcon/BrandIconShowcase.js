@@ -20,6 +20,7 @@ import { BrandIcon, BRAND_ICON_NAMES, hasBrandIcon } from './BrandIcon';
 import { CodeBlock } from '../CodeBlock';
 import { Body, BodySmall, Caption, EyebrowSmall, H3 } from '../Typography';
 import { Link } from '../Link';
+import { Input } from '../Input/Input';
 
 /* No curated list. An earlier version offered fifteen buttons, which was a
    guess at which marks matter dressed up as a feature: this build carries
@@ -142,21 +143,16 @@ export function BrandIconShowcase() {
                   <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>
                     MARK
                   </EyebrowSmall>
-                  <input
-                    type="text"
-                    list="brand-icon-names"
+                  {/* The library's TextInput, not a browser input. */}
+                  <Input size="small" fullWidth
+                    /* aria-invalid goes in inputProps so a valid name carries
+                       no attribute at all, not MUI's aria-invalid="false". */
+                    inputProps={{ list: 'brand-icon-names', 'aria-invalid': name && !known ? 'true' : undefined }}
                     value={name}
                     onChange={(e) => setName(e.target.value.trim().toLowerCase())}
                     placeholder="github"
                     aria-label="Brand mark name"
-                    aria-invalid={name && !known ? 'true' : undefined}
-                    style={{
-                      width: '100%', boxSizing: 'border-box',
-                      padding: '8px 10px', fontSize: 12, fontFamily: 'inherit',
-                      color: 'var(--Text)', background: 'var(--Background)',
-                      borderRadius: 'var(--Input-Radius, 6px)',
-                      border: `1px solid ${name && !known ? 'var(--Buttons-Error-Border)' : 'var(--Border)'}`,
-                    }}
+                    validation={name && !known ? 'error' : undefined}
                   />
                   {/* All 609, so the name does not have to be typed from
                       memory. A datalist suggests without constraining —

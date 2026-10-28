@@ -25,6 +25,8 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import StarIcon from '@mui/icons-material/Star';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import { BottomNavigation } from './BottomNavigation';
+import { Input } from '../Input/Input';
+import { Select } from '../Select/Select';
 import {
   H3, H4, H5, BodySmall, Caption, Label, EyebrowSmall
 } from '../Typography';
@@ -98,37 +100,21 @@ function ControlButton({ label, selected, onClick, disabled }) {
     </Box>
   );
 }
-function TextInput({ value, onChange, placeholder, sx: sxOverride }) {
+function TextInput({ value, onChange, placeholder, label, sx: sxOverride }) {
   return (
-    <Box component="input" type="text" value={value}
+    /* The library's TextInput, not a browser input. */
+    <Input size="small" value={value}
       onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
-      sx={{
-        flex: 1, padding: '4px 8px', fontSize: '13px', fontFamily: 'inherit',
-        border: '1px solid var(--Border)', borderRadius: '4px',
-        backgroundColor: 'var(--Background)', color: 'var(--Text)', outline: 'none',
-        minWidth: 0, '&:focus': { borderColor: 'var(--Focus-Visible)' },
-        ...sxOverride,
-      }}
+      aria-label={label || placeholder}
+      sx={{ flex: 1, minWidth: 0, ...sxOverride }}
     />
   );
 }
 function SelectInput({ value, onChange, options, label }) {
   return (
-    <Box component="select" value={value}
-      onChange={(e) => onChange(e.target.value)} aria-label={label}
-      sx={{
-        padding: '4px 6px', fontSize: '13px', fontFamily: 'inherit',
-        border: '1px solid var(--Border)', borderRadius: '4px',
-        backgroundColor: 'var(--Background)', color: 'var(--Text)', outline: 'none',
-        cursor: 'pointer', '&:focus': { borderColor: 'var(--Focus-Visible)' },
-      }}
-    >
-      {options.map((o) => (
-        <option key={typeof o === 'string' ? o : o.value} value={typeof o === 'string' ? o : o.value}>
-          {typeof o === 'string' ? o : o.label}
-        </option>
-      ))}
-    </Box>
+    /* The library's Select, not a browser select. */
+    <Select size="small" value={value} onChange={onChange}
+      options={options} label={label} labelPosition="none" minWidth={0} />
   );
 }
 function NumberStepper({ value, onChange, min, max, label }) {
@@ -378,6 +364,7 @@ export function BottomNavigationShowcase() {
                         value={cfg.label}
                         onChange={(val) => updateItemConfig(i, 'label', val)}
                         placeholder="Label"
+                        label={'Item ' + (i + 1) + ' label'}
                       />
                     )}
                   </Box>

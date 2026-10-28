@@ -230,7 +230,7 @@ export const NUMBER_FIELD_DOC = {
     'Set `min` and `max` where the range is real. Clamping is the only thing that stops a stepper running to -1 items or 400%, and it applies to typed input too.',
   ],
   accessibility: [
-    'The input is a real `<input type="number">`, so arrow keys step it and the browser announces it as a spin button without anything being added.',
+    'The input is a text input with `role="spinbutton"` and `inputMode="decimal"` (a phone shows the number pad): arrow keys step it, and it carries `aria-valuenow` / `-valuemin` / `-valuemax`, so a screen reader announces it as a spin button with its value and range.',
     'Each stepper has its own name \u2014 "Increase" and "Decrease" \u2014 rather than the arrow glyph, which announces as nothing.',
     'A stepper that would pass `min` or `max` is disabled rather than inert, so it reports that the end of the range has been reached instead of silently ignoring the press.',
     '`helperText` is wired to the input with `aria-describedby`; it is read with the field rather than stranded after it.',

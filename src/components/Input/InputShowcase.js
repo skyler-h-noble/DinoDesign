@@ -109,18 +109,12 @@ function ColorSwatchButton({ color, selected, onClick }) {
 
 function TextInput({ value, onChange, placeholder, label: inputLabel }) {
   return (
-    <Box>
-      {inputLabel && <Caption style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 4 }}>{inputLabel}</Caption>}
-      <Box component="input" type="text" value={value}
-        onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
-        sx={{
-          width: '100%', padding: '6px 10px', fontSize: '13px', fontFamily: 'inherit',
-          border: '1px solid var(--Border)', borderRadius: '4px',
-          backgroundColor: 'var(--Background)', color: 'var(--Text)', outline: 'none',
-          '&:focus': { borderColor: 'var(--Focus-Visible)' },
-        }}
-      />
-    </Box>
+    /* The library's TextInput, not a browser input. Its label is the lib's
+       FormLabel, tied to the field, so the visible label is the name. */
+    <Input size="small" fullWidth value={value}
+      onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
+      label={inputLabel} aria-label={inputLabel ? undefined : placeholder}
+    />
   );
 }
 
