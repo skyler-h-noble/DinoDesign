@@ -39,6 +39,13 @@ import { shapePath, shapeStyle, MORPHABLE_SHAPES, SHAPE_NAMES } from '../Shape/s
  * content, -Hover / -Pressed. Text below the shape is --Text (it sits on the
  * page, not on the fill).
  *
+ * BORDER — every button has one: --Button-Border-Width (1px) in
+ * --Buttons-{C}-Border. On a path it is a non-scaling stroke, so it stays
+ * 1px at every size; over an image, an outline drawn on top; on a wide shape,
+ * an edge layer in the border color with the fill inset inside it — so the
+ * angled sides of a slanted or cut tag keep their border, which a clip-path
+ * border would cut off.
+ *
  * The Morph Button add-on in the studio builds the pair and the code.
  */
 
@@ -116,6 +123,13 @@ export const ShapeButton = React.forwardRef(function ShapeButton({
   const s = SIZES[size] || SIZES.medium;
   const C = cap(color);
   const fill = 'var(--Buttons-' + C + '-Button)';
+  const edge = 'var(--Buttons-' + C + '-Border)';
+  const bw = 'var(--Button-Border-Width, 1px)';
+  const outline = (d, filled) => (
+    <svg className="shape-button-shape" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+      <path className={filled ? 'shape-button-fill' : 'shape-button-outline'} d={d} style={{ d: 'path("' + d + '")' }} />
+    </svg>
+  );
 
   /* The shape layer: an SVG path (icon buttons), a CSS shape (inside a label),
      or the image masked to the shape. */
@@ -128,16 +142,16 @@ export const ShapeButton = React.forwardRef(function ShapeButton({
         <Box className="shape-button-scrim" sx={{ position: 'absolute', inset: 0 }} />
       </Box>
     );
+    shapeLayer = <>{shapeLayer}{outline(pathFor(current), false)}</>;
   } else if (inside) {
     const css = (WIDE[current] || WIDE.pill)(s.box);
-    shapeLayer = <Box className="shape-button-bg" aria-hidden="true" sx={{ position: 'absolute', inset: 0, backgroundColor: fill, ...css }} />;
-  } else {
-    const d = pathFor(current);
     shapeLayer = (
-      <svg className="shape-button-shape" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-        <path d={d} style={{ d: 'path("' + d + '")' }} />
-      </svg>
+      <Box className="shape-button-edge" aria-hidden="true" sx={{ position: 'absolute', inset: 0, backgroundColor: edge, ...css }}>
+        <Box className="shape-button-bg" sx={{ position: 'absolute', inset: bw, backgroundColor: fill, ...css }} />
+      </Box>
     );
+  } else {
+    shapeLayer = outline(pathFor(current), true);
   }
 
   const hasIcon = React.Children.count(children) > 0;
@@ -194,14 +208,19 @@ export const ShapeButton = React.forwardRef(function ShapeButton({
         '& svg.shape-button-shape': { position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible' },
         '& svg.shape-button-shape path': {
           fill,
+          stroke: edge,
+          strokeWidth: bw,
+          vectorEffect: 'non-scaling-stroke',
           '@media (prefers-reduced-motion: no-preference)': {
             transition: 'd 0.45s cubic-bezier(.3, 1.35, .5, 1), fill 0.15s ease',
           },
         },
         /* Hover and pressed are CSS, like every other button; JS only tracks
            them for the morph trigger. */
-        '&:hover:not(:disabled) svg.shape-button-shape path, &:hover:not(:disabled) .shape-button-bg': { fill: 'var(--Buttons-' + C + '-Hover)', backgroundColor: 'var(--Buttons-' + C + '-Hover)' },
-        '&:active:not(:disabled) svg.shape-button-shape path, &:active:not(:disabled) .shape-button-bg': { fill: 'var(--Buttons-' + C + '-Pressed)', backgroundColor: 'var(--Buttons-' + C + '-Pressed)' },
+        /* Over an image the path is only the edge. */
+        '& svg.shape-button-shape path.shape-button-outline': { fill: 'none' },
+        '&:hover:not(:disabled) svg.shape-button-shape path.shape-button-fill, &:hover:not(:disabled) .shape-button-bg': { fill: 'var(--Buttons-' + C + '-Hover)', backgroundColor: 'var(--Buttons-' + C + '-Hover)' },
+        '&:active:not(:disabled) svg.shape-button-shape path.shape-button-fill, &:active:not(:disabled) .shape-button-bg': { fill: 'var(--Buttons-' + C + '-Pressed)', backgroundColor: 'var(--Buttons-' + C + '-Pressed)' },
         /* An image has no fill to change, so hover and press lay the surface's
            own scrim over it. */
         '&:hover:not(:disabled) .shape-button-scrim': { backgroundColor: 'var(--Hover)' },
