@@ -795,10 +795,10 @@ export const QUOTE_DOC = {
 
 export const SHAPE_BUTTON_DOC = {
   name: 'ShapeButton',
-  summary: 'An icon button on one of the system\u2019s shapes, which can morph into another on hover, press or while selected.',
+  summary: 'A button on one of the system\u2019s shapes \u2014 an icon or an image, with a label below, inside, or none \u2014 which can morph into another shape on hover, press or while selected.',
   insteadUse: [{
-    when: 'It has a text label',
-    use: 'Button \u2014 text buttons keep the radius-token corners, so the label always fits'
+    when: 'It is an ordinary text action (Save, Cancel)',
+    use: 'Button \u2014 the brand\u2019s own corners; reach for a shaped one only where the shape means something'
   }, {
     when: 'It is the one primary action on a screen',
     use: 'Fab'
@@ -824,6 +824,22 @@ export const SHAPE_BUTTON_DOC = {
     name: 'selected',
     type: 'boolean',
     default: 'false'
+  }, {
+    name: 'label',
+    type: 'string',
+    default: 'undefined',
+    note: 'Visible text. It names the button, so aria-label becomes optional.'
+  }, {
+    name: 'labelPosition',
+    type: 'string',
+    values: ['below', 'inside'],
+    default: 'below',
+    note: 'below: under the shape, like an app icon \u2014 any shape, and it still morphs. inside: the shape is the label\u2019s background \u2014 wide shapes only (pill, rounded, squircle, square, slanted, clamshell, cut-corners), and the button hugs the text; wide shapes do not blend, so a morph snaps.'
+  }, {
+    name: 'imageSrc / imageAlt',
+    type: 'string',
+    default: 'undefined',
+    note: 'An image fills the shape instead of a color \u2014 a profile photo, a product. Hover and press lay the surface\u2019s scrim over it. An icon passed too sits on top.'
   }, {
     name: 'color',
     type: 'string',

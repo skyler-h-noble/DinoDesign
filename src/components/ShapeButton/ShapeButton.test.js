@@ -41,8 +41,31 @@ describe('ShapeButton', () => {
     render(<ShapeButton shape="circle">i</ShapeButton>);
     const msgs = warn.mock.calls.map((c) => String(c[0]));
     expect(msgs.some((m) => m.includes('will snap'))).toBe(true);
-    expect(msgs.some((m) => m.includes('needs an aria-label'))).toBe(true);
+    expect(msgs.some((m) => m.includes('needs a label or an aria-label'))).toBe(true);
     warn.mockRestore();
+  });
+
+  test('a label below names the button, so no aria-label is needed', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const { container } = render(<ShapeButton shape="cookie-9" label="Favourites">i</ShapeButton>);
+    expect(screen.getByRole('button', { name: 'Favourites' })).toBeInTheDocument();
+    expect(container.querySelector('.shape-button-label-below')).not.toBeNull();
+    expect(warn.mock.calls.some((c) => String(c[0]).includes('needs a label'))).toBe(false);
+    warn.mockRestore();
+  });
+
+  test('a label inside draws a wide shape behind it and hugs the text', () => {
+    const { container } = render(<ShapeButton shape="pill" label="Save" labelPosition="inside">i</ShapeButton>);
+    expect(container.querySelector('.shape-button-bg')).toHaveStyle({ borderRadius: '9999px' });
+    expect(container.querySelector('.shape-button-label-inside')).toHaveTextContent('Save');
+    expect(container.querySelector('svg.shape-button-shape')).toBeNull();
+  });
+
+  test('an image fills the shape instead of a color', () => {
+    const { container } = render(<ShapeButton shape="cookie-9" imageSrc="/me.jpg" label="Profile" />);
+    const img = container.querySelector('.shape-button-image img');
+    expect(img).toHaveAttribute('src', '/me.jpg');
+    expect(container.querySelector('svg.shape-button-shape')).toBeNull();
   });
 
   test('has no axe violations', async () => {
