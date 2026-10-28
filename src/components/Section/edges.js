@@ -54,7 +54,9 @@ const DEFS = {
   zigzag: [toPath([[0, 100], [50, 0], [100, 100]]), 2],
   steps: [toPath([[0, 100], [0, 20], [50, 20], [50, 80], [100, 80], [100, 100]]), 2],
   'random-wave': [randomWave(0), 12],
-  curve: [toPath(sampled((x) => 100 - 100 * Math.sin((x / 100) * Math.PI))), 0],
+  /* Off-centre: the peak sits about a third of the way across, so it reads
+     as a sweep rather than a symmetrical hill. (x/100)^0.6 = 0.5 at 31.5%. */
+  curve: [toPath(sampled((x) => 100 - 100 * Math.sin(Math.pow(x / 100, 0.6) * Math.PI), 64)), 0],
   slant: [toPath([[0, 100], [100, 0], [100, 100]]), 0],
 };
 
@@ -67,6 +69,11 @@ const DEFAULT_HEIGHT = { 'random-wave': 96, curve: 96, slant: 96 };
 export function edgeDefaultHeight(name) {
   return DEFAULT_HEIGHT[name] || 48;
 }
+
+/* Named sizes for the small repeating edges — the bump, tooth or step gets
+   smaller with the height, because the tile is a multiple of it. */
+export const SIZED_EDGES = ['scallop', 'zigzag', 'steps'];
+export const EDGE_SIZES = { small: 16, medium: 24, large: 48 };
 /** Edges built from a repeating tile — the ones that can drift. */
 export const REPEATING_EDGES = EDGE_NAMES.filter((n) => DEFS[n][1] > 0);
 

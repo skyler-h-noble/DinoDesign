@@ -743,6 +743,12 @@ export const SECTION_DOC = {
     default: 'undefined',
     note: 'The shape where this section meets the one above (or below). The section reaches into its neighbour by `edgeHeight` in its own color, so the edge follows any theme and surface. Wave, random-wave, scallop, zigzag and steps repeat across the width; curve and slant stretch.'
   }, {
+    name: 'edgeSize',
+    type: 'string',
+    values: ['small', 'medium', 'large'],
+    default: 'large',
+    note: 'For scallop, zigzag and steps: 16 / 24 / 48px tall, and the bumps, teeth and steps shrink with it. edgeHeight overrides it.'
+  }, {
     name: 'edgeHeight',
     type: 'number',
     default: '48 · 96 for random-wave, curve, slant',

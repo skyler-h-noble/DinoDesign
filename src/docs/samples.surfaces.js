@@ -423,6 +423,15 @@ export const SURFACE_SAMPLES = {
           </div>
         )} />
     ),
+    edgeSize: () => (
+      <AxisStack values={['small', 'medium', 'large']} defaultValue="large"
+        render={(v) => (
+          <div style={{ width: '100%' }}>
+            <Section surface="Surface" padding="16px 16px 56px" />
+            <Section theme="Primary" surface="Surface" edgeTop="scallop" edgeSize={v} padding="12px 16px"><Caption>scallop · {v}</Caption></Section>
+          </div>
+        )} />
+    ),
     edgeAnimate: () => (
       <Toggle render={(on) => (
         <div style={{ width: 280 }}>

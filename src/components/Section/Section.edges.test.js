@@ -51,6 +51,14 @@ describe('Section edges', () => {
     expect(w.querySelector('.section-edge-top')).toHaveStyle({ height: '48px' });
   });
 
+  test('scallop, zigzag and steps come in three sizes; the tile shrinks with them', () => {
+    for (const [size, h] of [['small', 16], ['medium', 24], ['large', 48]]) {
+      const { container } = render(<Section edgeTop="scallop" edgeSize={size}>x</Section>);
+      expect(container.querySelector('.section-edge-top')).toHaveStyle({ height: h + 'px' });
+    }
+    expect(edgeTile('zigzag', 16)).toBe(32);
+  });
+
   test('no edge leaves the section exactly as it was', () => {
     const { container } = render(<Section>x</Section>);
     expect(container.firstChild.style.position).toBe('');

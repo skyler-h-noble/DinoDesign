@@ -2,7 +2,7 @@
 import React from 'react';
 import { keyframes } from '@mui/system';
 import { Box } from '@mui/material';
-import { EDGE_NAMES, edgeMaskURL, edgeTile, edgeDefaultHeight } from './edges';
+import { EDGE_NAMES, edgeMaskURL, edgeTile, edgeDefaultHeight, EDGE_SIZES, SIZED_EDGES } from './edges';
 
 /**
  * Section Component
@@ -38,8 +38,10 @@ import { EDGE_NAMES, edgeMaskURL, edgeTile, edgeDefaultHeight } from './edges';
  *              own color, so the edge needs no colors of its own and follows
  *              any theme and surface. The neighbour's content should leave
  *              that much room.
- *   edgeHeight — px. Default 48, and 96 for the wide gentle edges
- *              (random-wave, curve, slant), which need the height to read.
+ *   edgeSize — small | medium | large (16 / 24 / 48) for scallop, zigzag
+ *              and steps: smaller bumps, teeth and steps. Default large.
+ *   edgeHeight — px, overriding the size. Default 48, and 96 for the wide
+ *              gentle edges (random-wave, curve, slant), which need it.
  *   edgeAnimate — the repeating edges (wave, random-wave, scallop, zigzag,
  *              steps) drift slowly sideways; curve and slant, which cannot
  *              slide, swell and settle. Off by default; never runs for someone
@@ -113,6 +115,7 @@ export function Section({
   edgeTop,
   edgeBottom,
   edgeHeight,
+  edgeSize = 'large',
   edgeAnimate = false,
   edgeSeed = 0,
   className,
@@ -121,6 +124,8 @@ export function Section({
   ...rest
 }) {
   const hasEdge = Boolean(edgeTop || edgeBottom);
+  const heightFor = (name) => edgeHeight
+    ?? (SIZED_EDGES.includes(name) ? (EDGE_SIZES[edgeSize] || EDGE_SIZES.large) : edgeDefaultHeight(name));
   return (
     <Tag
       {...(theme ? { 'data-theme': theme } : {})}
@@ -135,9 +140,9 @@ export function Section({
       }}
       {...rest}
     >
-      {edgeTop && <SectionEdge name={edgeTop} side="top" height={edgeHeight ?? edgeDefaultHeight(edgeTop)} animate={edgeAnimate} seed={edgeSeed} />}
+      {edgeTop && <SectionEdge name={edgeTop} side="top" height={heightFor(edgeTop)} animate={edgeAnimate} seed={edgeSeed} />}
       {children}
-      {edgeBottom && <SectionEdge name={edgeBottom} side="bottom" height={edgeHeight ?? edgeDefaultHeight(edgeBottom)} animate={edgeAnimate} seed={edgeSeed} />}
+      {edgeBottom && <SectionEdge name={edgeBottom} side="bottom" height={heightFor(edgeBottom)} animate={edgeAnimate} seed={edgeSeed} />}
     </Tag>
   );
 }
