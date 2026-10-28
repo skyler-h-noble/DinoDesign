@@ -208,7 +208,9 @@ export function Autocomplete({
           <LabelComp
             component="label"
             style={{
-              display: 'block', marginBottom: '6px',
+              /* Start-aligned whatever the page's text-align — a label sits on
+                 the field's leading edge, and a centred container centred it. */
+              display: 'block', marginBottom: '6px', textAlign: 'start',
               color: disabled ? 'var(--Quiet)' : 'var(--Text)',
               fontWeight: 500,
               opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
@@ -307,10 +309,17 @@ export function Autocomplete({
           <CircularProgress size={16} sx={{ mr: 1, color: 'var(--Quiet)' }} />
         )}
 
-        {/* Clear button */}
-        {clearable && currentInput && !disabled && (
+        {/* Clear button. Its space is ALWAYS reserved, and it only becomes
+            visible with a value: the field must not change width as the user
+            types — appearing in the flow, it widened the field by 24px on
+            the first keystroke and shoved everything beside it. Hidden, it is
+            out of the tab order and the accessibility tree. */}
+        {clearable && !disabled && (
           <Box component="button" type="button" aria-label="Clear" onClick={clearValue}
+            tabIndex={currentInput ? 0 : -1}
+            aria-hidden={currentInput ? undefined : true}
             sx={{
+              visibility: currentInput ? 'visible' : 'hidden',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               width: 20, height: 20, borderRadius: '50%', mr: 0.5,
               border: 'none', backgroundColor: 'transparent',

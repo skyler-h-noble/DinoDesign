@@ -147,6 +147,21 @@ describe('Clear', () => {
     expect(screen.queryByLabelText('Clear')).not.toBeInTheDocument();
   });
 
+  test('the clear button is in the layout from the start, hidden until there is a value', () => {
+    /* So the field does not widen on the first keystroke. Hidden, it is out
+       of the tab order and the accessibility tree. */
+    renderAC();
+    const btn = screen.getByLabelText('Clear', { selector: 'button' });
+    expect(btn).toHaveAttribute('aria-hidden', 'true');
+    expect(btn).toHaveAttribute('tabindex', '-1');
+    expect(btn).toHaveStyle({ visibility: 'hidden' });
+  });
+
+  test('the top label is start-aligned whatever the page centres', () => {
+    renderAC({ label: 'Theme' });
+    expect(screen.getByText('Theme')).toHaveStyle({ textAlign: 'start' });
+  });
+
   test('clear button shows after typing', () => {
     renderAC();
     const input = screen.getByRole('combobox');
