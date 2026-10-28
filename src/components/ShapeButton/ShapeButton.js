@@ -1,7 +1,7 @@
 // src/components/ShapeButton/ShapeButton.js
 import React, { useState } from 'react';
 import { Box } from '@mui/material';
-import { shapePath, shapeStyle, MORPHABLE_SHAPES, AVATAR_SHAPES } from '../Shape/shapes';
+import { shapePath, shapeStyle, MORPHABLE_SHAPES, AVATAR_SHAPES, MORPH_TARGET_SHAPES } from '../Shape/shapes';
 
 /**
  * ShapeButton — a button whose background is one of the system's shapes, and
@@ -26,8 +26,11 @@ import { shapePath, shapeStyle, MORPHABLE_SHAPES, AVATAR_SHAPES } from '../Shape
  * the IMAGE only — the button around it still carries the ring.
  *
  * SHAPES — the same twelve as an Avatar (AVATAR_SHAPES): circle, squircle,
- * rounded, the cookies, flower, gem, puffy, bun. Anything else draws a circle and
- * warns. Pointed or busy shapes (bursts, hearts, arrows) do not read as a
+ * rounded, the cookies, flower, gem, puffy, bun — at rest. It may MORPH into
+ * any of MORPH_TARGET_SHAPES: the blending avatar shapes plus sunny,
+ * very-sunny, the clovers, soft-burst, soft-boom and heart, because the
+ * morphed state is brief or a deliberate "on" and can be louder. Anything
+ * else draws a circle and warns. Pointed or busy shapes (bursts, hearts, arrows) do not read as a
  * button and do not hold an icon.
  *
  * MORPHING. The path's `d` transitions between two ROUND shapes
@@ -89,9 +92,10 @@ export const ShapeButton = React.forwardRef(function ShapeButton({
 
   const ok = (n) => AVATAR_SHAPES.includes(n);
   if (!ok(shape)) warnOnce('shape:' + shape, '"' + shape + '" is not a button shape — drawn as a circle. Use one of: ' + AVATAR_SHAPES.join(', ') + '.');
-  if (morphTo && !ok(morphTo)) warnOnce('shape:' + morphTo, '"' + morphTo + '" is not a button shape — drawn as a circle.');
+  const okTarget = (n) => ok(n) || MORPH_TARGET_SHAPES.includes(n);
+  if (morphTo && !okTarget(morphTo)) warnOnce('shape:' + morphTo, '"' + morphTo + '" is not a morph target — drawn as a circle. Use one of: ' + MORPH_TARGET_SHAPES.join(', ') + '.');
   shape = ok(shape) ? shape : 'circle';
-  morphTo = morphTo && !ok(morphTo) ? 'circle' : morphTo;
+  morphTo = morphTo && !okTarget(morphTo) ? 'circle' : morphTo;
   if (morphTo && !imageSrc && !(MORPHABLE_SHAPES.includes(shape) && MORPHABLE_SHAPES.includes(morphTo))) {
     warnOnce('morph:' + shape + morphTo, shape + ' → ' + morphTo + ' will snap rather than blend. '
       + 'Both ends must be round shapes (MORPHABLE_SHAPES): ' + MORPHABLE_SHAPES.join(', ') + '.');

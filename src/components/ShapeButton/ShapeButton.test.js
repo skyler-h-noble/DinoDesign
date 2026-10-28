@@ -71,6 +71,11 @@ describe('ShapeButton', () => {
     warn.mockRestore();
   });
 
+  test('may morph into a livelier shape than it rests as', () => {
+    const { container } = render(<ShapeButton shape="circle" morphTo="sunny" selected aria-label="Fav">i</ShapeButton>);
+    expect(d(container)).toBe(shapePath('sunny'));
+  });
+
   test('has no axe violations', async () => {
     const { container } = render(<ShapeButton shape="cookie-9" aria-label="Add to favourites">i</ShapeButton>);
     expect(await axe(container)).toHaveNoViolations();

@@ -813,7 +813,7 @@ export const SHAPE_BUTTON_DOC = {
     name: 'morphTo',
     type: 'string',
     default: 'undefined',
-    note: 'The shape it becomes. Both ends round, or it snaps instead of blending (and warns).'
+    note: 'The shape it becomes: any of MORPH_TARGET_SHAPES \u2014 the blending avatar shapes plus sunny, very-sunny, clover-4, clover-8, soft-burst, soft-boom and heart. The morphed state is brief or a deliberate "on", so it can be louder than the resting shape. From squircle, rounded, gem or bun it snaps rather than blends (and warns).'
   }, {
     name: 'morphOn',
     type: 'string',

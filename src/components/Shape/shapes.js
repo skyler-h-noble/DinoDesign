@@ -258,6 +258,16 @@ export const AVATAR_SHAPES = [
   'flower', 'gem', 'puffy', 'bun',
 ];
 
+/** What a ShapeButton may MORPH into: the avatar shapes that blend, plus the
+ *  livelier round ones. The morphed state is momentary (hover, press) or a
+ *  deliberate "on" (selected), so it can be louder than the resting shape —
+ *  a circle that blooms into a sunny or a clover. All share 120 points with
+ *  the resting shapes, so every pair blends. */
+export const MORPH_TARGET_SHAPES = [
+  'circle', 'cookie-4', 'cookie-6', 'cookie-7', 'cookie-9', 'cookie-12', 'flower', 'puffy',
+  'sunny', 'very-sunny', 'clover-4', 'clover-8', 'soft-burst', 'soft-boom', 'heart',
+];
+
 /** Shapes an icon still reads inside at IconBadge's 40px with a 24px glyph:
  *  nothing pointed enough to clip the icon's corners. */
 export const ICON_SHAPES = [
