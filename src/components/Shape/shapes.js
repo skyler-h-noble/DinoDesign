@@ -100,7 +100,9 @@ const cookie = (n, a) => (t) => 44 - a + a * Math.cos(n * t);
 const sunny = (n, a, p) => (t) => 47 - a + a * Math.pow((1 + Math.cos(n * t)) / 2, p);
 const flower = (n, d) => (t) => 47 - d + d * Math.abs(Math.cos(n * t / 2));
 const puffy = (n) => (t) => 40 + 7 * Math.sqrt(Math.abs(Math.cos(n * t / 2)));
-const clover = (n) => (t) => 22 + 26 * Math.pow(Math.abs(Math.cos(n * t / 2)), 0.55);
+/* Lobes that overlap, with a small notch between: four (or eight) round
+   leaves rather than petals on thin stems. */
+const clover = (n, depth) => (t) => 47 - depth + depth * Math.pow(Math.abs(Math.cos(n * t / 2)), 0.45);
 
 function heart() {
   const pts = [];
@@ -144,6 +146,17 @@ function pixelTriangle() {
   return pixelRows(rows, 4, 96);
 }
 
+/* An arch whose bottom rises in the middle — a ghost's hem. */
+function ghost() {
+  const top = arc(C, 46, 42, Math.PI, 2 * Math.PI, 40);
+  const hem = [];
+  for (let i = 0; i <= 30; i++) {
+    const t = i / 30;
+    hem.push([92 - 84 * t, 92 - 12 * Math.sin(Math.PI * t)]);
+  }
+  return top.concat(hem);
+}
+
 function scallop(bumps = 6) {
   const w = 100 / bumps;
   const R = w / 2;
@@ -168,6 +181,9 @@ const DEFS = [
   ['arch', 'round', () => [[6, 94]].concat(arc(C, 50, 44, Math.PI, 2 * Math.PI, 40)).concat([[94, 94]])],
   ['semicircle', 'round', () => arc(C, 74, 47, Math.PI, 2 * Math.PI, 48)],
   ['heart', 'round', heart],
+  ['ghost', 'round', ghost],
+  /* Two pills, stacked, pinched where they meet. */
+  ['bun', 'round', () => rounded([[8, 8], [92, 8], [92, 42], [82, 50], [92, 58], [92, 92], [8, 92], [8, 58], [18, 50], [8, 42]], 18)],
   // Soft polygons
   ['square', 'polygon', () => rounded([[6, 6], [94, 6], [94, 94], [6, 94]], 18)],
   ['slanted', 'polygon', () => rounded([[18, 8], [96, 8], [82, 92], [4, 92]], 12)],
@@ -187,8 +203,8 @@ const DEFS = [
   ['cookie-12', 'cookie', () => polar(cookie(12, 3))],
   ['sunny', 'cookie', () => polar(sunny(8, 9, 1.5))],
   ['very-sunny', 'cookie', () => polar(sunny(8, 14, 3))],
-  ['clover-4', 'cookie', () => polar(clover(4))],
-  ['clover-8', 'cookie', () => polar(clover(8))],
+  ['clover-4', 'cookie', () => polar(clover(4, 14))],
+  ['clover-8', 'cookie', () => polar(clover(8, 9))],
   ['flower', 'cookie', () => polar(flower(8, 12))],
   ['puffy', 'cookie', () => polar(puffy(10))],
   ['puffy-diamond', 'cookie', () => stretch(polar(puffy(8)), 0.86, 1.06)],
