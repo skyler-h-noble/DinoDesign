@@ -11,6 +11,7 @@ import { ButtonGroup } from './ButtonGroup';
 import { Button } from '../Button/Button';
 import { Icon } from '../Icon/Icon';
 import { Switch } from '../Switch/Switch';
+import { Slider } from '../Slider/Slider';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { PreviewSurface } from '../PreviewSurface';
 import { BackgroundPicker } from '../BackgroundPicker';
@@ -338,16 +339,11 @@ export function ButtonGroupShowcase() {
                       SPACING — {spacing === 0 ? 'Connected' : spacing + ' units'}
                     </EyebrowSmall>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Box
-                        component="input"
-                        type="range"
-                        min={0}
-                        max={3}
-                        step={0.5}
-                        value={spacing}
-                        onChange={(e) => setSpacing(Number(e.target.value))}
-                        sx={{ flex: 1, accentColor: 'var(--Buttons-Primary-Button)' }}
-                      />
+                      {/* The library's Slider, not a browser range input. */}
+                      <Box sx={{ flex: 1 }}>
+                        <Slider min={0} max={3} step={0.5} value={spacing} aria-label="Spacing"
+                          onChange={(e, v) => setSpacing(Number(Array.isArray(v) ? v[0] : v))} />
+                      </Box>
                       <Caption style={{ color: 'var(--Text)', minWidth: 24, textAlign: 'right' }}>
                         {spacing}
                       </Caption>

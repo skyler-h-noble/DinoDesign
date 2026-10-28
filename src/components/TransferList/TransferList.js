@@ -111,11 +111,14 @@ export function TransferList({
     const someChecked = items.some((i) => checked.includes(i)) && !allChecked;
     const countText = isEnhanced
       ? checkedItems.length + '/' + items.length
-      : items.length + ' items';
+      : items.length + (items.length === 1 ? ' item' : ' items');
 
     return (
-      // OUTER: fill — the panel takes equal share of the parent row.
-      <Box sx={{ flex: 1, minWidth: 0 }}>
+      // OUTER: fill — the panel takes equal share of the parent row, and is
+      // never narrower than 200 (or the row, on a phone). Hugging its content,
+      // a short list shrank until "Available · 2 items" wrapped onto two lines
+      // and the two panels came out different widths.
+      <Box sx={{ flex: '1 1 200px', minWidth: 'min(200px, 100%)' }}>
         {/* MIDDLE: hug, Card-Radius, no shadow (inputs & dropdowns are flat) */}
         <Box sx={{
           borderRadius: 'var(--Card-Radius)',
@@ -168,7 +171,7 @@ export function TransferList({
                 {title}
               </BodySmall>
               {/* Right title — hug, Caption, --Quiet */}
-              <Caption style={{ color: 'var(--Quiet)' }}>
+              <Caption style={{ color: 'var(--Quiet)', whiteSpace: 'nowrap' }}>
                 {countText}
               </Caption>
             </Box>
@@ -256,6 +259,9 @@ export function TransferList({
         justifyContent: 'center',
         gap: '4px',
         fontFamily: 'inherit',
+        /* Start-aligned whatever the page centres — a centred container
+           centred every row's label between its checkbox and the edge. */
+        textAlign: 'start',
         ...sx,
       }}
       {...props}

@@ -9,6 +9,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { OmniStack } from './Stack';
 import { Button } from '../Button/Button';
 import { Switch } from '../Switch/Switch';
+import { Slider } from '../Slider/Slider';
 import { Chip } from '../Chip/Chip';
 import { Link } from '../Link/Link';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
@@ -230,9 +231,12 @@ function Playground() {
               GAP — {gap} unit{willEnforce ? ' → raised to var(--min-stack-gap)' : ''}
             </EyebrowSmall>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box component="input" type="range" min={0} max={6} step={0.5} value={gap}
-                onChange={(e) => setGap(Number(e.target.value))}
-                sx={{ flex: 1, accentColor: 'var(--Primary-Color-10)' }} />
+              {/* The library's Slider, not a browser range input — a raw one
+                  draws the browser's own track and thumb, not the system's. */}
+              <Box sx={{ flex: 1 }}>
+                <Slider min={0} max={6} step={0.5} value={gap} aria-label="Gap"
+                  onChange={(e, v) => setGap(Number(Array.isArray(v) ? v[0] : v))} />
+              </Box>
               <Caption style={{ color: 'var(--Text)', minWidth: 24, textAlign: 'right' }}>{gap}</Caption>
             </Box>
           </Box>
