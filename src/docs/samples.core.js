@@ -22,6 +22,8 @@ import { Icon } from '../components/Icon';
 import { Swatch } from '../components/Swatch';
 import { Tag } from '../components/Tag';
 import { IconBadge } from '../components/IconBadge';
+import { Shape } from '../components/Shape';
+import { Quote } from '../components/Quote';
 import { Link } from '../components/Link';
 import { Divider } from '../components/Divider';
 import { Loader } from '../components/Loader';
@@ -35,6 +37,13 @@ import { PALETTES, SIZES, Axis, AxisStack, Toggle, Cell } from './samples';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import MailIcon from '@mui/icons-material/Mail';
+
+/* A stand-in photo for shape samples: image CONTENT, so its colors are its own. */
+const SAMPLE_PHOTO = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" preserveAspectRatio="xMidYMid slice">'
+  + '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fc7d8"/><stop offset=".55" stop-color="#cfe2dc"/></linearGradient></defs>'
+  + '<rect width="96" height="96" fill="url(#g)"/><circle cx="68" cy="28" r="10" fill="#f6d58a"/>'
+  + '<path d="M0 62 L30 40 L52 58 L70 46 L96 64 V96 H0Z" fill="#5e8f7c"/><path d="M0 78 Q40 66 96 80 V96 H0Z" fill="#2f5a4c"/></svg>');
 import FavoriteIcon from '@mui/icons-material/Favorite';
 
 const SNIPPET = 'npm install @omni-design/components';
@@ -156,7 +165,7 @@ export const CORE_SAMPLES = {
             render={(v) => (
               <div style={{ width: 420 }}>
                 <Player size={v} title="Weather Report" subtitle="The Mercury Lamps"
-                        avatarInitials="ML" defaultPosition={42} duration={195}
+                        defaultPosition={42} duration={195}
                         onSeek={() => {}} onPlayPause={() => {}} />
               </div>
             )} />
@@ -168,14 +177,14 @@ export const CORE_SAMPLES = {
       <VStack gap="var(--Sizing-2)">
         <Cell label="paused" emphasis>
           <div style={{ width: 420 }}>
-            <Player title="Weather Report" avatarInitials="ML"
+            <Player title="Weather Report"
                     defaultPosition={42} duration={195}
                     onSeek={() => {}} onPlayPause={() => {}} />
           </div>
         </Cell>
         <Cell label="playing">
           <div style={{ width: 420 }}>
-            <Player playing title="Weather Report" avatarInitials="ML"
+            <Player playing title="Weather Report"
                     defaultPosition={42} duration={195}
                     onSeek={() => {}} onPlayPause={() => {}} />
           </div>
@@ -185,7 +194,7 @@ export const CORE_SAMPLES = {
     showTime: () => (
       <Toggle offLabel="true" onLabel="false" render={(off) => (
         <div style={{ width: 420 }}>
-          <Player showTime={!off} title="Weather Report" avatarInitials="ML"
+          <Player showTime={!off} title="Weather Report"
                   defaultPosition={42} duration={195}
                   onSeek={() => {}} onPlayPause={() => {}} />
         </div>
@@ -194,7 +203,7 @@ export const CORE_SAMPLES = {
     disabled: () => (
       <Toggle render={(on) => (
         <div style={{ width: 420 }}>
-          <Player disabled={on} title="Weather Report" avatarInitials="ML"
+          <Player disabled={on} title="Weather Report"
                   defaultPosition={42} duration={195}
                   onSeek={() => {}} onPlayPause={() => {}} />
         </div>
@@ -454,23 +463,57 @@ export const CORE_SAMPLES = {
     ),
   },
 
+  Shape: {
+    /* A cross-section of the seven groups, each framing the same photo. */
+    shape: () => (
+      <Axis values={['circle', 'arch', 'cookie-9', 'flower', 'gem', 'burst', 'cut-corners', 'scallop']} defaultValue="circle"
+            render={(v) => <Shape shape={v} width={72}><img src={SAMPLE_PHOTO} alt="" /></Shape>} />
+    ),
+    /* With a color the shape is a themed surface — a sticker's label has a
+       known contrast against it. */
+    color: () => (
+      <Axis values={['primary', 'secondary', 'tertiary', 'neutral', 'warning']} defaultValue="primary"
+            render={(v) => <Shape shape="burst" color={v} width={64}><Caption component="span" style={{ fontWeight: 700 }}>NEW</Caption></Shape>} />
+    ),
+    variant: () => (
+      <Axis values={['solid', 'light', 'dark']} defaultValue="solid"
+            render={(v) => <Shape shape="cookie-9" color="primary" variant={v} width={64} decorative />} />
+    ),
+    decorative: () => (
+      <Toggle render={(on) => <Shape shape="flower" color="tertiary" width={64} decorative={on} />}
+              offLabel="announced" onLabel="aria-hidden" />
+    ),
+  },
+
+  Quote: {
+    size: () => (
+      <AxisStack values={SIZES} defaultValue="medium"
+                 render={(v) => <Quote size={v} cite="Priya Shah" detail="Studio Lead, Northwind" avatarInitials="PS">Set up in an afternoon.</Quote>} />
+    ),
+    align: () => (
+      <AxisStack values={['start', 'center']} defaultValue="start"
+                 render={(v) => <Quote align={v} size="small" cite="Priya Shah" detail="Studio Lead">Set up in an afternoon.</Quote>} />
+    ),
+    mark: () => (
+      <Toggle render={(on) => <Quote mark={on} size="small" cite="Priya Shah">Set up in an afternoon.</Quote>}
+              offLabel="no mark" onLabel="mark" />
+    ),
+  },
+
   IconBadge: {
     color: () => (
       <Axis values={['default', ...PALETTES]} defaultValue="primary"
             render={(v) => <IconBadge color={v}><MailIcon /></IconBadge>} />
     ),
-    /* The doc declares small / medium / large and the component WARNS on any
-       of them — size was removed, and IconBadge is now one size. Shown as the
-       one value it has rather than three that warn; the doc is the side that
-       needs the edit. */
-    size: () => (
-      <VStack gap="var(--Sizing-1)">
-        <IconBadge color="primary"><MailIcon /></IconBadge>
-        <Body color="quiet">
-          One size. `size` was removed and the component warns if you pass it —
-          the prop table above still lists three values, which is a doc bug.
-        </Body>
-      </VStack>
+    variant: () => (
+      <Axis values={['solid', 'light', 'dark']} defaultValue="solid"
+            render={(v) => <IconBadge color="primary" variant={v}><MailIcon /></IconBadge>} />
+    ),
+    /* One shape for every tile on a page — that is what makes it the brand's.
+       Shown across the icon-safe set, the drawn 8px corner first. */
+    shape: () => (
+      <Axis values={['rounded', 'squircle', 'circle', 'gem', 'cookie-9', 'flower', 'cut-corners']} defaultValue="rounded"
+            render={(v) => <IconBadge color="primary" shape={v === 'rounded' ? undefined : v}><MailIcon /></IconBadge>} />
     ),
   },
 

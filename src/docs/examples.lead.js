@@ -36,6 +36,8 @@ import { Paper } from '../components/Paper';
 import { Popover } from '../components/Popover';
 import { Rail } from '../components/Rail';
 import { Player } from '../components/Player';
+import { Shape } from '../components/Shape';
+import { Quote } from '../components/Quote';
 import { Ratio } from '../components/Ratio';
 import { SearchField } from '../components/SearchField';
 import { Select } from '../components/Select';
@@ -67,6 +69,13 @@ import FormatBoldIcon from '@mui/icons-material/FormatBold';
 import FormatItalicIcon from '@mui/icons-material/FormatItalic';
 import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
 import { Sheet } from '../components/Sheet';
+
+/* A stand-in photo for shape samples: image CONTENT, so its colors are its own. */
+const SAMPLE_PHOTO = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" preserveAspectRatio="xMidYMid slice">'
+  + '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fc7d8"/><stop offset=".55" stop-color="#cfe2dc"/></linearGradient></defs>'
+  + '<rect width="96" height="96" fill="url(#g)"/><circle cx="68" cy="28" r="10" fill="#f6d58a"/>'
+  + '<path d="M0 62 L30 40 L52 58 L70 46 L96 64 V96 H0Z" fill="#5e8f7c"/><path d="M0 78 Q40 66 96 80 V96 H0Z" fill="#2f5a4c"/></svg>');
 import { TransferList } from '../components/TransferList';
 
 /* Shared sample data. One set per shape, reused by the axis samples too, so a
@@ -297,7 +306,6 @@ function PlayerExample() {
     <Player
       title="Weather Report"
       subtitle="The Mercury Lamps"
-      avatarInitials="ML"
       playing={playing}
       onPlayPause={setPlaying}
       position={pos}
@@ -321,6 +329,21 @@ function ToggleButtonExample() {
 }
 
 export const LEAD_EXAMPLES = {
+  /* The job it is best at: a photo framed in the brand's shape, with a
+     sticker in a second one. */
+  Shape: () => (
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      <Shape shape="arch" width={120} height={150}><img src={SAMPLE_PHOTO} alt="Hills under a pale sky" /></Shape>
+      <Shape shape="burst" color="warning" width={56} style={{ position: 'absolute', right: -20, top: -12 }}>
+        <Caption component="span" style={{ fontWeight: 700 }}>NEW</Caption>
+      </Shape>
+    </div>
+  ),
+  Quote: () => (
+    <Quote cite="Priya Shah" detail="Studio Lead, Northwind" avatarInitials="PS">
+      Set up in an afternoon, and it has not needed us since.
+    </Quote>
+  ),
   ToggleButton: () => <ToggleButtonExample />,
   Player: () => <PlayerExample />,
   ButtonGroup: () => <ButtonGroupExample />,

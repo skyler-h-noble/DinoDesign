@@ -663,7 +663,135 @@ export const CURVED_TEXT_DOC = {
   ]
 };
 
-export const REST_DOCS = [SELECT_DOC, MENU_DOC, CODE_BLOCK_DOC, PLAYER_DOC,
+
+export const SHAPE_DOC = {
+  name: 'Shape',
+  summary: 'A box cut to one of the system\u2019s shapes \u2014 for image frames, decorative accents and the occasional sticker.',
+  insteadUse: [{
+    when: 'It is clickable (a button, a chip, a card)',
+    use: 'the component itself \u2014 its shape comes from the radius tokens'
+  }, {
+    when: 'It is a person',
+    use: 'Avatar \u2014 people stay circles'
+  }, {
+    when: 'It is an icon on a tile',
+    use: 'IconBadge with `shape`'
+  }, {
+    when: 'It is a media slot at a fixed ratio',
+    use: 'Ratio with `shape`'
+  }],
+  props: [{
+    name: 'shape',
+    type: 'string',
+    values: ['circle', 'arch', 'cookie-9', 'flower', 'gem', 'burst', 'cut-corners', 'scallop'],
+    default: 'circle',
+    note: 'Any of SHAPE_NAMES: 42 shapes in seven groups \u2014 radius (rounded, squircle), round, polygon, cookie, burst, pixel, cut. Every one is a path in ./shapes, the same list the Figma plugin builds the Shapes component from.'
+  }, {
+    name: 'width / height',
+    type: 'number | string',
+    default: '96 / square',
+    note: 'Round shapes are drawn for a square; with a height that differs they stretch.'
+  }, {
+    name: 'color',
+    type: 'string',
+    values: ['primary', 'secondary', 'tertiary', 'neutral', 'warning'],
+    default: 'undefined',
+    note: 'Makes the shape a themed surface (data-theme + data-surface), so text inside has a known contrast. Unset paints nothing \u2014 an image frame is the image.'
+  }, {
+    name: 'variant',
+    type: 'string',
+    values: ['solid', 'light', 'dark'],
+    default: 'solid',
+    note: 'With `color`: the surface level \u2014 Surface, Surface-Brightest, Surface-Dimmest.'
+  }, {
+    name: 'decorative',
+    type: 'boolean',
+    default: 'false',
+    note: 'aria-hidden. For accents that carry nothing \u2014 a blob behind a hero.'
+  }],
+  states: [{
+    state: 'None',
+    setBy: 'prop',
+    note: 'A shape is not interactive. Wrap it in the Link or Button; the wrapper carries hover, pressed and the focus ring.'
+  }],
+  theming: inherits(),
+  tokens: [surfaceToken('--Background', 'the fill, with `color`'), surfaceToken('--Text', 'text inside, with `color`')],
+  composition: [
+    'An image, video or picture child fills the shape edge to edge (object-fit: cover).',
+    'One signature shape per brand, used in two or three places \u2014 image frames, icon tiles, one edge. Six shapes on one page is a sticker sheet.',
+    'ROUND shapes share one point count, so they can morph into one another (MORPHABLE_SHAPES).',
+  ],
+  accessibility: [
+    'The shape carries no meaning. A decorative one is `decorative`; an image inside keeps its own alt text.',
+    'Nothing focusable inside: the mask clips focus rings. Shape the image, not the control.',
+  ],
+  gotchas: [
+    'It is a CSS mask, not clip-path: path(). path() takes pixels only, so the shape would not resize with its box.',
+    'A mask clips box-shadow too. For a shadow that follows the shape, put `filter: drop-shadow(...)` on a wrapper.',
+    '`rounded` follows --Style-Border-Radius; every other shape is fixed geometry and looks the same in every brand.',
+  ]
+};
+
+export const QUOTE_DOC = {
+  name: 'Quote',
+  summary: 'A pull quote or a testimonial: the words, who said them, and what they are.',
+  insteadUse: [{
+    when: 'It is a short highlighted fact, not someone\u2019s words',
+    use: 'Alert or Card'
+  }, {
+    when: 'It is quoted inline in running text',
+    use: 'Body with quotation marks'
+  }],
+  props: [{
+    name: 'children',
+    type: 'node',
+    default: '\u2014',
+    note: 'The words. Set in the header face \u2014 a pull quote is display text \u2014 but rendered as a <p>, so the heading outline is untouched.'
+  }, {
+    name: 'cite / detail',
+    type: 'string',
+    default: 'undefined',
+    note: 'Who said it (Subtitle) and what they are (Caption, quiet).'
+  }, {
+    name: 'avatarSrc / avatarInitials',
+    type: 'string',
+    default: 'undefined',
+    note: 'The person. An Avatar \u2014 a person stays a circle.'
+  }, {
+    name: 'size',
+    type: 'string',
+    values: ['small', 'medium', 'large'],
+    default: 'medium',
+    note: 'The words at H5 / H4 / H3, the avatar as tall as the name and detail.'
+  }, {
+    name: 'align',
+    type: 'string',
+    values: ['start', 'center'],
+    default: 'start'
+  }, {
+    name: 'mark',
+    type: 'boolean',
+    default: 'true',
+    note: 'The quotation mark, in `markColor` (primary). Decorative \u2014 aria-hidden.'
+  }],
+  states: [{
+    state: 'None',
+    setBy: 'prop'
+  }],
+  theming: inherits(),
+  tokens: [surfaceToken('--Header', 'the words'), surfaceToken('--Text', 'the name'), surfaceToken('--Quiet', 'the detail')],
+  composition: [
+    'No frame of its own. Put it in a Card, a Section, or beside a Shape-framed photo as the page needs.',
+  ],
+  accessibility: [
+    'A <figure>: the words in a <blockquote>, the attribution in a <figcaption>. That pairing is what tells a screen reader whose words these are.',
+  ],
+  gotchas: [
+    'Do not centre a container\u2019s text to centre a Quote \u2014 use `align="center"`, which centres the attribution row as well.',
+  ]
+};
+
+export const REST_DOCS = [SELECT_DOC, MENU_DOC, CODE_BLOCK_DOC, PLAYER_DOC, SHAPE_DOC, QUOTE_DOC,
   CIRCULAR_PROGRESS_DOC, LINEAR_PROGRESS_DOC, TYPOGRAPHY_DOC,
   GRID_DOC, MINI_SWATCH_DOC, BEVEL_TEXT_DOC, CURVED_TEXT_DOC, undesigned('Autocomplete', 'A text field whose list narrows as the user types.', [{
   when: 'The list is short and fixed',
@@ -968,25 +1096,29 @@ export const REST_DOCS = [SELECT_DOC, MENU_DOC, CODE_BLOCK_DOC, PLAYER_DOC,
 }, {
   state: 'Selected',
   setBy: 'prop'
-}], [surfaceToken('--Background', 'the bar'), surfaceToken('--Hover', 'item hover')], ['Items are data. A FAB comes from `fab` rather than being nested.'], ['Icon-only items each need a name saying the action.', 'A toolbar is a `toolbar` role with arrow-key navigation between items, and one tab stop for the whole thing.'], ['No Figma drawing. `AppBar` shares its elevation group — AppBar, Toolbars and Menus are one row in the elevation table.']), undesigned('IconBadge', 'An icon with a badge already positioned on it.', [{
-  when: 'You are badging something else',
+}], [surfaceToken('--Background', 'the bar'), surfaceToken('--Hover', 'item hover')], ['Items are data. A FAB comes from `fab` rather than being nested.'], ['Icon-only items each need a name saying the action.', 'A toolbar is a `toolbar` role with arrow-key navigation between items, and one tab stop for the whole thing.'], ['No Figma drawing. `AppBar` shares its elevation group — AppBar, Toolbars and Menus are one row in the elevation table.']), undesigned('IconBadge', 'An icon on a themed tile — the feature-list and empty-state icon, 40px with a 24px glyph.', [{
+  when: 'You are badging something else (a count on an icon)',
   use: 'Badge around it'
 }, {
-  when: 'There is no badge',
+  when: 'The icon stands alone, with no tile',
   use: 'Icon'
 }], [{
   name: 'color',
   type: 'string',
+  values: ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'],
   default: 'primary'
 }, {
   name: 'variant',
   type: 'string',
-  default: 'solid'
+  values: ['solid', 'light', 'dark'],
+  default: 'solid',
+  note: 'The surface level of its theme: Surface, Surface-Brightest, Surface-Dimmest. There are no -Light themes.'
 }, {
-  name: 'size',
+  name: 'shape',
   type: 'string',
-  values: ['small', 'medium', 'large'],
-  default: 'medium'
+  values: ['rounded', 'squircle', 'circle', 'gem', 'cookie-9', 'flower', 'cut-corners'],
+  default: 'undefined',
+  note: 'The tile\u2019s shape, from the system\u2019s shape list. Unset is the drawn 8px corner. Use one shape for every tile on a page \u2014 that is what makes it read as the brand. ICON_SHAPES lists the ones a 24px glyph fits inside; anything else warns, because a triangle or a burst clips the icon.'
 }], [{
   state: 'None',
   setBy: 'prop'

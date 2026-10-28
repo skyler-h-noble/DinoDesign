@@ -1,6 +1,7 @@
 // src/components/Ratio/Ratio.js
 import React from 'react';
 import { Box as MuiBox } from '@mui/material';
+import { shapeStyle } from '../Shape/shapes';
 import { ImagePlaceholder } from '../ImagePlaceholder';
 /* Level from the Figma effect style that NAMES this component.
    The five Effect-Levels are the five Figma effect styles, Elevations/Level-1 … Level-5:
@@ -105,6 +106,10 @@ export function Ratio({
   maxWidth,
   maxHeight,
   component = 'div',
+  /* Cut the slot to one of the system's shapes (see Shape) — an arch, a
+     cookie, a blob around a photo. Round shapes want ratio="1:1"; on a wide
+     slot they stretch with it. */
+  shape,
   className = '',
   sx = {},
   ...props
@@ -179,6 +184,7 @@ export function Ratio({
         borderRadius: 0,
         boxShadow: 'none',
         overflow: 'hidden',
+        ...(shape && shapeStyle(shape)),
         ...sx,
       }}
       {...props}

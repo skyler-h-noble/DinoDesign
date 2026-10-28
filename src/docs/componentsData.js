@@ -594,6 +594,12 @@ export const RATIO_DOC = {
     name: 'padding',
     type: 'string',
     default: 'none'
+  }, {
+    name: 'shape',
+    type: 'string',
+    values: ['arch', 'cookie-9', 'gem', 'scallop'],
+    default: 'undefined',
+    note: 'Cuts the slot to one of the system\u2019s shapes (see Shape). Round shapes want `ratio="1:1"`; on a wide slot they stretch.'
   }],
   states: [{
     state: 'None',

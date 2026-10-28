@@ -71,6 +71,8 @@ import { StackShowcase } from '../components/Stack/StackShowcase';
 import { TagShowcase } from '../components/Tag/TagShowcase';
 import { SectionShowcase } from '../components/Section/SectionShowcase';
 import { RatioShowcase } from '../components/Ratio/RatioShowcase';
+import { ShapeShowcase } from '../components/Shape/ShapeShowcase';
+import { QuoteShowcase } from '../components/Quote/QuoteShowcase';
 import { FooterShowcase } from '../components/Footer/FooterShowcase';
 import { CopyrightShowcase } from '../components/Copyright/CopyrightShowcase';
 import { CurvedTextShowcase } from '../components/CurvedText/CurvedTextShowcase';
@@ -232,6 +234,7 @@ const NAV_ITEMS = [
       { id: 'card', label: 'Card' },
       { id: 'box', label: 'Box' },
       { id: 'ratio', label: 'Ratio' },
+      { id: 'shape', label: 'Shape' },
       { id: 'sheet', label: 'Sheet' },
       { id: 'accordion', label: 'Accordion' },
       { id: 'treeview', label: 'Tree View' },
@@ -259,6 +262,7 @@ const NAV_ITEMS = [
       { id: 'chip', label: 'Chip' },
       { id: 'tag', label: 'Tag' },
       { id: 'divider', label: 'Divider' },
+      { id: 'quote', label: 'Quote' },
       { id: 'codeblock', label: 'Code Block' },
       { id: 'list', label: 'List' },
       { id: 'table', label: 'Table' },
@@ -505,6 +509,8 @@ function ShowcaseInner() {
             {activeSection === 'stack' && <StackShowcase />}
             {activeSection === 'section' && <SectionShowcase />}
             {activeSection === 'ratio' && <RatioShowcase />}
+            {activeSection === 'shape' && <ShapeShowcase />}
+            {activeSection === 'quote' && <QuoteShowcase />}
 
             {/* ============ SURFACES ============ */}
             {activeSection === 'card' && <CardShowcase />}

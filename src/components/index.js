@@ -79,6 +79,10 @@ export { CarouselDots, CarouselDot } from './CarouselDots';
    inside a menu row, documented where it appears — Select and Menu. */
 export { MiniSwatch } from './MiniSwatch';
 export { IconBadge } from './IconBadge';
+export { Shape, SHAPE_NAMES, SHAPE_GROUPS, MORPHABLE_SHAPES, ICON_SHAPES, shapePath, shapeStyle } from './Shape';
+export { Quote } from './Quote';
+export { ShapeShowcase } from './Shape/ShapeShowcase';
+export { QuoteShowcase } from './Quote/QuoteShowcase';
 export { IconBadgeShowcase } from './IconBadge/IconBadgeShowcase';
 
 // ========== BUTTONS ==========

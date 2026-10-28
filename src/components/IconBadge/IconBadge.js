@@ -1,6 +1,7 @@
 // src/components/IconBadge/IconBadge.js
 import React from 'react';
 import { Box } from '@mui/material';
+import { shapeStyle, ICON_SHAPES } from '../Shape/shapes';
 
 /**
  * IconBadge Component
@@ -76,16 +77,27 @@ function warnRemovedSize(size) {
   );
 }
 
+const warnedShapes = new Set();
+
 export function IconBadge({
   children,
   color = 'primary',
   variant = 'solid',
+  /* The tile's shape, from the system's shape list (see Shape). Unset is the
+     drawn component's 8px corner. Stick to ICON_SHAPES: a triangle or a burst
+     clips the corners of a 24px glyph in a 40px tile. */
+  shape,
   size,
   className = '',
   sx = {},
   ...props
 }) {
   warnRemovedSize(size);
+  if (shape && !ICON_SHAPES.includes(shape) && process.env.NODE_ENV !== 'production' && !warnedShapes.has(shape)) {
+    warnedShapes.add(shape);
+    // eslint-disable-next-line no-console
+    console.warn('[IconBadge] shape="' + shape + '" clips the icon at this size. Icon-safe shapes: ' + ICON_SHAPES.join(', ') + '.');
+  }
   const s = ICON_BADGE_SIZE;
   const theme = THEME_MAP[color] || THEME_MAP.primary;
 
@@ -119,6 +131,7 @@ export function IconBadge({
         width: s.size,
         height: s.size,
         borderRadius: s.borderRadius,
+        ...(shape && { borderRadius: 0, ...shapeStyle(shape) }),
         backgroundColor: 'var(--Background)',
         color: 'var(--Text)',
         display: 'flex',

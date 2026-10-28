@@ -97,6 +97,13 @@ import AddIcon from '@mui/icons-material/Add';
 import PersonIcon from '@mui/icons-material/Person';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { Sheet } from '../components/Sheet';
+
+/* A stand-in photo for shape samples: image CONTENT, so its colors are its own. */
+const SAMPLE_PHOTO = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" preserveAspectRatio="xMidYMid slice">'
+  + '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fc7d8"/><stop offset=".55" stop-color="#cfe2dc"/></linearGradient></defs>'
+  + '<rect width="96" height="96" fill="url(#g)"/><circle cx="68" cy="28" r="10" fill="#f6d58a"/>'
+  + '<path d="M0 62 L30 40 L52 58 L70 46 L96 64 V96 H0Z" fill="#5e8f7c"/><path d="M0 78 Q40 66 96 80 V96 H0Z" fill="#2f5a4c"/></svg>');
 import { TransferList } from '../components/TransferList';
 
 /* Three actions, named. The name is the accessible name whether or not
@@ -405,6 +412,11 @@ export const SURFACE_SAMPLES = {
   },
 
   Ratio: {
+    /* A photo slot cut to a shape. Round shapes want 1:1. */
+    shape: () => (
+      <Axis values={['arch', 'cookie-9', 'gem', 'scallop']} defaultValue="arch"
+            render={(v) => <div style={{ width: 88 }}><Ratio ratio="1:1" shape={v}><img src={SAMPLE_PHOTO} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} /></Ratio></div>} />
+    ),
     /* Which dimension the ratio is computed FROM. `width` is the usual one —
        the box fills its column and derives its height. `height` is for a row
        of items that must share a height and may differ in width. */
