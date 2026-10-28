@@ -175,7 +175,10 @@ export function DocSummary({ component, theme = null, surface = 'Surface' }) {
                   it needs is a parent with width to claim — and `text-align`
                   centres the inline-level examples (a Button, a Chip) without
                   taking that width away from the ones that fill. */}
-              <Box sx={{ width: '100%', maxWidth: 420, textAlign: 'center' }}>
+              {/* `text-align` centres the inline-level examples as BOXES; the
+                  `& > *` rule stops it reaching their contents, or a filling
+                  component — an Accordion, a Player — centred its own text. */}
+              <Box sx={{ width: '100%', maxWidth: 420, textAlign: 'center', '& > *': { textAlign: 'start' } }}>
                 {example({ theme, surface })}
               </Box>
             </Box>

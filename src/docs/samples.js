@@ -54,7 +54,12 @@ export const Cell = ({ label, emphasis = false, width, children }) => (
      `text-align` as well as `align-items`, because a caption that wraps to two
      lines centres both of them. */
   <VStack gap="var(--Sizing-Half)" style={{ alignItems: 'center', width, textAlign: 'center' }}>
-    <div>{children}</div>
+    {/* The CAPTION centres; the component does not. align-items already
+        centres the sample as a box, and the text-align above was inherited
+        by everything inside it — an Accordion's body, an Autocomplete's
+        label, a TransferList's rows all came out centred, which no real page
+        would draw. */}
+    <div style={{ textAlign: 'start' }}>{children}</div>
     <Caption color={emphasis ? 'standard' : 'quiet'}>{label}</Caption>
   </VStack>
 );
