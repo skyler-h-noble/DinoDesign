@@ -739,9 +739,9 @@ export const SECTION_DOC = {
     name: 'edgeTop / edgeBottom',
     sample: 'edgeTop',
     type: 'string',
-    values: ['wave', 'scallop', 'zigzag', 'steps', 'curve', 'slant'],
+    values: ['wave', 'random-wave', 'scallop', 'zigzag', 'steps', 'curve', 'slant'],
     default: 'undefined',
-    note: 'The shape where this section meets the one above (or below). The section reaches into its neighbour by `edgeHeight` in its own color, so the edge follows any theme and surface. Wave, scallop, zigzag and steps repeat across the width; curve and slant stretch.'
+    note: 'The shape where this section meets the one above (or below). The section reaches into its neighbour by `edgeHeight` in its own color, so the edge follows any theme and surface. Wave, random-wave, scallop, zigzag and steps repeat across the width; curve and slant stretch.'
   }, {
     name: 'edgeHeight',
     type: 'number',
@@ -751,7 +751,12 @@ export const SECTION_DOC = {
     name: 'edgeAnimate',
     type: 'boolean',
     default: 'false',
-    note: 'The repeating edges drift slowly sideways. Never runs for someone whose device asks to reduce motion.'
+    note: 'The repeating edges drift slowly sideways; curve and slant swell and settle. Never runs for someone whose device asks to reduce motion.'
+  }, {
+    name: 'edgeSeed',
+    type: 'number',
+    default: '0',
+    note: 'Varies random-wave, so stacked sections do not match. The same seed always draws the same wave; 0 is the one Figma draws.'
   }],
   composition: [
     'This is what the rule "never write `background: var(--Surface)`" points at. Setting theme and surface exposes the whole matched set \u2014 background, text, quiet, border, hover, link \u2014 all tuned for that level, so nothing inside has to be told what it is sitting on.',

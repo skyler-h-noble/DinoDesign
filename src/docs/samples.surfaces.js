@@ -415,7 +415,7 @@ export const SURFACE_SAMPLES = {
   /* Two sections meeting, so the edge has something to reach into. */
   Section: {
     edgeTop: () => (
-      <AxisStack values={['wave', 'scallop', 'zigzag', 'steps', 'curve', 'slant']} defaultValue="wave"
+      <AxisStack values={['wave', 'random-wave', 'scallop', 'zigzag', 'steps', 'curve', 'slant']} defaultValue="wave"
         render={(v) => (
           <div style={{ width: '100%' }}>
             <Section surface="Surface" padding="24px 16px 48px"><Caption color="quiet">The section above</Caption></Section>

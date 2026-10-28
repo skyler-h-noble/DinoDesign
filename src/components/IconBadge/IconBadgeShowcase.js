@@ -1,31 +1,24 @@
 // src/components/IconBadge/IconBadgeShowcase.js
 import React, { useState } from 'react';
-import { Box } from '@mui/material';
+import { Box, Stack, Grid } from '@mui/material';
+import { A11yScopeNote } from '../a11yPanel';
 import { ShowcaseHeader } from '../ShowcaseHeader';
+import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { BackgroundPicker } from '../BackgroundPicker';
-import { IconBadge } from './IconBadge';
+import { PreviewSurface } from '../PreviewSurface';
+import { CodeBlock } from '../CodeBlock/CodeBlock';
+import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { Button } from '../Button/Button';
-import { ButtonGroup } from '../ButtonGroup/ButtonGroup';
-import { H3, BodySmall, Label } from '../Typography';
-import { VStack, HStack } from '../Stack/Stack';
-import { Card } from '../Card/Card';
+import { H5, BodySmall, Caption, EyebrowSmall } from '../Typography';
+import { IconBadge } from './IconBadge';
+import { ICON_SHAPES } from '../Shape/shapes';
 import HomeIcon from '@mui/icons-material/Home';
-import CodeIcon from '@mui/icons-material/Code';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import StarIcon from '@mui/icons-material/Star';
-import GridViewIcon from '@mui/icons-material/GridView';
-import ComputerIcon from '@mui/icons-material/Computer';
 
-const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
-
-const COLOR_GROUPS = [
-  { label: 'Default', colors: ['default'] },
-  { label: 'Theme', colors: ['primary', 'secondary', 'tertiary'] },
-  
-  { label: 'State', colors: ['info', 'success', 'warning', 'error'] },
-];
-
-const ICONS = [HomeIcon, CodeIcon, CheckCircleOutlineIcon, StarIcon, GridViewIcon, ComputerIcon];
+const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+const VARIANTS = ['solid', 'light', 'dark'];
+const SIZES = ['small', 'medium', 'large'];
+/* "tile" is the drawn 8px tile — no `shape` prop at all. */
+const SHAPES = ['tile', ...ICON_SHAPES.filter((s) => s !== 'rounded')];
 
 export function IconBadgeShowcase() {
   const [bgTheme, setBgTheme] = useState('Default');
@@ -33,143 +26,109 @@ export function IconBadgeShowcase() {
   const [color, setColor] = useState('primary');
   const [variant, setVariant] = useState('solid');
   const [size, setSize] = useState('medium');
+  const [shape, setShape] = useState('tile');
 
-  const IconComp = ICONS[0];
+  const generateCode = () => {
+    const parts = [];
+    if (color !== 'primary') parts.push(`color="${color}"`);
+    if (variant !== 'solid') parts.push(`variant="${variant}"`);
+    if (size !== 'medium') parts.push(`size="${size}"`);
+    if (shape !== 'tile') parts.push(`shape="${shape}"`);
+    return '<IconBadge' + (parts.length ? ' ' + parts.join(' ') : '') + '>\n  <HomeIcon />\n</IconBadge>';
+  };
+
+  const choice = (label, values, value, set) => (
+    <Box>
+      <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>{label}</EyebrowSmall>
+      <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
+        {values.map((v) => (
+          <Button key={v} size="small" selected={value === v} variant={value === v ? 'default' : 'default-outline'}
+                  onClick={() => set(v)}>{v}</Button>
+        ))}
+      </Stack>
+    </Box>
+  );
 
   return (
-    <VStack spacing={4} style={{ paddingBottom: 64 }}>
+    <Box sx={{ pb: 8 }}>
       <ShowcaseHeader title="Icon Badge" component="IconBadge" />
       <Box sx={{ mt: 1 }}>
         <BackgroundPicker theme={bgTheme} onThemeChange={setBgTheme} surface={bgSurface} onSurfaceChange={setBgSurface} />
       </Box>
+      <BodySmall color="quiet">
+        An icon on a themed tile — or on one of the system&rsquo;s shapes. Three sizes, from Figma&rsquo;s Component-Size modes.
+      </BodySmall>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-        {/* Preview */}
-        <Card padding="medium">
-          <VStack spacing={4} alignItems="center">
-            {/* Main preview */}
-            <div style={{ padding: 40 }}>
-              <IconBadge color={color} variant={variant} size={size}>
-                <IconComp />
-              </IconBadge>
-            </div>
+      <Box sx={{ mt: 2, backgroundColor: 'var(--Background)', overflow: 'hidden' }}>
+        <Tabs defaultValue={0} variant="standard">
+          <TabList>
+            <Tab>Summary</Tab>
+            <Tab>Playground</Tab>
+            <Tab>Accessibility</Tab>
+            <Tab>Change Log</Tab>
+          </TabList>
 
-            {/* All sizes */}
-            <HStack spacing={4} alignItems="flex-end">
-              {['small', 'medium', 'large'].map((s) => (
-                <VStack key={s} spacing={1} alignItems="center">
-                  <IconBadge color={color} variant={variant} size={s}>
-                    <IconComp />
-                  </IconBadge>
-                  <BodySmall style={{ color: 'var(--Quiet)' }}>{cap(s)}</BodySmall>
-                </VStack>
-              ))}
-            </HStack>
+          <TabPanel value={0}>
+            <DocSummary component="IconBadge" theme={bgTheme} surface={bgSurface} />
+          </TabPanel>
 
-            {/* All variants for current color */}
-            <VStack spacing={1} alignItems="center">
-              <BodySmall style={{ color: 'var(--Quiet)', fontWeight: 600, fontSize: '0.7rem' }}>Variants</BodySmall>
-              <HStack spacing={3}>
-                {['solid', 'light', 'dark'].map((v) => (
-                  <VStack key={v} spacing={1} alignItems="center">
-                    <IconBadge color={color} variant={v} size="medium">
-                      <IconComp />
-                    </IconBadge>
-                    <BodySmall style={{ color: 'var(--Quiet)', fontSize: '0.65rem' }}>{cap(v)}</BodySmall>
-                  </VStack>
-                ))}
-              </HStack>
-            </VStack>
-
-            {/* All colors grid */}
-            <VStack spacing={1} alignItems="center">
-              <BodySmall style={{ color: 'var(--Quiet)', fontWeight: 600, fontSize: '0.7rem' }}>All Colors</BodySmall>
-              <HStack spacing={2} style={{ flexWrap: 'wrap', justifyContent: 'center' }}>
-                {COLOR_GROUPS.flatMap(g => g.colors).map((c) => (
-                  <VStack key={c} spacing={0} alignItems="center">
-                    <IconBadge color={c} variant={variant} size="small">
-                      <IconComp />
-                    </IconBadge>
-                    <BodySmall style={{ color: 'var(--Quiet)', fontSize: '0.55rem' }}>{cap(c)}</BodySmall>
-                  </VStack>
-                ))}
-              </HStack>
-            </VStack>
-          </VStack>
-        </Card>
-
-        {/* Controls */}
-        <Card padding="medium">
-          <VStack spacing={4}>
-            <H3 style={{ fontSize: '1rem' }}>Playground</H3>
-
-            {/* Color */}
-            <VStack spacing={2}>
-              <Label>Color</Label>
-              {COLOR_GROUPS.map((group) => (
-                <VStack key={group.label} spacing={1}>
-                  <BodySmall style={{ color: 'var(--Quiet)', fontWeight: 600, fontSize: '0.7rem' }}>{group.label}</BodySmall>
-                  <HStack spacing={1}>
-                    {group.colors.map((c) => (
-                      <Button
-                        key={c}
-                        variant={color === c ? 'default' : 'outline'}
-                        size="small"
-                        onClick={() => setColor(c)}
-                      >
-                        {cap(c)}
-                      </Button>
+          <TabPanel value={1}>
+            <Grid container sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
+              <Grid item sx={{ width: { xs: '100%', md: '55%' }, flexShrink: 0, pr: { md: 3 }, p: 3 }}>
+                <PreviewSurface theme={bgTheme} surface={bgSurface}>
+                  <Box sx={{ p: 4, display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: 3 }}>
+                    {SIZES.map((s) => (
+                      <Box key={s} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                        <IconBadge color={color} variant={variant} size={s} shape={shape === 'tile' ? undefined : shape}>
+                          <HomeIcon />
+                        </IconBadge>
+                        <Caption color={s === size ? 'standard' : 'quiet'}>{s}</Caption>
+                      </Box>
                     ))}
-                  </HStack>
-                </VStack>
-              ))}
-            </VStack>
+                  </Box>
+                </PreviewSurface>
+                <CodeBlock code={generateCode()} language="JSX" wrap sx={{ mt: 2 }} />
+              </Grid>
 
-            {/* Variant */}
-            <VStack spacing={1}>
-              <Label>Variant</Label>
-              <ButtonGroup size="small">
-                {['solid', 'light', 'dark'].map((v) => (
-                  <Button
-                    key={v}
-                    variant={variant === v ? 'default' : 'outline'}
-                    size="small"
-                    onClick={() => setVariant(v)}
-                  >
-                    {cap(v)}
-                  </Button>
+              <Grid item sx={{ width: { xs: '100%', md: '45%' }, flexShrink: 0, minWidth: 0 }}>
+                <Box sx={{ p: 3 }}>
+                  <Stack spacing={3}>
+                    {choice('SHAPE', SHAPES, shape, setShape)}
+                    {choice('COLOR', COLORS, color, setColor)}
+                    {choice('VARIANT', VARIANTS, variant, setVariant)}
+                    {choice('SIZE', SIZES, size, setSize)}
+                  </Stack>
+                </Box>
+              </Grid>
+            </Grid>
+          </TabPanel>
+
+          <TabPanel value={2}>
+            <A11yScopeNote />
+            <Box sx={{ p: 3 }}>
+              <Box sx={{ p: 3, backgroundColor: 'var(--Background)', borderRadius: 'var(--Style-Border-Radius)', border: '1px solid var(--Border)' }}>
+                <H5>ARIA and Semantics</H5>
+                {[
+                  { label: 'Role', value: 'None — a badge is decoration beside the text it illustrates. The icon inside is aria-hidden (the lib’s Icon default).' },
+                  { label: 'When it stands alone', value: 'Give the icon an aria-label naming what it MEANS ("Secure"), not the glyph ("lock").' },
+                  { label: 'Contrast', value: 'Solid: Icons/On-Icon on Icons/Icon, the pair Switch uses — 3:1 non-text contrast by construction.' },
+                  { label: 'Shape', value: shape === 'tile' ? 'The drawn 8px tile.' : `"${shape}" — an icon-safe shape: the 24px glyph sits inside it at every size.` },
+                ].map(({ label: l, value }) => (
+                  <Box key={l} sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
+                    <BodySmall>{l}:</BodySmall>
+                    <Caption style={{ color: 'var(--Text-Quiet)', fontFamily: 'monospace' }}>{value}</Caption>
+                  </Box>
                 ))}
-              </ButtonGroup>
-            </VStack>
+              </Box>
+            </Box>
+          </TabPanel>
 
-            {/* Size */}
-            <VStack spacing={1}>
-              <Label>Size</Label>
-              <ButtonGroup size="small">
-                {['small', 'medium', 'large'].map((s) => (
-                  <Button
-                    key={s}
-                    variant={size === s ? 'default' : 'outline'}
-                    size="small"
-                    onClick={() => setSize(s)}
-                  >
-                    {cap(s)}
-                  </Button>
-                ))}
-              </ButtonGroup>
-            </VStack>
-
-            {/* Token info */}
-            <VStack spacing={0}>
-              <BodySmall style={{ color: 'var(--Quiet)' }}>data-theme: {cap(color)}{variant === 'light' ? '-Light' : ''}</BodySmall>
-              <BodySmall style={{ color: 'var(--Quiet)' }}>data-surface: {variant === 'dark' ? 'Surface-Dimmest' : 'Surface'}</BodySmall>
-              <BodySmall style={{ color: 'var(--Quiet)' }}>bg: var(--Background)</BodySmall>
-              <BodySmall style={{ color: 'var(--Quiet)' }}>icon: var(--Text)</BodySmall>
-            </VStack>
-          </VStack>
-        </Card>
-      </div>
-    </VStack>
+          <TabPanel value={3}>
+            <DocChanges component="IconBadge" />
+          </TabPanel>
+        </Tabs>
+      </Box>
+    </Box>
   );
 }
 

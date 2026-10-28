@@ -33,26 +33,34 @@ import { EDGE_NAMES, edgeMaskURL, edgeTile } from './edges';
  *   as       — element tag, defaults to "section"
  *   padding  — CSS padding value (string or number). Optional.
  *   edgeTop / edgeBottom — the shape where this section meets the one above
- *              / below: wave | scallop | zigzag | steps | curve | slant.
+ *              / below: wave | random-wave | scallop | zigzag | steps | curve | slant.
  *              The section reaches INTO its neighbour by `edgeHeight`, in its
  *              own color, so the edge needs no colors of its own and follows
  *              any theme and surface. The neighbour's content should leave
  *              that much room.
  *   edgeHeight — px, default 48.
- *   edgeAnimate — the repeating edges (wave, scallop, zigzag, steps) drift
- *              slowly sideways. Off by default; never runs for someone who
- *              has asked their device to reduce motion.
+ *   edgeAnimate — the repeating edges (wave, random-wave, scallop, zigzag,
+ *              steps) drift slowly sideways; curve and slant, which cannot
+ *              slide, swell and settle. Off by default; never runs for someone
+ *              who has asked their device to reduce motion.
+ *   edgeSeed — a number that varies random-wave, so stacked sections do not
+ *              match. Default 0, which is the one Figma draws.
  *   className, style, children, ...rest — forwarded.
  *
  * For wrapping without painting (e.g. AppBar's themed zone), use ThemedZone
  * instead.
  */
+/* Stretched edges cannot slide, so they breathe: the edge grows from its
+   baseline and settles back. scaleY keeps the shape and only changes how far
+   it reaches. */
+const swell = (flip) => keyframes`from { transform: scaleY(${flip ? -0.7 : 0.7}); } to { transform: scaleY(${flip ? -1 : 1}); }`;
+
 const drift = (tile) => keyframes`from { -webkit-mask-position: 0 0; mask-position: 0 0; } to { -webkit-mask-position: ${tile}px 0; mask-position: ${tile}px 0; }`;
 
 const warned = new Set();
 
 /** The section's own color, shaped, reaching into its neighbour. */
-function SectionEdge({ name, side, height, animate }) {
+function SectionEdge({ name, side, height, animate, seed }) {
   if (!EDGE_NAMES.includes(name)) {
     if (process.env.NODE_ENV !== 'production' && !warned.has(name)) {
       warned.add(name);
@@ -62,7 +70,7 @@ function SectionEdge({ name, side, height, animate }) {
     return null;
   }
   const tile = edgeTile(name, height);
-  const url = edgeMaskURL(name);
+  const url = edgeMaskURL(name, seed);
   const mask = url + (tile ? ' 0 0 / ' + tile + 'px 100% repeat-x' : ' center / 100% 100% no-repeat');
   return (
     <Box
@@ -81,10 +89,15 @@ function SectionEdge({ name, side, height, animate }) {
         mask,
         pointerEvents: 'none',
         zIndex: 1,
-        ...(animate && tile && {
-          '@media (prefers-reduced-motion: no-preference)': {
-            animation: drift(tile) + ' ' + Math.round(tile / 12) + 's linear infinite',
-          },
+        ...(animate && {
+          '@media (prefers-reduced-motion: no-preference)': tile
+            ? { animation: drift(tile) + ' ' + Math.round(tile / 12) + 's linear infinite' }
+            : {
+                /* From the baseline, so it grows out of the section rather
+                   than floating. */
+                transformOrigin: 'bottom',
+                animation: swell(side === 'bottom') + ' 5s ease-in-out infinite alternate',
+              },
         }),
       }}
     />
@@ -100,6 +113,7 @@ export function Section({
   edgeBottom,
   edgeHeight = 48,
   edgeAnimate = false,
+  edgeSeed = 0,
   className,
   style,
   children,
@@ -120,9 +134,9 @@ export function Section({
       }}
       {...rest}
     >
-      {edgeTop && <SectionEdge name={edgeTop} side="top" height={edgeHeight} animate={edgeAnimate} />}
+      {edgeTop && <SectionEdge name={edgeTop} side="top" height={edgeHeight} animate={edgeAnimate} seed={edgeSeed} />}
       {children}
-      {edgeBottom && <SectionEdge name={edgeBottom} side="bottom" height={edgeHeight} animate={edgeAnimate} />}
+      {edgeBottom && <SectionEdge name={edgeBottom} side="bottom" height={edgeHeight} animate={edgeAnimate} seed={edgeSeed} />}
     </Tag>
   );
 }

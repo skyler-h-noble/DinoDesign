@@ -13,7 +13,7 @@ describe('Section edges', () => {
   });
 
   test('repeating edges tile by height; curve and slant stretch', () => {
-    expect(REPEATING_EDGES).toEqual(['wave', 'scallop', 'zigzag', 'steps']);
+    expect(REPEATING_EDGES).toEqual(['wave', 'scallop', 'zigzag', 'steps', 'random-wave']);
     expect(edgeTile('wave', 48)).toBe(288);
     expect(edgeTile('curve', 48)).toBeNull();
   });
@@ -31,6 +31,17 @@ describe('Section edges', () => {
     const { container } = render(<Section edgeBottom="zigzag" edgeHeight={24}>x</Section>);
     const edge = container.querySelector('.section-edge-bottom');
     expect(edge).toHaveStyle({ top: '100%', height: '24px', transform: 'scaleY(-1)' });
+  });
+
+  test('random-wave is fixed for a seed and differs between seeds', () => {
+    expect(edgePath('random-wave', 3)).toBe(edgePath('random-wave', 3));
+    expect(edgePath('random-wave', 3)).not.toBe(edgePath('random-wave', 0));
+  });
+
+  test('random-wave repeats without a seam: it ends where it starts', () => {
+    const nums = edgePath('random-wave').replace(/[MLZ]/g, ' ').trim().split(/\s+/).map(Number);
+    // [0,100], then the first sampled point, ..., the last sampled point, [100,100]
+    expect(Math.abs(nums[3] - nums[nums.length - 3])).toBeLessThan(0.2);
   });
 
   test('no edge leaves the section exactly as it was', () => {
