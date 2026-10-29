@@ -25,28 +25,28 @@ describe('Switch Component', () => {
 
   test('renders with role switch', () => {
     render(<Switch aria-label="Test switch" />);
-    expect(screen.getByRole('checkbox')).toBeInTheDocument();
+    expect(screen.getByRole('switch')).toBeInTheDocument();
   });
 
   test('renders unchecked by default', () => {
     render(<Switch aria-label="Test switch" />);
-    expect(screen.getByRole('checkbox')).not.toBeChecked();
+    expect(screen.getByRole('switch')).not.toBeChecked();
   });
 
   test('renders checked when defaultChecked', () => {
     render(<Switch defaultChecked aria-label="Test switch" />);
-    expect(screen.getByRole('checkbox')).toBeChecked();
+    expect(screen.getByRole('switch')).toBeChecked();
   });
 
   test('renders checked with controlled value', () => {
     render(<Switch checked onChange={() => {}} aria-label="Test switch" />);
-    expect(screen.getByRole('checkbox')).toBeChecked();
+    expect(screen.getByRole('switch')).toBeChecked();
   });
 
   test('calls onChange when toggled', () => {
     const handleChange = jest.fn();
     render(<Switch onChange={handleChange} aria-label="Test switch" />);
-    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.click(screen.getByRole('switch'));
     expect(handleChange).toHaveBeenCalledTimes(1);
   });
 
@@ -64,7 +64,7 @@ describe('Switch Component', () => {
 
   test('handles disabled state', () => {
     render(<Switch disabled aria-label="Disabled" />);
-    expect(screen.getByRole('checkbox')).toBeDisabled();
+    expect(screen.getByRole('switch')).toBeDisabled();
   });
 
   /* The input carries the `disabled` attribute, which is what stops a real
@@ -74,7 +74,7 @@ describe('Switch Component', () => {
      is. Assert the guarantee that actually exists. */
   test('is genuinely disabled, not just styled that way', () => {
     render(<Switch disabled onChange={jest.fn()} aria-label="Disabled" />);
-    expect(screen.getByRole('checkbox')).toBeDisabled();
+    expect(screen.getByRole('switch')).toBeDisabled();
   });
 
   // --- Variants ---
@@ -180,29 +180,31 @@ describe('Convenience Exports', () => {
 // ─── Accessibility ───────────────────────────────────────────────────────────
 
 describe('Accessibility', () => {
-  test('has checkbox role (MUI Switch)', () => {
+  test('has the switch role (an input type=checkbox with role="switch")', () => {
     render(<Switch aria-label="Accessible" />);
-    expect(screen.getByRole('checkbox')).toBeInTheDocument();
+    expect(screen.getByRole('switch')).toBeInTheDocument();
+    // Still a native checkbox underneath — form semantics and keyboard come from it.
+    expect(screen.getByRole('switch')).toHaveAttribute('type', 'checkbox');
   });
 
   test('passes aria-label to input', () => {
     render(<Switch aria-label="My switch" />);
-    expect(screen.getByRole('checkbox')).toHaveAttribute('aria-label', 'My switch');
+    expect(screen.getByRole('switch')).toHaveAttribute('aria-label', 'My switch');
   });
 
   test('disabled switch is disabled in DOM', () => {
     render(<Switch disabled aria-label="Test" />);
-    expect(screen.getByRole('checkbox')).toBeDisabled();
+    expect(screen.getByRole('switch')).toBeDisabled();
   });
 
   test('checked state reflected in aria', () => {
     render(<Switch defaultChecked aria-label="Test" />);
-    expect(screen.getByRole('checkbox')).toBeChecked();
+    expect(screen.getByRole('switch')).toBeChecked();
   });
 
   test('toggle changes checked state', () => {
     render(<Switch aria-label="Test" />);
-    const checkbox = screen.getByRole('checkbox');
+    const checkbox = screen.getByRole('switch');
     expect(checkbox).not.toBeChecked();
     fireEvent.click(checkbox);
     expect(checkbox).toBeChecked();

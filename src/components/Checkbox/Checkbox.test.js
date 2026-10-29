@@ -3,6 +3,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { axe } from 'jest-axe';
 import { Checkbox, normalizeCheckboxVariant } from './Checkbox';
+import { cssFor, declared } from '../_testCss';
 
 // ─── Render Tests ─────────────────────────────────────────────────────────────
 
@@ -323,16 +324,6 @@ describe('Checkbox variant is color only', () => {
 /* The gap is --Label-Gap, the one variable Checkbox Field, RadioField and
    SwitchField bind; the label is the Label type style (Figma's Form-Label). */
 describe('label and gap follow the shared Label-Gap and Label style', () => {
-  const cssFor = (el) => {
-    const cls = (el.className || '').split(/\s+/).find((c) => c.startsWith('css-'));
-    if (!cls) return '';
-    return Array.from(document.styleSheets)
-      .flatMap((sheet) => Array.from(sheet.cssRules || []))
-      .filter((r) => (r.selectorText || '').includes('.' + cls))
-      .map((r) => r.cssText)
-      .join('\n');
-  };
-
   test.each([
     ['small', 'var(--Sm-Label-Gap, 4px)'],
     ['medium', 'var(--Label-Gap, 8px)'],
@@ -376,9 +367,19 @@ describe('Checkbox matches the Figma set', () => {
 
   test('checked fills with the default button, not primary', () => {
     const { container } = render(<Checkbox checked onChange={() => {}} aria-label="on" />);
-    const css = allRules();
-    expect(css).toMatch(/background-color:\s*var\(--Buttons-Default-Button\)/);
-    expect(css).toMatch(/border:\s*2px solid var\(--Buttons-Default-Border\)/);
+    /* Colour arrives as custom properties declared on the root; follow them
+       through to the token each part actually paints. */
+    const root = container.querySelector('.MuiCheckbox-root');
+    const box = container.querySelector('.chk-box-icon');
+    const viaRoot = (el, prop) => {
+      const v = declared(el, prop);
+      const m = /^var\((--_[\w-]+)\)$/.exec(v || '');
+      return m ? declared(root, m[1]) : v;
+    };
+    expect(viaRoot(box.firstElementChild, 'background-color')).toBe('var(--Buttons-Default-Button)');
+    expect(declared(box, 'border-width')).toBe('2px');
+    expect(declared(box, 'border-style')).toBe('solid');
+    expect(viaRoot(box, 'border-color')).toBe('var(--Buttons-Default-Border)');
     // Earlier tests' rules stay in the document, so the default is read off
     // the rendered class rather than by the absence of Primary tokens.
     expect(container.querySelector('.chk-default')).not.toBeNull();
@@ -386,8 +387,11 @@ describe('Checkbox matches the Figma set', () => {
   });
 
   test('the check mark takes the fill\'s label color, not its border', () => {
-    render(<Checkbox checked onChange={() => {}} aria-label="mark" />);
-    expect(allRules()).toMatch(/color:\s*var\(--Buttons-Default-Text\)/);
+    const { container } = render(<Checkbox checked onChange={() => {}} aria-label="mark" />);
+    const root = container.querySelector('.MuiCheckbox-root');
+    const mark = container.querySelector('svg');
+    expect(declared(mark, 'color')).toBe('var(--_chk-glyph)');
+    expect(declared(root, '--_chk-glyph')).toBe('var(--Buttons-Default-Text)');
   });
 
   test('focus is a 2px ring 1px outside the box', () => {
@@ -396,8 +400,12 @@ describe('Checkbox matches the Figma set', () => {
   });
 
   test('disabled dims once, not twice', () => {
-    render(<Checkbox disabled aria-label="d" />);
+    const { container } = render(<Checkbox disabled aria-label="d" />);
     expect(allRules()).not.toMatch(/\.chk-box-icon\{[^}]*opacity/);
+    // The root dims; the box and its fill carry no opacity of their own.
+    expect(declared(container.querySelector('.MuiCheckbox-root'), 'opacity')).toBe('var(--Disabled, 0.38)');
+    expect(declared(container.querySelector('.chk-box-icon'), 'opacity')).toBeUndefined();
+    expect(declared(container.querySelector('.chk-box-icon').firstElementChild, 'opacity')).toBeUndefined();
   });
 });
 
