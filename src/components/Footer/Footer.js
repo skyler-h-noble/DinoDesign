@@ -229,7 +229,11 @@ function LinksColumn({ title, links = [] }) {
      not. A layout primitive should not cost semantics. */
   return (
     <VStack gap="var(--Sizing-1)">
-      {title && <H4 style={{ color: 'inherit' }}>{title}</H4>}
+      {/* H4's look, an h2's place in the outline. The footer is its own
+          landmark, so its column titles head their own sections; a fixed
+          <h4> skipped a level after a page's h2 sections and Lighthouse
+          marked every page with a Footer down for heading order. */}
+      {title && <H4 component="h2" style={{ color: 'inherit' }}>{title}</H4>}
       <VStack component="ul" gap="var(--Sizing-1)" sx={{ listStyle: 'none', m: 0, p: 0 }}>
         {links.map((l, i) => (
           <li key={i}>
@@ -336,7 +340,7 @@ function SubscribeArea({
       onSubmit={handleSubmit}
       style={{ minWidth: 260, maxWidth: 360, flex: '1 1 260px' }}
     >
-      <H4 style={{ color: 'inherit', marginBottom: 6 }}>{title}</H4>
+      <H4 component="h2" style={{ color: 'inherit', marginBottom: 6 }}>{title}</H4>
       {description && (
         <BodySmall
           style={{

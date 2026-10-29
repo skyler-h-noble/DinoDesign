@@ -337,9 +337,6 @@ async function fetchThemeManifest(themeURL) {
  * @param {boolean}  props.darkMode
  * @param {function} props.onDarkModeChange
  *
- * Device type ramp ('auto' by default — guarded; false to opt out):
- * @param {false|'auto'|'IOS-Mobile'|'IOS-Tablet'|'Android-Mobile'|'Android-Tablet'|'Desktop'} [props.device]
- *
  * DOM:
  * @param {string}   props.className
  * @param {object}   props.style
@@ -384,18 +381,6 @@ export function OmniDesignProvider({
   darkMode: controlledDarkMode,
   onDarkModeChange,
 
-  /* Which device type ramp the page uses. 'auto' (default) follows the
-     screen — below 600px the phone ramp, 600–899 the tablet ramp, 900+
-     desktop — so a phone gets phone sizes, not a 72px display headline. The
-     device ramps use the BRAND faces (data-fonts="System" is what swaps in
-     the platform's), with the design's own phone weights.
-     GUARDED: applied only once the theme has loaded, and only if the ramp
-     then resolves a body font. A design system published before the
-     --Platform-Font-Families-* hooks has a phone ramp pointing at nothing
-     (text fell back to Times in 0.25.0); such a theme stays on desktop sizes.
-     A device name pins one; false leaves data-device alone. Never applied
-     when something else has set data-device on <html>. */
-  device = 'auto',
 
   // DOM
   className,
@@ -500,58 +485,12 @@ export function OmniDesignProvider({
   const [cssStatus, setCssStatus] = useState(hasAnyCSSSource ? 'loading' : 'ready');
   const [cssError,  setCssError]  = useState(null);
 
-  // ── EFFECT: data-device from the screen width ───────────────────────────
-  useEffect(() => {
-    if (device === false || typeof document === 'undefined') return undefined;
-    if (device === 'auto' && cssStatus !== 'ready') return undefined;
-    const root = document.documentElement;
-    // Someone else owns it: leave it alone, now and on every resize.
-    if (root.hasAttribute('data-device') && root.getAttribute('data-omni-device') !== 'auto') return undefined;
-    const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
-    let written = root.getAttribute('data-device');
-    const set = (value) => {
-      // Stop if anything changed it since our last write.
-      if (root.getAttribute('data-device') !== written) return false;
-      if (value) {
-        root.setAttribute('data-device', value);
-        root.setAttribute('data-platform', value); // systems published before the rename
-      } else {
-        root.removeAttribute('data-device');
-        root.removeAttribute('data-platform');
-      }
-      root.setAttribute('data-omni-device', 'auto');
-      written = value || null;
-      return true;
-    };
-    if (device !== 'auto') { set(device === 'Desktop' ? 'Desktop' : device); return undefined; }
-    if (typeof window === 'undefined' || !window.matchMedia) return undefined;
-    const phone = window.matchMedia('(max-width: 599.98px)');
-    const tablet = window.matchMedia('(max-width: 899.98px)');
-    const timers = [];
-    const stop = () => {
-      phone.removeEventListener('change', apply); tablet.removeEventListener('change', apply);
-      timers.forEach(clearTimeout);
-    };
-    const resolvesFont = () => Boolean(getComputedStyle(root).getPropertyValue('--Font-Family-Body').trim());
-    function apply() {
-      const kind = phone.matches ? 'Mobile' : tablet.matches ? 'Tablet' : null;
-      if (!set(kind ? (isAndroid ? 'Android-' : 'IOS-') + kind : null)) { stop(); return; }
-      // The guard: a ramp that resolves no body font is worse than desktop
-      // sizes, so drop back to desktop. Not for good, though — 'ready' can
-      // arrive a beat before the type sheet applies, and giving up on that
-      // first look left a phone on 72px headlines. Look again as the sheets
-      // settle; a theme that genuinely lacks the hooks fails every look and
-      // simply stays on desktop.
-      if (kind && !resolvesFont()) set(null);
-    }
-    apply();
-    [150, 600, 2000].forEach((ms) => timers.push(setTimeout(() => {
-      if (!root.hasAttribute('data-device') && (phone.matches || tablet.matches)) apply();
-    }, ms)));
-    phone.addEventListener('change', apply);
-    tablet.addEventListener('change', apply);
-    return stop;
-  }, [device, cssStatus]);
+  /* Phone and tablet type ramps come from the theme's CSS by screen width
+     (@media … :root:not([data-device])) — the browser applies them as the
+     sheet parses. The provider used to set data-device from JavaScript, which
+     painted desktop type first and resized every heading after. data-device
+     is for an app that wants to pin a device (and for Figma's device modes),
+     not something the provider sets. */
 
 
   // ── DEV WARNING: no design-system CSS anywhere on the page ────────────────
@@ -654,6 +593,26 @@ export function OmniDesignProvider({
       .catch(err => console.error('OmniDesignProvider mode CSS error:', err));
 
   }, [isDark, resolvedSources.lightMode, resolvedSources.darkMode]);
+
+  // ── EFFECT: Prefetch the OTHER mode sheet once the page is ready ─────────
+  // The first toggle used to wait on the network: Dark-Mode.css (≈550 KB
+  // raw, ≈17 KB compressed) was only requested when the user asked for it,
+  // so the page sat light for about a second. A low-priority prefetch after
+  // the page settles puts it in the HTTP cache, and the swap above is
+  // instant. URLs only — a raw-CSS source has nothing to fetch.
+  useEffect(() => {
+    if (cssStatus !== 'ready' || typeof document === 'undefined') return undefined;
+    const other = isDark ? resolvedSources.lightMode : resolvedSources.darkMode;
+    if (!other || !/^(https?:)?\/\/|^\//.test(other)) return undefined;
+    if (document.querySelector('link[rel="prefetch"][href="' + other + '"]')) return undefined;
+    const link = document.createElement('link');
+    link.rel = 'prefetch';
+    link.as = 'style';
+    link.href = other;
+    link.setAttribute('data-omni', 'prefetch');
+    document.head.appendChild(link);
+    return undefined;
+  }, [cssStatus, isDark, resolvedSources.lightMode, resolvedSources.darkMode]);
 
   // Cleanup mode tag on unmount
   useEffect(() => { return () => removeStyleTag(TAG.mode); }, []);

@@ -26,6 +26,18 @@ import { OmniDesignProvider, OMNI_DEFAULT_THEME_URL } from '@omni-design/compone
 The components carry no colors or fonts of their own; `themeURL` loads them.
 Pass nothing and the page renders as bare HTML (the provider warns in dev).
 
+For a faster first paint, let the browser open its connections while your
+JavaScript downloads — in `index.html`'s `<head>`:
+
+```html
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+```
+
+(Or self-host the theme: copy `node_modules/@omni-design/components/public/styles/`
+to `public/omni/` and pass `themeURL="/omni/theme.json"` — no CDN round trip.)
+
 The CSS styles no bare elements, so set the body once:
 
 ```css
@@ -52,9 +64,10 @@ headings, borders, buttons — picks the right contrast-checked colors.
 
 ## 4. Phones, light and dark — already handled
 
-- **Phones:** type follows the screen — the phone ramp below 600px, tablet
-  below 900px (smaller headings; body text is semibold on phones by design —
-  do not override it). `AppBar` folds its links, and every `endSlot` action
+- **Phones:** type follows the screen through the theme's CSS — the phone
+  ramp below 600px, tablet below 900px (smaller headings; body text is
+  semibold on phones by design — do not override it). Do not set
+  `data-device`; it only pins a device on purpose. `AppBar` folds its links, and every `endSlot` action
   but the last, into a menu button below 900px. Pass `endSlot` as a fragment
   of buttons, primary action last. Nothing to set up.
 - **Light / dark:** a toggle is three lines; every component and color

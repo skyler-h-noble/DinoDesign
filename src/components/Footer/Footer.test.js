@@ -72,6 +72,11 @@ describe('Footer Component', () => {
     await waitFor(() => expect(container.querySelector('a[aria-label="GitHub"] svg')).not.toBeNull());
   });
 
+  test('column titles are h2 in the footer landmark (no skipped heading level)', () => {
+    render(<Footer brand="TestCo" columns={[{ title: 'Product', links: [{ label: 'Pricing', href: '#p' }] }]} />);
+    expect(screen.getByRole('heading', { name: 'Product' }).tagName).toBe('H2');
+  });
+
   test('has no accessibility violations', async () => {
     const { container } = render(
       <Footer address={sampleAddress} copyrightName="TestCo" />
