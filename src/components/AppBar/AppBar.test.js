@@ -1,6 +1,6 @@
 // src/components/AppBar/AppBar.test.js
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AppBar, DesktopAppBar, MobileAppBar } from './AppBar';
 import CheckIcon from '@mui/icons-material/Check';
 import { axe } from 'jest-axe';
@@ -107,23 +107,25 @@ describe('DesktopAppBar', () => {
     render(<DesktopAppBar menuType="hamburger" navLinks={['Home']} showMenu={false} />);
     expect(screen.queryByLabelText('Open navigation menu')).not.toBeInTheDocument();
   });
-  test('auto: links inline, and the menu button opens the same links', () => {
+  test('auto: links inline, and the menu button opens the same links', async () => {
     render(<DesktopAppBar brand="Acme" navLinks={[{ label: 'Features', href: '#features' }, { label: 'Pricing', href: '#pricing' }]} />);
     const nav = screen.getByLabelText('Main navigation');
     expect(nav.querySelector('a[href="#features"]')).not.toBeNull();
     fireEvent.click(screen.getByLabelText('Open navigation menu'));
-    expect(screen.getAllByText('Pricing').length).toBeGreaterThan(1);
+    // The drawer loads on first use.
+    await waitFor(() => expect(screen.getAllByText('Pricing').length).toBeGreaterThan(1));
   });
   test('auto: collapses below collapseAt (default 900px)', () => {
     render(<DesktopAppBar brand="Acme" navLinks={['A']} />);
     const css = Array.from(document.styleSheets).flatMap((sh) => Array.from(sh.cssRules).map((r) => r.cssText)).join('\n');
     expect(css).toMatch(/max-width:\s*899\.98px/);
   });
-  test('a bar with navLinks has no search unless asked', () => {
+  test('a bar with navLinks has no search unless asked', async () => {
     const { container, rerender } = render(<DesktopAppBar navLinks={['A']} />);
     expect(container.querySelector('input')).toBeNull();
     rerender(<DesktopAppBar navLinks={['A']} searchPosition="right" />);
-    expect(container.querySelector('input')).not.toBeNull();
+    // The search field loads on first use.
+    await waitFor(() => expect(container.querySelector('input')).not.toBeNull());
   });
   test('collapsed: every action but the last moves into the drawer', () => {
     render(<DesktopAppBar brand="Acme" navLinks={['Features']}

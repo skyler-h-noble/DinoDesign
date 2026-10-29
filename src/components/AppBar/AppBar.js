@@ -1,12 +1,10 @@
 // src/components/AppBar/AppBar.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Box } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import { SearchField } from '../SearchField/SearchField';
 import { Tabs, TabList, Tab } from '../Tabs/Tabs';
-import { Drawer } from '../Drawer/Drawer';
 import { H3 } from '../Typography';
 import { Button } from '../Button/Button';
 /* Level from the Figma effect style that NAMES this component.
@@ -17,6 +15,24 @@ import { Button } from '../Button/Button';
      4  Elevations/Level-4 (FAB-Hover, Elevated-Card-Drag)
      5  Elevations/Level-5 (Dialog & Modal) */
 import { SHADOW_LEVEL_2 } from '../_shadows';
+
+/* Loaded only when used. Most bars never open the drawer and many show no
+   search, so neither belongs in the first download. The drawer starts loading
+   when the menu button is first pointed at or focused, so it is there by the
+   time the press lands; Drawer renders nothing while closed, so mounting it
+   then loses no animation. */
+const loadDrawer = () => import('../Drawer/Drawer');
+const Drawer = lazy(() => loadDrawer().then((m) => ({ default: m.Drawer })));
+const SearchField = lazy(() => import('../SearchField/SearchField').then((m) => ({ default: m.SearchField })));
+
+/** Drawer state that also records whether the drawer has been wanted yet. */
+function useNavDrawer() {
+  const [open, setOpenState] = useState(false);
+  const [wanted, setWanted] = useState(false);
+  const setOpen = (v) => { if (v) setWanted(true); setOpenState(v); };
+  const prefetch = () => { loadDrawer(); setWanted(true); };
+  return [open, setOpen, wanted, prefetch];
+}
 
 /**
  * AppBar Component
@@ -66,10 +82,11 @@ const AppBarSizeContext = React.createContext('medium');
 const barHeight = (size) => BAR_HEIGHT[size] || BAR_HEIGHT.medium;
 
 /* --- Icon Button (uses Button component) --- */
-function AppBarIconButton({ children, onClick, ariaLabel }) {
+function AppBarIconButton({ children, onClick, ariaLabel, onIntent }) {
   const size = React.useContext(AppBarSizeContext);
   return (
-    <Button iconOnly variant="ghost" size={size} onClick={onClick} aria-label={ariaLabel}>
+    <Button iconOnly variant="ghost" size={size} onClick={onClick} aria-label={ariaLabel}
+      onPointerEnter={onIntent} onFocus={onIntent}>
       {children}
     </Button>
   );
@@ -130,7 +147,7 @@ function DesktopAppBar({
   className = '', sx = {},
 }) {
   const barSize = React.useContext(AppBarSizeContext);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen, drawerWanted, prefetchDrawer] = useNavDrawer();
   const barTheme = THEME_MAP[barColor] || THEME_MAP.default;
   const dataTheme = barTheme.theme;
   const dataSurface = barTheme.surface || surface;
@@ -177,7 +194,8 @@ function DesktopAppBar({
   const below = '@media (max-width: ' + (collapseAt - 0.02) + 'px)';
 
   // The navigation drawer the menu button opens — shared by both bars.
-  const navDrawer = (
+  const navDrawer = drawerWanted && (
+      <Suspense fallback={null}>
       <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} anchor="left" size="small">
         <Box component="nav" aria-label="Main navigation" sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, p: 'var(--Sizing-2, 16px)' }}>
           {links.map((link, i) => (
@@ -201,6 +219,7 @@ function DesktopAppBar({
           )}
         </Box>
       </Drawer>
+      </Suspense>
   );
 
   if (layout) {
@@ -213,7 +232,7 @@ function DesktopAppBar({
        The end group is whatever endSlot holds (Figma: a ButtonGroup and an
        avatar button, Sizing-2 apart). */
     const menu = showMenu && layout !== 'title' && (
-      <AppBarIconButton ariaLabel="Open navigation menu" onClick={onMenuClick || (() => setDrawerOpen(true))}>
+      <AppBarIconButton ariaLabel="Open navigation menu" onClick={onMenuClick || (() => setDrawerOpen(true))} onIntent={onMenuClick ? undefined : prefetchDrawer}>
         <MenuIcon sx={{ fontSize: 'inherit' }} />
       </AppBarIconButton>
     );
@@ -275,14 +294,19 @@ function DesktopAppBar({
     );
   }
 
+  const searchFlex = searchPosition === 'left' ? '0 1 400px' : '0 1 280px';
+  /* The placeholder holds the field's room in the bar, so nothing moves when
+     it arrives. */
   const searchField = (
-    <SearchField
-      placeholder={searchPlaceholder}
-      size="medium"
-      value={searchValue}
-      onChange={onSearchChange}
-      sx={{ flex: searchPosition === 'left' ? '0 1 400px' : '0 1 280px', minWidth: 0 }}
-    />
+    <Suspense fallback={<div aria-hidden="true" style={{ flex: searchFlex, minWidth: 0 }} />}>
+      <SearchField
+        placeholder={searchPlaceholder}
+        size="medium"
+        value={searchValue}
+        onChange={onSearchChange}
+        sx={{ flex: searchFlex, minWidth: 0 }}
+      />
+    </Suspense>
   );
 
   return (
@@ -309,7 +333,7 @@ function DesktopAppBar({
               className="appbar-menu"
               sx={effectiveMenu === 'auto' ? { display: 'none', [below]: { display: 'contents' } } : { display: 'contents' }}
             >
-              <AppBarIconButton ariaLabel="Open navigation menu" onClick={onMenuClick || (() => setDrawerOpen(true))}>
+              <AppBarIconButton ariaLabel="Open navigation menu" onClick={onMenuClick || (() => setDrawerOpen(true))} onIntent={onMenuClick ? undefined : prefetchDrawer}>
                 <MenuIcon sx={{ fontSize: 'inherit' }} />
               </AppBarIconButton>
             </Box>
@@ -396,9 +420,10 @@ function DesktopAppBar({
                       as every other tab bar, with aria-current on the section
                       you are at (a site nav goes to a place; it does not
                       switch a panel, so no tab roles). */}
-                  <Box className="appbar-links" sx={{ display: 'flex', alignItems: 'stretch', alignSelf: 'stretch', flexShrink: 0, [below]: { display: 'none' } }}>
+                  {/* Centred on the bar's height, like the brand and the actions beside it. */}
+                  <Box className="appbar-links" sx={{ display: 'flex', alignItems: 'center', alignSelf: 'center', flexShrink: 0, [below]: { display: 'none' } }}>
                     <Tabs navigation value={currentIndex} onChange={setCurrentIndex} baseline={false} size={barSize}
-                          sx={{ alignSelf: 'stretch', display: 'flex', alignItems: 'flex-end' }}>
+                          sx={{ display: 'flex', alignItems: 'center' }}>
                       <TabList aria-label="Main navigation">
                         {links.map((link, i) => (
                           <Tab key={typeof link.label === 'string' ? link.label : i} value={i} href={link.href} onClick={link.onClick}>{link.label}</Tab>
@@ -491,7 +516,7 @@ function MobileAppBar({
   className = '', sx = {},
 }) {
   const barSize = React.useContext(AppBarSizeContext);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen, drawerWanted, prefetchDrawer] = useNavDrawer();
   const barTheme = THEME_MAP[barColor] || THEME_MAP.default;
   const dataTheme = barTheme.theme;
   const dataSurface = barTheme.surface || surface;
@@ -510,7 +535,8 @@ function MobileAppBar({
   };
 
   const links = navLinks.map((l) => (typeof l === 'string' ? { label: l } : l));
-  const navDrawer = (
+  const navDrawer = drawerWanted && (
+    <Suspense fallback={null}>
     <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} anchor="left" size="small">
       <Box component="nav" aria-label="Main navigation" sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, py: 1 }}>
         {links.map((link, i) => (
@@ -527,6 +553,7 @@ function MobileAppBar({
         ))}
       </Box>
     </Drawer>
+    </Suspense>
   );
 
   if (mobileVariant === 'search') {
@@ -536,15 +563,17 @@ function MobileAppBar({
         {...commonProps}
         sx={{ ...containerSx, display: 'flex', alignItems: 'center', height: barHeight(barSize), px: 1.5, gap: 1.5 }}>
         {links.length > 0 && (
-          <AppBarIconButton ariaLabel="Open navigation menu" onClick={() => setDrawerOpen(true)}>
+          <AppBarIconButton ariaLabel="Open navigation menu" onClick={() => setDrawerOpen(true)} onIntent={prefetchDrawer}>
             <MenuIcon sx={{ fontSize: 'inherit' }} />
           </AppBarIconButton>
         )}
-        <SearchField
-          placeholder={'Search ' + companyName}
-          size="small"
-          sx={{ flex: 1, minWidth: 0 }}
-        />
+        <Suspense fallback={<div aria-hidden="true" style={{ flex: 1, minWidth: 0 }} />}>
+          <SearchField
+            placeholder={'Search ' + companyName}
+            size="small"
+            sx={{ flex: 1, minWidth: 0 }}
+          />
+        </Suspense>
         <Button iconOnly variant="ghost" size="medium" aria-label="Account">
           <AccountCircleIcon sx={{ fontSize: 28 }} />
         </Button>

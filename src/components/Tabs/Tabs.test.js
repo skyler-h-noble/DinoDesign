@@ -1,6 +1,6 @@
 // src/components/Tabs/Tabs.test.js
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Tabs, TabList, Tab, TabPanel } from './Tabs';
 import { axe } from 'jest-axe';
 
@@ -580,11 +580,12 @@ describe('Tabs overflow', () => {
     expect(more.closest('[role="tablist"]')).toBeNull();
   });
 
-  test('more: picking a folded tab selects it and marks the … selected', () => {
+  test('more: picking a folded tab selects it and marks the … selected', async () => {
     const { container } = four();
     fireEvent.click(container.querySelector('.tab-list-more-btn'));
+    // The More panel loads on first use.
+    await waitFor(() => expect(document.querySelectorAll('.tab-list-more-item').length).toBe(2));
     const rows = document.querySelectorAll('.tab-list-more-item');
-    expect(rows.length).toBe(2);
     fireEvent.click(rows[1]); // "Four"
     expect(container.querySelector('#' + CSS.escape(container.querySelectorAll('[role="tab"]')[3].id)).getAttribute('aria-selected')).toBe('true');
     expect(container.querySelector('.tab-list-more-btn').getAttribute('aria-label')).toMatch(/Four selected/);

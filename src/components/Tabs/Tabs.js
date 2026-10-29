@@ -3,13 +3,18 @@ import React, { createContext, useContext, useState, useRef, useCallback, useId,
 import { Box } from '@mui/material';
 import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography, CAP_HEIGHT_TRIM, Body } from '../Typography';
 import { Button } from '../Button/Button';
-import { Popover } from '../Popover/Popover';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import CheckIcon from '@mui/icons-material/Check';
+
+/* The More menu's panel, loaded the first time it is wanted: most tab lists
+   never overflow, so Popover stays out of their download. Pointing at or
+   focusing the More button starts the load, ahead of the press. */
+const loadPopover = () => import('../Popover/Popover');
+const Popover = React.lazy(() => loadPopover().then((m) => ({ default: m.Popover })));
 
 /**
  * Tabs Component Suite
@@ -302,6 +307,7 @@ export function TabList({
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [visibleCount, setVisibleCount] = useState(null); // null = all
   const [moreOpen, setMoreOpen] = useState(false);
+  const [moreWanted, setMoreWanted] = useState(false);
   const isHorizontal = isHorizontalOrientation(orientation);
   const isMore = overflow === 'more' && isHorizontal;
   const isStandard = variant === 'standard';
@@ -545,9 +551,11 @@ export function TabList({
           <Button ref={moreRef} iconOnly variant="ghost" size={btnSize} selected={!!selectedHidden}
             className="tab-list-more-btn" aria-haspopup="dialog" aria-expanded={moreOpen}
             aria-label={overflowed.length + ' more tabs' + (selectedHidden && typeof selectedHidden.label === 'string' ? ', ' + selectedHidden.label + ' selected' : '')}
-            onClick={() => setMoreOpen((o) => !o)} sx={btnSx}>
+            onPointerEnter={loadPopover} onFocus={loadPopover}
+            onClick={() => { setMoreWanted(true); setMoreOpen((o) => !o); }} sx={btnSx}>
             <MoreHorizIcon />
           </Button>
+          {moreWanted && <React.Suspense fallback={null}>
           <Popover open={moreOpen} onClose={() => setMoreOpen(false)} anchorEl={moreRef.current}
             placement="bottom-end" arrow width="auto" theme={null} aria-label="More tabs">
             <Box className="tab-list-more-menu" sx={{ display: 'flex', flexDirection: 'column', p: 'var(--Sizing-1, 8px)', minWidth: 160 }}>
@@ -562,6 +570,7 @@ export function TabList({
               ))}
             </Box>
           </Popover>
+          </React.Suspense>}
         </>
       )}
     </Box>
