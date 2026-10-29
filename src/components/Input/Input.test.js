@@ -210,3 +210,13 @@ describe('prefix / suffix', () => {
     expect(screen.getByTestId('end')).toBeInTheDocument();
   });
 });
+
+/* Props only MUI's TextField understands hand the whole call to Input's MUI
+   version (loaded on demand), so a caller using them keeps working. */
+describe('MUI-only props fall back to the MUI version', () => {
+  test('InputProps still renders its adornment', async () => {
+    render(<Input aria-label="Handle" InputProps={{ startAdornment: <span>@</span> }} />);
+    expect(await screen.findByText('@')).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Handle' })).toBeInTheDocument();
+  });
+});

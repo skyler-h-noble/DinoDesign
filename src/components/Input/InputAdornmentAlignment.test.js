@@ -1,6 +1,7 @@
 import { render } from '@testing-library/react';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import { Input, floatingLabelGeometry, ADORNMENT_GAP, FLOATING_SIZE_MAP } from './Input';
+import { declared } from '../_testCss';
 
 /* The floating label has to start at exactly the same x as the text it labels,
    and the adornment has to sit on the same vertical band as that text. Both
@@ -84,10 +85,16 @@ describe('the adornments centre on the field', () => {
   });
 
   test('the row stretches instead of bottom-aligning', () => {
-    render(<Input label="Email" labelPosition="floating" startAdornment={<AttachMoneyIcon />} />);
-    const c = css().replace(/\s+/g, '');
-    expect(c).toContain('align-items:stretch');
-    expect(c).not.toContain('margin-bottom:8px');
+    const { container } = render(<Input label="Email" labelPosition="floating" startAdornment={<AttachMoneyIcon />} />);
+    expect(declared(container.querySelector('.MuiOutlinedInput-root'), 'align-items')).toBe('stretch');
+    /* The old hack: a fixed 8px margin under each adornment. Scoped to the
+       adornment rules — the field sheet carries FormControl's margin="normal"
+       (margin-bottom: 8px), which is not this. */
+    const adornmentRules = Array.from(document.styleSheets)
+      .flatMap(ss => { try { return Array.from(ss.cssRules); } catch { return []; } })
+      .filter(r => r.selectorText && r.selectorText.includes('MuiInputAdornment'))
+      .map(r => r.cssText).join('').replace(/\s+/g, '');
+    expect(adornmentRules).not.toContain('margin-bottom:8px');
   });
 
   test("MUI's 2em cap is released", () => {
@@ -111,12 +118,12 @@ describe('the shrunk label is a real text style', () => {
     const { container } = render(
       <Input label="Email" labelPosition="floating" startAdornment={<AttachMoneyIcon />} />
     );
-    const own = [...container.querySelector('.MuiTextField-root').classList]
-      .find(c => c.startsWith('css-'));
+    // Our rules: the shrink rules hung off one of the field root's own classes.
+    const own = [...container.querySelector('.MuiTextField-root').classList];
     const ours = Array.from(document.styleSheets)
       .flatMap(ss => { try { return Array.from(ss.cssRules); } catch { return []; } })
       .filter(r => r.selectorText
-        && r.selectorText.includes(own)
+        && own.some(c => r.selectorText.startsWith('.' + c + ' '))
         && r.selectorText.includes('MuiInputLabel-shrink'))
       .map(r => r.cssText).join('');
 
@@ -127,11 +134,20 @@ describe('the shrunk label is a real text style', () => {
   test('shrunk and resting share one x, so it does not jump sideways', () => {
     const cfg = FLOATING_SIZE_MAP.large;
     const g = floatingLabelGeometry(cfg, true);
-    render(<Input size="large" label="Email" labelPosition="floating" startAdornment={<AttachMoneyIcon />} />);
+    /* The offsets arrive as custom properties on the field root; resolve the
+       label's winning transform through them, at rest and shrunk. */
+    const transformOf = (container) => {
+      const root = container.querySelector('.MuiTextField-root');
+      const label = container.querySelector('.MuiInputLabel-root');
+      return declared(label, 'transform')
+        .replace(/var\((--_inp-[\w-]+)\)/g, (_, n) => declared(root, n))
+        .replace(/\s+/g, '');
+    };
     // labelX is a CSS length now, so no "px" is appended to it.
-    const c = css().replace(/\s+/g, '');
     const x = g.labelX.replace(/\s+/g, '');
-    expect(c).toContain('translate(' + x + ',' + g.restingY + 'px)');
-    expect(c).toContain('translate(' + x + ',' + g.shrunkY + 'px)');
+    const resting = render(<Input size="large" label="Email" labelPosition="floating" startAdornment={<AttachMoneyIcon />} />);
+    expect(transformOf(resting.container)).toBe('translate(' + x + ',' + g.restingY + 'px)');
+    const shrunk = render(<Input size="large" label="Email" labelPosition="floating" defaultValue="x" startAdornment={<AttachMoneyIcon />} />);
+    expect(transformOf(shrunk.container)).toBe('translate(' + x + ',' + g.shrunkY + 'px)');
   });
 });

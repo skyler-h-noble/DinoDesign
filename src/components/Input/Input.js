@@ -1,17 +1,10 @@
 // src/components/Input/Input.js
 import React, { useId, useState } from 'react';
-import {
-  TextField as MuiTextField,
-  FormHelperText,
-  InputAdornment,
-  Box,
-} from '@mui/material';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { FormLabel } from '../FormLabel/FormLabel';
-import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox, lazyFallback } from '../_lazyFallback';
+import { StaticTextField, FieldAdornment, HelperText } from '../_textFieldBase';
+import { Glyph, SVG_ICON_DECLS } from '../_glyph';
 
 /**
  * Input Component
@@ -248,13 +241,6 @@ export function floatingLabelGeometry(sizeConfig, hasStartAdornment) {
 
 // --- Validation icons --------------------------------------------------------
 
-const VALIDATION_ICONS = {
-  info:    InfoOutlinedIcon,
-  success: CheckCircleOutlineIcon,
-  warning: WarningAmberIcon,
-  error:   ErrorOutlineIcon,
-};
-
 const VALIDATION_COLORS = {
   info:    { border: 'var(--Buttons-Info-Border)',    hoverBorder: 'var(--Buttons-Info-Hover)',    pressedBorder: 'var(--Buttons-Info-Pressed)',    icon: 'var(--Icons-Info)',    text: 'var(--Hotlink)' },
   success: { border: 'var(--Buttons-Success-Border)', hoverBorder: 'var(--Buttons-Success-Hover)', pressedBorder: 'var(--Buttons-Success-Pressed)', icon: 'var(--Icons-Success)', text: 'var(--Text-Success)' },
@@ -262,12 +248,168 @@ const VALIDATION_COLORS = {
   error:   { border: 'var(--Buttons-Error-Border)',   hoverBorder: 'var(--Buttons-Error-Hover)',   pressedBorder: 'var(--Buttons-Error-Pressed)',   icon: 'var(--Icons-Error)',   text: 'var(--Text-Error)' },
 };
 
+// --- Static sheet --------------------------------------------------------------
+//
+// Input was MUI's TextField inside three MUI Boxes, all styled by sx. It now
+// renders the same markup from _textFieldBase.js and this sheet, so a field
+// looks and behaves as it did while MUI and emotion stay out of the bundle.
+//
+// The sx on the TextField became the rules under .omni-inp-tf, with the SAME
+// selectors and weights — one class on the field root, then MUI's part
+// classes — so a caller's sx (emotion, appended after this sheet) wins
+// wherever it did. What varied per instance is split into one class per
+// feature (size, floating, start icon, multiline, …), each emitting exactly
+// the declarations the merged sx object ended up with for that feature. Where
+// a later sx key REPLACED an earlier one (a floating field with a start icon
+// lost its whole `& input` block; multiline replaced the adornment blocks),
+// the replacement is reproduced, not "fixed".
+//
+// The label's two offsets are per-instance arithmetic, so they arrive as
+// custom properties on the field root (--_inp-lx, --_inp-ry).
+const SxBox = lazySxBox('Input');
+const InputMui = lazyFallback('Input', () => import('./Input.mui'));
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+/* Props only MUI's TextField understands. Given any, Input hands the whole
+   call to its MUI version, so nothing that worked before breaks. */
+const MUI_ONLY = ['select', 'SelectProps', 'slots', 'slotProps', 'InputProps', 'InputLabelProps', 'FormHelperTextProps', 'inputComponent', 'children'];
+const SZ = { small: 'sm', medium: 'md', large: 'lg' };
+const SIZES = ['small', 'medium', 'large'];
+const RESIZE = ['none', 'vertical', 'both', 'horizontal', 'block', 'inline'];
+const V_ICON = { info: 'InfoOutlined', success: 'CheckCircleOutline', warning: 'WarningAmber', error: 'ErrorOutline' };
+const TF = '.omni-inp-tf';
+const OR = ' .MuiOutlinedInput-root';
+const PH = (sel, decls) => [`${sel}::-webkit-input-placeholder{${decls}}`, `${sel}::placeholder{${decls}}`];
+const pad = (sel, padding) => {
+  // `padding: a b [c]` as longhands — jsdom drops a shorthand holding var().
+  const p = padding.match(/(?:var\([^()]*\)|calc\([^()]*\)|[^\s])+/g);
+  const [t, r = t, b = t] = p;
+  return `${sel}{padding-top:${t};padding-right:${r};padding-bottom:${b};padding-left:${r}}`;
+};
+const fontDecls = (f) => Object.entries(f).map(([k, v]) => k.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase()) + ':' + v).join(';');
+
+registerStaticStyles('omni-input', [
+  /* The wrapper. */
+  '.omni-inp{width:auto}',
+  '.omni-inp-full{width:100%}',
+  '.omni-inp-left{display:grid;grid-template-columns:auto minmax(0, 1fr);column-gap:var(--Sizing-1, 8px);-webkit-box-align:center;align-items:center}',
+  '.omni-inp-left > :not(.form-label-row){grid-column:2}',
+
+  /* The shell: the edge is an inside-stroke overlay; the ring 2px, 1px out. */
+  '.omni-inp-shell{position:relative;border:none;overflow:hidden;transition:border-color 0.15s ease-in-out;box-shadow:none;'
+    + `--_inp-edge:${defaultStyles().border};--_inp-hover:${defaultStyles().hoverBorder};--_inp-press:${defaultStyles().pressedBorder};`
+    + 'border-radius:var(--Input-Radius, var(--Style-Border-Radius))}',
+  '.omni-inp-shell-sm{border-radius:var(--Sm-Input-Radius, var(--Input-Radius, var(--Style-Border-Radius)))}',
+  '.omni-inp-shell-lg{border-radius:var(--Lg-Input-Radius, var(--Input-Radius, var(--Style-Border-Radius)))}',
+  ...Object.entries(VALIDATION_COLORS).map(([v, c]) => `.omni-inp-v-${v}{--_inp-edge:${c.border};--_inp-hover:${c.hoverBorder};--_inp-press:${c.pressedBorder}}`),
+  '.omni-inp-shell::after{content:"";position:absolute;inset:0;pointer-events:none;border-width:1px;border-style:solid;'
+    + 'border-color:var(--_inp-edge);border-radius:inherit;transition:border-color 0.15s ease-in-out}',
+  '.omni-inp-v::after{border-width:2px}',
+  /* A disabled field takes no state: these rules hang off .omni-inp-on. */
+  '.omni-inp-on:hover::after{border-color:var(--_inp-hover)}',
+  '.omni-inp-on:active::after{border-color:var(--_inp-press);border-width:2px}',
+  `.omni-inp-on:hover${OR},.omni-inp-on:active${OR},.omni-inp-on:focus-within${OR}{color:var(--Text)}`,
+  `.omni-inp-on:hover${OR}{background-color:var(--Pressed)}`,
+  `.omni-inp-on:active${OR}{background-color:var(--Hover)}`,
+  '.omni-inp-shell:focus-within{outline-width:2px;outline-style:solid;outline-color:var(--Focus-Visible);outline-offset:1px}',
+  '.omni-inp-shell:focus-within::after{border-width:2px}',
+  '.omni-inp-shell-off{opacity:var(--Disabled, 0.38)}',
+
+  /* The field (the TextField's sx). */
+  `${TF}${OR}{background-color:var(--Hover);color:var(--Quiet);font-family:var(--Body-Font-Family, var(--Font-Family-Body, inherit));`
+    + 'padding:0;border-radius:0;transition:color 0.15s ease-in-out}',
+  ...SIZES.map((s) => `.omni-inp-s${SZ[s]}${OR}{font-size:${SIZE_MAP[s].fontSize};min-height:${SIZE_MAP[s].height}}`),
+  ...SIZES.map((s) => `.omni-inp-f${SZ[s]}${OR}{font-size:${FLOATING_SIZE_MAP[s].fontSize};min-height:${FLOATING_SIZE_MAP[s].height}}`),
+  `.omni-inp-flt${OR}{-webkit-box-align:stretch;align-items:stretch}`,
+  `.omni-inp-ml${OR}{flex-wrap:wrap;align-items:flex-start;align-content:flex-start;`
+    + 'padding-top:0;padding-bottom:0;padding-left:var(--Sizing-1, 8px);padding-right:var(--Sizing-1, 8px);min-height:var(--Text-Area-Min-Height, 88px)}',
+  `${TF}${OR} fieldset{border:none}`,
+  `${TF}${OR}.Mui-focused{color:var(--Text)}`,
+  `${TF}${OR}:not(.Mui-focused) .MuiOutlinedInput-input:not(:placeholder-shown){color:var(--Text)}`,
+  `${TF}${OR}.Mui-disabled{opacity:1;color:var(--Quiet);cursor:not-allowed}`,
+  `${TF}${OR}.Mui-disabled .MuiInputBase-input.Mui-disabled{color:inherit;-webkit-text-fill-color:currentColor}`,
+  `${TF}${OR}.Mui-disabled .MuiInputBase-input.Mui-disabled:not(:placeholder-shown){color:var(--Text)}`,
+  // `& input` — on every field but a floating one with a start icon.
+  ...SIZES.map((s) => pad(`.omni-inp-in-s${SZ[s]}${OR} input`, SIZE_MAP[s].padding)),
+  ...SIZES.map((s) => pad(`.omni-inp-in-f${SZ[s]}${OR} input`, FLOATING_SIZE_MAP[s].padding)),
+  ...SIZES.map((s) => `.omni-inp-in-s${SZ[s]}${OR} input{line-height:${SIZE_MAP[s].lineHeight}}`),
+  `.omni-inp-in${OR} input{color:inherit}`,
+  ...PH(`.omni-inp-in${OR} input`, 'color:var(--Quiet);opacity:1'),
+  `.omni-inp-start${OR} input{padding-left:0}`,
+  `.omni-inp-fstart${OR} input{padding-left:0}`,
+  // `& textarea` — multiline only (a single-line field has none).
+  `.omni-inp-ml${OR} textarea{flex-basis:100%;order:0;padding-top:var(--Input-Padding, 12px);padding-bottom:var(--Input-Padding, 12px);`
+    + 'padding-left:var(--Sizing-1, 8px);padding-right:var(--Sizing-1, 8px);color:inherit}',
+  ...SIZES.map((s) => `.omni-inp-ml-${SZ[s]}${OR} textarea{line-height:${SIZE_MAP[s].lineHeight}}`),
+  ...RESIZE.map((r) => `.omni-inp-rz-${r}${OR} textarea{resize:${r}}`),
+  ...PH(`.omni-inp-ml${OR} textarea`, 'color:var(--Quiet);opacity:1'),
+  `.omni-inp-mlff${OR} textarea{padding-top:var(--Sizing-2, 16px);padding-bottom:var(--Sizing-2, 16px)}`,
+  // Adornments
+  `.omni-inp-std${OR} .MuiInputAdornment-root{max-height:none;height:auto;align-self:stretch;-webkit-box-align:center;align-items:center}`,
+  `.omni-inp-fad${OR} .MuiInputAdornment-root{max-height:none;height:auto;align-self:center;margin-top:0;margin-bottom:0}`,
+  `.omni-inp-ml${OR} .MuiInputAdornment-root{max-height:none;height:var(--Button-Height, 32px);align-self:auto;margin:0}`,
+  `${TF}${OR} .MuiInputAdornment-positionStart > .MuiSvgIcon-root{color:var(--Icons-Default, var(--Text))}`,
+  `.omni-inp-std${OR} .MuiInputAdornment-positionStart{margin-left:var(--Input-Padding, 12px);margin-right:var(--Sizing-1-and-Half, 12px)}`,
+  ...SIZES.map((s) => `.omni-inp-std-${SZ[s]}${OR} .MuiInputAdornment-positionStart .MuiSvgIcon-root{font-size:${SIZE_MAP[s].iconSize}}`),
+  ...SIZES.map((s) => {
+    const sc = FLOATING_SIZE_MAP[s];
+    return `.omni-inp-fad-${SZ[s]}${OR} .MuiInputAdornment-positionStart{margin-left:${floatingLabelGeometry(sc, false).padX};`
+      + `margin-right:${ADORNMENT_GAP}px;width:${sc.iconSize}px;min-width:${sc.iconSize}px;-webkit-box-pack:center;justify-content:center}`;
+  }),
+  ...SIZES.map((s) => `.omni-inp-fad-${SZ[s]}${OR} .MuiInputAdornment-positionStart .MuiSvgIcon-root{font-size:${FLOATING_SIZE_MAP[s].iconSize}px}`),
+  `.omni-inp-ml${OR} .MuiInputAdornment-positionStart{order:1;margin:0}`,
+  `.omni-inp-std${OR} .MuiInputAdornment-positionEnd,.omni-inp-fad${OR} .MuiInputAdornment-positionEnd{margin-left:0;margin-right:0}`,
+  `.omni-inp-ml${OR} .MuiInputAdornment-positionEnd{order:2;margin:0 0 0 auto}`,
+  // The floating label: Body at rest, the Floating-Label style raised.
+  `${TF} .MuiInputLabel-root{color:var(--Quiet);font-family:var(--Font-Families-Body, var(--Body-Font-Family));transform-origin:top left;`
+    + 'transition:transform 0.15s ease, font-size 0.15s ease, color 0.15s ease;transform:translate(var(--_inp-lx), var(--_inp-ry))}',
+  ...SIZES.map((s) => `.omni-inp-l${SZ[s]} .MuiInputLabel-root{${fontDecls(tokenFont((FLOATING_LABEL_STYLE[s]).resting))}}`),
+  `${TF} .MuiInputLabel-root.MuiInputLabel-shrink{transform:translate(var(--_inp-lx), 2px);color:var(--Quiet)}`,
+  ...SIZES.map((s) => `.omni-inp-l${SZ[s]} .MuiInputLabel-root.MuiInputLabel-shrink{${fontDecls(floatingLabelFont(FLOATING_LABEL_STYLE[s].shrunk))}}`),
+  `${TF} .MuiInputLabel-root.Mui-focused{color:var(--Text)}`,
+  `${TF} .MuiInputLabel-root.Mui-disabled{color:var(--Quiet)}`,
+  /* Focus raises a floating TEXTAREA's text as well as its label. */
+  '.omni-inp-mlfoc:focus-within textarea{padding-top:var(--Sizing-2, 16px);padding-bottom:var(--Sizing-2, 16px)}',
+  /* Figma raises the floating label on hover too; disabled, on focus only. */
+  ...SIZES.map((s) => {
+    const k = SZ[s];
+    const decls = `transform:translate(var(--_inp-lx), 2px);${fontDecls(floatingLabelFont(FLOATING_LABEL_STYLE[s].shrunk))}`;
+    return `.omni-inp-raise-${k}:hover .MuiInputLabel-root,.omni-inp-raise-${k}:active .MuiInputLabel-root,`
+      + `.omni-inp-raise-${k}:focus-within .MuiInputLabel-root,.omni-inp-raiseoff-${k}:focus-within .MuiInputLabel-root{${decls}}`;
+  }),
+  `${TF} .MuiOutlinedInput-notchedOutline legend{display:none}`,
+  `${TF} .MuiOutlinedInput-notchedOutline{top:0}`,
+  `${TF} .MuiOutlinedInput-root.Mui-focused{outline:none}`,
+  `${TF} .MuiOutlinedInput-root:focus-within{outline:none}`,
+
+  /* Prefix / suffix text, set tight against the value. */
+  '.omni-inp-affix{color:var(--Text);font:inherit;white-space:nowrap;flex-shrink:0}',
+  '.omni-ad.omni-inp-ml0{margin-left:0}',
+  '.omni-ad.omni-inp-mr0{margin-right:0}',
+
+  /* Validation message and helper text, under the field. */
+  '.omni-inp-msg{display:flex;-webkit-box-align:center;align-items:center;gap:6px;margin-top:4px;margin-left:2px}',
+  `.omni-inp-vicon{${SVG_ICON_DECLS};flex-shrink:0}`,
+  ...SIZES.map((s) => `.omni-inp-vicon-s${SZ[s]}{font-size:${SIZE_MAP[s].iconSize}}`),
+  ...SIZES.map((s) => `.omni-inp-vicon-f${SZ[s]}{font-size:${FLOATING_SIZE_MAP[s].iconSize}px}`),
+  ...Object.entries(VALIDATION_COLORS).map(([v, c]) => `.omni-inp-vicon-${v}{color:${c.icon}}`),
+  /* Two classes: the helper's own base rule is one, in another sheet. */
+  '.omni-ht.omni-inp-ht{margin:0;font-size:12px}',
+  '.omni-ht.omni-inp-ht-sm{font-size:11px}',
+  ...Object.entries(VALIDATION_COLORS).map(([v, c]) => `.omni-ht.omni-inp-ht-${v}{color:${c.text}}`),
+  '.omni-ht.omni-inp-help{color:var(--Quiet);margin-top:4px;margin-left:2px}',
+].join('\n'));
+
 // --- Component ---------------------------------------------------------------
 
 let warnedResizeWithEnd = false;
 let warnedVariant = false;
 
-export function Input({
+export function Input(allProps) {
+  if (MUI_ONLY.some((k) => allProps[k] !== undefined)) return <InputMui {...allProps} />;
+  return <InputStatic {...allProps} />;
+}
+
+function InputStatic({
   variant = 'default',
   size = 'medium',
   label,
@@ -325,7 +467,7 @@ export function Input({
   onBlur,
   ...props
 }) {
-  const styles = defaultStyles();
+  useStaticStyles('omni-input');
   const isFloating = labelPosition === 'floating';
   const isLeft = labelPosition === 'left';
 
@@ -335,30 +477,19 @@ export function Input({
     console.warn('[Input] variant="' + variant + '" was removed — a field has one edge, the surface\'s Border. '
       + 'Colour on a field edge means validation; use validation="error | warning | success | info".');
   }
-  const sizeConfig = isFloating
-    ? (FLOATING_SIZE_MAP[size] || FLOATING_SIZE_MAP.medium)
-    : (SIZE_MAP[size] || SIZE_MAP.medium);
+  const sizeKey = (isFloating ? FLOATING_SIZE_MAP : SIZE_MAP)[size] ? size : 'medium';
+  const sizeConfig = isFloating ? FLOATING_SIZE_MAP[sizeKey] : SIZE_MAP[sizeKey];
+  const k = SZ[sizeKey];
 
-  /* The standard label must be ASSOCIATED with the field, not merely adjacent.
-   *
-   * It rendered as a bare <label> with no htmlFor, and the input is its sibling
-   * rather than its child — so there was no association, explicit or implicit.
-   * With labelPosition="standard", which is the DEFAULT, a screen reader
-   * announced the field as unlabelled while sighted users saw the label sitting
-   * right above it. Invisible in the render, passes every visual check.
-   *
-   * It surfaced only when TextArea was collapsed onto Input: the old TextArea
-   * wrapped MUI directly and MUI wires label-to-input itself, so its test
-   * started failing the moment it stopped doing that. The floating label was
-   * never affected — MUI owns that one. */
+  /* The standard label must be ASSOCIATED with the field, not merely adjacent:
+     it points at the field by id (htmlFor), generated when none is given. */
   const generatedId = useId();
   const inputId = idProp || generatedId;
 
   /* The floating label rests IN the field until there is something to make
-     room for: focus or content. MUI decides this itself and counts a start
-     adornment as a reason to float, so an empty field with an icon showed its
-     label already raised — nothing typed, nothing focused. Owning the flag
-     puts the label back where Figma's empty field draws it. */
+     room for: focus or content. MUI counted a start adornment as a reason to
+     float, so an empty field with an icon showed its label already raised.
+     Owning the flag puts the label back where Figma's empty field draws it. */
   const [focused, setFocused] = useState(false);
   const [typed, setTyped] = useState(() => defaultValue != null && String(defaultValue) !== '');
   const filled = value != null ? String(value) !== '' : typed;
@@ -378,40 +509,18 @@ export function Input({
     }
     resize = 'none';
   }
-  // Growing, not fixed: MUI grows a textarea only between minRows and maxRows.
+  // Growing, not fixed: the textarea grows only between minRows and maxRows.
   const rowProps = hasActions && resize === 'none'
     ? { minRows: rows ?? 1, maxRows: maxRows ?? 8 }
     : { rows, maxRows };
 
   const geo = floatingLabelGeometry(sizeConfig, !!startAdornment && !multiline);
-  const { padX, shrunkY } = geo;
   /* A TEXT AREA's floating label sits on the first line, not centred in a
-     field: Figma's TextArea Style=Floating rests it where the text starts
-     (Input-Padding down, Sizing-1 in from the frame's own Sizing-1) and never
-     moves it for a decorator — those live in the actions row underneath. */
-  /* The Body line, whatever the label does: the floating size map is a
-     single-line field's and carries none, which left an empty floating
-     textarea on MUI's 1.4375em — 23px, a pixel short of Figma's 24. */
-  const textAreaLine = (SIZE_MAP[size] || SIZE_MAP.medium).lineHeight;
+     field, and never moves for a decorator. */
   const labelX = multiline ? 'calc(var(--Sizing-1, 8px) * 2)' : geo.labelX;
   const restingY = multiline ? 'var(--Input-Padding, 12px)' : geo.restingY + 'px';
-  const labelStyle = FLOATING_LABEL_STYLE[size] || FLOATING_LABEL_STYLE.medium;
 
-  // Extract color name from variant (e.g. "primary-outline" → "primary")
-  /* There was a `colorName`/`C` pair derived from the variant STRING here,
-     used by nothing. It was also wrong: variant 'outline' has no '-outline'
-     suffix to strip, so it yielded --Buttons-Outline-*, a family that does not
-     exist. The state tokens below come off the variant-map entry instead, which
-     is built from the palette argument and therefore cannot disagree with the
-     border it sits next to. */
-  const activeTextColor = 'var(--Text)';
-
-
-  // Validation state overrides border color
   const validationConfig = validation ? VALIDATION_COLORS[validation] : null;
-  const ValidationIcon = validation ? VALIDATION_ICONS[validation] : null;
-  const stateSource = validationConfig || styles;
-  const effectiveBorder = stateSource.border;
 
   // Pass aria attributes to the actual <input> element
   const mergedInputProps = {
@@ -423,9 +532,7 @@ export function Input({
     ...(ariaInvalid     && { 'aria-invalid': ariaInvalid }),
   };
 
-  /* Standard / left label: the lib's FormLabel, Figma's Form-Label — the
-     Label type style in --Text, with the required / optional marker. It was a
-     Body at a literal 13px / weight 500, the label style nothing else used. */
+  /* Standard / left label: the lib's FormLabel, Figma's Form-Label. */
   const renderStandardLabel = () => {
     if (!label || isFloating) return null;
     return (
@@ -443,122 +550,71 @@ export function Input({
     );
   };
 
-  // Build end adornment
-  const affixSx = { color: 'var(--Text)', font: 'inherit', whiteSpace: 'nowrap', flexShrink: 0 };
   const renderEndAdornment = () => {
-    const suffixEl = !multiline && suffix != null && suffix !== '' ? (
-      <Box component="span" className="inp-suffix" sx={affixSx}>{suffix}</Box>
-    ) : null;
+    const suffixEl = !multiline && suffix != null && suffix !== ''
+      ? <span className="inp-suffix MuiBox-root omni-inp-affix">{suffix}</span> : null;
     if (!endAdornment && !suffixEl) return undefined;
     return (
       <>
         {/* No gap before the suffix: it belongs to the value. */}
-        {suffixEl && <InputAdornment position="end" sx={{ ml: 0 }}>{suffixEl}</InputAdornment>}
-        {endAdornment && <InputAdornment position="end">{endAdornment}</InputAdornment>}
+        {suffixEl && <FieldAdornment position="end" className="omni-inp-ml0">{suffixEl}</FieldAdornment>}
+        {endAdornment && <FieldAdornment position="end">{endAdornment}</FieldAdornment>}
       </>
     );
   };
   const renderStartAdornment = () => {
-    const prefixEl = !multiline && prefix != null && prefix !== '' ? (
-      <Box component="span" className="inp-prefix" sx={affixSx}>{prefix}</Box>
-    ) : null;
+    const prefixEl = !multiline && prefix != null && prefix !== ''
+      ? <span className="inp-prefix MuiBox-root omni-inp-affix">{prefix}</span> : null;
     if (!startAdornment && !prefixEl) return undefined;
     return (
       <>
-        {startAdornment && <InputAdornment position="start">{startAdornment}</InputAdornment>}
+        {startAdornment && <FieldAdornment position="start">{startAdornment}</FieldAdornment>}
         {/* No gap after the prefix: it belongs to the value. */}
-        {prefixEl && <InputAdornment position="start" sx={{ mr: 0 }}>{prefixEl}</InputAdornment>}
+        {prefixEl && <FieldAdornment position="start" className="omni-inp-mr0">{prefixEl}</FieldAdornment>}
       </>
     );
   };
 
-  return (
-    <Box
-      className={'inp-default ' + className}
-      sx={{
-        width: fullWidth ? '100%' : 'auto',
-        /* Left label: the label in its own column, centred on the field, and
-           the field plus anything under it (helper, validation) in the second,
-           so a message lines up with the field rather than the label. */
-        ...(isLeft && label && {
-          display: 'grid',
-          gridTemplateColumns: 'auto minmax(0, 1fr)',
-          columnGap: 'var(--Sizing-1, 8px)',
-          alignItems: 'center',
-          '& > :not(.form-label-row)': { gridColumn: 2 },
-        }),
-        ...sx,
-      }}
-    >
+  const floatStart = isFloating && !!startAdornment;
+  const sm = isFloating ? 'f' + k : 's' + k;
+  const fieldClass = [
+    'omni-inp-tf', 'omni-inp-' + sm, 'omni-inp-l' + k,
+    // Multiline's own align-items replaced the floating one in the sx object.
+    isFloating && !multiline && 'omni-inp-flt',
+    !floatStart && 'omni-inp-in omni-inp-in-' + sm,
+    !isFloating && startAdornment && 'omni-inp-start',
+    floatStart && 'omni-inp-fstart',
+    !multiline && (isFloating ? 'omni-inp-fad omni-inp-fad-' + k : 'omni-inp-std omni-inp-std-' + k),
+    multiline && 'omni-inp-ml omni-inp-ml-' + k + ' omni-inp-rz-' + resize,
+    isFloating && filled && multiline && 'omni-inp-mlff',
+    isFloating && multiline && !disabled && 'omni-inp-mlfoc',
+    isFloating && (disabled ? 'omni-inp-raiseoff-' + k : 'omni-inp-raise-' + k),
+  ].filter(Boolean).join(' ');
+
+  const wrapperProps = {
+    className: 'inp-default ' + className + ' MuiBox-root omni-inp' + (fullWidth ? ' omni-inp-full' : '')
+      + (isLeft && label ? ' omni-inp-left' : ''),
+  };
+  const body = (
+    <>
       {renderStandardLabel()}
 
-      {/* Outer border shell — provides contrast against page background.
-          Radius uses the size-aware Input-Radius token so a small input is
-          rounded by its own height, not the medium button's. */}
-      <Box className="inp-shell" sx={{
-        /* The edge is an OVERLAY, not a border — Figma's inside stroke, drawn
-           on top and taking no space. As a border it added 2px to the field
-           (34 against 32) and pushed the icon, the text and a 32px end button
-           in by a pixel. */
-        position: 'relative',
-        border: 'none',
-        '&::after': {
-          content: '""', position: 'absolute', inset: 0, pointerEvents: 'none',
-          /* A validation state is Figma's Validation Frame: a 2px inside
-             stroke in the state's Buttons Border, over the field's 1px edge. */
-          border: (validationConfig ? '2px' : '1px') + ' solid ' + effectiveBorder, borderRadius: 'inherit',
-          transition: 'border-color 0.15s ease-in-out',
-        },
-        borderRadius: size === 'small'
-          ? 'var(--Sm-Input-Radius, var(--Input-Radius, var(--Style-Border-Radius)))'
-          : size === 'large'
-            ? 'var(--Lg-Input-Radius, var(--Input-Radius, var(--Style-Border-Radius)))'
-            : 'var(--Input-Radius, var(--Style-Border-Radius))',
-        overflow: 'hidden',
-        transition: 'border-color 0.15s ease-in-out',
-        boxShadow: 'none',
-        /* A disabled field takes no state. Guarding here rather than inside
-           each selector matters: :hover still MATCHES a disabled input (only
-           pointer-events would stop it), so an unguarded rule would light up
-           a control that cannot be used. */
-        ...(!disabled && {
-          '&:hover::after': { borderColor: stateSource.hoverBorder },
-          /* Pressed and focused, the edge is 2px — Figma's Input draws its
-             Inner Frame stroke at 2 in those two states, 1 at rest and hover. */
-          '&:active::after': { borderColor: stateSource.pressedBorder, borderWidth: '2px' },
-          /* Figma's Hover, Pressed and Focus-Visible fields draw their text in
-             --Text, placeholder included; only the resting field is --Quiet. */
-          '&:hover .MuiOutlinedInput-root, &:active .MuiOutlinedInput-root, &:focus-within .MuiOutlinedInput-root': { color: activeTextColor },
-          /* The FILL is the field's hover, by design: it rests on --Hover (a
-             consistent tint against any surface), deepens to --Pressed under
-             the pointer, and returns to --Hover while pressed. */
-          '&:hover .MuiOutlinedInput-root': { backgroundColor: 'var(--Pressed)' },
-          '&:active .MuiOutlinedInput-root': { backgroundColor: 'var(--Hover)' },
-        }),
-        /* 2px ring 1px outside — Figma's Focus-Visible frame sits 3px out with
-           a 2px inside stroke, the same ring as every other control. */
-        '&:focus-within': {
-          outline: '2px solid var(--Focus-Visible)',
-          outlineOffset: '1px',
-        },
-        '&:focus-within::after': { borderWidth: '2px' },
-        // Disabled dims the WHOLE field (Figma's variant opacity), edge included.
-        ...(disabled && { opacity: 'var(--Disabled, 0.38)' }),
-      }}>
-
+      {/* Outer border shell — the edge as an overlay; radius by size. */}
+      <div className={'inp-shell MuiBox-root omni-inp-shell'
+        + (sizeKey !== 'medium' ? ' omni-inp-shell-' + k : '')
+        + (validationConfig ? ' omni-inp-v omni-inp-v-' + validation : '')
+        + (disabled ? ' omni-inp-shell-off' : ' omni-inp-on')}
+      >
         {/* Inner wrapper. No data-surface — the input inherits the parent
-            surface so it doesn't bleed the brand --Background through. The
-            field itself uses --Hover (a subtle tint of the parent surface)
-            for its background, which gives a visible affordance without
-            fighting saturated dark surfaces. */}
-        <Box>
-          <MuiTextField
+            surface; the field's own --Hover gives it its affordance. */}
+        <div className="MuiBox-root">
+          <StaticTextField
             value={value}
             defaultValue={defaultValue}
             onChange={handleChange}
             onFocus={(e) => { setFocused(true); if (onFocus) onFocus(e); }}
             onBlur={(e) => { setFocused(false); if (onBlur) onBlur(e); }}
-            InputLabelProps={isFloating ? { shrink: focused || filled } : undefined}
+            labelShrink={isFloating ? (focused || filled) : undefined}
             name={name}
             type={type}
             disabled={disabled}
@@ -575,284 +631,33 @@ export function Input({
               startAdornment: renderStartAdornment(),
               endAdornment: renderEndAdornment(),
             }}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                backgroundColor: 'var(--Hover)',
-                color: 'var(--Quiet)',
-                fontSize: sizeConfig.fontSize,
-                fontFamily: 'var(--Body-Font-Family, var(--Font-Family-Body, inherit))',
-                /* The field is Button-Height OVERALL, as Figma draws it: its
-                   inside stroke takes no space, so the shell's 1px border comes
-                   out of the height rather than being added to it (34 → 32). */
-                // Button-Height overall: the edge is an overlay, so nothing comes off it.
-                minHeight: multiline ? 'auto' : sizeConfig.height,
-                padding: 0,
-                borderRadius: 0,
-                transition: 'color 0.15s ease-in-out',
-                /* Stretch, so the adornments can take the same vertical
-                   padding as the input and land on its text band by
-                   construction.
-
-                   This was `flex-end` plus a marginBottom on each adornment —
-                   two hacks pulling opposite ways: the row bottom-aligned
-                   everything, then a fixed 8px lifted the adornments back up.
-                   Neither number knew the input's real padding, so the
-                   adornment missed the text by whatever the size config said
-                   that day, and every size missed it differently. */
-                ...(isFloating && { alignItems: 'stretch' }),
-
-                '& fieldset': {
-                  border: 'none',
-                },
-
-                '&.Mui-focused': {
-                  color: activeTextColor,
-                },
-
-                // Filled state — text color changes
-                '&:not(.Mui-focused) .MuiOutlinedInput-input:not(:placeholder-shown)': {
-                  color: activeTextColor,
-                },
-
-                '&.Mui-disabled': {
-                  // The shell carries the 38%; dimming here too would double it.
-                  opacity: 1,
-                  color: 'var(--Quiet)',
-                  /* MUI paints disabled text its own rgba(0,0,0,.38) — through
-                     -webkit-text-fill-color too — over the design's --Quiet. */
-                  /* A disabled field keeps a typed VALUE in --Text (the whole
-                     field is already at 38%); only the placeholder is --Quiet. */
-                  '& .MuiInputBase-input.Mui-disabled': {
-                    color: 'inherit', WebkitTextFillColor: 'currentColor',
-                    '&:not(:placeholder-shown)': { color: activeTextColor },
-                  },
-                  cursor: 'not-allowed',
-                },
-
-                '& input': {
-                  padding: sizeConfig.padding,
-                  /* Beside a start icon the icon's gap is the whole space — set
-                     here, in the one '& input' rule, because a second key of the
-                     same name REPLACES this object rather than merging into it
-                     (it dropped the padding and MUI's 16.5px made the row 56). */
-                  ...(!isFloating && startAdornment && { paddingLeft: 0 }),
-                  lineHeight: sizeConfig.lineHeight,
-                  color: 'inherit',
-                  '&::placeholder': { color: 'var(--Quiet)', opacity: 1 },
-                },
-
-                '& textarea': {
-                  padding: sizeConfig.padding,
-                  ...(!isFloating && startAdornment && { paddingLeft: 0 }),
-                  color: 'inherit',
-                  resize,
-                  '&::placeholder': { color: 'var(--Quiet)', opacity: 1 },
-                },
-
-
-                /* Prefix / suffix text stays Quiet; an ICON is Figma's Icons/Icon (the Default mode → --Icons-Default),
-                   the same as every other icon on the surface. */
-                '& .MuiInputAdornment-root': { color: 'var(--Quiet)' },
-                '& .MuiInputAdornment-positionStart > .MuiSvgIcon-root': { color: 'var(--Icons-Default, var(--Text))' },
-
-                /* Standard field: Figma insets the start icon by the input
-                   padding and leaves Sizing-1-and-Half (12) before the text;
-                   the end decorator sits flush right at full field height (the
-                   Inner Frame has no right padding), so an icon button fits its
-                   own 32. */
-                ...(!isFloating && {
-                  '& .MuiInputAdornment-root': { maxHeight: 'none', height: 'auto', alignSelf: 'stretch', alignItems: 'center' },
-                  '& .MuiInputAdornment-positionStart': {
-                    marginLeft: 'var(--Input-Padding, 12px)',
-                    marginRight: 'var(--Sizing-1-and-Half, 12px)',
-                    '& .MuiSvgIcon-root': { fontSize: sizeConfig.iconSize },
-                  },
-                  /* Flush to the right edge: Figma's Inner Frame has no right
-                     padding, so the end decorator's own 32px box is the inset. */
-                  '& .MuiInputAdornment-positionEnd': { marginLeft: 0, marginRight: 0 },
-                }),
-
-                // Start adornment positioning when floating — gives it some
-                // breathing room from the left edge and pushes it up by the
-                // input's bottom padding so it centers with the input text.
-                ...(isFloating && {
-                  /* MUI caps an adornment at max-height 2em and centres it in
-                     its own box, which is why it could never line up with a
-                     text row that sits inside 22px of top padding. Releasing
-                     the cap and giving it the input's own padTop/padBottom
-                     puts its centre exactly where the text's centre is, at
-                     every size, with no number to keep in sync. */
-                  /* Centred on the FIELD, as Figma draws them — the 20px icon at
-                     y 18 and the 32px decorator at y 12 of a 56 field. They used
-                     to take the text band's padding, which centred them on the
-                     typed text (low in a floating field) and, around a 32px
-                     button, made the field 60 tall. */
-                  '& .MuiInputAdornment-root': {
-                    maxHeight: 'none',
-                    height: 'auto',
-                    alignSelf: 'center',
-                    marginTop: 0,
-                    marginBottom: 0,
-                  },
-                  '& .MuiInputAdornment-positionStart': {
-                    /* The same token the text and label use. A literal here
-                       put the adornment at 14px while the text it precedes
-                       started at var(--Input-Padding) — the same mismatch one
-                       element over. */
-                    marginLeft: padX,
-                    marginRight: ADORNMENT_GAP + 'px',
-                    /* Pinned so floatingLabelGeometry's labelX is true rather
-                       than approximate — the label's x is computed from
-                       iconSize, so the adornment has to actually BE iconSize
-                       wide whatever glyph or icon is inside it. */
-                    width: sizeConfig.iconSize + 'px',
-                    minWidth: sizeConfig.iconSize + 'px',
-                    justifyContent: 'center',
-                    '& .MuiSvgIcon-root': { fontSize: sizeConfig.iconSize + 'px' },
-                  },
-                  // Flush right, as the standard field (no right padding in Figma).
-                  '& .MuiInputAdornment-positionEnd': {
-                    marginLeft: 0,
-                    marginRight: 0,
-                  },
-                  /* The gap is the adornment's marginRight alone. Splitting it
-                     with an input paddingLeft is what let the two halves drift
-                     out of step with the label. */
-                  ...(startAdornment && {
-                    '& input': { paddingLeft: 0 },
-                    '& textarea': { paddingLeft: 0 },
-                  }),
-                }),
-                /* MULTILINE is Figma's TextArea: the text on top (Input-Padding
-                   above and below, Sizing-1 either side inside the frame's own
-                   Sizing-1) and an
-                   ACTIONS row under it — the start decorator at the left, the
-                   end decorator at the right — inside the same frame, which is
-                   never shorter than Text-Area-Min-Height. MUI already renders
-                   both adornments inside the root; wrapping the row and giving
-                   the text the whole first line puts them on the second. */
-                ...(multiline && {
-                  flexWrap: 'wrap',
-                  alignItems: 'flex-start',
-                  alignContent: 'flex-start',
-                  padding: '0 var(--Sizing-1, 8px)',
-                  minHeight: 'var(--Text-Area-Min-Height, 88px)',
-                  '& textarea': {
-                    flexBasis: '100%',
-                    order: 0,
-                    /* Sizing-1 in from the frame's own Sizing-1, so the text
-                       lines up with the decorators' icons below it. */
-                    padding: 'var(--Input-Padding, 12px) var(--Sizing-1, 8px)',
-                    // Stated: an EMPTY textarea is sized off its placeholder, and
-                    // without the Body line height it came out 1px short.
-                    lineHeight: textAreaLine,
-                    color: 'inherit',
-                    resize,
-                    '&::placeholder': { color: 'var(--Quiet)', opacity: 1 },
-                  },
-                  '& .MuiInputAdornment-root': {
-                    maxHeight: 'none', height: 'var(--Button-Height, 32px)', alignSelf: 'auto',
-                    margin: 0,
-                  },
-                  '& .MuiInputAdornment-positionStart': { order: 1, margin: 0 },
-                  '& .MuiInputAdornment-positionEnd': { order: 2, margin: '0 0 0 auto' },
-                  /* Floating with a value, the text drops to Sizing-2 top and
-                     bottom to make room for the raised label (Figma: 48 → 56).
-                     Focus does the same — below. Hover raises the label but
-                     keeps the padding, so the field doesn't jump under the
-                     pointer. */
-                  ...(isFloating && filled && {
-                    '& textarea': {
-                      flexBasis: '100%', order: 0, lineHeight: textAreaLine, color: 'inherit', resize,
-                      padding: 'var(--Sizing-2, 16px) var(--Sizing-1, 8px)',
-                      '&::placeholder': { color: 'var(--Quiet)', opacity: 1 },
-                    },
-                  }),
-                }),
-              },
-
-              '& .MuiInputLabel-root': {
-                color: 'var(--Quiet)',
-                fontFamily: 'var(--Font-Families-Body, var(--Body-Font-Family))',
-                ...tokenFont(labelStyle.resting),
-                transformOrigin: 'top left',
-                // font-size animates too, since the shrink is a real style
-                // change now rather than a scale on the resting one.
-                transition: 'transform 0.15s ease, font-size 0.15s ease, color 0.15s ease',
-                /* Both offsets are COMPUTED from the size config. They used to
-                 * be the constants 16px and 32px, which were tuned for one size
-                 * and wrong at the other two.
-                 *
-                 * X — the resting label must sit exactly where the input text
-                 * sits, or it visibly jumps sideways when it shrinks. With a
-                 * start adornment the text begins after it, so the label has to
-                 * clear the SAME distance the adornment actually occupies:
-                 * its marginLeft, its icon, its marginRight. The old flat 32
-                 * was 8px too far at large and 12px too far at small, because
-                 * the icon is 20/18/16 — it got further wrong as the icon got
-                 * smaller.
-                 *
-                 * Y — the resting label is vertically CENTRED in the field.
-                 * A constant 16px centred the small field and left large 4px
-                 * high, which is why the error grew with the size. */
-                transform: 'translate(' + labelX + ', ' + restingY + ')',
-                '&.MuiInputLabel-shrink': {
-                  /* Shrunk, it sits in the field's top padding, bottom-aligned
-                     to where the text begins. No scale() — it becomes a real
-                     Label style, weight and tracking included. */
-                  transform: 'translate(' + labelX + ', ' + shrunkY + 'px)',
-                  ...floatingLabelFont(labelStyle.shrunk),
-                  color: 'var(--Quiet)',
-                },
-                '&.Mui-focused': { color: activeTextColor },
-                // The shell already dims the whole field to 38%; dimming here too made it 14%.
-                '&.Mui-disabled': { color: 'var(--Quiet)' },
-              },
-
-              /* Focus raises the label in CSS as well as through the shrink
-                 flag, so the raised label is a property of :focus-within — the
-                 same selector the ring uses, and one a forced-state preview can
-                 reach without real focus. */
-              ...(isFloating && multiline && !disabled && {
-                '&:focus-within textarea': { paddingTop: 'var(--Sizing-2, 16px)', paddingBottom: 'var(--Sizing-2, 16px)' },
-              }),
-              ...(isFloating && {
-                /* Figma raises it on HOVER too: the empty field clears its
-                   resting label out of the way as the pointer arrives, ready
-                   for typing. Not when disabled — nothing will be typed. */
-                [disabled ? '&:focus-within .MuiInputLabel-root' : '&:hover .MuiInputLabel-root, &:active .MuiInputLabel-root, &:focus-within .MuiInputLabel-root']: {
-                  transform: 'translate(' + labelX + ', ' + shrunkY + 'px)',
-                  ...floatingLabelFont(labelStyle.shrunk),
-                },
-              }),
-              '& .MuiOutlinedInput-notchedOutline legend': { display: 'none' },
-              '& .MuiOutlinedInput-notchedOutline': { top: 0 },
-
-              '& .MuiOutlinedInput-root.Mui-focused': { outline: 'none' },
-              '& .MuiOutlinedInput-root:focus-within': { outline: 'none' },
-            }}
+            className={fieldClass}
             {...props}
+            style={{ '--_inp-lx': labelX, '--_inp-ry': restingY, ...props.style }}
           />
-        </Box>
-      </Box>
+        </div>
+      </div>
 
       {(validation && validationMessage) ? (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px', marginLeft: '2px' }}>
-          {ValidationIcon && (
-            <ValidationIcon sx={{ fontSize: sizeConfig.iconSize, color: validationConfig.icon, flexShrink: 0 }} />
+        <div className="MuiBox-root omni-inp-msg">
+          {V_ICON[validation] && (
+            <Glyph name={V_ICON[validation]} className={'omni-inp-vicon omni-inp-vicon-' + sm + ' omni-inp-vicon-' + validation} />
           )}
-          <FormHelperText sx={{ color: validationConfig.text, fontSize: size === 'small' ? '11px' : '12px', margin: 0 }}>
+          <HelperText className={'omni-inp-ht' + (size === 'small' ? ' omni-inp-ht-sm' : '') + ' omni-inp-ht-' + validation}>
             {validationMessage}
-          </FormHelperText>
-        </Box>
+          </HelperText>
+        </div>
       ) : helperText ? (
-        <FormHelperText sx={{ color: 'var(--Quiet)', fontSize: size === 'small' ? '11px' : '12px', marginTop: '4px', marginLeft: '2px' }}>
+        <HelperText className={'omni-inp-ht omni-inp-help' + (size === 'small' ? ' omni-inp-ht-sm' : '')}>
           {helperText}
-        </FormHelperText>
+        </HelperText>
       ) : null}
-    </Box>
+    </>
   );
+  if (hasSx(sx)) return <SxBox sx={sx} {...wrapperProps}>{body}</SxBox>;
+  return <div {...wrapperProps}>{body}</div>;
 }
+
 
 // --- Convenience Exports -----------------------------------------------------
 /* The colour-named exports (PrimaryOutlineInput … ErrorOutlineInput,

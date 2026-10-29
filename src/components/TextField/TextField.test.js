@@ -211,3 +211,13 @@ describe('TextField — Accessibility (jest-axe)', () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+/* Props only MUI's TextField understands hand the whole call to the MUI
+   version (loaded on demand), so a caller using them keeps working. */
+describe('MUI-only props fall back to the MUI version', () => {
+  test('InputLabelProps still reaches the label', async () => {
+    render(<TextField label="Price" InputLabelProps={{ 'data-testid': 'label' }} onChange={() => {}} />);
+    expect(await screen.findByTestId('label')).toHaveTextContent('Price');
+    expect(screen.getByRole('textbox', { name: 'Price' })).toBeInTheDocument();
+  });
+});
