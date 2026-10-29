@@ -1,6 +1,6 @@
 // src/components/Section/Section.js
 import React from 'react';
-import { keyframes } from '@mui/system';
+import { keyframes } from '@emotion/react';
 import { Box } from '@mui/material';
 import { EDGE_NAMES, edgeMaskURL, edgeTile, edgeDefaultHeight, EDGE_SIZES, SIZED_EDGES } from './edges';
 

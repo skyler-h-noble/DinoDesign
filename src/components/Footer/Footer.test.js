@@ -1,6 +1,6 @@
 // src/components/Footer/Footer.test.js
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { Footer } from './Footer';
 import { axe } from 'jest-axe';
 
@@ -62,6 +62,14 @@ describe('Footer Component', () => {
       />
     );
     expect(screen.getByLabelText('Twitter')).toBeInTheDocument();
+  });
+
+  test('a social link that names a brand renders its mark (loaded on demand)', async () => {
+    const { container } = render(
+      <Footer brand="TestCo" socialLinks={[{ brand: 'github', url: 'https://github.com', label: 'GitHub' }]} />,
+    );
+    expect(screen.getByLabelText('GitHub')).toBeInTheDocument();
+    await waitFor(() => expect(container.querySelector('a[aria-label="GitHub"] svg')).not.toBeNull());
   });
 
   test('has no accessibility violations', async () => {

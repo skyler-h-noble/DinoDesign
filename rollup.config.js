@@ -17,15 +17,11 @@ const babelConfig = {
   ],
 };
 
-const external = [
-  'react',
-  'react-dom',
-  'react/jsx-runtime',
-  '@mui/material',
-  '@mui/icons-material',
-  '@emotion/react',
-  '@emotion/styled',
-];
+/* Everything React, MUI or emotion is the APP's copy, subpaths included.
+   A list of bare names missed subpaths: Section imported `@mui/system`,
+   which matched nothing here, so a second copy of MUI's core was bundled
+   into the package and shipped to every consumer alongside their own. */
+const external = (id) => /^(react|react-dom)(\/.*)?$/.test(id) || /^@(mui|emotion)\//.test(id);
 
 /* Writes the package version into OMNI_DEFAULT_THEME_URL, so the default
    theme it points at is the one published with these components. */
@@ -58,6 +54,9 @@ export default [
         format: 'cjs',
         sourcemap: true,
         exports: 'named',
+        /* One file for require(): Footer's lazy BrandIcon is folded in.
+           The ESM build below keeps it as its own chunk. */
+        inlineDynamicImports: true,
         /* 'auto': an external compiled from ES modules (every @mui/icons-material
            icon) keeps its component under .default. The default interop used
            the module object itself as the component, so under require() —
@@ -65,12 +64,27 @@ export default [
            icon import threw "Element type is invalid … got: object". */
         interop: 'auto',
       },
-      {
-        file: 'dist/index.esm.js',
-        format: 'esm',
-        sourcemap: true,
-      },
     ],
+    plugins,
+    external,
+  },
+
+  /* ── ES modules, one file per source module ─────────────────────────────
+     A single bundled file cannot be tree-shaken: a page importing Button
+     pulled in all ~150 components (1.5 MB of a 1.6 MB build). With modules
+     preserved and "sideEffects": false, a bundler keeps only what is
+     imported. Index and provider share ONE build, so there is one
+     OmniDesign context, not a copy per entry. */
+  {
+    input: { 'components/index': 'src/components/index.js', OmniDesignProvider: 'src/OmniDesignProvider.js' },
+    output: {
+      dir: 'dist/esm',
+      format: 'esm',
+      sourcemap: true,
+      preserveModules: true,
+      preserveModulesRoot: 'src',
+      entryFileNames: '[name].js',
+    },
     plugins,
     external,
   },
@@ -84,17 +98,15 @@ export default [
         format: 'cjs',
         sourcemap: true,
         exports: 'named',
+        /* One file for require(): Footer's lazy BrandIcon is folded in.
+           The ESM build below keeps it as its own chunk. */
+        inlineDynamicImports: true,
         /* 'auto': an external compiled from ES modules (every @mui/icons-material
            icon) keeps its component under .default. The default interop used
            the module object itself as the component, so under require() —
            server rendering, Jest, older Next.js — SearchField and every other
            icon import threw "Element type is invalid … got: object". */
         interop: 'auto',
-      },
-      {
-        file: 'dist/OmniDesignProvider.esm.js',
-        format: 'esm',
-        sourcemap: true,
       },
     ],
     plugins,

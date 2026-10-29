@@ -10,7 +10,11 @@ import { Button } from '../Button/Button';
  * shipping the deprecated one is the library declining to use itself. */
 import { Input as TextInput } from '../Input/Input';
 import { Copyright } from '../Copyright/Copyright';
-import { BrandIcon } from '../BrandIcon/BrandIcon';
+/* Loaded only when a social link names a brand. BrandIcon resolves names
+   against all ~600 Font Awesome brand marks (591 KB of source), and a static
+   import put that in every page with a Footer — social links or not. Now it
+   is a separate chunk a page fetches only if it renders a brand mark. */
+const BrandIcon = React.lazy(() => import('../BrandIcon/BrandIcon').then((m) => ({ default: m.BrandIcon })));
 import { VStack, HStack } from '../Stack/Stack';
 
 /**
@@ -295,7 +299,9 @@ function SocialRow({ links }) {
             {/* `brand` takes a Font Awesome brand icon and renders the real
                 mark; `icon` stays supported for anything already passing its
                 own node. */}
-            {s.brand ? <BrandIcon name={s.brand} size="24px" /> : s.icon}
+            {s.brand
+              ? <React.Suspense fallback={<span style={{ display: 'inline-block', width: 24, height: 24 }} />}><BrandIcon name={s.brand} size="24px" /></React.Suspense>
+              : s.icon}
           </a>
         );
       })}

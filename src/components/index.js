@@ -5,66 +5,11 @@
  */
 
 // ========== DESIGN FOUNDATION ==========
-export { 
-  Typography, 
-  CAP_HEIGHT_TRIM,
-  Heading, 
-  DisplayLarge,
-  DisplayMedium,
-  AltDisplayLarge,
-  AltDisplayMedium,
-  AltDisplaySmall,
-  DisplaySmall,
-  H1, 
-  H2, 
-  H3, 
-  H4, 
-  H5, 
-  H6, 
-  Body,
-  Body1, 
-  Body2, 
-  BodySemibold,
-  BodyBold,
-  BodySmall,
-  BodySmallSemibold,
-  BodySmallBold,
-  BodyLarge,
-  BodyLargeSemibold,
-  BodyLargeBold,
-  Caption,
-  CaptionBold,
-  Subtitle,
-  Subtitle1, 
-  Subtitle2,
-  SubtitleSmall,
-  SubtitleMedium,
-  SubtitleLarge,
-  Legal,
-  LegalSemibold,
-  Label,
-  LabelExtraSmall,
-  MobileNavLabel,
-  LabelSmall,
-  LabelLarge,
-  Eyebrow,
-  EyebrowSmall,
-  EyebrowMedium,
-  EyebrowLarge,
-  // Overline — former name for Eyebrow, kept as an alias.
-  Overline,
-  OverlineSmall,
-  OverlineMedium,
-  OverlineLarge,
-  NumberSmall,
-  NumberMedium,
-  NumberLarge,
-  Button as ButtonText,
-  ButtonSmall,
-} from './Typography';
+export { Typography, CAP_HEIGHT_TRIM, Heading, DisplayLarge, DisplayMedium, AltDisplayLarge, AltDisplayMedium, AltDisplaySmall, DisplaySmall, H1, H2, H3, H4, H5, H6, Body, Body1, Body2, BodySemibold, BodyBold, BodySmall, BodySmallSemibold, BodySmallBold, BodyLarge, BodyLargeSemibold, BodyLargeBold, Caption, CaptionBold, Subtitle, Subtitle1, Subtitle2, SubtitleSmall, SubtitleMedium, SubtitleLarge, Legal, LegalSemibold, Label, LabelExtraSmall, MobileNavLabel, LabelSmall, LabelLarge, Eyebrow, EyebrowSmall, EyebrowMedium, EyebrowLarge, // Overline — former name for Eyebrow, kept as an alias.
+  Overline, OverlineSmall, OverlineMedium, OverlineLarge, NumberSmall, NumberMedium, NumberLarge, Button as ButtonText, ButtonSmall } from './Typography';
 export { Colors } from './Colors';
 export { Spacing } from './Spacing';
-export { Icon, IconShowcase } from './Icon';
+export { Icon } from './Icon';
 /* Brand marks — GitHub, LinkedIn, Figma. Separate from Icon on purpose: Icon
    renders the design system's OWN vocabulary (Material Symbols, taking the
    brand's icon color and ramp), while a brand mark is somebody else's
@@ -81,35 +26,23 @@ export { MiniSwatch } from './MiniSwatch';
 export { IconBadge } from './IconBadge';
 export { Shape, shapeOptions, SHAPE_NAMES, SHAPE_GROUPS, MORPHABLE_SHAPES, ICON_SHAPES, AVATAR_SHAPES, MORPH_TARGET_SHAPES, shapePath, shapeStyle, shapeSafeArea } from './Shape';
 export { Quote } from './Quote';
-export { ShapeButton, ShapeButtonShowcase } from './ShapeButton';
-export { ShapeShowcase } from './Shape/ShapeShowcase';
-export { QuoteShowcase } from './Quote/QuoteShowcase';
-export { IconBadgeShowcase } from './IconBadge/IconBadgeShowcase';
+export { ShapeButton } from './ShapeButton';
+
+
+
 
 // ========== BUTTONS ==========
 export { Button } from './Button';
 export { ButtonGroup } from './ButtonGroup';
-export { Fab, FabShowcase } from './Fab';
-export { Rail, RailItem, RailSectionTitle, RailShowcase } from './Rail';
-export { Toolbar, ToolbarShowcase } from './Toolbar';
-export { NumberField, FieldButton, NumberFieldShowcase } from './NumberField';
+export { Fab } from './Fab';
+export { Rail, RailItem, RailSectionTitle } from './Rail';
+export { Toolbar } from './Toolbar';
+export { NumberField, FieldButton } from './NumberField';
 export { ToggleButton } from './ToggleButton';
 // The GROUP is a separate component from the standalone ToggleButton: it owns
 // the selection state, so a segmented control comes from here rather than from
 // wiring individual buttons together.
-export {
-  ToggleButtonGroup,
-  DefaultToggleButtonGroup,
-  PrimaryToggleButtonGroup,
-  SecondaryToggleButtonGroup,
-  TertiaryToggleButtonGroup,
-  NeutralToggleButtonGroup,
-  BlackWhiteToggleButtonGroup,
-  InfoToggleButtonGroup,
-  SuccessToggleButtonGroup,
-  WarningToggleButtonGroup,
-  ErrorToggleButtonGroup,
-} from './ToggleButtonGroup/ToggleButtonGroup';
+export { ToggleButtonGroup, DefaultToggleButtonGroup, PrimaryToggleButtonGroup, SecondaryToggleButtonGroup, TertiaryToggleButtonGroup, NeutralToggleButtonGroup, BlackWhiteToggleButtonGroup, InfoToggleButtonGroup, SuccessToggleButtonGroup, WarningToggleButtonGroup, ErrorToggleButtonGroup } from './ToggleButtonGroup/ToggleButtonGroup';
 
 // ========== INPUTS & FORMS ==========
 // Canonical input: full-featured component with variants, validation,
@@ -120,17 +53,7 @@ export { Input as TextInput, InputDecorator } from './Input';
 // DEPRECATED — kept for backward compat. New code should use `TextInput`
 // (the canonical export above). These are thinner wrappers around MUI
 // TextField; `TextInput` has every feature they do plus more.
-export {
-  TextField,
-  EmailTextField,
-  PasswordTextField,
-  SearchTextField,
-  NumberTextField,
-  PhoneTextField,
-  URLTextField,
-  TextArea,
-  TextFieldGroup
-} from './TextField';
+export { TextField, EmailTextField, PasswordTextField, SearchTextField, NumberTextField, PhoneTextField, URLTextField, TextArea, TextFieldGroup } from './TextField';
 
 /* The first two pieces of the design's Forms system. FormLabel is the first
    thing here to read the LABEL type style — every other form component renders
@@ -142,15 +65,15 @@ export { FormHelper, FORM_HELPER_VALIDATIONS, useFormHelperIds } from './FormHel
 export { FieldGroup } from './FieldGroup';
 export { TextAreaField } from './TextAreaField';
 
-export { Select, SelectShowcase } from './Select';
-export { Autocomplete, AutocompleteShowcase } from './Autocomplete';
+export { Select } from './Select';
+export { Autocomplete } from './Autocomplete';
 export { Checkbox } from './Checkbox';
 export { Radio, RadioGroup, RadioInput } from './Radio';
 export { Player, formatTime } from './Player';
 export { SwitchInput } from './Switch';
 export { SliderInput, RangeSlider } from './Slider';
 export { RatingInput } from './Rating';
-export { SearchField, SearchFieldShowcase } from './SearchField';
+export { SearchField } from './SearchField';
 
 // ========== CHIPS & TAGS ==========
 export { Chip } from './Chip';
@@ -158,54 +81,27 @@ export { Chip } from './Chip';
    never exported, while src/components/Tag/ carried the component, its tests,
    its stories and a showcase. Nothing consuming the package could reach it, and
    the section heading above said "TAGS" the whole time. */
-export {
-  Tag,
-  TAG_COLORS,
-  TAG_COLOR_TOKEN_MAP,
-  PrimaryTag,
-  SecondaryTag,
-  TertiaryTag,
-  NeutralTag,
-  InfoTag,
-  SuccessTag,
-  WarningTag,
-  ErrorTag,
-  TagShowcase,
-} from './Tag';
+export { Tag, TAG_COLORS, TAG_COLOR_TOKEN_MAP, PrimaryTag, SecondaryTag, TertiaryTag, NeutralTag, InfoTag, SuccessTag, WarningTag, ErrorTag } from './Tag';
 
 // ========== LAYOUT ==========
-export {
-  OmniStack,
-  Stack,
-  HStack,
-  VStack,
-  CenteredStack,
-  SpaceBetweenStack,
-  WrapStack,
-  ResponsiveStack,
-  GridStack,
-  StackDivider,
-  InsetStack,
-  ScrollStack,
-  StackShowcase,
-} from './Stack';
-export { Box, BoxShowcase } from './Box';
+export { OmniStack, Stack, HStack, VStack, CenteredStack, SpaceBetweenStack, WrapStack, ResponsiveStack, GridStack, StackDivider, InsetStack, ScrollStack } from './Stack';
+export { Box } from './Box';
 export { Container } from './Container';
 export { Grid } from './Grid';
-export { Section, SectionShowcase, EDGE_NAMES, REPEATING_EDGES, edgePath } from './Section';
-export { Ratio, RatioShowcase, RATIO_NAMES } from './Ratio';
+export { Section, EDGE_NAMES, REPEATING_EDGES, edgePath } from './Section';
+export { Ratio, RATIO_NAMES } from './Ratio';
 
 // ========== NAVIGATION ==========
-export { Tabs, TabList, Tab, TabPanel, TabsShowcase, useTabsContext } from './Tabs';
-export { Breadcrumbs, BreadcrumbItem, BreadcrumbsShowcase } from './Breadcrumbs';
-export { Pagination, PaginationShowcase } from './Pagination';
-export { Dropdown, MenuButton, Menu, MenuItem, MenuDivider, MenuShowcase } from './Menu';
-export { BottomNavigation, BottomNavigationShowcase } from './BottomNavigation';
-export { Stepper, Step, StepperShowcase, useStepperContext } from './Stepper';
+export { Tabs, TabList, Tab, TabPanel, useTabsContext } from './Tabs';
+export { Breadcrumbs, BreadcrumbItem } from './Breadcrumbs';
+export { Pagination } from './Pagination';
+export { Dropdown, MenuButton, Menu, MenuItem, MenuDivider } from './Menu';
+export { BottomNavigation } from './BottomNavigation';
+export { Stepper, Step, useStepperContext } from './Stepper';
 export { LinkGroup } from './LinkGroup';
 export { ImagePlaceholder } from './ImagePlaceholder';
 export { DatePicker, DayCell } from './DatePicker';
-export { SpeedDial, SpeedDialShowcase } from './SpeedDial';
+export { SpeedDial } from './SpeedDial';
 
 // ========== SURFACES & CARDS ==========
 export { Card, SelectableCard, CardContent, CardActions, CardOverflow, CardCover } from './Card';
@@ -213,45 +109,37 @@ export { Paper } from './Paper';
 
 // ========== DIALOGS & MODALS ==========
 export { Popover } from './Popover';
-export { Dialog, AlertDialog, FormDialog, DialogShowcase } from './Dialog';
+export { Dialog, AlertDialog, FormDialog } from './Dialog';
 export { Modal } from './Modal';
-export { Drawer, DrawerClose, DrawerHeader, DrawerContent, DrawerShowcase } from './Drawer';
+export { Drawer, DrawerClose, DrawerHeader, DrawerContent } from './Drawer';
 /* Sheet — the bottom sheet (Figma's Sheet). It was never exported here, so the
    package shipped without it while its docs page described it. */
 export { Sheet } from './Sheet';
 export { DropZone } from './DropZone';
 
 // ========== FEEDBACK ==========
-export { Alert, AlertShowcase } from './Alert';
-export { Snackbar, SnackbarShowcase } from './Snackbar';
-export { CircularProgress, CircularProgressShowcase } from './CircularProgress';
-export { LinearProgress, LinearProgressShowcase } from './LinearProgress';
+export { Alert } from './Alert';
+export { Snackbar } from './Snackbar';
+export { CircularProgress } from './CircularProgress';
+export { LinearProgress } from './LinearProgress';
 /* Loader, same story as Tag — present in the tree with tests, missing from the
    index. It is NOT a duplicate of the two Progress components above: those are
    a determinate bar and ring, while Loader covers the skeleton and overlay
    shapes (SkeletonLoader, SkeletonCard, DotsLoader, PageLoader, OverlayLoader)
    that nothing else in the package provides. */
-export {
-  Loader,
-  LinearLoader,
-  SkeletonLoader,
-  DotsLoader,
-  PageLoader,
-  SkeletonCard,
-  OverlayLoader,
-} from './Loader';
+export { Loader, LinearLoader, SkeletonLoader, DotsLoader, PageLoader, SkeletonCard, OverlayLoader } from './Loader';
 
 // ========== DATA DISPLAY ==========
-export { Avatar, AvatarShowcase, DEFAULT_AVATAR_SRC } from './Avatar';
+export { Avatar, DEFAULT_AVATAR_SRC } from './Avatar';
 export { AvatarGroup } from './AvatarGroup';
-export { Badge, BadgeShowcase } from './Badge';
+export { Badge } from './Badge';
 export { Divider } from './Divider';
 export { List, ListItem, ListItemDecorator } from './List';
 export { Table } from './Table';
 export { Tooltip } from './Tooltip';
 
 // ========== APP STRUCTURE ==========
-export { AppBar, DesktopAppBar, MobileAppBar, AppBarShowcase } from './AppBar';
+export { AppBar, DesktopAppBar, MobileAppBar } from './AppBar';
 /* `Header` was removed. It was a SECOND app bar — built on MUI's AppBar and
    MUI's Typography rather than the library's, with four literal
    rgba(0,0,0,0.1) shadows and three raw --Primary-Color-11 hovers, none of
@@ -266,23 +154,16 @@ export { AppBar, DesktopAppBar, MobileAppBar, AppBarShowcase } from './AppBar';
 
    A marketing-site header is a legitimate thing to want and is NOT what this
    was; if one is built it should sit on AppBar. Tracked on the backlog. */
-export { Footer, FooterShowcase } from './Footer';
-export { Copyright, CopyrightShowcase } from './Copyright';
-export { CurvedText, CurvedTextShowcase } from './CurvedText';
-export { BevelText, BevelTextShowcase } from './BevelText';
+export { Footer } from './Footer';
+export { Copyright } from './Copyright';
+export { CurvedText } from './CurvedText';
+export { BevelText } from './BevelText';
 export { Sidebar } from './Sidebar';
 export { MainLayout } from './MainLayout';
 export { Accordion, AccordionSummary, AccordionDetails, AccordionGroup } from './Accordion';
 
 // ========== TREE VIEW ==========
-export {
-  OmniTreeView,
-  SolidTreeView,
-  LightTreeView,
-  DEFAULT_ITEMS,
-  TreeBranch,
-  TreeViewShowcase,
-} from './TreeView';
+export { OmniTreeView, SolidTreeView, LightTreeView, DEFAULT_ITEMS, TreeBranch } from './TreeView';
 
 // ========== UTILITIES & LINKS ==========
 export { Link } from './Link';
@@ -334,24 +215,8 @@ export { Ghost, useGhost, ghostBlockSx } from './_ghost';
    than kept in the studio so a consumer's agent can READ what a component
    expects instead of inferring it from prop names, which is where most wrong
    output starts. The gallery renders the same data. */
-export {
-  COMPONENT_DOCS,
-  FOUNDATIONS,
-  renderFoundations,
-  renderColorSystem,
-  /* The British spellings were the published names, so they stay exported as
-     aliases. Renaming them outright would break an import for a cosmetic win,
-     and a package that moves a public symbol to fix its own spelling teaches
+export { COMPONENT_DOCS, FOUNDATIONS, renderFoundations, renderColorSystem, /* The British spellings were the published names, so they stay exported as
+     aliases. Renaming them outright would break an import for a cosmetic win, and a package that moves a public symbol to fix its own spelling teaches
      consumers that the export list is not a promise. */
-  renderColorSystem as renderColourSystem,
-  renderComponentDoc,
-  COLOR_COLLECTIONS,
-  /* @deprecated British spelling, kept so published imports keep resolving. */
-  COLOR_COLLECTIONS as COLOUR_COLLECTIONS,
-  docsSlug,
-  componentDocsUrl,
-  componentDocsIndexUrl,
-  DOCS_ORIGIN,
-  EXAMPLES,
-  hasExample,
-} from '../docs';
+  renderColorSystem as renderColourSystem, renderComponentDoc, COLOR_COLLECTIONS, /* @deprecated British spelling, kept so published imports keep resolving. */
+  COLOR_COLLECTIONS as COLOUR_COLLECTIONS, docsSlug, componentDocsUrl, componentDocsIndexUrl, DOCS_ORIGIN, EXAMPLES, hasExample } from '../docs';
