@@ -1,6 +1,7 @@
 // src/components/SpeedDial/SpeedDial.js
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 import { Tooltip } from '../Tooltip/Tooltip';
 import AddIcon from '@omni-design/icons/Add';
 import { Fab } from '../Fab/Fab';
@@ -60,6 +61,32 @@ const SIZE_MAP = {
   large:  { fab: 56, fabSize: 'large',  action: 56, actionSize: 'large',  gap: 16 },
 };
 
+const SxBox = lazySxBox('SpeedDial');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+/* ─── Static sheet ───
+   Rules that reach into a Fab carry the dial's class as well (two classes),
+   so they beat the Fab's own single-class rules whatever order the two
+   sheets were inserted in — the action's transition and opacity REPLACED the
+   Fab's, as the sx they come from did. */
+registerStaticStyles('omni-speed-dial', [
+  '.omni-sd{position:relative;display:inline-flex;overflow:visible;width:var(--_sd-w);height:var(--_sd-h)}',
+  '.omni-sd .omni-sd-main{position:relative;z-index:2}',
+  /* lineHeight 0, or the + rotates off its own centre: an inline-flex box
+     reserves a line box (the strut) whether or not there is text in it, so
+     the wrapper came out taller than the icon and its 50% sat below the
+     glyph's middle. Zeroing it makes the box exactly the icon. The origin is
+     stated rather than relied on, so a parent rule cannot move it silently. */
+  '.omni-sd-icon{display:inline-flex;-webkit-box-align:center;align-items:center;-webkit-box-pack:center;justify-content:center;line-height:0;transform-origin:50% 50%;'
+    + 'transition:transform 0.3s ease;transform:rotate(0deg)}',
+  '.omni-sd-icon-open{transform:rotate(45deg)}',
+  '.omni-sd-menu{position:absolute;inset:0;pointer-events:none;overflow:visible}',
+  '.omni-sd .omni-sd-act{opacity:0;transform:scale(0.3);transition:opacity 0.2s ease, transform 0.2s ease;pointer-events:none}',
+  '.omni-sd .omni-sd-act-open{opacity:1;transform:scale(1);pointer-events:auto}',
+  '.omni-sd .omni-sd-act-abs{position:absolute}',
+  '.omni-sd-slot{position:absolute;display:flex}',
+].join('\n'));
+
 export function SpeedDial({
   actions = [],
   variant = 'solid',
@@ -92,9 +119,10 @@ export function SpeedDial({
      cannot open. */
   disabled = false,
   className = '',
-  sx = {},
+  sx,
   ...props
 }) {
+  useStaticStyles('omni-speed-dial');
   /* Normalised rather than typed away, so an existing variant="outline" keeps
      rendering instead of breaking at a call site that cannot be edited. */
   if (process.env.NODE_ENV !== 'production' && variant !== 'solid') {
@@ -111,7 +139,13 @@ export function SpeedDial({
   const GAP = sc.gap;
   const FIRST_GAP = 12; // Sizing-1-and-Half, at every size
 
-  const [internalOpen, setInternalOpen] = useState(false);
+  const [internalOpen, setInternalOpenState] = useState(false);
+  /* What the dial is about to be, not only what it last rendered: a hover
+     that opens it and a click that lands before React has re-rendered must
+     see the open dial, so the click closes it (as it does when the two are
+     further apart). */
+  const openNow = useRef(false);
+  const setInternalOpen = useCallback((v) => { openNow.current = v; setInternalOpenState(v); }, []);
   const isControlled = controlledOpen !== undefined;
   const isOpen = !disabled && (isControlled ? controlledOpen : internalOpen);
   const containerRef = useRef(null);
@@ -121,14 +155,14 @@ export function SpeedDial({
   const ACTION_FAB_SIZE = sc.actionSize;
 
   const handleToggle = useCallback(() => {
-    if (isOpen) {
+    if (isControlled ? isOpen : !disabled && openNow.current) {
       if (!isControlled) setInternalOpen(false);
       onClose?.();
     } else {
       if (!isControlled) setInternalOpen(true);
       onOpen?.();
     }
-  }, [isOpen, isControlled, onOpen, onClose]);
+  }, [isOpen, isControlled, disabled, onOpen, onClose, setInternalOpen]);
 
   /* Hover, built to WCAG 1.4.13 rather than to onMouseEnter/onMouseLeave.
    *
@@ -235,58 +269,31 @@ export function SpeedDial({
 
   const tooltipPlacement = direction === 'up' || direction === 'down' ? 'left' : 'top';
 
-  // The main icon (defaults to AddIcon). We wrap it in a rotating Box so the
+  // The main icon (defaults to AddIcon). We wrap it in a rotating box so the
   // 45° turn animates whether the user provides a custom icon or not — the
-  // rotation alone turns + into × without an icon swap / remount.
+  // rotation alone turns + into × without an icon swap / remount (see the
+  // sheet for why its line-height is 0).
   const mainIcon = (
-    <Box
-      sx={{
-        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-        /* lineHeight: 0, or the + rotates off its own centre.
-         *
-         * An inline-flex box reserves a LINE BOX: the strut that line-height
-         * sets aside for ascenders and descenders, whether or not there is any
-         * text in it. So this wrapper came out taller than the icon it holds,
-         * its 50% sat a few pixels below the glyph's middle, and `rotate()`
-         * — which turns about the element's own box, not its contents —
-         * swung the + around that lower point. The result reads as a wobble
-         * rather than a spin, and it is worse at larger icon sizes because the
-         * strut grows with the font size while the glyph does not.
-         *
-         * Zeroing it collapses the strut so the box is exactly the icon, and
-         * the two centres become the same point. */
-        lineHeight: 0,
-        /* Stated rather than relied on. It is the initial value, but a parent
-           setting transform-origin on a descendant selector would otherwise
-           move this silently, and a rotation that is off by a few pixels is
-           hard to trace back to a rule nobody remembers writing. */
-        transformOrigin: '50% 50%',
-        transition: 'transform 0.3s ease',
-        transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)',
-      }}
-    >
+    <div className={'omni-sd-icon' + (isOpen ? ' omni-sd-icon-open' : '')}>
       {icon || <AddIcon />}
-    </Box>
+    </div>
   );
 
-  return (
-    <Box
-      ref={containerRef}
-      /* On the CONTAINER, not the Fab: it wraps the dial and the whole fan,
-         including the gaps between them, so the pointer can travel inward
-         without the fan closing underneath it. */
-      onMouseEnter={handleHoverOpen}
-      onMouseLeave={handleHoverClose}
-      className={'speed-dial speed-dial-' + variant + ' speed-dial-' + color + ' speed-dial-' + direction + ' ' + className}
-      sx={{
-        position: 'relative', display: 'inline-flex', overflow: 'visible',
-        width: isVertical ? FAB_SIZE + 'px' : 'auto',
-        height: isVertical ? 'auto' : FAB_SIZE + 'px',
-        ...sx,
-      }}
-      {...props}
-    >
-      {/* Main FAB — large (56), rotates 45° on open */}
+  const rootProps = {
+    ref: containerRef,
+    /* On the CONTAINER, not the Fab: it wraps the dial and the whole fan,
+       including the gaps between them, so the pointer can travel inward
+       without the fan closing underneath it. */
+    onMouseEnter: handleHoverOpen,
+    onMouseLeave: handleHoverClose,
+    className: 'speed-dial speed-dial-' + variant + ' speed-dial-' + color + ' speed-dial-' + direction + ' omni-sd ' + className,
+    ...props,
+    // The dial's footprint as custom properties, so a caller's sx still wins.
+    style: { '--_sd-w': isVertical ? FAB_SIZE + 'px' : 'auto', '--_sd-h': isVertical ? 'auto' : FAB_SIZE + 'px', ...props.style },
+  };
+  const content = (
+    <>
+      {/* Main FAB — rotates 45° on open */}
       <Fab
         size={sc.fabSize}
         variant={fabVariant}
@@ -296,13 +303,13 @@ export function SpeedDial({
         aria-label={ariaLabel}
         aria-expanded={isOpen}
         aria-haspopup="menu"
-        sx={{ position: 'relative', zIndex: 2 }}
+        className="omni-sd-main"
       >
         {mainIcon}
       </Fab>
 
       {/* Actions */}
-      <Box role="menu" sx={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'visible' }}>
+      <div role="menu" className="omni-sd-menu">
         {actions.map((action, index) => {
           const offset = getActionOffset(index);
           const delay = index * speed;
@@ -316,19 +323,13 @@ export function SpeedDial({
               variant={fabVariant}
               color={color}
               role="menuitem"
-              className={action.className}
+              className={'omni-sd-act' + (isOpen ? ' omni-sd-act-open' : '') + (disablePortal ? '' : ' omni-sd-act-abs')
+                + (action.className ? ' ' + action.className : '')}
               aria-label={action.name || 'Action ' + (index + 1)}
               onClick={() => handleActionClick(action, index)}
-              sx={{
-                /* In place, the offset moves to the wrapper below so the
-                   label can sit beside the action with CSS. */
-                ...(disablePortal ? {} : { position: 'absolute', ...offset }),
-                opacity: isOpen ? 1 : 0,
-                transform: isOpen ? 'scale(1)' : 'scale(0.3)',
-                transition: 'opacity 0.2s ease, transform 0.2s ease',
-                transitionDelay: isOpen ? delay + 'ms' : '0ms',
-                pointerEvents: isOpen ? 'auto' : 'none',
-              }}
+              /* In place, the offset moves to the wrapper below so the label
+                 can sit beside the action with CSS. */
+              style={{ ...(disablePortal ? {} : offset), transitionDelay: isOpen ? delay + 'ms' : '0ms' }}
             >
               {action.icon || <AddIcon />}
             </Fab>
@@ -337,9 +338,7 @@ export function SpeedDial({
           if (showTooltips && action.name) {
             const label = (
               /* The lib's Tooltip — its one solid style, as Figma's SpeedDial
-                 draws beside each action. This was a raw MUI tooltip painted
-                 Container + a Border + a hardcoded shadow: the light / outline
-                 tooltip the system retired. */
+                 draws beside each action. */
               <Tooltip
                 key={action.key || index}
                 title={action.name}
@@ -356,18 +355,22 @@ export function SpeedDial({
             );
             if (!disablePortal) return label;
             return (
-              <Box key={action.key || index} sx={{ position: 'absolute', ...offset, display: 'flex' }}>
+              <div key={action.key || index} className="omni-sd-slot" style={offset}>
                 {label}
-              </Box>
+              </div>
             );
           }
           return disablePortal
-            ? <Box key={action.key || index} sx={{ position: 'absolute', ...offset, display: 'flex' }}>{actionEl}</Box>
+            ? <div key={action.key || index} className="omni-sd-slot" style={offset}>{actionEl}</div>
             : actionEl;
         })}
-      </Box>
-    </Box>
+      </div>
+    </>
   );
+
+  return hasSx(sx)
+    ? <SxBox sx={sx} {...rootProps}>{content}</SxBox>
+    : <div {...rootProps}>{content}</div>;
 }
 
 export default SpeedDial;

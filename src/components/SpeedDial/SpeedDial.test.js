@@ -244,13 +244,9 @@ describe('SpeedDial — Accessibility (jest-axe)', () => {
 
 /* ─── Figma's SpeedDial geometry and Disabled state ─── */
 describe('Matches Figma', () => {
-  const cssFor = (el) => {
-    const out = [];
-    for (const sheet of document.styleSheets) for (const r of sheet.cssRules) {
-      try { if (el.matches(r.selectorText)) out.push(r.cssText); } catch (e) { /* skip */ }
-    }
-    return out.join('\n');
-  };
+  // Every rule matching the element plus its inline style (the offsets are
+  // per action, so they ride on the element).
+  const { cssFor } = require('../_testCss');
   const acts = [{ name: 'A' }, { name: 'B' }, { name: 'C' }];
 
   test('first action 12 from the dial, then SpeedDial-Gap (large: 68, 140, 212)', () => {

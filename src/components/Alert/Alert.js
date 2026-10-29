@@ -1,6 +1,7 @@
 // src/components/Alert/Alert.js
 import React from 'react';
-import { Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 import { Typography } from '../Typography';
 import { Icon } from '../Icon/Icon';
 import InfoIcon from '@omni-design/icons/Info';
@@ -80,6 +81,42 @@ const SIZE_MAP = {
    system (Popsicle's 30px made it a capsule). */
 const RADIUS = 'var(--Sizing-1, 8px)';
 
+/* ─── Static sheet ───
+   Every declaration the parts handed emotion per render, as classes over the
+   same tokens. Size and the title layout are classes; the state color names
+   its border token in its own class. */
+const SxBox = lazySxBox('Alert');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+registerStaticStyles('omni-alert', [
+  `.omni-alert{border:1px solid var(--_al-bd);border-radius:${RADIUS};overflow:hidden;box-shadow:${SHADOW_LEVEL_1}}`,
+  ...Object.keys(STATE_ICONS).map((c) => `.omni-alert-c-${c}{--_al-bd:var(--Buttons-${cap(c)}-Border)}`),
+  /* Two rows with a title (header, then body); one row without — icon, body
+     and end CENTRED on the row, as Figma's Title=false: the 24px icon and body
+     line sit in the middle of the 32px close button.
+     The face is the body face, not `inherit`: a string message gets a
+     Typography, but a node renders as-is, and the generated CSS gives the
+     page no font, so it came out in the UA serif. */
+  '.omni-alert-inner{display:flex;flex-direction:row;-webkit-box-align:center;align-items:center;font-family:var(--Font-Family-Body, inherit);'
+    + `line-height:1.5;border-radius:calc(${RADIUS} - 1px)}`,
+  '.omni-alert-inner-t{flex-direction:column;-webkit-box-align:stretch;align-items:stretch}',
+  ...Object.entries(SIZE_MAP).map(([k, v]) => `.omni-alert-inner-${k}{gap:${v.gap};padding:${v.pad};font-size:${v.fontSize}}`),
+  /* On the element WITH its zone attributes, because the design system paints
+     every [data-theme][data-surface] element with an opaque --Background and
+     --Text at (0,2,0) — which beat a single class and erased both the 75% fill
+     and Text-Match on the page. Class + two attributes is (0,3,0).
+     Text-Match: see textNode. The fill is 75% of the surface, as Figma's
+     Theme-Container fill (Surface/Background at 0.753 opacity). */
+  '.omni-alert-inner[data-theme][data-surface]{color:var(--Text-Match, var(--Text));'
+    + 'background-color:color-mix(in srgb, var(--Background) 75.3%, transparent)}',
+  '.omni-alert-start{display:inline-flex;-webkit-box-align:center;align-items:center;line-height:1;flex-shrink:0}',
+  ...Object.entries(SIZE_MAP).map(([k, v]) => `.omni-alert-start-${k}{font-size:${v.iconSize}}`),
+  '.omni-alert-end{display:inline-flex;-webkit-box-align:center;align-items:center;flex-shrink:0}',
+  '.omni-alert-header{display:flex;-webkit-box-align:center;align-items:center}',
+  ...Object.entries(SIZE_MAP).map(([k, v]) => `.omni-alert-gap-${k}{gap:${v.gap}}`),
+  '.omni-alert-grow{flex:1;min-width:0}',
+].join('\n'));
+
 export function Alert({
   children,
   title,
@@ -90,9 +127,10 @@ export function Alert({
   startDecorator: startProp,
   endDecorator,
   className = '',
-  sx = {},
+  sx,
   ...props
 }) {
+  useStaticStyles('omni-alert');
   const color = normalizeAlertColor(colorProp);
   const C = cap(color);
   const StateGlyph = STATE_ICONS[color];
@@ -101,7 +139,8 @@ export function Alert({
   const startDecorator = startProp === undefined
     ? <Icon size="small"><StateGlyph /></Icon>
     : startProp;
-  const s = SIZE_MAP[size] || SIZE_MAP.medium;
+  const sizeKey = SIZE_MAP[size] ? size : 'medium';
+  const s = SIZE_MAP[sizeKey];
 
   // A light variant is the base theme at its BRIGHTEST surface, not a theme of
   // its own. Generated design systems stopped emitting *-Light themes — their
@@ -119,116 +158,68 @@ export function Alert({
    * mapping, which stays as the default so existing usage is untouched.
    * Same shape as Card's surface prop. */
   const dataSurface = surface || (variant === 'light' ? 'Surface-Brightest' : 'Surface');
-  const borderToken = 'var(--Buttons-' + C + '-Border)';
 
   /* Text is --Text-Match, the theme's own colored text (Figma's Text-Match):
      dark blue on an Info alert, dark green on Success — not the surface's
      near-black --Text. Set once on the inner box and INHERITED by the title
      and a string body (color="inherit"); a node passed as children should
      take color="inherit" to follow it. */
-  const textNode = (content, className) =>
+  const textNode = (content) =>
     typeof content === 'string'
-      ? <Typography textStyle={s.text} color="inherit" className={className}>{content}</Typography>
+      ? <Typography textStyle={s.text} color="inherit">{content}</Typography>
       : content;
 
   const start = startDecorator && (
-    <Box
-      className="alert-start-decorator"
-      sx={{ display: 'inline-flex', alignItems: 'center', fontSize: s.iconSize, lineHeight: 1, flexShrink: 0 }}
-    >
+    <div className={'alert-start-decorator omni-alert-start omni-alert-start-' + sizeKey}>
       {startDecorator}
-    </Box>
+    </div>
   );
   const end = endDecorator && (
-    <Box
-      className="alert-end-decorator"
-      sx={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0, gap: s.gap }}
-    >
+    <div className={'alert-end-decorator omni-alert-end omni-alert-gap-' + sizeKey}>
       {endDecorator}
-    </Box>
+    </div>
   );
 
   const innerContent = title ? (
     <>
-      <Box className="alert-header" sx={{ display: 'flex', alignItems: 'center', gap: s.gap }}>
+      <div className={'alert-header omni-alert-header omni-alert-gap-' + sizeKey}>
         {start}
-        <Box className="alert-title" sx={{ flex: 1, minWidth: 0 }}>
+        <div className="alert-title omni-alert-grow">
           {typeof title === 'string'
             ? <Typography textStyle={s.title} color="inherit">{title}</Typography>
             : title}
-        </Box>
+        </div>
         {end}
-      </Box>
+      </div>
       {children != null && (
-        <Box className="alert-message">{textNode(children)}</Box>
+        <div className="alert-message">{textNode(children)}</div>
       )}
     </>
   ) : (
     <>
       {start}
-      <Box className="alert-message" sx={{ flex: 1, minWidth: 0 }}>{textNode(children)}</Box>
+      <div className="alert-message omni-alert-grow">{textNode(children)}</div>
       {end}
     </>
   );
 
-  return (
-    <Box
-      role="alert"
-      className={'alert alert-' + variant + ' alert-' + size + ' alert-' + color + ' ' + className}
-      sx={{
-        border: '1px solid ' + borderToken,
-        borderRadius: RADIUS,
-        overflow: 'hidden',
-        boxShadow: SHADOW_LEVEL_1,  // Alert
-
-        ...sx,
-      }}
-      {...props}
+  const rootProps = {
+    role: 'alert',
+    className: 'alert alert-' + variant + ' alert-' + size + ' alert-' + color + ' omni-alert omni-alert-c-' + color + ' ' + className,
+    ...props,
+  };
+  const inner = (
+    <div
+      data-theme={dataTheme}
+      data-surface={dataSurface}
+      className={'alert-inner omni-alert-inner omni-alert-inner-' + sizeKey + (title ? ' omni-alert-inner-t' : '')}
     >
-      <Box
-        data-theme={dataTheme}
-        data-surface={dataSurface}
-        className="alert-inner"
-        sx={{
-          display: 'flex',
-          /* Two rows with a title (header, then body); one row without —
-             icon, body and end CENTRED on the row, as Figma's Title=false:
-             the 24px icon and body line sit in the middle of the 32px close
-             button. */
-          flexDirection: title ? 'column' : 'row',
-          alignItems: title ? 'stretch' : 'center',
-          gap: s.gap,
-          padding: s.pad,
-          fontSize: s.fontSize,
-          /* The body face, not `inherit`. A string message gets a Typography,
-             but a node — text with a <strong> in it — renders as-is, and the
-             generated CSS gives the page no font, so it came out in the UA
-             serif. */
-          fontFamily: 'var(--Font-Family-Body, inherit)',
-          lineHeight: 1.5,
-          borderRadius: 'calc(' + RADIUS + ' - 1px)',
-          /* On the element WITH its zone attributes, because the design
-             system paints every [data-theme][data-surface] element with an
-             opaque --Background and --Text at (0,2,0) — which beat this
-             component's single class and erased both the 75% fill and
-             Text-Match on the page. Class + two attributes is (0,3,0).
-
-             Text-Match: see textNode above.
-
-             The fill is 75% of the surface, as Figma's Theme-Container fill
-             (Surface/Background at 0.753 opacity): the page shows faintly
-             through. Text-Match's contrast is set against the opaque surface,
-             so on a busy backdrop the text sits on a blend of the two. */
-          '&[data-theme][data-surface]': {
-            color: 'var(--Text-Match, var(--Text))',
-            backgroundColor: 'color-mix(in srgb, var(--Background) 75.3%, transparent)',
-          },
-        }}
-      >
-        {innerContent}
-      </Box>
-    </Box>
+      {innerContent}
+    </div>
   );
+  return hasSx(sx)
+    ? <SxBox sx={sx} {...rootProps}>{inner}</SxBox>
+    : <div {...rootProps}>{inner}</div>;
 }
 
 /* ─── Convenience Exports ─── */

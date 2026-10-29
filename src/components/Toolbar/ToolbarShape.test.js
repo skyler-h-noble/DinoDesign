@@ -87,7 +87,8 @@ describe('the FAB belongs to its bar', () => {
                fab={{ icon: <AddIcon />, label: 'Add' }} />);
     const fab = container.querySelector('.fab, [class*="fab"]');
     expect(fab).toBeTruthy();
-    const all = Array.from(container.querySelectorAll('button')).map(cssFor).join('\n');
+    // The Fab renders from its static sheet; its palette rides on the button (see _testCss).
+    const all = Array.from(container.querySelectorAll('button')).map((b) => require('../_testCss').cssFor(b)).join('\n');
     expect(all).toContain('--Buttons-Primary-');
   });
 

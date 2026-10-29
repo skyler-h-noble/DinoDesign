@@ -4,6 +4,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { Fab } from './Fab';
 import EditIcon from '@omni-design/icons/Edit';
 import { axe } from 'jest-axe';
+import { cssFor } from '../_testCss';
 
 const renderFab = (props = {}) =>
   render(<Fab ariaLabel="Test action" {...props} />);
@@ -215,7 +216,8 @@ describe('Fab — the bevel uses the fill palette', () => {
   const allCss = () => Array.from(document.styleSheets).flatMap((s) => Array.from(s.cssRules).map((r) => r.cssText)).join('\n');
   test('a default FAB bevels in Tertiary, like its fill', () => {
     render(<Fab ariaLabel="Add" />);
-    const css = allCss();
+    // The palette rides on the button itself (inline custom properties).
+    const css = allCss() + '\n' + cssFor(screen.getByRole('button'));
     expect(css).toContain('--Buttons-Tertiary-Highlight');
     expect(css).toContain('--Buttons-Tertiary-Lowlight');
     expect(css).not.toContain('--Buttons-Default-Highlight');

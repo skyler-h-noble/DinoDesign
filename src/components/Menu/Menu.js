@@ -7,7 +7,8 @@
      4  Elevations/Level-4 (FAB-Hover, Elevated-Card-Drag)
      5  Elevations/Level-5 (Dialog & Modal) */
 import React, { createContext, useContext, useState, useRef, useEffect, useCallback, useId } from 'react';
-import { Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 import ExpandMoreIcon from '@omni-design/icons/ExpandMore';
 import { Button } from '../Button/Button';
 import { BodySmall, Body, BodyLarge } from '../Typography';
@@ -40,6 +41,53 @@ const SIZE_MAP = {
   large:  { minWidth: '180px' },
 };
 
+const SxBox = lazySxBox('Menu');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+const FRAME_RADIUS = 'var(--Dropdown-Frame-Radius, var(--Input-Radius, var(--Style-Border-Radius, 4px)))';
+
+/* ─── Static sheet ───
+   State rules weigh one class + one pseudo-class, as emotion's did, so a
+   caller's sx state rule still wins. */
+registerStaticStyles('omni-menu', [
+  '.omni-dd{display:inline-flex;position:relative}',
+  /* "Menus" sits in the Level 2 style, with App bars, Toolbars and Tooltip.
+     Edges are the neutral --Border: the color marks the SELECTION, not the
+     frame, so field and panel read as one control at the 3:1 an edge needs. */
+  '.omni-menu{position:absolute;top:100%;left:0;right:auto;z-index:99999;margin-top:4px;border:1px solid var(--Border);'
+    + `border-radius:${FRAME_RADIUS};box-shadow:${SHADOW_LEVEL_2};overflow:hidden}`,
+  '.omni-menu-end{left:auto;right:0}',
+  /* The TreeView panel's padding: a menu is a list of Menu Item rows. Its
+     corner sits 1px inside the frame, so it tracks the SAME token. */
+  '.omni-menu-list{background-color:var(--Background);color:var(--Text);font-family:inherit;text-align:left;'
+    + `padding:var(--Sizing-1, 8px);outline:none;border-radius:calc(${FRAME_RADIUS} - 1px)}`,
+  ...Object.entries(SIZE_MAP).map(([k, v]) => `.omni-menu-list-${k}{min-width:${v.minWidth}}`),
+  // A MenuDivider replaces the row's own line rather than doubling it.
+  '.omni-menu-list .menu-item:has(+ .menu-divider){box-shadow:none}',
+  '.omni-mi{display:flex;-webkit-box-align:center;align-items:center;gap:var(--Sizing-Half, 4px);position:relative;box-sizing:border-box;'
+    + 'padding:0 var(--Sizing-1, 8px) 0 var(--Menu-Level-0-Left-Margin, 8px);border-radius:var(--Menu-Item-Radius, 0px);'
+    + 'color:var(--Text);box-shadow:none;background-color:transparent;cursor:pointer;opacity:1;outline:none;'
+    + 'transition:background-color 0.15s ease;user-select:none}',
+  '.omni-mi-small{min-height:var(--Sm-Button-Height, 32px)}',
+  '.omni-mi-medium{min-height:var(--Button-Height, 32px)}',
+  '.omni-mi-large{min-height:var(--Lg-Button-Height, 32px)}',
+  '.omni-mi-rule{box-shadow:inset 0 -1px 0 var(--Border-Variant)}',
+  '.omni-mi-off{cursor:not-allowed;opacity:var(--Disabled, 0.38)}',
+  '.omni-mi-sel.omni-mi-mark::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background-color:var(--Buttons-Default-Border);pointer-events:none}',
+  '.omni-mi-h:hover{background-color:var(--Hover)}',
+  '.omni-mi-a:active{background-color:var(--Pressed)}',
+  '.omni-mi-f:focus-visible{outline:3px solid var(--Focus-Visible);outline-offset:-4px}',
+  '.omni-mi-deco{width:24px;height:24px;flex-shrink:0;display:flex;-webkit-box-align:center;align-items:center;-webkit-box-pack:center;justify-content:center}',
+  '.omni-mi-deco .MuiSvgIcon-root{font-size:24px}',
+  '.omni-mi-slot{flex:1;min-width:0;display:flex;padding:0 var(--Sizing-Half, 4px)}',
+  '.omni-menu-hr{border:none;border-top:1px solid var(--Border-Variant);margin:0}',
+].join('\n'));
+
+/** A part's root: plain element, or an MUI box only when given sx. */
+const Part = React.forwardRef(function Part({ sx, component: Tag = 'div', ...props }, ref) {
+  if (hasSx(sx)) return <SxBox component={Tag} sx={sx} ref={ref} {...props} />;
+  return <Tag ref={ref} {...props} />;
+});
+
 /* ─── Context ─── */
 const DropdownContext = createContext({
   open: false, setOpen: () => {}, anchorRef: { current: null },
@@ -51,8 +99,9 @@ const useDropdown = () => useContext(DropdownContext);
 /* ─── Dropdown ─── */
 export function Dropdown({
   children, variant = 'outline', color = 'default', size = 'medium',
-  open: controlledOpen, onOpenChange, ...props
+  open: controlledOpen, onOpenChange, className, ...props
 }) {
+  useStaticStyles('omni-menu');
   const [internalOpen, setInternalOpen] = useState(false);
   const controlled = controlledOpen !== undefined;
   const open = controlled ? controlledOpen : internalOpen;
@@ -69,9 +118,11 @@ export function Dropdown({
 
   return (
     <DropdownContext.Provider value={{ open, setOpen, anchorRef, menuId, buttonId, variant, color, size }}>
-      <Box sx={{ display: 'inline-flex', position: 'relative' }} {...props}>
+      {/* A caller's sx REPLACED this root's own styles (it was spread after
+          them), so with one the static class stays off, as before. */}
+      <Part className={(hasSx(props.sx) ? '' : 'omni-dd') + (className ? ' ' + className : '')} {...props}>
         {children}
-      </Box>
+      </Part>
     </DropdownContext.Provider>
   );
 }
@@ -80,7 +131,7 @@ export function Dropdown({
 /* The trigger IS a Button — Figma has no Menu Button, a menu opens from an
    ordinary outline Button with a chevron. It was a hand-drawn pill (its own
    padding, 600 weight, border) that matched nothing in the design file. */
-export function MenuButton({ children, className = '', variant: buttonVariant, sx = {}, ...props }) {
+export function MenuButton({ children, className = '', variant: buttonVariant, sx, ...props }) {
   const { open, setOpen, anchorRef, menuId, buttonId, size, color } = useDropdown();
   return (
     <Button
@@ -106,15 +157,13 @@ export function MenuButton({ children, className = '', variant: buttonVariant, s
 }
 
 /* ─── Menu ─── */
-export function Menu({ children, className = '', placement = 'bottom-start', sx = {}, ...props }) {
+export function Menu({ children, className = '', placement = 'bottom-start', sx, ...props }) {
+  useStaticStyles('omni-menu');
   const { open, setOpen, anchorRef, menuId, buttonId, variant, color, size } = useDropdown();
   const menuRef = useRef(null);
-  const s = SIZE_MAP[size] || SIZE_MAP.medium;
+  const sizeKey = SIZE_MAP[size] ? size : 'medium';
 
   const C = cap(color === 'default' ? 'Default' : color);
-  /* Edges are the neutral --Border: the color marks the SELECTION, not the
-     frame, so field and panel read as one control at the 3:1 an edge needs. */
-  const borderToken = 'var(--Border)';
 
   // A light variant is the base theme at its BRIGHTEST surface, not a theme of
   // its own. Generated design systems stopped emitting *-Light themes, so
@@ -155,42 +204,14 @@ export function Menu({ children, className = '', placement = 'bottom-start', sx 
   if (!open) return null;
 
   return (
-    <Box
-      className={'menu menu-' + variant + ' ' + className}
-      sx={{
-        position: 'absolute',
-        top: '100%', left: placement === 'bottom-end' ? 'auto' : 0,
-        right: placement === 'bottom-end' ? 0 : 'auto',
-        zIndex: 99999, marginTop: '4px',
-        border: '1px solid ' + borderToken,
-        // Menu's floating panel — same frame role as Select's dropdown.
-        borderRadius: 'var(--Dropdown-Frame-Radius, var(--Input-Radius, var(--Style-Border-Radius, 4px)))',
-        /* "Menus" sits in the Level 2 style, with App bars, Toolbars and
-           Tooltip. The panel floats over the page and had no shadow at all,
-           so it read as part of whatever it covered. */
-        boxShadow: SHADOW_LEVEL_2,
-        overflow: 'hidden',
-        ...sx,
-      }}
+    <Part
+      className={'menu menu-' + variant + ' omni-menu' + (placement === 'bottom-end' ? ' omni-menu-end' : '') + ' ' + className}
+      sx={sx}
     >
-      <Box
+      <div
         ref={menuRef} id={menuId} role="menu" aria-labelledby={buttonId}
         data-theme={dataTheme} data-surface={dataSurface}
-        sx={{
-          minWidth: s.minWidth,
-          backgroundColor: 'var(--Background)',
-          color: 'var(--Text)',
-          fontFamily: 'inherit',
-          textAlign: 'left',
-          // The TreeView panel's padding: a menu is a list of Menu Item rows.
-          padding: 'var(--Sizing-1, 8px)',
-          // A MenuDivider replaces the row's own line rather than doubling it.
-          '& .menu-item:has(+ .menu-divider)': { boxShadow: 'none' },
-          outline: 'none',
-          // Inner surface sits 1px inside the frame above, so it has to
-          // track the SAME token or the two corners disagree.
-          borderRadius: 'calc(var(--Dropdown-Frame-Radius, var(--Input-Radius, var(--Style-Border-Radius, 4px))) - 1px)',
-        }}
+        className={'omni-menu-list omni-menu-list-' + sizeKey}
         onKeyDown={(e) => {
           const items = menuRef.current?.querySelectorAll('[role="menuitem"]:not([aria-disabled="true"])');
           if (!items?.length) return;
@@ -204,8 +225,8 @@ export function Menu({ children, className = '', placement = 'bottom-start', sx 
         {...props}
       >
         {children}
-      </Box>
-    </Box>
+      </div>
+    </Part>
   );
 }
 
@@ -221,8 +242,11 @@ export function Menu({ children, className = '', placement = 'bottom-start', sx 
      disabled 38%
    It drew centered Quiet labels with a bold Hover-filled selected row, which
    is in nothing in the design file. */
-export function MenuItem({ children, onClick, selected = false, disabled = false, divider = true, startDecorator, className = '', sx = {}, ...props }) {
+export function MenuItem({ children, onClick, selected = false, disabled = false, divider = true, startDecorator, className = '', sx, ...props }) {
+  useStaticStyles('omni-menu');
   const { setOpen, size } = useDropdown();
+  const sizeKey = SIZE_MAP[size] ? size : 'medium';
+  const own = (key) => hasSx(sx) && typeof sx === 'object' && !Array.isArray(sx) && sx[key] !== undefined;
   const TextComp = MENU_TEXT[size] || MENU_TEXT.medium;
 
   const handleClick = () => {
@@ -231,58 +255,39 @@ export function MenuItem({ children, onClick, selected = false, disabled = false
   };
 
   return (
-    <Box
+    <Part
       role="menuitem" tabIndex={disabled ? -1 : 0}
       aria-disabled={disabled || undefined} aria-current={selected || undefined}
       onClick={handleClick}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } }}
-      className={'menu-item' + (selected ? ' menu-item-selected' : '') + ' ' + className}
-      sx={{
-        display: 'flex', alignItems: 'center', gap: 'var(--Sizing-Half, 4px)',
-        position: 'relative', boxSizing: 'border-box',
-        minHeight: 'var(--' + ({ small: 'Sm-', large: 'Lg-' }[size] || '') + 'Button-Height, 32px)',
-        padding: '0 var(--Sizing-1, 8px) 0 var(--Menu-Level-0-Left-Margin, 8px)',
-        borderRadius: 'var(--Menu-Item-Radius, 0px)',
-        color: 'var(--Text)',
-        boxShadow: divider ? 'inset 0 -1px 0 var(--Border-Variant)' : 'none',
-        backgroundColor: 'transparent',
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
-        outline: 'none', transition: 'background-color 0.15s ease',
-        userSelect: 'none',
-        ...(selected && {
-          '&::before': {
-            content: '""', position: 'absolute', left: 0, top: 0, bottom: 0, width: '4px',
-            backgroundColor: 'var(--Buttons-Default-Border)', pointerEvents: 'none',
-          },
-        }),
-        ...(!disabled && {
-          '&:hover': { backgroundColor: 'var(--Hover)' },
-          '&:active': { backgroundColor: 'var(--Pressed)' },
-        }),
-        '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '-4px' },
-        ...sx,
-      }}
+      className={'menu-item' + (selected ? ' menu-item-selected' : '')
+        + ' omni-mi omni-mi-' + sizeKey + (divider ? ' omni-mi-rule' : '') + (disabled ? ' omni-mi-off' : '')
+        /* A caller's sx state key REPLACED the row's own (one sx object), so
+           with one the matching static rule stays off. */
+        + (!disabled && !own('&:hover') ? ' omni-mi-h' : '') + (!disabled && !own('&:active') ? ' omni-mi-a' : '')
+        + (!own('&:focus-visible') ? ' omni-mi-f' : '')
+        + (selected ? ' omni-mi-sel' + (!own('&::before') ? ' omni-mi-mark' : '') : '') + ' ' + className}
+      sx={sx}
       {...props}
     >
       {startDecorator && (
-        <Box aria-hidden="true" sx={{ width: 24, height: 24, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', '& .MuiSvgIcon-root': { fontSize: 24 } }}>
+        <div aria-hidden="true" className="omni-mi-deco">
           {startDecorator}
-        </Box>
+        </div>
       )}
       {/* Figma's Menu Slot: the label with Sizing-Half either side. */}
-      <Box className="menu-item-slot" sx={{ flex: 1, minWidth: 0, display: 'flex', padding: '0 var(--Sizing-Half, 4px)' }}>
+      <div className="menu-item-slot omni-mi-slot">
         <TextComp color="standard">{children}</TextComp>
-      </Box>
-    </Box>
+      </div>
+    </Part>
   );
 }
 
 /* ─── MenuDivider ─── */
-export function MenuDivider({ className = '', sx = {}, ...props }) {
+export function MenuDivider({ className = '', sx, ...props }) {
+  useStaticStyles('omni-menu');
   return (
-    <Box component="hr" role="separator" className={'menu-divider ' + className}
-      sx={{ border: 'none', borderTop: '1px solid var(--Border-Variant)', margin: 0, ...sx }} {...props} />
+    <Part component="hr" role="separator" className={'menu-divider omni-menu-hr ' + className} sx={sx} {...props} />
   );
 }
 

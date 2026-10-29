@@ -1,7 +1,8 @@
 // src/components/Popover/Popover.js
 import React, { useRef, useEffect, useLayoutEffect, useState, useCallback } from 'react';
 import ReactDOM from 'react-dom';
-import { Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 /* Level from the Figma effect style that NAMES this component.
    The five Effect-Levels are the five Figma effect styles, Elevations/Level-1 … Level-5:
      1  Elevations/Level-1 (Card, Accordion, Handle, Alert, Bottom-Sheet)
@@ -62,6 +63,32 @@ const ARROW_BOX = 10;
 const ARROW_INSET = 12 + ARROW_BOX * Math.SQRT1_2;
 const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])';
 
+const SxBox = lazySxBox('Popover');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+/* MUI's sizing rule, as the sx it replaces read a number: a fraction up to 1
+   is a percentage, anything else pixels. */
+const sizeValue = (v) => (typeof v === 'number' ? (v > 0 && v <= 1 ? v * 100 + '%' : v + 'px') : v);
+
+/* ─── Static sheet ───
+   Per-instance values (the measured position, the width, the arrow's x, the
+   body's max height) arrive as custom properties, so a caller's sx still
+   overrides any of them as it did. */
+registerStaticStyles('omni-popover', [
+  '.omni-pop{position:fixed;top:var(--_pop-top);left:var(--_pop-left);visibility:var(--_pop-vis);z-index:2000000000;'
+    + 'width:var(--_pop-w);box-sizing:border-box;background-color:var(--Background);color:var(--Text);border:1px solid var(--Border);'
+    + `border-radius:${RADIUS};box-shadow:${SHADOW_LEVEL_2};outline:none}`,
+  '.omni-pop-inplace{position:relative;top:auto;left:auto;z-index:auto}',
+  /* arrowX is measured from the panel's outer edge; the arrow sits in its
+     padding box, 1px in. */
+  `.omni-pop > .popover-arrow{position:absolute;width:${ARROW_BOX}px;height:${ARROW_BOX}px;box-sizing:border-box;left:var(--_pop-ax);`
+    + 'background-color:var(--Background);border:1px solid var(--Border);transform:rotate(45deg);pointer-events:none}',
+  `.omni-pop[data-side="bottom"] > .popover-arrow{top:${-ARROW_BOX / 2}px;border-right:none;border-bottom:none}`,
+  `.omni-pop[data-side="top"] > .popover-arrow{bottom:${-ARROW_BOX / 2}px;border-left:none;border-top:none}`,
+  /* The scroll lives on an inner box, so the arrow can sit outside the frame
+     without being clipped by the overflow. */
+  '.omni-pop-body{max-height:var(--_pop-mh);overflow-y:auto;border-radius:inherit}',
+].join('\n'));
+
 export function Popover({
   open = false,
   onClose,
@@ -75,7 +102,7 @@ export function Popover({
   maxHeight = 400,
   children,
   className = '',
-  sx = {},
+  sx,
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledby,
   role = 'dialog',
@@ -85,7 +112,23 @@ export function Popover({
   onMouseLeave,
   disablePortal = false,
 }) {
+  useStaticStyles('omni-popover');
   const popoverRef = useRef(null);
+  /* With sx the panel is an MUI box that loads on demand and REPLACES the
+     plain one — remounting what was focused inside it. Once focus has moved
+     in, a new panel takes it again, so it ends where it always did. */
+  const focusedIn = useRef(false);
+  const placeRef = useRef(null);
+  const lastNode = useRef(null);
+  const setPopoverRef = useCallback((node) => {
+    popoverRef.current = node;
+    if (!node) return;
+    const replaced = lastNode.current !== null && lastNode.current !== node && !lastNode.current.isConnected;
+    lastNode.current = node;
+    // A replacement may be a different size (its sx arrived): measure again.
+    if (replaced && placeRef.current) placeRef.current();
+    if (focusedIn.current && !node.contains(document.activeElement)) (node.querySelector(FOCUSABLE) || node).focus({ preventScroll: true });
+  }, []);
   const wasOpen = useRef(false);
   const [pos, setPos] = useState(null);
   const getAnchor = useCallback(() => anchorEl || anchorRef?.current || null, [anchorEl, anchorRef]);
@@ -121,6 +164,7 @@ export function Popover({
     setPos({ top, left, side, arrowX });
   }, [getAnchor, placement, arrow, disablePortal]);
 
+  placeRef.current = place;
   useLayoutEffect(() => {
     if (!open) { setPos(null); return undefined; }
     place();
@@ -141,9 +185,11 @@ export function Popover({
         const p = popoverRef.current;
         if (!p) return;
         (p.querySelector(FOCUSABLE) || p).focus({ preventScroll: true });
+        focusedIn.current = true;
       }, 0);
       return () => clearTimeout(t);
     }
+    focusedIn.current = false;
     if (wasOpen.current) {
       wasOpen.current = false;
       const a = getAnchor();
@@ -182,57 +228,38 @@ export function Popover({
 
   if (!open) return null;
 
-  const panel = (
-    <Box
-      ref={popoverRef}
-      role={role}
-      id={id}
-      aria-label={ariaLabel}
-      aria-labelledby={ariaLabelledby}
-      tabIndex={role === 'tooltip' ? undefined : -1}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-      onKeyDown={onKeyDown}
-      data-theme={theme || undefined}
-      data-surface={surface}
-      data-side={pos?.side}
-      className={'popover' + (className ? ' ' + className : '')}
-      sx={{
-        position: disablePortal ? 'relative' : 'fixed',
-        ...(disablePortal ? {} : { top: pos ? pos.top : -9999, left: pos ? pos.left : -9999 }),
-        visibility: pos ? 'visible' : 'hidden',
-        zIndex: disablePortal ? 'auto' : 2000000000,
-        width,
-        boxSizing: 'border-box',
-        backgroundColor: 'var(--Background)',
-        color: 'var(--Text)',
-        border: '1px solid var(--Border)',
-        borderRadius: RADIUS,
-        boxShadow: SHADOW_LEVEL_2,  // the Menus / Tooltip step
-        outline: 'none',
-        '& > .popover-arrow': {
-          position: 'absolute', width: ARROW_BOX, height: ARROW_BOX, boxSizing: 'border-box',
-          // arrowX is measured from the panel's outer edge; the arrow sits in
-          // its padding box, 1px in.
-          left: (pos?.arrowX ?? 0) - 1 - ARROW_BOX / 2,
-          backgroundColor: 'var(--Background)',
-          border: '1px solid var(--Border)',
-          transform: 'rotate(45deg)',
-          pointerEvents: 'none',
-        },
-        '&[data-side="bottom"] > .popover-arrow': { top: -ARROW_BOX / 2, borderRight: 'none', borderBottom: 'none' },
-        '&[data-side="top"] > .popover-arrow': { bottom: -ARROW_BOX / 2, borderLeft: 'none', borderTop: 'none' },
-        ...sx,
-      }}
-    >
+  const panelProps = {
+    ref: setPopoverRef,
+    role,
+    id,
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledby,
+    tabIndex: role === 'tooltip' ? undefined : -1,
+    onMouseEnter,
+    onMouseLeave,
+    onKeyDown,
+    'data-theme': theme || undefined,
+    'data-surface': surface,
+    'data-side': pos?.side,
+    className: 'popover omni-pop' + (disablePortal ? ' omni-pop-inplace' : '') + (className ? ' ' + className : ''),
+    style: {
+      ...(disablePortal ? {} : { '--_pop-top': (pos ? pos.top : -9999) + 'px', '--_pop-left': (pos ? pos.left : -9999) + 'px' }),
+      '--_pop-vis': pos ? 'visible' : 'hidden',
+      '--_pop-w': sizeValue(width),
+      '--_pop-ax': ((pos?.arrowX ?? 0) - 1 - ARROW_BOX / 2) + 'px',
+    },
+  };
+  const content = (
+    <>
       {arrow && <span className="popover-arrow" aria-hidden="true" />}
-      {/* The scroll lives on an inner box, so the arrow can sit outside the
-          frame without being clipped by the overflow. */}
-      <Box className="popover-body" sx={{ maxHeight, overflowY: 'auto', borderRadius: 'inherit' }}>
+      <div className="popover-body omni-pop-body" style={{ '--_pop-mh': sizeValue(maxHeight) }}>
         {children}
-      </Box>
-    </Box>
+      </div>
+    </>
   );
+  const panel = hasSx(sx)
+    ? <SxBox sx={sx} {...panelProps}>{content}</SxBox>
+    : <div {...panelProps}>{content}</div>;
   return disablePortal ? panel : ReactDOM.createPortal(panel, document.body);
 }
 
