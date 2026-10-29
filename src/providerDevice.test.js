@@ -17,27 +17,33 @@ afterEach(() => {
   delete window.matchMedia;
 });
 
-test('a phone-width screen gets the phone ramp', () => {
+test('off by default: a web page keeps the desktop ramp at any width', () => {
   mockWidth(390);
   render(<OmniDesignProvider><span /></OmniDesignProvider>);
+  expect(root.hasAttribute('data-device')).toBe(false);
+});
+
+test('device="auto": a phone-width screen gets the phone ramp', () => {
+  mockWidth(390);
+  render(<OmniDesignProvider device="auto"><span /></OmniDesignProvider>);
   expect(root.getAttribute('data-device')).toBe('IOS-Mobile');
   expect(root.getAttribute('data-platform')).toBe('IOS-Mobile');
 });
 
 test('a tablet-width screen gets the tablet ramp; desktop gets none', () => {
   mockWidth(800);
-  const { unmount } = render(<OmniDesignProvider><span /></OmniDesignProvider>);
+  const { unmount } = render(<OmniDesignProvider device="auto"><span /></OmniDesignProvider>);
   expect(root.getAttribute('data-device')).toBe('IOS-Tablet');
   unmount();
   mockWidth(1440);
-  render(<OmniDesignProvider><span /></OmniDesignProvider>);
+  render(<OmniDesignProvider device="auto"><span /></OmniDesignProvider>);
   expect(root.hasAttribute('data-device')).toBe(false);
 });
 
 test('an app that sets data-device keeps control', () => {
   root.setAttribute('data-device', 'Desktop');
   mockWidth(390);
-  render(<OmniDesignProvider><span /></OmniDesignProvider>);
+  render(<OmniDesignProvider device="auto"><span /></OmniDesignProvider>);
   expect(root.getAttribute('data-device')).toBe('Desktop');
 });
 

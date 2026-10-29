@@ -337,6 +337,9 @@ async function fetchThemeManifest(themeURL) {
  * @param {boolean}  props.darkMode
  * @param {function} props.onDarkModeChange
  *
+ * Device type ramp (off by default — the ramps describe native apps):
+ * @param {false|'auto'|'IOS-Mobile'|'IOS-Tablet'|'Android-Mobile'|'Android-Tablet'|'Desktop'} [props.device]
+ *
  * DOM:
  * @param {string}   props.className
  * @param {object}   props.style
@@ -381,14 +384,16 @@ export function OmniDesignProvider({
   darkMode: controlledDarkMode,
   onDarkModeChange,
 
-  /* Which type ramp the page uses. 'auto' (default) follows the screen:
-     below 600px a phone ramp, 600–899 a tablet ramp, 900+ desktop — the
-     Adaptive Nav breakpoints. Without it a phone got desktop type (a 72px
-     display headline at 390px wide) unless the app set data-device itself.
-     A device name pins it; false leaves data-device alone. Only ever applied
-     when nothing else has set data-device on <html> — an app that manages it
-     (the studio pins Desktop; the gallery has a picker) keeps control. */
-  device = 'auto',
+  /* Which device type ramp the page uses. OFF by default (false).
+     'auto' follows the screen — below 600px a phone ramp, 600–899 a tablet
+     ramp — and a device name pins one. It was the default in 0.25.0 and was
+     withdrawn in 0.25.1: the device ramps describe NATIVE apps (platform
+     faces, their weights — SF Pro's 600 is not a brand face's 600), so a web
+     page at phone width got semibold body copy, and with a design system
+     that predates the --Platform-Font-Families-* hooks, no body font at all.
+     A web phone is not an iOS app. Only ever applied when nothing else has
+     set data-device on <html>. */
+  device = false,
 
   // DOM
   className,
