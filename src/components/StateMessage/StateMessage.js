@@ -1,11 +1,16 @@
 // src/components/StateMessage/StateMessage.js
 import React, { useId } from 'react';
-import { Box } from '@mui/material';
 import InboxOutlinedIcon from '@omni-design/icons/InboxOutlined';
 import SearchOffOutlinedIcon from '@omni-design/icons/SearchOffOutlined';
 import ErrorOutlineOutlinedIcon from '@omni-design/icons/ErrorOutlineOutlined';
 import { Icon } from '../Icon/Icon';
 import { Subtitle, Body, BodySmall } from '../Typography';
+import { useStaticStyles } from '../_staticStyles';
+import { registerBoxStyles } from '../_webkitBox';
+import { lazySxBox } from '../_lazyFallback';
+
+const SxBox = lazySxBox('StateMessage');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
 
 /**
  * StateMessage — what a region shows instead of data.
@@ -68,6 +73,19 @@ const SIZE_MAP = {
   large:  { icon: 'large',  pad: '80px 24px', gap: '16px', maxWidth: '44ch' },
 };
 
+/* The static sheet: one rule for the region, one per size (gap, padding and
+   the body's measure, from SIZE_MAP). The body's cap is two classes — it sits
+   on a Typography element, whose own rules are one class each. */
+registerBoxStyles('omni-state-message', [
+  /* The region must not collapse. An empty table that shrinks to its header
+     makes the page jump on every filter change. */
+  '.omni-sm{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;'
+    + 'width:100%;box-sizing:border-box}',
+  ...Object.entries(SIZE_MAP).map(([k, v]) => `.omni-sm-${k}{gap:${v.gap};padding:${v.pad}}`),
+  ...Object.entries(SIZE_MAP).map(([k, v]) => `.omni-sm-${k}>.omni-sm-body{max-width:${v.maxWidth}}`),
+  '.omni-sm-action{margin-top:4px}',
+].join('\n'));
+
 /**
  * @param {'empty'|'no-results'|'error'} type
  * @param {ReactNode} icon    overrides the type's default
@@ -85,11 +103,13 @@ export function StateMessage({
   action,
   size = 'medium',
   className = '',
-  sx = {},
+  sx,
   ...props
 }) {
+  useStaticStyles('omni-state-message');
   const t = TYPES[type] || TYPES.empty;
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
+  const sizeKey = SIZE_MAP[size] ? size : 'medium';
   const BodyComp = size === 'small' ? BodySmall : Body;
 
   /* The region is NAMED by its own headline. Without this it is an unlabelled
@@ -109,32 +129,20 @@ export function StateMessage({
     );
   }
 
-  return (
-    <Box
-      className={'state-message state-message-' + type + ' state-message-' + size + ' ' + className}
-      /* An error is a change the user did not ask for, so it interrupts.
-         `empty` and `no-results` are the ordinary outcome of an ordinary
-         query — announcing those assertively talks over whatever the user was
-         reading, so they are a plain labelled group instead. */
-      role={t.role || 'group'}
-      aria-labelledby={titleId}
-      aria-describedby={bodyId}
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center',
-        gap: s.gap,
-        padding: s.pad,
-        /* The region must not collapse. An empty table that shrinks to its
-           header makes the page jump on every filter change. */
-        width: '100%',
-        boxSizing: 'border-box',
-        ...sx,
-      }}
-      {...props}
-    >
+  const root = {
+    className: 'state-message state-message-' + type + ' state-message-' + size + ' ' + className
+      + ' MuiBox-root omni-sm omni-sm-' + sizeKey,
+    /* An error is a change the user did not ask for, so it interrupts.
+       `empty` and `no-results` are the ordinary outcome of an ordinary
+       query — announcing those assertively talks over whatever the user was
+       reading, so they are a plain labelled group instead. */
+    role: t.role || 'group',
+    'aria-labelledby': titleId,
+    'aria-describedby': bodyId,
+    ...props,
+  };
+  const content = (
+    <>
       {/* Decorative. The headline already says what this is, so naming the
           glyph too would announce the region twice — the same rule as an
           icon inside a labelled Button. <Icon> is aria-hidden unless given an
@@ -150,14 +158,16 @@ export function StateMessage({
         /* Capped so the sentence does not sprawl across a wide table. Set on
            the text, not the container, so the icon and action stay centred on
            the region rather than on the paragraph. */
-        <BodyComp id={bodyId} color="quiet" sx={{ maxWidth: s.maxWidth }}>
+        <BodyComp id={bodyId} color="quiet" className="MuiBox-root omni-sm-body">
           {body}
         </BodyComp>
       )}
 
-      {action && <Box sx={{ marginTop: '4px' }}>{action}</Box>}
-    </Box>
+      {action && <div className="MuiBox-root omni-sm-action">{action}</div>}
+    </>
   );
+  if (hasSx(sx)) return <SxBox sx={sx} {...root}>{content}</SxBox>;
+  return <div {...root}>{content}</div>;
 }
 
 export default StateMessage;

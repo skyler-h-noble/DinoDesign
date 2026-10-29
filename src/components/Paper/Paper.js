@@ -1,6 +1,89 @@
 // src/components/Paper/Paper.js
-import React, { useMemo } from 'react';
-import { Paper as MuiPaper, Box } from '@mui/material';
+import React from 'react';
+import { useStaticStyles } from '../_staticStyles';
+import { registerBoxStyles } from '../_webkitBox';
+import { lazySxBox } from '../_lazyFallback';
+
+const SxBox = lazySxBox('Paper');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+/* ── The MUI Paper this was, as static CSS ─────────────────────────────────
+   Every component here was an MUI Paper styled by sx. The Paper's own rules
+   (from MUI's default theme — the library installs no MUI theme, so these are
+   the values it always rendered with) come first, then each wrapper's sx as
+   classes after them, so the later rule wins exactly as the sx did inside the
+   one emotion rule. The MuiPaper-* class names are kept for consumers.
+
+   The elevation is MUI's: the variant draws box-shadow: var(--Paper-shadow)
+   and the element carries --Paper-shadow inline, from MUI's default 25-step
+   shadow table (copied below). An elevation outside the table leaves the
+   variable undefined and draws no shadow, as MUI did. */
+const umbra = 'rgba(0,0,0,0.2)';
+const penumbra = 'rgba(0,0,0,0.14)';
+const ambient = 'rgba(0,0,0,0.12)';
+const mk = (...px) => `${px[0]}px ${px[1]}px ${px[2]}px ${px[3]}px ${umbra},${px[4]}px ${px[5]}px ${px[6]}px ${px[7]}px ${penumbra},${px[8]}px ${px[9]}px ${px[10]}px ${px[11]}px ${ambient}`;
+const MUI_SHADOWS = ['none', mk(0, 2, 1, -1, 0, 1, 1, 0, 0, 1, 3, 0), mk(0, 3, 1, -2, 0, 2, 2, 0, 0, 1, 5, 0), mk(0, 3, 3, -2, 0, 3, 4, 0, 0, 1, 8, 0), mk(0, 2, 4, -1, 0, 4, 5, 0, 0, 1, 10, 0), mk(0, 3, 5, -1, 0, 5, 8, 0, 0, 1, 14, 0), mk(0, 3, 5, -1, 0, 6, 10, 0, 0, 1, 18, 0), mk(0, 4, 5, -2, 0, 7, 10, 1, 0, 2, 16, 1), mk(0, 5, 5, -3, 0, 8, 10, 1, 0, 3, 14, 2), mk(0, 5, 6, -3, 0, 9, 12, 1, 0, 3, 16, 2), mk(0, 6, 6, -3, 0, 10, 14, 1, 0, 4, 18, 3), mk(0, 6, 7, -4, 0, 11, 15, 1, 0, 4, 20, 3), mk(0, 7, 8, -4, 0, 12, 17, 2, 0, 5, 22, 4), mk(0, 7, 8, -4, 0, 13, 19, 2, 0, 5, 24, 4), mk(0, 7, 9, -4, 0, 14, 21, 2, 0, 5, 26, 4), mk(0, 8, 9, -5, 0, 15, 22, 2, 0, 6, 28, 5), mk(0, 8, 10, -5, 0, 16, 24, 2, 0, 6, 30, 5), mk(0, 8, 11, -5, 0, 17, 26, 2, 0, 6, 32, 5), mk(0, 9, 11, -5, 0, 18, 28, 2, 0, 7, 34, 6), mk(0, 9, 12, -6, 0, 19, 29, 2, 0, 7, 36, 6), mk(0, 10, 13, -6, 0, 20, 31, 3, 0, 8, 38, 7), mk(0, 10, 13, -6, 0, 21, 33, 3, 0, 8, 40, 7), mk(0, 10, 14, -6, 0, 22, 35, 3, 0, 8, 42, 7), mk(0, 11, 14, -7, 0, 23, 36, 3, 0, 9, 44, 8), mk(0, 11, 15, -7, 0, 24, 38, 3, 0, 9, 46, 8)];
+
+const CARD_PADDING = { none: 0, small: 1, medium: 2, large: 3 };
+
+registerBoxStyles('omni-paper', [
+  // MUI Paper.
+  '.omni-paper{background-color:#fff;color:rgba(0, 0, 0, 0.87);transition:box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms}',
+  '.omni-paper-rounded{border-radius:4px}',
+  '.omni-paper-outlined{border:1px solid rgba(0, 0, 0, 0.12)}',
+  '.omni-paper-elevation{box-shadow:var(--Paper-shadow);background-image:var(--Paper-overlay)}',
+  // The wrappers' sx.
+  '.omni-paper-lib{padding:16px;border-radius:8px}',
+  ...Object.entries(CARD_PADDING).map(([k, v]) => `.omni-paper-p-${k}{padding:${v * 8}px}`),
+  '.omni-paper-nopad{padding:0}',
+  '.omni-paper-fade{transition:all 0.2s ease-in-out}',
+  '.omni-paper-edge{border:1px solid var(--Border)}',
+  '.omni-paper-i{cursor:default}',
+  '.omni-paper-click{cursor:pointer}',
+  /* `hoverable` already swaps the surface and elevation, but that is a
+     separate opt-in: a Paper given only an onClick got cursor:pointer and no
+     feedback whatsoever, and no keyboard route in either. */
+  '.omni-paper-off{opacity:var(--Disabled, 0.38);cursor:not-allowed;pointer-events:none}',
+  '.omni-paper-on:hover{background-color:var(--Hover)}',
+  '.omni-paper-on:active{background-color:var(--Pressed)}',
+  '.omni-paper-on:focus-visible{outline:2px solid var(--Focus-Visible);outline-offset:2px}',
+  '.omni-paper-float{position:relative;z-index:var(--_pp-z)}',
+  '@media (max-width: 600px){.omni-paper-resp[data-surface]{--elevation:var(--_pp-m)}}',
+  '@media (min-width: 601px) and (max-width: 1024px){.omni-paper-resp[data-surface]{--elevation:var(--_pp-t)}}',
+  '.omni-paper-tier{flex:1 1 200px;min-height:100px;display:flex;align-items:center;justify-content:center;text-align:center}',
+  '.omni-paper-tiers{display:flex;gap:16px;flex-wrap:wrap}',
+  '.omni-paper-tier-note{font-size:0.75rem;color:var(--Text-Secondary)}',
+].join('\n'));
+
+/* The MUI Paper's markup, classes and rules, plus the wrapper's own classes
+   (`lib`). A caller's sx renders through the lazily loaded MUI Box, whose
+   emotion rule comes after this sheet and wins, as sx did. */
+function PaperBase({
+  component: Tag = 'div',
+  elevation = 1,
+  square = false,
+  variant = 'elevation',
+  className,
+  sx,
+  style,
+  lib = '',
+  children,
+  ...other
+}) {
+  useStaticStyles('omni-paper');
+  const isElevation = variant === 'elevation';
+  const root = {
+    className: 'MuiPaper-root MuiPaper-' + variant + (square ? '' : ' MuiPaper-rounded')
+      + (isElevation ? ' MuiPaper-elevation' + elevation : '') + (className ? ' ' + className : '')
+      + ' omni-paper' + (square ? '' : ' omni-paper-rounded')
+      + (variant === 'outlined' ? ' omni-paper-outlined' : '') + (isElevation ? ' omni-paper-elevation' : '')
+      + (lib ? ' ' + lib : ''),
+    style: isElevation ? { '--Paper-shadow': MUI_SHADOWS[elevation], ...style } : style,
+    ...other,
+  };
+  if (hasSx(sx)) return <SxBox component={Tag} sx={sx} {...root}>{children}</SxBox>;
+  return <Tag {...root}>{children}</Tag>;
+}
 
 /**
  * usePaperSurface Hook
@@ -56,7 +139,7 @@ export function Paper({
   surface = 'Container',
   outlined = false,
   variant = outlined ? 'outlined' : 'elevation',
-  sx = {},
+  sx,
   ...props
 }) {
   const { dataSurface, elevation } = usePaperSurface(surface);
@@ -72,20 +155,16 @@ export function Paper({
   const isOutlined = variant === 'outlined' || outlined;
 
   return (
-    <MuiPaper
+    <PaperBase
       variant={variant}
       elevation={isOutlined ? 0 : elevation}
       data-surface={dataSurface}
-      sx={{
-        padding: 2,
-        borderRadius: '8px',
-        transition: 'all 0.2s ease-in-out',
-        ...sx,
-      }}
+      lib="omni-paper-lib omni-paper-fade"
+      sx={sx}
       {...props}
     >
       {children}
-    </MuiPaper>
+    </PaperBase>
   );
 }
 
@@ -105,25 +184,25 @@ export function InteractivePaper({
   onClick,
   disabled = false,
   hoverable = true,
-  sx = {},
+  sx,
   ...props
 }) {
   const { dataSurface, elevation } = usePaperSurface(surface);
   const [isHovered, setIsHovered] = React.useState(false);
 
   // Determine elevation on hover
-  const hoverSurface = surface === 'Container-Lowest' ? 'Container-Low' : 
+  const hoverSurface = surface === 'Container-Lowest' ? 'Container-Low' :
                         surface === 'Container-Low' ? 'Container' :
                         surface === 'Container' ? 'Container-High' :
                         surface === 'Container-High' ? 'Container-Highest' :
                         'Container-Highest';
-  
+
   const { elevation: hoverElevation } = usePaperSurface(
     hoverable && isHovered ? hoverSurface : surface
   );
 
   return (
-    <MuiPaper
+    <PaperBase
       data-surface={hoverable && isHovered ? hoverSurface : dataSurface}
       elevation={hoverable && isHovered ? hoverElevation : elevation}
       onMouseEnter={() => setIsHovered(true)}
@@ -135,33 +214,13 @@ export function InteractivePaper({
       onKeyDown={onClick && !disabled ? (e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(e); }
       } : undefined}
-      sx={{
-        padding: 2,
-        borderRadius: '8px',
-        cursor: onClick ? 'pointer' : 'default',
-        transition: 'all 0.2s ease-in-out',
-        /* `hoverable` already swaps the surface and elevation, but that is a
-           separate opt-in: a Paper given only an onClick got cursor:pointer
-           and no feedback whatsoever, and no keyboard route in either. */
-        ...(disabled && {
-          opacity: 'var(--Disabled, 0.38)',
-          cursor: 'not-allowed',
-          pointerEvents: 'none',
-        }),
-        ...(onClick && !disabled && {
-          '&:hover': { backgroundColor: 'var(--Hover)' },
-          '&:active': { backgroundColor: 'var(--Pressed)' },
-          '&:focus-visible': {
-            outline: '2px solid var(--Focus-Visible)',
-            outlineOffset: '2px',
-          },
-        }),
-        ...sx,
-      }}
+      lib={'omni-paper-lib omni-paper-i' + (onClick ? ' omni-paper-click' : '') + ' omni-paper-fade'
+        + (disabled ? ' omni-paper-off' : '') + (onClick && !disabled ? ' omni-paper-on' : '')}
+      sx={sx}
       {...props}
     >
       {children}
-    </MuiPaper>
+    </PaperBase>
   );
 }
 
@@ -176,25 +235,15 @@ export function InteractivePaper({
 export function ElevatedPaper({
   children,
   surface = 'Container',
-  sx = {},
+  sx,
   ...props
 }) {
   const { dataSurface, elevation } = usePaperSurface(surface);
 
   return (
-    <MuiPaper
-      variant="elevation"
-      elevation={elevation}
-      data-surface={dataSurface}
-      sx={{
-        padding: 2,
-        borderRadius: '8px',
-        ...sx,
-      }}
-      {...props}
-    >
+    <PaperBase variant="elevation" elevation={elevation} data-surface={dataSurface} lib="omni-paper-lib" sx={sx} {...props}>
       {children}
-    </MuiPaper>
+    </PaperBase>
   );
 }
 
@@ -209,25 +258,15 @@ export function ElevatedPaper({
 export function OutlinedPaper({
   children,
   surface = 'Container-Lowest',
-  sx = {},
+  sx,
   ...props
 }) {
   const { dataSurface } = usePaperSurface(surface);
 
   return (
-    <MuiPaper
-      variant="outlined"
-      data-surface={dataSurface}
-      sx={{
-        padding: 2,
-        borderRadius: '8px',
-        border: '1px solid var(--Border)',
-        ...sx,
-      }}
-      {...props}
-    >
+    <PaperBase variant="outlined" data-surface={dataSurface} lib="omni-paper-lib omni-paper-edge" sx={sx} {...props}>
       {children}
-    </MuiPaper>
+    </PaperBase>
   );
 }
 
@@ -244,32 +283,23 @@ export function CardPaper({
   children,
   surface = 'Container',
   padding = 'medium',
-  sx = {},
+  sx,
   ...props
 }) {
   const { dataSurface, elevation } = usePaperSurface(surface);
-
-  const paddingMap = {
-    none: 0,
-    small: 1,
-    medium: 2,
-    large: 3,
-  };
+  /* An unknown padding left sx's padding undefined: MUI Paper's own (none). */
+  const pad = CARD_PADDING[padding] !== undefined ? ' omni-paper-p-' + padding : '';
 
   return (
-    <MuiPaper
+    <PaperBase
       elevation={elevation}
       data-surface={dataSurface}
-      sx={{
-        padding: paddingMap[padding],
-        borderRadius: '8px',
-        transition: 'all 0.2s ease-in-out',
-        ...sx,
-      }}
+      lib={'omni-paper-lib' + (pad || ' omni-paper-nopad') + ' omni-paper-fade'}
+      sx={sx}
       {...props}
     >
       {children}
-    </MuiPaper>
+    </PaperBase>
   );
 }
 
@@ -286,34 +316,18 @@ export function NestedPaper({
   children,
   outerSurface = 'Container-Low',
   innerSurface = 'Container',
-  sx = {},
+  sx,
   ...props
 }) {
   const outerConfig = usePaperSurface(outerSurface);
   const innerConfig = usePaperSurface(innerSurface);
 
   return (
-    <MuiPaper
-      elevation={outerConfig.elevation}
-      data-surface={outerConfig.dataSurface}
-      sx={{
-        padding: 2,
-        borderRadius: '8px',
-        ...sx,
-      }}
-      {...props}
-    >
-      <MuiPaper
-        elevation={innerConfig.elevation}
-        data-surface={innerConfig.dataSurface}
-        sx={{
-          padding: 2,
-          borderRadius: '8px',
-        }}
-      >
+    <PaperBase elevation={outerConfig.elevation} data-surface={outerConfig.dataSurface} lib="omni-paper-lib" sx={sx} {...props}>
+      <PaperBase elevation={innerConfig.elevation} data-surface={innerConfig.dataSurface} lib="omni-paper-lib">
         {children}
-      </MuiPaper>
-    </MuiPaper>
+      </PaperBase>
+    </PaperBase>
   );
 }
 
@@ -328,42 +342,27 @@ export function NestedPaper({
 export function TieredPaper({
   children,
   label,
-  sx = {},
+  sx,
   ...props
 }) {
+  useStaticStyles('omni-paper');
   const surfaces = ['Container-Lowest', 'Container-Low', 'Container', 'Container-High', 'Container-Highest'];
 
-  return (
-    <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', ...sx }}>
-      {surfaces.map((surface) => {
-        const config = usePaperSurface(surface);
-        return (
-          <MuiPaper
-            key={surface}
-            elevation={config.elevation}
-            data-surface={surface}
-            sx={{
-              flex: '1 1 200px',
-              padding: 2,
-              borderRadius: '8px',
-              minHeight: '100px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              textAlign: 'center',
-            }}
-          >
-            <Box>
-              <strong>{surface}</strong>
-              <Box sx={{ fontSize: '0.75rem', color: 'var(--Text-Secondary)' }}>
-                elevation: {config.elevation}dp
-              </Box>
-            </Box>
-          </MuiPaper>
-        );
-      })}
-    </Box>
-  );
+  const tiers = surfaces.map((surface) => {
+    const config = usePaperSurface(surface);
+    return (
+      <PaperBase key={surface} elevation={config.elevation} data-surface={surface} lib="omni-paper-lib omni-paper-tier">
+        <div className="MuiBox-root">
+          <strong>{surface}</strong>
+          <div className="MuiBox-root omni-paper-tier-note">
+            elevation: {config.elevation}dp
+          </div>
+        </div>
+      </PaperBase>
+    );
+  });
+  if (hasSx(sx)) return <SxBox sx={sx} className="MuiBox-root omni-paper-tiers">{tiers}</SxBox>;
+  return <div className="MuiBox-root omni-paper-tiers">{tiers}</div>;
 }
 
 /**
@@ -381,43 +380,27 @@ export function ResponsivePaper({
   mobileSurface = 'Container-Low',
   tabletSurface = 'Container',
   desktopSurface = 'Container-High',
-  sx = {},
+  sx,
+  style,
   ...props
 }) {
   const mobileConfig = usePaperSurface(mobileSurface);
   const tabletConfig = usePaperSurface(tabletSurface);
   const desktopConfig = usePaperSurface(desktopSurface);
 
+  /* --elevation follows the breakpoint (the media rules in the sheet read
+     these two). */
   return (
-    <MuiPaper
+    <PaperBase
       data-surface={desktopSurface}
       elevation={desktopConfig.elevation}
-      sx={{
-        padding: 2,
-        borderRadius: '8px',
-        transition: 'all 0.2s ease-in-out',
-        '&[data-surface]': {
-          // Mobile
-          '@media (max-width: 600px)': {
-            elevation: mobileConfig.elevation,
-            '&': {
-              '--elevation': mobileConfig.elevation,
-            },
-          },
-          // Tablet
-          '@media (min-width: 601px) and (max-width: 1024px)': {
-            elevation: tabletConfig.elevation,
-            '&': {
-              '--elevation': tabletConfig.elevation,
-            },
-          },
-        },
-        ...sx,
-      }}
+      lib="omni-paper-lib omni-paper-fade omni-paper-resp"
+      style={{ '--_pp-m': mobileConfig.elevation, '--_pp-t': tabletConfig.elevation, ...style }}
+      sx={sx}
       {...props}
     >
       {children}
-    </MuiPaper>
+    </PaperBase>
   );
 }
 
@@ -430,26 +413,23 @@ export function ResponsivePaper({
  */
 export function FloatingPaper({
   children,
-  sx = {},
+  sx,
+  style,
   ...props
 }) {
   const config = usePaperSurface('Container-Highest');
 
   return (
-    <MuiPaper
+    <PaperBase
       elevation={config.elevation}
       data-surface="Container-Highest"
-      sx={{
-        padding: 2,
-        borderRadius: '8px',
-        position: 'relative',
-        zIndex: config.zIndex,
-        ...sx,
-      }}
+      lib="omni-paper-lib omni-paper-float"
+      style={{ '--_pp-z': config.zIndex, ...style }}
+      sx={sx}
       {...props}
     >
       {children}
-    </MuiPaper>
+    </PaperBase>
   );
 }
 

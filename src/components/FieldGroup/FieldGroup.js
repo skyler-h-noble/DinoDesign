@@ -26,9 +26,24 @@
 // lives here; the other half is in FormField, where a lone control owns its
 // own error.
 import React from 'react';
-import { Box } from '@mui/material';
 import { FormLabel } from '../FormLabel';
 import { FormHelper, useFormHelperIds } from '../FormHelper';
+import { useStaticStyles } from '../_staticStyles';
+import { registerBoxStyles } from '../_webkitBox';
+import { lazySxBox } from '../_lazyFallback';
+
+const SxBox = lazySxBox('FieldGroup');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+registerBoxStyles('omni-field-group', [
+  /* A fieldset arrives with a border, margin and padding of its own, and a
+     legend with layout rules that predate flexbox. Reset them here so the
+     markup can be correct without the appearance being inherited. */
+  '.omni-fg{border:0px solid;margin:0;padding:0;min-inline-size:0;display:flex;flex-direction:column;gap:var(--Sizing-Half)}',
+  /* Figma's Form Slot: the options, at Sizing-1. */
+  '.omni-fg-options{display:flex;flex-direction:column;flex-wrap:nowrap;align-items:flex-start;gap:var(--Sizing-1)}',
+  '.omni-fg-options-h{flex-direction:row;flex-wrap:wrap;align-items:center}',
+].join('\n'));
 
 export function FieldGroup({
   children,
@@ -49,36 +64,24 @@ export function FieldGroup({
   orientation = 'vertical',
   disabled = false,
   className = '',
-  sx = {},
+  sx,
   ...props
 }) {
+  useStaticStyles('omni-field-group');
   const { helperId, messageId, describedBy } = useFormHelperIds({ showHelper, validation });
   const invalid = validation === 'error';
 
-  return (
-    <Box
-      component="fieldset"
-      disabled={disabled || undefined}
-      className={'field-group field-group-' + orientation + ' ' + className}
-      /* The group is the thing being validated, so the group carries the
-         wiring. See the header. */
-      aria-invalid={invalid || undefined}
-      aria-describedby={describedBy}
-      sx={{
-        /* A fieldset arrives with a border, margin and padding of its own, and
-           a legend with layout rules that predate flexbox. Reset them here so
-           the markup can be correct without the appearance being inherited. */
-        border: 0,
-        margin: 0,
-        padding: 0,
-        minInlineSize: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 'var(--Sizing-Half)',
-        ...sx,
-      }}
-      {...props}
-    >
+  const root = {
+    disabled: disabled || undefined,
+    className: 'field-group field-group-' + orientation + ' ' + className + ' MuiBox-root omni-fg',
+    /* The group is the thing being validated, so the group carries the
+       wiring. See the header. */
+    'aria-invalid': invalid || undefined,
+    'aria-describedby': describedBy,
+    ...props,
+  };
+  const content = (
+    <>
       {label && (
         <FormLabel as="legend" type={type} moreInfo={moreInfo} disabled={disabled}>
           {label}
@@ -95,20 +98,13 @@ export function FieldGroup({
       />
 
       {/* Figma's Form Slot: the options, at Sizing-1. */}
-      <Box
-        className="field-group-options"
-        sx={{
-          display: 'flex',
-          flexDirection: orientation === 'horizontal' ? 'row' : 'column',
-          flexWrap: orientation === 'horizontal' ? 'wrap' : 'nowrap',
-          alignItems: orientation === 'horizontal' ? 'center' : 'flex-start',
-          gap: 'var(--Sizing-1)',
-        }}
-      >
+      <div className={'field-group-options MuiBox-root omni-fg-options' + (orientation === 'horizontal' ? ' omni-fg-options-h' : '')}>
         {children}
-      </Box>
-    </Box>
+      </div>
+    </>
   );
+  if (hasSx(sx)) return <SxBox component="fieldset" sx={sx} {...root}>{content}</SxBox>;
+  return <fieldset {...root}>{content}</fieldset>;
 }
 
 export default FieldGroup;

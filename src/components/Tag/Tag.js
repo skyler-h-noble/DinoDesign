@@ -1,7 +1,12 @@
 // src/components/Tag/Tag.js
 import React from 'react';
-import { Box } from '@mui/material';
 import { Label } from '../Typography/Typography';
+import { useStaticStyles } from '../_staticStyles';
+import { registerBoxStyles } from '../_webkitBox';
+import { lazySxBox } from '../_lazyFallback';
+
+const SxBox = lazySxBox('Tag');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
 
 /**
  * Tag Component
@@ -66,12 +71,26 @@ function warnAllCapsOnce() {
    `shape` overrides it for one tag. Only shapes a hug-width label can keep:
    corners, not cut or pointed ends, which Figma cannot hold while it grows. */
 export const TAG_SHAPES = ['square', 'rounded', 'squircle', 'pill'];
-const TAG_RADIUS = {
-  square: { borderRadius: '2px' },
-  rounded: { borderRadius: '6px' },
-  squircle: { borderRadius: '10px', '@supports (corner-shape: squircle)': { cornerShape: 'squircle' } },
-  pill: { borderRadius: '999px' },
-};
+
+/* The static sheet. Color and shape are classes generated from the tables
+   above, so no per-instance value is inline. Figma's Tag: Sizing-Quarter x
+   Sizing-2 around the label; the corner is the brand's --Tag-Radius (2px when
+   unset), or `shape`. */
+registerBoxStyles('omni-tag', [
+  '.omni-tag{display:inline-flex;align-items:center;justify-content:flex-start;'
+    + 'padding:var(--Sizing-Quarter, 2px) var(--Sizing-2, 16px);border-radius:var(--Tag-Radius, 2px);'
+    + 'background-color:var(--_tag-bg);color:var(--_tag-fg);width:auto;flex-shrink:0;user-select:none}',
+  '.omni-tag-fill{display:flex;justify-content:center;width:100%}',
+  ...Object.values(COLOR_TOKEN_MAP).map((C) => `.omni-tag-c-${C}{--_tag-bg:var(--Tag-${C}-BG);--_tag-fg:var(--Tag-${C}-Text)}`),
+  '.omni-tag-sh-square{border-radius:2px}',
+  '.omni-tag-sh-rounded{border-radius:6px}',
+  '.omni-tag-sh-squircle{border-radius:10px}',
+  '@supports (corner-shape: squircle){.omni-tag-sh-squircle{corner-shape:squircle}}',
+  '.omni-tag-sh-pill{border-radius:999px}',
+  /* Two classes: the label's own Typography rules are one class each, in a
+     sheet inserted after this one. */
+  '.omni-tag>.omni-tag-label{color:inherit;white-space:nowrap;text-transform:uppercase}',
+].join('\n'));
 
 export function Tag({
   color = 'default',
@@ -82,48 +101,24 @@ export function Tag({
   shape,
   children,
   className = '',
-  sx = {},
+  sx,
   ...props
 }) {
+  useStaticStyles('omni-tag');
   if (allCaps === false) warnAllCapsOnce();
   const isFill = width === 'fill';
-  const C    = COLOR_TOKEN_MAP[color] || 'Primary';
-  const bg   = 'var(--Tag-' + C + '-BG)';
-  const text = 'var(--Tag-' + C + '-Text)';
+  const C = COLOR_TOKEN_MAP[color] || 'Primary';
 
-  return (
-    <Box
-      component="span"
-      className={'tag tag-' + color + (className ? ' ' + className : '')}
-      sx={{
-        display:         isFill ? 'flex' : 'inline-flex',
-        alignItems:      'center',
-        justifyContent:  isFill ? 'center' : 'flex-start',
-        // Figma's Tag: Sizing-Quarter x Sizing-2 around the label; the corner is
-        // the brand's --Tag-Radius (2px when unset), or `shape`.
-        padding:         'var(--Sizing-Quarter, 2px) var(--Sizing-2, 16px)',
-        ...(TAG_RADIUS[shape] || { borderRadius: 'var(--Tag-Radius, 2px)' }),
-        backgroundColor: bg,
-        color:           text,
-        width:           isFill ? '100%' : 'auto',
-        flexShrink:      0,
-        userSelect:      'none',
-        ...sx,
-      }}
-      {...props}
-    >
-      <Label
-        component="span"
-        sx={{
-          color:         'inherit',
-          whiteSpace:    'nowrap',
-          textTransform: 'uppercase',
-        }}
-      >
-        {children}
-      </Label>
-    </Box>
-  );
+  const root = {
+    className: 'tag tag-' + color + (className ? ' ' + className : '')
+      + ' MuiBox-root omni-tag omni-tag-c-' + C
+      + (isFill ? ' omni-tag-fill' : '')
+      + (TAG_SHAPES.includes(shape) ? ' omni-tag-sh-' + shape : ''),
+    ...props,
+  };
+  const label = <Label component="span" className="MuiBox-root omni-tag-label">{children}</Label>;
+  if (hasSx(sx)) return <SxBox component="span" sx={sx} {...root}>{label}</SxBox>;
+  return <span {...root}>{label}</span>;
 }
 
 // ─── Convenience exports ──────────────────────────────────────────────────────

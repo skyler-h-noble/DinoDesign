@@ -27,9 +27,25 @@
 // `htmlFor` ties it to the control by id. Floating is the one exception: that
 // label lives inside the field, so Input draws it.
 import React, { useId } from 'react';
-import { Box } from '@mui/material';
 import { FormLabel } from '../FormLabel';
 import { TextArea } from '../TextField/TextField';
+import { useStaticStyles } from '../_staticStyles';
+import { registerBoxStyles } from '../_webkitBox';
+import { lazySxBox } from '../_lazyFallback';
+
+const SxBox = lazySxBox('TextAreaField');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+/* Figma: a vertical stack at Sizing-Half; label-left is a row at Sizing-1
+   with the label held at the top. The label and the area take their share of
+   the row through two-class rules — each sits on a component whose own
+   rules are one class. */
+registerBoxStyles('omni-textarea-field', [
+  '.omni-taf{display:flex;flex-direction:column;align-items:stretch;gap:var(--Sizing-Half)}',
+  '.omni-taf-left{flex-direction:row;align-items:flex-start;gap:var(--Sizing-1)}',
+  '.omni-taf-left>.omni-taf-label{flex-shrink:0}',
+  '.omni-taf-left>.omni-taf-area{flex:1;min-width:0}',
+].join('\n'));
 
 export function TextAreaField({
   label,
@@ -41,30 +57,24 @@ export function TextAreaField({
   id: idProp,
   disabled = false,
   className = '',
-  sx = {},
+  sx,
   ...props
 }) {
+  useStaticStyles('omni-textarea-field');
   const generatedId = useId();
   const id = idProp || generatedId;
 
   const isLeft = labelPosition === 'left';
   const isFloating = labelPosition === 'floating';
   const showLabel = labelPosition !== 'none' && !isFloating;
-  return (
-    <Box
-      className={'textarea-field textarea-field-label-' + labelPosition + (className ? ' ' + className : '')}
-      sx={{
-        display: 'flex',
-        /* Figma: a vertical stack at Sizing-Half; label-left is a row at
-           Sizing-1 with the label held at the top. */
-        flexDirection: isLeft ? 'row' : 'column',
-        alignItems: isLeft ? 'flex-start' : 'stretch',
-        gap: isLeft ? 'var(--Sizing-1)' : 'var(--Sizing-Half)',
-        ...sx,
-      }}
-    >
+  const root = {
+    className: 'textarea-field textarea-field-label-' + labelPosition + (className ? ' ' + className : '')
+      + ' MuiBox-root omni-taf' + (isLeft ? ' omni-taf-left' : ''),
+  };
+  const content = (
+    <>
       {showLabel && (
-        <FormLabel htmlFor={id} type={type} moreInfo={moreInfo} disabled={disabled} sx={isLeft ? { flexShrink: 0 } : undefined}>
+        <FormLabel htmlFor={id} type={type} moreInfo={moreInfo} disabled={disabled} className={isLeft ? 'omni-taf-label' : ''}>
           {label}
         </FormLabel>
       )}
@@ -78,10 +88,12 @@ export function TextAreaField({
         {...(labelPosition === 'none' && typeof label === 'string' ? { 'aria-label': label } : {})}
         {...props}
         {...(isFloating ? { labelPosition: 'floating', label, placeholder: undefined } : {})}
-        sx={{ ...(isLeft ? { flex: 1, minWidth: 0 } : {}), ...(props.sx || {}) }}
+        {...(isLeft ? { className: 'omni-taf-area' } : {})}
       />
-    </Box>
+    </>
   );
+  if (hasSx(sx)) return <SxBox sx={sx} {...root}>{content}</SxBox>;
+  return <div {...root}>{content}</div>;
 }
 
 export default TextAreaField;

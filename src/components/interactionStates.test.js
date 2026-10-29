@@ -135,8 +135,10 @@ const REGISTRY = [
   { control: 'MainLayout nav row',  file: 'MainLayout/MainLayout.js' },
   { control: 'MainLayout menu btn', file: 'MainLayout/MainLayout.js', delegatesTo: 'Button/Button.js', renders: /<IconButton\b/ },
   // Paper itself is a surface with no onClick. InteractivePaper is the
-  // clickable export, and its docblock promises hover and focus.
-  { control: 'InteractivePaper',    file: 'Paper/Paper.js', within: ['export function InteractivePaper', 'export function ElevatedPaper'] },
+  // clickable export, and its docblock promises hover and focus. Its states
+  // are the .omni-paper-on rules in the static sheet at the top of the file,
+  // so the scan runs from the sheet's start, not only over the function.
+  { control: 'InteractivePaper',    file: 'Paper/Paper.js', within: ["registerBoxStyles('omni-paper'", 'export function ElevatedPaper'] },
   // The steppers ARE FieldButtons now (registered below); the field is Input.
   { control: 'NumberField spinner', file: 'NumberField/NumberField.js', delegatesTo: 'NumberField/FieldButton.js', renders: /<FieldButton\b/ },
   { control: 'Field button',        file: 'NumberField/FieldButton.js' },

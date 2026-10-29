@@ -1,7 +1,12 @@
 // src/components/ShapeButton/ShapeButton.js
 import React, { useState } from 'react';
-import { Box } from '@mui/material';
 import { shapePath, shapeStyle, MORPHABLE_SHAPES, AVATAR_SHAPES, MORPH_TARGET_SHAPES } from '../Shape/shapes';
+import { useStaticStyles } from '../_staticStyles';
+import { registerBoxStyles } from '../_webkitBox';
+import { lazySxBox } from '../_lazyFallback';
+
+const SxBox = lazySxBox('ShapeButton');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
 
 /**
  * ShapeButton — a button whose background is one of the system's shapes, and
@@ -56,6 +61,48 @@ const SIZES = {
 };
 
 
+/* The static sheet. Per instance: the palette (four Buttons tokens) and the
+   size (box, icon, label font) as custom properties on the button; the shape
+   layer's mask (an image) on the image layer. Every state rule keeps the
+   weight its sx rule had. */
+registerBoxStyles('omni-shape-button', [
+  '.omni-shbtn{position:relative;display:inline-flex;flex-direction:column;align-items:center;gap:6px;padding:0;border:none;'
+    + 'background:transparent;font:inherit;cursor:pointer;opacity:1;border-radius:50%;outline:none}',
+  '.omni-shbtn-off{cursor:not-allowed;opacity:var(--Disabled, 0.38)}',
+  /* The ring hugs what is there: a circle round an icon button, a rounded
+     box round a shape and its label. */
+  '.omni-shbtn-below{border-radius:var(--Button-Focus-Radius, 8px)}',
+  '.omni-shbtn:focus-visible{outline:2px solid var(--Focus-Visible);outline-offset:2px}',
+  /* Content on the fill reads -Text. */
+  '.omni-shbtn .shape-button-box{color:var(--_shb-text)}',
+  '.omni-shbtn svg.shape-button-shape{position:absolute;inset:0;width:100%;height:100%;overflow:visible}',
+  '.omni-shbtn svg.shape-button-shape path{fill:var(--_shb-fill);stroke:var(--_shb-edge);stroke-width:var(--Button-Border-Width, 1px);vector-effect:non-scaling-stroke}',
+  '@media (prefers-reduced-motion: no-preference){.omni-shbtn svg.shape-button-shape path{transition:d 0.45s cubic-bezier(.3, 1.35, .5, 1), fill 0.15s ease}}',
+  /* Hover and pressed are CSS, like every other button; JS only tracks them
+     for the morph trigger. Over an image the path is only the edge. */
+  '.omni-shbtn svg.shape-button-shape path.shape-button-outline{fill:none}',
+  '.omni-shbtn:hover:not(:disabled) svg.shape-button-shape path.shape-button-fill{fill:var(--_shb-hover)}',
+  '.omni-shbtn:active:not(:disabled) svg.shape-button-shape path.shape-button-fill{fill:var(--_shb-pressed)}',
+  /* An image has no fill to change, so hover and press lay the surface's own
+     scrim over it. */
+  '.omni-shbtn:hover:not(:disabled) .shape-button-scrim{background-color:var(--Hover)}',
+  '.omni-shbtn:active:not(:disabled) .shape-button-scrim{background-color:var(--Pressed)}',
+  '.omni-shbtn .shape-button-icon{position:relative;display:inline-flex}',
+  '.omni-shbtn .shape-button-icon svg{width:var(--_shb-icon);height:var(--_shb-icon);font-size:var(--_shb-icon)}',
+  '.omni-shbtn .shape-button-label{position:relative;font-family:var(--Body-Font-Family, inherit);font-size:var(--_shb-font);'
+    + 'font-weight:600;line-height:1.2;white-space:nowrap}',
+  /* Below the shape it sits on the page, so it is the page's text. */
+  '.omni-shbtn>.shape-button-label{color:var(--Text)}',
+  '.omni-shbtn-box{position:relative;display:inline-grid;place-items:center;flex-shrink:0;width:var(--_shb-box);height:var(--_shb-box)}',
+  '.omni-shbtn-image{position:absolute;inset:0}',
+  '.omni-shbtn-image.omni-shbtn-mask{-webkit-mask:var(--_shb-mask);mask:var(--_shb-mask)}',
+  '.omni-shbtn-image.omni-shbtn-rounded{border-radius:var(--Card-Radius, var(--Style-Border-Radius, 8px))}',
+  '.omni-shbtn-image.omni-shbtn-squircle{border-radius:28%}',
+  '@supports (corner-shape: squircle){.omni-shbtn-image.omni-shbtn-squircle{border-radius:40%;corner-shape:squircle}}',
+  '.omni-shbtn-img{width:100%;height:100%;object-fit:cover;display:block}',
+  '.omni-shbtn-scrim{position:absolute;inset:0}',
+].join('\n'));
+
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const warned = new Set();
 const warnOnce = (key, msg) => {
@@ -83,9 +130,11 @@ export const ShapeButton = React.forwardRef(function ShapeButton({
   disabled = false,
   onClick,
   className = '',
-  sx = {},
+  sx,
+  style,
   ...props
 }, ref) {
+  useStaticStyles('omni-shape-button');
   const [hover, setHover] = useState(false);
   const [press, setPress] = useState(false);
   const pos = label ? 'below' : 'none';
@@ -109,9 +158,6 @@ export const ShapeButton = React.forwardRef(function ShapeButton({
   const current = morphed ? morphTo : shape;
   const s = SIZES[size] || SIZES.medium;
   const C = cap(color);
-  const fill = 'var(--Buttons-' + C + '-Button)';
-  const edge = 'var(--Buttons-' + C + '-Border)';
-  const bw = 'var(--Button-Border-Width, 1px)';
   const outline = (d, filled) => (
     <svg className="shape-button-shape" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
       <path className={filled ? 'shape-button-fill' : 'shape-button-outline'} d={d} style={{ d: 'path("' + d + '")' }} />
@@ -122,12 +168,15 @@ export const ShapeButton = React.forwardRef(function ShapeButton({
      outline drawn over it. */
   let shapeLayer;
   if (imageSrc) {
+    const mask = shapeStyle(current).mask;
+    const radius = current === 'rounded' || current === 'squircle' ? ' omni-shbtn-' + current : '';
     shapeLayer = (
-      <Box className="shape-button-image" aria-hidden={imageAlt ? undefined : true}
-           sx={{ position: 'absolute', inset: 0, ...shapeStyle(current) }}>
-        <Box component="img" src={imageSrc} alt={imageAlt} sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-        <Box className="shape-button-scrim" sx={{ position: 'absolute', inset: 0 }} />
-      </Box>
+      <div className={'shape-button-image MuiBox-root omni-shbtn-image' + (mask ? ' omni-shbtn-mask' : '') + radius}
+           aria-hidden={imageAlt ? undefined : true}
+           style={mask ? { '--_shb-mask': mask } : undefined}>
+        <img className="MuiBox-root omni-shbtn-img" src={imageSrc} alt={imageAlt} />
+        <div className="shape-button-scrim MuiBox-root omni-shbtn-scrim" />
+      </div>
     );
     shapeLayer = <>{shapeLayer}{outline(pathFor(current), false)}</>;
   } else {
@@ -136,91 +185,48 @@ export const ShapeButton = React.forwardRef(function ShapeButton({
 
   const hasIcon = React.Children.count(children) > 0;
   const shapeBox = (
-    <Box className="shape-button-box" sx={{
-      position: 'relative', display: 'inline-grid', placeItems: 'center', flexShrink: 0,
-      width: s.box, height: s.box,
-    }}>
+    <div className="shape-button-box MuiBox-root omni-shbtn-box">
       {shapeLayer}
       {hasIcon && <span className="shape-button-icon" aria-hidden="true">{children}</span>}
-    </Box>
+    </div>
   );
 
-  const ringRadius = pos === 'none' ? '50%' : 'var(--Button-Focus-Radius, 8px)';
-
-  return (
-    <Box
-      ref={ref}
-      component="button"
-      type="button"
-      disabled={disabled}
-      aria-pressed={morphOn === 'selected' && morphTo ? selected : undefined}
-      onClick={onClick}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => { setHover(false); setPress(false); }}
-      onPointerDown={() => setPress(true)}
-      onPointerUp={() => setPress(false)}
-      onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') setPress(true); }}
-      onKeyUp={() => setPress(false)}
-      onBlur={() => setPress(false)}
-      className={'shape-button shape-button-' + size + ' shape-button-label-' + pos + (morphed ? ' shape-button-morphed' : '') + (className ? ' ' + className : '')}
-      sx={{
-        position: 'relative',
-        display: 'inline-flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '6px',
-        p: 0,
-        border: 'none',
-        background: 'transparent',
-        font: 'inherit',
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
-        /* The ring hugs what is there: a circle round an icon button, a
-           rounded box round a shape and its label. */
-        borderRadius: ringRadius,
-        outline: 'none',
-        '&:focus-visible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '2px' },
-        /* Content on the fill reads -Text. */
-        '& .shape-button-box': { color: 'var(--Buttons-' + C + '-Text)' },
-        '& svg.shape-button-shape': { position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible' },
-        '& svg.shape-button-shape path': {
-          fill,
-          stroke: edge,
-          strokeWidth: bw,
-          vectorEffect: 'non-scaling-stroke',
-          '@media (prefers-reduced-motion: no-preference)': {
-            transition: 'd 0.45s cubic-bezier(.3, 1.35, .5, 1), fill 0.15s ease',
-          },
-        },
-        /* Hover and pressed are CSS, like every other button; JS only tracks
-           them for the morph trigger. */
-        /* Over an image the path is only the edge. */
-        '& svg.shape-button-shape path.shape-button-outline': { fill: 'none' },
-        '&:hover:not(:disabled) svg.shape-button-shape path.shape-button-fill': { fill: 'var(--Buttons-' + C + '-Hover)' },
-        '&:active:not(:disabled) svg.shape-button-shape path.shape-button-fill': { fill: 'var(--Buttons-' + C + '-Pressed)' },
-        /* An image has no fill to change, so hover and press lay the surface's
-           own scrim over it. */
-        '&:hover:not(:disabled) .shape-button-scrim': { backgroundColor: 'var(--Hover)' },
-        '&:active:not(:disabled) .shape-button-scrim': { backgroundColor: 'var(--Pressed)' },
-        '& .shape-button-icon': { position: 'relative', display: 'inline-flex', '& svg': { width: s.icon, height: s.icon, fontSize: s.icon } },
-        '& .shape-button-label': {
-          position: 'relative',
-          fontFamily: 'var(--Body-Font-Family, inherit)',
-          fontSize: s.font,
-          fontWeight: 600,
-          lineHeight: 1.2,
-          whiteSpace: 'nowrap',
-        },
-        /* Below the shape it sits on the page, so it is the page's text. */
-        '& > .shape-button-label': { color: 'var(--Text)' },
-        ...sx,
-      }}
-      {...props}
-    >
+  const root = {
+    ref,
+    type: 'button',
+    disabled,
+    'aria-pressed': morphOn === 'selected' && morphTo ? selected : undefined,
+    onClick,
+    onMouseEnter: () => setHover(true),
+    onMouseLeave: () => { setHover(false); setPress(false); },
+    onPointerDown: () => setPress(true),
+    onPointerUp: () => setPress(false),
+    onKeyDown: (e) => { if (e.key === ' ' || e.key === 'Enter') setPress(true); },
+    onKeyUp: () => setPress(false),
+    onBlur: () => setPress(false),
+    className: 'shape-button shape-button-' + size + ' shape-button-label-' + pos + (morphed ? ' shape-button-morphed' : '') + (className ? ' ' + className : '')
+      + ' MuiBox-root omni-shbtn' + (disabled ? ' omni-shbtn-off' : '') + (pos === 'none' ? '' : ' omni-shbtn-below'),
+    style: {
+      '--_shb-fill': 'var(--Buttons-' + C + '-Button)',
+      '--_shb-edge': 'var(--Buttons-' + C + '-Border)',
+      '--_shb-hover': 'var(--Buttons-' + C + '-Hover)',
+      '--_shb-pressed': 'var(--Buttons-' + C + '-Pressed)',
+      '--_shb-text': 'var(--Buttons-' + C + '-Text)',
+      '--_shb-box': s.box + 'px',
+      '--_shb-icon': s.icon + 'px',
+      '--_shb-font': s.font,
+      ...style,
+    },
+    ...props,
+  };
+  const content = (
+    <>
       {shapeBox}
       {pos === 'below' && <span className="shape-button-label shape-button-label-below">{label}</span>}
-    </Box>
+    </>
   );
+  if (hasSx(sx)) return <SxBox component="button" sx={sx} {...root}>{content}</SxBox>;
+  return <button {...root}>{content}</button>;
 });
 
 export default ShapeButton;

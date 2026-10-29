@@ -1,10 +1,15 @@
 // src/components/Quote/Quote.js
 import React from 'react';
-import { Box } from '@mui/material';
 import FormatQuoteIcon from '@omni-design/icons/FormatQuote';
 import { H3, H4, H5, Subtitle, Caption } from '../Typography';
 import { Avatar } from '../Avatar';
 import { Icon } from '../Icon/Icon';
+import { useStaticStyles } from '../_staticStyles';
+import { registerBoxStyles } from '../_webkitBox';
+import { lazySxBox } from '../_lazyFallback';
+
+const SxBox = lazySxBox('Quote');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
 
 /**
  * Quote — a pull quote or a testimonial: the words, who said them, and what
@@ -35,6 +40,17 @@ const WORDS = { small: H5, medium: H4, large: H3 };
 /* As tall as the name and detail beside it. */
 const AVATAR = { small: 'medium', medium: 'large', large: 'xl' };
 
+registerBoxStyles('omni-quote', [
+  '.omni-quote{margin:0;display:flex;flex-direction:column;align-items:flex-start;gap:var(--Sizing-2, 16px);text-align:start;max-width:65ch}',
+  '.omni-quote-center{align-items:center;text-align:center}',
+  // Two classes: the Icon's own rules are one class, in its own sheet.
+  '.omni-quote>.omni-quote-mark{margin-bottom:calc(-1 * var(--Sizing-1, 8px))}',
+  '.omni-quote-words{margin:0}',
+  '.omni-quote-cite{display:flex;align-items:center;gap:var(--Sizing-1, 8px);flex-direction:row}',
+  '.omni-quote-center>.omni-quote-cite{flex-direction:column}',
+  '.omni-quote-who{display:flex;flex-direction:column;min-width:0}',
+].join('\n'));
+
 export function Quote({
   children,
   cite,
@@ -46,51 +62,42 @@ export function Quote({
   mark = true,
   markColor = 'primary',
   className = '',
-  sx = {},
+  sx,
   ...props
 }) {
+  useStaticStyles('omni-quote');
   const Words = WORDS[size] || WORDS.medium;
   const centred = align === 'center';
   const hasPerson = Boolean(avatarSrc || avatarInitials);
 
-  return (
-    <Box
-      component="figure"
-      className={'quote quote-' + size + (className ? ' ' + className : '')}
-      sx={{
-        margin: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: centred ? 'center' : 'flex-start',
-        gap: 'var(--Sizing-2, 16px)',
-        textAlign: centred ? 'center' : 'start',
-        maxWidth: '65ch',
-        ...sx,
-      }}
-      {...props}
-    >
+  const root = {
+    className: 'quote quote-' + size + (className ? ' ' + className : '')
+      + ' MuiBox-root omni-quote' + (centred ? ' omni-quote-center' : ''),
+    ...props,
+  };
+  const content = (
+    <>
       {mark && (
-        <Icon color={markColor} size="large" aria-hidden="true" className="quote-mark"
-              sx={{ marginBottom: 'calc(-1 * var(--Sizing-1, 8px))' }}>
+        <Icon color={markColor} size="large" aria-hidden="true" className="quote-mark MuiBox-root omni-quote-mark">
           <FormatQuoteIcon />
         </Icon>
       )}
-      <Box component="blockquote" className="quote-words" sx={{ margin: 0 }}>
+      <blockquote className="quote-words MuiBox-root omni-quote-words">
         <Words component="p" style={{ margin: 0 }}>{children}</Words>
-      </Box>
+      </blockquote>
       {(cite || detail) && (
-        <Box component="figcaption" className="quote-cite"
-             sx={{ display: 'flex', alignItems: 'center', gap: 'var(--Sizing-1, 8px)',
-                   flexDirection: centred ? 'column' : 'row' }}>
+        <figcaption className="quote-cite MuiBox-root omni-quote-cite">
           {hasPerson && <Avatar src={avatarSrc} initials={avatarInitials} size={AVATAR[size] || 'medium'} alt="" />}
-          <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+          <div className="MuiBox-root omni-quote-who">
             {cite && <Subtitle component="span">{cite}</Subtitle>}
             {detail && <Caption color="quiet" component="span">{detail}</Caption>}
-          </Box>
-        </Box>
+          </div>
+        </figcaption>
       )}
-    </Box>
+    </>
   );
+  if (hasSx(sx)) return <SxBox component="figure" sx={sx} {...root}>{content}</SxBox>;
+  return <figure {...root}>{content}</figure>;
 }
 
 export default Quote;
