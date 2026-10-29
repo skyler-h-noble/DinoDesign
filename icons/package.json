@@ -1,0 +1,41 @@
+{
+  "name": "@omni-design/icons",
+  "version": "0.1.0",
+  "description": "Material Icons as plain SVG React components \u2014 same names and glyphs as @mui/icons-material, without MUI.",
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "./index.js",
+  "module": "./esm/index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./esm/index.js",
+      "require": "./index.js"
+    },
+    "./*": {
+      "types": "./*.d.ts",
+      "import": "./esm/*.js",
+      "require": "./*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "*.js",
+    "*.d.ts",
+    "esm",
+    "LICENSE",
+    "README.md",
+    "!scripts"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "prepublishOnly": "node scripts/build.mjs"
+  },
+  "peerDependencies": {
+    "react": ">=17"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
