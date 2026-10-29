@@ -116,8 +116,9 @@ import HomeIcon from '@mui/icons-material/Home';
 | Form field | `TextField` | `label`, `value`, `onChange`, `type`, `helperText` |
 | Footer | `Footer` | `brand`, `columns`, `copyrightName` |
 
-Icons: `@mui/icons-material` (MUI 7). Use `<Icon color="primary">` to give one a
-brand color.
+Icons: `@mui/icons-material` (MUI 7) — use names that exist in v7 (e.g. `Eco`
+is gone; `EnergySavingsLeaf` replaces it), or the build fails. Use
+`<Icon color="primary">` to give one a brand color.
 
 ## 6. Rules
 
