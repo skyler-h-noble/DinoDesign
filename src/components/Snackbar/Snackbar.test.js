@@ -354,38 +354,27 @@ describe('Snackbar — Accessibility (jest-axe)', () => {
  * own default should not contradict what its design system says for a device
  * with no chrome.
  *
- * Read off the emotion stylesheet rather than `getComputedStyle`. jsdom drops
+ * Read off the stylesheet (the winning declaration, see _testCss) rather than
+ * `getComputedStyle`. jsdom drops
  * any declaration whose value contains `var()`, so the computed `top` of a
  * correctly-wired snackbar and of one with no offset at all are both the empty
  * string — a test written that way passes on the bug it is meant to catch.
  */
 describe('edge offset', () => {
-  /** The emotion rule for this element, as text. */
-  const ruleFor = (el) => {
-    const cls = [...el.classList].find((c) => c.startsWith('css-'));
-    for (const sheet of document.styleSheets) {
-      try {
-        for (const rule of sheet.cssRules) {
-          if (rule.selectorText === '.' + cls) return rule.cssText;
-        }
-      } catch (e) { /* cross-origin sheets: none here, but cssRules can throw */ }
-    }
-    return '';
-  };
-
+  const { declared, cssFor } = require('../_testCss');
   const offsetOf = (anchor) => {
     const { container } = render(
       <Snackbar open={true} anchor={anchor} message="Test message" />
     );
-    const css = ruleFor(container.querySelector('.snackbar'));
-    const grab = (prop) => (css.match(new RegExp('(?:^|[;{]\\s*)' + prop + ':\\s*([^;]+);')) || [])[1] || '';
-    return { css, top: grab('top'), bottom: grab('bottom') };
+    const el = container.querySelector('.snackbar');
+    const grab = (prop) => declared(el, prop) || '';
+    return { css: cssFor(el), position: grab('position'), top: grab('top'), bottom: grab('bottom') };
   };
 
   test('the probe itself works — the rule is found and carries the anchor', () => {
-    /* Guards the helper above. If ruleFor ever returns '' the three tests
+    /* Guards the helper above. If it ever found nothing the three tests
        below would agree with each other and assert nothing. */
-    expect(offsetOf('top').css).toMatch(/position:\s*fixed/);
+    expect(offsetOf('top').position).toBe('fixed');
   });
 
   test('reads the device token at the top, and leaves the other edge unset', () => {

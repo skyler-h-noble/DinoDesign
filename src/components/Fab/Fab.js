@@ -1,6 +1,7 @@
 // src/components/Fab/Fab.js
 import React from 'react';
-import { Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 import AddIcon from '@omni-design/icons/Add';
 import { SHADOW_LEVEL_3, SHADOW_LEVEL_4, bevelShadow, tokenSegment } from '../_shadows';
 
@@ -89,13 +90,50 @@ function getTokens(color) {
  * and rang black regardless of the button's color. --Buttons-<C>-Button is
  * set per color already, so the ring now follows the button it surrounds.
  */
-const pulseKeyframes = `
-@keyframes fab-pulse {
-  0% { box-shadow: 0 0 0 0 var(--fab-pulse-color); }
-  50% { box-shadow: 0 0 0 8px var(--fab-pulse-color); }
-  100% { box-shadow: 0 0 0 8px transparent; }
-}
-`;
+const SxBox = lazySxBox('Fab');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+/* ─── Static sheet ───
+   The palette arrives as custom properties on the button (--_fab-*), set from
+   getTokens; everything else is a class. State rules weigh one class + one
+   pseudo-class, as emotion's did, so a caller's sx state rule still wins. */
+registerStaticStyles('omni-fab', [
+  '@keyframes fab-pulse{0%{box-shadow:0 0 0 0 var(--fab-pulse-color)}50%{box-shadow:0 0 0 8px var(--fab-pulse-color)}100%{box-shadow:0 0 0 8px transparent}}',
+  '.omni-fab{display:inline-flex;-webkit-box-align:center;align-items:center;-webkit-box-pack:center;justify-content:center;gap:0;'
+    + 'background-color:var(--_fab-bg);color:var(--_fab-fg);border:var(--Button-Border-Width) solid var(--_fab-bd);'
+    + `box-shadow:var(--_fab-bevel), ${SHADOW_LEVEL_3};`
+    + 'font-family:inherit;font-weight:600;cursor:pointer;opacity:1;outline:none;flex-shrink:0;'
+    + 'transition:background-color 0.15s ease, box-shadow 0.2s ease, transform 0.1s ease}',
+  /* Bevel sizing — height feeds --_bevel via --Button-Bevel % (matches Button
+     + Slider). The FAB's OWN bevel — --FAB-Bevel / --Sm-FAB-Bevel /
+     --Lg-FAB-Bevel, the numbers Figma's FAB-Bevel effect style reads. The
+     height-derived value stays as the fallback for a design system published
+     before these existed; it is the same formula, unrounded, with the same
+     min() cap as Button (never more than 20% of the height). */
+  ...Object.entries(SIZE_MAP).map(([k, v]) => `.omni-fab-${k}{height:${v.size}px;--_height:${v.size}px;font-size:${v.fontSize};`
+    + `--_bevel:var(--${FAB_BEVEL_PREFIX[k]}FAB-Bevel, min(calc(var(--Button-Bevel) * var(--_height) / 100), calc(var(--_height) / 5)))}`),
+  // A round FAB, or the extended pill (no width: it hugs its label).
+  ...Object.entries(SIZE_MAP).map(([k, v]) => `.omni-fab-c-${k}{width:${v.size}px;border-radius:50%}`),
+  ...Object.entries(SIZE_MAP).map(([k, v]) => `.omni-fab-x-${k}{border-radius:${v.size / 2}px;padding-left:${v.px}px;padding-right:${v.px}px;gap:${v.gap}px}`),
+  '.omni-fab-off{cursor:not-allowed;opacity:var(--Disabled, 0.38)}',
+  `.omni-fab-h:hover{background-color:var(--_fab-h);box-shadow:var(--_fab-bevel), ${SHADOW_LEVEL_4}}`,
+  /* Pressed changes the fill only. Figma's Pressed FAB keeps the resting FAB
+     elevation and its full size. */
+  `.omni-fab-a:active{background-color:var(--_fab-a);box-shadow:var(--_fab-bevel), ${SHADOW_LEVEL_3}}`,
+  /* 2px ring 1px outside — the same ring as every other component. */
+  '.omni-fab-f:focus-visible,.omni-fab-f.Mui-focusVisible{outline:2px solid var(--Focus-Visible);outline-offset:1px}',
+  /* 50% of the button's own color — Figma's Start and Middle both sit at
+     opacity 0.5. The loop stops outright under prefers-reduced-motion (WCAG
+     2.2.2): the duration tokens cannot carry a 2s breath, so it is not
+     shortened, it is stopped. */
+  '.omni-fab-pulse{--fab-pulse-color:color-mix(in srgb, var(--_fab-bg) 50%, transparent);'
+    + 'animation:fab-pulse 2s var(--Motion-Easing-Standard, ease) infinite}',
+  '@media (prefers-reduced-motion: reduce){.omni-fab-pulse.omni-fab-calm{animation:none}}',
+  '.omni-fab-icon{display:flex;-webkit-box-align:center;align-items:center;-webkit-box-pack:center;justify-content:center;color:inherit}',
+  ...Object.entries(SIZE_MAP).map(([k, v]) => `.omni-fab-icon-${k}{font-size:${v.iconSize}}`),
+  '.omni-fab-icon .MuiSvgIcon-root{font-size:inherit;color:inherit}',
+  '.omni-fab-label{white-space:nowrap;line-height:1}',
+].join('\n'));
 
 /* forwardRef, so a Tooltip (SpeedDial's action labels) can anchor to the
    button. It returned a fragment with no ref, so MUI's Tooltip had nothing to
@@ -117,9 +155,11 @@ export const Fab = React.forwardRef(function Fab({
   onClick,
   ariaLabel,
   className = '',
-  sx = {},
+  sx,
+  style,
   ...props
 }, ref) {
+  useStaticStyles('omni-fab');
   /* `variant` stays as a prop so an existing variant="solid" keeps working and
      does not fall through ...props onto the <button> as an unknown attribute.
      Anything else normalises to solid — there is only one variant now. */
@@ -143,120 +183,54 @@ export const Fab = React.forwardRef(function Fab({
 
   const effectiveLabel = ariaLabel || label || 'Action';
 
-  return (
+  const sizeKey = SIZE_MAP[size] ? size : 'medium';
+  const own = (key) => hasSx(sx) && typeof sx === 'object' && !Array.isArray(sx) && sx[key] !== undefined;
+  const vars = {
+    '--_fab-bg': tokens.bg, '--_fab-fg': tokens.text, '--_fab-bd': tokens.border,
+    '--_fab-h': tokens.hover, '--_fab-a': tokens.active, '--_fab-bevel': bevelShadow(palette),
+  };
+  const rootProps = {
+    ref,
+    type: 'button',
+    role: 'button',
+    'aria-label': effectiveLabel,
+    onClick,
+    disabled,
+    className: 'fab fab-' + effectiveVariant + ' fab-' + color + ' fab-' + size +
+      (extended ? ' fab-extended' : '') +
+      (animate ? ' fab-animate' : '') +
+      (disabled ? ' fab-disabled' : '') +
+      ' omni-fab omni-fab-' + sizeKey + (extended ? ' omni-fab-x-' : ' omni-fab-c-') + sizeKey +
+      (disabled ? ' omni-fab-off' : '') +
+      /* A caller's sx state key REPLACED the Fab's own (one sx object), so
+         with one the matching static state rule stays off. */
+      (!disabled && !own('&:hover') ? ' omni-fab-h' : '') +
+      (!disabled && !own('&:active') ? ' omni-fab-a' : '') +
+      (!own('&:focus-visible, &.Mui-focusVisible') ? ' omni-fab-f' : '') +
+      (animate && !disabled ? ' omni-fab-pulse' + (!own('@media (prefers-reduced-motion: reduce)') ? ' omni-fab-calm' : '') : '') +
+      (className ? ' ' + className : ''),
+    style: { ...vars, ...style },
+    ...props,
+  };
+  const content = (
     <>
-      {animate && <style>{pulseKeyframes}</style>}
-      <Box
-        ref={ref}
-        component="button"
-        type="button"
-        role="button"
-        aria-label={effectiveLabel}
-        onClick={onClick}
-        disabled={disabled}
-        className={'fab fab-' + effectiveVariant + ' fab-' + color + ' fab-' + size +
-          (extended ? ' fab-extended' : '') +
-          (animate ? ' fab-animate' : '') +
-          (disabled ? ' fab-disabled' : '') +
-          (className ? ' ' + className : '')}
-        sx={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: extended ? s.gap + 'px' : 0,
-          // Sizing
-          ...(extended
-            ? {
-                height: s.size + 'px',
-                borderRadius: s.size / 2 + 'px',
-                px: s.px + 'px',
-              }
-            : {
-                width: s.size + 'px',
-                height: s.size + 'px',
-                borderRadius: '50%',
-              }),
-          // Tokens
-          backgroundColor: tokens.bg,
-          color: tokens.text,
-          border: 'var(--Button-Border-Width) solid ' + tokens.border,
-          // Bevel sizing — height feeds --_bevel via --Button-Bevel %
-          // (matches Button + Slider). At default --Button-Bevel: 0 the
-          // bevel is invisible; bumping the token lights it up everywhere.
-          '--_height': s.size + 'px',
-          // Same min() cap as Button — bevel can never exceed 20% of height,
-          // so the inset can't bleed into icon/label area regardless of
-          // how high --Button-Bevel is set.
-          /* The FAB's OWN bevel — --FAB-Bevel / --Sm-FAB-Bevel / --Lg-FAB-Bevel,
-             the numbers Figma's FAB-Bevel effect style reads (Component-Size ›
-             FAB/FAB-Bevel, aliased per size to Devices-Type). Deeper than a
-             button's because the FAB is bigger. The height-derived value stays
-             as the fallback for a design system published before these existed;
-             it is the same formula, unrounded (9.6px where Figma draws 10). */
-          '--_bevel': 'var(--' + (FAB_BEVEL_PREFIX[size] ?? '') + 'FAB-Bevel, min(calc(var(--Button-Bevel) * var(--_height) / 100), calc(var(--_height) / 5)))',
-          boxShadow: `${bevelShadow(palette)}, ${SHADOW_LEVEL_3}`,
-          // Typography
-          fontSize: s.fontSize,
-          fontFamily: 'inherit',
-          fontWeight: 600,
-          // Interaction
-          cursor: disabled ? 'not-allowed' : 'pointer',
-          opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
-          outline: 'none',
-          flexShrink: 0,
-          transition: 'background-color 0.15s ease, box-shadow 0.2s ease, transform 0.1s ease',
-          '&:hover': !disabled ? { backgroundColor: tokens.hover, boxShadow: `${bevelShadow(palette)}, ${SHADOW_LEVEL_4}` } : {},
-          /* Pressed changes the fill only. Figma's Pressed FAB keeps the resting
-             FAB elevation and its full size — the 96% shrink and the dropped
-             shadow were this file's, and the shrink also moved the icon. */
-          '&:active': !disabled ? { backgroundColor: tokens.active, boxShadow: `${bevelShadow(palette)}, ${SHADOW_LEVEL_3}` } : {},
-          /* 2px ring 1px outside — Figma's Focus-Visible frame sits 3px out
-             with a 2px inside stroke (FAB-Focus-Radius = width + 6), the same
-             ring as every other component. It was 3px at 2px out. */
-          '&:focus-visible, &.Mui-focusVisible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px' },
-          // Animation
-          ...(animate && !disabled && {
-            /* 50% of the button's own color — Figma's Start and Middle both
-               sit at opacity 0.5, and color-mix gets that from the same token
-               the fill uses rather than needing a second variable. */
-            '--fab-pulse-color': `color-mix(in srgb, ${tokens.bg} 50%, transparent)`,
-            animation: 'fab-pulse 2s var(--Motion-Easing-Standard, ease) infinite',
-            /* The design system zeroes --Motion-Duration-* under
-               prefers-reduced-motion, and this loop ignored that entirely: a
-               hardcoded `2s infinite` kept pulsing for a viewer who has asked
-               the OS to stop moving things. WCAG 2.2.2 is about exactly this —
-               content that moves indefinitely and cannot be stopped.
+      {/* Icon */}
+      <div className={'omni-fab-icon omni-fab-icon-' + sizeKey}>
+        {iconEl}
+      </div>
 
-               The duration tokens cannot carry the loop (they are 100-300ms
-               and this is a 2s breath), so the honest fix is to stop the
-               animation outright rather than shorten it. */
-            '@media (prefers-reduced-motion: reduce)': {
-              animation: 'none',
-            },
-          }),
-          ...sx,
-        }}
-        {...props}
-      >
-        {/* Icon */}
-        <Box sx={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: s.iconSize,
-          color: 'inherit',
-          '& .MuiSvgIcon-root': { fontSize: 'inherit', color: 'inherit' },
-        }}>
-          {iconEl}
-        </Box>
-
-        {/* Extended label */}
-        {extended && label && (
-          <Box component="span" sx={{ whiteSpace: 'nowrap', lineHeight: 1 }}>
-            {label}
-          </Box>
-        )}
-      </Box>
+      {/* Extended label */}
+      {extended && label && (
+        <span className="omni-fab-label">
+          {label}
+        </span>
+      )}
     </>
   );
+
+  return hasSx(sx)
+    ? <SxBox component="button" sx={sx} {...rootProps}>{content}</SxBox>
+    : <button {...rootProps}>{content}</button>;
 });
 
 export default Fab;

@@ -1,6 +1,7 @@
 // src/components/Snackbar/Snackbar.js
 import React, { useEffect, useRef, useCallback } from 'react';
-import { Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 import CloseIcon from '@omni-design/icons/Close';
 import { Button } from '../Button/Button';
 import { Body, BodySmall, BodyLarge } from '../Typography';
@@ -51,6 +52,41 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const RADIUS = 'var(--Dropdown-Frame-Radius, 4px)';
 const MARGIN = 'var(--Margin, 64px)';
 
+const SxBox = lazySxBox('Snackbar');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+/* ─── Static sheet ───
+   The slide-in reads its start and end transforms from custom properties set
+   by the anchor's class, so one @keyframes serves all four anchors (the
+   centred ones keep their translateX(-50%) through the slide). */
+registerStaticStyles('omni-snackbar', [
+  '@keyframes snackbar-slide-in{from{transform:var(--_sb-from)}to{transform:var(--_sb-to)}}',
+  `.omni-sb{position:fixed;z-index:1400;width:min(520px, calc(100vw - 2 * ${MARGIN}));box-sizing:border-box;`
+    + `border-radius:${RADIUS};box-shadow:${SHADOW_LEVEL_3};overflow:hidden;animation:snackbar-slide-in 0.3s ease forwards}`,
+  /* Offset from the edge the snackbar is anchored to — see the note in the
+     render on --SnackBar-Top / --SnackBar-Bottom. */
+  `.omni-sb-right{right:${MARGIN}}`,
+  '.omni-sb-mid{left:50%;transform:translateX(-50%)}',
+  '.omni-sb-top{top:var(--SnackBar-Top, 24px)}',
+  '.omni-sb-bottom{bottom:var(--SnackBar-Bottom, 24px)}',
+  '.omni-sb-top.omni-sb-right{--_sb-from:translateY(-120%);--_sb-to:translateY(0)}',
+  '.omni-sb-bottom.omni-sb-right{--_sb-from:translateY(120%);--_sb-to:translateY(0)}',
+  '.omni-sb-top.omni-sb-mid{--_sb-from:translateX(-50%) translateY(-120%);--_sb-to:translateX(-50%) translateY(0)}',
+  '.omni-sb-bottom.omni-sb-mid{--_sb-from:translateX(-50%) translateY(120%);--_sb-to:translateX(-50%) translateY(0)}',
+  /* A real border: Figma's stroke here is included in the layout, so the
+     content starts 1px further in (31, not 30) and the snack is 50 tall. */
+  '.omni-sb-inner{display:flex;-webkit-box-align:center;align-items:center;gap:10px;padding:var(--Sizing-1, 8px) var(--Card-Padding, 16px);'
+    + `font-family:var(--Font-Family-Body, inherit);border-radius:${RADIUS};border:1px solid var(--Border)}`,
+  /* On the element WITH its zone attributes, as Alert: the design system
+     paints [data-theme][data-surface] at (0,2,0). */
+  '.omni-sb-inner[data-theme][data-surface]{color:var(--Text-Match, var(--Text));background-color:var(--Background)}',
+  '.omni-sb-icon{display:inline-flex;flex-shrink:0;line-height:1;font-size:24px;color:var(--Icons-Match, currentColor)}',
+  '.omni-sb-icon .MuiSvgIcon-root{font-size:inherit}',
+  '.omni-sb-msg{flex:1;min-width:0}',
+  '.omni-sb-slot{display:inline-flex;flex-shrink:0}',
+  '.omni-sb-end{line-height:1}',
+].join('\n'));
+
 /** Warn once per session, not once per render. */
 let warnedSolid = false;
 
@@ -68,9 +104,10 @@ export function Snackbar({
   endDecorator,
   action,
   className = '',
-  sx = {},
+  sx,
   ...props
 }) {
+  useStaticStyles('omni-snackbar');
   const timerRef = useRef(null);
   const C = cap(color === 'default' ? 'Default' : color);
   const TextComp = size === 'small' ? BodySmall : size === 'large' ? BodyLarge : Body;
@@ -139,126 +176,83 @@ export function Snackbar({
     }
   }, [open, autoHideDuration, onClose]);
 
-  const x = atRight ? '' : 'translateX(-50%) ';
-  const slideKeyframes = {
-    from: { transform: x + 'translateY(' + (atTop ? '-120%' : '120%') + ')' },
-    to: { transform: x + 'translateY(0)' },
-  };
-
   if (!open) return null;
 
-  return (
-    <Box
-      role="alert"
-      aria-live="polite"
-      aria-atomic="true"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      className={'snackbar snackbar-' + variant + ' snackbar-' + size + ' snackbar-' + anchor + ' snackbar-' + color + ' ' + className}
-      sx={{
-        position: 'fixed',
-        ...(atRight
-          ? { right: MARGIN }
-          : { left: '50%', transform: 'translateX(-50%)' }),
-        /* Offset from the edge the snackbar is anchored to.
-         *
-         * --SnackBar-Top / --SnackBar-Bottom are per-device: they are the
-         * platform's system chrome (status bar + app bar at the top, home
-         * indicator or gesture bar at the bottom) plus the clearance that
-         * gives the shadow somewhere to fall. A phone reserves 98px at the
-         * top where a desktop reserves 24, so a fixed number lands a snackbar
-         * on top of the app bar's title on every touch platform.
-         *
-         * The two ends are deliberately asymmetric on every device but
-         * Desktop: the top clears the app bar as well as the status bar,
-         * while the bottom clears only the OS indicator — a bottom nav is a
-         * template's choice, not the device's, so a template that places one
-         * adds its height rather than this reserving space for a bar that may
-         * not be there.
-         *
-         * The fallback is the DESKTOP value, not a smaller "safe" one. These
-         * variables are defined by a generated foundation.css and by nothing
-         * in this library, so the fallback is what an unthemed consumer
-         * actually gets — and it should be the design system's answer for a
-         * device with no chrome, not a number that contradicts it. */
-        ...(atTop
-          ? { top: 'var(--SnackBar-Top, 24px)' }
-          : { bottom: 'var(--SnackBar-Bottom, 24px)' }),
-        zIndex: 1400,
-        width: 'min(520px, calc(100vw - 2 * ' + MARGIN + '))',
-        boxSizing: 'border-box',
-        borderRadius: RADIUS,
-        boxShadow: SHADOW_LEVEL_3,
-        overflow: 'hidden',
-        animation: 'snackbar-slide-in 0.3s ease forwards',
-        '@keyframes snackbar-slide-in': slideKeyframes,
-        ...sx,
-      }}
-      {...props}
-    >
-      <Box
-        data-theme={dataTheme}
-        data-surface={dataSurface}
-        className="snackbar-inner"
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          padding: 'var(--Sizing-1, 8px) var(--Card-Padding, 16px)',
-          fontFamily: 'var(--Font-Family-Body, inherit)',
-          borderRadius: RADIUS,
-          /* A real border: Figma's stroke here is included in the layout, so
-             the content starts 1px further in (31, not 30) and the snack is
-             50 tall, not 48. */
-          border: '1px solid var(--Border)',
-          /* On the element WITH its zone attributes, as Alert: the design
-             system paints [data-theme][data-surface] at (0,2,0). */
-          '&[data-theme][data-surface]': {
-            color: 'var(--Text-Match, var(--Text))',
-            backgroundColor: 'var(--Background)',
-          },
-        }}
-      >
-        {startDecorator && (
-          <Box className="snackbar-icon" sx={{ display: 'inline-flex', flexShrink: 0, lineHeight: 1, fontSize: '24px',
-            color: 'var(--Icons-Match, currentColor)', '& .MuiSvgIcon-root': { fontSize: 'inherit' } }}>
-            {startDecorator}
-          </Box>
-        )}
+  /* Offset from the edge the snackbar is anchored to (omni-sb-top / -bottom).
+   *
+   * --SnackBar-Top / --SnackBar-Bottom are per-device: they are the
+   * platform's system chrome (status bar + app bar at the top, home
+   * indicator or gesture bar at the bottom) plus the clearance that
+   * gives the shadow somewhere to fall. A phone reserves 98px at the
+   * top where a desktop reserves 24, so a fixed number lands a snackbar
+   * on top of the app bar's title on every touch platform.
+   *
+   * The two ends are deliberately asymmetric on every device but
+   * Desktop: the top clears the app bar as well as the status bar,
+   * while the bottom clears only the OS indicator — a bottom nav is a
+   * template's choice, not the device's, so a template that places one
+   * adds its height rather than this reserving space for a bar that may
+   * not be there.
+   *
+   * The fallback is the DESKTOP value, not a smaller "safe" one. These
+   * variables are defined by a generated foundation.css and by nothing
+   * in this library, so the fallback is what an unthemed consumer
+   * actually gets — and it should be the design system's answer for a
+   * device with no chrome, not a number that contradicts it. */
+  const rootProps = {
+    role: 'alert',
+    'aria-live': 'polite',
+    'aria-atomic': 'true',
+    onMouseEnter: handleMouseEnter,
+    onMouseLeave: handleMouseLeave,
+    className: 'snackbar snackbar-' + variant + ' snackbar-' + size + ' snackbar-' + anchor + ' snackbar-' + color
+      + ' omni-sb omni-sb-' + (atRight ? 'right' : 'mid') + ' omni-sb-' + (atTop ? 'top' : 'bottom') + ' ' + className,
+    ...props,
+  };
+  const inner = (
+    <div data-theme={dataTheme} data-surface={dataSurface} className="snackbar-inner omni-sb-inner">
+      {startDecorator && (
+        <div className="snackbar-icon omni-sb-icon">
+          {startDecorator}
+        </div>
+      )}
 
-        <Box className="snackbar-message" sx={{ flex: 1, minWidth: 0 }}>
-          {typeof children === 'string' ? (
-            <TextComp color="inherit">{children}</TextComp>
-          ) : children}
-        </Box>
+      <div className="snackbar-message omni-sb-msg">
+        {typeof children === 'string' ? (
+          <TextComp color="inherit">{children}</TextComp>
+        ) : children}
+      </div>
 
-        {action && (
-          <Box sx={{ display: 'inline-flex', flexShrink: 0 }}>
-            {action}
-          </Box>
-        )}
+      {action && (
+        <div className="omni-sb-slot">
+          {action}
+        </div>
+      )}
 
-        {endDecorator && (
-          <Box sx={{ display: 'inline-flex', flexShrink: 0, lineHeight: 1 }}>
-            {endDecorator}
-          </Box>
-        )}
+      {endDecorator && (
+        <div className="omni-sb-slot omni-sb-end">
+          {endDecorator}
+        </div>
+      )}
 
-        {onClose && (
-          <Button
-            iconOnly
-            variant="ghost"
-            onClick={(e) => onClose(e, 'closeClick')}
-            aria-label="Close notification"
-            className="snackbar-close"
-            sx={{ flexShrink: 0 }}
-          >
-            <CloseIcon />
-          </Button>
-        )}
-      </Box>
-    </Box>
+      {/* Button already keeps itself from shrinking (flex-shrink: 0). */}
+      {onClose && (
+        <Button
+          iconOnly
+          variant="ghost"
+          onClick={(e) => onClose(e, 'closeClick')}
+          aria-label="Close notification"
+          className="snackbar-close"
+        >
+          <CloseIcon />
+        </Button>
+      )}
+    </div>
   );
+
+  return hasSx(sx)
+    ? <SxBox sx={sx} {...rootProps}>{inner}</SxBox>
+    : <div {...rootProps}>{inner}</div>;
 }
 
 export default Snackbar;
