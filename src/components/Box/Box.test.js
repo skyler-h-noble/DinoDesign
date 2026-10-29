@@ -75,15 +75,21 @@ describe('radius opts in, and is not a boolean', () => {
 
   test.each(['small', 'medium', 'large'])('%s reads a Card radius token', (radius) => {
     const { container } = renderBox({ radius });
-    const cls = (container.querySelector('.omni-box').className || '')
-      .split(/\s+/).find((c) => c.startsWith('css-'));
-    const css = Array.from(document.styleSheets)
-      .flatMap((sheet) => Array.from(sheet.cssRules || []))
-      .filter((r) => (r.selectorText || '').includes('.' + cls))
-      .map((r) => r.cssText).join('');
-    expect(css).toMatch(/border-radius:\s*var\(--/);
+    expect(styleOf(container.querySelector('.omni-box'))).toMatch(/border-radius:\s*var\(--/);
   });
 });
+
+
+/* The element's own declarations, wherever they live: its style attribute
+   (the static path) or a generated class rule (the emotion path). */
+function styleOf(el) {
+  const classes = (el.className || '').split(/\s+/).filter(Boolean);
+  const rules = Array.from(document.styleSheets)
+    .flatMap((sheet) => { try { return Array.from(sheet.cssRules || []); } catch { return []; } })
+    .filter((r) => classes.some((c) => (r.selectorText || '').includes('.' + c) && c.startsWith('css-')))
+    .map((r) => r.cssText).join('');
+  return (el.getAttribute('style') || '') + rules;
+}
 
 /* --- elevation --- */
 describe('elevation wraps rather than paints', () => {
@@ -160,14 +166,14 @@ describe('ratio', () => {
   };
   test('a Ratio name sets aspect-ratio', () => {
     const { container } = render(<Box ratio="16:9" />);
-    expect(ruleOf(container.querySelector('.omni-box'))).toMatch(/aspect-ratio: 16 ?\/ ?9/);
+    expect(styleOf(container.querySelector('.omni-box'))).toMatch(/(aspect-ratio|--omni-ratio): 16 ?\/ ?9/);
   });
   test('a number is width / height', () => {
     const { container } = render(<Box ratio={2} />);
-    expect(ruleOf(container.querySelector('.omni-box'))).toContain('aspect-ratio: 2');
+    expect(styleOf(container.querySelector('.omni-box'))).toMatch(/(aspect-ratio|--omni-ratio): 2/);
   });
   test('unset is Fit = No Ratio', () => {
     const { container } = render(<Box />);
-    expect(ruleOf(container.querySelector('.omni-box'))).not.toContain('aspect-ratio');
+    expect(styleOf(container.querySelector('.omni-box'))).not.toMatch(/aspect-ratio: |--omni-ratio/);
   });
 });
