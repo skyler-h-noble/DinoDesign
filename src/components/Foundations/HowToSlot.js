@@ -24,9 +24,23 @@
 // a gap nobody can see is a gap nobody fills, and this page is read by the
 // people who could capture it.
 import React from 'react';
-import { Box } from '@mui/material';
 import { BodySmall, Caption, EyebrowSmall } from '../Typography';
 import { VStack } from '../Stack/Stack';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+
+/* maxWidth and the placeholder's aspect are per instance: custom properties
+   declared on the element, read by the static rules. */
+registerStaticStyles('omni-howto', [
+  '.omni-howto-frame{width:100%;max-width:var(--_ht-mw);display:block;'
+    + 'border-radius:var(--Card-Radius, var(--Style-Border-Radius));border:1px solid var(--Border-Variant)}',
+  '.omni-howto-ph{width:100%;max-width:var(--_ht-mw);aspect-ratio:var(--_ht-ar);display:flex;-webkit-box-align:center;align-items:center;'
+    + '-webkit-box-pack:center;justify-content:center;background-color:var(--Background);color:var(--Text);'
+    + 'border-radius:var(--Card-Radius, var(--Style-Border-Radius));border:2px dashed var(--Border-Variant);'
+    + 'padding:24px;text-align:center}',
+].join('\n'));
+
+/* MUI's rule for a number in a size key: (0, 1] is a fraction, else px. */
+const size = (v) => (typeof v === 'number' ? (v > 0 && v <= 1 ? v * 100 + '%' : v + 'px') : v);
 
 const MOVING = /\.(mp4|mov|webm)$/i;
 
@@ -39,38 +53,29 @@ const MOVING = /\.(mp4|mov|webm)$/i;
  * @param maxWidth cap in px. Panel crops are narrow, so the default is too.
  */
 export function HowToSlot({ src, title, shows, aspect = '4 / 3', maxWidth = 560 }) {
-  const frame = {
-    width: '100%', maxWidth, display: 'block',
-    borderRadius: 'var(--Card-Radius, var(--Style-Border-Radius))',
-    border: '1px solid var(--Border-Variant)',
-  };
+  useStaticStyles('omni-howto');
+  const mw = { '--_ht-mw': size(maxWidth) };
 
   if (src && MOVING.test(src)) {
-    return <Box component="video" src={src} controls preload="metadata" playsInline sx={frame} />;
+    return <video src={src} controls preload="metadata" playsInline className="MuiBox-root omni-howto-frame" style={mw} />;
   }
   if (src) {
-    return <Box component="img" src={src} alt={title || ''} loading="lazy" sx={frame} />;
+    return <img src={src} alt={title || ''} loading="lazy" className="MuiBox-root omni-howto-frame" style={mw} />;
   }
 
+  /* Dashed, so it cannot be mistaken for an image that failed to load. */
   return (
-    <Box
+    <div
       data-surface="Container"
-      sx={{
-        width: '100%', maxWidth, aspectRatio: aspect,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        backgroundColor: 'var(--Background)', color: 'var(--Text)',
-        borderRadius: 'var(--Card-Radius, var(--Style-Border-Radius))',
-        /* Dashed, so it cannot be mistaken for an image that failed to load. */
-        border: '2px dashed var(--Border-Variant)',
-        p: 3, textAlign: 'center',
-      }}
+      className="MuiBox-root omni-howto-ph"
+      style={{ ...mw, '--_ht-ar': aspect }}
     >
       <VStack gap="var(--Sizing-1)" style={{ alignItems: 'center', maxWidth: 440 }}>
         <EyebrowSmall>Screenshot to capture</EyebrowSmall>
         <BodySmall>{title}</BodySmall>
         {shows && <Caption color="quiet">{shows}</Caption>}
       </VStack>
-    </Box>
+    </div>
   );
 }
 

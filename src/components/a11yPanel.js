@@ -9,9 +9,25 @@
 // measurement is the same everywhere rather than reimplemented per component
 // and drifting.
 import React, { useState, useEffect } from 'react';
-import { Box } from '@mui/material';
 import { BodySmall, Caption } from './Typography';
 import { getContrast, getCssVarFrom } from './contrast';
+import { registerStaticStyles, useStaticStyles } from './_staticStyles';
+
+/* One sheet for the panel. The pass / fail / unmeasured verdict is a class,
+   not an inline color, so the three states are read in one place. */
+registerStaticStyles('omni-a11y-panel', [
+  '.omni-a11y-badge{padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;'
+    + 'color:var(--Buttons-Error-Text);background-color:var(--Buttons-Error-Button);border:none}',
+  '.omni-a11y-badge-pass{color:var(--Buttons-Success-Text);background-color:var(--Buttons-Success-Button)}',
+  '.omni-a11y-badge-none{color:var(--Text-Quiet);background-color:transparent;border:1px solid var(--Border)}',
+  '.omni-a11y-note{margin-bottom:24px;padding:16px;border-left:3px solid var(--Border);background-color:var(--Hover)}',
+  '.omni-a11y-row{display:flex;-webkit-box-pack:justify;justify-content:space-between;align-items:flex-start;padding-top:12px;padding-bottom:12px;'
+    + 'border-bottom:1px solid var(--Border);gap:16px}',
+  '.omni-a11y-label{flex:1;min-width:0}',
+].join('\n'));
+
+const badgeClass = (unmeasured, pass) => 'MuiBox-root omni-a11y-badge'
+  + (unmeasured ? ' omni-a11y-badge-none' : (pass ? ' omni-a11y-badge-pass' : ''));
 
 /* Three-valued on purpose. null means the ratio could not be MEASURED — a
    token that did not resolve, or a color format the parser does not read —
@@ -21,16 +37,11 @@ import { getContrast, getCssVarFrom } from './contrast';
 export function ContrastBadge({ ratio, threshold = 4.5 }) {
   const unmeasured = ratio === null || ratio === undefined || Number.isNaN(ratio);
   const pass = unmeasured ? null : ratio >= threshold;
+  useStaticStyles('omni-a11y-panel');
   return (
-    <Box sx={{
-      px: 1, py: 0.25, borderRadius: '4px', fontSize: '11px', fontWeight: 700,
-      whiteSpace: 'nowrap', flexShrink: 0,
-      color: unmeasured ? 'var(--Text-Quiet)' : (pass ? 'var(--Buttons-Success-Text)' : 'var(--Buttons-Error-Text)'),
-      backgroundColor: unmeasured ? 'transparent' : (pass ? 'var(--Buttons-Success-Button)' : 'var(--Buttons-Error-Button)'),
-      border: unmeasured ? '1px solid var(--Border)' : 'none',
-    }}>
+    <div className={badgeClass(unmeasured, pass)}>
       {unmeasured ? '--' : `${ratio.toFixed(2)}:1 ${pass ? 'PASS' : 'FAIL'}`}
-    </Box>
+    </div>
   );
 }
 
@@ -53,12 +64,9 @@ export function ContrastBadge({ ratio, threshold = 4.5 }) {
  * showcases, so it can be corrected once.
  */
 export function A11yScopeNote({ configuration }) {
+  useStaticStyles('omni-a11y-panel');
   return (
-    <Box sx={{
-      mb: 3, p: 2,
-      borderLeft: '3px solid var(--Border)',
-      backgroundColor: 'var(--Hover)',
-    }}>
+    <div className="MuiBox-root omni-a11y-note">
       <BodySmall>
         These are live measurements of the component <strong>as you have it set
         up in the Playground</strong> — its current variant, color, size and
@@ -75,20 +83,20 @@ export function A11yScopeNote({ configuration }) {
         are checked the same way — switch to them to see their numbers. A row
         reading “--” could not be measured and is not a failure.
       </Caption>
-    </Box>
+    </div>
   );
 }
 
 export function A11yRow({ label, ratio, threshold, note }) {
+  useStaticStyles('omni-a11y-panel');
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
-               py: 1.5, borderBottom: '1px solid var(--Border)', gap: 2 }}>
-      <Box sx={{ flex: 1, minWidth: 0 }}>
+    <div className="MuiBox-root omni-a11y-row">
+      <div className="MuiBox-root omni-a11y-label">
         <BodySmall style={{ color: 'var(--Text)' }}>{label}</BodySmall>
         {note && <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>{note}</Caption>}
-      </Box>
+      </div>
       <ContrastBadge ratio={ratio} threshold={threshold} />
-    </Box>
+    </div>
   );
 }
 
@@ -96,23 +104,17 @@ export function A11yRow({ label, ratio, threshold, note }) {
    measured in px, say. Same three-valued rule. */
 export function A11yCheckRow({ label, pass, detail, note }) {
   const unmeasured = pass === null || pass === undefined;
+  useStaticStyles('omni-a11y-panel');
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
-               py: 1.5, borderBottom: '1px solid var(--Border)', gap: 2 }}>
-      <Box sx={{ flex: 1, minWidth: 0 }}>
+    <div className="MuiBox-root omni-a11y-row">
+      <div className="MuiBox-root omni-a11y-label">
         <BodySmall style={{ color: 'var(--Text)' }}>{label}</BodySmall>
         {note && <Caption style={{ color: 'var(--Text-Quiet)', display: 'block' }}>{note}</Caption>}
-      </Box>
-      <Box sx={{
-        px: 1, py: 0.25, borderRadius: '4px', fontSize: '11px', fontWeight: 700,
-        whiteSpace: 'nowrap', flexShrink: 0,
-        color: unmeasured ? 'var(--Text-Quiet)' : (pass ? 'var(--Buttons-Success-Text)' : 'var(--Buttons-Error-Text)'),
-        backgroundColor: unmeasured ? 'transparent' : (pass ? 'var(--Buttons-Success-Button)' : 'var(--Buttons-Error-Button)'),
-        border: unmeasured ? '1px solid var(--Border)' : 'none',
-      }}>
+      </div>
+      <div className={badgeClass(unmeasured, pass)}>
         {unmeasured ? '--' : `${detail ? detail + ' ' : ''}${pass ? 'PASS' : 'FAIL'}`}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }
 

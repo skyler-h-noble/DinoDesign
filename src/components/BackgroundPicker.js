@@ -1,7 +1,17 @@
 // src/components/BackgroundPicker.js
 import React from 'react';
-import { Box, Stack } from '@mui/material';
 import { Select } from './Select/Select';
+import { registerStaticStyles, useStaticStyles } from './_staticStyles';
+
+/* MUI's Stack direction="row" spacing={1}, as it rendered: the gap is a left
+   margin on every child after the first, with the same selector weight. */
+registerStaticStyles('omni-bg-picker', [
+  '.omni-bg-picker{display:flex;flex-direction:row;-webkit-box-align:center;align-items:center}',
+  '.omni-bg-picker>:not(style):not(style){margin:0}',
+  '.omni-bg-picker>:not(style)~:not(style){margin-left:8px}',
+  '.omni-bg-picker-theme{width:160px}',
+  '.omni-bg-picker-surface{width:180px}',
+].join('\n'));
 
 /**
  * BackgroundPicker
@@ -69,11 +79,12 @@ export function BackgroundPicker({
   surfaces        = ALL_SURFACES,
   size            = 'small',
 }) {
+  useStaticStyles('omni-bg-picker');
   const surfaceOptions = surfaces.map((s) => ({ value: s, label: s }));
 
   return (
-    <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-      <Box sx={{ width: 160 }}>
+    <div className="MuiStack-root omni-bg-picker">
+      <div className="MuiBox-root omni-bg-picker-theme">
         <Select
           options={THEME_OPTIONS}
           /* null still displays as Default, for a caller that has not picked
@@ -88,8 +99,8 @@ export function BackgroundPicker({
           aria-label="Background theme"
           fullWidth
         />
-      </Box>
-      <Box sx={{ width: 180 }}>
+      </div>
+      <div className="MuiBox-root omni-bg-picker-surface">
         <Select
           options={surfaceOptions}
           value={surface}
@@ -101,8 +112,8 @@ export function BackgroundPicker({
           aria-label="Surface"
           fullWidth
         />
-      </Box>
-    </Stack>
+      </div>
+    </div>
   );
 }
 

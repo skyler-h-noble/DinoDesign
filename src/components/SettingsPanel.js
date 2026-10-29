@@ -1,11 +1,38 @@
 // src/components/SettingsPanel.js
 import React, { useState, useEffect } from 'react';
 import { useOmniDesign } from '../OmniDesignProvider';
-import { Box, Stack, Divider } from '@mui/material';
 import { Settings as SettingsIcon, Close as CloseIcon } from '@omni-design/icons';
 import { Button } from './Button/Button';
 import { Drawer } from './Drawer/Drawer';
 import { H5, BodySmall, Caption, EyebrowSmall } from './Typography';
+import { registerStaticStyles, useStaticStyles } from './_staticStyles';
+
+/* Static sheet. The stacks keep MUI's own selectors (and so their weight):
+   a child's margin is reset and the gap is a margin on every child after the
+   first. The dividers are MUI's hr, with the border color the panel gave it. */
+registerStaticStyles('omni-settings-panel', [
+  '.omni-sp-fab{position:fixed;bottom:24px;right:24px;width:52px;height:52px;border-radius:50%;'
+    + 'background-color:var(--Buttons-Tertiary-Button);color:var(--Buttons-Tertiary-Text);display:flex;-webkit-box-align:center;align-items:center;'
+    + '-webkit-box-pack:center;justify-content:center;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:999;'
+    + 'transition:transform 0.15s ease,box-shadow 0.15s ease}',
+  '.omni-sp-fab:hover{transform:scale(1.08);box-shadow:0 6px 16px rgba(0,0,0,0.2)}',
+  '.omni-sp-inner{padding:24px;height:100%;display:flex;flex-direction:column}',
+  '.omni-sp-head{display:flex;-webkit-box-pack:justify;justify-content:space-between;-webkit-box-align:center;align-items:center;margin-bottom:16px}',
+  '.omni-sp-hr{margin:0;flex-shrink:0;border-width:0 0 thin;border-style:solid;border-color:var(--Border)}',
+  '.omni-sp-hr-top{margin:0 0 24px}',
+  '.omni-sp-hr-bottom{margin:24px 0}',
+  '.omni-sp-body{flex:1;overflow-y:auto}',
+  '.omni-sp-col,.omni-sp-row{display:flex;flex-direction:column}',
+  '.omni-sp-row{flex-direction:row}',
+  '.omni-sp-col>:not(style):not(style),.omni-sp-row>:not(style):not(style){margin:0}',
+  '.omni-sp-col>:not(style)~:not(style){margin-top:var(--_sp-gap)}',
+  '.omni-sp-row>:not(style)~:not(style){margin-left:var(--_sp-gap)}',
+  '.omni-sp-opt{padding:12px;border-radius:var(--Style-Border-Radius);cursor:pointer;border:1px solid var(--Border);'
+    + 'background-color:transparent;display:flex;-webkit-box-pack:justify;justify-content:space-between;-webkit-box-align:center;align-items:center;transition:all 0.15s ease}',
+  '.omni-sp-opt-on{border:2px solid var(--Buttons-Primary-Button);background-color:var(--Background)}',
+  '.omni-sp-opt:hover{background-color:var(--Hover)}',
+  '.omni-sp-dot{width:8px;height:8px;border-radius:50%;background-color:var(--Buttons-Primary-Button);flex-shrink:0}',
+].join('\n'));
 
 const PLATFORMS = [
   { value: 'desktop',    label: 'Desktop',    note: '32px touch targets (WCAG)' },
@@ -63,6 +90,7 @@ export function SettingsPanel() {
   };
   const [panelOpen, setPanelOpen] = useState(false);
   const [platform, setPlatform]   = useState('desktop');
+  useStaticStyles('omni-settings-panel');
 
   useEffect(() => {
     /* Platform only. The mode is restored by the Provider, which takes the
@@ -90,19 +118,10 @@ export function SettingsPanel() {
   return (
     <>
       {/* FAB */}
-      <Box onClick={() => setPanelOpen(true)} role="button" aria-label="Open settings"
-        sx={{
-          position: 'fixed', bottom: 24, right: 24,
-          width: 52, height: 52, borderRadius: '50%',
-          backgroundColor: 'var(--Buttons-Tertiary-Button)',
-          color: 'var(--Buttons-Tertiary-Text)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          cursor: 'pointer', boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-          zIndex: 999, transition: 'transform 0.15s ease, box-shadow 0.15s ease',
-          '&:hover': { transform: 'scale(1.08)', boxShadow: '0 6px 16px rgba(0,0,0,0.2)' },
-        }}>
-        <SettingsIcon sx={{ fontSize: 24 }} />
-      </Box>
+      <div onClick={() => setPanelOpen(true)} role="button" aria-label="Open settings"
+        className="MuiBox-root omni-sp-fab">
+        <SettingsIcon style={{ fontSize: 24 }} />
+      </div>
 
       {/* Drawer — our own component carries data-theme + data-surface on
           its panel automatically, so child token references resolve correctly
@@ -113,68 +132,61 @@ export function SettingsPanel() {
         onClose={() => setPanelOpen(false)}
         hideBackdrop
         size="small"
-        sx={{ width: 320, zIndex: 99999999 }}
+        style={{ width: 320, zIndex: 99999999 }}
       >
         {/* Inner padding wrapper — the Drawer's own panel already supplies
-            data-surface; this Box just provides padding + layout. */}
-        <Box
-          sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
+            data-surface; this wrapper just provides padding + layout. */}
+        <div className="MuiBox-root omni-sp-inner">
 
           {/* Header */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <div className="MuiBox-root omni-sp-head">
             <H5>Settings</H5>
             <Button iconOnly variant="ghost" size="small" onClick={() => setPanelOpen(false)}
               aria-label="Close settings">
               <CloseIcon fontSize="small" />
             </Button>
-          </Box>
+          </div>
 
-          <Divider sx={{ mb: 3, borderColor: 'var(--Border)' }} />
+          <hr className="MuiDivider-root MuiDivider-fullWidth omni-sp-hr omni-sp-hr-top" />
 
-          <Box sx={{ flex: 1, overflowY: 'auto' }}>
-            <Stack spacing={4}>
+          <div className="MuiBox-root omni-sp-body">
+            <div className="MuiStack-root omni-sp-col" style={{ '--_sp-gap': '32px' }}>
 
               {/* Mode */}
-              <Box>
+              <div className="MuiBox-root">
                 <EyebrowSmall style={{ color: 'var(--Text)', opacity: 0.85, display: 'block', marginBottom: 12, fontWeight: 600 }}>
                   MODE
                 </EyebrowSmall>
-                <Stack direction="row" spacing={1}>
+                <div className="MuiStack-root omni-sp-row" style={{ '--_sp-gap': '8px' }}>
                   <Button
                     variant={mode === 'light' ? 'primary' : 'primary-outline'}
                     size="small"
                     onClick={() => switchMode('light')}
-                    sx={{ flex: 1 }}>
+                    style={{ flex: 1 }}>
                     Light
                   </Button>
                   <Button
                     variant={mode === 'dark' ? 'primary' : 'primary-outline'}
                     size="small"
                     onClick={() => switchMode('dark')}
-                    sx={{ flex: 1 }}>
+                    style={{ flex: 1 }}>
                     Dark
                   </Button>
-                </Stack>
-              </Box>
+                </div>
+              </div>
 
               {/* Platform */}
-              <Box>
+              <div className="MuiBox-root">
                 <EyebrowSmall style={{ color: 'var(--Text)', opacity: 0.85, display: 'block', marginBottom: 12, fontWeight: 600 }}>
                   PLATFORM
                 </EyebrowSmall>
-                <Stack spacing={1}>
+                <div className="MuiStack-root omni-sp-col" style={{ '--_sp-gap': '8px' }}>
                   {PLATFORMS.map(({ value, label, note }) => {
                     const isSel = platform === value;
                     return (
-                      <Box key={value} onClick={() => handlePlatformChange(value)}
-                        sx={{
-                          p: 1.5, borderRadius: 'var(--Style-Border-Radius)', cursor: 'pointer',
-                          border: isSel ? '2px solid var(--Buttons-Primary-Button)' : '1px solid var(--Border)',
-                          backgroundColor: isSel ? 'var(--Background)' : 'transparent',
-                          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                          transition: 'all 0.15s ease', '&:hover': { backgroundColor: 'var(--Hover)' },
-                        }}>
-                        <Box>
+                      <div key={value} onClick={() => handlePlatformChange(value)}
+                        className={'MuiBox-root omni-sp-opt' + (isSel ? ' omni-sp-opt-on' : '')}>
+                        <div className="MuiBox-root">
                           <BodySmall style={{
                             color: isSel ? 'var(--Buttons-Primary-Button)' : 'var(--Text)',
                             fontWeight: isSel ? 600 : 400,
@@ -182,26 +194,26 @@ export function SettingsPanel() {
                             {label}
                           </BodySmall>
                           <Caption style={{ color: 'var(--Text)', opacity: 0.7 }}>{note}</Caption>
-                        </Box>
+                        </div>
                         {isSel && (
-                          <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'var(--Buttons-Primary-Button)', flexShrink: 0 }} />
+                          <div className="MuiBox-root omni-sp-dot" />
                         )}
-                      </Box>
+                      </div>
                     );
                   })}
-                </Stack>
-              </Box>
+                </div>
+              </div>
 
-            </Stack>
-          </Box>
+            </div>
+          </div>
 
-          <Divider sx={{ my: 3, borderColor: 'var(--Border)' }} />
+          <hr className="MuiDivider-root MuiDivider-fullWidth omni-sp-hr omni-sp-hr-bottom" />
 
           <Button variant="primary-outline" size="small" onClick={handleReset}
-            sx={{ width: '100%' }}>
+            style={{ width: '100%' }}>
             Reset to Defaults
           </Button>
-        </Box>
+        </div>
       </Drawer>
     </>
   );
