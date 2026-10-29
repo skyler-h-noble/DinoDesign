@@ -212,7 +212,7 @@ import { ThemedZone, Surfaced } from '@omni-design/components';
 
 // AppBar themes ITSELF (barColor → data-theme on its own root). A
 // ThemedZone around it changes nothing; use one for a bar you build yourself.
-<AppBar mode="desktop" barColor="default" brand="My App" />
+<AppBar barColor="default" brand="My App" navLinks={[{ label: 'Home', href: '/' }]} />
 
 // Semantic alert zones
 <ThemedZone theme="Success" surface="Surface-Bright">
@@ -692,15 +692,19 @@ import {
 ### AppBar
 ```jsx
 // Sets its own data-theme from barColor — no ThemedZone needed.
-// mode="desktop" | "mobile": it does not switch by itself, so pick per
-// breakpoint (e.g. render mobile below 600px).
+// A site nav: navLinks render inline on a wide bar and fold into a menu
+// button (a drawer of the same links) below collapseAt — 900px by default.
+// The menu button appears only when there are links (or onMenuClick).
 <AppBar
-  mode="desktop"
-  barColor="default"
   brand="My App"
-  centerSlot={<HStack spacing={3}><Link href="#a">A</Link></HStack>}
+  barColor="default"
+  navLinks={[{ label: 'Features', href: '#features' }, { label: 'Pricing', href: '#pricing' }]}
   endSlot={<Button variant="default" size="small">Get started</Button>}
 />
+// menuType: 'auto' (default) | 'hamburger' (always) | 'expanded' (tabs) | 'none'
+// centerSlot replaces the middle with your own content (it does not collapse).
+// mode="mobile" is an APP-screen bar — mobileVariant 'search' | 'small' |
+// 'medium' | 'large' — not a site nav.
 ```
 
 ### Section — paint a region with the design system

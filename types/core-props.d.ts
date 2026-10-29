@@ -341,3 +341,50 @@ export interface FooterProps extends Native {
   copyrightYear?: number;
   children?: React.ReactNode;
 }
+
+export interface AppBarLink { label: React.ReactNode; href?: string; onClick?: React.MouseEventHandler<HTMLElement>; }
+export interface AppBarProps {
+  /** desktop (default; collapses its links below `collapseAt`) | mobile (an
+   *  app-screen bar: search or title — not a site nav). */
+  mode?: 'desktop' | 'mobile';
+  size?: Size;
+  barColor?: 'default' | 'primary' | 'primary-light' | 'white' | 'black';
+  surface?: Surface;
+  brand?: React.ReactNode;
+  onBrandClick?: React.MouseEventHandler<HTMLElement>;
+  /** Site links. Inline on a wide bar; below `collapseAt` they move into a
+   *  menu button's drawer. Strings work too. */
+  navLinks?: Array<AppBarLink | string>;
+  /** px; default 900 (the Adaptive Nav's tablet-horizontal breakpoint). */
+  collapseAt?: number;
+  /** auto (default) | hamburger (always the menu button) | expanded (tabs) | none */
+  menuType?: 'auto' | 'hamburger' | 'expanded' | 'none';
+  showMenu?: boolean;
+  onMenuClick?: React.MouseEventHandler<HTMLElement>;
+  /** Replaces the middle (links / search) with your own content. */
+  centerSlot?: React.ReactNode;
+  /** Replaces the right side (login / actions) with your own content. */
+  endSlot?: React.ReactNode;
+  searchPosition?: 'left' | 'right' | 'none';
+  searchValue?: string;
+  onSearchChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  searchPlaceholder?: string;
+  loginType?: 'login' | 'avatar' | 'none';
+  onLogin?: () => void;
+  onSignOut?: () => void;
+  user?: { displayName?: string; photoURL?: string } | null;
+  brandType?: 'name' | 'logo';
+  companyName?: string;
+  rightButtons?: Array<{ icon: React.ReactNode; label?: string; raw?: boolean }>;
+  showRightButtons?: boolean;
+  /** Figma's AppBar Layout, drawn exactly as the Figma set does. */
+  layout?: 'left-brand' | 'center-brand' | 'title';
+  title?: React.ReactNode;
+  /** mode="mobile" only. */
+  mobileVariant?: 'search' | 'small' | 'medium' | 'large';
+  subtitle?: React.ReactNode;
+  actionIcon?: React.ReactNode;
+  children?: React.ReactNode;
+  className?: string;
+  sx?: Sx;
+}

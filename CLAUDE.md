@@ -54,14 +54,14 @@ headings, borders, buttons — picks the right contrast-checked colors.
 
 ```jsx
 import {
-  AppBar, Section, Container, Grid, VStack, HStack, Card, Button, Link, Footer,
+  AppBar, Section, Container, Grid, VStack, Card, Button, Footer,
   DisplayLarge, H2, Subtitle, Body, BodySmall, Eyebrow, IconBadge,
 } from '@omni-design/components';
 import HomeIcon from '@mui/icons-material/Home';
 
 <>
-  <AppBar mode="desktop" brand="Acme"
-          centerSlot={<HStack spacing={3}><Link href="#features">Features</Link></HStack>}
+  <AppBar brand="Acme"
+          navLinks={[{ label: 'Features', href: '#features' }, { label: 'Pricing', href: '#pricing' }]}
           endSlot={<Button variant="default" size="small">Get started</Button>} />
 
   <Section theme="Default" surface="Surface" padding="80px 24px">
@@ -103,7 +103,7 @@ import HomeIcon from '@mui/icons-material/Home';
 | Center + max width | `Container` | `maxWidth` (`sm`/`md`/`lg`/`xl`) — layout only, paints nothing |
 | Columns | `Grid` | container: `container spacing`; child: `size={{ xs: 12, md: 4 }}` |
 | Stacks | `VStack`, `HStack` | `spacing`, `alignItems`, `justifyContent` |
-| Top bar | `AppBar` | `mode` (`desktop`/`mobile` — pick per breakpoint, it does not switch itself), `brand`, `centerSlot`, `endSlot`, `barColor` |
+| Site nav | `AppBar` | `brand`, `navLinks` (`{ label, href }` — inline on wide screens, a menu button below 900px; change with `collapseAt`), `endSlot`, `barColor`. `mode="mobile"` is an app-screen bar (search / title), not a site nav |
 | Card | `Card` | pads itself; `variant` (`solid`/`light`/`dark`), `color`, `elevated`, `clickable` |
 | Button | `Button` | `variant`, `size` (`small`/`medium`/`large`), `startIcon`, `endIcon`, `fullWidth` |
 | Segmented choice | `ToggleButtonGroup` | `value`, `onChange`; each child `<Button value="…">` (no `variant` on children) |

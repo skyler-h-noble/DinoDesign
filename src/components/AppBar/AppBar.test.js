@@ -1,6 +1,6 @@
 // src/components/AppBar/AppBar.test.js
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { AppBar, DesktopAppBar, MobileAppBar } from './AppBar';
 import CheckIcon from '@mui/icons-material/Check';
 import { axe } from 'jest-axe';
@@ -91,10 +91,39 @@ describe('DesktopAppBar', () => {
     expect(screen.getByText('TestCo')).toBeInTheDocument();
   });
   test('hamburger menu', () => {
-    render(<DesktopAppBar menuType="hamburger" />);
+    render(<DesktopAppBar menuType="hamburger" navLinks={['Home']} />);
     /* The accessible name is "Open navigation menu" — naming the ACTION, not
        the glyph, which is the lib's own icon-button rule. */
     expect(screen.getByLabelText('Open navigation menu')).toBeInTheDocument();
+  });
+  /* The menu button opens a drawer of navLinks. Without links (or an
+     onMenuClick) there is nothing to open, so there is no button — it used to
+     open a drawer of placeholder Home / Products / About links. */
+  test('no menu button when there is nothing to open', () => {
+    render(<DesktopAppBar brand="Acme" endSlot={<span>end</span>} />);
+    expect(screen.queryByLabelText('Open navigation menu')).not.toBeInTheDocument();
+  });
+  test('showMenu={false} hides the menu button', () => {
+    render(<DesktopAppBar menuType="hamburger" navLinks={['Home']} showMenu={false} />);
+    expect(screen.queryByLabelText('Open navigation menu')).not.toBeInTheDocument();
+  });
+  test('auto: links inline, and the menu button opens the same links', () => {
+    render(<DesktopAppBar brand="Acme" navLinks={[{ label: 'Features', href: '#features' }, { label: 'Pricing', href: '#pricing' }]} />);
+    const nav = screen.getByLabelText('Main navigation');
+    expect(nav.querySelector('a[href="#features"]')).not.toBeNull();
+    fireEvent.click(screen.getByLabelText('Open navigation menu'));
+    expect(screen.getAllByText('Pricing').length).toBeGreaterThan(1);
+  });
+  test('auto: collapses below collapseAt (default 900px)', () => {
+    render(<DesktopAppBar brand="Acme" navLinks={['A']} />);
+    const css = Array.from(document.styleSheets).flatMap((sh) => Array.from(sh.cssRules).map((r) => r.cssText)).join('\n');
+    expect(css).toMatch(/max-width:\s*899\.98px/);
+  });
+  test('a bar with navLinks has no search unless asked', () => {
+    const { container, rerender } = render(<DesktopAppBar navLinks={['A']} />);
+    expect(container.querySelector('input')).toBeNull();
+    rerender(<DesktopAppBar navLinks={['A']} searchPosition="right" />);
+    expect(container.querySelector('input')).not.toBeNull();
   });
   test('expanded nav with 3 links', () => {
     render(<DesktopAppBar menuType="expanded" navLinks={['Home', 'About', 'Help']} />);

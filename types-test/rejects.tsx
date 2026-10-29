@@ -1,7 +1,7 @@
 // Each line must be a TYPE ERROR. `@ts-expect-error` fails the build if the
 // line compiles, so this file proves the core types reject real mistakes —
 // the ones that used to fail silently at runtime.
-import { Section, Button, Card, Body, H2, Grid, IconBadge, Chip, Avatar } from '@omni-design/components';
+import { Section, Button, Card, Body, H2, Grid, IconBadge, Chip, Avatar, AppBar } from '@omni-design/components';
 
 export const rejects = (
   <>
@@ -29,5 +29,9 @@ export const rejects = (
     <Chip variant="primary-outline" />
     {/* @ts-expect-error — not an avatar size */}
     <Avatar size="huge" />
+    {/* @ts-expect-error — there is no "title" mobile variant (it fell through to large) */}
+    <AppBar mode="mobile" mobileVariant="title" />
+    {/* @ts-expect-error — not a menu type */}
+    <AppBar menuType="drawer" />
   </>
 );

@@ -102,6 +102,8 @@ const CORE = [
   ['Avatar/Avatar', 'AvatarProps', 'Avatar', ['Avatar']],
   ['TextField/TextField', 'TextFieldProps', 'TextField', ['TextField']],
   ['Footer/Footer', 'FooterProps', 'Footer', ['Footer']],
+  ['AppBar/AppBar', 'AppBarProps', 'DesktopAppBar', ['AppBar']],
+  ['AppBar/AppBar', 'AppBarProps', 'MobileAppBar', []],
 ];
 
 /** Every member a props interface declares, following `extends` of local
@@ -194,5 +196,5 @@ writeFileSync(indexDts, readFileSync(indexDts, 'utf8')
   + '\nexport type { Theme, Surface, Color, Size, ButtonVariant, TextColor, HeadingColor, IconShape, AvatarShape, '
   + 'SectionProps, ContainerProps, GridProps, StackProps, CardProps, ButtonProps, ToggleButtonGroupProps, LinkProps, '
   + 'TextProps, HeadingProps, TypographyProps, IconProps, IconBadgeProps, ChipProps, AvatarProps, TextFieldProps, '
-  + 'FooterProps, FooterColumn, FooterLink, FooterSocialLink } from "../core-props";\n');
+  + 'FooterProps, FooterColumn, FooterLink, FooterSocialLink, AppBarProps, AppBarLink } from "../core-props";\n');
 console.log('fix-dts: ' + typed + ' core components given exact prop types');

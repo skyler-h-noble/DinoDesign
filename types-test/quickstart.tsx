@@ -2,7 +2,7 @@
 // quickstart example must compile against the published types.
 
 import {
-  AppBar, Section, Container, Grid, VStack, HStack, Card, Button, Link, Footer,
+  AppBar, Section, Container, Grid, VStack, Card, Button, Footer,
   DisplayLarge, H2, Subtitle, Body, BodySmall, Eyebrow, IconBadge,
 } from '@omni-design/components';
 import HomeIcon from '@mui/icons-material/Home';
@@ -11,8 +11,8 @@ import HomeIcon from '@mui/icons-material/Home';
 export function QuickstartPage() {
   return (
 <>
-  <AppBar mode="desktop" brand="Acme"
-          centerSlot={<HStack spacing={3}><Link href="#features">Features</Link></HStack>}
+  <AppBar brand="Acme"
+          navLinks={[{ label: 'Features', href: '#features' }, { label: 'Pricing', href: '#pricing' }]}
           endSlot={<Button variant="default" size="small">Get started</Button>} />
 
   <Section theme="Default" surface="Surface" padding="80px 24px">

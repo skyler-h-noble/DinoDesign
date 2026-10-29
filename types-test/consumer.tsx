@@ -11,6 +11,8 @@ export function Page() {
     <OmniDesignProvider themeURL={OMNI_DEFAULT_THEME_URL}>
       <ThemedZone theme="App-Bar" surface="Surface-Bright" as="header">
         <AppBar mode="desktop" brand="OmniDesign" endSlot={<Button variant="default" size="small">Go</Button>} />
+        <AppBar brand="OmniDesign" collapseAt={600} menuType="auto"
+                navLinks={[{ label: 'Features', href: '#features' }, 'Pricing', { label: 'Blog', onClick: () => {} }]} />
       </ThemedZone>
       <Section theme="Primary" surface="Surface" padding="80px 24px" id="hero">
         <Container maxWidth="lg">

@@ -9,6 +9,7 @@ import { Tabs, TabList, Tab } from '../Tabs/Tabs';
 import { Drawer } from '../Drawer/Drawer';
 import { H3 } from '../Typography';
 import { Button } from '../Button/Button';
+import { Link } from '../Link/Link';
 /* Level from the Figma effect style that NAMES this component.
    The five Effect-Levels are the five Figma effect styles, Elevations/Level-1 … Level-5:
      1  Elevations/Level-1 (Card, Accordion, Handle, Alert, Bottom-Sheet)
@@ -88,9 +89,24 @@ function AppBarIconButton({ children, onClick, ariaLabel }) {
 function DesktopAppBar({
   barColor = 'default',
   surface = 'Surface',
-  loginType = 'login', menuType = 'hamburger', brandType = 'name',
-  searchPosition = 'right', companyName = 'Company',
-  navLinks = ['Home', 'Products', 'About'],
+  /* menuType — how navLinks show:
+       auto      (default) inline on a wide bar; below `collapseAt` they fold
+                 into a menu button that opens a drawer of the SAME links
+       hamburger always the menu button
+       expanded  always inline, as tabs
+       none      no menu at all
+     It defaulted to 'hamburger' with navLinks defaulting to Home / Products /
+     About, so every bar — including ones whose links lived in centerSlot —
+     drew a menu button that opened a drawer of placeholder links. */
+  loginType = 'login', menuType = 'auto', brandType = 'name',
+  /* 'left' | 'right' | 'none'. Unset: a bar with navLinks is a site nav and
+     gets no search; a bar without keeps the search it always had. */
+  searchPosition: searchPositionProp, companyName = 'Company',
+  /* Links: { label, href } / { label, onClick }, or plain strings. */
+  navLinks = [],
+  /* Width (px) below which `auto` folds the links into the menu button —
+     900 is the Adaptive Nav's tablet-horizontal breakpoint. */
+  collapseAt = 900,
   rightButtons = [], showRightButtons = false,
   onMenuClick,
   user,
@@ -119,21 +135,30 @@ function DesktopAppBar({
   const barTheme = THEME_MAP[barColor] || THEME_MAP.default;
   const dataTheme = barTheme.theme;
   const dataSurface = barTheme.surface || surface;
-  const effectiveMenu = (menuType === 'expanded' && navLinks.length > 3) ? 'hamburger' : menuType;
+  const links = navLinks.map((l) => (typeof l === 'string' ? { label: l } : l));
+  const searchPosition = searchPositionProp ?? (links.length ? 'none' : 'right');
+  const effectiveMenu = (menuType === 'expanded' && links.length > 3) ? 'hamburger' : menuType;
+  /* The menu button only appears when it opens something: links for the
+     drawer, or the caller's own onMenuClick. showMenu={false} hides it in
+     every layout (it used to reach the `layout` bar only). */
+  const canOpen = links.length > 0 || Boolean(onMenuClick);
+  const menuButton = showMenu && canOpen && (effectiveMenu === 'hamburger' || effectiveMenu === 'auto');
+  const below = '@media (max-width: ' + (collapseAt - 0.02) + 'px)';
 
   // The navigation drawer the menu button opens — shared by both bars.
   const navDrawer = (
       <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} anchor="left" size="small">
         <Box component="nav" aria-label="Main navigation" sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, py: 1 }}>
-          {navLinks.map((link) => (
+          {links.map((link, i) => (
             <Button
-              key={link}
+              key={typeof link.label === 'string' ? link.label : i}
               variant="ghost"
               size="medium"
-              onClick={() => setDrawerOpen(false)}
+              href={link.href}
+              onClick={(e) => { setDrawerOpen(false); if (link.onClick) link.onClick(e); }}
               sx={{ justifyContent: 'flex-start', width: '100%' }}
             >
-              {link}
+              {link.label}
             </Button>
           ))}
         </Box>
@@ -241,10 +266,15 @@ function DesktopAppBar({
     >
       {children || (
         <>
-          {effectiveMenu === 'hamburger' && (
-            <AppBarIconButton ariaLabel="Open navigation menu" onClick={onMenuClick || (() => setDrawerOpen(true))}>
-              <MenuIcon sx={{ fontSize: 'inherit' }} />
-            </AppBarIconButton>
+          {menuButton && (
+            <Box
+              className="appbar-menu"
+              sx={effectiveMenu === 'auto' ? { display: 'none', [below]: { display: 'contents' } } : { display: 'contents' }}
+            >
+              <AppBarIconButton ariaLabel="Open navigation menu" onClick={onMenuClick || (() => setDrawerOpen(true))}>
+                <MenuIcon sx={{ fontSize: 'inherit' }} />
+              </AppBarIconButton>
+            </Box>
           )}
 
           {/* The wordmark is H3 — the STYLE, on a span or a button.
@@ -312,12 +342,28 @@ function DesktopAppBar({
               {effectiveMenu === 'expanded' && (
                 <Tabs defaultValue={0} variant="standard" color="default" size={barSize} sx={{ ml: 2, minHeight: 0 }}>
                   <TabList aria-label="Main navigation">
-                    {navLinks.map((link) => (
-                      <Tab key={link}>{link}</Tab>
+                    {links.map((link, i) => (
+                      <Tab key={i}>{link.label}</Tab>
                     ))}
                   </TabList>
                 </Tabs>
               )}
+
+              {/* auto: the links inline and centred on a wide bar; hidden below
+                  collapseAt, where the menu button opens the same list. */}
+              {effectiveMenu === 'auto' && links.length > 0 ? (
+                <>
+                  <Box sx={{ flex: 1 }} />
+                  <Box
+                    component="nav" aria-label="Main navigation" className="appbar-links"
+                    sx={{ display: 'flex', alignItems: 'center', gap: 'var(--Sizing-3, 24px)', flexShrink: 0, [below]: { display: 'none' } }}
+                  >
+                    {links.map((link, i) => (
+                      <Link key={typeof link.label === 'string' ? link.label : i} href={link.href} onClick={link.onClick}>{link.label}</Link>
+                    ))}
+                  </Box>
+                </>
+              ) : null}
 
               <Box sx={{ flex: 1 }} />
 
@@ -388,7 +434,9 @@ function MobileAppBar({
   surface = 'Surface',
   title = 'Page Title', subtitle = 'Subtitle text',
   actionIcon, companyName = 'Company',
-  navLinks = ['Home', 'Products', 'About'],
+  /* { label, href } / { label, onClick } or strings. No placeholder default:
+     the menu button only appears when there are links to open. */
+  navLinks = [],
   className = '', sx = {},
 }) {
   const barSize = React.useContext(AppBarSizeContext);
@@ -410,18 +458,20 @@ function MobileAppBar({
     'data-surface': dataSurface,
   };
 
+  const links = navLinks.map((l) => (typeof l === 'string' ? { label: l } : l));
   const navDrawer = (
     <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} anchor="left" size="small">
       <Box component="nav" aria-label="Main navigation" sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, py: 1 }}>
-        {navLinks.map((link) => (
+        {links.map((link, i) => (
           <Button
-            key={link}
+            key={typeof link.label === 'string' ? link.label : i}
             variant="ghost"
             size="medium"
-            onClick={() => setDrawerOpen(false)}
+            href={link.href}
+            onClick={(e) => { setDrawerOpen(false); if (link.onClick) link.onClick(e); }}
             sx={{ justifyContent: 'flex-start', width: '100%' }}
           >
-            {link}
+            {link.label}
           </Button>
         ))}
       </Box>
@@ -434,9 +484,11 @@ function MobileAppBar({
       <Box component="header" role="banner" className={'appbar appbar-mobile appbar-mobile-search appbar-' + barColor + ' ' + className}
         {...commonProps}
         sx={{ ...containerSx, display: 'flex', alignItems: 'center', height: barHeight(barSize), px: 1.5, gap: 1.5 }}>
-        <AppBarIconButton ariaLabel="Open navigation menu" onClick={() => setDrawerOpen(true)}>
-          <MenuIcon sx={{ fontSize: 'inherit' }} />
-        </AppBarIconButton>
+        {links.length > 0 && (
+          <AppBarIconButton ariaLabel="Open navigation menu" onClick={() => setDrawerOpen(true)}>
+            <MenuIcon sx={{ fontSize: 'inherit' }} />
+          </AppBarIconButton>
+        )}
         <SearchField
           placeholder={'Search ' + companyName}
           size="small"

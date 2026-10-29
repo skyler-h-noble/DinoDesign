@@ -105,7 +105,7 @@ export function AppBarShowcase() {
   const [barColor, setBarColor]             = useState('default');
   const [surface, setSurface]               = useState('Surface');
   const [loginType, setLoginType]           = useState('login');
-  const [menuType, setMenuType]             = useState('hamburger');
+  const [menuType, setMenuType]             = useState('auto');
   const [brandType, setBrandType]           = useState('name');
   const [searchPosition, setSearchPosition] = useState('right');
   const [mobileVariant, setMobileVariant]   = useState('search');
@@ -126,11 +126,12 @@ export function AppBarShowcase() {
       if (barColor !== 'default')      props.push('barColor="' + barColor + '"');
       if (surface !== 'Surface')       props.push('surface="' + surface + '"');
       if (loginType !== 'login')       props.push('loginType="' + loginType + '"');
-      if (menuType !== 'hamburger')    props.push('menuType="' + menuType + '"');
+      if (menuType !== 'auto')         props.push('menuType="' + menuType + '"');
       if (brandType !== 'name')        props.push('brandType="' + brandType + '"');
-      if (searchPosition !== 'right')  props.push('searchPosition="' + searchPosition + '"');
-      const propsStr = props.length ? '\n  ' + props.join('\n  ') + '\n' : '';
-      return '<AppBar mode="desktop"' + (propsStr ? propsStr : ' ') + 'companyName="My App" />';
+      // The preview passes navLinks, which turns the search off unless asked.
+      if (searchPosition !== 'none')   props.push('searchPosition="' + searchPosition + '"');
+      return '<AppBar\n  companyName="My App"\n  navLinks={[\'Home\', \'Products\', \'About\']}'
+        + (props.length ? '\n  ' + props.join('\n  ') : '') + '\n/>';
     } else {
       const props = ['mode="mobile"', 'mobileVariant="' + mobileVariant + '"'];
       if (barColor !== 'default') props.push('barColor="' + barColor + '"');
@@ -256,7 +257,7 @@ export function AppBarShowcase() {
                       <Box sx={{ mt: 3 }}>
                         <EyebrowSmall style={{ color: 'var(--Text-Quiet)', display: 'block', marginBottom: 8 }}>MENU TYPE</EyebrowSmall>
                         <Stack direction="row" spacing={1}>
-                          {['hamburger', 'expanded'].map((m) => (
+                          {['auto', 'hamburger', 'expanded', 'none'].map((m) => (
                             <ControlButton key={m} label={cap(m)} selected={menuType === m} onClick={() => setMenuType(m)} />
                           ))}
                         </Stack>
