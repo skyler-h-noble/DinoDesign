@@ -1,14 +1,8 @@
 // src/components/Loader/Loader.js
 import React from 'react';
-import {
-  LinearProgress,
-  Box,
-  Stack,
-  Typography,
-  Skeleton,
-  Paper,
-} from '@mui/material';
 import { Body } from '../Typography';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 
 const LOADER_COLOR = {
   default: 'Default', primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary',
@@ -27,30 +21,23 @@ const LOADER_COLOR = {
  * Size is Figma's Component-Size Other/Loader: 24 / 32 / 56. */
 export const LOADER_SIZE_MAP = { small: 24, medium: 32, large: 56 };
 
-export function LoaderRing({ size = 'medium', color = 'primary', className = '', sx = {}, ...props }) {
+export function LoaderRing({ size = 'medium', color = 'primary', className = '', sx = {}, style, ...props }) {
+  useStaticStyles('omni-loader');
   const d = typeof size === 'number' ? size : (LOADER_SIZE_MAP[size] ?? LOADER_SIZE_MAP.medium);
   const C = LOADER_COLOR[color] || 'Primary';
   const ring = d * 0.1;
-  return (
-    <Box
-      role="progressbar"
-      className={'loader-ring ' + className}
-      sx={{
-        width: d, height: d, flexShrink: 0, borderRadius: '50%',
-        /* Figma's Position 1: the hard edge at 6 o'clock, the border colour
-           there fading clockwise round to the Background. */
-        background: 'conic-gradient(from 180deg, var(--Buttons-' + C + '-Border), var(--Background))',
-        // Cut the disc to the ring: transparent inside 90% of the radius.
-        WebkitMask: 'radial-gradient(farthest-side, transparent calc(100% - ' + ring + 'px), #000 calc(100% - ' + ring + 'px))',
-        mask: 'radial-gradient(farthest-side, transparent calc(100% - ' + ring + 'px), #000 calc(100% - ' + ring + 'px))',
-        animation: 'loader-ring-spin 1s linear infinite',
-        '@keyframes loader-ring-spin': { to: { transform: 'rotate(360deg)' } },
-        '@media (prefers-reduced-motion: reduce)': { animationDuration: '3s' },
-        ...sx,
-      }}
-      {...props}
-    />
-  );
+  /* Figma's Position 1: the hard edge at 6 o'clock, the border colour there
+     fading clockwise round to the Background; the disc cut to the ring by a
+     mask, transparent inside 90% of the radius. The sizes and the palette
+     arrive as custom properties (see .omni-ld-ring). */
+  const ringProps = {
+    role: 'progressbar',
+    className: 'loader-ring ' + className + ' MuiBox-root omni-ld-ring',
+    ...props,
+    style: { '--_lr-d': d + 'px', '--_lr-w': ring + 'px', '--_lr-c': 'var(--Buttons-' + C + '-Border)', ...style },
+  };
+  if (hasSx(sx)) return <SxBox sx={sx} {...ringProps} />;
+  return <div {...ringProps} />;
 }
 
 /* ─── Loader styles ───────────────────────────────────────────────────────
@@ -71,92 +58,156 @@ export function LoaderRing({ size = 'medium', color = 'primary', className = '',
  * Geometry is drawn at Figma's 32 and scaled: k = size / 32. */
 export const LOADER_TYPES = ['spinner', 'orbit', 'bounce', 'ripple', 'dual-ring', 'bars'];
 const MULTI = ['var(--Buttons-Primary-Border)', 'var(--Buttons-Secondary-Border)', 'var(--Buttons-Tertiary-Border)'];
-const KEYFRAMES = {
-  '@keyframes omni-loader-turn': { to: { transform: 'rotate(360deg)' } },
-  '@keyframes omni-loader-turn-back': { to: { transform: 'rotate(-360deg)' } },
-  '@keyframes omni-loader-pop': { '0%, 100%': { transform: 'scale(.6)' }, '50%': { transform: 'scale(1)' } },
-  '@keyframes omni-loader-hop': {
-    '0%, 60%, 100%': { transform: 'translateY(0)', animationTimingFunction: 'cubic-bezier(.3, 0, .2, 1)' },
-    '30%': { transform: 'translateY(calc(var(--omni-loader-k) * -9px))', animationTimingFunction: 'cubic-bezier(.6, 0, .8, 1)' },
-  },
+/* ── Static sheet ───────────────────────────────────────────────────────
+   Every part of every loader as plain classes (they were MUI Boxes, Stacks,
+   Typography, Skeleton, Paper and LinearProgress with an sx each), over the
+   same tokens. The MUI parts keep MUI's markup, class names and default-theme
+   values — Roboto, its type scale, its grey Paper shadow — so the helpers look
+   exactly as they did; only the engine is gone. */
+const MUI_FONT = '"Roboto","Helvetica","Arial",sans-serif';
+registerStaticStyles('omni-loader', [
+  /* LoaderRing */
+  '.omni-ld-ring{width:var(--_lr-d);height:var(--_lr-d);flex-shrink:0;border-radius:50%;'
+    + 'background:conic-gradient(from 180deg, var(--_lr-c), var(--Background));'
+    + '-webkit-mask:radial-gradient(farthest-side, transparent calc(100% - var(--_lr-w)), #000 calc(100% - var(--_lr-w)));'
+    + 'mask:radial-gradient(farthest-side, transparent calc(100% - var(--_lr-w)), #000 calc(100% - var(--_lr-w)));'
+    + 'animation:loader-ring-spin 1s linear infinite}',
+  '@keyframes loader-ring-spin{to{transform:rotate(360deg)}}',
+  '@media (prefers-reduced-motion: reduce){.omni-ld-ring{animation-duration:3s}}',
+  /* The loader styles. Geometry is per piece, inline (k = size / 32). */
+  '.omni-ld-g{position:relative;width:var(--_lg-d);height:var(--_lg-d);flex-shrink:0}',
+  '.omni-ld-p{position:absolute;box-sizing:border-box}',
+  '@keyframes omni-loader-turn{to{transform:rotate(360deg)}}',
+  '@keyframes omni-loader-turn-back{to{transform:rotate(-360deg)}}',
+  '@keyframes omni-loader-pop{0%,100%{transform:scale(.6)}50%{transform:scale(1)}}',
+  '@keyframes omni-loader-hop{0%,60%,100%{transform:translateY(0);animation-timing-function:cubic-bezier(.3, 0, .2, 1)}'
+    + '30%{transform:translateY(calc(var(--omni-loader-k) * -9px));animation-timing-function:cubic-bezier(.6, 0, .8, 1)}}',
   /* Grows the ring's box, not its scale: scaling thinned the 2px stroke to a
      hairline on the small rings, which is where the ripple starts. */
-  '@keyframes omni-loader-ripple': {
-    '0%': { inset: 'calc(var(--omni-loader-k) * 13px)', opacity: 1 },
-    '70%': { opacity: 0.6 },
-    '100%': { inset: 'calc(var(--omni-loader-k) * 1px)', opacity: 0 },
-  },
-  '@keyframes omni-loader-bar': { '0%, 100%': { transform: 'scaleY(.3)' }, '50%': { transform: 'scaleY(1)' } },
-};
-const SLOW = { '@media (prefers-reduced-motion: reduce)': { '&, & *': { animationDuration: '3s !important' } } };
+  '@keyframes omni-loader-ripple{0%{inset:calc(var(--omni-loader-k) * 13px);opacity:1}70%{opacity:0.6}100%{inset:calc(var(--omni-loader-k) * 1px);opacity:0}}',
+  '@keyframes omni-loader-bar{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}',
+  /* Reduced motion keeps every loader moving — a still loader reads as
+     frozen — but three times slower. */
+  '@media (prefers-reduced-motion: reduce){.omni-ld-g,.omni-ld-g *{animation-duration:3s !important}}',
+  /* MUI Stack: a flex column (or row); `spacing` is a margin on every child
+     after the first, which the child's own margin cannot outweigh. */
+  '.omni-ld-st{display:flex;flex-direction:column}',
+  '.omni-ld-row{flex-direction:row}',
+  '.omni-ld-center{align-items:center;justify-content:center}',
+  '.omni-ld-between{justify-content:space-between}',
+  ...[['1', '8px'], ['2', '16px'], ['v', 'var(--_ld-sp)']].map(([k, v]) => `.omni-ld-sp${k}>:not(style):not(style){margin:0}.omni-ld-sp${k}>:not(style)~:not(style){margin-top:${v}}`),
+  '.omni-ld-loader{gap:var(--Sizing-2, 16px);padding-top:32px;padding-bottom:32px}',
+  '.omni-ld-py4{padding-top:32px;padding-bottom:32px}',
+  /* MUI Typography, default theme */
+  `.omni-ld-ty{margin:0;font-family:${MUI_FONT}}`,
+  '.omni-ld-body2{font-weight:500;font-size:0.875rem;line-height:1.43;letter-spacing:0.01071em;color:var(--Text)}',
+  '.omni-ld-caption{font-weight:400;font-size:0.75rem;line-height:1.66;letter-spacing:0.03333em;color:var(--Text-Secondary)}',
+  /* MUI LinearProgress (LinearLoader) */
+  '.omni-ld-lp{position:relative;overflow:hidden;display:block;z-index:0;background-color:var(--Border-Variant);height:4px;border-radius:8px}',
+  '@media print{.omni-ld-lp{-webkit-print-color-adjust:exact;print-color-adjust:exact}}',
+  '.omni-ld-lpb{position:absolute;left:0;bottom:0;top:0;transform-origin:left;background-color:var(--Primary-Color-11)}',
+  '.omni-ld-lpb-d{width:100%;transition:transform .4s linear}',
+  '.omni-ld-lpb-1,.omni-ld-lpb-2{transition:transform .2s linear;width:auto}',
+  '.omni-ld-lpb-1{animation:omni-ld-indeterminate1 2.1s cubic-bezier(0.65, 0.815, 0.735, 0.395) infinite}',
+  '.omni-ld-lpb-2{--LinearProgressBar2-barColor:#1976d2;animation:omni-ld-indeterminate2 2.1s cubic-bezier(0.165, 0.84, 0.44, 1) 1.15s infinite}',
+  '@keyframes omni-ld-indeterminate1{0%{left:-35%;right:100%}60%{left:100%;right:-90%}100%{left:100%;right:-90%}}',
+  '@keyframes omni-ld-indeterminate2{0%{left:-200%;right:100%}60%{left:107%;right:-8%}100%{left:107%;right:-8%}}',
+  /* MUI Skeleton (pulse) and Paper (elevation 1) */
+  '.omni-ld-sk{display:block;height:1.2em;animation:omni-ld-pulse 2s ease-in-out 0.5s infinite;background-color:var(--Container-Low)}',
+  '.omni-ld-sk-r8{border-radius:8px}',
+  '.omni-ld-sk-r4{border-radius:4px}',
+  '.omni-ld-sk-text{margin-top:0;margin-bottom:0;height:auto;transform-origin:0 55%;transform:scale(1, 0.60);border-radius:4px/6.7px}',
+  '.omni-ld-sk-text:empty:before{content:"\\00a0"}',
+  '@keyframes omni-ld-pulse{0%{opacity:1}50%{opacity:0.4}100%{opacity:1}}',
+  '.omni-ld-paper{color:rgba(0, 0, 0, 0.87);transition:box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1);border-radius:4px;'
+    + '--Paper-shadow:0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);'
+    + 'box-shadow:var(--Paper-shadow);background-image:var(--Paper-overlay);padding:16px;background-color:var(--Container)}',
+  /* DotsLoader */
+  '.omni-ld-dots{display:flex;gap:8px}',
+  '.omni-ld-dot{width:8px;height:8px;border-radius:50%;background-color:var(--Primary-Color-11);animation:pulse 1.4s infinite;animation-delay:var(--_ld-delay)}',
+  '@keyframes pulse{0%{opacity:1}50%{opacity:0.5}100%{opacity:1}}',
+  /* PageLoader, OverlayLoader */
+  '.omni-ld-page{display:flex;align-items:center;justify-content:center;min-height:100vh;background-color:var(--Background)}',
+  '.omni-ld-ov{position:relative}',
+  '.omni-ld-ov-veil{position:absolute;top:0;left:0;right:0;bottom:0;background-color:rgba(0, 0, 0, 0.3);display:flex;'
+    + 'align-items:center;justify-content:center;border-radius:inherit;z-index:1000;backdrop-filter:blur(4px)}',
+].join('\n'));
+
+const SxBox = lazySxBox('Loader');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+/** The root of a helper: its static classes, plus the caller's sx when there is one. */
+function Root({ sx, className = '', children, ...props }) {
+  useStaticStyles('omni-loader');
+  if (hasSx(sx)) return <SxBox sx={sx} className={className} {...props}>{children}</SxBox>;
+  return <div className={className} {...props}>{children}</div>;
+}
+const join = (...c) => c.filter(Boolean).join(' ');
 
 function LoaderGraphic({ type, d, color, multicolor, ...rest }) {
   const C = LOADER_COLOR[color] || 'Primary';
   const tone = (i) => (multicolor ? MULTI[i] : 'var(--Buttons-' + C + '-Border)');
   const k = d / 32;
   const px = (n) => n * k + 'px';
-  const root = {
-    position: 'relative', width: d, height: d, flexShrink: 0,
-    '--omni-loader-k': k, ...KEYFRAMES, ...SLOW,
-  };
-  const piece = { position: 'absolute', boxSizing: 'border-box' };
+  useStaticStyles('omni-loader');
+  const rootStyle = { '--_lg-d': d + 'px', '--omni-loader-k': k };
+  const P = 'MuiBox-root omni-ld-p';
 
   if (type === 'orbit') {
     return (
-      <Box className="loader-graphic loader-orbit" sx={root} {...rest}>
-        <Box aria-hidden="true" sx={{ ...piece, inset: 0, animation: 'omni-loader-turn 1.2s linear infinite' }}>
+      <div className="loader-graphic loader-orbit MuiBox-root omni-ld-g" style={rootStyle} {...rest}>
+        <div aria-hidden="true" className={P} style={{ inset: 0, animation: 'omni-loader-turn 1.2s linear infinite' }}>
           {[0, 1, 2].map((i) => {
             const a = (-90 + i * 120) * Math.PI / 180;
-            return <Box key={i} sx={{ ...piece, width: px(8), height: px(8), borderRadius: '50%', backgroundColor: tone(i),
+            return <div key={i} className={P} style={{ width: px(8), height: px(8), borderRadius: '50%', backgroundColor: tone(i),
               left: px(16 + 11 * Math.cos(a) - 4), top: px(16 + 11 * Math.sin(a) - 4),
               animation: 'omni-loader-pop 1.2s ease-in-out ' + (i * -0.4) + 's infinite' }} />;
           })}
-        </Box>
-      </Box>
+        </div>
+      </div>
     );
   }
   if (type === 'bounce') {
     return (
-      <Box className="loader-graphic loader-bounce" sx={root} {...rest}>
+      <div className="loader-graphic loader-bounce MuiBox-root omni-ld-g" style={rootStyle} {...rest}>
         {[0, 1, 2].map((i) => (
-          <Box key={i} aria-hidden="true" sx={{ ...piece, width: px(8), height: px(8), borderRadius: '50%', backgroundColor: tone(i),
+          <div key={i} aria-hidden="true" className={P} style={{ width: px(8), height: px(8), borderRadius: '50%', backgroundColor: tone(i),
             left: px(i * 12), top: px(12), animation: 'omni-loader-hop .9s ' + (i * 0.12) + 's infinite' }} />
         ))}
-      </Box>
+      </div>
     );
   }
   if (type === 'ripple') {
     return (
-      <Box className="loader-graphic loader-ripple" sx={root} {...rest}>
+      <div className="loader-graphic loader-ripple MuiBox-root omni-ld-g" style={rootStyle} {...rest}>
         {[0, 1, 2].map((i) => (
-          <Box key={i} aria-hidden="true" sx={{ ...piece, inset: px(13), borderRadius: '50%', border: px(2) + ' solid ' + tone(i),
+          <div key={i} aria-hidden="true" className={P} style={{ inset: px(13), borderRadius: '50%', border: px(2) + ' solid ' + tone(i),
             opacity: 0, animation: 'omni-loader-ripple 1.8s linear ' + (i * -0.6) + 's infinite' }} />
         ))}
-      </Box>
+      </div>
     );
   }
   if (type === 'dual-ring') {
     const arcs = (c) => ({ borderTopColor: c, borderBottomColor: c, borderLeftColor: 'transparent', borderRightColor: 'transparent' });
     return (
-      <Box className="loader-graphic loader-dual-ring" sx={root} {...rest}>
-        <Box aria-hidden="true" sx={{ ...piece, inset: 0, borderRadius: '50%', borderWidth: px(3), borderStyle: 'solid', ...arcs(tone(0)),
+      <div className="loader-graphic loader-dual-ring MuiBox-root omni-ld-g" style={rootStyle} {...rest}>
+        <div aria-hidden="true" className={P} style={{ inset: 0, borderRadius: '50%', borderWidth: px(3), borderStyle: 'solid', ...arcs(tone(0)),
           animation: 'omni-loader-turn 1.1s linear infinite' }} />
-        <Box aria-hidden="true" sx={{ ...piece, inset: px(6), borderRadius: '50%', borderWidth: px(3), borderStyle: 'solid', ...arcs(tone(1)),
+        <div aria-hidden="true" className={P} style={{ inset: px(6), borderRadius: '50%', borderWidth: px(3), borderStyle: 'solid', ...arcs(tone(1)),
           transform: 'rotate(45deg)', animation: 'omni-loader-turn-back .9s linear infinite' }} />
-        <Box aria-hidden="true" sx={{ ...piece, left: px(13), top: px(13), width: px(6), height: px(6), borderRadius: '50%', backgroundColor: tone(2),
+        <div aria-hidden="true" className={P} style={{ left: px(13), top: px(13), width: px(6), height: px(6), borderRadius: '50%', backgroundColor: tone(2),
           animation: 'omni-loader-pop 1.1s ease-in-out infinite' }} />
-      </Box>
+      </div>
     );
   }
   if (type === 'bars') {
     return (
-      <Box className="loader-graphic loader-bars" sx={root} {...rest}>
+      <div className="loader-graphic loader-bars MuiBox-root omni-ld-g" style={rootStyle} {...rest}>
         {[0, 1, 2].map((i) => (
-          <Box key={i} aria-hidden="true" sx={{ ...piece, left: px(2 + i * 11), top: px(3), width: px(6), height: px(26), borderRadius: px(3),
+          <div key={i} aria-hidden="true" className={P} style={{ left: px(2 + i * 11), top: px(3), width: px(6), height: px(26), borderRadius: px(3),
             backgroundColor: tone(i), transformOrigin: 'center', transform: 'scaleY(.3)',
             animation: 'omni-loader-bar .9s ease-in-out ' + (i * 0.15) + 's infinite' }} />
         ))}
-      </Box>
+      </div>
     );
   }
   // spinner — one colour, always (Figma has no Multicolor Spinner)
@@ -200,19 +251,13 @@ export function Loader({
   // on the wrapper and role="progressbar" had no accessible name.
   'aria-label': ariaLabel = 'Loading',
   'aria-labelledby': ariaLabelledby,
+  className,
   ...props
 }) {
+  /* A centred column, Sizing-2 between the graphic and the message, 32px
+     above and below (MUI Stack's markup and class name, kept). */
   return (
-    <Stack
-      alignItems="center"
-      justifyContent="center"
-      sx={{
-        gap: 'var(--Sizing-2, 16px)',
-        py: 4,
-        ...sx,
-      }}
-      {...props}
-    
+    <Root sx={sx} className={join('MuiStack-root', className, 'omni-ld-st omni-ld-center omni-ld-loader')} {...props}
       data-theme={theme || undefined}
       data-surface={surface || undefined}
     >
@@ -229,7 +274,7 @@ export function Loader({
           --Text-Secondary (the secondary palette's text, not a muted one) at
           a literal 500 weight. */}
       {message && <Body>{message}</Body>}
-    </Stack>
+    </Root>
   );
 }
 
@@ -245,35 +290,39 @@ export function LinearLoader({
   value,
   label,
   sx = {},
+  className,
   ...props
 }) {
+  const det = value !== undefined;
+  /* MUI's LinearProgress markup and default theme, the bar in
+     --Primary-Color-11 over a --Border-Variant track. */
   return (
-    <Stack spacing={1} sx={{ ...sx }} {...props}>
+    <Root sx={sx} className={join('MuiStack-root', className, 'omni-ld-st omni-ld-sp1')} {...props}>
       {label && (
-        <Stack direction="row" justifyContent="space-between">
-          <Typography variant="body2" sx={{ color: 'var(--Text)', fontWeight: 500 }}>
+        <div className="MuiStack-root omni-ld-st omni-ld-row omni-ld-between">
+          <p className="MuiTypography-root MuiTypography-body2 omni-ld-ty omni-ld-body2">
             {label}
-          </Typography>
+          </p>
           {value !== undefined && (
-            <Typography variant="caption" sx={{ color: 'var(--Text-Secondary)' }}>
+            <span className="MuiTypography-root MuiTypography-caption omni-ld-ty omni-ld-caption">
               {value}%
-            </Typography>
+            </span>
           )}
-        </Stack>
+        </div>
       )}
-      <LinearProgress
-        variant={value !== undefined ? 'determinate' : 'indeterminate'}
-        value={value}
-        sx={{
-          backgroundColor: 'var(--Border-Variant)',
-          '& .MuiLinearProgress-bar': {
-            backgroundColor: 'var(--Primary-Color-11)',
-          },
-          height: 4,
-          borderRadius: 2,
-        }}
-      />
-    </Stack>
+      <span className={'MuiLinearProgress-root MuiLinearProgress-colorPrimary MuiLinearProgress-' + (det ? 'determinate' : 'indeterminate') + ' omni-ld-lp'}
+        role="progressbar" {...(det ? { 'aria-valuenow': Math.round(value), 'aria-valuemin': 0, 'aria-valuemax': 100 } : {})}>
+        {det ? (
+          <span className="MuiLinearProgress-bar MuiLinearProgress-bar1 MuiLinearProgress-barColorPrimary MuiLinearProgress-bar1Determinate omni-ld-lpb omni-ld-lpb-d"
+            style={{ transform: `translateX(${value - 100}%)` }} />
+        ) : (
+          <>
+            <span className="MuiLinearProgress-bar MuiLinearProgress-bar1 MuiLinearProgress-barColorPrimary MuiLinearProgress-bar1Indeterminate omni-ld-lpb omni-ld-lpb-1" />
+            <span className="MuiLinearProgress-bar MuiLinearProgress-bar2 MuiLinearProgress-barColorPrimary MuiLinearProgress-bar2Indeterminate omni-ld-lpb omni-ld-lpb-2" />
+          </>
+        )}
+      </span>
+    </Root>
   );
 }
 
@@ -290,22 +339,18 @@ export function SkeletonLoader({
   height = 100,
   spacing = 2,
   sx = {},
+  className,
+  style,
   ...props
 }) {
   return (
-    <Stack spacing={spacing} sx={{ ...sx }} {...props}>
+    <Root sx={sx} className={join('MuiStack-root', className, 'omni-ld-st omni-ld-spv')}
+      style={{ '--_ld-sp': typeof spacing === 'number' ? spacing * 8 + 'px' : spacing, ...style }} {...props}>
       {Array.from({ length: rows }).map((_, i) => (
-        <Skeleton
-          key={i}
-          variant="rectangular"
-          height={height}
-          sx={{
-            backgroundColor: 'var(--Container-Low)',
-            borderRadius: '8px',
-          }}
-        />
+        <span key={i} className="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse omni-ld-sk omni-ld-sk-r8"
+          style={{ height }} />
       ))}
-    </Stack>
+    </Root>
   );
 }
 
@@ -319,55 +364,21 @@ export function SkeletonLoader({
 export function DotsLoader({
   message = 'Loading',
   sx = {},
+  className,
   ...props
 }) {
   return (
-    <Stack
-      alignItems="center"
-      justifyContent="center"
-      spacing={2}
-      sx={{
-        py: 4,
-        ...sx,
-      }}
-      {...props}
-    >
-      <Box
-        sx={{
-          display: 'flex',
-          gap: 1,
-        }}
-      >
+    <Root sx={sx} className={join('MuiStack-root', className, 'omni-ld-st omni-ld-center omni-ld-sp2 omni-ld-py4')} {...props}>
+      <div className="MuiBox-root omni-ld-dots">
         {[0, 1, 2].map((i) => (
-          <Box
-            key={i}
-            sx={{
-              width: 8,
-              height: 8,
-              borderRadius: '50%',
-              backgroundColor: 'var(--Primary-Color-11)',
-              animation: `pulse 1.4s infinite`,
-              animationDelay: `${i * 0.2}s`,
-              '@keyframes pulse': {
-                '0%': {
-                  opacity: 1,
-                },
-                '50%': {
-                  opacity: 0.5,
-                },
-                '100%': {
-                  opacity: 1,
-                },
-              },
-            }}
-          />
+          <div key={i} className="MuiBox-root omni-ld-dot" style={{ '--_ld-delay': `${i * 0.2}s` }} />
         ))}
-      </Box>
+      </div>
       {/* Figma's Message: Body in --Text, Sizing-2 under the ring. It was
           --Text-Secondary (the secondary palette's text, not a muted one) at
           a literal 500 weight. */}
       {message && <Body>{message}</Body>}
-    </Stack>
+    </Root>
   );
 }
 
@@ -383,22 +394,13 @@ export function PageLoader({
   message = 'Loading page...',
   size = 60,
   sx = {},
+  className,
   ...props
 }) {
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        backgroundColor: 'var(--Background)',
-        ...sx,
-      }}
-      {...props}
-    >
+    <Root sx={sx} className={join(className, 'MuiBox-root omni-ld-page')} {...props}>
       <Loader size={size} message={message} />
-    </Box>
+    </Root>
   );
 }
 
@@ -414,42 +416,23 @@ export function SkeletonCard({
   lines = 3,
   showImage = true,
   sx = {},
+  className,
   ...props
 }) {
   return (
-    <Paper
-      sx={{
-        p: 2,
-        backgroundColor: 'var(--Container)',
-        ...sx,
-      }}
-      {...props}
-    >
-      <Stack spacing={2}>
+    <Root sx={sx} className={join('MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1', className, 'omni-ld-paper')} {...props}>
+      <div className="MuiStack-root omni-ld-st omni-ld-sp2">
         {showImage && (
-          <Skeleton
-            variant="rectangular"
-            height={200}
-            sx={{
-              backgroundColor: 'var(--Container-Low)',
-              borderRadius: 1,
-            }}
-          />
+          <span className="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse omni-ld-sk omni-ld-sk-r4" style={{ height: 200 }} />
         )}
-        <Stack spacing={1}>
+        <div className="MuiStack-root omni-ld-st omni-ld-sp1">
           {Array.from({ length: lines }).map((_, i) => (
-            <Skeleton
-              key={i}
-              variant="text"
-              height={i === 0 ? 24 : 16}
-              sx={{
-                backgroundColor: 'var(--Container-Low)',
-              }}
-            />
+            <span key={i} className="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse omni-ld-sk omni-ld-sk-text"
+              style={{ height: i === 0 ? 24 : 16 }} />
           ))}
-        </Stack>
-      </Stack>
-    </Paper>
+        </div>
+      </div>
+    </Root>
   );
 }
 
@@ -467,38 +450,18 @@ export function OverlayLoader({
   message = 'Loading...',
   children,
   sx = {},
+  className,
   ...props
 }) {
   return (
-    <Box
-      sx={{
-        position: 'relative',
-        ...sx,
-      }}
-      {...props}
-    >
+    <Root sx={sx} className={join(className, 'MuiBox-root omni-ld-ov')} {...props}>
       {children}
       {isLoading && (
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.3)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: 'inherit',
-            zIndex: 1000,
-            backdropFilter: 'blur(4px)',
-          }}
-        >
+        <div className="MuiBox-root omni-ld-ov-veil">
           <Loader size={40} message={message} />
-        </Box>
+        </div>
       )}
-    </Box>
+    </Root>
   );
 }
 

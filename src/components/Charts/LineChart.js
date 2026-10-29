@@ -1,12 +1,11 @@
 // src/components/Charts/LineChart.js
 import React, { useEffect, useId, useState } from 'react';
-import { Box } from '@mui/material';
 import {
   toNumbers, toLabels, extent, bands, scaleY,
   linePath, smoothPath, areaPath, ticks,
 } from './geometry';
 import { CHART_TOKENS, CHART_LABEL_TYPE } from './tokens';
-import { ChartTable, ChartReadout, ChartHitTargets, useChartHover, CHART_MOTION } from './a11y';
+import { ChartTable, ChartReadout, ChartHitTargets, useChartHover, CHART_MOTION, ChartFigure } from './a11y';
 
 /**
  * LineChart — one series, straight or curved, with an optional area fill.
@@ -76,10 +75,9 @@ export function LineChart({
   const baseY = padTop + plotH;
 
   return (
-    <Box
-      component="figure"
+    <ChartFigure
       className={'line-chart ' + className}
-      sx={{ display: 'block', width: '100%', m: 0, position: 'relative', ...sx }}
+      sx={sx}
       {...props}
     >
       <svg
@@ -171,7 +169,7 @@ export function LineChart({
         caption={label || `Line chart, ${values.length} points`}
         labels={labels} values={values}
       />
-    </Box>
+    </ChartFigure>
   );
 }
 

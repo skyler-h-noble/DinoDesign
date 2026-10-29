@@ -1,6 +1,7 @@
 // src/components/CircularProgress/CircularProgress.js
 import React from 'react';
-import { Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 
 /**
  * CircularProgress Component
@@ -39,6 +40,19 @@ const SIZE_MAP = {
   large:  { diameter: 80, thickness: 10, fontSize: '16px' },
 };
 
+/* The frame and the centre label as plain elements on a static sheet (they
+   were MUI Boxes with an sx each); the SVG is unchanged. Diameter and label
+   size are per instance, so they arrive as custom properties. */
+registerStaticStyles('omni-circular-progress', [
+  '.omni-cp{position:relative;display:inline-flex;align-items:center;justify-content:center;'
+    + 'width:var(--_cp-d);height:var(--_cp-d);flex-shrink:0}',
+  '.omni-cp-spin{animation:circular-progress-spin 1.2s linear infinite}',
+  '@keyframes circular-progress-spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}',
+  '.omni-cp-label{position:relative;z-index:1;font-size:var(--_cp-fs);font-weight:700;font-family:inherit;line-height:1;color:var(--Text);user-select:none}',
+].join('\n'));
+const SxBox = lazySxBox('CircularProgress');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
 export function CircularProgress({
   value,
   color = 'default',
@@ -50,6 +64,7 @@ export function CircularProgress({
   sx = {},
   ...props
 }) {
+  useStaticStyles('omni-circular-progress');
   const C = COLOR_LABEL_MAP[color] || 'Default';
   /* `size` takes a named step OR a diameter in px.
    *
@@ -79,41 +94,23 @@ export function CircularProgress({
   const arc = Math.max(0, fraction * circumference - 2 - w);
   const fillColor = 'var(--Buttons-' + C + '-Border)';
 
+  const rootProps = {
+    role: 'progressbar',
+    'aria-valuenow': hasValue ? Math.round(clampedValue) : undefined,
+    'aria-valuemin': hasValue ? 0 : undefined,
+    'aria-valuemax': hasValue ? 100 : undefined,
+    'aria-label': hasValue ? Math.round(clampedValue) + '% progress' : 'Loading',
+    className:
+      'circular-progress circular-progress-' + size + ' circular-progress-' + color
+      + (hasValue ? ' circular-progress-value' : ' circular-progress-indeterminate')
+      + ' ' + className + ' MuiBox-root omni-cp' + (hasValue ? '' : ' omni-cp-spin'),
+    ...props,
+    style: { '--_cp-d': s.diameter + 'px', '--_cp-fs': s.fontSize, ...props.style },
+  };
+  const Root = hasSx(sx) ? SxBox : 'div';
+
   return (
-    <Box
-      role="progressbar"
-      aria-valuenow={hasValue ? Math.round(clampedValue) : undefined}
-      aria-valuemin={hasValue ? 0 : undefined}
-      aria-valuemax={hasValue ? 100 : undefined}
-      aria-label={
-        hasValue
-          ? Math.round(clampedValue) + '% progress'
-          : 'Loading'
-      }
-      className={
-        'circular-progress circular-progress-' + size + ' circular-progress-' + color
-        + (hasValue ? ' circular-progress-value' : ' circular-progress-indeterminate')
-        + ' ' + className
-      }
-      sx={{
-        position: 'relative',
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: s.diameter + 'px',
-        height: s.diameter + 'px',
-        flexShrink: 0,
-        ...(!hasValue && {
-          animation: 'circular-progress-spin 1.2s linear infinite',
-          '@keyframes circular-progress-spin': {
-            '0%':   { transform: 'rotate(0deg)' },
-            '100%': { transform: 'rotate(360deg)' },
-          },
-        }),
-        ...sx,
-      }}
-      {...props}
-    >
+    <Root {...(hasSx(sx) ? { sx } : {})} {...rootProps}>
       <svg
         viewBox={'0 0 ' + D + ' ' + D}
         width={D}
@@ -139,24 +136,11 @@ export function CircularProgress({
 
       {/* Center content: value label or children */}
       {(showValue || children) && hasValue && (
-        <Box
-          className="circular-progress-label"
-          aria-hidden="true"
-          sx={{
-            position: 'relative',
-            zIndex: 1,
-            fontSize: s.fontSize,
-            fontWeight: 700,
-            fontFamily: 'inherit',
-            lineHeight: 1,
-            color: 'var(--Text)',
-            userSelect: 'none',
-          }}
-        >
+        <div className="circular-progress-label MuiBox-root omni-cp-label" aria-hidden="true">
           {children || Math.round(clampedValue) + '%'}
-        </Box>
+        </div>
       )}
-    </Box>
+    </Root>
   );
 }
 

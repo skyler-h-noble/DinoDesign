@@ -1,7 +1,8 @@
 // src/components/Table/Table.js
 import React from 'react';
-import { Box } from '@mui/material';
-import { Ghost, ghostBlockSx } from '../_ghost';
+import { Ghost } from '../_ghost';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 
 /**
  * Table Component
@@ -44,6 +45,51 @@ const SIZE_MAP = {
   large:  { py: '12px', px: '16px', fontSize: '16px', headerFontSize: '14px' },
 };
 
+// --- Static sheet --------------------------------------------------------------
+
+/* Table used to be MUI Boxes with an sx each. It renders plain table markup
+   now, styled from this sheet over the same tokens.
+
+   The cell rules hang off the <table> (`.omni-tb-t thead th`, one class and
+   two elements), the weight the old nested sx rules had. That weight is why a
+   column's `align` never showed: the table's own `text-align: left` outweighed
+   the cell's — kept as it was, so nothing moves.
+
+   Per-instance values arrive as custom properties on the <table>: the size's
+   padding and font sizes (plain lengths), and for `light` the palette's
+   Buttons tokens. */
+registerStaticStyles('omni-table', [
+  '.omni-tb{width:100%;overflow:auto;border:none;border-radius:0}',
+  '.omni-tb-outlined{border:1px solid var(--_tb-bd)}',
+  '.omni-tb-round{border-radius:var(--Style-Border-Radius)}',
+  '.omni-tb-t{width:100%;border-collapse:collapse;table-layout:fixed;font-family:inherit}',
+  '.omni-tb-t thead th{font-weight:600;font-size:var(--_tb-hfs);text-align:left;padding:var(--_tb-py) var(--_tb-px);'
+    + 'border-bottom:2px solid var(--Border);color:var(--Text);white-space:nowrap;background-color:var(--Background)}',
+  '.omni-tb-t tbody td{padding:var(--_tb-py) var(--_tb-px);font-size:var(--_tb-fs);color:var(--Text);border-bottom:1px solid var(--Border);text-align:left}',
+  '.omni-tb-t tfoot td,.omni-tb-t tfoot th{font-weight:600;font-size:var(--_tb-hfs);text-align:left;padding:var(--_tb-py) var(--_tb-px);'
+    + 'border-top:2px solid var(--Border);color:var(--Text);white-space:nowrap;background-color:var(--Background)}',
+  '.omni-tb-light thead th,.omni-tb-light tfoot td,.omni-tb-light tfoot th{background-color:var(--_tb-btn);color:var(--_tb-btxt)}',
+  '.omni-tb-solid thead th,.omni-tb-solid tfoot td,.omni-tb-solid tfoot th{background-color:var(--Hover)}',
+  '.omni-tb-sh thead th{position:sticky;top:0;z-index:2}',
+  '.omni-tb-sf tfoot td,.omni-tb-sf tfoot th{position:sticky;bottom:0;z-index:2}',
+  /* The structured rows' own fill, at a single class as the row's sx was. */
+  '.omni-tb-row-Surface{background-color:var(--Surface)}',
+  '.omni-tb-row-Surface-Dim{background-color:var(--Surface-Dim)}',
+  /* The ghost table inside a loading row. */
+  '.omni-tb-ghost{width:100%;border-collapse:collapse;table-layout:fixed}',
+  /* A loading footer cell is ghosted on the cell (Ghost's <div> cannot sit in
+     a <tfoot>). The footer rule above outweighs the block's own fill and
+     text color, so only the corner, the sweep and the inertness show. */
+  '.omni-tb-ghostcell{border-radius:var(--Ghost-Radius, 4px);user-select:none;pointer-events:none;'
+    + 'background-image:linear-gradient(90deg, transparent 0%, var(--Background) 50%, transparent 100%);'
+    + 'background-size:200% 100%;background-repeat:no-repeat;animation:omni-ghost-sweep 1.4s linear infinite}',
+  '@media (prefers-reduced-motion: reduce){.omni-tb-ghostcell{background-image:none;animation:none}}',
+].join('\n'));
+
+const SxBox = lazySxBox('Table');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+const B = 'MuiBox-root';
+
 // --- Table -------------------------------------------------------------------
 
 export function Table({
@@ -69,19 +115,15 @@ export function Table({
   stickyFooter = false,
   className = '',
   sx = {},
+  style,
   ...props
 }) {
+  useStaticStyles('omni-table');
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
   const isSolid = variant === 'solid';
   const isOutlined = variant === 'outlined';
   const isLight = variant === 'light';
-  const isDefault = variant === 'default';
   const C = cap(color);
-
-  // Container border for outlined
-  const containerBorder = isOutlined
-    ? '1px solid var(--Buttons-' + C + '-Border)'
-    : 'none';
 
   /* Wrapper data attributes for the solid theme.
 
@@ -95,66 +137,6 @@ export function Table({
     wrapperDataAttrs['data-theme'] = THEME_MAP[color];
   }
 
-  // Header styles per variant
-  const getHeaderSx = () => {
-    const base = {
-      fontWeight: 600,
-      fontSize: s.headerFontSize,
-      textAlign: 'left',
-      padding: s.py + ' ' + s.px,
-      borderBottom: '2px solid var(--Border)',
-      color: 'var(--Text)',
-      whiteSpace: 'nowrap',
-    };
-
-    if (isLight) {
-      base.backgroundColor = 'var(--Buttons-' + C + '-Button)';
-      base.color = 'var(--Buttons-' + C + '-Text)';
-    } else if (isSolid) {
-      base.backgroundColor = 'var(--Hover)';
-    } else {
-      base.backgroundColor = 'var(--Background)';
-    }
-
-    if (stickyHeader) {
-      base.position = 'sticky';
-      base.top = 0;
-      base.zIndex = 2;
-    }
-
-    return base;
-  };
-
-  // Footer styles
-  const getFooterSx = () => {
-    const base = {
-      fontWeight: 600,
-      fontSize: s.headerFontSize,
-      textAlign: 'left',
-      padding: s.py + ' ' + s.px,
-      borderTop: '2px solid var(--Border)',
-      color: 'var(--Text)',
-      whiteSpace: 'nowrap',
-    };
-
-    if (isLight) {
-      base.backgroundColor = 'var(--Buttons-' + C + '-Button)';
-      base.color = 'var(--Buttons-' + C + '-Text)';
-    } else if (isSolid) {
-      base.backgroundColor = 'var(--Hover)';
-    } else {
-      base.backgroundColor = 'var(--Background)';
-    }
-
-    if (stickyFooter) {
-      base.position = 'sticky';
-      base.bottom = 0;
-      base.zIndex = 2;
-    }
-
-    return base;
-  };
-
   // Row data-surface for striping
   const getRowSurface = (rowIndex) => {
     if (stripe === 'none') return 'Surface';
@@ -162,15 +144,6 @@ export function Table({
     if (stripe === 'even') return rowIndex % 2 === 0 ? 'Surface-Dim' : 'Surface';
     return 'Surface';
   };
-
-  // Cell styles
-  const getCellSx = () => ({
-    padding: s.py + ' ' + s.px,
-    fontSize: s.fontSize,
-    color: 'var(--Text)',
-    borderBottom: '1px solid var(--Border)',
-    textAlign: 'left',
-  });
 
   /* Precedence: error beats loading beats empty. A failed request that is
      retrying is still an error the user has to see, and a request that
@@ -186,20 +159,19 @@ export function Table({
 
   /* The header is kept in every state. Dropping it makes the region change
      width between states, so the page jumps each time a filter runs — the same
-     reflow Ghost exists to avoid. */
+     reflow Ghost exists to avoid. The cell's own padding: 0 / border: none
+     never showed (the table's tbody rule outweighs them), so it is not set. */
   const renderMessageRow = (content) => (
-    <Box component="tbody">
-      <Box component="tr">
-        <Box
-          component="td"
-          colSpan={columns ? columns.length : 1}
-          sx={{ padding: 0, border: 'none' }}
-        >
+    <tbody className={B}>
+      <tr className={B}>
+        <td className={B} colSpan={columns ? columns.length : 1}>
           {content}
-        </Box>
-      </Box>
-    </Box>
+        </td>
+      </tr>
+    </tbody>
   );
+
+  const cellsOf = (row) => (Array.isArray(row) ? row : columns.map((col) => row[col.field || col.key]));
 
   // Build table from columns/rows if provided
   const renderStructured = () => {
@@ -208,41 +180,33 @@ export function Table({
 
     return (
       <>
-        <Box component="thead">
-          <Box component="tr">
+        <thead className={B}>
+          <tr className={B}>
             {columns.map((col, i) => (
-              <Box
-                component="th"
-                key={'h-' + i}
-                sx={{
-                  ...getHeaderSx(),
-                  ...(col.width ? { width: col.width } : {}),
-                  ...(col.align ? { textAlign: col.align } : {}),
-                }}
-              >
+              <th className={B} key={'h-' + i} style={col.width ? { width: col.width } : undefined}>
                 {col.label || col.header || col}
-              </Box>
+              </th>
             ))}
-          </Box>
-        </Box>
+          </tr>
+        </thead>
         {dataState === 'loading' && renderMessageRow(
           /* Real rows of placeholder text, ghosted — so the column widths and
              row heights are the ones the data will land in. A generic block
              here would resize the moment the rows arrived. */
           <Ghost label="Loading">
-            <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
-              <Box component="tbody">
+            <table className={B + ' omni-tb-ghost'}>
+              <tbody className={B}>
                 {Array.from({ length: skeletonRows }).map((_, ri) => (
-                  <Box component="tr" key={'sk-' + ri} data-surface={getRowSurface(ri)}>
+                  <tr className={B} key={'sk-' + ri} data-surface={getRowSurface(ri)}>
                     {columns.map((_c, ci) => (
-                      <Box component="td" key={'skc-' + ri + '-' + ci} sx={getCellSx()}>
+                      <td className={B} key={'skc-' + ri + '-' + ci}>
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                      </Box>
+                      </td>
                     ))}
-                  </Box>
+                  </tr>
                 ))}
-              </Box>
-            </Box>
+              </tbody>
+            </table>
           </Ghost>,
         )}
 
@@ -250,31 +214,17 @@ export function Table({
         {dataState === 'empty' && renderMessageRow(empty)}
 
         {!dataState && rows && (
-        <Box component="tbody">
+        <tbody className={B}>
           {rows.map((row, ri) => (
-            <Box
-              component="tr"
-              key={'r-' + ri}
-              data-surface={getRowSurface(ri)}
-              sx={{
-                backgroundColor: 'var(--' + getRowSurface(ri) + ')',
-              }}
-            >
-              {(Array.isArray(row) ? row : columns.map((col) => row[col.field || col.key])).map((cell, ci) => (
-                <Box
-                  component="td"
-                  key={'c-' + ri + '-' + ci}
-                  sx={{
-                    ...getCellSx(),
-                    ...(columns[ci] && columns[ci].align ? { textAlign: columns[ci].align } : {}),
-                  }}
-                >
+            <tr className={B + ' omni-tb-row-' + getRowSurface(ri)} key={'r-' + ri} data-surface={getRowSurface(ri)}>
+              {cellsOf(row).map((cell, ci) => (
+                <td className={B} key={'c-' + ri + '-' + ci}>
                   {cell}
-                </Box>
+                </td>
               ))}
-            </Box>
+            </tr>
           ))}
-        </Box>
+        </tbody>
         )}
         {/* The footer is decided PER STATE, not dropped wholesale.
 
@@ -301,82 +251,51 @@ export function Table({
            element, and React said so on every render. A block comment in JSX
            is CONTENT unless it is wrapped in braces. */}
         {footerShown && (
-          <Box component="tfoot">
+          <tfoot className={B}>
             {footerRows.map((row, fi) => (
-              <Box component="tr" key={'f-' + fi}>
-                {(Array.isArray(row) ? row : columns.map((col) => row[col.field || col.key])).map((cell, ci) => (
-                  <Box
-                    component="td"
-                    key={'fc-' + fi + '-' + ci}
-                    sx={{
-                      ...getFooterSx(),
-                      ...(columns[ci] && columns[ci].align ? { textAlign: columns[ci].align } : {}),
-                      /* Ghosted on the CELL, not via a <Ghost> wrapper: Ghost
-                         renders a <div>, and a div inside <tfoot> is invalid
-                         markup that browsers hoist out of the table. */
-                      ...(dataState === 'loading' ? ghostBlockSx() : {}),
-                    }}
-                  >
+              <tr className={B} key={'f-' + fi}>
+                {cellsOf(row).map((cell, ci) => (
+                  /* Ghosted on the CELL, not via a <Ghost> wrapper: Ghost
+                     renders a <div>, and a div inside <tfoot> is invalid
+                     markup that browsers hoist out of the table. */
+                  <td className={B + (dataState === 'loading' ? ' omni-tb-ghostcell' : '')} key={'fc-' + fi + '-' + ci}>
                     {cell}
-                  </Box>
+                  </td>
                 ))}
-              </Box>
+              </tr>
             ))}
-          </Box>
+          </tfoot>
         )}
       </>
     );
   };
 
-  return (
-    <Box
-      className={'table-wrapper table-' + variant + (isSolid || isLight || isOutlined ? ' table-' + color : '') + ' ' + className}
-      {...wrapperDataAttrs}
-      /* On the WRAPPER, not on Ghost's inner div: this is the element a screen
-         reader lands on, and aria-busy has to be on the region whose content is
-         in flux, not on a node buried inside a cell. */
-      aria-busy={dataState === 'loading' ? 'true' : undefined}
-      sx={{
-        width: '100%',
-        overflow: 'auto',
-        border: containerBorder,
-        borderRadius: isOutlined || isLight ? 'var(--Style-Border-Radius)' : 0,
-        ...sx,
-      }}
+  const wrapperClass = 'table-wrapper table-' + variant + (isSolid || isLight || isOutlined ? ' table-' + color : '') + ' ' + className
+    + ' ' + B + ' omni-tb' + (isOutlined ? ' omni-tb-outlined' : '') + (isOutlined || isLight ? ' omni-tb-round' : '');
+  const wrapperProps = {
+    className: wrapperClass,
+    ...wrapperDataAttrs,
+    /* On the WRAPPER, not on Ghost's inner div: this is the element a screen
+       reader lands on, and aria-busy has to be on the region whose content is
+       in flux, not on a node buried inside a cell. */
+    'aria-busy': dataState === 'loading' ? 'true' : undefined,
+    style: isOutlined ? { '--_tb-bd': 'var(--Buttons-' + C + '-Border)' } : undefined,
+  };
+  const tableVars = { '--_tb-py': s.py, '--_tb-px': s.px, '--_tb-fs': s.fontSize, '--_tb-hfs': s.headerFontSize };
+  if (isLight) Object.assign(tableVars, { '--_tb-btn': 'var(--Buttons-' + C + '-Button)', '--_tb-btxt': 'var(--Buttons-' + C + '-Text)' });
+  const table = (
+    <table
+      className={B + ' omni-tb-t' + (isLight ? ' omni-tb-light' : isSolid ? ' omni-tb-solid' : '')
+        + (stickyHeader ? ' omni-tb-sh' : '') + (stickyFooter ? ' omni-tb-sf' : '')}
+      style={style ? { ...tableVars, ...style } : tableVars}
+      {...props}
     >
-      <Box
-        component="table"
-        sx={{
-          width: '100%',
-          borderCollapse: 'collapse',
-          tableLayout: 'fixed',
-          fontFamily: 'inherit',
-          '& thead th': getHeaderSx(),
-          '& tbody td': getCellSx(),
-          '& tfoot td, & tfoot th': getFooterSx(),
-          ...(stickyHeader ? {
-            '& thead th': {
-              ...getHeaderSx(),
-              position: 'sticky',
-              top: 0,
-              zIndex: 2,
-            },
-          } : {}),
-          ...(stickyFooter ? {
-            '& tfoot td, & tfoot th': {
-              ...getFooterSx(),
-              position: 'sticky',
-              bottom: 0,
-              zIndex: 2,
-            },
-          } : {}),
-        }}
-        {...props}
-      >
-        {columns && rows ? renderStructured() : children}
-      </Box>
-    </Box>
+      {columns && rows ? renderStructured() : children}
+    </table>
   );
+
+  if (hasSx(sx)) return <SxBox sx={sx} {...wrapperProps}>{table}</SxBox>;
+  return <div {...wrapperProps}>{table}</div>;
 }
 
 // --- Convenience Exports -----------------------------------------------------
