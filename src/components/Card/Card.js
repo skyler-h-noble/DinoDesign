@@ -1,7 +1,11 @@
 // src/components/Card/Card.js
 import React, { createContext, useContext } from 'react';
-import { Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3, SHADOW_LEVEL_4 } from '../_shadows';
+
+const SxBox = lazySxBox('Card');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
 
 /**
  * Card Component
@@ -60,15 +64,86 @@ const CardContext = createContext({
 });
 export const useCardContext = () => useContext(CardContext);
 
+/* --- Static sheet ---
+   Every declaration the parts used to hand emotion per render, as classes over
+   the same tokens.
+
+   Shadows: Level 1 at rest, not 2 — read off the file. The five Effect-Levels
+   ARE the five named effect styles (Level 1 = Elevations/Level-1, the Card
+   style; Level 2 = Card-Hover; Level 3 = Card-Drag / Elevated-Card-Hover;
+   Level 4 = Elevated-Card-Drag). `elevated` moves the whole set up one, which
+   keeps Card and Card-Hover one step apart at either setting. The set is
+   three custom properties, so elevated is one class that re-points them.
+
+   Pressed keeps the RESTING elevation: Figma's Pressed card wears the same
+   Card style as Default.
+
+   The border is ALWAYS 1px. Figma draws the selected ring as a frame laid OVER
+   a card whose border stays put, so the second pixel is an inset ring on the
+   inner surface and selecting a card moves nothing. --_cd-sel carries the
+   selected palette's border to the outer edge, --_cd-ring to the ring.
+
+   State rules weigh one class + one pseudo-class, as emotion's `&:hover` did,
+   so a caller's sx state rule still wins. */
+const sizeRules = (sel) => Object.entries(SIZE_MAP).map(([k, v]) => `${sel}-${k}{gap:${v.gap}}`);
+
+registerStaticStyles('omni-card', [
+  `.omni-card{--_cd-rest:${SHADOW_LEVEL_1};--_cd-hover:${SHADOW_LEVEL_2};--_cd-drag:${SHADOW_LEVEL_3};`
+    + 'display:flex;border-width:1px;border-style:solid;border-color:var(--Border-Variant);border-radius:var(--Card-Radius);'
+    + 'box-shadow:var(--_cd-rest);overflow:hidden;text-decoration:none;'
+    + 'transition:box-shadow 0.2s ease, border-color 0.2s ease, transform 0.1s ease}',
+  `.omni-card-elev{--_cd-rest:${SHADOW_LEVEL_2};--_cd-hover:${SHADOW_LEVEL_3};--_cd-drag:${SHADOW_LEVEL_4}}`,
+  '.omni-card-ia{border-color:var(--Buttons-Default-Border)}',
+  '.omni-card-sel{border-color:var(--_cd-sel)}',
+  '.omni-card-off{opacity:var(--Disabled, 0.38);cursor:not-allowed;pointer-events:none}',
+  '.omni-card-click{cursor:pointer}',
+  '.omni-card-drag{cursor:grab}',
+  '.omni-card-click:hover,.omni-card-drag:hover{box-shadow:var(--_cd-hover);transform:translateY(-1px)}',
+  '.omni-card-click:where(:not(.omni-card-sel)):hover,.omni-card-drag:hover{border-color:var(--Buttons-Default-Border)}',
+  '.omni-card-click:active{transform:translateY(0);box-shadow:var(--_cd-rest)}',
+  /* Figma's State=Drag: lifted 1px like Hover, two shadow levels above rest. */
+  '.omni-card-drag:active{cursor:grabbing;z-index:10;box-shadow:var(--_cd-drag);transform:translateY(-1px)}',
+  /* No border-radius on the ring: the browser draws the outline around the
+     box's own corners, offset included. */
+  '.omni-card-click:focus-visible,.omni-card-drag:focus-visible{outline:2px solid var(--Focus-Visible);outline-offset:1px}',
+  /* Inner surface: the scoped theme and surface. Its radius is the card's
+     MINUS the 1px border, so its edge is concentric with the border's inner
+     edge and the selected ring never pulls away at the corners. */
+  '.omni-card-inner{display:flex;flex-direction:column;padding:var(--Card-Padding);background-color:var(--Background);'
+    + 'box-shadow:none;color:var(--Text);font-family:inherit;border-radius:calc(var(--Card-Radius) - 1px);'
+    + 'position:relative;flex:1;min-width:0;overflow:hidden}',
+  '.omni-card-inner-h{flex-direction:row}',
+  ...Object.entries(SIZE_MAP).map(([k, v]) => `.omni-card-inner-${k}{gap:${v.gap};font-size:${v.fontSize}}`),
+  /* The ring is declared on the inner element (--_cd-ring) so the token
+     resolves against the card's OWN theme and surface — the ring sits on the
+     inner surface, the border on the parent's, and each is tuned to its own. */
+  '.omni-card-sel>.omni-card-inner{box-shadow:inset 0 0 0 1px var(--_cd-ring)}',
+  '.omni-card-content{display:flex;flex-direction:column;flex:1;min-width:0}',
+  ...sizeRules('.omni-card-content'),
+  '.omni-card-overflow{overflow:hidden;flex-shrink:0}',
+  '.omni-card-overflow-v{margin-left:calc(var(--Card-Padding) * -1);margin-right:calc(var(--Card-Padding) * -1)}',
+  '.omni-card-overflow-v:first-of-type{margin-top:calc(var(--Card-Padding) * -1)}',
+  '.omni-card-overflow-v:last-of-type{margin-bottom:calc(var(--Card-Padding) * -1)}',
+  '.omni-card-overflow-h{margin-top:calc(var(--Card-Padding) * -1);margin-bottom:calc(var(--Card-Padding) * -1)}',
+  '.omni-card-overflow-h:first-of-type{margin-left:calc(var(--Card-Padding) * -1)}',
+  '.omni-card-overflow-h:last-of-type{margin-right:calc(var(--Card-Padding) * -1)}',
+  '.omni-card-cover{position:absolute;inset:0;z-index:0;overflow:hidden;border-radius:inherit}',
+  '.omni-card-cover img,.omni-card-cover video{width:100%;height:100%;object-fit:cover}',
+  '.omni-card-actions{display:flex;align-items:center;flex-wrap:wrap}',
+  ...sizeRules('.omni-card-actions'),
+].join('\n'));
+
+/** A part's root: static classes, plus an MUI box only when given sx. */
+function Part({ sx, component: Tag = 'div', ...props }) {
+  if (hasSx(sx)) return <SxBox component={Tag} sx={sx} {...props} />;
+  return <Tag {...props} />;
+}
+
 /* --- Card --- */
 export function Card({
   children,
   variant = 'solid',
   color = 'default',
-  // Optional explicit surface override for the inner content. By default a
-  // default-color card uses "Container"; pass surface="Surface" when the card
-  // is actually a Surface-level region (so tokens like --Header resolve to the
-  // Surface tone, not the Container tone).
   surface,
   size = 'medium',
   orientation = 'vertical',
@@ -80,23 +155,16 @@ export function Card({
   disabled = false,
   href,
   className = '',
-  sx = {},
+  style,
+  sx,
   ...props
 }) {
+  useStaticStyles('omni-card');
   const isDark = variant === 'dark';
-  // Default-color cards inherit the parent theme and override Container
-  // surface so they pick up the consumer's card-coloring choice (white/black/
-  // tonal). Themed cards (color="primary" etc.) stamp their own theme +
-  // Surface so the card paints the brand color directly.
   const isDefaultColor = color === 'default';
 
-  // Theme for inner content — omitted for default-color cards so the parent
-  // theme inherits through.
   const dataTheme = isDefaultColor ? '' : SOLID_THEME_MAP[color];
 
-  // Surface for inner content — Container for default-color cards so they
-  // respect the consumer's card-coloring tokens; Surface (or Surface-Dimmest
-  // for dark variant) for themed cards.
   const dataSurface = surface
     ? surface
     : isDefaultColor
@@ -107,7 +175,7 @@ export function Card({
           ? 'Surface-Brightest'
           : 'Surface';
 
-  const s = SIZE_MAP[size] || SIZE_MAP.medium;
+  const sizeKey = SIZE_MAP[size] ? size : 'medium';
   const isHorizontal = orientation === 'horizontal';
   const isDraggable = !!draggableProp;
   /* A disabled card is not clickable. Deriving it here rather than guarding
@@ -115,62 +183,17 @@ export function Card({
      that merely LOOKED disabled but kept role="button" and tabIndex={0} would
      still be reachable by keyboard and still fire. */
   const isClickable = !disabled && (clickable || !!onClick || !!href || selected || isDraggable);
-  const component = href ? 'a' : 'div';
 
-  // Border color token — selected uses theme-specific border
-  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-  const borderColorToken = selected
-    ? `var(--Buttons-${cap(color === 'default' ? 'Default' : color)}-Border)`
-    : 'var(--Buttons-Default-Border)';
-
-  /* The border is ALWAYS 1px. Selected used to be a 2px border, which pushed
-     the content 1px in and made the card 2px larger than an unselected one —
-     Figma draws the selected ring as a frame laid OVER a card whose border
-     stays put. So the second pixel is an inset ring on the inner surface (see
-     selectedRing), and selecting a card moves nothing.
-
-     Selected is tested before clickable on purpose: a disabled card is not
-     clickable, and the selected ring went with it — Figma's Disabled variant
-     keeps the ring at the disabled opacity, because "chosen, but unavailable"
-     is still chosen. */
-  const borderStyle = selected
-    ? `1px solid ${borderColorToken}`
-    : !isClickable
-      ? '1px solid var(--Border-Variant)'
-      : '1px solid var(--Buttons-Default-Border)';
-  const selectedRing = selected ? `inset 0 0 0 1px ${borderColorToken}` : 'none';
-
-  // Elevation shadows (on outer shell, inherits parent dropshadow-color)
-  /* Level 1 at rest, not 2 — read off the file rather than chosen.
-     The five Effect-Levels ARE the five named effect styles, and the mapping
-     is exact once you line up the alphas and radii in a published bundle:
-
-       Level 1  a=0.145 r=1.6   Elevations/Level-1 (Card, Accordion, Handle, Alert, Bottom-Sheet)
-       Level 2  a=0.169 r=3.6   Elevations/Level-2 (Card-Hover, App bars, Toolbars, Menus, Tooltip, Popover)
-       Level 3  a=0.200 r=8.1   Elevations/Level-3 (FAB, Snackbar, Card-Drag, Elevated-Card-Hover)
-       Level 4  a=0.184 r=18.1  Elevations/Level-4 (FAB-Hover, Elevated-Card-Drag)
-       Level 5  a=0.251 r=40.4  Elevations/Level-5 (Dialog & Modal)
-
-     So Figma's `Card` style is Level ONE. This sat at Level 2, which is the
-     App-bar step — every card in every brand wore a shadow a full level too
-     heavy, and a card nested in a card wore it twice. It reads as a glow rather
-     than as a mistake, because an over-heavy shadow is still a plausible
-     shadow, and the number 2 looks as reasonable in the source as 1 does.
-
-     elevated moves the whole set up one, which is what the prop means and what
-     keeps `Card` and `Card-Hover` one step apart at either setting. */
-  const restShadow  = elevated ? SHADOW_LEVEL_2 : SHADOW_LEVEL_1;
-  const hoverShadow = elevated ? SHADOW_LEVEL_3 : SHADOW_LEVEL_2;
-  const dragShadow  = elevated ? SHADOW_LEVEL_4 : SHADOW_LEVEL_3;
-  /* Pressed keeps the RESTING elevation: Figma's Pressed card wears the same
-     Card style as Default. It used to drop a level and shrink to 99.5%. */
-  const activeShadow = restShadow;
+  const cap = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+  const selBorder = `var(--Buttons-${cap(color === 'default' ? 'Default' : color)}-Border)`;
+  const selStyle = selected ? { '--_cd-sel': selBorder } : null;
 
   return (
     <CardContext.Provider value={{ variant, color, size, orientation }}>
       {/* Outer shell — no data-surface, inherits parent dropshadow-color */}
-      <Box
-        component={component}
+      <Part
+        component={href ? 'a' : 'div'}
+        sx={sx}
         href={href || undefined}
         onClick={isClickable ? onClick : undefined}
         role={isClickable ? 'button' : undefined}
@@ -184,236 +207,79 @@ export function Card({
           + (selected   ? ' card-selected'  : '')
           + (elevated   ? ' card-elevated'  : '')
           + (isDraggable ? ' card-draggable' : '')
+          + ' omni-card'
+          + (elevated ? ' omni-card-elev' : '')
+          + (isClickable ? ' omni-card-ia' : '')
+          + (selected ? ' omni-card-sel' : '')
+          + (disabled ? ' omni-card-off' : '')
+          + (isClickable && !isDraggable ? ' omni-card-click' : '')
+          + (isDraggable ? ' omni-card-drag' : '')
           + ' ' + className
         }
-        sx={{
-          display: 'flex',
-          border: borderStyle,
-          borderRadius: 'var(--Card-Radius)',
-          boxShadow: restShadow,
-          overflow: 'hidden',
-          textDecoration: 'none',
-          transition: 'box-shadow 0.2s ease, border-color 0.2s ease, transform 0.1s ease',
-          ...(disabled && {
-            opacity: 'var(--Disabled, 0.38)',
-            cursor: 'not-allowed',
-            pointerEvents: 'none',
-          }),
-          ...(isClickable && !isDraggable && {
-            cursor: 'pointer',
-            '&:hover': {
-              // A selected card keeps its selected border color on hover.
-              ...(!selected && { borderColor: 'var(--Buttons-Default-Border)' }),
-              boxShadow: hoverShadow,
-              transform: 'translateY(-1px)',
-            },
-            '&:active': {
-              // Settles back from the hover lift, at rest elevation, no scale.
-              transform: 'translateY(0)',
-              boxShadow: activeShadow,
-            },
-            /* No borderRadius here. It was calc(--Card-Radius + 3px), meant
-               for the ring — but it rounded the CARD to 27px whenever it had
-               focus. The browser already draws an outline around the box's
-               own corners, offset included. */
-            '&:focus-visible': {
-              // Figma: a 2px ring, 1px outside the card.
-              outline: '2px solid var(--Focus-Visible)',
-              outlineOffset: '1px',
-            },
-          }),
-          ...(isDraggable && {
-            cursor: 'grab',
-            '&:hover': {
-              borderColor: 'var(--Buttons-Default-Border)',
-              boxShadow: hoverShadow,
-              transform: 'translateY(-1px)',
-            },
-            '&:active': {
-              cursor: 'grabbing',
-              zIndex: 10,
-              /* Figma's State=Drag: lifted 1px like Hover (the variant loses
-                 its 1px padding), two shadow levels above rest — Level 3, or
-                 Level 4 for an elevated card. Same edge as rest: it used to
-                 scale to 102% and swap to a 2px Primary border, neither of
-                 which the design has. */
-              boxShadow: dragShadow,
-              transform: 'translateY(-1px)',
-            },
-            '&:focus-visible': {
-              // Figma: a 2px ring, 1px outside the card.
-              outline: '2px solid var(--Focus-Visible)',
-              outlineOffset: '1px',
-            },
-          }),
-          ...sx,
-        }}
+        style={selStyle || style ? { ...selStyle, ...style } : undefined}
         onKeyDown={isClickable ? (e) => {
           if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick?.(); }
         } : undefined}
         {...props}
       >
-        {/* Inner content — scoped theme and surface. `borderRadius: inherit`
-            picks up the outer Card's rounding (whatever --Card-Radius
-            resolves to under the active theme) so the two always agree,
-            even if the token changes. The outer also has overflow:hidden,
-            so nested images/media get clipped to the outer's rounded
-            corners without needing extra math here. */}
-        <Box
+        {/* Inner content — scoped theme and surface. The outer has
+            overflow:hidden, so nested images/media get clipped to its rounded
+            corners without extra math here. */}
+        <div
           data-theme={dataTheme || undefined}
           data-surface={dataSurface}
-          sx={{
-            display: 'flex',
-            flexDirection: isHorizontal ? 'row' : 'column',
-            gap: s.gap,
-            padding: s.padding,
-            backgroundColor: 'var(--Background)',
-            // The selected ring's second pixel, inside the 1px border.
-            boxShadow: selectedRing,
-            color: 'var(--Text)',
-            fontSize: s.fontSize,
-            fontFamily: 'inherit',
-            /* The card's radius MINUS its 1px border, so this surface's edge
-               is concentric with the border's inner edge. At `inherit` it
-               curved 1px too tight, and the selected ring drawn on it pulled
-               away from the border at every corner — a hairline gap that read
-               as two rings. */
-            borderRadius: 'calc(var(--Card-Radius) - 1px)',
-            position: 'relative',
-            flex: 1,
-            minWidth: 0,
-            overflow: 'hidden',
-          }}
+          className={'omni-card-inner omni-card-inner-' + sizeKey + (isHorizontal ? ' omni-card-inner-h' : '')}
+          style={selected ? { '--_cd-ring': selBorder } : undefined}
         >
           {children}
-        </Box>
-      </Box>
+        </div>
+      </Part>
     </CardContext.Provider>
   );
 }
 
 /* --- CardContent --- */
-export function CardContent({
-  children,
-  className = '',
-  sx = {},
-  ...props
-}) {
+export function CardContent({ children, className = '', ...props }) {
+  useStaticStyles('omni-card');
   const { size } = useCardContext();
-  const s = SIZE_MAP[size] || SIZE_MAP.medium;
-
+  const sizeKey = SIZE_MAP[size] ? size : 'medium';
   return (
-    <Box
-      className={'card-content ' + className}
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: s.gap,
-        flex: 1,
-        minWidth: 0,
-        ...sx,
-      }}
-      {...props}
-    >
+    <Part className={'card-content omni-card-content omni-card-content-' + sizeKey + ' ' + className} {...props}>
       {children}
-    </Box>
+    </Part>
   );
 }
 
 /* --- CardOverflow --- */
-export function CardOverflow({
-  children,
-  className = '',
-  sx = {},
-  ...props
-}) {
-  const { size, orientation } = useCardContext();
-  const isHorizontal = orientation === 'horizontal';
-  const pad = (SIZE_MAP[size] || SIZE_MAP.medium).padding;
-
+export function CardOverflow({ children, className = '', ...props }) {
+  useStaticStyles('omni-card');
+  const { orientation } = useCardContext();
   return (
-    <Box
-      className={'card-overflow ' + className}
-      sx={{
-        // Negative margin to bleed to card edges
-        ...(isHorizontal
-          ? {
-              marginTop: 'calc(' + pad + ' * -1)',
-              marginBottom: 'calc(' + pad + ' * -1)',
-              '&:first-of-type': { marginLeft: 'calc(' + pad + ' * -1)' },
-              '&:last-of-type': { marginRight: 'calc(' + pad + ' * -1)' },
-            }
-          : {
-              marginLeft: 'calc(' + pad + ' * -1)',
-              marginRight: 'calc(' + pad + ' * -1)',
-              '&:first-of-type': { marginTop: 'calc(' + pad + ' * -1)' },
-              '&:last-of-type': { marginBottom: 'calc(' + pad + ' * -1)' },
-            }),
-        overflow: 'hidden',
-        flexShrink: 0,
-        ...sx,
-      }}
-      {...props}
-    >
+    <Part className={'card-overflow omni-card-overflow omni-card-overflow-' + (orientation === 'horizontal' ? 'h' : 'v') + ' ' + className} {...props}>
       {children}
-    </Box>
+    </Part>
   );
 }
 
 /* --- CardCover --- */
-export function CardCover({
-  children,
-  className = '',
-  sx = {},
-  ...props
-}) {
+export function CardCover({ children, className = '', ...props }) {
+  useStaticStyles('omni-card');
   return (
-    <Box
-      className={'card-cover ' + className}
-      sx={{
-        position: 'absolute',
-        inset: 0,
-        zIndex: 0,
-        overflow: 'hidden',
-        borderRadius: 'inherit',
-        '& img, & video': {
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-        },
-        ...sx,
-      }}
-      {...props}
-    >
+    <Part className={'card-cover omni-card-cover ' + className} {...props}>
       {children}
-    </Box>
+    </Part>
   );
 }
 
 /* --- CardActions --- */
-export function CardActions({
-  children,
-  className = '',
-  sx = {},
-  ...props
-}) {
+export function CardActions({ children, className = '', ...props }) {
+  useStaticStyles('omni-card');
   const { size } = useCardContext();
-  const s = SIZE_MAP[size] || SIZE_MAP.medium;
-
+  const sizeKey = SIZE_MAP[size] ? size : 'medium';
   return (
-    <Box
-      className={'card-actions ' + className}
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: s.gap,
-        flexWrap: 'wrap',
-        ...sx,
-      }}
-      {...props}
-    >
+    <Part className={'card-actions omni-card-actions omni-card-actions-' + sizeKey + ' ' + className} {...props}>
       {children}
-    </Box>
+    </Part>
   );
 }
 

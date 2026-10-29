@@ -4,6 +4,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { Avatar } from './Avatar';
 import { AvatarGroup } from '../AvatarGroup/AvatarGroup';
 import { axe } from 'jest-axe';
+import { declared } from '../_testCss';
 
 const renderAvatar = (props = {}) => render(<Avatar {...props} />);
 
@@ -205,10 +206,11 @@ describe('Avatar shape', () => {
   test('shaped initials are smaller than round ones', () => {
     const { container } = render(<Avatar shape="cookie-9" initials="LN" size="xs" />);
     expect(container.querySelector('.avatar-initials').textContent).toBe('LN');
-    // 8px at xs (round initials are 12) — read from the emitted CSS, since
-    // jsdom does not resolve var().
-    const css = [...document.styleSheets].flatMap((sh) => [...sh.cssRules].map((r) => r.cssText)).join('');
-    expect(css).toContain('var(--Avatar-Shape-Initials, 8px)');
+    // 8px at xs (round initials are 12) — read as declared, since jsdom does
+    // not resolve var().
+    const el = container.querySelector('.omni-av-shinit');
+    expect(declared(el, 'font-size')).toBe('var(--_av-fs)');
+    expect(declared(el, '--_av-fs')).toBe('var(--Avatar-Shape-Initials, 8px)');
   });
 
   test('the default style is a person knocked out of the filled shape', () => {

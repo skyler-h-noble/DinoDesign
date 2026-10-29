@@ -256,6 +256,8 @@ export interface IconBadgeProps extends Native {
 }
 
 export interface ChipProps extends Native<HTMLElement, 'onClick'> {
+  onKeyDown?: React.KeyboardEventHandler<HTMLDivElement>;
+  onKeyUp?: React.KeyboardEventHandler<HTMLDivElement>;
   variant?: Color;
   label?: React.ReactNode;
   clickable?: boolean;
@@ -351,6 +353,8 @@ export interface AppBarProps {
   mode?: 'desktop' | 'mobile';
   size?: Size;
   barColor?: 'default' | 'primary' | 'primary-light' | 'white' | 'black';
+  /** Desktop: stays at the top of its scrolling parent. Default true. */
+  sticky?: boolean;
   surface?: Surface;
   brand?: React.ReactNode;
   onBrandClick?: React.MouseEventHandler<HTMLElement>;

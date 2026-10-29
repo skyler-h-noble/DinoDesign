@@ -1,12 +1,12 @@
 // src/components/Avatar/Avatar.js
 import React, { useState } from 'react';
-import PersonIcon from '@mui/icons-material/Person';
 import { shapePath, shapeStyle, AVATAR_SHAPES } from '../Shape/shapes';
-import { Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 import { AvatarGlyph } from './AvatarGlyph';
-import { NumberSmall, NumberMedium, NumberLarge, CAP_HEIGHT_TRIM } from '../Typography';
+import { NumberSmall, NumberMedium, NumberLarge } from '../Typography';
 import { DEFAULT_AVATAR_SRC } from './defaultAvatar';
-import { useGhost, ghostBlockSx } from '../_ghost';
+import { useGhost } from '../_ghost';
 
 /**
  * Avatar Component
@@ -187,6 +187,73 @@ function warnIconOnce() {
   );
 }
 
+const SxBox = lazySxBox('Avatar');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+/* The static sheet: every declaration the avatar used to hand emotion per
+   render, as classes over the same tokens. The palette's three button tokens
+   arrive as custom properties from a color class on the root.
+
+   One ring, all three styles, at every size: every disc frame in the Figma set
+   (Photo, Button-Theme-Avatar, Button-Theme-Initials) draws a 1px stroke bound
+   to Buttons::Border — the button's own outline, not the surface's --Border.
+   Decided 2026-10-20: always a ring. It also gives a clickable avatar the 3:1
+   boundary its fill alone may not.
+
+   The Default style is the person glyph ALONE: Figma's Button-Theme-Avatar
+   frame has no fill, and its glyph carries its own disc in Buttons::Border.
+
+   State rules weigh one class + one pseudo-class, as emotion's did. */
+const TRIM = '{text-box-trim:trim-both;text-box-edge:cap alphabetic;padding-top:0;padding-bottom:0}';
+registerStaticStyles('omni-avatar', [
+  ...Object.values(COLOR_MAP).map((C) =>
+    `.omni-av-c-${C}{--_av-btn:var(--Buttons-${C}-Button);--_av-bd:var(--Buttons-${C}-Border);--_av-tx:var(--Buttons-${C}-Text)}`),
+  '.omni-av{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;border-radius:50%;'
+    + 'width:var(--_av-size);height:var(--_av-size);background-color:var(--_av-btn);color:var(--_av-tx);font-family:inherit;font-weight:600;position:relative;'
+    + `overflow:hidden;flex-shrink:0;border-width:${BORDER_WIDTH};border-style:solid;border-color:var(--_av-bd)}`,
+  '.omni-av-photo{background-color:transparent}',
+  '.omni-av-glyph{background-color:transparent;color:var(--_av-bd);overflow:visible}',
+  /* A ghosting avatar is the avatar's own geometry with the photo and initials
+     gone — the circle stays, so the row does not reflow when it loads. */
+  '.omni-av-ghost{background-color:var(--Border-Variant);border-radius:50%;color:transparent;user-select:none;pointer-events:none;overflow:hidden}',
+  '.omni-av-ghost-anim{background-image:linear-gradient(90deg, transparent 0%, var(--Background) 50%, transparent 100%);background-size:200% 100%;background-repeat:no-repeat;animation:omni-ghost-sweep 1.4s linear infinite}',
+  '@media (prefers-reduced-motion: reduce){.omni-av-ghost-anim{background-image:none;animation:none}}',
+  '.omni-av-inbtn{margin-left:2px;margin-right:2px}',
+  '.omni-av-click{cursor:pointer;outline:none;padding:0;transition:background-color 0.15s ease, border-color 0.15s ease}',
+  '.omni-av-click:hover{background-color:var(--Buttons-Default-Hover)}',
+  '.omni-av-click:where(.omni-av-photo):hover{background-color:rgba(0,0,0,0.08)}',
+  '.omni-av-click:active{background-color:var(--Buttons-Default-Pressed)}',
+  '.omni-av-click:where(.omni-av-photo):active{background-color:rgba(0,0,0,0.15)}',
+  '.omni-av-click:focus-visible,.omni-av-shaped-click:focus-visible{outline:3px solid var(--Focus-Visible);outline-offset:2px}',
+  '.omni-av-img{width:100%;height:100%;object-fit:cover;border-radius:50%}',
+  /* Initials centre on their letterforms (cap height to baseline) where the
+     browser can trim the line box. */
+  '.omni-av .omni-av-initials{line-height:1;text-align:center}',
+  `@supports (text-box-edge: cap alphabetic){.omni-av .omni-av-initials${TRIM}.omni-av-shaped .omni-av-shinit${TRIM}}`,
+  // Shaped
+  '.omni-av-shaped{position:relative;display:inline-grid;place-items:center;flex-shrink:0;box-sizing:border-box;width:var(--_av-size);height:var(--_av-size);'
+    + 'padding:0;border:none;background:transparent;font-family:inherit;color:var(--Background)}',
+  '.omni-av-shaped-init{color:var(--_av-tx)}',
+  '.omni-av-shaped-click{cursor:pointer;outline:none;border-radius:var(--Button-Focus-Radius, 8px)}',
+  '.omni-av-shaped-click:hover .avatar-shape-fill::after{background-color:var(--Hover)}',
+  '.omni-av-shaped-click:active .avatar-shape-fill::after{background-color:var(--Pressed)}',
+  '.omni-av-fill{position:absolute;inset:0}',
+  '.omni-av-fill::after{content:"";position:absolute;inset:0}',
+  '.omni-av-sq{border-radius:28%}',
+  '@supports (corner-shape: squircle){.omni-av-sq{border-radius:40%;corner-shape:squircle}}',
+  '.omni-av-shimg{width:100%;height:100%;object-fit:cover;display:block}',
+  '.omni-av-shaped .omni-av-shinit{position:relative;line-height:1;text-align:center;font-size:var(--_av-fs)}',
+  /* The Default glyph inside a shape: the person, knocked out in --Background. */
+  '.omni-av-person{user-select:none;display:inline-block;flex-shrink:0;fill:currentColor;font-size:1.5rem;'
+    + 'transition:fill 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;position:relative;width:60%;height:60%;color:inherit}',
+].join('\n'));
+
+/** The root: static classes, plus an MUI box only when given sx. */
+function Root({ sx, component: Tag, ...props }) {
+  if (hasSx(sx)) return <SxBox component={Tag} sx={sx} {...props} />;
+  return <Tag {...props} />;
+}
+
 export function Avatar({
   src,
   // The DEFAULT avatar IS the photo: a bare <Avatar /> shows the lib's built-in
@@ -213,9 +280,11 @@ export function Avatar({
      brand — a list of people in mixed shapes reads as broken. */
   shape,
   className = '',
-  sx = {},
+  style,
+  sx,
   ...props
 }) {
+  useStaticStyles('omni-avatar');
   const ghost = useGhost();
   const [imgError, setImgError] = useState(false);
   // Custom size — pixel diameter from `customSize` prop, icon ~50% of that.
@@ -257,13 +326,14 @@ export function Avatar({
       <ShapedAvatar shape={shape} s={s} size={size} C={C} component={component}
         isClickable={isClickable} onClick={onClick} alt={alt} initials={initials}
         effectiveSrc={hasSrc ? effectiveSrc : null} onImgError={() => setImgError(true)}
-        hasInitials={hasInitials} insideButton={insideButton} className={className} sx={sx} {...props} />
+        hasInitials={hasInitials} insideButton={insideButton} className={className} style={style} sx={sx} {...props} />
     );
   }
 
   return (
-    <Box
+    <Root
       component={component}
+      sx={sx}
       type={isClickable ? 'button' : undefined}
       role={isClickable ? 'button' : 'img'}
       aria-label={alt || initials || 'Avatar'}
@@ -273,60 +343,18 @@ export function Avatar({
       className={'avatar avatar-' + size + ' avatar-' + color +
         (isClickable ? ' avatar-clickable' : '') +
         (hasSrc ? ' avatar-image' : hasInitials ? ' avatar-initials' : ' avatar-fallback') +
+        ' omni-av omni-av-c-' + C +
+        (hasSrc ? ' omni-av-photo' : glyphOnly ? ' omni-av-glyph' : '') +
+        (ghost ? ' omni-av-ghost' + (ghost.animate ? ' omni-av-ghost-anim' : '') : '') +
+        (insideButton ? ' omni-av-inbtn' : '') +
+        (isClickable ? ' omni-av-click' : '') +
         (className ? ' ' + className : '')}
-      sx={{
-        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-        width: s.size + 'px', height: s.size + 'px',
-        // The ring sits INSIDE the diameter, as Figma's stroke does — without
-        // this a 32px avatar in a button measured 34.
-        boxSizing: 'border-box',
-        borderRadius: '50%',
-        backgroundColor: bg,
-        color: textColor,
-        /* Keeps the circle — a ghosting avatar is the avatar's own geometry
-           with the photo and initials gone, so the row does not reflow when
-           the real one loads. The 50% radius above already wins over the
-           block's default. */
-        ...(ghost ? ghostBlockSx({ radius: '50%', animate: ghost.animate }) : {}),
-        fontFamily: 'inherit', fontWeight: 600,
-        // The lone glyph overlays the ring (see below), and overflow clips at
-        // the padding edge — inside the border — so it would cut the glyph's
-        // rim off. The glyph is itself a disc; nothing else can spill.
-        position: 'relative',
-        overflow: glyphOnly && !ghost ? 'visible' : 'hidden',
-        flexShrink: 0,
-        /* One ring, all three styles, at every size: every disc frame in the
-           Figma set (Photo, Button-Theme-Avatar, Button-Theme-Initials) draws a
-           1px stroke bound to Buttons::Border (--Buttons-{C}-Border, the
-           button's own outline — not the surface's --Border, which diverges
-           once a color is set). Decided 2026-10-20: always a ring.
-
-           Icons & Avatars::Avatar-Border (0 standalone, 1 in a button) is bound
-           to the component root, which has no stroke, so it does not reach the
-           ring. 0.14.16 followed that variable and dropped the ring standalone;
-           this restores it. The ring also gives a clickable avatar the 3:1
-           boundary its fill alone may not. */
-        border: BORDER_WIDTH + ' solid ' + borderColor,
-        // Inside-button breathing room. Pure margin so the avatar's circular
-        // silhouette doesn't get pushed into an ellipse by padding.
-        ...(insideButton && { marginLeft: '2px', marginRight: '2px' }),
-        // Button reset
-        ...(isClickable && {
-          cursor: 'pointer',
-          outline: 'none',
-          padding: 0,
-          transition: 'background-color 0.15s ease, border-color 0.15s ease',
-          '&:hover': { backgroundColor: hasSrc ? 'rgba(0,0,0,0.08)' : 'var(--Buttons-Default-Hover)' },
-          '&:active': { backgroundColor: hasSrc ? 'rgba(0,0,0,0.15)' : 'var(--Buttons-Default-Pressed)' },
-          '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px' },
-        }),
-        ...sx,
-      }}
+      style={{ '--_av-size': s.size + 'px', ...style }}
       {...props}
     >
       {hasSrc && (
-        <Box
-          component="img"
+        <img
+          className="omni-av-img"
           src={effectiveSrc}
           alt={alt || 'Avatar'}
           /* Google profile photos (lh3.googleusercontent.com) refuse requests
@@ -335,36 +363,18 @@ export function Avatar({
              referrer is what those URLs need and costs nothing elsewhere. */
           referrerPolicy="no-referrer"
           onError={() => setImgError(true)}
-          sx={{
-            width: '100%', height: '100%',
-            objectFit: 'cover',
-            borderRadius: '50%',
-          }}
         />
       )}
       {hasInitials && (() => {
         const TextComp = getInitialsComp(size);
         return (
-          <TextComp
-            sx={{
-              color: 'inherit',
-              // No fontWeight override — the Number step carries its own (700).
-              fontSize: initialsFontSize(s.size, size === 'custom' ? null : resolveSizeName(size)),
-              lineHeight: 1,
-              textAlign: 'center',
-              // Trim to cap height / baseline — Figma's "cap height to
-              // baseline" — so the initials centre on their own letterforms.
-              ...CAP_HEIGHT_TRIM,
-            }}
-            aria-hidden="true"
-          >
+          <TextComp color="inherit" className="omni-av-initials" aria-hidden="true"
+            style={{ fontSize: initialsFontSize(s.size, size === 'custom' ? null : resolveSizeName(size)) }}>
             {initials.slice(0, 2).toUpperCase()}
           </TextComp>
         );
       })()}
-      {/* The glyph fills the disc edge to edge in Buttons::Border. It sat in an
-          Icon with no size of its own, so its 100% resolved against nothing
-          and the SVG drew at the browser's default 300px. */}
+      {/* The glyph fills the disc edge to edge in Buttons::Border. */}
       {glyphOnly && (
         <AvatarGlyph
           style={{
@@ -379,7 +389,7 @@ export function Avatar({
           }}
         />
       )}
-    </Box>
+    </Root>
   );
 }
 
@@ -396,13 +406,17 @@ export function Avatar({
  * clips it. The root is not masked, so a clickable avatar's focus ring is whole.
  */
 function ShapedAvatar({ shape, s, size, C, component, isClickable, onClick, alt, initials, effectiveSrc,
-  onImgError, hasInitials, insideButton, className, sx, ...props }) {
+  onImgError, hasInitials, insideButton, className, style, sx, ...props }) {
   const d = shapePath(shape);
   const edge = 'var(--Buttons-' + C + '-Border)';
   const fill = effectiveSrc ? 'transparent' : hasInitials ? 'var(--Buttons-' + C + '-Button)' : edge;
+  /* Squircle's corner-shape sits in an @supports rule, which only a stylesheet
+     can hold, so it is a class; the other shapes' masks and radii go inline. */
+  const squircle = shape === 'squircle';
   return (
-    <Box
+    <Root
       component={component}
+      sx={sx}
       type={isClickable ? 'button' : undefined}
       role={isClickable ? 'button' : 'img'}
       aria-label={alt || initials || 'Avatar'}
@@ -410,48 +424,38 @@ function ShapedAvatar({ shape, s, size, C, component, isClickable, onClick, alt,
       onClick={isClickable ? onClick : undefined}
       className={'avatar avatar-shaped avatar-shape-' + shape + ' avatar-' + size +
         (effectiveSrc ? ' avatar-image' : hasInitials ? ' avatar-initials' : ' avatar-fallback') +
-        (isClickable ? ' avatar-clickable' : '') + (className ? ' ' + className : '')}
-      sx={{
-        position: 'relative', display: 'inline-grid', placeItems: 'center', flexShrink: 0,
-        width: s.size + 'px', height: s.size + 'px', boxSizing: 'border-box',
-        p: 0, border: 'none', background: 'transparent', fontFamily: 'inherit',
-        color: hasInitials ? 'var(--Buttons-' + C + '-Text)' : 'var(--Background)',
-        ...(insideButton && { marginLeft: '2px', marginRight: '2px' }),
-        ...(isClickable && {
-          cursor: 'pointer', outline: 'none', borderRadius: 'var(--Button-Focus-Radius, 8px)',
-          '&:hover .avatar-shape-fill::after': { backgroundColor: 'var(--Hover)' },
-          '&:active .avatar-shape-fill::after': { backgroundColor: 'var(--Pressed)' },
-          '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px' },
-        }),
-        ...sx,
-      }}
+        (isClickable ? ' avatar-clickable' : '') +
+        ' omni-av-shaped omni-av-c-' + C +
+        (hasInitials ? ' omni-av-shaped-init' : '') +
+        (insideButton ? ' omni-av-inbtn' : '') +
+        (isClickable ? ' omni-av-shaped-click' : '') +
+        (className ? ' ' + className : '')}
+      style={{ '--_av-size': s.size + 'px', ...style }}
       {...props}
     >
-      <Box className="avatar-shape-fill" aria-hidden="true" sx={{
-        position: 'absolute', inset: 0, backgroundColor: fill, ...shapeStyle(shape),
+      <div className={'avatar-shape-fill omni-av-fill' + (squircle ? ' omni-av-sq' : '')} aria-hidden="true" style={{
+        backgroundColor: fill,
+        ...(squircle ? {} : shapeStyle(shape)),
         /* Radius shapes keep a CSS border; path shapes get the outline below. */
         ...(d ? {} : { border: BORDER_WIDTH + ' solid ' + edge, boxSizing: 'border-box' }),
-        '&::after': { content: '""', position: 'absolute', inset: 0 },
       }}>
         {effectiveSrc && (
-          <Box component="img" src={effectiveSrc} alt="" referrerPolicy="no-referrer" onError={onImgError}
-               sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+          <img className="omni-av-shimg" src={effectiveSrc} alt="" referrerPolicy="no-referrer" onError={onImgError} />
         )}
-      </Box>
+      </div>
       {hasInitials && (() => {
         const TextComp = getInitialsComp(size);
         return (
-          <TextComp aria-hidden="true" sx={{
-            position: 'relative', color: 'inherit', lineHeight: 1, textAlign: 'center',
-            fontSize: shapeInitialsFontSize(s.size, size === 'custom' ? null : resolveSizeName(size)),
-            ...CAP_HEIGHT_TRIM,
-          }}>
+          <TextComp color="inherit" className="omni-av-shinit" aria-hidden="true"
+            style={{ '--_av-fs': shapeInitialsFontSize(s.size, size === 'custom' ? null : resolveSizeName(size)) }}>
             {initials.slice(0, 2).toUpperCase()}
           </TextComp>
         );
       })()}
       {!effectiveSrc && !hasInitials && (
-        <PersonIcon aria-hidden="true" sx={{ position: 'relative', width: '60%', height: '60%', color: 'inherit' }} />
+        <svg className="omni-av-person" aria-hidden="true" focusable="false" viewBox="0 0 24 24" data-testid="PersonIcon">
+          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4m0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4" />
+        </svg>
       )}
       {d && (
         <svg aria-hidden="true" focusable="false" viewBox="0 0 100 100" preserveAspectRatio="none"
@@ -459,7 +463,7 @@ function ShapedAvatar({ shape, s, size, C, component, isClickable, onClick, alt,
           <path d={d} fill="none" stroke={edge} strokeWidth={BORDER_WIDTH} vectorEffect="non-scaling-stroke" />
         </svg>
       )}
-    </Box>
+    </Root>
   );
 }
 

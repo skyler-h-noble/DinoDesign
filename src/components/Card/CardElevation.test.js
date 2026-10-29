@@ -24,47 +24,37 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { Card } from './Card';
+import { declared } from '../_testCss';
 
-const shadowRulesFor = (el) => {
-  const classes = Array.from(el.classList);
-  const out = [];
-  for (const sheet of Array.from(document.styleSheets)) {
-    let list; try { list = sheet.cssRules; } catch { continue; }
-    for (const r of Array.from(list || [])) {
-      if (!r.selectorText || !classes.some((c) => r.selectorText.includes('.' + c))) continue;
-      out.push(r.cssText);
-    }
-  }
-  return out.join('\n');
+/* The levels a card resolves to: its rest / hover / drag shadows are custom
+   properties on the card, re-pointed one step up by `elevated`. */
+const levelOf = (el, which) => {
+  const m = (declared(el, '--_cd-' + which) || '').match(/--Effect-Level-(\d)/);
+  return m ? Number(m[1]) : null;
 };
-
-const levelsIn = (css) =>
-  [...css.matchAll(/--Effect-Level-(\d)/g)].map((m) => Number(m[1]));
 
 describe('Card elevation', () => {
   it('rests on Level 1, the level Figma calls "Card"', () => {
     const { container } = render(<Card>hi</Card>);
-    const css = shadowRulesFor(container.firstChild);
-    expect(`rest uses Level 1: ${levelsIn(css).includes(1)}`).toBe('rest uses Level 1: true');
+    expect(`rest level: ${levelOf(container.firstChild, 'rest')}`).toBe('rest level: 1');
   });
 
   it('never rests on the App-bar step', () => {
     /* Level 2 is Elevations/Level-2 (Card-Hover, App bars, Toolbars, Menus). A card wearing it at
-       REST is the bug this file exists for. It may appear in a hover rule. */
+       REST is the bug this file exists for. It may appear as the hover level. */
     const { container } = render(<Card>hi</Card>);
-    const css = shadowRulesFor(container.firstChild);
-    const restRule = css.split('\n').find((r) => !/:hover|:active|:focus/.test(r)) || '';
-    expect(`rest uses Level 2: ${/--Effect-Level-2/.test(restRule)}`).toBe('rest uses Level 2: false');
+    expect(levelOf(container.firstChild, 'rest')).not.toBe(2);
+    expect(levelOf(container.firstChild, 'hover')).toBe(2);
   });
 
   it('moves the whole set up one when elevated', () => {
     /* The prop means "one step up", so Card and Card-Hover stay one apart at
        either setting. If elevated only raised the rest state, a raised card
        would stop lifting on hover. */
-    const plain = shadowRulesFor(render(<Card>a</Card>).container.firstChild);
-    const up = shadowRulesFor(render(<Card elevated>b</Card>).container.firstChild);
-    const maxPlain = Math.max(...levelsIn(plain), 0);
-    const maxUp = Math.max(...levelsIn(up), 0);
-    expect(`elevated is higher: ${maxUp > maxPlain}`).toBe('elevated is higher: true');
+    const plain = render(<Card>a</Card>).container.firstChild;
+    const up = render(<Card elevated>b</Card>).container.firstChild;
+    for (const which of ['rest', 'hover', 'drag']) {
+      expect(`${which}: ${levelOf(up, which) - levelOf(plain, which)}`).toBe(`${which}: 1`);
+    }
   });
 });

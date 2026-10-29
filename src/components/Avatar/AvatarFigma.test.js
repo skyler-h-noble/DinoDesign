@@ -9,24 +9,17 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { Avatar } from './Avatar';
+import { cssFor, declared } from '../_testCss';
 
-const rulesFor = (el) => {
-  const classes = Array.from(el.classList);
-  const out = [];
-  for (const sheet of Array.from(document.styleSheets)) {
-    let list; try { list = sheet.cssRules; } catch { continue; }
-    for (const r of Array.from(list || [])) {
-      if (r.selectorText && classes.some((c) => r.selectorText.includes('.' + c))) out.push(r.cssText);
-    }
-  }
-  return out.join('\n');
-};
+/* Every rule matching the element plus its inline style (see _testCss). */
+const rulesFor = cssFor;
 
 describe('Avatar matches the Figma variables', () => {
   it('always has a 1px ring, inside the diameter', () => {
     for (const props of [{}, { insideButton: true }]) {
       const el = render(<Avatar initials="LN" {...props} />).container.querySelector('.avatar');
-      expect(rulesFor(el)).toMatch(/border:[^;]*solid/);
+      expect(declared(el, 'border-style')).toBe('solid');
+      expect(declared(el, 'border-width')).toMatch(/1px/);
       expect(rulesFor(el)).toMatch(/box-sizing:\s*border-box/);
     }
   });
@@ -45,6 +38,8 @@ describe('Avatar matches the Figma variables', () => {
     const svg = el.querySelector('svg');
     // Over the ring, at the full diameter (jsdom drops the calc(var()) sizes).
     expect(svg.style.position).toBe('absolute');
-    expect(rulesFor(el)).toMatch(/(^|[;{\s])color:\s*var\(--Buttons-Default-Border\)/);
+    // The glyph's color is the palette's border, carried by --_av-bd.
+    expect(declared(el, 'color')).toBe('var(--_av-bd)');
+    expect(declared(el, '--_av-bd')).toBe('var(--Buttons-Default-Border)');
   });
 });

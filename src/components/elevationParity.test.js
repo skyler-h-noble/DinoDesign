@@ -62,7 +62,10 @@ describe('elevation matches the Figma effect styles', () => {
   it('Card rests on the Card pair; Ratio draws no shadow at all', () => {
     /* Ratio used to share Card's pair. It is a bare media slot now — no frame,
        no states — so it must not import a shadow level at all. */
-    expect(/elevated \? SHADOW_LEVEL_2 : SHADOW_LEVEL_1/.test(read('Card/Card.js'))).toBe(true);
+    /* Rest is Level 1, and the elevated class moves it to Level 2. */
+    const card = read('Card/Card.js');
+    expect(/\.omni-card\{--_cd-rest:\$\{SHADOW_LEVEL_1\}/.test(card)).toBe(true);
+    expect(/\.omni-card-elev\{--_cd-rest:\$\{SHADOW_LEVEL_2\}/.test(card)).toBe(true);
     expect(/SHADOW_LEVEL_/.test(read('Ratio/Ratio.js'))).toBe(false);
   });
 });

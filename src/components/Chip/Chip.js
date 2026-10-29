@@ -1,6 +1,7 @@
 // src/components/Chip/Chip.js
 import React, { forwardRef } from 'react';
-import { Chip as MuiChip, Avatar as MuiAvatar, Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 import CloseIcon from '@mui/icons-material/Close';
 import { Button } from '../Button/Button';
 import { SHADOW_LEVEL_1 } from '../_shadows';
@@ -66,14 +67,6 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 // --Buttons-{C}-Hover is tuned against the button fill, not against
 // --Background.
 const CHIP_SURFACE = { selected: 'Surface-Dimmest', unselected: 'Surface-Brightest' };
-
-const chipStyles = () => ({
-  bg:       'var(--Background)',
-  text:     'var(--Text)',
-  border:   '1px solid var(--Border)',
-  hoverBg:  'var(--Hover)',
-  activeBg: 'var(--Pressed)',
-});
 
 // The `-light` shape is removed. It was solidStyles PLUS a border — the SAME
 // --Buttons-{C}-Button fill as the solid chip — so `success-light` painted the
@@ -171,6 +164,72 @@ function warnRemovedSize(size) {
 
 // --- Delete Icon Button ------------------------------------------------------
 
+/* The static sheet. Chip used to be MUI's Chip with an sx override; it is now
+   its own markup, so this sheet carries both the base MUI gave it and the
+   design's own layer on top, over the same tokens.
+
+   The root is NOT the surface. The paint — fill, border, text — is on the
+   inner .chip-surface, which carries data-theme + data-surface. The root keeps
+   the PARENT's tokens, so the focus ring, which sits outside the chip on the
+   page, takes the page's --Focus-Visible. Same split as Card's outer shell and
+   inner surface, and as Figma's set, where Focus-Visible is a sibling of
+   Theme-Chip-Body, not inside it.
+
+   Type is the Legal-Semibold style, which is what the Figma label is bound to.
+   Never `inherit`: the generated CSS gives the page no font, so outside a
+   styled parent the chip would come out in the UA serif.
+
+   State rules weigh what emotion's did, so a caller's sx state rule still
+   wins over them. */
+const SxBox = lazySxBox('Chip');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+const R = (CHIP_SIZE.height / 2) + 'px';
+const DECORATOR_RULES = (sel) => [
+  `${sel}{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}`,
+  `${sel} .MuiSvgIcon-root{font-size:${CHIP_SIZE.iconSize}px}`,
+  /* The lib's Avatar is `.avatar` — `.MuiAvatar-root` alone missed it. Figma
+     pins Icons & Avatars to xxs: 16. Avatar takes its size from --_av-size, so
+     this rule can still set it. */
+  `${sel} .MuiAvatar-root,${sel} .avatar{width:${CHIP_SIZE.iconSize}px;height:${CHIP_SIZE.iconSize}px;min-width:${CHIP_SIZE.iconSize}px;font-size:9px}`,
+];
+
+registerStaticStyles('omni-chip', [
+  '.omni-chip{max-width:100%;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;'
+    + 'transition:background-color 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;'
+    + 'cursor:unset;outline:0;text-decoration:none;border:0;vertical-align:middle;color:inherit;line-height:1.5;'
+    + `height:${CHIP_SIZE.height}px;font-size:var(--Legal-Font-Size, 10px);font-weight:var(--Legal-Semibold-Font-Weight, 600);`
+    + 'letter-spacing:var(--Legal-Letter-Spacing, 0);font-family:var(--Legal-Font-Family, var(--Font-Family-Body, inherit));'
+    + `border-radius:${R};padding:0;min-width:${CHIP_SIZE.minWidth}px;box-sizing:border-box;position:relative;`
+    + 'background-color:transparent;box-shadow:none}',
+  /* The 24x24 touch target (WCAG 2.5.8), centred on the chip. */
+  '.omni-chip::after{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);min-width:24px;min-height:24px;width:100%;height:100%}',
+  '.omni-chip-click{cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;'
+    + 'transition:background-color 0.15s ease, box-shadow 0.15s ease, outline 0.15s ease}',
+  /* Figma's Hover chip wears the Level-1 elevation; Pressed drops back to none. */
+  `.omni-chip-click:hover{background-color:transparent;box-shadow:${SHADOW_LEVEL_1}}`,
+  '.omni-chip-click:hover .chip-surface{background-color:var(--Hover)}',
+  '.omni-chip-click:active{background-color:transparent;box-shadow:none}',
+  '.omni-chip-click:active .chip-surface{background-color:var(--Pressed)}',
+  /* 2px ring 1px outside, as on Card and Checkbox. */
+  '.omni-chip:focus-visible{outline:2px solid var(--Focus-Visible);outline-offset:1px}',
+  // Figma's Disabled chip, as on Swatch.
+  '.omni-chip-off{opacity:0.38;cursor:not-allowed;pointer-events:none}',
+  '.omni-chip-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0;height:100%;align-self:stretch;flex:1;'
+    + 'font-size:inherit;font-weight:inherit;font-family:inherit;line-height:var(--Legal-Line-Height, 15px);letter-spacing:inherit;'
+    + `display:flex;align-items:center;gap:${CHIP_SIZE.gap}px}`,
+  /* The surface: its attributes are the paint. Its radius is stated, not
+     `inherit` — the parent label has no radius. */
+  `.omni-chip-surface{display:inline-flex;align-items:center;gap:${CHIP_SIZE.gap}px;line-height:1;height:100%;width:100%;`
+    + `justify-content:center;box-sizing:border-box;padding:${CHIP_SIZE.padding};border-radius:${R};`
+    + 'background-color:var(--Background);color:var(--Text);border-width:1px;border-style:solid;border-color:var(--Border);'
+    + 'transition:background-color 0.15s ease}',
+  /* Figma's selected chip has no stroke. The border stays as a transparent
+     1px so the content does not move between states. */
+  '.omni-chip-surface-sel{border-color:transparent}',
+  ...DECORATOR_RULES('.omni-chip-dec'),
+  `.omni-chip-text{padding:${CHIP_SIZE.labelPadding};display:inline-flex;align-items:center;line-height:var(--Legal-Line-Height, 15px)}`,
+].join('\n'));
+
 /* Figma's Deletable: a SMALL GHOST ICON-ONLY Button (close) after the label.
    It was a hand-rolled <button> with a Cancel glyph, an rgba hover and its
    own focus ring — states the lib Button already has, drawn from the
@@ -227,12 +286,14 @@ export function Chip({
   icon,
   children,
   className = '',
-  sx = {},
+  sx,
+  onKeyDown,
+  onKeyUp,
   ...props
 }) {
+  useStaticStyles('omni-chip');
   const startDecorator = startDecoratorProp ?? icon;
   const chipColor = normalizeChipVariant(variant);
-  const styles = chipStyles();
   /* `default` gets no data-theme and INHERITS, matching ButtonGroup. Naming a
      Default theme would pin the chip to the brand's default palette even inside
      a themed zone, which is the opposite of what inheriting means. */
@@ -267,221 +328,63 @@ export function Chip({
 
   const displayLabel = label || children;
 
-  const chipSx = {
-    height: sc.height,
-    /* The Legal-Semibold type style, which is what the Figma label is bound to
-       (size, leading, tracking and face from Legal-*, weight from
-       Legal-Semibold-Font-Weight). It used to be
-       the button's face at 12px / 500, which no chip in the file draws. Never
-       `inherit`: the generated CSS gives the page no font, so outside a styled
-       parent the chip would come out in the UA serif. */
-    fontSize: 'var(--Legal-Font-Size, 10px)',
-    fontWeight: 'var(--Legal-Semibold-Font-Weight, 600)',
-    letterSpacing: 'var(--Legal-Letter-Spacing, 0)',
-    fontFamily: 'var(--Legal-Font-Family, var(--Font-Family-Body, inherit))',
-    borderRadius: (sc.height / 2) + 'px',
-    padding: 0,
-    // `Sizing-4` on the Figma variant — a chip never narrower than 32px.
-    minWidth: sc.minWidth,
-    boxSizing: 'border-box',
-    position: 'relative',
-
-    /* The root is NOT the surface. The paint — fill, border, text — is on the
-       inner `.chip-surface`, which carries data-theme + data-surface. The
-       root keeps the PARENT's tokens, so the focus ring, which sits outside
-       the chip on the page, takes the page's --Focus-Visible. On the root, a
-       selected chip (Surface-Dimmest) drew its ring in the dark surface's
-       light blue — about 2:1 on a light page. Same split as Card's outer
-       shell and inner surface, and as Figma's set, where Focus-Visible is a
-       sibling of Theme-Chip-Body, not inside it. */
-    backgroundColor: 'transparent',
-
-
-    // 24x24 minimum touch target (WCAG 2.5.8) — always, there being one size.
-    ...{
-      '&::after': {
-        content: '""',
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        minWidth: 24,
-        minHeight: 24,
-        width: '100%',
-        height: '100%',
-      },
-    },
-
-    ...(isClickable && !disabled ? {
-      cursor: 'pointer',
-      transition: 'background-color 0.15s ease, outline 0.15s ease',
-      transition: 'background-color 0.15s ease, box-shadow 0.15s ease, outline 0.15s ease',
-      /* Figma's Hover chip wears the Level-1 elevation; Pressed drops back to
-         none. MUI's clickable chip adds its own shadow on :active, which is
-         why Pressed has to say `none` rather than leave it unset. */
-      '&:hover': {
-        backgroundColor: 'transparent',
-        '& .chip-surface': { backgroundColor: styles.hoverBg },
-        boxShadow: SHADOW_LEVEL_1,
-      },
-      '&:active': {
-        backgroundColor: 'transparent',
-        '& .chip-surface': { backgroundColor: styles.activeBg },
-        boxShadow: 'none',
-      },
-    } : {}),
-
-    /* 2px ring 1px outside, as on Card and Checkbox — Figma's Focus-Visible
-       frame sits 3px out with its 2px stroke inside. */
-    '&:focus-visible, &.Mui-focusVisible': {
-      outline: '2px solid var(--Focus-Visible)',
-      outlineOffset: '1px',
-    },
-
-    ...(disabled ? {
-      opacity: 0.38, // Figma's Disabled chip, as on Swatch
-      cursor: 'not-allowed',
-      pointerEvents: 'none',
-    } : {}),
-
-    boxShadow: 'none',
-
-    '& .MuiChip-label': {
-      padding: 0,
-      height: '100%',
-      alignSelf: 'stretch',
-      flex: 1,
-      fontSize: 'inherit',
-      fontWeight: 'inherit',
-      fontFamily: 'inherit',
-      lineHeight: 'var(--Legal-Line-Height, 15px)',
-      letterSpacing: 'inherit',
-      display: 'flex',
-      alignItems: 'center',
-      gap: sc.gap + 'px',
-    },
-
-    '& .MuiChip-icon': {
-      margin: 0,
-      marginLeft: '-2px',
-      color: 'inherit',
-      fontSize: sc.iconSize,
-    },
-
-    '& .MuiChip-deleteIcon': {
-      display: 'none',
-    },
-
-    ...sx,
+  /* The root is a button when it can be pressed: focusable, named a button
+     unless a selection role says otherwise, Enter presses on key-down and
+     Space on key-up — the behaviour MUI's ButtonBase gave it. Disabled is not
+     pressable at all, so it is a plain element again. */
+  const pressable = isClickable && !disabled;
+  const handleKeyDown = (e) => {
+    if (pressable && e.target === e.currentTarget) {
+      if (e.key === ' ') e.preventDefault();
+      if (e.key === 'Enter') { e.preventDefault(); if (onClick) onClick(e); }
+    }
+    if (onKeyDown) onKeyDown(e);
+  };
+  const handleKeyUp = (e) => {
+    if (pressable && e.target === e.currentTarget && e.key === ' ' && onClick) onClick(e);
+    if (e.target === e.currentTarget && e.key === 'Escape') e.currentTarget.blur();
+    if (onKeyUp) onKeyUp(e);
   };
 
+  const decorator = (node) => <span className="omni-chip-dec">{node}</span>;
   const labelContent = (
-    <Box
-      component="span"
-      className="chip-surface"
+    <span
+      className={'chip-surface omni-chip-surface' + (selected ? ' omni-chip-surface-sel' : '')}
       /* The attributes are the paint. Every token here — --Background,
          --Text, --Border, --Hover, --Pressed — resolves from this pair, so
          without them the chip falls through to the page's own zone and a
          Success chip renders in the page color. */
       data-theme={chipTheme}
       data-surface={chipSurface}
-      sx={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: sc.gap + 'px',
-        lineHeight: 1,
-        height: '100%',
-        width: '100%',
-        justifyContent: 'center',
-        boxSizing: 'border-box',
-        padding: sc.padding,
-        /* Stated, not `inherit`: the parent is .MuiChip-label, which has no
-           radius, so inherit drew a square chip. */
-        borderRadius: (sc.height / 2) + 'px',
-        backgroundColor: styles.bg,
-        color: styles.text,
-        border: styles.border,
-        /* Figma's selected chip has no stroke. The border stays as a
-           transparent 1px so the content does not move between states; the
-           fill paints under it, so the edge is the fill. */
-        ...(selected ? { borderColor: 'transparent' } : {}),
-        transition: 'background-color 0.15s ease',
-      }}
     >
-      {startDecorator && (
-        <Box
-          component="span"
-          sx={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            '& .MuiSvgIcon-root': { fontSize: sc.iconSize },
-            /* The lib's Avatar is `.avatar` — `.MuiAvatar-root` alone missed it,
-               so an avatar decorator rendered at its own 32px default and
-               overflowed the 24px chip. Figma pins Icons & Avatars to xxs: 16. */
-            '& .MuiAvatar-root, & .avatar': {
-              width: sc.iconSize,
-              height: sc.iconSize,
-              minWidth: sc.iconSize,
-              fontSize: '9px',
-            },
-          }}
-        >
-          {startDecorator}
-        </Box>
-      )}
+      {startDecorator && decorator(startDecorator)}
       {displayLabel != null && displayLabel !== '' && (
-        <Box component="span" sx={{ padding: sc.labelPadding, display: 'inline-flex', alignItems: 'center', lineHeight: 'var(--Legal-Line-Height, 15px)' }}>
-          {displayLabel}
-        </Box>
+        <span className="omni-chip-text">{displayLabel}</span>
       )}
-      {endDecorator && (
-        <Box
-          component="span"
-          sx={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            '& .MuiSvgIcon-root': { fontSize: sc.iconSize },
-            /* The lib's Avatar is `.avatar` — `.MuiAvatar-root` alone missed it,
-               so an avatar decorator rendered at its own 32px default and
-               overflowed the 24px chip. Figma pins Icons & Avatars to xxs: 16. */
-            '& .MuiAvatar-root, & .avatar': {
-              width: sc.iconSize,
-              height: sc.iconSize,
-              minWidth: sc.iconSize,
-              fontSize: '9px',
-            },
-          }}
-        >
-          {endDecorator}
-        </Box>
-      )}
+      {endDecorator && decorator(endDecorator)}
       {onDelete && (
         <ChipDeleteButton onClick={onDelete} label={typeof displayLabel === 'string' ? displayLabel : undefined} disabled={disabled} />
       )}
-    </Box>
+    </span>
   );
 
-  return (
-    <MuiChip
-      label={labelContent}
-      clickable={isClickable && !disabled}
-      disabled={disabled}
-      onClick={isClickable ? onClick : undefined}
-      className={'chip-' + chipColor + (selected ? ' chip-selected' : '') + ' ' + className}
-      sx={chipSx}
-      {...selectionProps}
-      {...props}
-    />
-  );
+  const rootProps = {
+    role: pressable ? 'button' : undefined,
+    tabIndex: pressable ? 0 : undefined,
+    onClick: pressable ? onClick : undefined,
+    onKeyDown: handleKeyDown,
+    onKeyUp: handleKeyUp,
+    className: 'MuiChip-root omni-chip' + (pressable ? ' MuiChip-clickable omni-chip-click' : '')
+      + (disabled ? ' Mui-disabled omni-chip-off' : '')
+      + ' chip-' + chipColor + (selected ? ' chip-selected' : '') + ' ' + className,
+    ...selectionProps,
+    ...props,
+  };
+  const body = <span className="MuiChip-label omni-chip-label">{labelContent}</span>;
+  if (hasSx(sx)) return <SxBox sx={sx} {...rootProps}>{body}</SxBox>;
+  return <div {...rootProps}>{body}</div>;
 }
 
-// --- Convenience Exports -----------------------------------------------------
-
-// Solid
 export const PrimaryChip    = (p) => <Chip variant="primary"    {...p} />;
 export const SecondaryChip  = (p) => <Chip variant="secondary"  {...p} />;
 export const TertiaryChip   = (p) => <Chip variant="tertiary"   {...p} />;

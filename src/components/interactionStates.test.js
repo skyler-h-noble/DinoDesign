@@ -67,12 +67,12 @@ const code = (src) =>
    exists to encourage. */
 const SHARED = /scrimStates\(|TOGGLE_STATES/;
 
-/* `${ON}:hover` is a static component sheet's rule (see _staticStyles.js):
-   ON is the component's enabled-state selector. */
+/* `${ON}:hover` and `.omni-card-click:hover` are static component sheet rules
+   (see _staticStyles.js): ON is a component's enabled-state selector. */
 const STATES = {
-  hover:    [/&:hover|\.bottom-nav-item:hover|:hover &|\$\{ON\}:hover/, SHARED],
-  pressed:  [/&:active|&\.Mui-active|\.bottom-nav-item:active|:active &|\$\{ON\}:active/, SHARED],
-  focus:    [/&:focus-visible|&\.Mui-focusVisible|&:focus-within|FOCUS_RING|\$\{ON\}:focus-visible/, SHARED],
+  hover:    [/&:hover|\.bottom-nav-item:hover|:hover &|\$\{ON\}:hover|\.omni-[\w-]+:hover/, SHARED],
+  pressed:  [/&:active|&\.Mui-active|\.bottom-nav-item:active|:active &|\$\{ON\}:active|\.omni-[\w-]+:active/, SHARED],
+  focus:    [/&:focus-visible|&\.Mui-focusVisible|&:focus-within|FOCUS_RING|\$\{ON\}:focus-visible|\.omni-[\w-]+:focus-visible/, SHARED],
   disabled: [/&:disabled|&\.Mui-disabled|disabled &&|disabled \?|DISABLED_STATE/, SHARED],
 };
 

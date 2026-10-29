@@ -143,10 +143,15 @@ function DesktopAppBar({
   title,
   // Figma's `Menu` boolean: the ghost menu button at the start.
   showMenu = true,
+  /* A site's nav stays at the top of the page as it scrolls. On by default;
+     sticky={false} lets the bar scroll away with the content. It sticks within
+     its scrolling parent, so inside a scroll pane it stays at that pane's top. */
+  sticky = true,
   children,
   className = '', sx = {},
 }) {
   const barSize = React.useContext(AppBarSizeContext);
+  const placement = sticky ? { position: 'sticky', top: 0, zIndex: 1100 } : { position: 'relative' };
   const [drawerOpen, setDrawerOpen, drawerWanted, prefetchDrawer] = useNavDrawer();
   const barTheme = THEME_MAP[barColor] || THEME_MAP.default;
   const dataTheme = barTheme.theme;
@@ -245,7 +250,7 @@ function DesktopAppBar({
         data-surface={dataSurface}
         className={'appbar appbar-desktop appbar-layout-' + layout + ' appbar-' + barColor + (className ? ' ' + className : '')}
         sx={{
-          position: 'relative',
+          ...placement,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           // The Margin padding sits INSIDE the bar's width, as in Figma: a bar
           // given 1920px is 1920px, not 1920 plus 128 of padding.
@@ -317,6 +322,7 @@ function DesktopAppBar({
       data-surface={dataSurface}
       className={'appbar appbar-desktop appbar-' + barColor + (className ? ' ' + className : '')}
       sx={{
+        ...placement,
         display: 'flex', alignItems: 'center', height: barHeight(barSize),
         px: 2, gap: 2,
         backgroundColor: 'var(--Background)', color: 'var(--Text)',

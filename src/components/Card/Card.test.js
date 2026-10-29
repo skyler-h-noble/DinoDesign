@@ -6,6 +6,7 @@ import {
   DefaultCard, SolidCard, LightCard,
 } from './Card';
 import { axe } from 'jest-axe';
+import { declared } from '../_testCss';
 
 /* ─── Helpers ─── */
 const renderCard = (props = {}, children) =>
@@ -292,37 +293,34 @@ describe('Card — Accessibility (jest-axe)', () => {
    stays put, so selecting must not change the card's size or move its content.
    The second pixel is an inset ring on the inner surface. */
 describe('Card selected ring', () => {
-  /* Read the generated rules, as ButtonSelectedBorder.test does: jsdom drops a
-     `border` shorthand that contains var(), so computed styles read empty. */
-  const allRules = () => Array.from(document.styleSheets).flatMap((sh) => {
-    try { return Array.from(sh.cssRules || []).map((r) => r.cssText); } catch { return []; }
-  }).join('\n');
-
+  /* Read the declared values (jsdom computes no var()), following the
+     selected palette's border through --_cd-sel. */
   test('a selected card keeps a 1px border and draws the ring inside', () => {
-    render(<Card selected>Body</Card>);
-    const css = allRules();
-    expect(css).toMatch(/border:\s*1px solid var\(--Buttons-Default-Border\)/);
-    expect(css).toMatch(/box-shadow:\s*inset 0 0 0 1px var\(--Buttons-Default-Border\)/);
-    // The border never thickens — that grew the card and moved its content.
-    expect(css).not.toMatch(/border:\s*2px solid var\(--Buttons-Default-Border\)/);
+    const { container } = render(<Card selected>Body</Card>);
+    const card = container.querySelector('.card');
+    expect(declared(card, 'border-width')).toBe('1px');
+    expect(declared(card, 'border-color')).toBe('var(--_cd-sel)');
+    expect(declared(card, '--_cd-sel')).toBe('var(--Buttons-Default-Border)');
+    expect(declared(card.firstChild, 'box-shadow')).toBe('inset 0 0 0 1px var(--_cd-ring)');
+    // Declared on the inner surface, so it resolves against the card's own theme.
+    expect(declared(card.firstChild, '--_cd-ring')).toBe('var(--Buttons-Default-Border)');
   });
 
   test('an unselected card has no ring', () => {
-    // Earlier tests' rules stay in the document, so read this card's own.
     const { container } = render(<Card clickable>Body</Card>);
-    const cls = [...container.querySelector('.card > div').classList].find((c) => c.startsWith('css-'));
-    const own = Array.from(document.styleSheets).flatMap((sh) => Array.from(sh.cssRules || []))
-      .map((r) => r.cssText).filter((t) => t.startsWith('.' + cls + ' ') || t.startsWith('.' + cls + '{')).join('');
-    expect(own).toMatch(/box-shadow:\s*none/);
+    expect(declared(container.querySelector('.card > div'), 'box-shadow')).toBe('none');
   });
 
   test('a disabled selected card keeps its ring (Figma Disabled keeps it, dimmed)', () => {
-    render(<Card selected disabled>Body</Card>);
-    expect(allRules()).toMatch(/box-shadow:\s*inset 0 0 0 1px var\(--Buttons-Default-Border\)/);
+    const { container } = render(<Card selected disabled>Body</Card>);
+    expect(declared(container.querySelector('.card > div'), 'box-shadow')).toBe('inset 0 0 0 1px var(--_cd-ring)');
   });
 
   test('focus does not round the card itself', () => {
     render(<Card clickable>Body</Card>);
+    const allRules = () => Array.from(document.styleSheets).flatMap((sh) => {
+      try { return Array.from(sh.cssRules || []).map((r) => r.cssText); } catch { return []; }
+    }).join('\n');
     expect(allRules()).not.toMatch(/calc\(var\(--Card-Radius\) \+ 3px\)/);
   });
 });
