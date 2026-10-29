@@ -14,8 +14,11 @@
 // is Font Awesome 6 Brands as a LIGATURE font — one component with a text
 // layer, where you type the brand's name and the font draws the glyph — so its
 // API is a lowercase hyphenated string: `github`, `x-twitter`, `linkedin`.
-// This mirrors that, and mirrors <Icon>, which is Material Symbols by the same
-// mechanism. A component whose API is a different shape from the design it
+// This mirrors that, and mirrors Figma's Icon (9155:25617), which is the
+// Material Icons ligature fonts by the same mechanism — Default, Round and
+// Sharp, the families @mui/icons-material draws in code (not Material
+// Symbols). Note the version gap here: Figma's font is Font Awesome 6 Brands,
+// the package below is v7, and a few marks were redrawn between them. A component whose API is a different shape from the design it
 // implements is one the converter cannot map.
 //
 // Path data comes from @fortawesome/free-brands-svg-icons (CC BY 4.0) rather
