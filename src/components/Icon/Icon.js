@@ -1,7 +1,8 @@
 // src/components/Icon/Icon.js
 import React from 'react';
-import { Box } from '@mui/material';
-import { useGhost, ghostBlockSx } from '../_ghost';
+import { useGhost } from '../_ghost';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 
 /**
  * Icon Component
@@ -103,6 +104,24 @@ function warnDisabledOnce() {
   console.warn('[Icon] disabled is retired — an icon is not interactive. Disable the Button that holds it.');
 }
 
+/* The static sheet. Size and color differ per icon, so they arrive as custom
+   properties (--_ic-size, --_ic-color) and one rule reads them. Not inline
+   values: a parent's rule — Button sizing the icon of an icon-only button —
+   has to be able to win, as it did when both were emotion's. */
+const SxBox = lazySxBox('Icon');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+registerStaticStyles('omni-icon', [
+  '.omni-icon{display:inline-flex;align-items:center;justify-content:center;font-size:var(--_ic-size);color:var(--_ic-color);line-height:1;flex-shrink:0}',
+  /* A ghosting icon is a square of its own size — the glyph hidden, so it
+     occupies exactly the space the real icon will. */
+  '.omni-icon-ghost{background-color:var(--Border-Variant);border-radius:var(--Ghost-Radius, 4px);color:transparent;user-select:none;pointer-events:none;width:var(--_ic-size);height:var(--_ic-size)}',
+  '.omni-icon-ghost-anim{background-image:linear-gradient(90deg, transparent 0%, var(--Background) 50%, transparent 100%);background-size:200% 100%;background-repeat:no-repeat;animation:omni-ghost-sweep 1.4s linear infinite}',
+  '@media (prefers-reduced-motion: reduce){.omni-icon-ghost-anim{background-image:none;animation:none}}',
+  '.omni-icon-ghost .MuiSvgIcon-root{visibility:hidden}',
+  '.omni-icon .MuiSvgIcon-root{font-size:inherit;color:inherit}',
+].join('\n'));
+
 export function Icon({
   children,
   color = 'default',
@@ -114,10 +133,12 @@ export function Icon({
   disabled,
   twoTone = false,
   className = '',
-  sx = {},
+  style,
+  sx,
   'aria-label': ariaLabel,
   ...props
 }) {
+  useStaticStyles('omni-icon');
   if (disabled) warnDisabledOnce();
   const ghost = useGhost();
   const C = COLOR_LABEL_MAP[color] || 'Default';
@@ -147,47 +168,25 @@ export function Icon({
   const variantToken =
     `color-mix(in srgb, ${iconColor} ${ICON_VARIANT_OPACITY}%, transparent)`;
 
-  return (
-    <Box
-      component="span"
-      className={
-        'icon icon-' + color + ' icon-' + size +
-        (twoTone ? ' icon-twotone' : '') +
-        (className ? ' ' + className : '')
-      }
-      aria-hidden={ariaLabel ? undefined : 'true'}
-      aria-label={ariaLabel || undefined}
-      role={ariaLabel ? 'img' : undefined}
-      sx={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: resolvedSize,
-        color: colorToken,
-        lineHeight: 1,
-        flexShrink: 0,
-        // Two-tone: set CSS variable for the secondary fill
-        ...(twoTone && { '--twotone-variant': variantToken }),
-        /* A ghosting icon is a square of its own size — the glyph is hidden by
-           the block's transparent color, and width/height come from fontSize
-           above, so it occupies exactly the space the real icon will. */
-        ...(ghost ? {
-          ...ghostBlockSx({ animate: ghost.animate }),
-          width: resolvedSize,
-          height: resolvedSize,
-          '& .MuiSvgIcon-root': { visibility: 'hidden' },
-        } : {}),
-        '& .MuiSvgIcon-root': {
-          fontSize: 'inherit',
-          color: 'inherit',
-        },
-        ...sx,
-      }}
-      {...props}
-    >
-      {children}
-    </Box>
-  );
+  const iconProps = {
+    className:
+      'icon icon-' + color + ' icon-' + size +
+      (twoTone ? ' icon-twotone' : '') +
+      ' omni-icon' + (ghost ? ' omni-icon-ghost' + (ghost.animate ? ' omni-icon-ghost-anim' : '') : '') +
+      (className ? ' ' + className : ''),
+    'aria-hidden': ariaLabel ? undefined : 'true',
+    'aria-label': ariaLabel || undefined,
+    role: ariaLabel ? 'img' : undefined,
+    style: {
+      '--_ic-size': resolvedSize,
+      '--_ic-color': colorToken,
+      ...(twoTone && { '--twotone-variant': variantToken }),
+      ...style,
+    },
+    ...props,
+  };
+  if (hasSx(sx)) return <SxBox component="span" sx={sx} {...iconProps}>{children}</SxBox>;
+  return <span {...iconProps}>{children}</span>;
 }
 
 export default Icon;

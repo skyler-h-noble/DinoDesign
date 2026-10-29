@@ -16,17 +16,11 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { Icon } from './Icon';
+import { cssFor } from '../_testCss';
 
-const styleOf = (el) => {
-  const classes = Array.from(el.classList);
-  for (const sheet of Array.from(document.styleSheets)) {
-    let list; try { list = sheet.cssRules; } catch { continue; }
-    for (const r of Array.from(list || [])) {
-      if (r.selectorText && classes.some((c) => r.selectorText.includes('.' + c))) return r.cssText;
-    }
-  }
-  return '';
-};
+/* Every rule that applies to the icon plus its inline style — the two-tone
+   variant is an inline custom property (see _testCss). */
+const styleOf = (el) => cssFor(el);
 const iconCss = (jsx) => styleOf(render(jsx).container.querySelector('.icon'));
 
 describe('two-tone icons', () => {
