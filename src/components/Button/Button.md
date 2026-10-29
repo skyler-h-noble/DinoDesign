@@ -278,7 +278,7 @@ import AddIcon from '@omni-design/icons/Add';
 ### Swatch button (wrap in Tooltip)
 
 ```jsx
-import { Tooltip } from '@mui/material';
+import { Tooltip } from '@omni-design/components';
 
 <Tooltip title="Select Primary" arrow>
   <Button
