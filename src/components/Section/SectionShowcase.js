@@ -6,7 +6,7 @@ import { H3, Body, BodySmall } from '../Typography';
 import { Button } from '../Button/Button';
 import { Switch } from '../Switch/Switch';
 import { DocSummary } from '../../docs/DocPanels';
-import { ButtonGroup } from '../ButtonGroup/ButtonGroup';
+import { ToggleButtonGroup } from '../ToggleButtonGroup/ToggleButtonGroup';
 import { EDGE_NAMES, EDGE_SIZES, SIZED_EDGES, edgeDefaultHeight } from './edges';
 
 export function SectionShowcase() {
@@ -55,9 +55,9 @@ export function SectionShowcase() {
       </BodySmall>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 16, marginBottom: 16 }}>
         <Switch checked={animate} onChange={(e) => setAnimate(e.target.checked)} label="Drift (edgeAnimate)" />
-        <ButtonGroup value={size} onChange={setSize} size="small">
+        <ToggleButtonGroup value={size} onChange={setSize} size="small">
           {Object.keys(EDGE_SIZES).map((s) => <Button key={s} value={s} size="small">{s}</Button>)}
-        </ButtonGroup>
+        </ToggleButtonGroup>
         <Button size="small" variant="default-outline" onClick={() => setSeed((n) => n + 1)}>New random wave</Button>
       </div>
       <div style={{ borderRadius: 8, overflow: 'hidden' }}>

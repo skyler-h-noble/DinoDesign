@@ -219,13 +219,18 @@ export function Chip({
   selectionMode,
   onDelete,
   onClick,
-  startDecorator,
+  startDecorator: startDecoratorProp,
   endDecorator,
+  /* MUI's name for the leading icon. Passed through, MUI drew it OUTSIDE the
+     chip's body (the body is drawn inside the label), so a check icon sat
+     beside the pill. It is the start decorator under another name. */
+  icon,
   children,
   className = '',
   sx = {},
   ...props
 }) {
+  const startDecorator = startDecoratorProp ?? icon;
   const chipColor = normalizeChipVariant(variant);
   const styles = chipStyles();
   /* `default` gets no data-theme and INHERITS, matching ButtonGroup. Naming a

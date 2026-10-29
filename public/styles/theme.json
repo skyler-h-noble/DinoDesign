@@ -1,13 +1,13 @@
 {
-  "name": "Lise's Design",
+  "name": "OmniDesign",
   "foundation": "foundation.css",
   "core": "core.css",
+  "typography": "typography-tokens.css",
   "lightMode": "Light-Mode.css",
   "darkMode": "Dark-Mode.css",
   "base": "base.css",
   "styles": "styles.css",
   "defaultTheme": "Default",
   "defaultStyle": "Modern",
-  "defaultSurface": "Surface",
-  "darkTheme": "Neutral"
+  "defaultSurface": "Surface"
 }

@@ -4,8 +4,11 @@ import { Container as MuiContainer, Box } from '@mui/material';
 
 /**
  * Container Component
- * Wrapper component that centers content and constrains max-width
- * Uses design system variables for spacing and responsive behavior
+ * Wrapper component that centers content and constrains max-width.
+ * LAYOUT ONLY — it paints nothing. It used to set data-surface="Surface" and
+ * paint --Background, which dropped a Surface-colored panel inside whatever
+ * Section it sat in (a white box in a Container or Secondary band). To paint
+ * a region, use <Section theme surface>; put a Container inside it.
  * 
  * @param {ReactNode} children - Content to wrap
  * @param {string} maxWidth - Max width: xs, sm, md, lg, xl (default: lg)
@@ -24,10 +27,7 @@ export function Container({
     <MuiContainer
       maxWidth={maxWidth}
       disableGutters={disableGutters}
-      data-surface="Surface"
       sx={{
-        backgroundColor: 'var(--Background)',
-        color: 'var(--Text)',
         transition: 'all 0.2s ease-in-out',
         ...sx,
       }}
@@ -92,12 +92,9 @@ export function FluidContainer({
 
   return (
     <Box
-      data-surface="Surface"
       sx={{
         width: '100%',
         padding: paddingMap[padding],
-        backgroundColor: 'var(--Background)',
-        color: 'var(--Text)',
         transition: 'all 0.2s ease-in-out',
         ...sx,
       }}
@@ -131,12 +128,9 @@ export function ConstrainedContainer({
 
   return (
     <Box
-      data-surface="Surface"
       sx={{
         margin: '0 auto',
         padding: 'var(--Spacing-3)',
-        backgroundColor: 'var(--Background)',
-        color: 'var(--Text)',
         transition: 'all 0.2s ease-in-out',
         ...sizeMap[size],
         ...sx,
@@ -164,14 +158,11 @@ export function LayoutContainer({
 }) {
   return (
     <Box
-      data-surface="Surface"
       sx={{
         display: 'flex',
         flexDirection: 'column',
         minHeight: fullHeight ? '100vh' : 'auto',
         width: '100%',
-        backgroundColor: 'var(--Background)',
-        color: 'var(--Text)',
         transition: 'all 0.2s ease-in-out',
         ...sx,
       }}
@@ -206,15 +197,12 @@ export function GridContainer({
 
   return (
     <Box
-      data-surface="Surface"
       sx={{
         display: 'grid',
         gridTemplateColumns: `repeat(${columns}, 1fr)`,
         gap: gapMap[gap],
         width: '100%',
         padding: 'var(--Spacing-3)',
-        backgroundColor: 'var(--Background)',
-        color: 'var(--Text)',
         transition: 'all 0.2s ease-in-out',
         ...sx,
       }}
@@ -251,7 +239,6 @@ export function StackContainer({
 
   return (
     <Box
-      data-surface="Surface"
       sx={{
         display: 'flex',
         flexDirection: direction,
@@ -259,8 +246,6 @@ export function StackContainer({
         alignItems: align,
         width: '100%',
         padding: 'var(--Spacing-3)',
-        backgroundColor: 'var(--Background)',
-        color: 'var(--Text)',
         transition: 'all 0.2s ease-in-out',
         ...sx,
       }}

@@ -4,6 +4,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import terser from '@rollup/plugin-terser';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 import babel from '@rollup/plugin-babel';
+import { readFileSync } from 'fs';
 
 // Babel must run BEFORE commonjs so JSX is transformed first
 const babelConfig = {
@@ -26,8 +27,21 @@ const external = [
   '@emotion/styled',
 ];
 
+/* Writes the package version into OMNI_DEFAULT_THEME_URL, so the default
+   theme it points at is the one published with these components. */
+const { version } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
+const omniVersion = {
+  name: 'omni-version',
+  transform(code) {
+    return code.includes('__OMNI_VERSION__')
+      ? { code: code.replace(/__OMNI_VERSION__/g, JSON.stringify(version)), map: null }
+      : null;
+  },
+};
+
 const plugins = [
   peerDepsExternal(),
+  omniVersion,
   babel(babelConfig),                         // ← 1st: transform JSX → JS
   resolve({ extensions: ['.js', '.jsx'] }),   // ← 2nd: resolve modules
   commonjs(),                                 // ← 3rd: convert CJS → ESM

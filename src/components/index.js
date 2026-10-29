@@ -208,7 +208,7 @@ export { DatePicker, DayCell } from './DatePicker';
 export { SpeedDial, SpeedDialShowcase } from './SpeedDial';
 
 // ========== SURFACES & CARDS ==========
-export { Card, SelectableCard } from './Card';
+export { Card, SelectableCard, CardContent, CardActions, CardOverflow, CardCover } from './Card';
 export { Paper } from './Paper';
 
 // ========== DIALOGS & MODALS ==========
@@ -295,7 +295,7 @@ export { SliderInput as Slider } from './Slider';
 export { RatingInput as Rating } from './Rating';
 
 // ========== PROVIDER ==========
-export { OmniDesignProvider, useOmniDesign, ThemedZone, Surfaced } from '../OmniDesignProvider';
+export { OmniDesignProvider, useOmniDesign, ThemedZone, Surfaced, OMNI_DEFAULT_THEME_URL } from '../OmniDesignProvider';
 
 export default {};
 

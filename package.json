@@ -1,7 +1,7 @@
 {
   "name": "@omni-design/components",
   "version": "0.20.0",
-  "description": "DynoDesign adaptive component library — token-driven React components with customizable CSS theming",
+  "description": "DynoDesign adaptive component library \u2014 token-driven React components with customizable CSS theming",
   "author": "Lise Noble",
   "license": "Apache-2.0",
   "main": "dist/index.js",
@@ -56,8 +56,8 @@
   "peerDependencies": {
     "@emotion/react": ">=11.0.0",
     "@emotion/styled": ">=11.0.0",
-    "@mui/icons-material": ">=5.0.0",
-    "@mui/material": ">=5.0.0",
+    "@mui/icons-material": "^7.0.0",
+    "@mui/material": "^7.0.0",
     "react": ">=17.0.0",
     "react-dom": ">=17.0.0"
   },

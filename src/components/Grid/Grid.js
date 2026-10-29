@@ -8,8 +8,9 @@ import { Grid as MuiGrid, Box } from '@mui/material';
  * Uses MUI Grid system with design system styling
  * 
  * @param {boolean} container - Use as grid container (default: false)
- * @param {boolean} item - Use as grid item (default: false)
- * @param {number} xs - Columns on extra small screens (1-12)
+ * @param {object} size - Columns per breakpoint, MUI 7: {{ xs: 12, md: 4 }}
+ * @param {boolean} item - Accepted for MUI 5 code; has no effect
+ * @param {number} xs - Columns on extra small screens (1-12) — mapped to size
  * @param {number} sm - Columns on small screens (1-12)
  * @param {number} md - Columns on medium screens (1-12)
  * @param {number} lg - Columns on large screens (1-12)
@@ -23,14 +24,24 @@ export function Grid({
   container = false,
   item = false,
   spacing = 2,
+  size,
+  xs, sm, md, lg, xl,
   sx = {},
   ...props
 }) {
+  /* MUI 7's Grid takes `size={{ xs: 12, md: 4 }}`; `item` and the bare
+     breakpoint props (xs/sm/md/lg/xl) are MUI 5's API and MUI 7 ignores them,
+     so every column collapsed to full width. Both spellings are accepted here
+     and mapped to `size`; an explicit `size` wins. `item` has no meaning in
+     MUI 7 (every child of a container is an item) and is dropped. */
+  const bp = { xs, sm, md, lg, xl };
+  const fromBreakpoints = Object.fromEntries(Object.entries(bp).filter(([, v]) => v !== undefined));
+  const resolvedSize = size ?? (Object.keys(fromBreakpoints).length ? fromBreakpoints : undefined);
   return (
     <MuiGrid
       container={container}
-      item={item}
-      spacing={spacing}
+      spacing={container ? spacing : undefined}
+      size={resolvedSize}
       sx={{
         transition: 'all 0.2s ease-in-out',
         ...sx,

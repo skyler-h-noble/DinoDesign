@@ -14,21 +14,21 @@ A React component library where **all visual styling comes from CSS tokens**, no
 
 ## Project Structure
 
+Your app needs the package, its MUI peers, and ONE design system's CSS. The
+components carry no colors, fonts or radii of their own — without a design
+system's CSS they render as bare HTML.
+
 ```
 my-project/
-├── public/styles/
-│   ├── foundation.css   ← primitives, spacing, reset (loads 1st)
-│   ├── core.css         ← component base styles (loads 2nd)
-│   ├── Light-Mode.css   ← light color tokens + [data-theme] selectors (loads 3rd)
-│   ├── Dark-Mode.css    ← dark color tokens + [data-theme] selectors (loads 3rd, swaps with light)
-│   ├── base.css         ← data-style, data-surface rules (loads 4th)
-│   └── styles.css       ← overrides (loads last)
 └── src/
-    ├── OmniDesignProvider.js   ← CSS injector + context + hook
-    ├── App.js
-    ├── index.js
-    └── components/             ← 49 components, all token-driven
+    ├── main.jsx   ← wraps the app in <OmniDesignProvider themeURL=…>
+    └── App.jsx    ← your page, built from the components below
 ```
+
+The design system arrives as seven CSS files (foundation, core, typography,
+Light-Mode, Dark-Mode, base, styles) listed in a `theme.json`. You do not copy
+them anywhere: pass the folder or the `theme.json` URL as `themeURL` and the
+provider loads them in the right order (see *Provider Setup*).
 
 ---
 
@@ -140,10 +140,13 @@ the cascade do the rest.
 
 `@omni-design/components` is built on MUI. The `OmniDesignProvider` handles all MUI `ThemeProvider` wiring internally — **you never configure MUI directly**. OmniDesign's CSS custom properties drive all visual values; MUI is purely structural.
 
-**MUI peer dependencies must be installed in the consuming app:**
+**MUI peer dependencies must be installed in the consuming app — MUI 7:**
 ```bash
-npm install @mui/material @mui/icons-material @emotion/react @emotion/styled
+npm install @omni-design/components @mui/material@^7 @mui/icons-material@^7 @emotion/react @emotion/styled
 ```
+
+Pin `^7`. A bare `npm install @mui/material` now gets MUI 9, which removed
+icons this library imports and changed `Grid`; the page fails to build.
 
 **Never use MUI's theming system to set colors — always use OmniDesign tokens:**
 ```jsx
@@ -158,30 +161,37 @@ sx={{ bgcolor: 'primary.main', color: 'white' }}
 
 ## Provider Setup
 
-The `OmniDesignProvider` must wrap your entire app. It injects CSS, configures MUI ThemeProvider, and sets the root attributes:
+The `OmniDesignProvider` must wrap your entire app. It loads the design
+system's CSS, configures MUI's ThemeProvider, and sets the root attributes.
 
 ```jsx
-// src/App.js
-import { OmniDesignProvider } from './OmniDesignProvider';
+// src/main.jsx — your own design system (the studio gives you this URL)
+import { OmniDesignProvider } from '@omni-design/components';
 
-function App({ foundationCSS, coreCSS, lightModeCSS, darkModeCSS, baseCSS, stylesCSS }) {
-  return (
-    <OmniDesignProvider
-      foundationCSS={foundationCSS}
-      coreCSS={coreCSS}
-      lightModeCSS={lightModeCSS}
-      darkModeCSS={darkModeCSS}
-      baseCSS={baseCSS}
-      stylesCSS={stylesCSS}
-      defaultTheme="Default"
-      defaultSurface="Surface"
-      defaultStyle="Modern"
-    >
-      {/* your app */}
-    </OmniDesignProvider>
-  );
-}
+<OmniDesignProvider themeURL="https://…/design-systems/<your-id>/theme.json">
+  <App />
+</OmniDesignProvider>
 ```
+
+No design system yet? Use the package's own theme — the OmniDesign look,
+served from npm and pinned to the version you installed:
+
+```jsx
+import { OmniDesignProvider, OMNI_DEFAULT_THEME_URL } from '@omni-design/components';
+
+<OmniDesignProvider themeURL={OMNI_DEFAULT_THEME_URL}>
+  <App />
+</OmniDesignProvider>
+```
+
+**Pass one or the other.** With neither, nothing is loaded, every component
+renders unstyled, and the provider warns in development. (Passing nothing is
+only right when your app injects the CSS itself.)
+
+The seven files can also be passed one by one — `foundationCSS`, `coreCSS`,
+`typographyCSS`, `lightModeCSS`, `darkModeCSS`, `baseCSS`, `stylesCSS` — each a
+URL or a raw CSS string. That is for local development of a theme; `themeURL`
+is the normal path.
 
 ### Accessing theme state in any child component:
 ```jsx
@@ -613,38 +623,37 @@ import {
 // read — which is the same reason the shape did not survive anywhere else.
 ```
 
-### ButtonGroup
+### ButtonGroup and ToggleButtonGroup
 ```jsx
-// Purely presentational — visually groups Buttons (shared border, spacing).
-// Does NOT manage selection. Each child Button owns its own onClick + variant.
-// Props: variant, size, disabled, orientation, spacing, fullWidth
-//   (variant/size on the group are inherited as defaults by children)
-//
-// For a segmented selector, drive the selected state in the parent and
-// flip each child's variant between solid and -outline:
-<ButtonGroup variant="primary" size="small">
-  <Button
-    variant={mode === 'light' ? 'primary' : 'primary-outline'}
-    onClick={() => setMode('light')}
-  >Light</Button>
-  <Button
-    variant={mode === 'dark' ? 'primary' : 'primary-outline'}
-    onClick={() => setMode('dark')}
-  >Dark</Button>
+// ButtonGroup — a group of buttons, each with its own onClick. No selection.
+<ButtonGroup size="small">
+  <Button onClick={copy}>Copy</Button>
+  <Button onClick={paste}>Paste</Button>
 </ButtonGroup>
 
-// ❌ Do NOT pass `value` / `onChange` to ButtonGroup — it has no controlled
-//    selection API. Use ToggleButtonGroup if you want managed selection.
+// ToggleButtonGroup — a segmented choice. Controlled: value + onChange on the
+// group, a `value` on each Button. At least one segment always stays on.
+<ToggleButtonGroup value={mode} onChange={setMode} size="small">
+  <Button value="light">Light</Button>
+  <Button value="dark">Dark</Button>
+</ToggleButtonGroup>
+
+// Do NOT set `variant` on the child Buttons — the group assigns it per
+// segment (filled when selected, outline when not); an explicit one wins and
+// every segment looks selected. `value` / `onChange` on ButtonGroup still
+// work but warn: selection moved to ToggleButtonGroup.
 ```
 
 ### Card
 ```jsx
-// Always sets data-surface="Container" internally
-// variant: 'default' | 'solid' | 'light'
-<Card variant="default" color="primary">
-  <CardContent>...</CardContent>
-  <CardActions>...</CardActions>
+// Sets its own data-surface and pads itself (--Card-Padding) — put content
+// straight inside. CardContent / CardActions are optional sections.
+// variant: 'solid' (default) | 'light' | 'dark'
+<Card>
+  <Subtitle>Title</Subtitle>
+  <BodySmall color="quiet">Description.</BodySmall>
 </Card>
+<Card style={{ height: '100%' }}>…</Card>   // equal heights in a grid row
 ```
 
 ### Alert
@@ -661,7 +670,7 @@ import {
 
 ### Switch
 ```jsx
-// variant: '{color}' | '{color}-outline' | '{color}-light'
+// variant: '{color}' | '{color}-outline'  (no -light; it normalizes and warns)
 // size: 'small' | 'medium' | 'large'
 <SwitchInput variant="primary" label="Enable notifications" />
 ```
@@ -704,6 +713,28 @@ import {
 
 // Render as a different element:
 <Section as="footer" theme="Neutral" surface="Surface-Dimmest">…</Section>
+```
+
+### Grid, Container
+```jsx
+// Grid follows MUI 7: columns per breakpoint go in `size`.
+<Grid container spacing={3}>
+  <Grid size={{ xs: 12, md: 4 }}>…</Grid>
+</Grid>
+// MUI 5's `item xs={12} md={4}` is still accepted and mapped to `size`.
+
+// Container is LAYOUT ONLY: centers content at a max width, paints nothing.
+<Section theme="Secondary" surface="Surface" padding="80px 24px">
+  <Container maxWidth="lg">…</Container>
+</Section>
+```
+
+### Chip
+```jsx
+// variant: a color ('neutral' default). There is no outline shape — the
+// unselected chip IS the outline look; `selected` fills it.
+<Chip label="Figma library" startDecorator={<CheckIcon />} />
+// MUI's `icon` prop works too and means the same thing.
 ```
 
 Use `<ThemedZone>` for the case where you want the attributes but NOT the

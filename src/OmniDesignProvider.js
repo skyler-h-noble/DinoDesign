@@ -105,6 +105,21 @@ export const OMNI_THEMES = [
 
 export const OMNI_STYLES = ['Professional', 'Modern', 'Bold', 'Playful'];
 
+/* The package's own theme — the OmniDesign look — served from npm through
+   jsdelivr and pinned to the installed version, so the CSS always matches the
+   components. Without SOME design-system CSS the components render as bare
+   HTML, and the files under public/styles are not loaded on their own:
+
+     <OmniDesignProvider themeURL={OMNI_DEFAULT_THEME_URL}>
+
+   A real design system passes its own themeURL (or the individual CSS props)
+   instead. The version is written in at build time; source builds (the
+   gallery, tests) fall back to @latest. */
+/* global __OMNI_VERSION__ */
+const OMNI_VERSION = typeof __OMNI_VERSION__ !== 'undefined' ? __OMNI_VERSION__ : 'latest';
+export const OMNI_DEFAULT_THEME_URL =
+  'https://cdn.jsdelivr.net/npm/@omni-design/components@' + OMNI_VERSION + '/public/styles/theme.json';
+
 export const OMNI_SURFACES = [
   // Five surface levels, darkest to lightest. Surface-Dimmest and
   // Surface-Brightest are the ends of the ramp: Brightest is the level that
@@ -468,6 +483,26 @@ export function OmniDesignProvider({
   );
   const [cssStatus, setCssStatus] = useState(hasAnyCSSSource ? 'loading' : 'ready');
   const [cssError,  setCssError]  = useState(null);
+
+  // ── DEV WARNING: no design-system CSS anywhere on the page ────────────────
+  // Passing no CSS is legitimate when the app injects its own sheets (the
+  // studio does), so the check is for the TOKENS, not the props: if no body
+  // font token resolves once the page has settled, nothing loaded one.
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'production' || hasAnyCSSSource) return undefined;
+    const t = setTimeout(() => {
+      const font = getComputedStyle(document.documentElement).getPropertyValue('--Font-Family-Body');
+      if (!font.trim()) {
+        // eslint-disable-next-line no-console
+        console.warn('[OmniDesignProvider] No design-system CSS is loaded, so components render unstyled. '
+          + 'Pass your design system\'s themeURL, or the package default: '
+          + '<OmniDesignProvider themeURL={OMNI_DEFAULT_THEME_URL}>.');
+      }
+    }, 1500);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
 
   // ── EFFECT: Inject static CSS (foundation, core, base, styles) ────────────
   // Injects each sheet in its correct cascade slot. URLs become <link> tags
