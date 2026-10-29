@@ -86,9 +86,9 @@ const HEADING = ['DisplayLarge', 'DisplayMedium', 'DisplaySmall', 'H1', 'H2', 'H
 // file → [type, the source function whose props it must cover, exports]
 const CORE = [
   ['Section/Section', 'SectionProps', 'Section', ['Section']],
-  ['Container/Container', 'ContainerProps', 'Container', ['Container']],
+  ['Container/Container', 'ContainerProps', 'ContainerMui', ['Container']],
   ['Grid/Grid', 'GridProps', 'Grid', ['Grid']],
-  ['Stack/Stack', 'StackProps', 'OmniStack', ['VStack', 'HStack', 'Stack']],
+  ['Stack/Stack', 'StackProps', 'OmniStackMui', ['VStack', 'HStack', 'Stack']],
   ['Card/Card', 'CardProps', 'Card', ['Card']],
   ['Button/Button', 'ButtonProps', 'Button', ['Button']],
   ['ToggleButtonGroup/ToggleButtonGroup', 'ToggleButtonGroupProps', 'ToggleButtonGroup', ['ToggleButtonGroup']],

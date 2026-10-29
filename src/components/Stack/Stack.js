@@ -1,4 +1,5 @@
 // src/components/Stack/Stack.js
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
 import React, { useMemo } from 'react';
 import { Stack as MuiStack, Box } from '@mui/material';
 
@@ -87,7 +88,7 @@ function gapToPx(gap, muiSpacingUnit = 8) {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function OmniStack({
+function OmniStackMui({
   children,
   gap,
   spacing,
@@ -161,6 +162,57 @@ export function OmniStack({
 }
 
 // ─── Convenience exports ──────────────────────────────────────────────────────
+
+/* ── Static path (no emotion) ─────────────────────────────────────────────
+   The common case — plain values, no divider, no sx — renders a div with the
+   fixed rules in a static sheet and the per-instance values (gap, direction,
+   alignment) as inline style: the same declarations MUI's Stack emits, with
+   no styling engine. Responsive object values, divider and sx keep the MUI
+   version above, so nothing that works today changes. */
+registerStaticStyles('omni-stack', `
+.omni-stack{display:flex;box-sizing:border-box}
+.omni-stack[data-surface],.omni-stack[data-theme]{background:var(--Background)}
+.omni-stack-min-gap-enforced::before{display:none}
+`);
+const plain = (v) => v === undefined || v === null || typeof v === 'string' || typeof v === 'number';
+const muiGap = (g) => (typeof g === 'number' ? g * 8 + 'px' : g);
+
+export function OmniStack(props) {
+  useStaticStyles('omni-stack');
+  const {
+    children, gap, spacing, direction = 'column', enforceMinGap = true, minGapToken = '--min-stack-gap',
+    divider, flexWrap, useFlexGap = true, alignItems, justifyContent, sx, className = '', style, component: Tag = 'div', ...rest
+  } = props;
+  const desiredGap = gap !== undefined ? gap : spacing;
+  const needsMinGap = enforceMinGap && hasSmallChild(children);
+  const effectiveGap = useMemo(() => {
+    if (!needsMinGap) return desiredGap;
+    const desiredPx = gapToPx(desiredGap);
+    const minPx = resolveCssVar(minGapToken, 8);
+    if (desiredPx >= minPx) return desiredGap;
+    return 'var(' + minGapToken + ', ' + minPx + 'px)';
+  }, [needsMinGap, desiredGap, minGapToken]);
+
+  const staticOK = !divider && useFlexGap && !(sx && Object.keys(sx).length)
+    && [direction, alignItems, justifyContent, flexWrap, desiredGap].every(plain);
+  if (!staticOK) return <OmniStackMui {...props} />;
+
+  const inline = { flexDirection: direction };
+  if (effectiveGap !== undefined && effectiveGap !== null) inline.gap = muiGap(effectiveGap);
+  if (alignItems) inline.alignItems = alignItems;
+  if (justifyContent) inline.justifyContent = justifyContent;
+  if (flexWrap) inline.flexWrap = flexWrap;
+  return (
+    <Tag
+      className={'MuiStack-root omni-stack' + (needsMinGap ? ' omni-stack-min-gap-enforced' : '') + (className ? ' ' + className : '')}
+      data-min-gap-enforced={needsMinGap ? 'true' : undefined}
+      style={style ? { ...inline, ...style } : inline}
+      {...rest}
+    >
+      {children}
+    </Tag>
+  );
+}
 
 export const HStack = (p) => <OmniStack direction="row" alignItems="center" {...p} />;
 export const VStack = (p) => <OmniStack direction="column" {...p} />;

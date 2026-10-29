@@ -1,6 +1,7 @@
 // src/components/Container/Container.js
 import React from 'react';
 import { Container as MuiContainer, Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
 
 /**
  * Container Component
@@ -16,7 +17,37 @@ import { Container as MuiContainer, Box } from '@mui/material';
  * @param {string} sx - Additional MUI sx props
  * @param {object} ...props - Other MUI Container props
  */
-export function Container({
+/* Static path (no emotion): MUI Container's own rules as a plain sheet —
+   full width, centred, 16px gutters (24px from 600px), and a max width that
+   applies from its breakpoint up (xs 444, sm 600, md 900, lg 1200, xl 1536).
+   sx or a `fixed` / `component` prop keeps the MUI version. */
+registerStaticStyles('omni-container', `
+.omni-container{width:100%;margin-left:auto;margin-right:auto;box-sizing:border-box;display:block;transition:all .2s ease-in-out}
+.omni-container-gutters{padding-left:16px;padding-right:16px}
+@media (min-width:600px){.omni-container-gutters{padding-left:24px;padding-right:24px}}
+.omni-container-xs{max-width:444px}
+@media (min-width:600px){.omni-container-sm{max-width:600px}}
+@media (min-width:900px){.omni-container-md{max-width:900px}}
+@media (min-width:1200px){.omni-container-lg{max-width:1200px}}
+@media (min-width:1536px){.omni-container-xl{max-width:1536px}}
+`);
+
+export function Container(props) {
+  useStaticStyles('omni-container');
+  const { children, maxWidth = 'lg', disableGutters = false, sx, className = '', fixed, component, ...rest } = props;
+  if ((sx && Object.keys(sx).length) || fixed || component) return <ContainerMui {...props} />;
+  return (
+    <div
+      className={'MuiContainer-root omni-container' + (disableGutters ? '' : ' omni-container-gutters')
+        + (maxWidth ? ' omni-container-' + maxWidth : '') + (className ? ' ' + className : '')}
+      {...rest}
+    >
+      {children}
+    </div>
+  );
+}
+
+function ContainerMui({
   children,
   maxWidth = 'lg',
   disableGutters = false,
