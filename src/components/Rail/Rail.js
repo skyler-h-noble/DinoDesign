@@ -1,6 +1,7 @@
 // src/components/Rail/Rail.js
 import React, { useState, useCallback } from 'react';
-import { Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 import MenuIcon from '@omni-design/icons/Menu';
 import CloseIcon from '@omni-design/icons/Close';
 import { Button } from '../Button/Button';
@@ -117,6 +118,97 @@ const TOP_ROW = {
   large: 'var(--Lg-App-Bar-Height, 88px)',
 };
 
+const SxBox = lazySxBox('Rail');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+/* ─── Static sheet ───
+   Every declaration the parts used to hand emotion per render, as classes
+   over the same tokens. The rail's width and a selected item's palette differ
+   per instance, so they arrive as custom properties (--_rl-w on the rail,
+   --_rl-fill / -on / -edge on the item, declared there so the Buttons tokens
+   resolve against the item's own theme and surface). State rules weigh what
+   emotion's did — one class plus the pseudo-class. */
+const sizeKeys = Object.keys(RAIL_WIDTH);
+/* What emotion's prefixer added beside align-items / justify-content — the
+   legacy -webkit-box spellings — so the computed style stays exactly what it
+   was. They only act on display:-webkit-box, which nothing here uses. */
+const webkitBox = (css) => css
+  .replace(/([;{])align-items:([^;}]+)/g, '$1-webkit-box-align:$2;align-items:$2')
+  .replace(/([;{])justify-content:([^;}]+)/g, (m, p, v) => p + '-webkit-box-pack:'
+    + v.replace(/^flex-/, '').replace(/^space-between$/, 'justify') + ';justify-content:' + v);
+
+registerStaticStyles('omni-rail', webkitBox([
+  `.omni-rail{display:flex;flex-direction:column;width:var(--_rl-w);min-height:100%;gap:${SLOT_GAP};background-color:var(--Background);`
+    + 'font-family:inherit;transition:width 0.25s ease;overflow:hidden;flex-shrink:0}',
+  '.omni-rail-x{gap:0}',
+  '.omni-rail-toggle{display:flex;justify-content:center;padding-left:0;padding-right:0;flex-shrink:0;align-items:center}',
+  '.omni-rail-toggle-open{justify-content:flex-end}',
+  ...sizeKeys.map((k) => `.omni-rail-top-${k}{height:${TOP_ROW[k]}}`),
+  `.omni-rail-brand{margin-left:${RAIL_PAD_X};margin-right:${RAIL_PAD_X};flex-shrink:0;box-sizing:border-box;align-self:stretch}`,
+  '.omni-rail-brand-row{display:flex;align-items:center;justify-content:center}',
+  ...sizeKeys.map((k) => `.omni-rail-brand-row-${k}{height:calc(${TOP_ROW[k]} - 1px)}`),
+  '.omni-rail-rule{height:1px;background-color:var(--Border-Variant)}',
+  '.omni-rail-div{height:1px;width:100%;background-color:var(--Border-Variant)}',
+  `.omni-rail-fab{padding:8px ${RAIL_PAD_X};flex-shrink:0;display:flex;justify-content:center}`,
+  '.omni-rail-fab-open{justify-content:flex-start}',
+  `.omni-rail-list{flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;align-items:center;gap:${ITEM_GAP};`
+    + `padding-left:${RAIL_PAD_X};padding-right:${RAIL_PAD_X};width:100%;box-sizing:border-box}`,
+  '.omni-rail-st{width:100%;min-height:24px;display:flex;align-items:center}',
+  '.omni-rail-st-closed{width:100%;height:24px;box-sizing:border-box;padding-left:var(--Sizing-2, 16px);padding-right:var(--Sizing-2, 16px);display:flex;align-items:center}',
+  '.omni-icon.omni-rail-ic{color:inherit}',
+  `.omni-rail-av{display:flex;width:${ICON_SIZE};height:${ICON_SIZE}}`,
+  /* The expanded item — Figma's Expandable Nav Rail Item. The stroke is an
+     inset ring (Figma's is INSIDE and takes no layout space); unselected it
+     strokes the surface's own Background, invisible at rest. */
+  `.omni-rail-xi{display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:2px;width:100%;min-height:${CIRCLE};`
+    + `padding:0;margin:0;box-sizing:border-box;border:none;box-shadow:inset 0 0 0 1px var(--Background);border-radius:${ITEM_RADIUS};`
+    + 'background-color:transparent;color:var(--Quiet);cursor:pointer;opacity:1;font-family:inherit;text-align:left;outline:none;'
+    + 'transition:background-color 0.15s ease, color 0.15s ease}',
+  '.omni-rail-xi-compact{justify-content:center}',
+  '.omni-rail-xi-sel{box-shadow:inset 0 0 0 1px var(--_rl-edge);background-color:var(--_rl-fill);color:var(--_rl-on)}',
+  '.omni-rail-xi-off{cursor:not-allowed;opacity:var(--Disabled, 0.38)}',
+  '.omni-rail-xi-hov:hover{background-color:var(--Hover);color:var(--Text)}',
+  '.omni-rail-xi-hov:active{background-color:var(--Pressed);color:var(--Text)}',
+  '.omni-rail-xi-fv:focus-visible,.omni-rail-xi-fv.Mui-focusVisible{outline:2px solid var(--Focus-Visible);outline-offset:1px}',
+  '.omni-rail-xi-fvc:focus-visible,.omni-rail-xi-fvc.Mui-focusVisible{color:var(--Text)}',
+  `.omni-rail-xic{position:relative;display:flex;align-items:center;justify-content:center;width:${CIRCLE};height:${CIRCLE};flex-shrink:0;border-radius:${ITEM_RADIUS}}`,
+  `.omni-rail-xlbl{display:flex;align-items:center;flex:1;min-width:0;padding-top:${ITEM_PAD_Y};padding-bottom:${ITEM_PAD_Y}}`,
+  /* The collapsed item. 2px between the icon and its own label — smaller
+     than anything on the sizing scale, so it reads as one item next to a
+     12px gap between items. The ITEM owns the foreground, so the label and
+     the icon inside it both follow the fill. */
+  `.omni-rail-it{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:100%;box-sizing:border-box;`
+    + `min-width:${ICON_SIZE};min-height:${ICON_SIZE};padding:0;border:none;border-radius:${ITEM_RADIUS};background-color:transparent;`
+    + 'box-shadow:none;color:var(--Quiet);cursor:pointer;opacity:1;font-family:inherit;text-align:center;'
+    + 'transition:background-color 0.15s ease, color 0.15s ease;outline:none}',
+  '.omni-rail-it-sel-c{background-color:var(--_rl-fill);box-shadow:inset 0 0 0 1px var(--_rl-edge);color:var(--_rl-on)}',
+  '.omni-rail-it-sel-o{color:var(--Text)}',
+  '.omni-rail-it-off{cursor:not-allowed;opacity:var(--Disabled, 0.38)}',
+  // Contained: the state is on the ITEM.
+  '.omni-rail-it-c-hov:hover{background-color:var(--Hover);color:var(--Text)}',
+  '.omni-rail-it-c-hov:active{background-color:var(--Pressed);color:var(--Text)}',
+  '.omni-rail-it-c-fv:focus-visible{outline:2px solid var(--Focus-Visible);outline-offset:1px}',
+  '.omni-rail-it-c-fvc:focus-visible{color:var(--Text)}',
+  // Outside: the item is what is hovered, pressed and focused; the circle shows it.
+  '.omni-rail-it-o-hov:hover,.omni-rail-it-o-hov:active,.omni-rail-it-o-hov:focus-visible{color:var(--Text)}',
+  '.omni-rail-it-o-hov:hover>:first-child{background-color:var(--Hover)}',
+  '.omni-rail-it-o-hov:active>:first-child{background-color:var(--Pressed)}',
+  '.omni-rail-it-o-fv:focus-visible>:first-child{outline:2px solid var(--Focus-Visible);outline-offset:1px}',
+  // Rail Button — the circle in Label Outside, a plain row otherwise.
+  '.omni-rail-btn{position:relative;display:flex;align-items:center;justify-content:center}',
+  `.omni-rail-btn-c{width:100%;height:auto;padding-top:${ITEM_PAD_Y};padding-bottom:${ITEM_PAD_Y};border-radius:${ITEM_RADIUS};background-color:transparent;transition:background-color 0.2s ease}`,
+  `.omni-rail-btn-o{width:${CIRCLE};height:${CIRCLE};padding-top:0;padding-bottom:0;border-radius:${CIRCLE};background-color:var(--Background);transition:background-color 0.2s ease}`,
+  '.omni-rail-btn-o-sel{background-color:var(--_rl-fill);color:var(--_rl-on);box-shadow:inset 0 0 0 1px var(--_rl-edge)}',
+  '.omni-rail-lbl{display:flex;align-items:flex-start;justify-content:center;width:100%}',
+].join('\n')));
+
+/** A selected item's palette, as the custom properties the sheet reads. */
+const paletteVars = (C) => ({
+  '--_rl-fill': 'var(--Buttons-' + C + '-Button)',
+  '--_rl-on': 'var(--Buttons-' + C + '-Text)',
+  '--_rl-edge': 'var(--Buttons-' + C + '-Border)',
+});
+
 export function Rail({
   items = [],
   sections,
@@ -159,8 +251,10 @@ export function Rail({
   sx = {},
   ...props
 }) {
+  useStaticStyles('omni-rail');
   const [internalValue, setInternalValue] = useState(defaultValue);
   const [expanded, setExpanded] = useState(defaultExpanded);
+  const sizeKey = RAIL_WIDTH[size] ? size : 'medium';
 
   const isControlled = controlledValue !== undefined;
   const activeIndex = isControlled ? controlledValue : internalValue;
@@ -208,8 +302,7 @@ export function Rail({
              margin would add to it and space the groups further apart than
              the design does. */
           elements.push(
-            <Box key={'divider-' + si} aria-hidden="true"
-              sx={{ height: '1px', width: '100%', backgroundColor: 'var(--Border-Variant)' }} />
+            <div key={'divider-' + si} aria-hidden="true" className="MuiBox-root omni-rail-div" />
           );
         }
         section.items.forEach((item) => {
@@ -231,9 +324,11 @@ export function Rail({
     ));
   };
 
+  const Root = hasSx(sx) ? SxBox : 'nav';
   return (
-    <Box
-      component="nav" role="navigation" aria-label="Navigation rail"
+    <Root
+      {...(Root === 'nav' ? {} : { component: 'nav', sx })}
+      role="navigation" aria-label="Navigation rail"
       /* Surface-Dim, the level Figma pins on the Nav Rail — and NO theme: the
          rail takes the theme it is placed in. It used to pin data-theme
          "Default", which switched a rail inside a Primary zone out of it. */
@@ -252,44 +347,36 @@ export function Rail({
         + ' rail-label-' + (labelStyle === 'outside' ? 'outside' : 'contained')
         + ' rail-' + (RAIL_WIDTH[size] ? size : 'medium')
         + ' ' + className
-      }
-      sx={{
-        display: 'flex', flexDirection: 'column',
-        width, minHeight: '100%',
         /* Sizing-1 under the Default rail's brand; none under the expandable
-           rail's toggle row — Figma butts the slot against it. */
-        gap: expandable ? 0 : SLOT_GAP,
-        backgroundColor: 'var(--Background)',
-        // No edge: Figma's rail draws none — its Surface-Dim level is what
-        // separates it (a 1px border also made it 81px against an 80 design).
-        fontFamily: 'inherit',
-        transition: 'width 0.25s ease',
-        overflow: 'hidden', flexShrink: 0,
-        ...sx,
-      }}
+           rail's toggle row — Figma butts the slot against it. No edge:
+           Figma's rail draws none — its Surface-Dim level is what separates
+           it (a 1px border also made it 81px against an 80 design). */
+        + ' MuiBox-root omni-rail' + (expandable ? ' omni-rail-x' : '')
+      }
       {...props}
+      style={{ '--_rl-w': width, ...props.style }}
     >
       {/* Toggle button */}
       {expandable && (
         /* Figma's Expand-Collapse: an App-Bar-Height row; the button centred
            when closed, flush to the trailing edge when open. */
-        <Box className="rail-toggle" sx={{ display: 'flex', justifyContent: isExpanded ? 'flex-end' : 'center', px: 0, height: TOP_ROW[size] || TOP_ROW.medium, flexShrink: 0, alignItems: 'center' }}>
+        <div className={'rail-toggle MuiBox-root omni-rail-toggle omni-rail-top-' + sizeKey + (isExpanded ? ' omni-rail-toggle-open' : '')}>
           <Button iconOnly variant="ghost" size="medium"
             onClick={toggleExpand} aria-label={isExpanded ? 'Collapse menu' : 'Expand menu'}>
-            <Icon size="small" sx={{ color: 'inherit' }}>
+            <Icon size="small" className="omni-rail-ic">
               {isExpanded ? <CloseIcon /> : <MenuIcon />}
             </Icon>
           </Button>
-        </Box>
+        </div>
       )}
 
       {brand && !expandable && (
         /* Figma's Top: App-Bar-Height in all, the divider included, inset by
            the slot's Sizing-1 so it spans the items, not the rail. */
-        <Box className="rail-brand" sx={{ mx: RAIL_PAD_X, flexShrink: 0, boxSizing: 'border-box', alignSelf: 'stretch' }}>
-          <Box sx={{ height: 'calc(' + (TOP_ROW[size] || TOP_ROW.medium) + ' - 1px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{brand}</Box>
-          <Box aria-hidden="true" sx={{ height: '1px', backgroundColor: 'var(--Border-Variant)' }} />
-        </Box>
+        <div className="rail-brand MuiBox-root omni-rail-brand">
+          <div className={'MuiBox-root omni-rail-brand-row omni-rail-brand-row-' + sizeKey}>{brand}</div>
+          <div aria-hidden="true" className="MuiBox-root omni-rail-rule" />
+        </div>
       )}
 
       {/* FAB action — the library's Fab, as Figma's FAB (6778:17180): the
@@ -297,39 +384,26 @@ export function Rail({
           an open one. It was a Button on primary-light, a shade that no
           longer exists, sized and rounded by hand. */}
       {fabAction && (
-        <Box className="rail-fab" sx={{ px: RAIL_PAD_X, py: 1, flexShrink: 0, display: 'flex', justifyContent: isExpanded ? 'flex-start' : 'center' }}>
+        <div className={'rail-fab MuiBox-root omni-rail-fab' + (isExpanded ? ' omni-rail-fab-open' : '')}>
           <Fab size="large" extended={isExpanded}
             icon={fabAction.icon} label={isExpanded ? fabAction.label : undefined}
             ariaLabel={fabAction.label || 'Action'} onClick={fabAction.onClick} />
-        </Box>
+        </div>
       )}
 
       {/* Nav items — the design's "Rail Slot".
-          
+
           The padding is HORIZONTAL. It used to be py:0.5, which put 4px above
           and below the whole list and nothing at the sides, so the items ran
           to the rail's edges and the dividers with them. In the design the
           slot insets its contents by Sizing-1 left and right and adds nothing
           top or bottom — the 12px item gap is all the vertical rhythm there
-          is. */}
-      <Box role="tablist" aria-orientation="vertical"
-        sx={{
-          flex: 1, overflowY: 'auto', overflowX: 'hidden',
-          display: 'flex', flexDirection: 'column', alignItems: 'center',
-          // The same slot open or closed: Sizing-1 at the sides, Sizing-1-and-Half between.
-          gap: ITEM_GAP,
-          px: RAIL_PAD_X,
-          width: '100%',
-          /* The padding has to come OUT of the 100%, not be added to it.
-             Without this the list is the rail's width plus 16px of padding,
-             the overflow is clipped on the right, and "centred" lands every
-             item 8px right of the rail's centre — wherever the page does not
-             happen to load a CSS reset that sets border-box for it. */
-          boxSizing: 'border-box',
-        }}>
+          is. The padding comes OUT of the 100% (border-box), not on top of
+          it, or every "centred" item lands 8px right of the rail's centre. */}
+      <div role="tablist" aria-orientation="vertical" className="MuiBox-root omni-rail-list">
         {renderItems()}
-      </Box>
-    </Box>
+      </div>
+    </Root>
   );
 }
 
@@ -337,15 +411,15 @@ export function Rail({
 /** Open: the section's name, Eyebrow in --Quiet, a 24px row. Closed: the same
  *  row holding a 1px Border-Variant rule inset by Sizing-2 either side. */
 export function RailSectionTitle({ title, expanded }) {
+  useStaticStyles('omni-rail');
   return expanded ? (
-    <Box className="rail-section-title" sx={{ width: '100%', minHeight: 24, display: 'flex', alignItems: 'center' }}>
+    <div className="rail-section-title MuiBox-root omni-rail-st">
       <Eyebrow color="quiet" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</Eyebrow>
-    </Box>
+    </div>
   ) : (
-    <Box className="rail-section-title rail-section-title-closed" aria-hidden="true"
-      sx={{ width: '100%', height: 24, boxSizing: 'border-box', px: 'var(--Sizing-2, 16px)', display: 'flex', alignItems: 'center' }}>
-      <Box sx={{ height: '1px', width: '100%', backgroundColor: 'var(--Border-Variant)' }} />
-    </Box>
+    <div className="rail-section-title rail-section-title-closed MuiBox-root omni-rail-st-closed" aria-hidden="true">
+      <div className="MuiBox-root omni-rail-div" />
+    </div>
   );
 }
 
@@ -393,74 +467,47 @@ export function RailSectionTitle({ title, expanded }) {
 /* compact: the CLOSED expandable rail — the same 32px row, the icon centred
    in the slot's width and no label (Figma's Closed-Expandable). */
 function ExpandedRailItem({ item, selected, variant, onClick, compact = false }) {
+  useStaticStyles('omni-rail');
   const { icon, avatar, label, badge, disabled } = item;
   const C = cap(variant);
   const interactive = !disabled;
+  /* Figma's stroke is INSIDE and takes no layout space, so it is an inset
+     ring, not a border: a 1px border made the row 34px tall and moved the
+     icon and label in by a pixel. */
   return (
-    <Box
-      component="button" type="button" role="tab"
+    <button
+      type="button" role="tab"
       aria-selected={selected} aria-label={label} aria-disabled={disabled || undefined}
       disabled={disabled || undefined}
       onClick={disabled ? undefined : onClick}
-      className={'rail-item rail-item-expanded' + (compact ? ' rail-item-compact' : '') + (selected ? ' rail-item-selected' : '')}
-      sx={{
-        display: 'flex', flexDirection: 'row', alignItems: 'center',
-        justifyContent: compact ? 'center' : 'flex-start',
-        gap: '2px',
-        width: '100%',
-        minHeight: CIRCLE,
-        p: 0, m: 0,
-        boxSizing: 'border-box',
-        /* Figma's stroke is INSIDE and takes no layout space, so it is an inset
-           ring here, not a border: a 1px border made the row 34px tall and
-           moved the icon and label in by a pixel. Unselected, Figma strokes the
-           surface's own Background — invisible at rest, it frames the hover
-           and pressed fills by a hair. */
-        border: 'none',
-        boxShadow: 'inset 0 0 0 1px ' + (selected ? 'var(--Buttons-' + C + '-Border)' : 'var(--Background)'),
-        borderRadius: ITEM_RADIUS,
-        backgroundColor: selected ? 'var(--Buttons-' + C + '-Button)' : 'transparent',
-        color: selected ? 'var(--Buttons-' + C + '-Text)' : 'var(--Quiet)',
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
-        fontFamily: 'inherit', textAlign: 'left',
-        outline: 'none',
-        transition: 'background-color 0.15s ease, color 0.15s ease',
-        ...(interactive && !selected && {
-          '&:hover': { backgroundColor: 'var(--Hover)', color: 'var(--Text)' },
-          '&:active': { backgroundColor: 'var(--Pressed)', color: 'var(--Text)' },
-        }),
-        ...(interactive && {
-          '&:focus-visible, &.Mui-focusVisible': {
-            outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px',
-            ...(selected ? {} : { color: 'var(--Text)' }),
-          },
-        }),
-      }}
+      className={'rail-item rail-item-expanded' + (compact ? ' rail-item-compact' : '') + (selected ? ' rail-item-selected' : '')
+        + ' MuiBox-root omni-rail-xi' + (compact ? ' omni-rail-xi-compact' : '') + (selected ? ' omni-rail-xi-sel' : '')
+        + (disabled ? ' omni-rail-xi-off' : '')
+        + (interactive && !selected ? ' omni-rail-xi-hov omni-rail-xi-fvc' : '')
+        + (interactive ? ' omni-rail-xi-fv' : '')}
+      style={selected ? paletteVars(C) : undefined}
     >
-      <Box className="rail-item-icon" sx={{
-        position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        width: CIRCLE, height: CIRCLE, flexShrink: 0, borderRadius: ITEM_RADIUS,
-      }}>
+      <div className="rail-item-icon MuiBox-root omni-rail-xic">
         {withBadge(badge, avatar
-          ? <Box sx={{ display: 'flex', width: ICON_SIZE, height: ICON_SIZE }}>{avatar}</Box>
-          : <Icon size="custom" fontSize={RAIL_ICON} sx={{ color: 'inherit' }}>{icon}</Icon>)}
-      </Box>
+          ? <div className="MuiBox-root omni-rail-av">{avatar}</div>
+          : <Icon size="custom" fontSize={RAIL_ICON} className="omni-rail-ic">{icon}</Icon>)}
+      </div>
       {label && !compact && (
-        <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0, py: ITEM_PAD_Y }}>
+        <div className="MuiBox-root omni-rail-xlbl">
           <MobileNavLabel className="rail-item-label" color="inherit"
             style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}>
             {label}
           </MobileNavLabel>
-        </Box>
+        </div>
       )}
-    </Box>
+    </button>
   );
 }
 
 /* Exported so one item can be placed on its own — a custom rail, or the
    parity page comparing a single Figma item. Rail renders these itself. */
 export function RailItem({ item, selected, expanded, compact = false, labelStyle, variant = 'default', onClick }) {
+  useStaticStyles('omni-rail');
   if (expanded || compact) return <ExpandedRailItem item={item} selected={selected} variant={variant} onClick={onClick} compact={!expanded && compact} />;
   const { icon, avatar, label, badge, disabled } = item;
 
@@ -474,182 +521,85 @@ export function RailItem({ item, selected, expanded, compact = false, labelStyle
      (--Text reversed with --Background), carried over from the bottom bar's
      Nav Item, which is a different component that does bind Surface/Text. */
   const C = cap(variant);
-  const SELECTED_FILL = 'var(--Buttons-' + C + '-Button)';
-  const ON_FILL = 'var(--Buttons-' + C + '-Text)';
-  const SELECTED_EDGE = 'var(--Buttons-' + C + '-Border)';
-  const stateBg = selected ? SELECTED_FILL : 'transparent';
 
   /* Contained puts the state on the ITEM; outside puts it on the circle. One
      of the two is always transparent, so they are computed together rather
-     than each guessing what the other did. */
+     than each guessing what the other did. (The expanded rail renders
+     ExpandedRailItem, so everything here is the collapsed item.) */
   const contained = labelStyle !== 'outside';
-  const onItem = contained && !expanded;
 
   /* WHERE THE LABEL SITS DECIDES ITS COLOUR, which is why this cannot be one
-     value. Contained fills the whole item, so the label is ON --Text and has
-     to reverse out of it. Outside fills only the circle, so the label is on
-     the surface and takes --Text itself — which is what the design shows,
-     the caption below the holder in the same token the holder is filled
-     with. */
-  const labelColor = selected
-    ? (onItem ? ON_FILL : 'var(--Text)')
-    : (expanded ? 'var(--Text)' : 'var(--Quiet)');
+     value. Contained fills the whole item, so the label is ON the fill and
+     has to reverse out of it (Buttons/Text). Outside fills only the circle,
+     so the label is on the surface and takes --Text itself.
 
-  /* "Selected wins" has to be enforced here, not just stated above.
-     Hover and Pressed paint SURFACE tokens, so applying them to a selected
-     item replaced its button fill with the surface's hover tint and its
-     paired label with the surface's text — the exact thing the rule forbids,
-     on every selected item, on every pointer-over.
-     It survived because `stateBg` used to resolve to nothing: against a
-     selected item that painted no fill, a hover that painted one looked like
-     the feature rather than the bug. Fixing the fill is what makes this
-     visible, so the two belong in one change.
-     Focus-visible is NOT in the exclusion — a selected item still has to show
-     where the keyboard is. Only its label recolour is dropped, since the ring
-     carries the affordance and the label is already correct. */
-  /* The colour goes on the ITEM, so the icon and the label move together —
-     Figma colours the glyph the same as the label in every state. (Only the
-     label used to brighten, leaving the icon Quiet under the pointer.) */
-  const pointerStates = selected ? {} : {
-    '&:hover': { backgroundColor: 'var(--Hover)', color: 'var(--Text)' },
-    '&:active': { backgroundColor: 'var(--Pressed)', color: 'var(--Text)' },
-  };
-  const stateStyles = disabled ? {} : {
-    ...pointerStates,
-    // Figma: a 2px ring 1px outside the item (the ring every control wears).
-    '&:focus-visible': {
-      outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px',
-      ...(selected ? {} : { color: 'var(--Text)' }),
-    },
-  };
+     "Selected wins": hover and pressed paint SURFACE tokens, so they are not
+     applied to a selected item at all — they would replace its button fill
+     with the surface's hover tint. Focus-visible still applies (a selected
+     item has to show where the keyboard is); only its label recolour is
+     dropped. The colour goes on the ITEM, so the icon and the label move
+     together — Figma colours the glyph the same as the label in every
+     state. Figma's ring is 2px, 1px outside the item.
+
+     Outside: the ITEM is what is hovered, pressed and focused (it is the
+     button); the circle shows it. A circle never takes focus, so its own
+     :focus-visible gave a keyboard user no ring at all. */
+  const stateClass = disabled ? ' omni-rail-it-off'
+    : contained
+      ? (selected ? ' omni-rail-it-c-fv' : ' omni-rail-it-c-hov omni-rail-it-c-fv omni-rail-it-c-fvc')
+      : (selected ? ' omni-rail-it-o-fv' : ' omni-rail-it-o-hov omni-rail-it-o-fv');
 
   return (
-    <Box
-      component="button" type="button" role="tab"
+    <button
+      type="button" role="tab"
       aria-selected={selected} aria-label={label} aria-disabled={disabled || undefined}
       disabled={disabled || undefined}
       onClick={disabled ? undefined : onClick}
-      className={'rail-item' + (selected ? ' rail-item-selected' : '')}
-      sx={{
-        display: 'flex',
-        flexDirection: expanded ? 'row' : 'column',
-        alignItems: 'center',
-        justifyContent: expanded ? 'flex-start' : 'center',
-        /* 2px, and it is not a token in the design either — the gap between an
-           icon and its own label is smaller than anything on the sizing scale
-           goes, which is the point: it has to read as one item next to a 12px
-           gap between items. */
-        gap: expanded ? 'var(--Sizing-1-and-Half, 12px)' : '2px',
-        width: '100%',
-        boxSizing: 'border-box',
-        minWidth: expanded ? undefined : ICON_SIZE,
-        minHeight: ICON_SIZE,
-        px: expanded ? 2.5 : 0,
-        /* No padding of its own: Figma's item is the 28px Rail Button (the
-           icon with Sizing-Half above and below), 2px, then the label — 47 in
-           all. It padded the item AND the button, and drew a 1px border, so it
-           came out 56.5. The edge is an inset ring (an inside stroke). */
-        py: 0,
-        border: 'none',
-        borderRadius: expanded ? 0 : ITEM_RADIUS,
-        backgroundColor: onItem || expanded ? stateBg : 'transparent',
-        boxShadow: selected && onItem ? 'inset 0 0 0 1px ' + SELECTED_EDGE : 'none',
-        /* The ITEM owns the foreground, so the label and the icon inside it
-           both follow the fill without either restating it. */
-        color: labelColor,
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        /* The token is a RATIO now, so the divide is gone. It read
-           calc(var(--Disabled, 38) / 100) because Figma stores 38 — its UI
-           expresses opacity in percent — and every consumer doing that
-           arithmetic is one that can forget it: opacity:38 clamps to 1 and
-           renders a disabled control at full strength. */
-        opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
-        fontFamily: 'inherit',
-        textAlign: expanded ? 'left' : 'center',
-        transition: 'background-color 0.15s ease, color 0.15s ease',
-        outline: 'none',
-        ...(onItem || expanded ? stateStyles : {}),
-        /* Outside: the circle takes the state, but the label beneath it still
-           brightens to --Text under the pointer, as Figma's Pressed draws it. */
-        /* Outside: the ITEM is what is hovered, pressed and focused (it is the
-           button); the circle shows it. The circle used to carry these on its
-           own :hover / :focus-visible — and a circle never takes focus, so a
-           keyboard user got no ring at all. Icon and label go --Text. */
-        ...(!onItem && !expanded && !disabled && {
-          ...(!selected && {
-            '&:hover, &:active, &:focus-visible': { color: 'var(--Text)' },
-            '&:hover > :first-child': { backgroundColor: 'var(--Hover)' },
-            '&:active > :first-child': { backgroundColor: 'var(--Pressed)' },
-          }),
-          '&:focus-visible > :first-child': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px' },
-        }),
-      }}
+      className={'rail-item' + (selected ? ' rail-item-selected' : '')
+        + ' MuiBox-root omni-rail-it' + (selected ? (contained ? ' omni-rail-it-sel-c' : ' omni-rail-it-sel-o') : '') + stateClass}
+      style={selected ? paletteVars(C) : undefined}
     >
-      {/* Rail Button — the circle in Label Outside, a plain row otherwise. */}
-      <Box sx={{
-        position: 'relative', display: 'flex',
-        alignItems: 'center', justifyContent: 'center',
-        ...(expanded ? { flexShrink: 0 } : {
-          width: contained ? '100%' : CIRCLE,
-          height: contained ? 'auto' : CIRCLE,
-          py: contained ? ITEM_PAD_Y : 0,
-          borderRadius: contained ? ITEM_RADIUS : CIRCLE,
-          // Outside: the circle rests on the surface's own Background (Figma).
-          backgroundColor: contained ? 'transparent' : (selected ? stateBg : 'var(--Background)'),
-          /* Selected, the glyph sits ON the button fill, so it takes the fill's
-             pair (Buttons/Text) while the label below stays --Text. */
-          ...(!contained && selected && { color: ON_FILL }),
-          boxShadow: !contained && selected ? 'inset 0 0 0 1px ' + SELECTED_EDGE : undefined,
-          transition: 'background-color 0.2s ease',
-          // (Outside's states are driven from the item — see above.)
-        }),
-      }}>
+      {/* Rail Button — the circle in Label Outside, a plain row otherwise.
+          Figma's item is the 28px Rail Button (the icon with Sizing-Half
+          above and below), 2px, then the label. Outside, the circle rests on
+          the surface's own Background; selected, the glyph sits ON the button
+          fill, so it takes the fill's pair while the label below stays
+          --Text. */}
+      <div className={'MuiBox-root omni-rail-btn ' + (contained ? 'omni-rail-btn-c' : 'omni-rail-btn-o' + (selected ? ' omni-rail-btn-o-sel' : ''))}>
         {/* The slot. An avatar goes in it as readily as an icon — an account
             at the foot of a rail is the same item shape with a face in it —
             so an avatar is passed through UNWRAPPED. Wrapping it in <Icon>
             would hand it the icon's color and sizing rules, which is right
             for a glyph and wrong for a picture. */}
         {withBadge(badge, avatar
-          ? <Box sx={{ display: 'flex', width: ICON_SIZE, height: ICON_SIZE }}>{avatar}</Box>
-          : <Icon size="custom" fontSize={RAIL_ICON} sx={{ color: 'inherit' }}>{icon}</Icon>)}
-      </Box>
+          ? <div className="MuiBox-root omni-rail-av">{avatar}</div>
+          : <Icon size="custom" fontSize={RAIL_ICON} className="omni-rail-ic">{icon}</Icon>)}
+      </div>
 
       {/* Label */}
       {label && (
-        <Box sx={{
-          display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-          width: '100%',
-        }}>
-          {/* MobileNavLabel, not Caption at an overridden 11px.
-              
-              The design's style is Typography/Labels/Extra-Small and the lib
-              publishes exactly that — --Label-ExtraSmall-*. Caption with an
-              inline fontSize matched the SIZE and nothing else: not the
-              weight, not the letter-spacing, not the line height, and none of
-              it would follow a brand that moved its label scale.
-              
-              It also fixes invalid markup. Caption renders a <p>, and a <p>
-              inside a <button> is not phrasing content — the browser was
-              repairing it silently. */}
+        <div className="MuiBox-root omni-rail-lbl">
+          {/* MobileNavLabel, not Caption at an overridden 11px: the design's
+              style is Typography/Labels/Extra-Small and the lib publishes
+              exactly that. Caption also rendered a <p> inside a <button>,
+              which is not phrasing content.
+              `color="inherit"` rather than style={{ color }} — Typography
+              strips a `color` from the style object and uses its own prop. */}
           <MobileNavLabel
             className="rail-item-label"
-            /* `color="inherit"` rather than style={{ color }} — Typography
-               strips a `color` from the style object and uses its own prop,
-               so the inline form silently rendered --Text on every selected
-               item while the rest of the style object applied normally. */
             color="inherit"
             style={{
               textAlign: 'center',
-              whiteSpace: expanded ? 'nowrap' : 'normal',
+              whiteSpace: 'normal',
               overflow: 'hidden', textOverflow: 'ellipsis',
-              ...(expanded ? { flex: 1 } : { maxWidth: '100%' }),
+              maxWidth: '100%',
             }}
           >
             {label}
           </MobileNavLabel>
-        </Box>
+        </div>
       )}
-    </Box>
+    </button>
   );
 }
 

@@ -1,6 +1,7 @@
 // src/components/TreeView/TreeView.js
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 import ChevronRightIcon from '@omni-design/icons/ChevronRight';
 import { Icon } from '../Icon/Icon';
 import { Body, Caption } from '../Typography';
@@ -78,12 +79,65 @@ const ANIMATION_MAP = {
   spring: 'omni-tree-slide 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
 };
 
-const KEYFRAMES = {
-  '@keyframes omni-tree-slide': {
-    from: { opacity: 0, transform: 'translateY(-4px)' },
-    to: { opacity: 1, transform: 'none' },
-  },
-};
+const SxBox = lazySxBox('OmniTreeView');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+/** A part's root: static classes, plus an MUI box only when given sx. Refs
+ *  forward, since a row registers its element for roving focus. */
+const Part = React.forwardRef(function Part({ sx, component: Tag = 'div', ...props }, ref) {
+  if (hasSx(sx)) return <SxBox component={Tag} sx={sx} ref={ref} {...props} />;
+  return <Tag ref={ref} {...props} />;
+});
+
+/* What emotion's prefixer added beside align-items / justify-content — the
+   legacy -webkit-box spellings — so the computed style stays exactly what it
+   was. They only act on display:-webkit-box, which nothing here uses. */
+const webkitBox = (css) => css
+  .replace(/([;{])align-items:([^;}]+)/g, '$1-webkit-box-align:$2;align-items:$2')
+  .replace(/([;{])justify-content:([^;}]+)/g, (m, p, v) => p + '-webkit-box-pack:'
+    + v.replace(/^flex-/, '').replace(/^space-between$/, 'justify') + ';justify-content:' + v);
+
+/* ─── Static sheet ───
+   Every declaration the parts used to hand emotion per render, as classes
+   over the same tokens. A row's indent is its level's
+   Menu-Level-n-Left-Margin, so it arrives as a custom property (--_tv-ind)
+   declared on the row. */
+registerStaticStyles('omni-tree-view', webkitBox([
+  '@keyframes omni-tree-slide{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}',
+  /* The panel is a list of menu rows, so it takes the menu panel's corner:
+     Dropdown-Frame-Radius (min of Input, Card and 16). */
+  '.omni-tv{background-color:var(--Background);border-radius:var(--Dropdown-Frame-Radius, 4px);overflow:hidden}',
+  '.omni-tv-tree{margin:0;padding:8px;list-style:none;font-family:inherit}',
+  '.omni-tv-item{outline:none;list-style:none}',
+  /* The row is Figma's Menu Item. Its divider is a 1px Border-Variant line
+     drawn inside, so it adds no height; item.divider === false drops it. */
+  `.omni-tv-row{display:flex;align-items:center;gap:${DENSITY_MAP.default.gap};min-height:${DENSITY_MAP.default.minHeight};position:relative;`
+    + 'box-sizing:border-box;padding:0 var(--Sizing-1, 8px) 0 var(--_tv-ind);border-radius:var(--Menu-Item-Radius, 0px);color:var(--Text);'
+    + 'box-shadow:inset 0 -1px 0 var(--Border-Variant);background-color:transparent;cursor:pointer;opacity:1;transition:background-color 0.15s ease}',
+  `.omni-tv-row-compact{gap:${DENSITY_MAP.compact.gap};min-height:${DENSITY_MAP.compact.minHeight};padding:0 8px;border-radius:var(--Style-Border-Radius);box-shadow:none}`,
+  '.omni-tv-row-flat{box-shadow:none}',
+  '.omni-tv-row-off{cursor:not-allowed;opacity:var(--Disabled, 0.38)}',
+  /* Selected: Figma's Selected Indicator, a 4px bar on the leading edge in
+     the button border colour. */
+  '.omni-tv-row-sel::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background-color:var(--Buttons-Default-Border);pointer-events:none}',
+  '.omni-tv-row-on:hover{background-color:var(--Hover)}',
+  '.omni-tv-row-on:active{background-color:var(--Pressed)}',
+  // 3px ring, 1px in from the row's edge (Figma's Focus-Visible frame).
+  'li:focus-visible>.omni-tv-row{outline:3px solid var(--Focus-Visible);outline-offset:-4px}',
+  `.omni-tv-glyph{width:${DENSITY_MAP.default.iconSize}px;height:${DENSITY_MAP.default.iconSize}px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--Icons-Default, var(--Text))}`,
+  /* The glyph size reaches into an <Icon> as well, whose own sheet sets the
+     svg to inherit — one more class of weight for that case, since the
+     sheets' order in <head> is not fixed. */
+  `.omni-tv-glyph .MuiSvgIcon-root,.omni-tv-glyph .omni-icon .MuiSvgIcon-root{font-size:${DENSITY_MAP.default.iconSize}px}`,
+  `.omni-tv-glyph-compact{width:${DENSITY_MAP.compact.iconSize}px;height:${DENSITY_MAP.compact.iconSize}px}`,
+  `.omni-tv-glyph-compact .MuiSvgIcon-root,.omni-tv-glyph-compact .omni-icon .MuiSvgIcon-root{font-size:${DENSITY_MAP.compact.iconSize}px}`,
+  '.omni-tv-label{flex:1;min-width:0;display:flex;padding:0 var(--Sizing-Half, 4px)}',
+  '.omni-tv-badge{flex-shrink:0}',
+  '.omni-tv-group{margin:0;padding:0;list-style:none}',
+  ...Object.entries(ANIMATION_MAP).filter(([, v]) => v).map(([k, v]) => `.omni-tv-anim-${k}{animation:${v}}`),
+  '.omni-icon.omni-tv-ic{color:inherit}',
+  '.omni-icon.omni-tv-ic-open{transform:rotate(90deg)}',
+].join('\n')));
 
 /* ── Walking the tree ──────────────────────────────────────────────────────
  *
@@ -122,7 +176,6 @@ function TreeNode({
   onToggle, onSelect, onFocusItem, registerRef,
 }) {
   const { item, level, index, siblings } = node;
-  const d = DENSITY_MAP[density] || DENSITY_MAP.default;
   const isCompact = density === 'compact';
   const TextComp = isCompact ? Caption : Body;
 
@@ -137,7 +190,7 @@ function TreeNode({
   const focusable = !disabled || disabledItemsFocusable;
 
   return (
-    <Box
+    <Part
       component="li"
       role="treeitem"
       aria-expanded={hasChildren ? isExpanded : undefined}
@@ -152,11 +205,22 @@ function TreeNode({
       tabIndex={focusedId === item.id && focusable ? 0 : -1}
       ref={(el) => registerRef(item.id, el)}
       onFocus={(e) => { e.stopPropagation(); onFocusItem(item.id); }}
-      className={item.className}
-      sx={{ outline: 'none', listStyle: 'none', ...(item.sx || {}) }}
+      className={(item.className ? item.className + ' ' : '') + 'MuiBox-root omni-tv-item'}
+      sx={item.sx}
     >
-      <Box
-        className="omni-tree-content"
+      {/* Selected: Figma's Selected Indicator, a 4px bar on the leading edge
+          in the button border colour. (It was a --Pressed fill with a bold
+          label, which hover then imitated.) The divider is a 1px
+          Border-Variant line under every row, drawn inside so it adds no
+          height; item.divider === false drops it — Figma's per-row Divider
+          boolean. */}
+      <div
+        className={'omni-tree-content MuiBox-root omni-tv-row'
+          + (isCompact ? ' omni-tv-row-compact' : '')
+          + (!isCompact && item.divider === false ? ' omni-tv-row-flat' : '')
+          + (isSelected ? ' omni-tv-row-sel' : '')
+          + (disabled ? ' omni-tv-row-off' : ' omni-tv-row-on')}
+        style={isCompact ? undefined : { '--_tv-ind': leftMargin(level) }}
         onClick={(e) => {
           if (disabled) return;
           e.stopPropagation();
@@ -167,58 +231,17 @@ function TreeNode({
           if (hasChildren) onToggle(e, item.id);
           if (!disableSelection) onSelect(e, item.id);
         }}
-        sx={{
-          display: 'flex', alignItems: 'center', gap: d.gap,
-          minHeight: d.minHeight,
-          position: 'relative',
-          boxSizing: 'border-box',
-          padding: isCompact ? '0 8px' : '0 var(--Sizing-1, 8px) 0 ' + leftMargin(level),
-          borderRadius: isCompact ? 'var(--Style-Border-Radius)' : 'var(--Menu-Item-Radius, 0px)',
-          color: 'var(--Text)',
-          // Figma's divider: a 1px Border-Variant line under every row, drawn
-          // inside so it adds no height.
-          // item.divider === false drops it — Figma's per-row Divider boolean.
-          boxShadow: isCompact || item.divider === false ? 'none' : 'inset 0 -1px 0 var(--Border-Variant)',
-          backgroundColor: 'transparent',
-          cursor: disabled ? 'not-allowed' : 'pointer',
-          opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
-          transition: 'background-color 0.15s ease',
-          /* Selected: Figma's Selected Indicator, a 4px bar on the leading edge
-             in the button border colour. (It was a --Pressed fill with a bold
-             label, which hover then imitated.) */
-          ...(isSelected && {
-            '&::before': {
-              content: '""', position: 'absolute', left: 0, top: 0, bottom: 0, width: '4px',
-              backgroundColor: 'var(--Buttons-Default-Border)', pointerEvents: 'none',
-            },
-          }),
-          ...(disabled ? {} : {
-            '&:hover': { backgroundColor: 'var(--Hover)' },
-            '&:active': { backgroundColor: 'var(--Pressed)' },
-          }),
-          // 3px ring, 1px in from the row's edge (Figma's Focus-Visible frame).
-          'li:focus-visible > &': {
-            outline: '3px solid var(--Focus-Visible)',
-            outlineOffset: '-4px',
-          },
-        }}
       >
         {/* The twisty — Figma's Toggle. A fixed box even on a leaf, or every
             leaf's label sits 8px left of its siblings' and the column stops
             reading as one. item.toggle === false (Toggle off) drops it, for a
             flat list with no branches. */}
-        {item.toggle !== false && <Box
+        {item.toggle !== false && <div
           aria-hidden="true"
-          className="omni-tree-twisty"
-          sx={{
-            width: d.iconSize, height: d.iconSize, flexShrink: 0,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: 'var(--Icons-Default, var(--Text))',
-            '& .MuiSvgIcon-root': { fontSize: d.iconSize },
-          }}
+          className={'omni-tree-twisty MuiBox-root omni-tv-glyph' + (isCompact ? ' omni-tv-glyph-compact' : '')}
         >
           {hasChildren && (isExpanded ? collapseIcon : expandIcon)}
-        </Box>}
+        </div>}
 
         {checkboxSelection && !disableSelection && (
           <Checkbox
@@ -235,50 +258,34 @@ function TreeNode({
         )}
 
         {item.icon && (
-          <Box aria-hidden="true" className="omni-tree-icon" sx={{
-            width: d.iconSize, height: d.iconSize, flexShrink: 0, display: 'flex',
-            alignItems: 'center', justifyContent: 'center', color: 'var(--Icons-Default, var(--Text))',
-            '& .MuiSvgIcon-root': { fontSize: d.iconSize },
-          }}>{item.icon}</Box>
+          <div aria-hidden="true" className={'omni-tree-icon MuiBox-root omni-tv-glyph' + (isCompact ? ' omni-tv-glyph-compact' : '')}>{item.icon}</div>
         )}
 
         {item.swatch && <MiniSwatch color={item.swatch} sx={{ width: 'var(--Menu-Swatch, 24px)', height: 'var(--Menu-Swatch, 24px)' }} />}
 
         {/* Figma's Menu Slot: the label with Sizing-Half either side. The padding
             is the slot's, so the text itself starts where Figma's does. */}
-        <Box className="omni-tree-label" sx={{ flex: 1, minWidth: 0, display: 'flex', padding: '0 var(--Sizing-Half, 4px)' }}>
+        <div className="omni-tree-label MuiBox-root omni-tv-label">
           <TextComp style={{
             flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           }}>
             {item.label}
           </TextComp>
-        </Box>
+        </div>
 
-        {item.badge && <Box sx={{ flexShrink: 0 }}>{item.badge}</Box>}
-      </Box>
+        {item.badge && <div className="MuiBox-root omni-tv-badge">{item.badge}</div>}
+      </div>
 
       {hasChildren && isExpanded && (
-        <Box
-          component="ul"
+        /* Indent only — NO guide line. Figma's TreeView (6911:36658) stacks
+           plain Menu Item instances at gap 0 with no strokes anywhere in the
+           set; the structure is read from the indent and the chevrons. (There
+           was a `borderLeft: 1px solid var(--Border)` here, an invented rule
+           in the wrong token.) The indent is each row's own padding
+           (Menu-Level-n-Left-Margin), so the group adds none. */
+        <ul
           role="group"
-          sx={{
-            /* Indent only — NO guide line. Figma's TreeView (6911:36658) stacks
-               plain Menu Item instances at gap 0 with no strokes anywhere in
-               the set; the structure is read from the indent and the chevrons.
-
-               There was a `borderLeft: 1px solid var(--Border)` here, which
-               invented a rule the design does not have. It was also the wrong
-               token even for a line that did exist: --Border carries a 3:1
-               contrast requirement because it outlines clickable things, and a
-               decorative tree guide is --Border-Variant's job. The 1px it
-               occupied is folded back into the padding so the indent is
-               unchanged. */
-            /* The indent is each row's own padding (Menu-Level-n-Left-Margin),
-               so the group adds none. */
-            margin: 0, padding: 0,
-            listStyle: 'none',
-            animation: ANIMATION_MAP[animation],
-          }}
+          className={'MuiBox-root omni-tv-group' + (ANIMATION_MAP[animation] ? ' omni-tv-anim-' + animation : '')}
         >
           {item.children.map((child, i) => (
             <TreeNode
@@ -293,9 +300,9 @@ function TreeNode({
               registerRef={registerRef}
             />
           ))}
-        </Box>
+        </ul>
       )}
-    </Box>
+    </Part>
   );
 }
 
@@ -334,6 +341,7 @@ export function OmniTreeView({
   sx = {},
   ...props
 }) {
+  useStaticStyles('omni-tree-view');
   const effectiveVariant = selectionStyle || variant;
   const multiSelect = selectionMode === 'multi';
 
@@ -464,13 +472,13 @@ export function OmniTreeView({
 
   const collapseIcon = slots?.collapseIcon
     ? <slots.collapseIcon />
-    : <Icon size="small" sx={{ color: 'inherit', transform: 'rotate(90deg)' }}><ChevronRightIcon /></Icon>;
+    : <Icon size="small" className="omni-tv-ic omni-tv-ic-open"><ChevronRightIcon /></Icon>;
   const expandIcon = slots?.expandIcon
     ? <slots.expandIcon />
-    : <Icon size="small" sx={{ color: 'inherit' }}><ChevronRightIcon /></Icon>;
+    : <Icon size="small" className="omni-tv-ic"><ChevronRightIcon /></Icon>;
 
   return (
-    <Box
+    <Part
       data-theme={dataTheme}
       data-surface={dataSurface}
       className={
@@ -479,26 +487,16 @@ export function OmniTreeView({
         + ' omni-treeview-' + color
         + ' omni-treeview-' + density
         + (className ? ' ' + className : '')
+        + ' MuiBox-root omni-tv'
       }
-      sx={{
-        backgroundColor: 'var(--Background)',
-        /* The panel is a list of menu rows, so it takes the menu panel's
-           corner: Dropdown-Frame-Radius (min of Input, Card and 16). Figma's
-           TreeView now binds the same; --Style-Border-Radius drew a 30px
-           pill-cornered panel. */
-        borderRadius: 'var(--Dropdown-Frame-Radius, 4px)',
-        overflow: 'hidden',
-        ...KEYFRAMES,
-        ...sx,
-      }}
+      sx={sx}
     >
-      <Box
-        component="ul"
+      <ul
         role="tree"
         aria-label={ariaLabel}
         aria-multiselectable={multiSelect || undefined}
         onKeyDown={onKeyDown}
-        sx={{ margin: 0, padding: '8px', listStyle: 'none', fontFamily: 'inherit' }}
+        className="MuiBox-root omni-tv-tree"
         {...props}
       >
         {items.map((item, i) => (
@@ -514,8 +512,8 @@ export function OmniTreeView({
             registerRef={registerRef}
           />
         ))}
-      </Box>
-    </Box>
+      </ul>
+    </Part>
   );
 }
 

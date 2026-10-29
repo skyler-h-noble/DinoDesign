@@ -24,6 +24,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { Rail } from './Rail';
+import { stateRules } from '../_testCss';
 
 const ITEMS = [
   { label: 'Home', icon: <span>h</span> },
@@ -37,18 +38,14 @@ function renderRail(props = {}) {
 
 /* The CSS the SELECTED item itself resolves to.
  *
- * Two earlier shapes of this helper were both wrong, in opposite directions:
- *
- *   - `style.textContent` returned '' — emotion inserts through
- *     `sheet.insertRule()`, which leaves the <style> element's text empty. A
- *     `.not` assertion over '' passes while proving nothing.
- *   - Reading every rule in the document, with an `afterEach` that removed the
- *     <style> tags, tore out emotion's sheet after the first test; and without
- *     that teardown, rules accumulate across tests, so a positive assertion
- *     can be satisfied by a PREVIOUS test's render.
- *
- * Scoping to the element's own class list fixes both: it cannot be empty while
- * the element has styles, and it cannot see another render's variant.
+ * Earlier shapes of this helper read the element's emotion classes, or every
+ * rule in the document (which let a PREVIOUS render's rules satisfy a positive
+ * assertion). The item now renders from the static sheet, so this asks each
+ * scoped element what WINS for it — matching rules by selector weight plus
+ * its inline style — with the private custom properties the sheet reads
+ * (--_rl-fill / -on / -edge, declared on the item) followed down to the real
+ * token. It cannot be empty while the element has styles, and it cannot see
+ * another render's variant, since those values live on this item.
  */
 function selectedItemCSS(container) {
   const el = container.querySelector('.rail-item-selected');
@@ -58,32 +55,8 @@ function selectedItemCSS(container) {
      helper that saw only the button could assert the fill moved and never
      notice its label had not. */
   const scoped = [el, ...Array.from(el.querySelectorAll('*'))];
-  const classes = scoped.flatMap((n) =>
-    Array.from(n.classList || []).filter((c) => c.startsWith('css-')));
-  if (!classes.length) throw new Error('selected item carries no emotion class');
-
-  const out = [];
-  for (const sheet of Array.from(document.styleSheets)) {
-    let rules;
-    try { rules = sheet.cssRules; } catch { continue; }
-    for (const rule of Array.from(rules || [])) {
-      const sel = rule.selectorText || '';
-      if (classes.some((c) => sel.includes(c))) out.push(rule.cssText);
-    }
-  }
-  /* Inline `style` attributes count too, and they are not optional here: the
-     label's color is set that way, so a helper reading only stylesheet rules
-     saw the label's emotion class (`color: var(--Text)`, from the Typography
-     component's own default) and concluded the pairing was broken when the
-     inline style was overriding it correctly. Rules alone answer a different
-     question than "what does this element paint". */
-  for (const n of scoped) {
-    const inline = n.getAttribute && n.getAttribute('style');
-    if (inline) out.push(inline);
-  }
-
-  const css = out.join('\n');
-  if (!css) throw new Error('no rules matched the selected item\'s classes');
+  const css = scoped.map((n) => stateRules(n).all).join('\n');
+  if (!/var\(--/.test(css)) throw new Error('no rules matched the selected item');
   return css;
 }
 

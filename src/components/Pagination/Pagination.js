@@ -1,6 +1,7 @@
 // src/components/Pagination/Pagination.js
 import React, { useState, useCallback } from 'react';
-import { Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 import ChevronLeftIcon from '@omni-design/icons/KeyboardArrowLeft';
 import ChevronRightIcon from '@omni-design/icons/KeyboardArrowRight';
 import FirstPageIcon from '@omni-design/icons/KeyboardDoubleArrowLeft';
@@ -30,6 +31,27 @@ const SIZE_MAP = {
   medium: { btnSize: 'medium', fontSize: '14px', gap: '4px' },
   large:  { btnSize: 'large',  fontSize: '16px', gap: '4px' },
 };
+
+const SxBox = lazySxBox('Pagination');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+/* What emotion's prefixer added beside align-items / justify-content — the
+   legacy -webkit-box spellings — so the computed style stays exactly what it
+   was. They only act on display:-webkit-box, which nothing here uses. */
+const webkitBox = (css) => css
+  .replace(/([;{])align-items:([^;}]+)/g, '$1-webkit-box-align:$2;align-items:$2')
+  .replace(/([;{])justify-content:([^;}]+)/g, (m, p, v) => p + '-webkit-box-pack:'
+    + v.replace(/^flex-/, '').replace(/^space-between$/, 'justify') + ';justify-content:' + v);
+
+/* The static sheet — what each part handed emotion, as classes over the same
+   tokens. The ellipsis is Figma's Pagination Ellipsis: not a control, so no
+   states. */
+registerStaticStyles('omni-pagination', webkitBox([
+  '.omni-pg{display:inline-flex}',
+  '.omni-pg-list{display:flex;align-items:center;list-style:none;margin:0;padding:0;flex-wrap:wrap}',
+  ...Object.entries(SIZE_MAP).map(([k, v]) => `.omni-pg-list-${k}{gap:${v.gap}}`),
+  '.omni-pg-gap{display:inline-flex;align-items:center;justify-content:center;width:var(--Button-Height, 32px);height:var(--Button-Height, 32px);color:var(--Quiet)}',
+].join('\n')));
 
 /* ─── Pagination algorithm ─── */
 function usePaginationRange({ count, page, siblingCount = 1, boundaryCount = 1 }) {
@@ -96,11 +118,14 @@ export function Pagination({
   sx = {},
   ...props
 }) {
+  useStaticStyles('omni-pagination');
   const [internalPage, setInternalPage] = useState(defaultPage);
   const isControlled = controlledPage !== undefined;
   const currentPage = isControlled ? controlledPage : internalPage;
   const C = cap(color === 'default' ? 'Default' : color);
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
+  const sizeKey = SIZE_MAP[size] ? size : 'medium';
+  const Root = hasSx(sx) ? SxBox : 'nav';
 
   const setPage = useCallback((newPage) => {
     const clamped = Math.max(1, Math.min(count, newPage));
@@ -113,55 +138,47 @@ export function Pagination({
   const effectiveColor = color === 'default' ? 'default' : color;
 
   return (
-    <Box
-      component="nav"
+    <Root
+      {...(Root === 'nav' ? {} : { component: 'nav', sx })}
       aria-label="Pagination"
       data-theme={theme || undefined}
       data-surface={surface || undefined}
-      className={'pagination pagination-' + color + ' pagination-' + size + ' ' + className}
-      sx={{ display: 'inline-flex', ...sx }}
+      className={'pagination pagination-' + color + ' pagination-' + size + ' ' + className + ' MuiBox-root omni-pg'}
       {...props}
     >
-      <Box
-        component="ul"
-        sx={{ display: 'flex', alignItems: 'center', gap: s.gap, listStyle: 'none', m: 0, p: 0, flexWrap: 'wrap' }}
-      >
+      <ul className={'MuiBox-root omni-pg-list omni-pg-list-' + sizeKey}>
         {showFirstButton && (
-          <Box component="li">
+          <li className="MuiBox-root">
             <Button iconOnly variant={effectiveColor + '-ghost'} size={s.btnSize}
               disabled={disabled || currentPage === 1}
               onClick={() => setPage(1)} aria-label="Go to first page">
               <Icon size="small"><FirstPageIcon /></Icon>
             </Button>
-          </Box>
+          </li>
         )}
 
-        <Box component="li">
+        <li className="MuiBox-root">
           <Button iconOnly variant={effectiveColor + '-ghost'} size={s.btnSize}
             disabled={disabled || currentPage === 1}
             onClick={() => setPage(currentPage - 1)} aria-label="Go to previous page">
             <Icon size="small"><ChevronLeftIcon /></Icon>
           </Button>
-        </Box>
+        </li>
 
         {pages.map((item, idx) => {
           if (typeof item === 'string') {
             return (
-              <Box component="li" key={item + '-' + idx}>
+              <li className="MuiBox-root" key={item + '-' + idx}>
                 {/* Figma's Pagination Ellipsis: not a control, so no states. */}
-                <Box className="pagination-ellipsis" aria-hidden="true" sx={{
-                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  width: 'var(--Button-Height, 32px)', height: 'var(--Button-Height, 32px)',
-                  color: 'var(--Quiet)',
-                }}>
+                <div className="pagination-ellipsis MuiBox-root omni-pg-gap" aria-hidden="true">
                   <Icon size="small"><MoreHorizIcon /></Icon>
-                </Box>
-              </Box>
+                </div>
+              </li>
             );
           }
           const isSelected = item === currentPage;
           return (
-            <Box component="li" key={item}>
+            <li className="MuiBox-root" key={item}>
               {/* Unselected pages are GHOST (Figma's Pagination Number):
                   Outline-Quiet at rest, Outline-Text when engaged, no edge,
                   so the current page is the only one with chrome. The
@@ -181,29 +198,29 @@ export function Pagination({
               >
                 {item}
               </Button>
-            </Box>
+            </li>
           );
         })}
 
-        <Box component="li">
+        <li className="MuiBox-root">
           <Button iconOnly variant={effectiveColor + '-ghost'} size={s.btnSize}
             disabled={disabled || currentPage === count}
             onClick={() => setPage(currentPage + 1)} aria-label="Go to next page">
             <Icon size="small"><ChevronRightIcon /></Icon>
           </Button>
-        </Box>
+        </li>
 
         {showLastButton && (
-          <Box component="li">
+          <li className="MuiBox-root">
             <Button iconOnly variant={effectiveColor + '-ghost'} size={s.btnSize}
               disabled={disabled || currentPage === count}
               onClick={() => setPage(count)} aria-label="Go to last page">
               <Icon size="small"><LastPageIcon /></Icon>
             </Button>
-          </Box>
+          </li>
         )}
-      </Box>
-    </Box>
+      </ul>
+    </Root>
   );
 }
 

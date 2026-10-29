@@ -1,6 +1,7 @@
 // src/components/BottomNavigation/BottomNavigation.js
 import React, { useState, useCallback } from 'react';
-import { Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 import AddIcon from '@omni-design/icons/Add';
 import { MobileNavLabel } from '../Typography';
 import { SpeedDial } from '../SpeedDial/SpeedDial';
@@ -127,6 +128,80 @@ const TOOLBAR_HEIGHT = 'var(--ToolBar, 80px)';
 const TOOLBAR_SHORT = 'var(--ToolBarShort, 64px)';
 const FLOATING_RADIUS = TOOLBAR_HEIGHT;
 
+const SxBox = lazySxBox('BottomNavigation');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+/** A part's root: static classes, plus an MUI box only when given sx. */
+function Part({ sx, component: Tag = 'div', ...props }) {
+  if (hasSx(sx)) return <SxBox component={Tag} sx={sx} {...props} />;
+  return <Tag {...props} />;
+}
+
+/** Figma's "FAB Frame": the gap in the items under a raised FAB. */
+const FAB_GAP = '24px';
+/** Right FAB: bar to FAB. */
+const FAB_BESIDE_GAP = 'var(--Sizing-1-and-Half, 12px)';
+/** The halo round a raised FAB, in the page's Background. */
+const HALO = 4;
+/** A raised FAB is centred on the bar's top edge: half its halo'd size. */
+const RAISE = (48 + HALO * 2) / 2 + 'px';
+
+/* What emotion's prefixer added beside align-items / justify-content — the
+   legacy -webkit-box spellings — so the computed style stays exactly what it
+   was. They only act on display:-webkit-box, which nothing here uses. */
+const webkitBox = (css) => css
+  .replace(/([;{])align-items:([^;}]+)/g, '$1-webkit-box-align:$2;align-items:$2')
+  .replace(/([;{])justify-content:([^;}]+)/g, (m, p, v) => p + '-webkit-box-pack:'
+    + v.replace(/^flex-/, '').replace(/^space-between$/, 'justify') + ';justify-content:' + v);
+
+/* The static sheet — what each part handed emotion, as classes over the same
+   tokens. Pinning is a class too (bottom-nav-fixed's positioning), so a
+   caller's sx still wins over it as it did. */
+registerStaticStyles('omni-bottom-nav', webkitBox([
+  '.omni-bn{display:flex;align-items:center;justify-content:center;background-color:var(--Background);border-radius:0;'
+    + 'font-family:inherit;box-sizing:border-box}',
+  '.omni-bn-h{flex-direction:row;height:' + TOOLBAR_HEIGHT + ';width:100%}',
+  '.omni-bn-h.omni-bn-fab{height:' + TOOLBAR_SHORT + '}',
+  '.omni-bn-v{flex-direction:column;width:fit-content}',
+  '.omni-bn-float{border-radius:' + FLOATING_RADIUS + '}',
+  '.omni-bn-float.omni-bn-fab{border-radius:' + TOOLBAR_SHORT + '}',
+  ...Object.entries({ fixed: NO_PAD, h: FLOATING_PAD.horizontal, v: FLOATING_PAD.vertical }).map(([k, p]) =>
+    `.omni-bn-pad-${k}{padding-left:${p.px};padding-right:${p.px};padding-top:${p.py};padding-bottom:${p.py}}`),
+  '.omni-bn-fab{flex:1;min-width:0}',
+  /* Spread across the bar when it is horizontal; a fixed gap when it is
+     vertical, where there is no width to spread into. */
+  '.omni-bn-list{display:flex;align-items:center}',
+  '.omni-bn-list-h{flex-direction:row;justify-content:space-between;gap:0;width:100%;max-width:600px}',
+  '.omni-bn-list-v{flex-direction:column;justify-content:flex-start;gap:10px;width:auto}',
+  '.omni-bn-half{flex:1;min-width:0;display:flex;align-items:center;justify-content:space-evenly}',
+  `.omni-bn-fab-gap{width:${FAB_GAP};flex-shrink:0}`,
+  '.omni-bn-wrap{position:relative;display:flex;align-items:center;gap:' + FAB_BESIDE_GAP + ';width:100%;box-sizing:border-box}',
+  `.omni-bn-wrap-raised{gap:0;padding-top:${RAISE}}`,
+  /* The item: a transparent column. Its focus ring is drawn on the icon
+     circle, not round the item. Figma's Nav Item Hover: the label goes Quiet
+     → Text; nothing else moves. Pressed follows it. */
+  `.omni-bn-item{display:flex;flex-direction:column;align-items:center;gap:${ITEM_GAP};width:${ITEM_WIDTH}px;flex-shrink:0;`
+    + 'border:none;background-color:transparent;cursor:pointer;padding:0;font-family:inherit;outline:none}',
+  '.omni-bn-item:focus-visible{outline:none}',
+  '.omni-bn-item:disabled{opacity:var(--Disabled, 0.38);cursor:not-allowed}',
+  '.omni-bn-item:hover:not(:disabled) .bottom-nav-label,.omni-bn-item:active:not(:disabled) .bottom-nav-label{color:var(--Text) !important}',
+  /* Icon-Holder — the circle that carries the selected state. border-box:
+     Figma's holder is the icon plus its padding (24 + 8 + 8 = 40), with
+     Button-Height only as a floor. --Text when selected, and the icon
+     reverses out of it (Icons/On-Icon); at rest the icon is Icons/Icon. */
+  `.omni-bn-holder{display:flex;align-items:center;justify-content:center;box-sizing:border-box;min-width:${HOLDER_MIN};min-height:${HOLDER_MIN};`
+    + `padding:${HOLDER_PAD};border-radius:${HOLDER_RADIUS};background-color:transparent;color:var(--Icons-Default, var(--Text));`
+    + `font-size:${ICON_SIZE};transition:background-color 0.2s ease, color 0.15s ease}`,
+  '.omni-bn-holder-on{background-color:var(--Text);color:var(--Icons-On-Default, var(--Background))}',
+  '.omni-bn-holder .MuiSvgIcon-root{font-size:inherit;color:inherit}',
+  '.bottom-nav-item:focus-visible .omni-bn-holder{outline:2px solid var(--Focus-Visible);outline-offset:1px}',
+  '.omni-bn-fabslot{display:flex;flex-shrink:0}',
+  `.omni-bn-fabslot-raised{position:absolute;top:0;left:50%;transform:translateX(-50%);padding:${HALO}px;border-radius:50%;background-color:var(--Background)}`,
+  /* Pinned to the viewport — last, so it wins over the wrapper's relative. */
+  '.omni-bn-pin{position:fixed;z-index:1100;bottom:0;left:0;right:0}',
+  '.omni-bn-pin-v{position:fixed;z-index:1100;top:50%;left:0;transform:translateY(-50%)}',
+].join('\n')));
+
 export function BottomNavigation({
   items = [],
   value: controlledValue,
@@ -160,6 +235,7 @@ export function BottomNavigation({
   sx = {},
   ...props
 }) {
+  useStaticStyles('omni-bottom-nav');
   const [internalValue, setInternalValue] = useState(defaultValue);
   const isControlled = controlledValue !== undefined;
   const activeIndex = isControlled ? controlledValue : internalValue;
@@ -174,17 +250,11 @@ export function BottomNavigation({
   const raised = hasFab && fabPosition === 'center';
   const isFloating = variant === 'floating' || hasFab;
   const dataTheme = THEME_MAP[barColor] || THEME_MAP.default;
-  const pad = !isFloating
-    ? NO_PAD
-    : (isVertical ? FLOATING_PAD.vertical : FLOATING_PAD.horizontal);
+  const padClass = !isFloating
+    ? ' omni-bn-pad-fixed'
+    : (isVertical ? ' omni-bn-pad-v' : ' omni-bn-pad-h');
 
-  const pinned = fixed && {
-    position: 'fixed',
-    zIndex: 1100,
-    ...(isVertical
-      ? { top: '50%', left: 0, transform: 'translateY(-50%)' }
-      : { bottom: 0, left: 0, right: 0 }),
-  };
+  const pinnedClass = fixed ? (isVertical ? ' omni-bn-pin-v' : ' omni-bn-pin') : '';
 
   const itemEls = items.map((item, index) => (
     <BottomNavItem
@@ -210,20 +280,23 @@ export function BottomNavigation({
   if (raised) {
     const cut = Math.ceil(itemEls.length / 2);
     const half = (key, els) => (
-      <Box key={key} role="none" className={'bottom-nav-half bottom-nav-half-' + key}
-        sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-evenly' }}>
+      <div key={key} role="none" className={'bottom-nav-half bottom-nav-half-' + key + ' MuiBox-root omni-bn-half'}>
         {els}
-      </Box>
+      </div>
     );
     rowEls = [
       half('start', itemEls.slice(0, cut)),
-      <Box key="fab-gap" role="presentation" className="bottom-nav-fab-gap" sx={{ width: FAB_GAP, flexShrink: 0 }} />,
+      <div key="fab-gap" role="presentation" className="bottom-nav-fab-gap MuiBox-root omni-bn-fab-gap" />,
       half('end', itemEls.slice(cut)),
     ];
   }
 
+  /* No top border: the design draws none — the bar's own surface is what
+     separates it. A horizontal bar is a SET height with its items centred —
+     ToolBar (80), or ToolBarShort (64) for the FAB styles — not its padding
+     plus whatever the items measure. The vertical bar hugs. */
   const bar = (
-    <Box
+    <Part
       component="nav"
       data-theme={dataTheme}
       data-surface={surface}
@@ -246,51 +319,21 @@ export function BottomNavigation({
         + (showLabels ? ' bottom-nav-labels' : ' bottom-nav-no-labels')
         + (fixed ? ' bottom-nav-fixed' : '')
         + (hasFab ? '' : (className ? ' ' + className : ''))
+        + ' MuiBox-root omni-bn ' + (isVertical ? 'omni-bn-v' : 'omni-bn-h')
+        + (isFloating ? ' omni-bn-float' : '') + padClass
+        + (hasFab ? ' omni-bn-fab' : pinnedClass)
       }
-      sx={{
-        display: 'flex',
-        flexDirection: isVertical ? 'column' : 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'var(--Background)',
-        /* No top border. The design draws none — the bar's own surface is
-           what separates it, and a hairline on a floating pill would trace
-           one edge of a shape that has no edges. */
-        borderRadius: isFloating ? (hasFab ? TOOLBAR_SHORT : FLOATING_RADIUS) : 0,
-        /* A horizontal bar is a SET height with its items centred — ToolBar
-           (80), or ToolBarShort (64) for the FAB styles — not its padding
-           plus whatever the items measure. The vertical bar hugs. */
-        ...(!isVertical && { height: hasFab ? TOOLBAR_SHORT : TOOLBAR_HEIGHT }),
-        fontFamily: 'inherit',
-        width: isVertical ? 'fit-content' : '100%',
-        boxSizing: 'border-box',
-        px: pad.px,
-        py: pad.py,
-        ...(hasFab ? { flex: 1, minWidth: 0 } : pinned),
-        ...(hasFab ? {} : sx),
-      }}
+      sx={hasFab ? undefined : sx}
       {...(hasFab ? {} : props)}
     >
-      <Box
+      <div
         role="tablist"
         aria-orientation={isVertical ? 'vertical' : 'horizontal'}
-        sx={{
-          display: 'flex',
-          flexDirection: isVertical ? 'column' : 'row',
-          alignItems: 'center',
-          /* Spread across the bar when it is horizontal; a fixed gap when it
-             is vertical, where there is no width to spread into. Both are the
-             design's — space-around was neither, and it left uneven margins
-             at the two ends. */
-          justifyContent: isVertical ? 'flex-start' : 'space-between',
-          gap: isVertical ? '10px' : 0,
-          width: isVertical ? 'auto' : '100%',
-          maxWidth: isVertical ? undefined : 600,
-        }}
+        className={'MuiBox-root omni-bn-list ' + (isVertical ? 'omni-bn-list-v' : 'omni-bn-list-h')}
       >
         {rowEls}
-      </Box>
-    </Box>
+      </div>
+    </Part>
   );
 
   if (!hasFab) return bar;
@@ -299,89 +342,36 @@ export function BottomNavigation({
      halo paints the PAGE's --Background (Figma's 4px ring in Background
      around the FAB) rather than the bar's. The wrapper takes the pinning. */
   return (
-    <Box
-      className={'bottom-nav-wrap bottom-nav-wrap-' + (raised ? 'raised' : 'right') + (className ? ' ' + className : '')}
-      sx={{
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        gap: raised ? 0 : FAB_BESIDE_GAP,
-        width: '100%',
-        boxSizing: 'border-box',
-        ...(raised && { pt: RAISE }),
-        ...pinned,
-        ...sx,
-      }}
+    <Part
+      className={'bottom-nav-wrap bottom-nav-wrap-' + (raised ? 'raised' : 'right') + (className ? ' ' + className : '')
+        + ' MuiBox-root omni-bn-wrap' + (raised ? ' omni-bn-wrap-raised' : '') + pinnedClass}
+      sx={sx}
       {...props}
     >
       {bar}
       <BottomNavFab {...fabAction} raised={raised} />
-    </Box>
+    </Part>
   );
 }
 
 function BottomNavItem({ id, icon, label, selected, showLabel, onClick, ariaLabel, disabled }) {
   return (
-    <Box
-      component="button" type="button" role="tab" id={id}
+    <button
+      type="button" role="tab" id={id}
       aria-selected={selected} aria-label={ariaLabel} onClick={onClick}
       disabled={disabled} aria-disabled={disabled || undefined}
-      className={'bottom-nav-item' + (selected ? ' bottom-nav-item-selected' : '')}
-      sx={{
-        display: 'flex', flexDirection: 'column', alignItems: 'center',
-        gap: ITEM_GAP,
-        width: ITEM_WIDTH,
-        flexShrink: 0,
-        border: 'none', backgroundColor: 'transparent', cursor: 'pointer',
-        padding: 0, fontFamily: 'inherit', outline: 'none',
-        // The ring is drawn on the icon circle (below), not round the item.
-        '&:focus-visible': { outline: 'none' },
-        '&:disabled': { opacity: 'var(--Disabled, 0.38)', cursor: 'not-allowed' },
-        /* Figma's Nav Item Hover: the label goes Quiet → Text; nothing else
-           moves. Pressed follows it (the set draws no pressed of its own). */
-        '&:hover:not(:disabled) .bottom-nav-label, &:active:not(:disabled) .bottom-nav-label': { color: 'var(--Text) !important' },
-      }}
+      className={'bottom-nav-item' + (selected ? ' bottom-nav-item-selected' : '') + ' MuiBox-root omni-bn-item'}
     >
-      {/* Icon-Holder — the circle that carries the selected state. */}
-      <Box sx={{
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        /* border-box: Figma's holder is the icon plus its padding (24 + 8 + 8
-           = 40), with Button-Height only as a floor. As content-box the padding
-           went on top of the 32 minimum and the circle came out 48. */
-        boxSizing: 'border-box',
-        minWidth: HOLDER_MIN, minHeight: HOLDER_MIN,
-        padding: HOLDER_PAD,
-        borderRadius: HOLDER_RADIUS,
-        /* --Text, and the icon reverses out of it. The pair has to move
-           together: a fill and a foreground picked separately is how a
-           selected item ends up dark-on-dark the first time someone changes
-           the bar's theme. */
-        backgroundColor: selected ? 'var(--Text)' : 'transparent',
-        /* Figma: the icon is Icons/Icon at rest (full strength — only the
-           LABEL is quiet) and Icons/On-Icon on the selected fill. */
-        color: selected ? 'var(--Icons-On-Default, var(--Background))' : 'var(--Icons-Default, var(--Text))',
-        fontSize: ICON_SIZE,
-        transition: 'background-color 0.2s ease, color 0.15s ease',
-        '& .MuiSvgIcon-root': { fontSize: 'inherit', color: 'inherit' },
-        /* The item had a focus ring and nothing else — no hover, no pressed.
-           It read as covered because the FAB menu further down this file has
-           both, which is the trap in auditing a directory rather than a
-           control.
-
-           These sit on the HOLDER, not the button: the button is a transparent
-           column containing the icon circle and the label, so a scrim on it
-           would paint a rectangle behind the text as well. Selected keeps its
-           --Text fill and moves the scrim on top of it. */
-        /* Hover / pressed change the LABEL (see the button above) — Figma
-           puts no fill on the circle. Focus is a 2px ring 1px outside the
-           circle (Figma's 46px Focus-Visible frame round the 40px holder),
-           not a box round the whole item. */
-        '.bottom-nav-item:focus-visible &': {
-          outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px',
-        },
-      }}>
+      {/* Icon-Holder — the circle that carries the selected state. The pair
+          (fill and foreground) moves together: a fill and a foreground picked
+          separately is how a selected item ends up dark-on-dark the first
+          time someone changes the bar's theme. Hover / pressed change the
+          LABEL — Figma puts no fill on the circle. Focus is a 2px ring 1px
+          outside the circle (Figma's 46px Focus-Visible frame round the 40px
+          holder), not a box round the whole item. */}
+      <div className={'MuiBox-root omni-bn-holder' + (selected ? ' omni-bn-holder-on' : '')}>
         {icon}
-      </Box>
+      </div>
 
       {showLabel && label && (
         /* MobileNavLabel — the design's Labels/Mobile-Nav-Label, which is
@@ -399,18 +389,9 @@ function BottomNavItem({ id, icon, label, selected, showLabel, onClick, ariaLabe
           {label}
         </MobileNavLabel>
       )}
-    </Box>
+    </button>
   );
 }
-
-/** Figma's "FAB Frame": the gap in the items under a raised FAB. */
-const FAB_GAP = '24px';
-/** Right FAB: bar to FAB. */
-const FAB_BESIDE_GAP = 'var(--Sizing-1-and-Half, 12px)';
-/** The halo round a raised FAB, in the page's Background. */
-const HALO = 4;
-/** A raised FAB is centred on the bar's top edge: half its halo'd size. */
-const RAISE = (48 + HALO * 2) / 2 + 'px';
 
 /** The FAB of Figma's two FAB styles — the library's own Fab (medium, 48),
  *  so its fill, bevel, states and focus ring are the FAB's, not redrawn.
@@ -426,16 +407,7 @@ const RAISE = (48 + HALO * 2) / 2 + 'px';
 function BottomNavFab({ icon, label, onClick, actions, disablePortal = false, raised = false }) {
   const isDial = Array.isArray(actions) && actions.length > 0;
   return (
-    <Box
-      className={'bottom-nav-fab' + (raised ? ' bottom-nav-fab-raised' : '')}
-      sx={{
-        display: 'flex', flexShrink: 0,
-        ...(raised && {
-          position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
-          p: HALO + 'px', borderRadius: '50%', backgroundColor: 'var(--Background)',
-        }),
-      }}
-    >
+    <div className={'bottom-nav-fab' + (raised ? ' bottom-nav-fab-raised' : '') + ' MuiBox-root omni-bn-fabslot' + (raised ? ' omni-bn-fabslot-raised' : '')}>
       {isDial ? (
         /* Tap only. The bar is phone chrome, where nothing hovers — and with
            hover on, a desktop click landed just after the hover had opened the
@@ -445,7 +417,7 @@ function BottomNavFab({ icon, label, onClick, actions, disablePortal = false, ra
       ) : (
         <Fab aria-label={label || 'Action'} onClick={onClick} icon={icon || <AddIcon />} />
       )}
-    </Box>
+    </div>
   );
 }
 

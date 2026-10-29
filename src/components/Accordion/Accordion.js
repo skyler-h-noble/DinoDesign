@@ -1,6 +1,7 @@
 // src/components/Accordion/Accordion.js
 import React, { useState, createContext, useContext } from 'react';
-import { Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 import ExpandMoreIcon from '@omni-design/icons/ExpandMore';
 import { Icon } from '../Icon/Icon';
 import {
@@ -100,6 +101,76 @@ const AccordionContext = createContext({
  * a pill. Falls back to --Button-Radius for a system that predates the token. */
 const RADIUS = 'var(--Accordion-Radius, var(--Button-Radius))';
 
+const SxBox = lazySxBox('Accordion');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+/** A part's root: static classes, plus an MUI box only when given sx. */
+function Part({ sx, component: Tag = 'div', ...props }) {
+  if (hasSx(sx)) return <SxBox component={Tag} sx={sx} {...props} />;
+  return <Tag {...props} />;
+}
+
+/* ─── Static sheet ───
+   Every declaration the parts used to hand emotion per render, as classes
+   over the same tokens, at the same selector weights — the connected
+   group's rules (class > .accordion-segment …) outweigh a segment's own
+   single class, as they did. The summary padding and gap are one value at
+   every size (Figma binds them so); only the chevron's size and the type
+   step with it. */
+const S0 = SIZE_MAP.medium;
+/* What emotion's prefixer added beside align-items / justify-content — the
+   legacy -webkit-box spellings — so the computed style stays exactly what it
+   was. They only act on display:-webkit-box, which nothing here uses. */
+const webkitBox = (css) => css
+  .replace(/([;{])align-items:([^;}]+)/g, '$1-webkit-box-align:$2;align-items:$2')
+  .replace(/([;{])justify-content:([^;}]+)/g, (m, p, v) => p + '-webkit-box-pack:'
+    + v.replace(/^flex-/, '').replace(/^space-between$/, 'justify') + ';justify-content:' + v);
+
+registerStaticStyles('omni-accordion', webkitBox([
+  /* Connected: the segments keep their OWN borders and overlap by one pixel.
+     The stack casts ONE shadow; a connected segment rings INSIDE (3px, its
+     outer edge 2px in), since an outside ring would be painted over by the
+     neighbours. */
+  `.omni-acc-grp{display:flex;flex-direction:column;border-radius:${RADIUS};box-shadow:${SHADOW_LEVEL_1}}`,
+  '.omni-acc-grp>.accordion-segment{border-radius:0;margin-bottom:-1px;box-shadow:none}',
+  '.omni-acc-grp>.accordion-segment .accordion-summary{border-radius:0}',
+  '.omni-acc-grp>.accordion-segment:has(> .accordion-summary:focus-visible){outline:3px solid var(--Focus-Visible);outline-offset:-5px}',
+  `.omni-acc-grp>.accordion-segment:first-of-type{border-top-left-radius:${RADIUS};border-top-right-radius:${RADIUS}}`,
+  `.omni-acc-grp>.accordion-segment:first-of-type .accordion-summary{border-top-left-radius:${RADIUS};border-top-right-radius:${RADIUS}}`,
+  `.omni-acc-grp>.accordion-segment:last-of-type{border-bottom-left-radius:${RADIUS};border-bottom-right-radius:${RADIUS};margin-bottom:0}`,
+  `.omni-acc-grp>.accordion-segment:last-of-type .accordion-summary:not(.accordion-summary-expanded){border-bottom-left-radius:${RADIUS};border-bottom-right-radius:${RADIUS}}`,
+  '.omni-acc-spaced{display:flex;flex-direction:column;gap:var(--_acc-gap)}',
+  /* The segment. The border is an OVERLAY (Figma's stroke is INSIDE), drawn
+     above the summary and details so a hover fill cannot cover it. The whole
+     segment takes the state tint while its summary is hovered or pressed;
+     its focus ring is an outline, so overflow:hidden cannot clip it. */
+  `.omni-acc-seg{position:relative;border-radius:${RADIUS};background-color:var(--Background);overflow:hidden;box-shadow:${SHADOW_LEVEL_1};opacity:1}`,
+  '.omni-acc-seg::after{content:"";position:absolute;inset:0;border:1px solid var(--Border);border-radius:inherit;pointer-events:none;z-index:1}',
+  '.omni-acc-seg:not(.accordion-disabled):has(> .accordion-summary:hover){background-color:var(--Hover)}',
+  '.omni-acc-seg:not(.accordion-disabled):has(> .accordion-summary:active){background-color:var(--Pressed)}',
+  '.omni-acc-seg:has(> .accordion-summary:focus-visible){outline:2px solid var(--Focus-Visible);outline-offset:1px;z-index:2}',
+  '.omni-acc-seg-off{opacity:var(--Disabled, 0.38)}',
+  /* The summary: an hstack, centred vertically as Figma's Accordion Summary
+     is. Its corners follow the segment's (only the top ones when expanded),
+     so the outline that a connected group draws comes out concentric. */
+  `.omni-acc-sum{display:flex;flex-direction:row;align-items:center;justify-content:flex-start;width:100%;gap:${S0.gap};`
+    + `padding:${S0.summaryPadding};border:none;background-color:transparent;color:var(--Quiet);font-family:inherit;cursor:pointer;`
+    + `text-align:left;transition:color 0.2s ease, background-color 0.15s ease;border-radius:${RADIUS}}`,
+  `.omni-acc-sum-open{color:var(--Text);border-radius:${RADIUS} ${RADIUS} 0 0}`,
+  '.omni-acc-sum-off{cursor:not-allowed}',
+  '.omni-acc-sum-on:hover,.omni-acc-sum-on:active{color:var(--Text)}',
+  '.omni-acc-sum-on:hover .omni-icon,.omni-acc-sum-on:active .omni-icon{color:var(--Text)}',
+  // The focus ring belongs to the SEGMENT — see the :has() rule on it.
+  '.omni-acc-sum:focus-visible{outline:none}',
+  '.omni-acc-slot{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}',
+  '.omni-acc-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:var(--Sizing-Half)}',
+  '.omni-acc-chevbox{display:flex;align-items:center;justify-content:center;transform:rotate(0deg);transition:transform 0.25s ease;flex-shrink:0}',
+  '.omni-acc-chevbox-open{transform:rotate(180deg)}',
+  '.omni-icon.omni-acc-chev{color:var(--Quiet);transition:color 0.15s ease}',
+  '.omni-icon.omni-acc-chev-open{color:var(--Text)}',
+  `.omni-acc-det{padding:0 ${S0.detailsPx} ${S0.detailsPy} ${S0.detailsPx};color:var(--Text);font-family:inherit;line-height:1.6}`,
+].join('\n')));
+
 export function AccordionGroup({
   children,
   variant = 'solid',
@@ -111,6 +182,7 @@ export function AccordionGroup({
   sx = {},
   ...props
 }) {
+  useStaticStyles('omni-accordion');
   const effectiveColor = color === 'default' ? 'Default' : cap(color);
   const isConnected = spacing === 0;
 
@@ -142,65 +214,21 @@ export function AccordionGroup({
      * also what lets the same segment be used standalone. */
     return (
       <GroupContext.Provider value={{ variant, color, size, spacing, dataTheme, dataSurface }}>
-        <Box
+        {/* The stack casts ONE shadow, as Figma puts the effect on the
+            connected group rather than on each segment: a shadow per segment
+            would band at every seam. First segment rounds its top corners,
+            last its bottom (and its summary only while collapsed), the ones
+            between stay square, and the -1px pulls adjacent borders onto each
+            other so the seam reads as a single line. A lone segment keeps the
+            outside ring set on the segment. */}
+        <Part
           role="presentation"
-          className={'accordion-group accordion-group-connected accordion-group-' + variant + ' ' + className}
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            /* The stack casts ONE shadow, as Figma puts the effect on the
-               connected group rather than on each segment: a shadow per
-               segment would band at every seam. Rounded like the stack so
-               the shadow follows its outer corners. */
-            borderRadius: RADIUS,
-            boxShadow: SHADOW_LEVEL_1,
-            '& > .accordion-segment': {
-              borderRadius: 0,
-              marginBottom: '-1px',
-              boxShadow: 'none',
-            },
-            /* The summary follows its segment, or its focus ring is a square
-               inside a rounded corner. Set here rather than in JS because the
-               segment's own corners are applied by these descendant selectors,
-               which the component cannot read. */
-            '& > .accordion-segment .accordion-summary': {
-              borderRadius: 0,
-            },
-            /* A connected segment rings INSIDE, as Figma draws it: 3px, its
-               outer edge 2px in from the segment's — an outside ring would be
-               painted over by the neighbours. The outline follows the corners
-               each position has (rounded top, rounded bottom, square middle).
-               A lone segment keeps the outside ring set on the segment. */
-            '& > .accordion-segment:has(> .accordion-summary:focus-visible)': {
-              outline: '3px solid var(--Focus-Visible)',
-              outlineOffset: '-5px',
-            },
-            '& > .accordion-segment:first-of-type': {
-              borderTopLeftRadius: RADIUS,
-              borderTopRightRadius: RADIUS,
-            },
-            '& > .accordion-segment:first-of-type .accordion-summary': {
-              borderTopLeftRadius: RADIUS,
-              borderTopRightRadius: RADIUS,
-            },
-            '& > .accordion-segment:last-of-type': {
-              borderBottomLeftRadius: RADIUS,
-              borderBottomRightRadius: RADIUS,
-              marginBottom: 0,
-            },
-            /* Only when it is also collapsed — an expanded last segment has
-               its details below the summary, so the summary is not the bottom
-               edge. */
-            '& > .accordion-segment:last-of-type .accordion-summary:not(.accordion-summary-expanded)': {
-              borderBottomLeftRadius: RADIUS,
-              borderBottomRightRadius: RADIUS,
-            },
-            ...sx,
-          }}
+          className={'accordion-group accordion-group-connected accordion-group-' + variant + ' ' + className + ' MuiBox-root omni-acc-grp'}
+          sx={sx}
           {...props}
         >
           {children}
-        </Box>
+        </Part>
       </GroupContext.Provider>
     );
   }
@@ -208,24 +236,23 @@ export function AccordionGroup({
   // Disconnected: each accordion gets its own border/shadow
   return (
     <GroupContext.Provider value={{ variant, color, size, spacing, dataTheme, dataSurface }}>
-      <Box
+      <Part
         role="presentation"
-        className={'accordion-group accordion-group-' + variant + ' accordion-group-spaced ' + className}
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
+        className={'accordion-group accordion-group-' + variant + ' accordion-group-spaced ' + className + ' MuiBox-root omni-acc-spaced'}
+        sx={sx}
+        {...props}
+        style={{
           /* Design default is Sizing-1 (8px) between segments. */
-          gap: spacing === 0.5 ? 'var(--Sizing-Half)'
+          '--_acc-gap': spacing === 0.5 ? 'var(--Sizing-Half)'
             : spacing === 1   ? 'var(--Sizing-1)'
             : spacing === 1.5 ? 'var(--Sizing-1-and-Half)'
             : spacing === 2   ? 'var(--Sizing-2)'
             : spacing * 8 + 'px',
-          ...sx,
+          ...props.style,
         }}
-        {...props}
       >
         {children}
-      </Box>
+      </Part>
     </GroupContext.Provider>
   );
 }
@@ -241,6 +268,7 @@ export function Accordion({
   sx = {},
   ...props
 }) {
+  useStaticStyles('omni-accordion');
   const [internalExpanded, setInternalExpanded] = useState(defaultExpanded);
   const isControlled = controlledExpanded !== undefined;
   const expanded = isControlled ? controlledExpanded : internalExpanded;
@@ -268,65 +296,28 @@ export function Accordion({
    * overlapping segments each casting their own shadow reads as banding. */
   const content = (
     <AccordionContext.Provider value={{ expanded, toggle, disabled, accordionId }}>
-      <Box
+      {/* The border is an OVERLAY, not a CSS border — Figma's Theme-
+          Container stroke is INSIDE, which takes no room and paints over the
+          contents. A CSS border added 2px to every segment (77 where Figma
+          draws 75) and pushed the text 1px in. Focus ring round the whole
+          segment, as Figma's Focus-Visible frame: 2px, 1px out — raised so a
+          connected neighbour does not paint over it. Hover and Pressed tint
+          the whole segment, not when disabled. */}
+      <Part
         className={
           'accordion-segment accordion'
           + (expanded ? ' accordion-expanded' : '')
           + (disabled ? ' accordion-disabled' : '')
           + ' ' + className
+          + ' MuiBox-root omni-acc-seg' + (disabled ? ' omni-acc-seg-off' : '')
         }
         data-theme={dataTheme}
         data-surface={dataSurface}
-        sx={{
-          /* The border is an OVERLAY, not a CSS border — Figma's Theme-
-             Container stroke is INSIDE, which takes no room and paints over
-             the contents. A CSS border added 2px to every segment (77 where
-             Figma draws 75) and pushed the text 1px in. Drawn last, above the
-             summary and details, so a hover or pressed fill on the summary
-             cannot cover it; `inherit` follows the corners a connected group
-             sets per position. */
-          position: 'relative',
-          borderRadius: RADIUS,
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            inset: 0,
-            border: '1px solid var(--Border)',
-            borderRadius: 'inherit',
-            pointerEvents: 'none',
-            zIndex: 1,
-          },
-          /* Focus ring round the whole segment, as Figma's Focus-Visible frame:
-             2px, 1px out, so its outer edge is 3px outside the segment — the
-             same ring Swatch and Radio draw. It was a 3px ring inset in the
-             summary. An outline, not a child, so the segment's own
-             overflow:hidden cannot clip it; raised so a connected neighbour
-             does not paint over it. */
-          /* The whole segment takes the state tint while its summary is
-             hovered or pressed — summary and open details alike, as Figma's
-             Hover and Pressed variants fill the segment. Not when disabled. */
-          '&:not(.accordion-disabled):has(> .accordion-summary:hover)': {
-            backgroundColor: 'var(--Hover)',
-          },
-          '&:not(.accordion-disabled):has(> .accordion-summary:active)': {
-            backgroundColor: 'var(--Pressed)',
-          },
-          '&:has(> .accordion-summary:focus-visible)': {
-            outline: '2px solid var(--Focus-Visible)',
-            outlineOffset: '1px',
-            zIndex: 2,
-          },
-          backgroundColor: 'var(--Background)',
-          overflow: 'hidden',
-          boxShadow: SHADOW_LEVEL_1,  // Accordion
-
-          opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
-          ...sx,
-        }}
+        sx={sx}
         {...props}
       >
         {children}
-      </Box>
+      </Part>
     </AccordionContext.Provider>
   );
 
@@ -372,12 +363,13 @@ export function AccordionSummary({
   ...props
 }) {
   const { expanded, toggle, disabled, accordionId } = useContext(AccordionContext);
+  useStaticStyles('omni-accordion');
   const { size } = useContext(GroupContext);
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
   const TitleComp = TITLE_COMPS[size] || TITLE_COMPS.medium;
 
   const icon = expandIcon || (
-    <Icon size={s.iconSize} sx={{ color: expanded ? 'var(--Text)' : 'var(--Quiet)', transition: 'color 0.15s ease' }}>
+    <Icon size={s.iconSize} className={'omni-acc-chev' + (expanded ? ' omni-acc-chev-open' : '')}>
       <ExpandMoreIcon />
     </Icon>
   );
@@ -390,7 +382,21 @@ export function AccordionSummary({
   };
 
   return (
-    <Box
+    /* An hstack, centred vertically as Figma's Accordion Summary is: a 21px
+       title sits in the middle of the 24px chevron row, and a tall summary
+       keeps its chevron centred. No fontSize: the summary is a shell, and its
+       title renders through TITLE_COMPS, which carries the size for the mode.
+
+       The ring a connected group draws is an `outline`, and an outline takes
+       its corner radius from the element it sits on — so the summary matches
+       the segment's corners (only the TOP ones when expanded: the details
+       panel sits directly beneath). The browser then draws the ring
+       concentric with no one computing it — the geometry Figma parameterises
+       by hand as Accordian-Inner-Focus-Radius (8 - 3 = 5).
+
+       Hover and Pressed tint the whole SEGMENT (the :has() rules on it); the
+       summary only takes its text and chevron to --Text. */
+    <Part
       component="button"
       role="button"
       aria-expanded={expanded}
@@ -399,87 +405,21 @@ export function AccordionSummary({
       tabIndex={disabled ? -1 : 0}
       onClick={toggle}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
-      className={'accordion-summary' + (expanded ? ' accordion-summary-expanded' : '') + ' ' + className}
-      sx={{
-        // hstack, centred vertically as Figma's Accordion Summary is: a 21px
-        // title sits in the middle of the 24px chevron row (it was pinned to
-        // the top, 1.5px high), and a tall summary keeps its chevron centred.
-        // The gap scales with size — it was pinned to Sizing-1-and-Half,
-        // which left medium 4px wider than the design.
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        width: '100%',
-        gap: s.gap,
-        padding: s.summaryPadding,
-        border: 'none',
-        backgroundColor: 'transparent',
-        color: expanded ? 'var(--Text)' : 'var(--Quiet)',
-        /* No fontSize here. The summary is a shell; its title renders through
-           TITLE_COMPS (BodySmall / Body / BodyLarge), which already carries the
-           size for the mode. A literal fontSize on the button overrode the
-           typography component for any bare string passed as a child, so the
-           same title rendered at two different sizes depending on whether it
-           went through the slot or the children. */
-        fontFamily: 'inherit',
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        textAlign: 'left',
-        transition: 'color 0.2s ease, background-color 0.15s ease',
-        /* The ring below is drawn with `outline`, and an outline takes its
-           corner radius from the element it sits on — so a square summary
-           inside a rounded segment produced a SQUARE ring whose corners were
-           then clipped by the segment's overflow:hidden. It read as a broken
-           rectangle rather than a focus indicator.
-
-           Matching the segment fixes it for free: the browser draws an
-           `outline` concentric with the border radius, so an inset ring inside
-           an 8px corner comes out at 5px without anyone computing it. That is
-           the same geometry Figma parameterises by hand as
-           Accordian-Inner-Focus-Radius (8 - 3 = 5) and Accordian-Focus-Radius
-           (8 + 3 = 11).
-
-           Only the TOP corners when expanded: the details panel sits directly
-           beneath, so rounding the bottom would curve the hover scrim inward
-           mid-panel. Collapsed, the summary IS the segment, so it takes all
-           four. A grouped segment overrides both — see the group rules. */
-        borderRadius: expanded ? RADIUS + ' ' + RADIUS + ' 0 0' : RADIUS,
-        /* Hover and Pressed tint the whole SEGMENT, as Figma draws them — the
-           fill is set by the :has() rules on the segment. The summary only
-           takes its text and chevron to --Text. */
-        '&:hover': !disabled ? {
-          color: 'var(--Text)',
-          '& .omni-icon': { color: 'var(--Text)' },
-        } : {},
-        '&:active': !disabled ? {
-          color: 'var(--Text)',
-          '& .omni-icon': { color: 'var(--Text)' },
-        } : {},
-        // The focus ring belongs to the SEGMENT — see the :has() rule on it.
-        '&:focus-visible': { outline: 'none' },
-        ...sx,
-      }}
+      className={'accordion-summary' + (expanded ? ' accordion-summary-expanded' : '') + ' ' + className
+        + ' MuiBox-root omni-acc-sum' + (expanded ? ' omni-acc-sum-open' : '') + (disabled ? ' omni-acc-sum-off' : ' omni-acc-sum-on')}
+      sx={sx}
       {...props}
     >
       {/* Start slot — hugs content, only renders when supplied. */}
       {startDecorator && (
-        <Box
-          className="accordion-summary-start"
-          sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
-        >
+        <div className="accordion-summary-start MuiBox-root omni-acc-slot">
           {startDecorator}
-        </Box>
+        </div>
       )}
 
       {/* Text frame — flex-fill vstack, Sizing-Half (4px) gap between
           the optional eyebrow, the title, and the optional secondary. */}
-      <Box sx={{
-        flex: 1,
-        minWidth: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 'var(--Sizing-Half)',
-      }}>
+      <div className="MuiBox-root omni-acc-text">
         {(eyebrow ?? overline) && (
           /* --Eyebrow, not Quiet: the eyebrow is the surface's rotated
              palette color (Figma's Eyebrow variable). */
@@ -497,32 +437,22 @@ export function AccordionSummary({
             {secondary}
           </BodySmall>
         )}
-      </Box>
+      </div>
 
       {/* End slot — hugs content, only renders when supplied. The chevron
           is separate from this slot so the consumer's end decorator never
           conflicts with the expand/collapse affordance. */}
       {endDecorator && (
-        <Box
-          className="accordion-summary-end"
-          sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
-        >
+        <div className="accordion-summary-end MuiBox-root omni-acc-slot">
           {endDecorator}
-        </Box>
+        </div>
       )}
 
       {/* Chevron — always rendered at the far right. */}
-      <Box
-        sx={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
-          transition: 'transform 0.25s ease',
-          flexShrink: 0,
-        }}
-      >
+      <div className={'MuiBox-root omni-acc-chevbox' + (expanded ? ' omni-acc-chevbox-open' : '')}>
         {icon}
-      </Box>
-    </Box>
+      </div>
+    </Part>
   );
 }
 
@@ -533,28 +463,22 @@ export function AccordionDetails({
   sx = {},
   ...props
 }) {
+  useStaticStyles('omni-accordion');
   const { expanded, accordionId } = useContext(AccordionContext);
   const { size } = useContext(GroupContext);
-  const s = SIZE_MAP[size] || SIZE_MAP.medium;
   const BodyComp = BODY_COMPS[size] || BODY_COMPS.medium;
 
   if (!expanded) return null;
 
   return (
-    <Box
+    /* Body typography comes from BODY_COMPS, applied to bare text below —
+       not from a literal fontSize, which would override it. */
+    <Part
       role="region"
       id={accordionId + '-content'}
       aria-labelledby={accordionId + '-header'}
-      className={'accordion-details ' + className}
-      sx={{
-        padding: '0 ' + s.detailsPx + ' ' + s.detailsPy + ' ' + s.detailsPx,
-        color: 'var(--Text)',
-        /* Body typography comes from BODY_COMPS, applied to bare text below —
-           not from a literal fontSize, which would override it. */
-        fontFamily: 'inherit',
-        lineHeight: 1.6,
-        ...sx,
-      }}
+      className={'accordion-details ' + className + ' MuiBox-root omni-acc-det'}
+      sx={sx}
       {...props}
     >
       {/* A bare string or number is the Accordion Body style, so it renders
@@ -564,7 +488,7 @@ export function AccordionDetails({
       {(typeof children === 'string' || typeof children === 'number')
         ? <BodyComp>{children}</BodyComp>
         : children}
-    </Box>
+    </Part>
   );
 }
 

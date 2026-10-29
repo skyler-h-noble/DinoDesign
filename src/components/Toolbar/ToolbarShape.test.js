@@ -3,22 +3,17 @@ import { render } from '@testing-library/react';
 import { Toolbar, TOOLBAR_COLORS, TOOLBAR_SURFACES } from './Toolbar';
 import FormatBoldIcon from '@omni-design/icons/FormatBold';
 import AddIcon from '@omni-design/icons/Add';
+import { stateRules } from '../_testCss';
 
 const ITEMS = [
   { icon: <FormatBoldIcon />, label: 'Bold' },
   { icon: <FormatBoldIcon />, label: 'Italic' },
 ];
 
-const cssFor = (el) => {
-  const raw = el.getAttribute ? (el.getAttribute('class') || '') : '';
-  const cls = raw.split(/\s+/).find((c) => c.startsWith('css-'));
-  if (!cls) return '';
-  return Array.from(document.styleSheets)
-    .flatMap((sheet) => Array.from(sheet.cssRules || []))
-    .filter((r) => (r.selectorText || '').includes('.' + cls))
-    .map((r) => r.cssText)
-    .join('\n');
-};
+/* What WINS on an element at rest and in each state — static sheet and
+   emotion rules alike, ordered by selector weight — so a horizontal rule
+   that a vertical one overrides cannot satisfy the vertical assertion. */
+const cssFor = (el) => stateRules(el).all;
 
 /* IT HUGS, AND A PARENT CANNOT UNDO IT. `inline-flex` shrink-wraps only while
    the cross size is auto — in a flex column, which is what a stacked sample or

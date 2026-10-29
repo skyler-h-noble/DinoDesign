@@ -1,7 +1,7 @@
 // src/components/Breadcrumbs/Breadcrumbs.js
 import React, { Children, isValidElement } from 'react';
-import { Box } from '@mui/material';
-import { Popover } from '../Popover/Popover';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 import { Button } from '../Button/Button';
 import MoreHorizIcon from '@omni-design/icons/MoreHoriz';
 import ArrowBackIcon from '@omni-design/icons/ArrowBack';
@@ -49,6 +49,64 @@ const SIZE_MAP = {
    working. */
 const SEPARATOR_SHAPES = { slanted: '/', bar: '|' };
 
+/* The hidden-pages panel, loaded the first time it is wanted: most trails
+   never condense, so Popover stays out of their download. Pointing at or
+   focusing the "…" starts the load, ahead of the press. */
+const loadPopover = () => import('../Popover/Popover');
+const Popover = React.lazy(() => loadPopover().then((m) => ({ default: m.Popover })));
+
+const SxBox = lazySxBox('Breadcrumbs');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+/** A part's root: static classes, plus an MUI box only when given sx. */
+function Part({ sx, component: Tag = 'div', ...props }) {
+  if (hasSx(sx)) return <SxBox component={Tag} sx={sx} {...props} />;
+  return <Tag {...props} />;
+}
+
+/* What emotion's prefixer added beside align-items / justify-content — the
+   legacy -webkit-box spellings — so the computed style stays exactly what it
+   was. They only act on display:-webkit-box, which nothing here uses. */
+const webkitBox = (css) => css
+  .replace(/([;{])align-items:([^;}]+)/g, '$1-webkit-box-align:$2;align-items:$2')
+  .replace(/([;{])justify-content:([^;}]+)/g, (m, p, v) => p + '-webkit-box-pack:'
+    + v.replace(/^flex-/, '').replace(/^space-between$/, 'justify') + ';justify-content:' + v);
+
+/* The static sheet — what each part handed emotion, as classes over the same
+   tokens. Size arrives as a modifier class per part (font size on the trail,
+   line height on the separators and the menu rows). */
+registerStaticStyles('omni-breadcrumbs', webkitBox([
+  '.omni-bc{font-family:var(--Body-Font-Family);line-height:1.5}',
+  ...Object.entries(SIZE_MAP).map(([k, v]) => `.omni-bc-${k}{font-size:${v.fontSize}}`),
+  ...Object.entries(SIZE_MAP).map(([k, v]) => `.omni-bc-lh-${k}{line-height:${v.line}}`),
+  `.omni-bc-list{display:flex;flex-wrap:wrap;align-items:center;gap:${GAP};list-style:none;margin:0;padding:0}`,
+  '@media (max-width: 600px){.omni-bc-list-bom{display:none}}',
+  /* Border-Variant, as Figma binds it: the separator is decoration
+     (aria-hidden), so it carries no contrast requirement — the crumbs do. A
+     full Body line tall, as the text-shaped separators are. */
+  '.omni-bc-sep{display:inline-flex;align-items:center;color:var(--Border-Variant);user-select:none;font-size:inherit;flex-shrink:0}',
+  '.omni-bc-dot{width:4px;height:4px;border-radius:50%;background-color:currentColor}',
+  /* Truncate long crumbs. The current crumb is --Text in the semibold token;
+     every other one takes the link role (see the note in the component). */
+  '.omni-bc-item{display:inline-flex;align-items:center;max-width:200px}',
+  '.omni-bc-item-cur{color:var(--Text);font-weight:var(--Body-Medium-Semibold-Font-Weight, 600)}',
+  '.omni-bc-item-link{color:var(--Link, var(--Hotlink))}',
+  '.omni-bc-item>*{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
+  '.omni-bc-back{display:none}',
+  '@media (max-width: 600px){.omni-bc-back{display:flex;align-items:center;gap:var(--Sizing-Half);color:var(--Link, var(--Hotlink))}'
+    + Object.entries(SIZE_MAP).map(([k, v]) => `.omni-bc-back-${k}{font-size:${v.fontSize}}`).join('') + '}',
+  '.omni-bc-back .omni-icon.omni-bc-ic{color:inherit}',
+  '.omni-bc-menu{list-style:none;margin:0;padding:var(--Sizing-1, 8px);display:flex;flex-direction:column}',
+  '.omni-bc-menu-item{padding:var(--Sizing-Half, 4px) var(--Sizing-1, 8px);font-size:inherit}',
+  /* BreadcrumbItem. text-decoration is set before its thickness so the
+     shorthand does not reset it; hover and pressed reset both, as the old
+     `text-decoration: none` did. */
+  '.omni-bc-link{color:inherit;text-decoration:none;text-underline-offset:3px;text-decoration-thickness:1px;cursor:default;transition:color 0.15s ease}',
+  '.omni-bc-link-a{text-decoration-line:underline;cursor:pointer}',
+  '.omni-bc-link-a:hover,.omni-bc-link-a:active{text-decoration:none}',
+  '.omni-bc-link-a:focus-visible{outline:3px solid var(--Focus-Visible);outline-offset:2px;border-radius:2px}',
+].join('\n')));
+
 export function Breadcrumbs({
   children,
   separator = 'slanted',  // 'slanted' | 'bar' | 'ellipsis' | any node
@@ -63,7 +121,8 @@ export function Breadcrumbs({
   sx = {},
   ...props
 }) {
-  const s = SIZE_MAP[size] || SIZE_MAP.medium;
+  useStaticStyles('omni-breadcrumbs');
+  const sizeKey = SIZE_MAP[size] ? size : 'medium';
   const items = Children.toArray(children).filter(isValidElement);
   const total = items.length;
 
@@ -75,6 +134,7 @@ export function Breadcrumbs({
   const shouldCondense = condense && total > maxItems;
   let visibleItems = items;
   const [menuOpen, setMenuOpen] = React.useState(false);
+  const [menuWanted, setMenuWanted] = React.useState(false);
   const ellipsisRef = React.useRef(null);
   const hiddenItems = shouldCondense ? items.slice(itemsBeforeCollapse, total - itemsAfterCollapse) : [];
 
@@ -91,7 +151,8 @@ export function Breadcrumbs({
           variant="ghost"
           contentType="iconOnly"
           size="small"
-          onClick={() => { setMenuOpen((o) => !o); onExpand?.(); }}
+          onPointerEnter={loadPopover} onFocus={loadPopover}
+          onClick={() => { setMenuWanted(true); setMenuOpen((o) => !o); onExpand?.(); }}
           aria-label={'Show ' + hiddenItems.length + ' hidden pages'}
           aria-haspopup="dialog"
           aria-expanded={menuOpen}
@@ -99,19 +160,19 @@ export function Breadcrumbs({
         >
           <MoreHorizIcon />
         </Button>
+        {menuWanted && <React.Suspense fallback={null}>
         <Popover open={menuOpen} onClose={() => setMenuOpen(false)} anchorEl={ellipsisRef.current}
           placement="bottom-start" arrow width="auto" theme={null} aria-label="Hidden pages">
-          <Box component="ul" className="breadcrumb-menu"
-            sx={{ listStyle: 'none', m: 0, p: 'var(--Sizing-1, 8px)', display: 'flex', flexDirection: 'column' }}>
+          <ul className="breadcrumb-menu MuiBox-root omni-bc-menu">
             {hiddenItems.map((item, i) => (
-              <Box key={'hidden-' + i} component="li" className="breadcrumb-menu-item"
-                onClick={() => setMenuOpen(false)}
-                sx={{ padding: 'var(--Sizing-Half, 4px) var(--Sizing-1, 8px)', lineHeight: s.line, fontSize: 'inherit' }}>
+              <li key={'hidden-' + i} className={'breadcrumb-menu-item MuiBox-root omni-bc-menu-item omni-bc-lh-' + sizeKey}
+                onClick={() => setMenuOpen(false)}>
                 {item}
-              </Box>
+              </li>
             ))}
-          </Box>
+          </ul>
         </Popover>
+        </React.Suspense>}
       </React.Fragment>
     );
     visibleItems = [...before, ellipsis, ...after];
@@ -119,25 +180,19 @@ export function Breadcrumbs({
 
   // ── Separator renderer ──
   const renderSeparator = (key) => (
-    <Box
+    /* Border-Variant, as Figma binds it: the separator is decoration
+       (aria-hidden), so it carries no contrast requirement — the crumbs
+       do. A full Body line tall, as the text-shaped separators are. */
+    <li
       key={'sep-' + key}
-      component="li"
       role="presentation"
       aria-hidden="true"
-      className="breadcrumb-separator"
-      sx={{
-        display: 'inline-flex', alignItems: 'center',
-        /* Border-Variant, as Figma binds it: the separator is decoration
-           (aria-hidden), so it carries no contrast requirement — the crumbs
-           do. A full Body line tall, as the text-shaped separators are. */
-        color: 'var(--Border-Variant)', userSelect: 'none',
-        fontSize: 'inherit', lineHeight: s.line, flexShrink: 0,
-      }}
+      className={'breadcrumb-separator MuiBox-root omni-bc-sep omni-bc-lh-' + sizeKey}
     >
       {separator === 'ellipsis'
-        ? <Box component="span" sx={{ width: 4, height: 4, borderRadius: '50%', backgroundColor: 'currentColor' }} />
+        ? <span className="MuiBox-root omni-bc-dot" />
         : (SEPARATOR_SHAPES[separator] ?? separator)}
-    </Box>
+    </li>
   );
 
   // ── Build interleaved list ──
@@ -148,40 +203,31 @@ export function Breadcrumbs({
       : i === total - 1;
 
     interleaved.push(
-      <Box
-        key={'crumb-' + i}
-        component="li"
-        className={'breadcrumb-item' + (isLast ? ' breadcrumb-current' : '')}
-        sx={{
-          display: 'inline-flex', alignItems: 'center',
-          /* Semibold, from the token rather than a literal 600. The design
-             sets the current crumb in SemiBold and the links in Regular, so
-             the page you are on is marked by WEIGHT — a signal that survives
-             greyscale and does not depend on color alone. A hardcoded 600
-             would not move with a brand that re-picks its semibold. */
-          ...(isLast && {
-            color: 'var(--Text)',
-            fontWeight: 'var(--Body-Medium-Semibold-Font-Weight, 600)',
-          }),
-          /* The link role, spelled exactly as Link.js spells it — `--Link` is
-             never defined by anything, so the fallback to `--Hotlink` (which
-             the generator does emit) is the value that actually lands. This is
-             the one case where a var() fallback is correct rather than dead.
+      /* Semibold, from the token rather than a literal 600. The design
+         sets the current crumb in SemiBold and the links in Regular, so the
+         page you are on is marked by WEIGHT — a signal that survives
+         greyscale and does not depend on color alone. A hardcoded 600 would
+         not move with a brand that re-picks its semibold.
 
-             Was `--Quiet`, the muted-TEXT role. Contrast was fine (Quiet is
-             tuned to 4.5:1), but a link painted as muted text does not
-             announce itself as a link, and every crumb except the last IS
-             one. Only the wrapper is set: a <Link> child still paints itself,
-             so this changes the plain-text case to match the design. */
-          ...(!isLast && { color: 'var(--Link, var(--Hotlink))' }),
-          // Truncate long crumbs
-          maxWidth: '200px',
-          '& > *': { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-        }}
+         Every other crumb takes the link role, spelled exactly as Link.js
+         spells it — `--Link` is never defined by anything, so the fallback to
+         `--Hotlink` (which the generator does emit) is the value that
+         actually lands. This is the one case where a var() fallback is
+         correct rather than dead.
+
+         Was `--Quiet`, the muted-TEXT role. Contrast was fine (Quiet is tuned
+         to 4.5:1), but a link painted as muted text does not announce itself
+         as a link, and every crumb except the last IS one. Only the wrapper
+         is set: a <Link> child still paints itself, so this changes the
+         plain-text case to match the design. Long crumbs truncate. */
+      <li
+        key={'crumb-' + i}
+        className={'breadcrumb-item' + (isLast ? ' breadcrumb-current' : '')
+          + ' MuiBox-root omni-bc-item ' + (isLast ? 'omni-bc-item-cur' : 'omni-bc-item-link')}
         {...(isLast ? { 'aria-current': 'page' } : {})}
       >
         {item}
-      </Box>
+      </li>
     );
     if (i < visibleItems.length - 1) {
       interleaved.push(renderSeparator(i));
@@ -192,57 +238,25 @@ export function Breadcrumbs({
   const parentItem = total >= 2 ? items[total - 2] : null;
 
   return (
-    <Box
+    <Part
       component="nav"
       aria-label="Breadcrumb"
-      className={'breadcrumbs breadcrumbs-' + size + ' ' + className}
-      sx={{
-        fontSize: s.fontSize,
-        fontFamily: 'var(--Body-Font-Family)',
-        lineHeight: 1.5,
-        ...sx,
-      }}
+      className={'breadcrumbs breadcrumbs-' + size + ' ' + className + ' MuiBox-root omni-bc omni-bc-' + sizeKey}
+      sx={sx}
       {...props}
     >
       {/* Full breadcrumb trail */}
-      <Box
-        component="ol"
-        className="breadcrumbs-list"
-        sx={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          gap: GAP,
-          listStyle: 'none',
-          margin: 0,
-          padding: 0,
-          ...(backOnlyMobile && {
-            '@media (max-width: 600px)': { display: 'none' },
-          }),
-        }}
-      >
+      <ol className={'breadcrumbs-list MuiBox-root omni-bc-list' + (backOnlyMobile ? ' omni-bc-list-bom' : '')}>
         {interleaved}
-      </Box>
+      </ol>
 
-      {/* Back-only mobile view */}
+      {/* Back-only mobile view. --Link is not emitted by the generator;
+          --Hotlink is. A bare var(--Link) left the arrow the surrounding
+          text's color. */}
       {backOnlyMobile && parentItem && (
-        <Box
-          className="breadcrumbs-back-mobile"
-          sx={{
-            display: 'none',
-            '@media (max-width: 600px)': {
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'var(--Sizing-Half)',
-              fontSize: s.fontSize,
-              /* --Link is not emitted by the generator; --Hotlink is. A bare
-                 var(--Link) left the arrow the surrounding text's color. */
-              color: 'var(--Link, var(--Hotlink))',
-            },
-          }}
-        >
+        <div className={'breadcrumbs-back-mobile MuiBox-root omni-bc-back omni-bc-back-' + sizeKey}>
           {/* arrow_back, as Figma's Mobile breadcrumb: "← Parent". */}
-          <Icon size="small" aria-hidden="true" sx={{ color: 'inherit' }}><ArrowBackIcon /></Icon>
+          <Icon size="small" aria-hidden="true" className="omni-bc-ic"><ArrowBackIcon /></Icon>
           {React.cloneElement(parentItem, {
             style: {
               ...(parentItem.props?.style || {}),
@@ -250,45 +264,31 @@ export function Breadcrumbs({
               textUnderlineOffset: '3px',
             },
           })}
-        </Box>
+        </div>
       )}
-    </Box>
+    </Part>
   );
 }
 
 /* ─── BreadcrumbItem: optional typed wrapper ─── */
+/* Links do not change COLOUR on hover — the design system emits no hover
+   tone for them and the underline carries the state instead. (This once read
+   `color: var(--Link-Hover)`, a variable nothing defines, which made a hovered
+   breadcrumb link stop looking like a link.) The Link rule: hover and pressed
+   REMOVE the underline, focus keeps it — Figma's Link set. */
 export function BreadcrumbItem({ children, href, className = '', sx = {}, ...props }) {
+  useStaticStyles('omni-breadcrumbs');
   const isLink = !!href;
   return (
-    <Box
+    <Part
       component={isLink ? 'a' : 'span'}
       href={href || undefined}
-      className={'breadcrumb-link ' + className}
-      sx={{
-        color: 'inherit',
-        textDecoration: isLink ? 'underline' : 'none',
-        textUnderlineOffset: '3px',
-        textDecorationThickness: '1px',
-        cursor: isLink ? 'pointer' : 'default',
-        transition: 'color 0.15s ease',
-        ...(isLink && {
-          /* Links do not change COLOUR on hover — the design system emits no
-             hover tone for them and the underline carries the state instead.
-             This read `color: var(--Link-Hover)`, a variable nothing defines,
-             and with no fallback the whole declaration is invalid at computed-
-             value time: the color fell back to `inherit`, so hovering a
-             breadcrumb link made it stop looking like a link. */
-          /* The Link rule: hover and pressed REMOVE the underline (focus
-             keeps it) — Figma's Link set. This thickened it to 2px / 3px. */
-          '&:hover, &:active': { textDecoration: 'none' },
-          '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '2px', borderRadius: '2px' },
-        }),
-        ...sx,
-      }}
+      className={'breadcrumb-link ' + className + ' MuiBox-root omni-bc-link' + (isLink ? ' omni-bc-link-a' : '')}
+      sx={sx}
       {...props}
     >
       {children}
-    </Box>
+    </Part>
   );
 }
 
