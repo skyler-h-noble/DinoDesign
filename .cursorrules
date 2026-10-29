@@ -1,16 +1,15 @@
 This project uses the @omni-design/components design system.
 
 Read node_modules/@omni-design/components/CLAUDE.md before writing any UI.
-It is the full contract; the rules below are the ones most often broken.
-Also: docs/getting-started.md, docs/token-system.md, docs/components.md.
+It is the contract; the rules below are the ones most often broken.
+Long form, for anything CLAUDE.md does not cover: docs/REFERENCE.md.
 
 SETUP
-- Import the CSS at the top of App.js:
-    import '@omni-design/components/public/styles/foundation.css'
-    import '@omni-design/components/public/styles/core.css'
-    import '@omni-design/components/public/styles/Light-Mode.css'
-    import '@omni-design/components/public/styles/base.css'
-- Wrap content in an element with data-theme, data-surface and data-style.
+- npm install @omni-design/components @mui/material@^7 @mui/icons-material@^7
+  @emotion/react @emotion/styled   (MUI 7 — MUI 9 breaks the build)
+- Wrap the app in <OmniDesignProvider themeURL={…}>: your design system's
+  theme.json URL, or OMNI_DEFAULT_THEME_URL (exported) for the package theme.
+  Do not import the CSS files yourself; the provider loads them in order.
 
 COMPONENTS
 - Import every UI element from '@omni-design/components'. No raw <button>,

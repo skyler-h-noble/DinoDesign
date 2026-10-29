@@ -1,7 +1,7 @@
 {
   "name": "@omni-design/components",
   "version": "0.21.0",
-  "description": "DynoDesign adaptive component library — token-driven React components with customizable CSS theming",
+  "description": "DynoDesign adaptive component library \u2014 token-driven React components with customizable CSS theming",
   "author": "Lise Noble",
   "license": "Apache-2.0",
   "main": "dist/index.js",
@@ -10,7 +10,7 @@
   "files": [
     "dist",
     "public/styles",
-    "docs",
+    "docs/REFERENCE.md",
     ".cursorrules",
     "CLAUDE.md",
     "README.md",
@@ -47,11 +47,12 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "deploy-storybook": "storybook-to-ghpages",
-    "prepublishOnly": "npm run build:lib",
+    "prepublishOnly": "npm run build:lib && npm run test:types",
     "predeploy": "npm run build:app",
     "deploy": "gh-pages -d build",
-    "build:types": "npx -y -p typescript@5.9 tsc -p tsconfig.dts.json",
-    "clean:lib": "rm -rf dist"
+    "build:types": "npx -y -p typescript@5.9 tsc -p tsconfig.dts.json && node scripts/fix-dts.mjs",
+    "clean:lib": "rm -rf dist",
+    "test:types": "node scripts/check-quickstart.mjs && npx -y -p typescript@5.9 tsc -p types-test/tsconfig.json"
   },
   "peerDependencies": {
     "@emotion/react": ">=11.0.0",

@@ -17,7 +17,9 @@ import { EDGE_NAMES, edgeMaskURL, edgeTile, edgeDefaultHeight, EDGE_SIZES, SIZED
  *            style={{ background: 'var(--Background)', color: 'var(--Text)' }}>
  *
  * Props:
- *   theme    — OmniDesign theme name (e.g. "Primary-Light", "Neutral-Dark").
+ *   theme    — Default | Primary | Secondary | Tertiary | Neutral | Info |
+ *              Success | Warning | Error. (No -Light / -Dark themes — that is
+ *              the surface axis.)
  *              Optional: omit to inherit from the parent theme zone.
  *   surface  — "Surface" (default) | "Surface-Dim" | "Surface-Dimmest" |
  *              "Surface-Bright" | "Surface-Brightest" |
