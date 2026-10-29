@@ -1,6 +1,7 @@
 // src/components/AppBar/AppBar.js
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 import MenuIcon from '@mui/icons-material/Menu';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -81,6 +82,52 @@ const BAR_HEIGHT = {
 const AppBarSizeContext = React.createContext('medium');
 const barHeight = (size) => BAR_HEIGHT[size] || BAR_HEIGHT.medium;
 
+/* --- Static sheet ---
+   The bar itself as classes over the tokens, so a caller's own CSS can still
+   reach it. Its inner layout boxes are plain elements with inline styles; the
+   one thing that has to be a stylesheet is the collapse, a media query whose
+   width is the `collapseAt` prop — so each width in use gets its own small
+   sheet (collapseSheet). */
+const SxBox = lazySxBox('AppBar');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+registerStaticStyles('omni-appbar', [
+  `.omni-ab{background-color:var(--Background);color:var(--Text);box-shadow:${SHADOW_LEVEL_2};font-family:inherit}`,
+  '.omni-ab-sticky{position:sticky;top:0;z-index:1100}',
+  '.omni-ab-rel{position:relative}',
+  '.omni-ab-desk{display:flex;align-items:center;height:var(--_ab-h);padding-left:16px;padding-right:16px;gap:16px}',
+  // The Margin padding sits INSIDE the bar's width, as in Figma.
+  '.omni-ab-layout{display:flex;align-items:center;justify-content:space-between;box-sizing:border-box;height:var(--_ab-h);padding-left:var(--Margin, 64px);padding-right:var(--Margin, 64px)}',
+  '.omni-ab-layout-title{padding-left:var(--Sizing-2, 16px)}',
+  '.omni-ab-mob{width:100%;max-width:420px}',
+  '.omni-ab-brand-centre{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}',
+  '.omni-ab-brand-centre > *{pointer-events:auto}',
+  // auto: the menu button exists only below collapseAt (see collapseSheet).
+  '.omni-ab-menu-auto{display:none}',
+  '.omni-ab-menu{display:contents}',
+  /* Display lives here, not inline, so the collapse rule can hide them. */
+  '.omni-ab-links{display:flex;align-items:center;align-self:center;flex-shrink:0}',
+  '.omni-ab-endsec{display:contents}',
+].join('\n'));
+
+/* Below collapseAt the links fold into the menu button, and every end action
+   but the last moves into the drawer. */
+function useCollapseSheet(collapseAt) {
+  const id = 'omni-appbar-below-' + String(collapseAt).replace(/[^\w-]/g, '_');
+  const c = String(collapseAt).replace(/[^\w-]/g, '_');
+  registerStaticStyles(id, `@media (max-width: ${collapseAt - 0.02}px){`
+    + `.omni-ab-below-${c} .omni-ab-menu-auto{display:contents}`
+    + `.omni-ab-below-${c} .appbar-links,.omni-ab-below-${c} .appbar-end-secondary{display:none}}`);
+  useStaticStyles(id);
+  return 'omni-ab-below-' + c;
+}
+
+/** The bar's root: static classes, plus an MUI box only when given sx. */
+function BarRoot({ sx, ...props }) {
+  if (hasSx(sx)) return <SxBox component="header" sx={sx} {...props} />;
+  return <header {...props} />;
+}
+
 /* --- Icon Button (uses Button component) --- */
 function AppBarIconButton({ children, onClick, ariaLabel, onIntent }) {
   const size = React.useContext(AppBarSizeContext);
@@ -148,10 +195,12 @@ function DesktopAppBar({
      its scrolling parent, so inside a scroll pane it stays at that pane's top. */
   sticky = true,
   children,
-  className = '', sx = {},
+  className = '', sx,
 }) {
+  useStaticStyles('omni-appbar');
   const barSize = React.useContext(AppBarSizeContext);
-  const placement = sticky ? { position: 'sticky', top: 0, zIndex: 1100 } : { position: 'relative' };
+  const placement = sticky ? ' omni-ab-sticky' : ' omni-ab-rel';
+  const belowClass = useCollapseSheet(collapseAt);
   const [drawerOpen, setDrawerOpen, drawerWanted, prefetchDrawer] = useNavDrawer();
   const barTheme = THEME_MAP[barColor] || THEME_MAP.default;
   const dataTheme = barTheme.theme;
@@ -196,13 +245,12 @@ function DesktopAppBar({
   const movesActions = menuType === 'auto' && endItems.length > 1;
   const canOpen = links.length > 0 || Boolean(onMenuClick) || movesActions;
   const menuButton = showMenu && canOpen && (effectiveMenu === 'hamburger' || effectiveMenu === 'auto');
-  const below = '@media (max-width: ' + (collapseAt - 0.02) + 'px)';
 
   // The navigation drawer the menu button opens — shared by both bars.
   const navDrawer = drawerWanted && (
       <Suspense fallback={null}>
       <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} anchor="left" size="small">
-        <Box component="nav" aria-label="Main navigation" sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, p: 'var(--Sizing-2, 16px)' }}>
+        <nav aria-label="Main navigation" style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 'var(--Sizing-2, 16px)' }}>
           {links.map((link, i) => (
             <Button
               key={typeof link.label === 'string' ? link.label : i}
@@ -212,17 +260,17 @@ function DesktopAppBar({
               aria-current={i === currentIndex ? 'location' : undefined}
               selected={i === currentIndex}
               onClick={(e) => { setDrawerOpen(false); setCurrentIndex(i); if (link.onClick) link.onClick(e); }}
-              sx={{ justifyContent: 'flex-start', width: '100%' }}
+              style={{ justifyContent: 'flex-start', width: '100%' }}
             >
               {link.label}
             </Button>
           ))}
           {movesActions && (
-            <Box className="appbar-drawer-actions" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 'var(--Sizing-1, 8px)', mt: 'var(--Sizing-2, 16px)' }}>
+            <div className="appbar-drawer-actions" style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 'var(--Sizing-1, 8px)', marginTop: 'var(--Sizing-2, 16px)' }}>
               {endItems.slice(0, -1)}
-            </Box>
+            </div>
           )}
-        </Box>
+        </nav>
       </Drawer>
       </Suspense>
   );
@@ -238,62 +286,52 @@ function DesktopAppBar({
        avatar button, Sizing-2 apart). */
     const menu = showMenu && layout !== 'title' && (
       <AppBarIconButton ariaLabel="Open navigation menu" onClick={onMenuClick || (() => setDrawerOpen(true))} onIntent={onMenuClick ? undefined : prefetchDrawer}>
-        <MenuIcon sx={{ fontSize: 'inherit' }} />
+        <MenuIcon />
       </AppBarIconButton>
     );
     const brandNode = typeof brand === 'string' ? <H3 component="span">{brand}</H3> : brand;
     return (
       <>
-      <Box
-        component="header" role="banner"
+      <BarRoot
+        role="banner"
         data-theme={dataTheme}
         data-surface={dataSurface}
-        className={'appbar appbar-desktop appbar-layout-' + layout + ' appbar-' + barColor + (className ? ' ' + className : '')}
-        sx={{
-          ...placement,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          // The Margin padding sits INSIDE the bar's width, as in Figma: a bar
-          // given 1920px is 1920px, not 1920 plus 128 of padding.
-          boxSizing: 'border-box',
-          height: barHeight(barSize),
-          paddingLeft: layout === 'title' ? 'var(--Sizing-2, 16px)' : 'var(--Margin, 64px)',
-          paddingRight: 'var(--Margin, 64px)',
-          backgroundColor: 'var(--Background)', color: 'var(--Text)',
-          boxShadow: SHADOW_LEVEL_2,  // App bars
-          fontFamily: 'inherit',
-          ...sx,
-        }}
+        className={'appbar appbar-desktop appbar-layout-' + layout + ' appbar-' + barColor
+          + ' omni-ab omni-ab-layout' + (layout === 'title' ? ' omni-ab-layout-title' : '') + placement
+          + (className ? ' ' + className : '')}
+        style={{ '--_ab-h': barHeight(barSize) }}
+        sx={sx}
       >
         {layout === 'title' ? (
           <H3 className="appbar-title">{title}</H3>
         ) : (
-          <Box className="appbar-start" sx={{ display: 'flex', alignItems: 'center', gap: 'var(--Sizing-1, 8px)', flexShrink: 0 }}>
+          <div className="appbar-start" style={{ display: 'flex', alignItems: 'center', gap: 'var(--Sizing-1, 8px)', flexShrink: 0 }}>
             {menu}
             {layout === 'left-brand' && brandNode}
-          </Box>
+          </div>
         )}
         {layout !== 'title' && (
-          <Box
+          <div
             className="appbar-center"
-            sx={{
+            style={{
               flex: 1, alignSelf: 'stretch', minWidth: 0,
               display: 'flex', alignItems: 'flex-end',
               justifyContent: layout === 'left-brand' ? 'center' : 'flex-start',
             }}
           >
             {centerSlot}
-          </Box>
+          </div>
         )}
-        <Box className="appbar-end" sx={{ display: 'flex', alignItems: 'center', gap: 'var(--Sizing-2, 16px)', flexShrink: 0 }}>
+        <div className="appbar-end" style={{ display: 'flex', alignItems: 'center', gap: 'var(--Sizing-2, 16px)', flexShrink: 0 }}>
           {endSlot}
-        </Box>
+        </div>
         {layout === 'center-brand' && (
           // Centred on the whole bar, not on the space between the groups.
-          <Box className="appbar-brand-centre" sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', '& > *': { pointerEvents: 'auto' } }}>
+          <div className="appbar-brand-centre omni-ab-brand-centre">
             {brandNode}
-          </Box>
+          </div>
         )}
-      </Box>
+      </BarRoot>
       {navDrawer}
       </>
     );
@@ -313,36 +351,27 @@ function DesktopAppBar({
       />
     </Suspense>
   );
+  const spacer = <div style={{ flex: 1 }} />;
 
   return (
     <>
-    <Box
-      component="header" role="banner"
+    <BarRoot
+      role="banner"
       data-theme={dataTheme}
       data-surface={dataSurface}
-      className={'appbar appbar-desktop appbar-' + barColor + (className ? ' ' + className : '')}
-      sx={{
-        ...placement,
-        display: 'flex', alignItems: 'center', height: barHeight(barSize),
-        px: 2, gap: 2,
-        backgroundColor: 'var(--Background)', color: 'var(--Text)',
-        boxShadow: SHADOW_LEVEL_2,  // App bars
-
-        fontFamily: 'inherit',
-        ...sx,
-      }}
+      className={'appbar appbar-desktop appbar-' + barColor + ' omni-ab omni-ab-desk ' + belowClass + placement
+        + (className ? ' ' + className : '')}
+      style={{ '--_ab-h': barHeight(barSize) }}
+      sx={sx}
     >
       {children || (
         <>
           {menuButton && (
-            <Box
-              className="appbar-menu"
-              sx={effectiveMenu === 'auto' ? { display: 'none', [below]: { display: 'contents' } } : { display: 'contents' }}
-            >
+            <div className={'appbar-menu ' + (effectiveMenu === 'auto' ? 'omni-ab-menu-auto' : 'omni-ab-menu')}>
               <AppBarIconButton ariaLabel="Open navigation menu" onClick={onMenuClick || (() => setDrawerOpen(true))} onIntent={onMenuClick ? undefined : prefetchDrawer}>
-                <MenuIcon sx={{ fontSize: 'inherit' }} />
+                <MenuIcon />
               </AppBarIconButton>
-            </Box>
+            </div>
           )}
 
           {/* The wordmark is H3 — the STYLE, on a span or a button.
@@ -376,7 +405,7 @@ function DesktopAppBar({
                 type="button"
                 width="hug"
                 onClick={onBrandClick}
-                sx={{
+                style={{
                   background: 'transparent', border: 'none', padding: 0,
                   cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
                 }}
@@ -384,12 +413,12 @@ function DesktopAppBar({
                 {brand}
               </H3>
             ) : (
-              <H3 component="span" width="hug" sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}>{brand}</H3>
+              <H3 component="span" width="hug" style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>{brand}</H3>
             )
           ) : brandType === 'logo' ? (
-            <Box sx={{ width: 32, height: 32, borderRadius: '6px', backgroundColor: 'var(--Text)', opacity: 0.8, flexShrink: 0 }} aria-label="Company logo" />
+            <div style={{ width: 32, height: 32, borderRadius: '6px', backgroundColor: 'var(--Text)', opacity: 0.8, flexShrink: 0 }} aria-label="Company logo" />
           ) : (
-            <H3 component="span" width="hug" sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}>{companyName}</H3>
+            <H3 component="span" width="hug" style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>{companyName}</H3>
           )}
 
           {/* Center: slot overrides default search/tabs.
@@ -397,18 +426,18 @@ function DesktopAppBar({
               centered in the AppBar regardless of brand or end-slot widths. */}
           {centerSlot !== undefined ? (
             <>
-              <Box sx={{ flex: 1 }} />
-              <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+              {spacer}
+              <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
                 {centerSlot}
-              </Box>
-              <Box sx={{ flex: 1 }} />
+              </div>
+              <div style={{ flex: 1 }} />
             </>
           ) : (
             <>
               {searchPosition === 'left' && searchField}
 
               {effectiveMenu === 'expanded' && (
-                <Tabs defaultValue={0} variant="standard" color="default" size={barSize} sx={{ ml: 2, minHeight: 0 }}>
+                <Tabs defaultValue={0} variant="standard" color="default" size={barSize} style={{ marginLeft: 16, minHeight: 0 }}>
                   <TabList aria-label="Main navigation">
                     {links.map((link, i) => (
                       <Tab key={i}>{link.label}</Tab>
@@ -421,26 +450,26 @@ function DesktopAppBar({
                   collapseAt, where the menu button opens the same list. */}
               {effectiveMenu === 'auto' && links.length > 0 ? (
                 <>
-                  <Box sx={{ flex: 1 }} />
+                  {spacer}
                   {/* The system's Tabs, as links: same look and selected marker
                       as every other tab bar, with aria-current on the section
                       you are at (a site nav goes to a place; it does not
                       switch a panel, so no tab roles). */}
                   {/* Centred on the bar's height, like the brand and the actions beside it. */}
-                  <Box className="appbar-links" sx={{ display: 'flex', alignItems: 'center', alignSelf: 'center', flexShrink: 0, [below]: { display: 'none' } }}>
+                  <div className="appbar-links omni-ab-links">
                     <Tabs navigation value={currentIndex} onChange={setCurrentIndex} baseline={false} size={barSize}
-                          sx={{ display: 'flex', alignItems: 'center' }}>
+                          style={{ display: 'flex', alignItems: 'center' }}>
                       <TabList aria-label="Main navigation">
                         {links.map((link, i) => (
                           <Tab key={typeof link.label === 'string' ? link.label : i} value={i} href={link.href} onClick={link.onClick}>{link.label}</Tab>
                         ))}
                       </TabList>
                     </Tabs>
-                  </Box>
+                  </div>
                 </>
               ) : null}
 
-              <Box sx={{ flex: 1 }} />
+              <div style={{ flex: 1 }} />
 
               {searchPosition === 'right' && searchField}
             </>
@@ -451,20 +480,20 @@ function DesktopAppBar({
               multiple direct children space themselves consistently without
               each consumer needing its own HStack/Box wrapper. */}
           {endSlot !== undefined ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               {movesActions ? (
                 <>
-                  <Box className="appbar-end-secondary" sx={{ display: 'contents', [below]: { display: 'none' } }}>
+                  <div className="appbar-end-secondary omni-ab-endsec">
                     {endItems.slice(0, -1)}
-                  </Box>
+                  </div>
                   {endItems[endItems.length - 1]}
                 </>
               ) : endSlot}
-            </Box>
+            </div>
           ) : (
             <>
               {showRightButtons && rightButtons.length > 0 && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                   {rightButtons.map((btn, i) =>
                     btn.raw ? (
                       <React.Fragment key={i}>{btn.icon}</React.Fragment>
@@ -474,17 +503,17 @@ function DesktopAppBar({
                       </AppBarIconButton>
                     )
                   )}
-                </Box>
+                </div>
               )}
 
               {user ? (
                 <Button variant="ghost" size="small" onClick={onSignOut} aria-label="Sign out"
                   startIcon={
                     user.photoURL ? (
-                      <Box component="img" src={user.photoURL} alt=""
-                        sx={{ width: 24, height: 24, borderRadius: '50%' }} />
+                      <img src={user.photoURL} alt=""
+                        style={{ width: 24, height: 24, borderRadius: '50%' }} />
                     ) : (
-                      <AccountCircleIcon sx={{ fontSize: 24 }} />
+                      <AccountCircleIcon />
                     )
                   }>
                   {user.displayName?.split(' ')[0] || 'Account'}
@@ -495,14 +524,14 @@ function DesktopAppBar({
                 </Button>
               ) : loginType === 'avatar' ? (
                 <Button iconOnly variant="ghost" size="medium" aria-label="Account">
-                  <AccountCircleIcon sx={{ fontSize: 28 }} />
+                  <AccountCircleIcon />
                 </Button>
               ) : null}
             </>
           )}
         </>
       )}
-    </Box>
+    </BarRoot>
 
     {navDrawer}
     </>
@@ -519,32 +548,31 @@ function MobileAppBar({
   /* { label, href } / { label, onClick } or strings. No placeholder default:
      the menu button only appears when there are links to open. */
   navLinks = [],
-  className = '', sx = {},
+  className = '', sx,
 }) {
+  useStaticStyles('omni-appbar');
   const barSize = React.useContext(AppBarSizeContext);
   const [drawerOpen, setDrawerOpen, drawerWanted, prefetchDrawer] = useNavDrawer();
   const barTheme = THEME_MAP[barColor] || THEME_MAP.default;
   const dataTheme = barTheme.theme;
   const dataSurface = barTheme.surface || surface;
 
-  const containerSx = {
-    backgroundColor: 'var(--Background)', color: 'var(--Text)',
-    boxShadow: SHADOW_LEVEL_2,  // App bars
-
-    fontFamily: 'inherit', width: '100%', maxWidth: 420,
-    ...sx,
-  };
-
-  const commonProps = {
+  /* The phone bar: the same paint as the desktop bar, at most 420px wide. */
+  const rootProps = (variant, style) => ({
+    role: 'banner',
     'data-theme': dataTheme,
     'data-surface': dataSurface,
-  };
+    className: 'appbar appbar-mobile appbar-mobile-' + variant + ' appbar-' + barColor + ' omni-ab omni-ab-mob ' + className,
+    style,
+    sx,
+  });
+  const ellipsis = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
 
   const links = navLinks.map((l) => (typeof l === 'string' ? { label: l } : l));
   const navDrawer = drawerWanted && (
     <Suspense fallback={null}>
     <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} anchor="left" size="small">
-      <Box component="nav" aria-label="Main navigation" sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, py: 1 }}>
+      <nav aria-label="Main navigation" style={{ display: 'flex', flexDirection: 'column', gap: 4, paddingTop: 8, paddingBottom: 8 }}>
         {links.map((link, i) => (
           <Button
             key={typeof link.label === 'string' ? link.label : i}
@@ -552,12 +580,12 @@ function MobileAppBar({
             size="medium"
             href={link.href}
             onClick={(e) => { setDrawerOpen(false); if (link.onClick) link.onClick(e); }}
-            sx={{ justifyContent: 'flex-start', width: '100%' }}
+            style={{ justifyContent: 'flex-start', width: '100%' }}
           >
             {link.label}
           </Button>
         ))}
-      </Box>
+      </nav>
     </Drawer>
     </Suspense>
   );
@@ -565,12 +593,10 @@ function MobileAppBar({
   if (mobileVariant === 'search') {
     return (
       <>
-      <Box component="header" role="banner" className={'appbar appbar-mobile appbar-mobile-search appbar-' + barColor + ' ' + className}
-        {...commonProps}
-        sx={{ ...containerSx, display: 'flex', alignItems: 'center', height: barHeight(barSize), px: 1.5, gap: 1.5 }}>
+      <BarRoot {...rootProps('search', { display: 'flex', alignItems: 'center', height: barHeight(barSize), paddingLeft: 12, paddingRight: 12, gap: 12 })}>
         {links.length > 0 && (
           <AppBarIconButton ariaLabel="Open navigation menu" onClick={() => setDrawerOpen(true)} onIntent={prefetchDrawer}>
-            <MenuIcon sx={{ fontSize: 'inherit' }} />
+            <MenuIcon />
           </AppBarIconButton>
         )}
         <Suspense fallback={<div aria-hidden="true" style={{ flex: 1, minWidth: 0 }} />}>
@@ -581,9 +607,9 @@ function MobileAppBar({
           />
         </Suspense>
         <Button iconOnly variant="ghost" size="medium" aria-label="Account">
-          <AccountCircleIcon sx={{ fontSize: 28 }} />
+          <AccountCircleIcon />
         </Button>
-      </Box>
+      </BarRoot>
       {navDrawer}
       </>
     );
@@ -591,70 +617,58 @@ function MobileAppBar({
 
   if (mobileVariant === 'small') {
     return (
-      <Box component="header" role="banner" className={'appbar appbar-mobile appbar-mobile-small appbar-' + barColor + ' ' + className}
-        {...commonProps}
-        sx={{ ...containerSx, display: 'flex', alignItems: 'center', height: barHeight(barSize), px: 1.5, gap: 1 }}>
+      <BarRoot {...rootProps('small', { display: 'flex', alignItems: 'center', height: barHeight(barSize), paddingLeft: 12, paddingRight: 12, gap: 8 })}>
         <AppBarIconButton ariaLabel="Back">
-          <ArrowBackIcon sx={{ fontSize: 'inherit' }} />
+          <ArrowBackIcon />
         </AppBarIconButton>
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Box sx={{ fontWeight: 600, fontSize: '16px', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</Box>
-          {subtitle && <Box sx={{ fontSize: '12px', opacity: 0.7, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{subtitle}</Box>}
-        </Box>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 600, fontSize: '16px', lineHeight: 1.3, ...ellipsis }}>{title}</div>
+          {subtitle && <div style={{ fontSize: '12px', opacity: 0.7, ...ellipsis }}>{subtitle}</div>}
+        </div>
         {actionIcon && (
           <AppBarIconButton ariaLabel="Action">
             {actionIcon}
           </AppBarIconButton>
         )}
-      </Box>
+      </BarRoot>
     );
   }
 
+  const topRow = (
+    <div style={{ display: 'flex', alignItems: 'center', height: 56, gap: 8 }}>
+      <AppBarIconButton ariaLabel="Back">
+        <ArrowBackIcon />
+      </AppBarIconButton>
+      <div style={{ flex: 1 }} />
+      {actionIcon && (
+        <AppBarIconButton ariaLabel="Action">
+          {actionIcon}
+        </AppBarIconButton>
+      )}
+    </div>
+  );
+
   if (mobileVariant === 'medium') {
     return (
-      <Box component="header" role="banner" className={'appbar appbar-mobile appbar-mobile-medium appbar-' + barColor + ' ' + className}
-        {...commonProps}
-        sx={{ ...containerSx, px: 1.5, pb: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', height: 56, gap: 1 }}>
-          <AppBarIconButton ariaLabel="Back">
-            <ArrowBackIcon sx={{ fontSize: 'inherit' }} />
-          </AppBarIconButton>
-          <Box sx={{ flex: 1 }} />
-          {actionIcon && (
-            <AppBarIconButton ariaLabel="Action">
-              {actionIcon}
-            </AppBarIconButton>
-          )}
-        </Box>
-        <Box sx={{ px: 1.5 }}>
-          <Box sx={{ fontWeight: 600, fontSize: '24px', lineHeight: 1.2 }}>{title}</Box>
-          {subtitle && <Box sx={{ fontSize: '14px', opacity: 0.7, mt: 0.5 }}>{subtitle}</Box>}
-        </Box>
-      </Box>
+      <BarRoot {...rootProps('medium', { paddingLeft: 12, paddingRight: 12, paddingBottom: 16 })}>
+        {topRow}
+        <div style={{ paddingLeft: 12, paddingRight: 12 }}>
+          <div style={{ fontWeight: 600, fontSize: '24px', lineHeight: 1.2 }}>{title}</div>
+          {subtitle && <div style={{ fontSize: '14px', opacity: 0.7, marginTop: 4 }}>{subtitle}</div>}
+        </div>
+      </BarRoot>
     );
   }
 
   // large
   return (
-    <Box component="header" role="banner" className={'appbar appbar-mobile appbar-mobile-large appbar-' + barColor + ' ' + className}
-      {...commonProps}
-      sx={{ ...containerSx, px: 1.5, pb: 3 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', height: 56, gap: 1 }}>
-        <AppBarIconButton ariaLabel="Back">
-          <ArrowBackIcon sx={{ fontSize: 'inherit' }} />
-        </AppBarIconButton>
-        <Box sx={{ flex: 1 }} />
-        {actionIcon && (
-          <AppBarIconButton ariaLabel="Action">
-            {actionIcon}
-          </AppBarIconButton>
-        )}
-      </Box>
-      <Box sx={{ px: 1.5, mt: 1 }}>
-        <Box sx={{ fontWeight: 600, fontSize: '36px', lineHeight: 1.1 }}>{title}</Box>
-        {subtitle && <Box sx={{ fontSize: '14px', opacity: 0.7, mt: 0.5 }}>{subtitle}</Box>}
-      </Box>
-    </Box>
+    <BarRoot {...rootProps('large', { paddingLeft: 12, paddingRight: 12, paddingBottom: 24 })}>
+      {topRow}
+      <div style={{ paddingLeft: 12, paddingRight: 12, marginTop: 8 }}>
+        <div style={{ fontWeight: 600, fontSize: '36px', lineHeight: 1.1 }}>{title}</div>
+        {subtitle && <div style={{ fontSize: '14px', opacity: 0.7, marginTop: 4 }}>{subtitle}</div>}
+      </div>
+    </BarRoot>
   );
 }
 
