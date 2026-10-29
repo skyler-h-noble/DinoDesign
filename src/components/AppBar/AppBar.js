@@ -141,14 +141,22 @@ function DesktopAppBar({
   /* The menu button only appears when it opens something: links for the
      drawer, or the caller's own onMenuClick. showMenu={false} hides it in
      every layout (it used to reach the `layout` bar only). */
-  const canOpen = links.length > 0 || Boolean(onMenuClick);
+  /* endSlot as a fragment or array is a list of actions. On a collapsed bar
+     every action but the LAST moves into the drawer under the links, and the
+     last (the primary — "Get started") stays in the bar: two small buttons
+     beside a brand and a menu button overflowed a 390px phone. */
+  const flatten = (node) => React.Children.toArray(node).flatMap((c) => (
+    React.isValidElement(c) && c.type === React.Fragment ? flatten(c.props.children) : [c]));
+  const endItems = endSlot !== undefined ? flatten(endSlot) : [];
+  const movesActions = menuType === 'auto' && endItems.length > 1;
+  const canOpen = links.length > 0 || Boolean(onMenuClick) || movesActions;
   const menuButton = showMenu && canOpen && (effectiveMenu === 'hamburger' || effectiveMenu === 'auto');
   const below = '@media (max-width: ' + (collapseAt - 0.02) + 'px)';
 
   // The navigation drawer the menu button opens — shared by both bars.
   const navDrawer = (
       <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} anchor="left" size="small">
-        <Box component="nav" aria-label="Main navigation" sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, py: 1 }}>
+        <Box component="nav" aria-label="Main navigation" sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, p: 'var(--Sizing-2, 16px)' }}>
           {links.map((link, i) => (
             <Button
               key={typeof link.label === 'string' ? link.label : i}
@@ -161,6 +169,11 @@ function DesktopAppBar({
               {link.label}
             </Button>
           ))}
+          {movesActions && (
+            <Box className="appbar-drawer-actions" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 'var(--Sizing-1, 8px)', mt: 'var(--Sizing-2, 16px)' }}>
+              {endItems.slice(0, -1)}
+            </Box>
+          )}
         </Box>
       </Drawer>
   );
@@ -377,7 +390,14 @@ function DesktopAppBar({
               each consumer needing its own HStack/Box wrapper. */}
           {endSlot !== undefined ? (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              {endSlot}
+              {movesActions ? (
+                <>
+                  <Box className="appbar-end-secondary" sx={{ display: 'contents', [below]: { display: 'none' } }}>
+                    {endItems.slice(0, -1)}
+                  </Box>
+                  {endItems[endItems.length - 1]}
+                </>
+              ) : endSlot}
             </Box>
           ) : (
             <>

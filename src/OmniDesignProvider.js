@@ -381,6 +381,15 @@ export function OmniDesignProvider({
   darkMode: controlledDarkMode,
   onDarkModeChange,
 
+  /* Which type ramp the page uses. 'auto' (default) follows the screen:
+     below 600px a phone ramp, 600–899 a tablet ramp, 900+ desktop — the
+     Adaptive Nav breakpoints. Without it a phone got desktop type (a 72px
+     display headline at 390px wide) unless the app set data-device itself.
+     A device name pins it; false leaves data-device alone. Only ever applied
+     when nothing else has set data-device on <html> — an app that manages it
+     (the studio pins Desktop; the gallery has a picker) keeps control. */
+  device = 'auto',
+
   // DOM
   className,
   style: styleProp,
@@ -414,6 +423,43 @@ export function OmniDesignProvider({
     mountedRef.current = true;
     return () => { mountedRef.current = false; };
   }, []);
+
+  // ── EFFECT: data-device from the screen width ───────────────────────────
+  useEffect(() => {
+    if (device === false || typeof document === 'undefined') return undefined;
+    const root = document.documentElement;
+    // Someone else owns it: leave it alone, now and on every resize.
+    if (root.hasAttribute('data-device') && root.getAttribute('data-omni-device') !== 'auto') return undefined;
+    const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
+    let written = root.getAttribute('data-device');
+    const set = (value) => {
+      // Stop if anything changed it since our last write.
+      if (root.getAttribute('data-device') !== written) return false;
+      if (value) {
+        root.setAttribute('data-device', value);
+        root.setAttribute('data-platform', value); // systems published before the rename
+      } else {
+        root.removeAttribute('data-device');
+        root.removeAttribute('data-platform');
+      }
+      root.setAttribute('data-omni-device', 'auto');
+      written = value || null;
+      return true;
+    };
+    if (device !== 'auto') { set(device === 'Desktop' ? 'Desktop' : device); return undefined; }
+    if (typeof window === 'undefined' || !window.matchMedia) return undefined;
+    const phone = window.matchMedia('(max-width: 599.98px)');
+    const tablet = window.matchMedia('(max-width: 899.98px)');
+    const apply = () => {
+      const kind = phone.matches ? 'Mobile' : tablet.matches ? 'Tablet' : null;
+      const ok = set(kind ? (isAndroid ? 'Android-' : 'IOS-') + kind : null);
+      if (!ok) { phone.removeEventListener('change', apply); tablet.removeEventListener('change', apply); }
+    };
+    apply();
+    phone.addEventListener('change', apply);
+    tablet.addEventListener('change', apply);
+    return () => { phone.removeEventListener('change', apply); tablet.removeEventListener('change', apply); };
+  }, [device]);
 
   // ── EFFECT: Fetch manifest if themeURL provided ────────────────────────────
   useEffect(() => {

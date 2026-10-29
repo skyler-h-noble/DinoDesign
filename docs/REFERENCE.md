@@ -1017,10 +1017,14 @@ Never hand-draw the panel (`position: absolute` + a border + a shadow). A
 hover card is `role="tooltip"` + `autoFocus={false}`. `Dropdown` + `Menu`
 works too, but does not portal — use it only where nothing clips.
 
-### A responsive nav comes from the Adaptive Nav add-on
+### Site nav vs app nav
 
-Do not assemble a responsive navigation from AppBar + Rail + BottomNavigation
-by hand. The studio's **Adaptive Nav** add-on (omni-design.netlify.app →
+A **site nav** (a marketing page, docs, a blog) is `<AppBar navLinks endSlot>`:
+it collapses into a menu button below 900px by itself — see AppBar above.
+
+An **app nav** — a rail on tablet, a bottom bar on phones, a top bar on
+desktop — should not be assembled from AppBar + Rail + BottomNavigation by
+hand. The studio's **Adaptive Nav** add-on (omni-design.netlify.app →
 Add-ons → Adaptive Nav) designs it per device and exports one React file — the
 parts switch at the breakpoints, the menu button opens a Drawer, the account
 menu is a Popover, the hero condenses on scroll — plus the matching Figma spec.
@@ -1032,8 +1036,8 @@ into the add-on's Import tab to change it.
 Never centre a container's text to centre the components in it.
 `text-align` is inherited: an Accordion's body, an Autocomplete's label, a
 TransferList's rows all centre with it, which no design draws. Centre the BOX
-(`alignItems: 'center'`, `margin: 0 auto`, `justifyContent`) and leave text
-alone.
+(`alignItems: 'center'`, `margin: 0 auto`, `justifyContent`), and when TEXT
+should be centred — a hero headline — set `textAlign` on that text element.
 
 ### Component specifics that are easy to get wrong
 

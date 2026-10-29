@@ -50,7 +50,35 @@ Set them with `<Section theme surface>` (paints the region) or
 `<ThemedZone theme surface>` (attributes only). Everything inside — text,
 headings, borders, buttons — picks the right contrast-checked colors.
 
-## 4. A page
+## 4. Phones, light and dark — already handled
+
+- **Phones:** text sizes follow the screen (a phone ramp below 600px, tablet
+  below 900px) and `AppBar` folds its links — and every `endSlot` action but
+  the last — into a menu button below 900px. Pass `endSlot` as a fragment of
+  buttons, primary action last. Nothing to set up.
+- **Light / dark:** a toggle is three lines; every component and color
+  follows, with contrast already checked in both modes:
+
+```jsx
+import { useOmniDesign, Button } from '@omni-design/components';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from '@mui/icons-material/LightMode';
+
+function ModeToggle() {
+  const { isDark, toggleDarkMode } = useOmniDesign();
+  return (
+    <Button iconOnly variant="ghost" aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'} onClick={toggleDarkMode}>
+      {isDark ? <LightModeIcon /> : <DarkModeIcon />}
+    </Button>
+  );
+}
+```
+
+- **Contrast and focus:** text, borders and focus rings meet WCAG AA on every
+  theme and surface in both modes. You do not need to check them; you need
+  only not override colors.
+
+## 5. A page
 
 ```jsx
 import {
@@ -62,14 +90,17 @@ import HomeIcon from '@mui/icons-material/Home';
 <>
   <AppBar brand="Acme"
           navLinks={[{ label: 'Features', href: '#features' }, { label: 'Pricing', href: '#pricing' }]}
-          endSlot={<Button variant="default" size="small">Get started</Button>} />
+          endSlot={<>
+            <Button variant="default-outline" size="small">Log in</Button>
+            <Button variant="default" size="small">Get started</Button>
+          </>} />
 
   <Section theme="Default" surface="Surface" padding="80px 24px">
     <Container maxWidth="md">
-      <VStack spacing={2} alignItems="center" style={{ textAlign: 'center' }}>
+      <VStack spacing={2} alignItems="center">
         <Eyebrow>Eyebrow</Eyebrow>
-        <DisplayLarge component="h1">Headline</DisplayLarge>
-        <Body color="quiet">Supporting copy.</Body>
+        <DisplayLarge component="h1" style={{ textAlign: 'center' }}>Headline</DisplayLarge>
+        <Body color="quiet" style={{ textAlign: 'center' }}>Supporting copy.</Body>
         <Button variant="default" size="large">Primary action</Button>
       </VStack>
     </Container>
@@ -95,7 +126,7 @@ import HomeIcon from '@mui/icons-material/Home';
 </>
 ```
 
-## 5. Components you will use
+## 6. Components you will use
 
 | Need | Use | Key props |
 | --- | --- | --- |
@@ -125,7 +156,7 @@ Icons: `@mui/icons-material` (MUI 7) — use names that exist in v7 (e.g. `Eco`
 is gone; `EnergySavingsLeaf` replaces it), or the build fails. Use
 `<Icon color="primary">` to give one a brand color.
 
-## 6. Rules
+## 7. Rules
 
 - **Use the components.** No raw `<button>`, `<h1>`–`<h6>`, `<p>`, `<a>` when
   a component above covers it. A plain `<div>` is fine for layout only.
@@ -143,7 +174,7 @@ is gone; `EnergySavingsLeaf` replaces it), or the build fails. Use
 - **Do not import components from `@mui/material`** — the package re-exports
   the ones it supports, themed.
 
-## 7. When something is missing
+## 8. When something is missing
 
 Tag it where you would have used it, so it can be added to the package:
 

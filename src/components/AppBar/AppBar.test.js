@@ -125,6 +125,19 @@ describe('DesktopAppBar', () => {
     rerender(<DesktopAppBar navLinks={['A']} searchPosition="right" />);
     expect(container.querySelector('input')).not.toBeNull();
   });
+  test('collapsed: every action but the last moves into the drawer', () => {
+    render(<DesktopAppBar brand="Acme" navLinks={['Features']}
+      endSlot={<><button type="button">Login</button><button type="button">Get started</button></>} />);
+    // In the bar, Login sits in the part hidden below collapseAt; Get started does not.
+    expect(screen.getAllByText('Login')[0].closest('.appbar-end-secondary')).not.toBeNull();
+    expect(screen.getByText('Get started').closest('.appbar-end-secondary')).toBeNull();
+    fireEvent.click(screen.getByLabelText('Open navigation menu'));
+    expect(document.querySelector('.appbar-drawer-actions').textContent).toContain('Login');
+  });
+  test('a single endSlot action stays put and adds no menu button', () => {
+    render(<DesktopAppBar brand="Acme" endSlot={<button type="button">Get started</button>} />);
+    expect(screen.queryByLabelText('Open navigation menu')).not.toBeInTheDocument();
+  });
   test('expanded nav with 3 links', () => {
     render(<DesktopAppBar menuType="expanded" navLinks={['Home', 'About', 'Help']} />);
     expect(screen.getByLabelText('Main navigation')).toBeInTheDocument();

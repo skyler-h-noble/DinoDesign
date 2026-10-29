@@ -1,5 +1,5 @@
-// GENERATED from CLAUDE.md section 4 by scripts/check-quickstart.mjs — the
-// quickstart example must compile against the published types.
+// GENERATED from CLAUDE.md section 5 by scripts/check-quickstart.mjs —
+// the quickstart must compile against the published types.
 
 import {
   AppBar, Section, Container, Grid, VStack, Card, Button, Footer,
@@ -13,14 +13,17 @@ export function QuickstartPage() {
 <>
   <AppBar brand="Acme"
           navLinks={[{ label: 'Features', href: '#features' }, { label: 'Pricing', href: '#pricing' }]}
-          endSlot={<Button variant="default" size="small">Get started</Button>} />
+          endSlot={<>
+            <Button variant="default-outline" size="small">Log in</Button>
+            <Button variant="default" size="small">Get started</Button>
+          </>} />
 
   <Section theme="Default" surface="Surface" padding="80px 24px">
     <Container maxWidth="md">
-      <VStack spacing={2} alignItems="center" style={{ textAlign: 'center' }}>
+      <VStack spacing={2} alignItems="center">
         <Eyebrow>Eyebrow</Eyebrow>
-        <DisplayLarge component="h1">Headline</DisplayLarge>
-        <Body color="quiet">Supporting copy.</Body>
+        <DisplayLarge component="h1" style={{ textAlign: 'center' }}>Headline</DisplayLarge>
+        <Body color="quiet" style={{ textAlign: 'center' }}>Supporting copy.</Body>
         <Button variant="default" size="large">Primary action</Button>
       </VStack>
     </Container>

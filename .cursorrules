@@ -39,8 +39,9 @@ DEVICES
 - Set data-device on the root: IOS-Mobile, IOS-Tablet, Android-Mobile or
   Android-Tablet (Desktop is the default — set nothing). Type sizes switch on
   it, not on width.
-- For responsive navigation use the Adaptive Nav add-on's exported file
-  rather than assembling AppBar + Rail + BottomNavigation by hand.
+- A site nav is <AppBar navLinks endSlot> — it collapses below 900px by
+  itself. App navigation (rail + bottom bar) comes from the Adaptive Nav
+  add-on's exported file, not hand-assembled.
 
 LAYOUT
 - Never center a container's text to center components inside it —
