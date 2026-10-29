@@ -45,7 +45,7 @@ function Inline({ text }) {
 export function FoundationTopic({ topic }) {
   if (!topic) return null;
   return (
-    <VStack gap="var(--Sizing-3)" sx={{ maxWidth: 820 }}>
+    <VStack gap="var(--Sizing-3)" style={{ maxWidth: 820 }}>
       <VStack gap="var(--Sizing-1)">
         <H3>{topic.title}</H3>
         <Body color="quiet"><Inline text={topic.lede} /></Body>

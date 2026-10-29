@@ -2,6 +2,8 @@
 import React from 'react';
 import { Container as MuiContainer, Box } from '@mui/material';
 import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazyFallback } from '../_lazyFallback';
+const ContainerMui = lazyFallback('Container', () => import('./Container.mui'));
 
 /**
  * Container Component
@@ -44,28 +46,6 @@ export function Container(props) {
     >
       {children}
     </div>
-  );
-}
-
-function ContainerMui({
-  children,
-  maxWidth = 'lg',
-  disableGutters = false,
-  sx = {},
-  ...props
-}) {
-  return (
-    <MuiContainer
-      maxWidth={maxWidth}
-      disableGutters={disableGutters}
-      sx={{
-        transition: 'all 0.2s ease-in-out',
-        ...sx,
-      }}
-      {...props}
-    >
-      {children}
-    </MuiContainer>
   );
 }
 

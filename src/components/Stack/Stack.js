@@ -2,6 +2,8 @@
 import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
 import React, { useMemo } from 'react';
 import { Stack as MuiStack, Box } from '@mui/material';
+import { lazyFallback } from '../_lazyFallback';
+const OmniStackMui = lazyFallback('Stack', () => import('./Stack.mui'));
 
 /**
  * OmniStack — wraps MUI Stack with smart minimum gap enforcement.
@@ -87,79 +89,6 @@ function gapToPx(gap, muiSpacingUnit = 8) {
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
-
-function OmniStackMui({
-  children,
-  gap,
-  spacing,
-  direction = 'column',
-  enforceMinGap = true,
-  minGapToken = '--min-stack-gap',
-  divider,
-  flexWrap,
-  useFlexGap = true,
-  alignItems,
-  justifyContent,
-  sx = {},
-  className = '',
-  ...props
-}) {
-  const desiredGap  = gap !== undefined ? gap : spacing;
-  const needsMinGap = enforceMinGap && hasSmallChild(children);
-
-  const effectiveGap = useMemo(() => {
-    if (!needsMinGap) return desiredGap;
-    const desiredPx = gapToPx(desiredGap);
-    const minPx     = resolveCssVar(minGapToken, 8);
-    if (desiredPx >= minPx) return desiredGap;
-    return 'var(' + minGapToken + ', ' + minPx + 'px)';
-  }, [needsMinGap, desiredGap, minGapToken]);
-
-  return (
-    <MuiStack
-      direction={direction}
-      spacing={useFlexGap ? undefined : effectiveGap}
-      gap={useFlexGap ? effectiveGap : undefined}
-      divider={divider}
-      flexWrap={flexWrap}
-      useFlexGap={useFlexGap}
-      alignItems={alignItems}
-      justifyContent={justifyContent}
-      className={
-        'omni-stack' +
-        (needsMinGap ? ' omni-stack-min-gap-enforced' : '') +
-        (className ? ' ' + className : '')
-      }
-      sx={{
-        /* Paint ONLY when this Stack was given a surface.
-         *
-         * It painted var(--Background) unconditionally, on the reasoning that
-         * with no surface set it resolves to the inherited value and is
-         * therefore a no-op. It is a no-op only while the parent is painting
-         * that same flat color. The moment the parent paints anything else —
-         * a hero image, a gradient, a Card at a Container level — an
-         * unsurfaced Stack punches an opaque rectangle through it, which is
-         * how a row of buttons ends up with a visible slab behind it.
-         *
-         * A layout primitive should not paint. Declaring a surface is how you
-         * ask it to, and that is the rule everywhere else in this system:
-         * data-theme + data-surface, or nothing. */
-        ...(props['data-surface'] || props['data-theme']
-          ? { background: 'var(--Background)' }
-          : {}),
-        // A fixed width is the OUTER width (matches a Figma frame: padding sits
-        // inside it). Without border-box, width + padding overflow the frame.
-        boxSizing: 'border-box',
-        ...(needsMinGap ? { '&::before': { display: 'none' } } : {}),
-        ...sx,
-      }}
-      data-min-gap-enforced={needsMinGap ? 'true' : undefined}
-      {...props}
-    >
-      {children}
-    </MuiStack>
-  );
-}
 
 // ─── Convenience exports ──────────────────────────────────────────────────────
 

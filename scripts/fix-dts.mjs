@@ -86,9 +86,9 @@ const HEADING = ['DisplayLarge', 'DisplayMedium', 'DisplaySmall', 'H1', 'H2', 'H
 // file → [type, the source function whose props it must cover, exports]
 const CORE = [
   ['Section/Section', 'SectionProps', 'Section', ['Section']],
-  ['Container/Container', 'ContainerProps', 'ContainerMui', ['Container']],
-  ['Grid/Grid', 'GridProps', 'GridMui', ['Grid']],
-  ['Stack/Stack', 'StackProps', 'OmniStackMui', ['VStack', 'HStack', 'Stack']],
+  ['Container/Container', 'ContainerProps', 'ContainerMui', ['Container'], 'Container/Container.mui'],
+  ['Grid/Grid', 'GridProps', 'GridMui', ['Grid'], 'Grid/Grid.mui'],
+  ['Stack/Stack', 'StackProps', 'OmniStackMui', ['VStack', 'HStack', 'Stack'], 'Stack/Stack.mui'],
   ['Card/Card', 'CardProps', 'Card', ['Card']],
   ['Button/Button', 'ButtonProps', 'Button', ['Button']],
   ['ToggleButtonGroup/ToggleButtonGroup', 'ToggleButtonGroupProps', 'ToggleButtonGroup', ['ToggleButtonGroup']],
@@ -97,7 +97,7 @@ const CORE = [
   ['Typography/Typography', 'TextProps', null, TEXT],
   ['Typography/Typography', 'HeadingProps', null, HEADING],
   ['Icon/Icon', 'IconProps', 'Icon', ['Icon']],
-  ['IconBadge/IconBadge', 'IconBadgeProps', 'IconBadgeEmotion', ['IconBadge']],
+  ['IconBadge/IconBadge', 'IconBadgeProps', 'IconBadgeEmotion', ['IconBadge'], 'IconBadge/IconBadge.mui'],
   ['Chip/Chip', 'ChipProps', 'Chip', ['Chip']],
   ['Avatar/Avatar', 'AvatarProps', 'Avatar', ['Avatar']],
   ['TextField/TextField', 'TextFieldProps', 'TextField', ['TextField']],
@@ -165,14 +165,14 @@ function replaceDecl(text, name, decl) {
 
 let typed = 0;
 const drift = [];
-for (const [file, type, fn, names] of CORE) {
+for (const [file, type, fn, names, source] of CORE) {
   const dts = join(root, 'components', file + '.d.ts');
   let text = readFileSync(dts, 'utf8');
   const rel = relative(dirname(dts), join(root, 'core-props')).split('\\').join('/');
   const T = 'import("' + (rel.startsWith('.') ? rel : './' + rel) + '").' + type;
   if (fn) {
     const declared = declaredProps(type);
-    const missing = destructured(file, fn).filter((p) => !declared.has(p) && !['className', 'style'].includes(p));
+    const missing = destructured(source || file, fn).filter((p) => !declared.has(p) && !['className', 'style'].includes(p));
     if (missing.length) drift.push(fn + ' takes ' + missing.join(', ') + ' — not in ' + type);
   }
   for (const name of names) {

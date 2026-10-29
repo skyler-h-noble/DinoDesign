@@ -234,7 +234,7 @@ function LinksColumn({ title, links = [] }) {
           <h4> skipped a level after a page's h2 sections and Lighthouse
           marked every page with a Footer down for heading order. */}
       {title && <H4 component="h2" style={{ color: 'inherit' }}>{title}</H4>}
-      <VStack component="ul" gap="var(--Sizing-1)" sx={{ listStyle: 'none', m: 0, p: 0 }}>
+      <VStack component="ul" gap="var(--Sizing-1)" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
         {links.map((l, i) => (
           <li key={i}>
             <Link
