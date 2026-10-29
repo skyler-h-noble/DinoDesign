@@ -1,7 +1,34 @@
 // src/components/Shape/Shape.js
 import React from 'react';
-import { Box } from '@mui/material';
 import { shapeStyle, shapeSafeArea, SHAPE_NAMES } from './shapes';
+import { useStaticStyles } from '../_staticStyles';
+import { registerBoxStyles } from '../_webkitBox';
+import { lazySxBox } from '../_lazyFallback';
+
+const SxBox = lazySxBox('Shape');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+/* The static sheet. Per instance: the width (and height) and, for a path
+   shape, its mask — custom properties on the element. The safe-area padding
+   is a custom property too. The two radius shapes are classes, since
+   squircle's corner-shape needs an @supports rule. */
+registerBoxStyles('omni-shape', [
+  '.omni-shape{position:relative;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;'
+    + 'box-sizing:border-box;width:var(--_sh-w);aspect-ratio:1 / 1;overflow:hidden}',
+  '.omni-shape-h{height:var(--_sh-h);aspect-ratio:auto}',
+  '.omni-shape-themed{background-color:var(--Background);color:var(--Text)}',
+  /* Content that is not an image stays inside the shape's safe area — the
+     largest centred square that fits in it — so a sticker's label cannot run
+     out past a burst's spikes. Percent padding is measured against the width,
+     which on a square box is the side. */
+  '.omni-shape-safe{padding:var(--_sh-pad);text-align:center;line-height:1.1}',
+  /* An image, video or picture fills the shape edge to edge. */
+  '.omni-shape>img,.omni-shape>video,.omni-shape>picture,.omni-shape>picture>img{width:100%;height:100%;object-fit:cover;display:block}',
+  '.omni-shape-mask{-webkit-mask:var(--_sh-mask);mask:var(--_sh-mask)}',
+  '.omni-shape-rounded{border-radius:var(--Card-Radius, var(--Style-Border-Radius, 8px))}',
+  '.omni-shape-squircle{border-radius:28%}',
+  '@supports (corner-shape: squircle){.omni-shape-squircle{border-radius:40%;corner-shape:squircle}}',
+].join('\n'));
 
 /**
  * Shape — a box cut to one of the system's shapes.
@@ -55,11 +82,13 @@ export function Shape({
   color,
   variant = 'solid',
   decorative = false,
-  component = 'div',
+  component: Tag = 'div',
   className = '',
-  sx = {},
+  sx,
+  style,
   ...props
 }) {
+  useStaticStyles('omni-shape');
   if (!SHAPE_NAMES.includes(shape) && process.env.NODE_ENV !== 'production' && !warnedShape.has(shape)) {
     warnedShape.add(shape);
     // eslint-disable-next-line no-console
@@ -70,46 +99,27 @@ export function Shape({
   const framesMedia = React.isValidElement(first) && ['img', 'video', 'picture'].includes(first.type);
   const theme = themed ? (THEME[color] || THEME.primary) : undefined;
   const css = (n) => (typeof n === 'number' ? n + 'px' : n);
+  const mask = shapeStyle(shape).mask;
+  const radiusClass = shape === 'rounded' || shape === 'squircle' ? ' omni-shape-' + shape : '';
 
-  return (
-    <Box
-      component={component}
-      data-theme={theme}
-      data-surface={themed ? (SURFACE[variant] || SURFACE.solid) : undefined}
-      aria-hidden={decorative || undefined}
-      className={'shape shape-' + shape + (className ? ' ' + className : '')}
-      sx={{
-        position: 'relative',
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: 0,
-        boxSizing: 'border-box',
-        width: css(width),
-        ...(height !== undefined ? { height: css(height) } : { aspectRatio: '1 / 1' }),
-        overflow: 'hidden',
-        ...(themed && { backgroundColor: 'var(--Background)', color: 'var(--Text)' }),
-        /* Content that is not an image stays inside the shape's safe area —
-           the largest centred square that fits in it — so a sticker's label
-           cannot run out past a burst's spikes. Percent padding is measured
-           against the width, which on a square box is the side. */
-        ...(!framesMedia && {
-          padding: ((1 - shapeSafeArea(shape)) / 2 * 100).toFixed(1) + '%',
-          textAlign: 'center',
-          lineHeight: 1.1,
-        }),
-        /* An image, video or picture fills the shape edge to edge. */
-        '& > img, & > video, & > picture, & > picture > img': {
-          width: '100%', height: '100%', objectFit: 'cover', display: 'block',
-        },
-        ...shapeStyle(shape),
-        ...sx,
-      }}
-      {...props}
-    >
-      {children}
-    </Box>
-  );
+  const vars = { '--_sh-w': css(width) };
+  if (height !== undefined) vars['--_sh-h'] = css(height);
+  if (!framesMedia) vars['--_sh-pad'] = ((1 - shapeSafeArea(shape)) / 2 * 100).toFixed(1) + '%';
+  if (mask) vars['--_sh-mask'] = mask;
+
+  const root = {
+    'data-theme': theme,
+    'data-surface': themed ? (SURFACE[variant] || SURFACE.solid) : undefined,
+    'aria-hidden': decorative || undefined,
+    className: 'shape shape-' + shape + (className ? ' ' + className : '')
+      + ' MuiBox-root omni-shape' + (height !== undefined ? ' omni-shape-h' : '')
+      + (themed ? ' omni-shape-themed' : '') + (!framesMedia ? ' omni-shape-safe' : '')
+      + (mask ? ' omni-shape-mask' : '') + radiusClass,
+    style: { ...vars, ...style },
+    ...props,
+  };
+  if (hasSx(sx)) return <SxBox component={Tag} sx={sx} {...root}>{children}</SxBox>;
+  return <Tag {...root}>{children}</Tag>;
 }
 
 export default Shape;

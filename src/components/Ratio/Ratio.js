@@ -1,8 +1,15 @@
 // src/components/Ratio/Ratio.js
 import React from 'react';
-import { Box as MuiBox } from '@mui/material';
 import { shapeStyle } from '../Shape/shapes';
 import { ImagePlaceholder } from '../ImagePlaceholder';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
+
+const SxBox = lazySxBox('Ratio');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+/* MUI's sizing rule for a number, as sx applied it to maxWidth / maxHeight:
+   a fraction (0 < n <= 1) is a percentage, anything else is px. */
+const muiSize = (n) => (typeof n === 'number' ? (n > 0 && n <= 1 ? n * 100 + '%' : n + 'px') : n);
 /* Level from the Figma effect style that NAMES this component.
    The five Effect-Levels are the five Figma effect styles, Elevations/Level-1 … Level-5:
      1  Elevations/Level-1 (Card, Accordion, Handle, Alert, Bottom-Sheet)
@@ -84,6 +91,38 @@ const PADDING_MAP = {
   xl: 6,
 };
 
+/* The static sheet. Per instance: the aspect ratio, and maxWidth /
+   maxHeight when given — custom properties on the shell, so a caller's sx can
+   still override them. Fit, padding and shape are classes. (aspect-ratio as a
+   custom property for the same reason Box does it: some style engines drop
+   it when set inline.) */
+registerStaticStyles('omni-ratio', [
+  /* CSS aspect-ratio holds the proportion regardless of container width.
+     fit drives which dimension fills the parent; the other derives from the
+     aspect ratio. flex:0 0 auto keeps a flex parent (a list row, an HStack)
+     from growing or shrinking the slot, so the aspect-ratio holds and the
+     derived axis isn't distorted. For fit="height" the PARENT must have a
+     definite height for height:100% to resolve. The min on the filled axis is
+     a floor so the box never collapses to nothing inside a hugging parent.
+     The default is a bare, SQUARE media slot: no edge, no radius, no shadow. */
+  '.omni-ratio{aspect-ratio:var(--_ra-ar);flex:0 0 auto;width:100%;height:auto;min-width:24px;'
+    + 'border:none;border-radius:0;box-shadow:none;overflow:hidden}',
+  '.omni-ratio-fh{height:100%;width:auto;min-width:auto;min-height:24px}',
+  '.omni-ratio-mw{max-width:var(--_ra-mw)}',
+  '.omni-ratio-mh{max-height:var(--_ra-mh)}',
+  '.omni-ratio-mask{-webkit-mask:var(--_ra-mask);mask:var(--_ra-mask)}',
+  '.omni-ratio-rounded{border-radius:var(--Card-Radius, var(--Style-Border-Radius, 8px))}',
+  '.omni-ratio-squircle{border-radius:28%}',
+  '@supports (corner-shape: squircle){.omni-ratio-squircle{border-radius:40%;corner-shape:squircle}}',
+  /* Inner content — scoped theme + surface so children resolve to the right
+     tokens, and any flex/fill child can occupy the ratio'd box. The
+     placeholder paints itself (ImagePlaceholder); else the surface. */
+  '.omni-ratio-in{width:100%;height:100%;background-color:var(--Background);color:var(--Text);font-family:inherit;border-radius:0}',
+  '.omni-ratio-in-ph{background-color:transparent}',
+  '.omni-ratio-in.omni-ratio-in>*{width:100%;height:100%}',
+  ...Object.entries(PADDING_MAP).map(([k, v]) => `.omni-ratio-p-${k}{padding:${v * 8}px}`),
+].join('\n'));
+
 export function Ratio({
   ratio = '1:1',
   children,
@@ -105,15 +144,17 @@ export function Ratio({
   onClick,
   maxWidth,
   maxHeight,
-  component = 'div',
+  component: Tag = 'div',
   /* Cut the slot to one of the system's shapes (see Shape) — an arch, a
      cookie, a blob around a photo. Round shapes want ratio="1:1"; on a wide
      slot they stretch with it. */
   shape,
   className = '',
-  sx = {},
+  sx,
+  style,
   ...props
 }) {
+  useStaticStyles('omni-ratio');
   if (variant !== 'default' && process.env.NODE_ENV !== 'production' && !warnedVariant) {
     warnedVariant = true;
     // eslint-disable-next-line no-console
@@ -152,68 +193,36 @@ export function Ratio({
      so a Ratio inside a Primary card is Primary's Surface-Dim. */
   const dataSurface = 'Surface-Dim';
 
-  const p = PADDING_MAP[padding] !== undefined ? PADDING_MAP[padding] : PADDING_MAP.none;
-  return (
-    <MuiBox
-      component={component}
-      className={'ratio ratio-' + ratio.toLowerCase() + ' ratio-default' +
+  const padKey = PADDING_MAP[padding] !== undefined ? padding : 'none';
+  const shapeCss = shape ? shapeStyle(shape) : {};
+  const vars = { '--_ra-ar': aspect };
+  if (maxWidth !== undefined) vars['--_ra-mw'] = muiSize(maxWidth);
+  if (maxHeight !== undefined) vars['--_ra-mh'] = muiSize(maxHeight);
+  if (shapeCss.mask) vars['--_ra-mask'] = shapeCss.mask;
 
-        (className ? ' ' + className : '')}
-      sx={{
-        // CSS aspect-ratio holds the proportion regardless of container
-        // width. The shell carries border, radius, and elevation so the
-        // shape is preserved while the inner layer handles theme tokens.
-        aspectRatio: aspect,
-        // fit drives which dimension fills the parent; the other derives from
-        // the aspect ratio. flex:0 0 auto keeps a flex parent (a list row, an
-        // HStack) from growing or shrinking the slot, so the aspect-ratio holds
-        // and the derived axis isn't distorted. For fit="height" the PARENT must
-        // have a definite height for height:100% to resolve. The min on the
-        // filled axis is a floor so the box never collapses to nothing inside a
-        // hugging parent. All overridable via sx.
-        flex: '0 0 auto',
-        ...(fit === 'height'
-          ? { height: '100%', width: 'auto', minHeight: 24 }
-          : { width: '100%', height: 'auto', minWidth: 24 }),
-        ...(maxWidth !== undefined && { maxWidth }),
-        ...(maxHeight !== undefined && { maxHeight }),
-        border: 'none',
-        // Default variant is a bare, SQUARE media slot (no radius) — matches a
-        // plain Ratio in the design. Styled variants (solid/light/dark) keep
-        // the brand radius for their card-like chrome.
-        borderRadius: 0,
-        boxShadow: 'none',
-        overflow: 'hidden',
-        ...(shape && shapeStyle(shape)),
-        ...sx,
-      }}
-      {...props}
+  const root = {
+    className: 'ratio ratio-' + ratio.toLowerCase() + ' ratio-default' + (className ? ' ' + className : '')
+      + ' MuiBox-root omni-ratio' + (fit === 'height' ? ' omni-ratio-fh' : '')
+      + (maxWidth !== undefined ? ' omni-ratio-mw' : '') + (maxHeight !== undefined ? ' omni-ratio-mh' : '')
+      + (shapeCss.mask ? ' omni-ratio-mask' : '')
+      + (shape === 'rounded' || shape === 'squircle' ? ' omni-ratio-' + shape : ''),
+    style: { ...vars, ...style },
+    ...props,
+  };
+  const inner = (
+    <div
+      data-theme={dataTheme || undefined}
+      data-surface={dataSurface}
+      className={'MuiBox-root omni-ratio-in omni-ratio-p-' + padKey + (showPlaceholder ? ' omni-ratio-in-ph' : '')}
     >
-      {/* Inner content — scoped theme + surface so children resolve to the
-          right tokens, and any flex/fill child can occupy the ratio'd box. */}
-      <MuiBox
-        data-theme={dataTheme || undefined}
-        data-surface={dataSurface}
-        sx={{
-          width: '100%',
-          height: '100%',
-          padding: p,
-          // The placeholder paints itself (ImagePlaceholder); else the surface.
-          backgroundColor: showPlaceholder ? 'transparent' : 'var(--Background)',
-          color: 'var(--Text)',
-          fontFamily: 'inherit',
-          borderRadius: 0,
-          // Center the placeholder icon; otherwise let a single child fill.
-          '& > *': { width: '100%', height: '100%' },
-        }}
-      >
-        {/* Figma's Image Placeholder: a Border-Variant tint with the photo
-            glyph in --Quiet, as large as the slot. It was a solid --Border
-            block with a 36px --Background icon — the design inverted. */}
-        {showPlaceholder ? <ImagePlaceholder /> : children}
-      </MuiBox>
-    </MuiBox>
+      {/* Figma's Image Placeholder: a Border-Variant tint with the photo
+          glyph in --Quiet, as large as the slot. It was a solid --Border
+          block with a 36px --Background icon — the design inverted. */}
+      {showPlaceholder ? <ImagePlaceholder /> : children}
+    </div>
   );
+  if (hasSx(sx)) return <SxBox component={Tag} sx={sx} {...root}>{inner}</SxBox>;
+  return <Tag {...root}>{inner}</Tag>;
 }
 
 export default Ratio;

@@ -1,8 +1,24 @@
 // src/components/SwatchField/SwatchField.js
 import React, { useId } from 'react';
-import { Box } from '@mui/material';
 import { FormLabel } from '../FormLabel/FormLabel';
 import { Swatch } from '../Swatch/Swatch';
+import { useStaticStyles } from '../_staticStyles';
+import { registerBoxStyles } from '../_webkitBox';
+import { lazySxBox } from '../_lazyFallback';
+
+const SxBox = lazySxBox('SwatchField');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+/* Stacked: Sizing-Half apart, the label centred on the swatch. Sideways:
+   Sizing-1 apart, the swatch filling the rest. The label and the swatch take
+   their place through two-class rules, over their own one-class sheets. */
+registerBoxStyles('omni-swatch-field', [
+  '.omni-swf{display:flex;flex-direction:column;align-items:flex-start;gap:var(--Sizing-Half, 4px)}',
+  '.omni-swf-side{flex-direction:row;gap:var(--Sizing-1, 8px)}',
+  '.omni-swf>.omni-swf-label{flex-shrink:0}',
+  '.omni-swf-stack>.omni-swf-label{align-self:stretch;justify-content:center}',
+  '.omni-swatch.omni-swf-swatch{flex:1;min-width:0}',
+].join('\n'));
 
 /**
  * SwatchField — Figma's SwatchField (9575:2390): a Swatch with its field
@@ -26,9 +42,10 @@ export function SwatchField({
   swatchLabel,
   disabled = false,
   className = '',
-  sx = {},
+  sx,
   ...swatchProps
 }) {
+  useStaticStyles('omni-swatch-field');
   const labelId = useId();
   const sideways = labelPosition === 'left' || labelPosition === 'right';
   const labelFirst = labelPosition === 'top' || labelPosition === 'left';
@@ -39,31 +56,28 @@ export function SwatchField({
       disabled={disabled}
       {...(label && { 'aria-labelledby': labelId })}
       {...swatchProps}
-      sx={{ ...(sideways && { flex: 1, minWidth: 0 }), ...(swatchProps.sx || {}) }}
+      {...(sideways && { className: 'omni-swf-swatch' })}
     />
   );
   if (!label) return swatch;
 
   const labelEl = (
-    <FormLabel id={labelId} disabled={disabled} sx={{ flexShrink: 0, ...(!sideways && { alignSelf: 'stretch', justifyContent: 'center' }) }}>{label}</FormLabel>
+    <FormLabel id={labelId} disabled={disabled} className="omni-swf-label">{label}</FormLabel>
   );
 
-  return (
-    <Box
-      className={'swatch-field swatch-field-' + labelPosition + (className ? ' ' + className : '')}
-      sx={{
-        display: 'flex',
-        flexDirection: sideways ? 'row' : 'column',
-        alignItems: 'flex-start',
-        gap: sideways ? 'var(--Sizing-1, 8px)' : 'var(--Sizing-Half, 4px)',
-        ...sx,
-      }}
-    >
+  const root = {
+    className: 'swatch-field swatch-field-' + labelPosition + (className ? ' ' + className : '')
+      + ' MuiBox-root omni-swf ' + (sideways ? 'omni-swf-side' : 'omni-swf-stack'),
+  };
+  const content = (
+    <>
       {labelFirst && labelEl}
       {swatch}
       {!labelFirst && labelEl}
-    </Box>
+    </>
   );
+  if (hasSx(sx)) return <SxBox sx={sx} {...root}>{content}</SxBox>;
+  return <div {...root}>{content}</div>;
 }
 
 export default SwatchField;

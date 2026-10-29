@@ -18,20 +18,13 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { Swatch } from './Swatch';
+import { stateRules } from '../_testCss';
 
-const rulesFor = (el) => {
-  const classes = Array.from(el.classList);
-  const out = [];
-  for (const sheet of Array.from(document.styleSheets)) {
-    let list; try { list = sheet.cssRules; } catch { continue; }
-    for (const r of Array.from(list || [])) {
-      if (!r.selectorText) continue;
-      if (!classes.some((c) => r.selectorText.includes('.' + c))) continue;
-      out.push(r.cssText);
-    }
-  }
-  return out.join('\n');
-};
+/* What applies to the element at rest and in each state, from whichever
+   sheet: the static component sheet now, emotion before it. Private custom
+   properties (--_sw-c) are followed down to the value they carry, so the
+   chip's colour reads as the colour. */
+const rulesFor = (el) => stateRules(el).all;
 
 describe('Swatch hover and pressed scrims', () => {
   const chipOf = (c) => c.querySelector('.swatch-chip');

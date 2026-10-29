@@ -20,9 +20,19 @@
 // two switches, and the combination most forms actually use — helper now,
 // error later — would be a different variant rather than a state change.
 import React, { useId } from 'react';
-import { Box } from '@mui/material';
 import { Legal } from '../Typography';
 import { InputMessage } from '../InputMessage';
+import { useStaticStyles } from '../_staticStyles';
+import { registerBoxStyles } from '../_webkitBox';
+import { lazySxBox } from '../_lazyFallback';
+
+const SxBox = lazySxBox('FormHelper');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+/* Figma binds itemSpacing -> Sizing-Half. */
+registerBoxStyles('omni-form-helper', [
+  '.omni-fh{display:flex;flex-direction:column;align-items:flex-start;gap:var(--Sizing-Half)}',
+].join('\n'));
 
 export const FORM_HELPER_VALIDATIONS = ['none', 'warning', 'info', 'success', 'error'];
 
@@ -51,26 +61,17 @@ export function FormHelper({
   helperId,
   messageId,
   className = '',
-  sx = {},
+  sx,
   ...props
 }) {
+  useStaticStyles('omni-form-helper');
   const hasHelper = showHelper && !!helperText;
   const hasMessage = validation !== 'none' && !!validationMessage;
   if (!hasHelper && !hasMessage) return null;
 
-  return (
-    <Box
-      className={'form-helper ' + className}
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        /* Figma binds itemSpacing -> Sizing-Half. */
-        gap: 'var(--Sizing-Half)',
-        ...sx,
-      }}
-      {...props}
-    >
+  const root = { className: 'form-helper ' + className + ' MuiBox-root omni-fh', ...props };
+  const content = (
+    <>
       {hasHelper && (
         /* Legal defaults to `quiet`, which is the token Figma binds here —
            so this does not restate a colour the type style already owns. */
@@ -81,8 +82,10 @@ export function FormHelper({
           {validationMessage}
         </InputMessage>
       )}
-    </Box>
+    </>
   );
+  if (hasSx(sx)) return <SxBox sx={sx} {...root}>{content}</SxBox>;
+  return <div {...root}>{content}</div>;
 }
 
 export default FormHelper;

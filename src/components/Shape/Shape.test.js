@@ -3,6 +3,7 @@ import { render } from '@testing-library/react';
 import { Shape } from './Shape';
 import { SHAPE_NAMES, MORPHABLE_SHAPES, ICON_SHAPES, shapePath, shapeStyle, POINTS } from './shapes';
 import { IconBadge } from '../IconBadge';
+import { stateRules } from '../_testCss';
 
 describe('shape source', () => {
   test('every drawn shape is a closed path inside the 0–100 box', () => {
@@ -80,8 +81,11 @@ describe('IconBadge shape', () => {
 describe('Shape content stays inside the shape', () => {
   test('text is padded into the safe area; an image is not', () => {
     const { container: t } = render(<Shape shape="soft-burst" color="warning">NEW</Shape>);
-    expect(t.firstChild).toHaveStyle({ padding: '25.5%' });
+    /* The padding is a static rule reading the instance's --_sh-pad; stateRules
+       follows the private property down to the value. */
+    expect(stateRules(t.firstChild).base).toContain('padding: 25.5%;');
     const { container: i } = render(<Shape shape="soft-burst"><img src="/a.jpg" alt="" /></Shape>);
+    expect(stateRules(i.firstChild).base).not.toContain('padding: 25.5%');
     expect(i.firstChild.style.padding || getComputedStyle(i.firstChild).padding).not.toBe('25.5%');
   });
 });

@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { FieldGroup } from './FieldGroup';
 import { Checkbox } from '../Checkbox';
+import { declared } from '../_testCss';
 
 const options = (
   <>
@@ -68,13 +69,10 @@ describe('it is a real group', () => {
   test('the browser fieldset chrome is reset', () => {
     const { container } = render(<FieldGroup label="D">{options}</FieldGroup>);
     const el = container.querySelector('fieldset');
-    const cls = (el.getAttribute('class') || '').split(/\s+/).find((c) => c.startsWith('css-'));
-    const css = Array.from(document.styleSheets)
-      .flatMap((s) => Array.from(s.cssRules || []))
-      .filter((r) => (r.selectorText || '').includes('.' + cls))
-      .map((r) => r.cssText).join('\n');
-    expect(css).toContain('border: 0');
-    expect(css).toContain('padding: 0');
+        // The winning declarations, whichever sheet they come from.
+    // No border: a zero width (MUI wrote sx border: 0 as "0px solid", the same nothing).
+    expect(declared(el, 'border')).toMatch(/^0(px)?(\s|$)/);
+    expect(declared(el, 'padding')).toBe('0');
   });
 });
 
@@ -143,11 +141,6 @@ describe('orientation', () => {
       const { container } = render(
         <FieldGroup label="D" orientation={orientation}>{options}</FieldGroup>);
       const el = container.querySelector('.field-group-options');
-      const cls = (el.getAttribute('class') || '').split(/\s+/).find((c) => c.startsWith('css-'));
-      const css = Array.from(document.styleSheets)
-        .flatMap((s) => Array.from(s.cssRules || []))
-        .filter((r) => (r.selectorText || '').includes('.' + cls))
-        .map((r) => r.cssText).join('\n');
-      expect(css).toContain('flex-direction: ' + direction);
+            expect(declared(el, 'flex-direction')).toBe(direction);
     });
 });

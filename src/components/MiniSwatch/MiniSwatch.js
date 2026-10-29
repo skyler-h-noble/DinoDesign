@@ -15,37 +15,43 @@
 // It has no gallery page: there is nothing to play with. It appears inside
 // Select and Menu, which is where it is documented.
 import React from 'react';
-import { Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
+
+const SxBox = lazySxBox('MiniSwatch');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+/* The chip's color is the one per-instance value: a custom property on the
+   chip itself, read by the static rule. */
+registerStaticStyles('omni-mini-swatch', [
+  '.omni-mini-swatch{width:var(--Menu-Swatch, 24px);height:var(--Menu-Swatch, 24px);flex-shrink:0;'
+    // Sizing-Half, which is what Figma binds — not Input-Swatch-Radius.
+    + 'border-radius:var(--Sizing-Half, 4px);background-color:var(--_ms-c);'
+    /* A 1px --Background edge, inside (Figma's MiniSwatch stroke). It is a
+       gap, not a selection mark: the row's 3px inside focus ring passes
+       close to the chip, and the edge keeps the ring from touching the
+       colour — so the ring's contrast is always against the surface. */
+    + 'box-shadow:inset 0 0 0 1px var(--Background)}',
+].join('\n'));
 
 export function MiniSwatch({
   color,
   className = '',
-  sx = {},
+  sx,
+  style,
   ...props
 }) {
-  return (
-    <Box
-      className={`mini-swatch ${className}`.trim()}
-      // Decorative: the option's text is the accessible name, so announcing the
-      // chip as well would read the same choice twice.
-      aria-hidden="true"
-      sx={{
-        width: 'var(--Menu-Swatch, 24px)',
-        height: 'var(--Menu-Swatch, 24px)',
-        flexShrink: 0,
-        // Sizing-Half, which is what Figma binds — not Input-Swatch-Radius.
-        borderRadius: 'var(--Sizing-Half, 4px)',
-        backgroundColor: color,
-        /* A 1px --Background edge, inside (Figma's MiniSwatch stroke). It is a
-           gap, not a selection mark: the row's 3px inside focus ring passes
-           close to the chip, and the edge keeps the ring from touching the
-           colour — so the ring's contrast is always against the surface. */
-        boxShadow: 'inset 0 0 0 1px var(--Background)',
-        ...sx,
-      }}
-      {...props}
-    />
-  );
+  useStaticStyles('omni-mini-swatch');
+  const root = {
+    className: `mini-swatch ${className}`.trim() + ' MuiBox-root omni-mini-swatch',
+    // Decorative: the option's text is the accessible name, so announcing the
+    // chip as well would read the same choice twice.
+    'aria-hidden': 'true',
+    style: color !== undefined ? { '--_ms-c': color, ...style } : style,
+    ...props,
+  };
+  if (hasSx(sx)) return <SxBox sx={sx} {...root} />;
+  return <div {...root} />;
 }
 
 export default MiniSwatch;

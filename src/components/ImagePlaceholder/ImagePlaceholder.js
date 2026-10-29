@@ -1,7 +1,19 @@
 // src/components/ImagePlaceholder/ImagePlaceholder.js
 import React from 'react';
-import { Box } from '@mui/material';
 import ImageIcon from '@omni-design/icons/Image';
+import { useStaticStyles } from '../_staticStyles';
+import { registerBoxStyles } from '../_webkitBox';
+import { lazySxBox } from '../_lazyFallback';
+
+const SxBox = lazySxBox('ImagePlaceholder');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+registerBoxStyles('omni-image-placeholder', [
+  '.omni-image-placeholder{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;'
+    + 'background-color:var(--Border-Variant);color:var(--Quiet);overflow:hidden;container-type:size}',
+  // The shorter side less a pixel each edge, as the file draws it.
+  '.omni-image-placeholder .image-placeholder-icon{width:calc(min(100cqw, 100cqh) - 2px);height:calc(min(100cqw, 100cqh) - 2px);color:inherit}',
+].join('\n'));
 
 /**
  * ImagePlaceholder — Figma's `Image Placeholder` (7251:1985): where an image
@@ -18,33 +30,17 @@ import ImageIcon from '@omni-design/icons/Image';
  * nothing a screen reader needs. Pass role="img" + aria-label if the absence
  * itself is information ("No photo uploaded").
  */
-export function ImagePlaceholder({ className = '', sx = {}, ...props }) {
+export function ImagePlaceholder({ className = '', sx, ...props }) {
+  useStaticStyles('omni-image-placeholder');
   const labelled = props['aria-label'] || props['aria-labelledby'];
-  return (
-    <Box
-      className={'image-placeholder ' + className}
-      aria-hidden={labelled ? undefined : 'true'}
-      sx={{
-        position: 'relative',
-        width: '100%', height: '100%',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        backgroundColor: 'var(--Border-Variant)',
-        color: 'var(--Quiet)',
-        overflow: 'hidden',
-        containerType: 'size',
-        '& .image-placeholder-icon': {
-          // The shorter side less a pixel each edge, as the file draws it.
-          width: 'calc(min(100cqw, 100cqh) - 2px)',
-          height: 'calc(min(100cqw, 100cqh) - 2px)',
-          color: 'inherit',
-        },
-        ...sx,
-      }}
-      {...props}
-    >
-      <ImageIcon className="image-placeholder-icon" />
-    </Box>
-  );
+  const root = {
+    className: 'image-placeholder ' + className + ' MuiBox-root omni-image-placeholder',
+    'aria-hidden': labelled ? undefined : 'true',
+    ...props,
+  };
+  const icon = <ImageIcon className="image-placeholder-icon" />;
+  if (hasSx(sx)) return <SxBox sx={sx} {...root}>{icon}</SxBox>;
+  return <div {...root}>{icon}</div>;
 }
 
 export default ImagePlaceholder;

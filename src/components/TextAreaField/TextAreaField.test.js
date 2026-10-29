@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TextAreaField } from './TextAreaField';
+import { declared } from '../_testCss';
 
 describe('TextAreaField', () => {
   /* The label and the control have to be ASSOCIATED, not merely stacked. The
@@ -67,12 +68,7 @@ describe('TextAreaField', () => {
   test('stacks the label above the control, always', () => {
     const { container } = render(<TextAreaField label="Bio" />);
     const root = container.querySelector('.textarea-field');
-    const cls = (root.getAttribute('class') || '').split(/\s+/).find((c) => c.startsWith('css-'));
-    const css = Array.from(document.styleSheets)
-      .flatMap((s2) => Array.from(s2.cssRules || []))
-      .filter((r) => (r.selectorText || '').includes('.' + cls))
-      .map((r) => r.cssText).join('\n');
-    expect(css).toContain('flex-direction: column');
+        expect(declared(root, 'flex-direction')).toBe('column');
     /* And the label comes first in the DOM, so reading order matches. */
     const kids = Array.from(root.children);
     expect(kids[0].querySelector('label')).toBeTruthy();

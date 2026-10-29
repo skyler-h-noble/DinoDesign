@@ -33,13 +33,25 @@
 // field's accessible name, so the field would announce as "Email More about
 // this field". The row is the container; the label is only its first child.
 import React from 'react';
-import { Box } from '@mui/material';
 // Straight from the file, not the folder index: the index also exports the
 // Typography showcase, which imports Select, which imports this — a cycle.
 import { Label } from '../Typography/Typography';
 import { Link } from '../Link/Link';
 import { Icon } from '../Icon/Icon';
 import InfoOutlinedIcon from '@omni-design/icons/InfoOutlined';
+import { useStaticStyles } from '../_staticStyles';
+import { registerBoxStyles } from '../_webkitBox';
+import { lazySxBox } from '../_lazyFallback';
+
+const SxBox = lazySxBox('FormLabel');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+registerBoxStyles('omni-form-label', [
+  /* Figma binds itemSpacing -> Sizing-Half on Form-Label. */
+  '.omni-fl-row{display:flex;align-items:center;gap:var(--Sizing-Half)}',
+  /* Two classes: the Link's own rules are one class, in its own sheet. */
+  '.omni-fl-more.omni-fl-more{display:inline-flex;align-items:center;gap:var(--Sizing-Half)}',
+].join('\n'));
 
 /** The design's literal strings, including its leading space before the star. */
 export const FORM_LABEL_MARKERS = {
@@ -68,9 +80,10 @@ export function FormLabel({
   moreInfo,
   disabled = false,
   className = '',
-  sx = {},
+  sx,
   ...props
 }) {
+  useStaticStyles('omni-form-label');
   const marker = FORM_LABEL_MARKERS[type];
   const isLegend = as === 'legend';
 
@@ -149,11 +162,10 @@ export function FormLabel({
 
   const moreInfoEl = moreInfo ? (
     <Link
-      className="form-label-more-info"
+      className="form-label-more-info MuiBox-root omni-fl-more"
       href={moreInfo.href}
       onClick={moreInfo.onClick}
       aria-label={moreInfo.label}
-      sx={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--Sizing-Half)' }}
     >
       {/* Icon first, as Figma's Form-Label draws it: ⓘ More information.
           aria-hidden by default in this library unless given its own label,
@@ -174,22 +186,9 @@ export function FormLabel({
     );
   }
 
-  return (
-    <Box
-      className={'form-label-row ' + className}
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        /* Figma binds itemSpacing -> Sizing-Half on Form-Label. */
-        gap: 'var(--Sizing-Half)',
-        ...sx,
-      }}
-      {...props}
-    >
-      {labelEl}
-      {moreInfoEl}
-    </Box>
-  );
+  const row = { className: 'form-label-row ' + className + ' MuiBox-root omni-fl-row', ...props };
+  if (hasSx(sx)) return <SxBox sx={sx} {...row}>{labelEl}{moreInfoEl}</SxBox>;
+  return <div {...row}>{labelEl}{moreInfoEl}</div>;
 }
 
 export default FormLabel;
