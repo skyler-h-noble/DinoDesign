@@ -116,6 +116,11 @@ import HomeIcon from '@mui/icons-material/Home';
 | Form field | `TextField` | `label`, `value`, `onChange`, `type`, `helperText` |
 | Footer | `Footer` | `brand`, `columns`, `copyrightName` |
 
+The core components above have exact TypeScript types: an editor lists the
+allowed values for `theme`, `surface`, `variant`, `color` and `size`, and a
+value TypeScript rejects is one the component does not support. The shared
+names are exported too: `Theme`, `Surface`, `Color`, `ButtonVariant`, `…Props`.
+
 Icons: `@mui/icons-material` (MUI 7) — use names that exist in v7 (e.g. `Eco`
 is gone; `EnergySavingsLeaf` replaces it), or the build fails. Use
 `<Icon color="primary">` to give one a brand color.

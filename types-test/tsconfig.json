@@ -16,5 +16,5 @@
     "paths": { "@omni-design/components": ["../dist/types/components/index.d.ts"] },
     "typeRoots": ["../node_modules/@types"]
   },
-  "files": ["consumer.tsx", "quickstart.tsx"]
+  "files": ["consumer.tsx", "quickstart.tsx", "rejects.tsx"]
 }
