@@ -5,10 +5,39 @@
 // Keyed by topic title rather than passed in, so a topic without a demo simply
 // renders its prose and nothing has to know which is which.
 import React from 'react';
-import { Box } from '@mui/material';
 import { H5, BodySmall, Caption, EyebrowSmall } from '../Typography';
 import { VStack, HStack } from '../Stack/Stack';
 import { HowToSlot } from './HowToSlot';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+
+/* One sheet for the demos. Per-instance colors and shadows are custom
+   properties declared on the element they paint. The `> *` rule reaches into
+   a Typography child, so it carries the class twice to win over that child's
+   own sheet wherever the two land in <head> — as emotion's later rule did. */
+registerStaticStyles('omni-foundation-demos', [
+  '.omni-fd-elev{height:72px;border-radius:var(--Card-Radius, var(--Style-Border-Radius));background-color:var(--Background);'
+    + 'color:var(--Text);box-shadow:var(--_fd-shadow);display:flex;-webkit-box-align:center;align-items:center;-webkit-box-pack:center;justify-content:center}',
+  '.omni-fd-surface{width:104px;height:56px;flex-shrink:0;border-radius:var(--Style-Border-Radius, 4px);'
+    + 'background-color:var(--Background);color:var(--Text);border:1px solid var(--Border-Variant);'
+    + 'display:flex;-webkit-box-align:center;align-items:center;-webkit-box-pack:center;justify-content:center}',
+  '.omni-fd-label{min-width:0}',
+  '.omni-fd-label.omni-fd-label>*{display:block;line-height:1.45}',
+  '.omni-fd-state{width:72px;height:36px;flex-shrink:0;border-radius:var(--Style-Border-Radius, 4px);'
+    + 'background-color:var(--_fd-bg);border:1px solid var(--Border-Variant)}',
+  '.omni-fd-ramp{display:flex;flex-wrap:nowrap;overflow-x:auto}',
+  '.omni-fd-tone{flex:0 0 auto;width:48px;text-align:center}',
+  '.omni-fd-tone-chip{height:40px;background-color:var(--_fd-bg);border:1px solid var(--Border-Variant)}',
+  '.omni-fd-method{background-color:var(--Background);color:var(--Text);padding:16px;'
+    + 'border-radius:var(--Card-Radius, var(--Style-Border-Radius));border:1px solid var(--Border-Variant)}',
+  '.omni-fd-steps{margin:0;padding-left:17.6px;display:flex;flex-direction:column;gap:4px}',
+  '.omni-fd-table{width:100%;border-collapse:collapse;text-align:left}',
+  '.omni-fd-th{padding-top:8px;padding-bottom:8px;padding-right:16px;vertical-align:bottom;border-bottom:1px solid var(--Border)}',
+  '.omni-fd-td{padding-top:10px;padding-bottom:10px;padding-right:16px;vertical-align:top}',
+  '.omni-fd-key{padding-top:8px;padding-bottom:8px;padding-right:16px;vertical-align:top;width:38%}',
+  '.omni-fd-val{padding-top:8px;padding-bottom:8px;vertical-align:top}',
+  '.omni-fd-code{font-family:ui-monospace, SFMono-Regular, Menlo, monospace;font-size:0.85em;padding:1px 4px;'
+    + 'border-radius:var(--Sizing-Half, 4px);background-color:var(--Hover)}',
+].join('\n'));
 
 /* Elevation is a CONTAINER LEVEL plus a shadow, not a shadow alone.
    The tone carries most of it, and the direction FLIPS with the mode — a
@@ -34,6 +63,7 @@ const ELEVATIONS = [
 ];
 
 export function ElevationDemo() {
+  useStaticStyles('omni-foundation-demos');
   return (
     <VStack gap="var(--Sizing-2)">
       <H5>The levels</H5>
@@ -45,14 +75,10 @@ export function ElevationDemo() {
       <HStack gap="var(--Sizing-3)" style={{ flexWrap: 'wrap', alignItems: 'flex-start' }}>
         {ELEVATIONS.map(({ level, surface, use }) => (
           <VStack key={level} gap="var(--Sizing-1)" style={{ width: 150 }}>
-            <Box data-surface={surface} sx={{
-              height: 72, borderRadius: 'var(--Card-Radius, var(--Style-Border-Radius))',
-              backgroundColor: 'var(--Background)', color: 'var(--Text)',
-              boxShadow: level === 0 ? 'none' : `var(--Effect-Level-${level})`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
+            <div data-surface={surface} className="MuiBox-root omni-fd-elev"
+              style={{ '--_fd-shadow': level === 0 ? 'none' : `var(--Effect-Level-${level})` }}>
               <Caption>Level {level}</Caption>
-            </Box>
+            </div>
             <Caption color="quiet" style={{ display: 'block', lineHeight: 1.4 }}>{surface}</Caption>
             <Caption color="quiet" style={{ display: 'block', lineHeight: 1.4 }}>{use}</Caption>
           </VStack>
@@ -83,18 +109,13 @@ const CONTAINERS = [
 ];
 
 function SurfaceRow({ name, usedBy }) {
+  useStaticStyles('omni-foundation-demos');
   return (
     <HStack gap="var(--Sizing-2)" style={{ alignItems: 'center' }} enforceMinGap={false}>
-      <Box data-surface={name} sx={{
-        width: 104, height: 56, flexShrink: 0,
-        borderRadius: 'var(--Style-Border-Radius, 4px)',
-        backgroundColor: 'var(--Background)', color: 'var(--Text)',
-        border: '1px solid var(--Border-Variant)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
+      <div data-surface={name} className="MuiBox-root omni-fd-surface">
         <Caption>Aa</Caption>
-      </Box>
-      {/* A plain Box, not a VStack.
+      </div>
+      {/* A plain box, not a VStack.
           OmniStack raises its gap to --min-stack-gap when a child is "small",
           and Caption is on that list — so a 2px gap silently became 8px, the
           text block grew taller than the 56px swatch beside it, and the name
@@ -108,10 +129,10 @@ function SurfaceRow({ name, usedBy }) {
           the two lines as far apart as before, the name floating above the
           swatch and its description below. `& > *` reaches the rendered element
           and does. */}
-      <Box sx={{ minWidth: 0, '& > *': { display: 'block', lineHeight: 1.45 } }}>
+      <div className="MuiBox-root omni-fd-label">
         <Caption style={{ fontFamily: 'ui-monospace, Menlo, monospace' }}>{name}</Caption>
         <Caption color="quiet">{usedBy}</Caption>
-      </Box>
+      </div>
     </HStack>
   );
 }
@@ -175,6 +196,7 @@ const STATE_TOKENS = [
 ];
 
 export function StatesDemo() {
+  useStaticStyles('omni-foundation-demos');
   return (
     <VStack gap="var(--Sizing-3)">
       <HowToSlot
@@ -194,12 +216,7 @@ export function StatesDemo() {
           <EyebrowSmall>{group}</EyebrowSmall>
           {rows.map(([token, note]) => (
             <HStack key={token} gap="var(--Sizing-2)" style={{ alignItems: 'center' }}>
-              <Box sx={{
-                width: 72, height: 36, flexShrink: 0,
-                borderRadius: 'var(--Style-Border-Radius, 4px)',
-                backgroundColor: `var(${token})`,
-                border: '1px solid var(--Border-Variant)',
-              }} />
+              <div className="MuiBox-root omni-fd-state" style={{ '--_fd-bg': `var(${token})` }} />
               <VStack gap="2px">
                 <Caption style={{ fontFamily: 'ui-monospace, Menlo, monospace' }}>{token}</Caption>
                 <Caption color="quiet">{note}</Caption>
@@ -233,6 +250,7 @@ export function StatesDemo() {
 const RAMP_PALETTES = ['Primary', 'Secondary', 'Tertiary', 'Neutral'];
 
 export function StaticColorsDemo() {
+  useStaticStyles('omni-foundation-demos');
   return (
     <VStack gap="var(--Sizing-2)">
       <H5>The ramps</H5>
@@ -242,21 +260,17 @@ export function StaticColorsDemo() {
         and wrong for a background.
       </BodySmall>
       {RAMP_PALETTES.map((palette) => (
-        <Box key={palette}>
+        <div key={palette} className="MuiBox-root">
           <Caption style={{ display: 'block', marginBottom: 4 }}>{palette}</Caption>
-          <Box sx={{ display: 'flex', flexWrap: 'nowrap', overflowX: 'auto' }}>
+          <div className="MuiBox-root omni-fd-ramp">
             {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
-              <Box key={n} sx={{ flex: '0 0 auto', width: 48, textAlign: 'center' }}>
-                <Box sx={{
-                  height: 40,
-                  backgroundColor: `var(--${palette}-Color-${n})`,
-                  border: '1px solid var(--Border-Variant)',
-                }} />
+              <div key={n} className="MuiBox-root omni-fd-tone">
+                <div className="MuiBox-root omni-fd-tone-chip" style={{ '--_fd-bg': `var(--${palette}-Color-${n})` }} />
                 <Caption color="quiet" style={{ fontSize: 10 }}>{n}</Caption>
-              </Box>
+              </div>
             ))}
-          </Box>
-        </Box>
+          </div>
+        </div>
       ))}
     </VStack>
   );
@@ -336,30 +350,27 @@ function Shot({ src, title, caption, maxWidth = 560 }) {
 }
 
 function Method({ name, when, steps, note }) {
+  useStaticStyles('omni-foundation-demos');
   return (
-    <Box data-surface="Container" sx={{
-      backgroundColor: 'var(--Background)', color: 'var(--Text)',
-      p: 2, borderRadius: 'var(--Card-Radius, var(--Style-Border-Radius))',
-      border: '1px solid var(--Border-Variant)',
-    }}>
+    <div data-surface="Container" className="MuiBox-root omni-fd-method">
       <VStack gap="var(--Sizing-1)">
         <VStack gap="var(--Sizing-Quarter)">
           <H5>{name}</H5>
           <Caption color="quiet">{when}</Caption>
         </VStack>
-        <Box component="ol" sx={{ m: 0, pl: 2.2, display: 'flex',
-                                  flexDirection: 'column', gap: 0.5 }}>
+        <ol className="MuiBox-root omni-fd-steps">
           {steps.map((t, i) => (
-            <Box component="li" key={i}><BodySmall>{t}</BodySmall></Box>
+            <li key={i} className="MuiBox-root"><BodySmall>{t}</BodySmall></li>
           ))}
-        </Box>
+        </ol>
         {note ? <BodySmall color="quiet">{note}</BodySmall> : null}
       </VStack>
-    </Box>
+    </div>
   );
 }
 
 function ThemingDemo() {
+  useStaticStyles('omni-foundation-demos');
   return (
     <VStack gap="var(--Sizing-3)">
       <VStack gap="var(--Sizing-1)">
@@ -444,14 +455,13 @@ function ThemingDemo() {
 
       <VStack gap="var(--Sizing-1)">
         <EyebrowSmall>Side by side</EyebrowSmall>
-        <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+        <table className="MuiBox-root omni-fd-table">
           <thead>
             <tr>
               {['', 'Plugin', 'Widget', 'By hand'].map((h, i) => (
-                <Box key={i} component="th" sx={{ py: 1, pr: 2, verticalAlign: 'bottom',
-                                                  borderBottom: '1px solid var(--Border)' }}>
+                <th key={i} className="MuiBox-root omni-fd-th">
                   <EyebrowSmall>{h}</EyebrowSmall>
-                </Box>
+                </th>
               ))}
             </tr>
           </thead>
@@ -468,7 +478,7 @@ function ThemingDemo() {
             ].map((row, r) => (
               <tr key={r}>
                 {row.map((cell, c) => (
-                  <Box key={c} component="td" sx={{ py: 1.25, pr: 2, verticalAlign: 'top' }}>
+                  <td key={c} className="MuiBox-root omni-fd-td">
                     {c === 0
                       ? <BodySmall>{cell}</BodySmall>
                       /* The yes is a word, not a tick. A tick in a table is a
@@ -480,17 +490,17 @@ function ThemingDemo() {
                         : cell === 0
                           ? <BodySmall color="quiet">No</BodySmall>
                           : <BodySmall color="quiet">{cell}</BodySmall>}
-                  </Box>
+                  </td>
                 ))}
               </tr>
             ))}
           </tbody>
-        </Box>
+        </table>
       </VStack>
 
       <VStack gap="var(--Sizing-1)">
         <EyebrowSmall>Reading the panel</EyebrowSmall>
-        <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+        <table className="MuiBox-root omni-fd-table">
           <tbody>
             {[
               ['Leave as is (Primary)', 'A mode is pinned here, and it is Primary.'],
@@ -500,21 +510,16 @@ function ThemingDemo() {
               ['Set where it does not belong', 'A layer that is not the switch is holding a mode, and has stopped following the theme.'],
             ].map(([k, v], i) => (
               <tr key={i}>
-                <Box component="td" sx={{ py: 1, pr: 2, verticalAlign: 'top', width: '38%' }}>
-                  <Box component="code" sx={{
-                    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-                    fontSize: '0.85em', px: 0.5, py: '1px',
-                    borderRadius: 'var(--Sizing-Half, 4px)',
-                    backgroundColor: 'var(--Hover)',
-                  }}>{k}</Box>
-                </Box>
-                <Box component="td" sx={{ py: 1, verticalAlign: 'top' }}>
+                <td className="MuiBox-root omni-fd-key">
+                  <code className="MuiBox-root omni-fd-code">{k}</code>
+                </td>
+                <td className="MuiBox-root omni-fd-val">
                   <BodySmall>{v}</BodySmall>
-                </Box>
+                </td>
               </tr>
             ))}
           </tbody>
-        </Box>
+        </table>
       </VStack>
     </VStack>
   );

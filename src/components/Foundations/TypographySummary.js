@@ -8,7 +8,6 @@
 // a separate Foundations entry to learn that half of it comes from Apple's
 // table rather than the brand's scale.
 import React from 'react';
-import { Box } from '@mui/material';
 import { H4, H5, Body, BodySmall, Caption, Typography,
          HEADER_COLORS, TEXT_COLORS, TYPOGRAPHY_STYLES,
          STYLE_TOKENS, STYLE_DEFAULT_COLOR } from '../Typography';

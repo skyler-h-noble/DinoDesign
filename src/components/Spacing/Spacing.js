@@ -1,6 +1,82 @@
 // src/components/Spacing/Spacing.js
 import React from 'react';
-import { Box, Typography, Stack, Grid } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+
+/* ── Static sheet ─────────────────────────────────────────────────────────
+   Built from MUI's Typography, Stack and Grid on MUI's default theme, and it
+   keeps that look exactly: each MUI part is its plain element with MUI's
+   class names and the styles MUI computed for it.
+
+   Stacks keep MUI's selectors and so their weight: every child's margin is
+   reset and the gap is a margin on each child after the first — so a child's
+   own margin inside a stack (SpacingBar's mb, the note's mt) never applied,
+   and still does not. The MUI v7 Grid ignores item / xs / sm / md / lg, so
+   its items size to their content. Per-instance sizes travel as custom
+   properties declared on the element they size. */
+const TYPE = {
+  h5: ['h5', 'font-family:Roboto, Helvetica, Arial, sans-serif;font-weight:400;font-size:1.5rem;line-height:1.334;letter-spacing:0em'],
+  h6: ['h6', 'font-family:Roboto, Helvetica, Arial, sans-serif;font-weight:500;font-size:1.25rem;line-height:1.6;letter-spacing:0.0075em'],
+  subtitle2: ['h6', 'font-family:Roboto, Helvetica, Arial, sans-serif;font-weight:500;font-size:0.875rem;line-height:1.57;letter-spacing:0.00714em'],
+  body2: ['p', 'font-family:Roboto, Helvetica, Arial, sans-serif;font-weight:400;font-size:0.875rem;line-height:1.43;letter-spacing:0.01071em'],
+  caption: ['span', 'font-family:Roboto, Helvetica, Arial, sans-serif;font-weight:400;font-size:0.75rem;line-height:1.66;letter-spacing:0.03333em'],
+};
+const stack = (cls, dir, gap) => [
+  `.${cls}>:not(style):not(style){margin:0}`,
+  `.${cls}>:not(style)~:not(style){margin-${dir === 'row' ? 'left' : 'top'}:${gap}}`,
+];
+registerStaticStyles('omni-spacing', [
+  '.omni-spc-t{margin:0}',
+  ...Object.entries(TYPE).map(([v, [, css]]) => `.omni-spc-${v}{${css}}`),
+  // Typography sx, after the variant as emotion wrote it.
+  '.omni-spc-mb1{margin-bottom:8px}',
+  '.omni-spc-mb2{margin-bottom:16px}',
+  '.omni-spc-mb3{margin-bottom:24px}',
+  '.omni-spc-mt1{margin-top:8px}',
+  '.omni-spc-w600{font-weight:600}',
+  '.omni-spc-w700{font-weight:700}',
+  '.omni-spc-quiet{color:var(--Text-Secondary)}',
+  '.omni-spc-block{display:block}',
+  // Boxes.
+  '.omni-spc-bar-row{display:flex;-webkit-box-align:center;align-items:center;gap:16px;margin-bottom:8px}',
+  '.omni-spc-bar{width:var(--_spc-w);min-width:20px;height:24px;background-color:var(--Buttons-Primary-Button);'
+    + 'border-radius:2px;border:1px solid var(--Border)}',
+  '.omni-spc-size{width:100px;height:var(--_spc-h);background-color:var(--Buttons-Primary-Button);border-radius:4px;'
+    + 'border:1px solid var(--Border);margin-bottom:8px}',
+  '.omni-spc-container{padding:var(--Spacing-3);background-color:var(--Container-Low);'
+    + 'border:2px dashed var(--Buttons-Primary-Button);border-radius:4px}',
+  '.omni-spc-pad{padding:var(--_spc-p);background-color:var(--Container);border:1px solid var(--Border);border-radius:4px}',
+  '.omni-spc-square{width:60px;height:60px;background-color:var(--Buttons-Primary-Button);border-radius:4px;flex-shrink:0}',
+  '.omni-spc-note{padding:16px;background-color:var(--Container-Low);border-radius:4px;'
+    + 'border-left:4px solid var(--Buttons-Primary-Button);margin-top:24px}',
+  // Stacks.
+  '.omni-spc-stack{display:flex;flex-direction:column}',
+  '.omni-spc-root{padding:16px}',
+  '.omni-spc-row{display:flex;flex-direction:row;margin-bottom:8px}',
+  ...stack('omni-spc-s3', 'column', '24px'),
+  ...stack('omni-spc-s1', 'column', '8px'),
+  ...stack('omni-spc-sh', 'column', '4px'),
+  ...stack('omni-spc-row', 'row', 'var(--_spc-gap)'),
+  // Grid.
+  '.omni-spc-grid{flex-flow:wrap;min-width:0;box-sizing:border-box;display:flex;gap:var(--_spc-g) var(--_spc-g)}',
+  '.omni-spc-grid-mb4{margin-bottom:32px}',
+  '.omni-spc-cell{min-width:0;box-sizing:border-box}',
+].join('\n'));
+
+/** One MUI Typography variant as its element. */
+function T({ v, as, className = '', children }) {
+  const Tag = as || TYPE[v][0];
+  return (
+    <Tag className={`MuiTypography-root MuiTypography-${v} omni-spc-t omni-spc-${v}${className ? ' ' + className : ''}`}>
+      {children}
+    </Tag>
+  );
+}
+
+const grid = (n, extra = '') => ({
+  className: `MuiGrid-root MuiGrid-container MuiGrid-direction-xs-row MuiGrid-spacing-xs-${n} omni-spc-grid${extra}`,
+  style: { '--_spc-g': n * 8 + 'px' },
+});
+const CELL = 'MuiGrid-root MuiGrid-direction-xs-row omni-spc-cell';
 
 /**
  * Spacing Component - Design System Documentation
@@ -17,6 +93,7 @@ import { Box, Typography, Stack, Grid } from '@mui/material';
  * @returns {React.ReactNode} Spacing scale documentation
  */
 export function Spacing() {
+  useStaticStyles('omni-spacing');
   const spacingUnits = [
     { name: 'Quarter', var: '--Spacing-Quarter', baseValue: '2px' },
     { name: 'Half', var: '--Spacing-Half', baseValue: '4px' },
@@ -74,55 +151,23 @@ export function Spacing() {
    */
   const SpacingBar = ({ name, varName, baseValue }) => {
     return (
-      <Box sx={{ mb: 2 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2,
-            mb: 1,
-          }}
-        >
+      <div className="MuiBox-root omni-spc-mb2">
+        <div className="MuiBox-root omni-spc-bar-row">
           {/* 
             Visual bar - HIDDEN from assistive technology
             aria-hidden="true" because the spacing value is fully conveyed 
             by the text labels below. Screen readers don't need this visual.
           */}
-          <Box
-            aria-hidden="true"
-            sx={{
-              width: `var(${varName})`,
-              minWidth: 20,
-              height: 24,
-              backgroundColor: 'var(--Buttons-Primary-Button)',
-              borderRadius: 0.5,
-              border: '1px solid var(--Border)',
-            }}
-          />
+          <div aria-hidden="true" className="MuiBox-root omni-spc-bar" style={{ '--_spc-w': `var(${varName})` }} />
           
           {/* Text labels - VISIBLE to screen readers */}
-          <Stack spacing={0.5}>
-            <Typography 
-              variant="subtitle2" 
-              sx={{ fontWeight: 600 }}
-            >
-              {name}
-            </Typography>
-            <Typography 
-              variant="caption" 
-              sx={{ color: 'var(--Text-Secondary)' }}
-            >
-              {varName}
-            </Typography>
-            <Typography 
-              variant="caption" 
-              sx={{ color: 'var(--Text-Secondary)' }}
-            >
-              Base: {baseValue}
-            </Typography>
-          </Stack>
-        </Box>
-      </Box>
+          <div className="MuiStack-root omni-spc-stack omni-spc-sh">
+            <T v="subtitle2" className="omni-spc-w600">{name}</T>
+            <T v="caption" className="omni-spc-quiet">{varName}</T>
+            <T v="caption" className="omni-spc-quiet">Base: {baseValue}</T>
+          </div>
+        </div>
+      </div>
     );
   };
 
@@ -133,65 +178,31 @@ export function Spacing() {
    */
   const SizingBox = ({ name, varName, value }) => {
     return (
-      <Box sx={{ mb: 2 }}>
+      <div className="MuiBox-root omni-spc-mb2">
         {/* 
           Decorative visual box - HIDDEN from assistive technology
           The actual size values are in the text below
         */}
-        <Box
-          aria-hidden="true"
-          sx={{
-            width: 100,
-            height: value,
-            backgroundColor: 'var(--Buttons-Primary-Button)',
-            borderRadius: 1,
-            border: '1px solid var(--Border)',
-            mb: 1,
-          }}
-        />
+        <div aria-hidden="true" className="MuiBox-root omni-spc-size" style={{ '--_spc-h': value }} />
         
         {/* Text content - VISIBLE to screen readers */}
-        <Typography 
-          variant="subtitle2" 
-          sx={{ fontWeight: 600 }}
-        >
-          {name}
-        </Typography>
-        <Typography 
-          variant="caption" 
-          sx={{ color: 'var(--Text-Secondary)', display: 'block' }}
-        >
-          {varName}
-        </Typography>
-        <Typography 
-          variant="caption" 
-          sx={{ color: 'var(--Text-Secondary)' }}
-        >
-          {value}
-        </Typography>
-      </Box>
+        <T v="subtitle2" className="omni-spc-w600">{name}</T>
+        <T v="caption" className="omni-spc-quiet omni-spc-block">{varName}</T>
+        <T v="caption" className="omni-spc-quiet">{value}</T>
+      </div>
     );
   };
 
   return (
-    <Stack spacing={3} sx={{ p: 2 }}>
+    <div className="MuiStack-root omni-spc-stack omni-spc-root omni-spc-s3">
       {/* Spacing Section */}
       <section>
-        <Typography 
-          variant="h5" 
-          component="h2"
-          sx={{ mb: 2, fontWeight: 700 }}
-        >
-          Spacing Scale
-        </Typography>
-        <Typography 
-          variant="body2" 
-          sx={{ mb: 3, color: 'var(--Text-Secondary)' }}
-        >
+        <T v="h5" as="h2" className="omni-spc-mb2 omni-spc-w700">Spacing Scale</T>
+        <T v="body2" className="omni-spc-mb3 omni-spc-quiet">
           
           Each spacing value includes a visual reference and text label for clarity.
-        </Typography>
-        <Stack spacing={1}>
+        </T>
+        <div className="MuiStack-root omni-spc-stack omni-spc-s1">
           {spacingUnits.map((unit) => (
             <SpacingBar
               key={unit.var}
@@ -200,266 +211,150 @@ export function Spacing() {
               baseValue={unit.baseValue}
             />
           ))}
-        </Stack>
+        </div>
       </section>
 
       {/* Sizing Section */}
       <section>
-        <Typography 
-          variant="h5"
-          component="h2"
-          sx={{ mb: 2, fontWeight: 700 }}
-        >
-          Sizing Scale
-        </Typography>
-        <Typography 
-          variant="body2" 
-          sx={{ mb: 3, color: 'var(--Text-Secondary)' }}
-        >
+        <T v="h5" as="h2" className="omni-spc-mb2 omni-spc-w700">Sizing Scale</T>
+        <T v="body2" className="omni-spc-mb3 omni-spc-quiet">
           Fixed sizing values for components and layouts. Each size is labeled 
           with its CSS variable and pixel value.
-        </Typography>
-        <Grid container spacing={3}>
+        </T>
+        <div {...grid(3)}>
           {sizingUnits.map((unit) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={unit.var}>
+            <div key={unit.var} className={CELL}>
               <SizingBox 
                 name={unit.name} 
                 varName={unit.var} 
                 value={unit.value} 
               />
-            </Grid>
+            </div>
           ))}
-        </Grid>
+        </div>
       </section>
 
       {/* Negative Sizing Section */}
       <section>
-        <Typography 
-          variant="h5"
-          component="h2"
-          sx={{ mb: 2, fontWeight: 700 }}
-        >
-          Negative Sizing
-        </Typography>
-        <Typography 
-          variant="body2" 
-          sx={{ mb: 3, color: 'var(--Text-Secondary)' }}
-        >
+        <T v="h5" as="h2" className="omni-spc-mb2 omni-spc-w700">Negative Sizing</T>
+        <T v="body2" className="omni-spc-mb3 omni-spc-quiet">
           Negative values for margins and offsets. Use these to reduce or remove 
           default spacing when needed.
-        </Typography>
-        <Grid container spacing={3}>
+        </T>
+        <div {...grid(3)}>
           {negativeSizing.map((unit) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={unit.var}>
-              <Box>
-                <Typography 
-                  variant="subtitle2" 
-                  sx={{ fontWeight: 600 }}
-                >
-                  {unit.name}
-                </Typography>
-                <Typography 
-                  variant="caption" 
-                  sx={{ color: 'var(--Text-Secondary)', display: 'block' }}
-                >
-                  {unit.var}
-                </Typography>
-                <Typography 
-                  variant="caption" 
-                  sx={{ color: 'var(--Text-Secondary)' }}
-                >
-                  {unit.value}
-                </Typography>
-              </Box>
-            </Grid>
+            <div key={unit.var} className={CELL}>
+              <div className="MuiBox-root">
+                <T v="subtitle2" className="omni-spc-w600">{unit.name}</T>
+                <T v="caption" className="omni-spc-quiet omni-spc-block">{unit.var}</T>
+                <T v="caption" className="omni-spc-quiet">{unit.value}</T>
+              </div>
+            </div>
           ))}
-        </Grid>
+        </div>
       </section>
 
       {/* Container Padding */}
       <section style={{ paddingTop: 24, borderTop: '1px solid var(--Border)' }}>
-        <Typography 
-          variant="h5"
-          component="h2"
-          sx={{ mb: 2, fontWeight: 700 }}
-        >
-          Container Padding
-        </Typography>
-        <Box
-          sx={{
-            p: 'var(--Spacing-3)',
-            backgroundColor: 'var(--Container-Low)',
-            border: '2px dashed var(--Buttons-Primary-Button)',
-            borderRadius: 1,
-          }}
-        >
-          <Typography variant="body2">
+        <T v="h5" as="h2" className="omni-spc-mb2 omni-spc-w700">Container Padding</T>
+        <div className="MuiBox-root omni-spc-container">
+          <T v="body2">
             Default container padding: <strong>var(--Spacing-3)</strong> = 24px
-          </Typography>
-          <Typography 
-            variant="caption"
-            sx={{ color: 'var(--Text-Secondary)', display: 'block', mt: 1 }}
-          >
+          </T>
+          <T v="caption" className="omni-spc-quiet omni-spc-block omni-spc-mt1">
             Use this variable for consistent padding around main content areas.
-          </Typography>
-        </Box>
+          </T>
+        </div>
       </section>
 
       {/* Practical Examples */}
       <section style={{ paddingTop: 24, borderTop: '1px solid var(--Border)' }}>
-        <Typography 
-          variant="h5"
-          component="h2"
-          sx={{ mb: 3, fontWeight: 700 }}
-        >
-          Practical Examples
-        </Typography>
+        <T v="h5" as="h2" className="omni-spc-mb3 omni-spc-w700">Practical Examples</T>
 
         {/* Padding Examples */}
         <article>
-          <Typography 
-            variant="h6"
-            component="h3"
-            sx={{ mb: 2, fontWeight: 600 }}
-          >
-            Padding Examples
-          </Typography>
-          <Typography 
-            variant="caption"
-            sx={{ color: 'var(--Text-Secondary)', mb: 2, display: 'block' }}
-          >
+          <T v="h6" as="h3" className="omni-spc-mb2 omni-spc-w600">Padding Examples</T>
+          <T v="caption" className="omni-spc-quiet omni-spc-mb2 omni-spc-block">
             Different padding values create different visual breathing room.
-          </Typography>
-          <Grid container spacing={2} sx={{ mb: 4 }}>
+          </T>
+          <div {...grid(2, ' omni-spc-grid-mb4')}>
             {['var(--Spacing-1)', 'var(--Spacing-2)', 'var(--Spacing-3)', 'var(--Spacing-4)'].map((spacing) => (
-              <Grid item xs={12} sm={6} key={spacing}>
-                <Box
-                  sx={{
-                    p: spacing,
-                    backgroundColor: 'var(--Container)',
-                    border: '1px solid var(--Border)',
-                    borderRadius: 1,
-                  }}
-                >
-                  <Typography variant="subtitle2">
+              <div key={spacing} className={CELL}>
+                <div className="MuiBox-root omni-spc-pad" style={{ '--_spc-p': spacing }}>
+                  <T v="subtitle2">
                     Padding: {spacing}
-                  </Typography>
-                  <Typography 
-                    variant="caption" 
-                    sx={{ 
-                      display: 'block', 
-                      mt: 1,
-                      color: 'var(--Text-Secondary)'
-                    }}
-                  >
+                  </T>
+                  <T v="caption" className="omni-spc-block omni-spc-mt1 omni-spc-quiet">
                     Content with spacing applied
-                  </Typography>
-                </Box>
-              </Grid>
+                  </T>
+                </div>
+              </div>
             ))}
-          </Grid>
+          </div>
         </article>
 
         {/* Gap Examples */}
         <article>
-          <Typography 
-            variant="h6"
-            component="h3"
-            sx={{ mb: 2, fontWeight: 600 }}
-          >
-            Gap Examples
-          </Typography>
-          <Typography 
-            variant="caption"
-            sx={{ color: 'var(--Text-Secondary)', mb: 2, display: 'block' }}
-          >
+          <T v="h6" as="h3" className="omni-spc-mb2 omni-spc-w600">Gap Examples</T>
+          <T v="caption" className="omni-spc-quiet omni-spc-mb2 omni-spc-block">
             Gap controls spacing between flex/grid children without adding extra elements.
-          </Typography>
-          <Stack spacing={3}>
+          </T>
+          <div className="MuiStack-root omni-spc-stack omni-spc-s3">
             {['var(--Spacing-1)', 'var(--Spacing-2)', 'var(--Spacing-3)'].map((gap) => (
-              <Box key={gap}>
-                <Stack 
-                  direction="row" 
-                  spacing={gap}
-                  sx={{ mb: 1 }}
-                >
+              <div key={gap} className="MuiBox-root">
+                <div className="MuiStack-root omni-spc-row" style={{ '--_spc-gap': gap }}>
                   {[1, 2, 3].map((item) => (
-                    <Box
-                      key={item}
-                      aria-hidden="true"
-                      sx={{
-                        width: 60,
-                        height: 60,
-                        backgroundColor: 'var(--Buttons-Primary-Button)',
-                        borderRadius: 1,
-                        flexShrink: 0,
-                      }}
-                    />
+                    <div key={item} aria-hidden="true" className="MuiBox-root omni-spc-square" />
                   ))}
-                </Stack>
-                <Typography 
-                  variant="caption" 
-                  sx={{ color: 'var(--Text-Secondary)' }}
-                >
+                </div>
+                <T v="caption" className="omni-spc-quiet">
                   Gap: {gap}
-                </Typography>
-              </Box>
+                </T>
+              </div>
             ))}
-          </Stack>
+          </div>
         </article>
       </section>
 
       {/* CSS Best Practices Note */}
-      <Box
-        role="note"
-        sx={{
-          p: 2,
-          backgroundColor: 'var(--Container-Low)',
-          borderRadius: 1,
-          borderLeft: '4px solid var(--Buttons-Primary-Button)',
-          mt: 3,
-        }}
-      >
-        <Typography 
-          variant="subtitle2"
-          sx={{ fontWeight: 600, mb: 1 }}
-        >
+      <div role="note" className="MuiBox-root omni-spc-note">
+        <T v="subtitle2" className="omni-spc-w600 omni-spc-mb1">
           ✓ Accessibility Best Practices Used
-        </Typography>
+        </T>
         <ul style={{ margin: '0.5rem 0', paddingLeft: '1.5rem' }}>
           <li>
-            <Typography variant="caption">
+            <T v="caption">
               <strong>aria-hidden="true"</strong> on purely decorative visual elements
-            </Typography>
+            </T>
           </li>
           <li>
-            <Typography variant="caption">
+            <T v="caption">
               All spacing information conveyed through text labels and values
-            </Typography>
+            </T>
           </li>
           <li>
-            <Typography variant="caption">
+            <T v="caption">
               No empty decorative <code>&lt;div&gt;</code> elements in DOM
-            </Typography>
+            </T>
           </li>
           <li>
-            <Typography variant="caption">
+            <T v="caption">
               Semantic HTML: <code>&lt;section&gt;</code> and <code>&lt;article&gt;</code> for structure
-            </Typography>
+            </T>
           </li>
           <li>
-            <Typography variant="caption">
+            <T v="caption">
               CSS-based spacing (padding/margin) for actual layout, not decorative divs
-            </Typography>
+            </T>
           </li>
           <li>
-            <Typography variant="caption">
+            <T v="caption">
               Full keyboard navigation and screen reader support
-            </Typography>
+            </T>
           </li>
         </ul>
-      </Box>
-    </Stack>
+      </div>
+    </div>
   );
 }
 
