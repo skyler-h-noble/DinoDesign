@@ -527,21 +527,30 @@ export function OmniDesignProvider({
     if (typeof window === 'undefined' || !window.matchMedia) return undefined;
     const phone = window.matchMedia('(max-width: 599.98px)');
     const tablet = window.matchMedia('(max-width: 899.98px)');
-    const stop = () => { phone.removeEventListener('change', apply); tablet.removeEventListener('change', apply); };
+    const timers = [];
+    const stop = () => {
+      phone.removeEventListener('change', apply); tablet.removeEventListener('change', apply);
+      timers.forEach(clearTimeout);
+    };
+    const resolvesFont = () => Boolean(getComputedStyle(root).getPropertyValue('--Font-Family-Body').trim());
     function apply() {
       const kind = phone.matches ? 'Mobile' : tablet.matches ? 'Tablet' : null;
       if (!set(kind ? (isAndroid ? 'Android-' : 'IOS-') + kind : null)) { stop(); return; }
-      // The guard: a ramp that resolves no body font is worse than desktop sizes.
-      if (kind && !getComputedStyle(root).getPropertyValue('--Font-Family-Body').trim()) {
-        set(null);
-        root.removeAttribute('data-omni-device');
-        stop();
-      }
+      // The guard: a ramp that resolves no body font is worse than desktop
+      // sizes, so drop back to desktop. Not for good, though — 'ready' can
+      // arrive a beat before the type sheet applies, and giving up on that
+      // first look left a phone on 72px headlines. Look again as the sheets
+      // settle; a theme that genuinely lacks the hooks fails every look and
+      // simply stays on desktop.
+      if (kind && !resolvesFont()) set(null);
     }
     apply();
+    [150, 600, 2000].forEach((ms) => timers.push(setTimeout(() => {
+      if (!root.hasAttribute('data-device') && (phone.matches || tablet.matches)) apply();
+    }, ms)));
     phone.addEventListener('change', apply);
     tablet.addEventListener('change', apply);
-    return () => { phone.removeEventListener('change', apply); tablet.removeEventListener('change', apply); };
+    return stop;
   }, [device, cssStatus]);
 
 

@@ -50,6 +50,17 @@ test('guard: a theme whose phone ramp resolves no body font stays on desktop', (
   expect(root.hasAttribute('data-device')).toBe(false);
 });
 
+test('guard retries: a font that resolves a moment later still gets the phone ramp', () => {
+  jest.useFakeTimers();
+  mockWidth(390); // type sheet not applied yet on the first look
+  render(<OmniDesignProvider><span /></OmniDesignProvider>);
+  expect(root.hasAttribute('data-device')).toBe(false);
+  themeWithPlatformFonts(); // …then it lands
+  jest.advanceTimersByTime(700);
+  expect(root.getAttribute('data-device')).toBe('IOS-Mobile');
+  jest.useRealTimers();
+});
+
 test('an app that sets data-device keeps control', () => {
   themeWithPlatformFonts();
   root.setAttribute('data-device', 'Desktop');
