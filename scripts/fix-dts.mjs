@@ -87,7 +87,7 @@ const HEADING = ['DisplayLarge', 'DisplayMedium', 'DisplaySmall', 'H1', 'H2', 'H
 const CORE = [
   ['Section/Section', 'SectionProps', 'Section', ['Section']],
   ['Container/Container', 'ContainerProps', 'ContainerMui', ['Container']],
-  ['Grid/Grid', 'GridProps', 'Grid', ['Grid']],
+  ['Grid/Grid', 'GridProps', 'GridMui', ['Grid']],
   ['Stack/Stack', 'StackProps', 'OmniStackMui', ['VStack', 'HStack', 'Stack']],
   ['Card/Card', 'CardProps', 'Card', ['Card']],
   ['Button/Button', 'ButtonProps', 'Button', ['Button']],

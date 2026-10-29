@@ -1,6 +1,7 @@
 // src/components/Grid/Grid.js
-import React from 'react';
+import React, { createContext, useContext } from 'react';
 import { Grid as MuiGrid, Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
 
 /**
  * Grid Component
@@ -19,7 +20,7 @@ import { Grid as MuiGrid, Box } from '@mui/material';
  * @param {ReactNode} children - Grid content
  * @param {object} props - Additional MUI Grid props
  */
-export function Grid({
+function GridMui({
   children,
   container = false,
   item = false,
@@ -373,6 +374,76 @@ export function ColumnGrid({
       {children}
     </MuiGrid>
   );
+}
+
+/* ── Static path (no emotion) ─────────────────────────────────────────────
+   MUI 7's Grid, reproduced: the container is a wrapping flex row with a gap
+   of its spacing; an item's width at each breakpoint is
+     calc(100% * N / C - (C - N) * (S / C))
+   where C and S are the PARENT container's columns and column spacing. MUI
+   writes those parent values into the children as literals, which is what
+   lets a nested grid with a different spacing work — a CSS variable would
+   read the nested grid's own value instead. So an item takes its parent's
+   values from context, computes the width literally, and the static sheet
+   applies it per breakpoint through a custom property. */
+const GridContext = createContext(null);
+const BREAKPOINTS = [['xs', 0], ['sm', 600], ['md', 900], ['lg', 1200], ['xl', 1536]];
+registerStaticStyles('omni-grid', [
+  '.omni-grid{min-width:0;box-sizing:border-box;transition:all .2s ease-in-out}',
+  '.omni-grid-container{display:flex;flex-flow:wrap;gap:var(--Grid-rowSpacing) var(--Grid-columnSpacing)}',
+  ...BREAKPOINTS.map(([bp, px]) => {
+    const r = `.omni-grid-n-${bp}{flex-grow:0;flex-basis:auto;width:var(--gw-${bp})}`
+      + `.omni-grid-grow-${bp}{flex-basis:0;flex-grow:1;max-width:100%}`
+      + `.omni-grid-auto-${bp}{flex:0 0 auto;max-width:none;width:auto}`;
+    return px ? `@media (min-width:${px}px){${r}}` : r;
+  }),
+].join('\n'));
+
+const isPlainSize = (v) => typeof v === 'number' || v === 'grow' || v === 'auto';
+const spacingPx = (v) => (typeof v === 'number' ? v * 8 + 'px' : v);
+
+export function Grid(props) {
+  useStaticStyles('omni-grid');
+  const parent = useContext(GridContext);
+  const {
+    children, container = false, item, spacing = 2, size, xs, sm, md, lg, xl, sx, className = '', style,
+    component: Tag = 'div', offset, columns, rowSpacing, columnSpacing, direction, wrap, ...rest
+  } = props;
+  const fromBreakpoints = Object.fromEntries(Object.entries({ xs, sm, md, lg, xl }).filter(([, v]) => v !== undefined));
+  const resolvedSize = size ?? (Object.keys(fromBreakpoints).length ? fromBreakpoints : undefined);
+  const sizes = resolvedSize === undefined ? {} : (typeof resolvedSize === 'object' ? resolvedSize : { xs: resolvedSize });
+  const staticOK = !(sx && Object.keys(sx).length)
+    && [offset, columns, rowSpacing, columnSpacing, direction, wrap].every((v) => v === undefined)
+    && (typeof spacing === 'number' || typeof spacing === 'string')
+    && Object.values(sizes).every(isPlainSize)
+    && (Object.keys(sizes).length === 0 || parent);
+  if (!staticOK) return <GridMui {...props} />;
+
+  const classes = ['MuiGrid-root', 'omni-grid'];
+  const vars = {};
+  for (const [bp] of BREAKPOINTS) {
+    const v = sizes[bp];
+    if (v === undefined) continue;
+    classes.push(`MuiGrid-grid-${bp}-${v}`); // MUI's own class names, for any CSS that targets them
+    if (v === 'grow' || v === 'auto') { classes.push(`omni-grid-${v}-${bp}`); continue; }
+    const C = parent.columns, S = parent.columnSpacing;
+    classes.push(`omni-grid-n-${bp}`);
+    vars[`--gw-${bp}`] = `calc(100% * ${v} / ${C} - (${C} - ${v}) * (${S} / ${C}))`;
+  }
+  let ctx = null;
+  if (container) {
+    const S = spacingPx(spacing);
+    classes.push('MuiGrid-container', 'omni-grid-container');
+    Object.assign(vars, { '--Grid-columns': 12, '--Grid-columnSpacing': S, '--Grid-rowSpacing': S });
+    ctx = { columns: 12, columnSpacing: S };
+  }
+  if (className) classes.push(className);
+  const el = (
+    <Tag className={classes.join(' ')} style={style ? { ...vars, ...style } : vars} {...rest}>
+      {children}
+    </Tag>
+  );
+  return ctx ? <GridContext.Provider value={ctx}>{el}</GridContext.Provider> : el;
 }
 
 export default Grid;
