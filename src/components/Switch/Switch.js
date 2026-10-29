@@ -1,11 +1,11 @@
 // src/components/Switch/Switch.js
-import React from 'react';
-import { Switch as MuiSwitch, FormControlLabel } from '@mui/material';
+import React, { useRef, useState } from 'react';
 import { Label, LabelSmall, LabelLarge } from '../Typography';
-import { labelGap } from '../_labelGap';
 import { SHADOW_LEVEL_2 } from '../_shadows';
-import CheckIcon from '@mui/icons-material/Check';
-import CloseIcon from '@mui/icons-material/Close';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
+import { ControlLabel } from '../_controlLabel';
+import { Glyph, SVG_ICON_DECLS } from '../_glyph';
 
 /**
  * Switch Component
@@ -205,6 +205,109 @@ const SIZE_MAP = {
   large:  { trackW: 56, trackH: 32, handle: 28, dotRadius: 'var(--Sizing-2-and-Half, 20px)', icon: 24 },
 };
 
+// --- Static sheet ------------------------------------------------------------
+//
+// Switch was MUI's Switch (SwitchBase on ButtonBase) with an sx override. It
+// is now its own markup over the same tokens, with the same parts and class
+// names — .MuiSwitch-root > .MuiSwitch-switchBase (> input + .MuiSwitch-thumb)
+// + .MuiSwitch-track — so a consumer rule that targeted them still lands.
+//
+// The rules keep the selectors and weights the sx produced (root class, then
+// the MUI part classes under it), so a caller's sx — which emotion appends
+// after this sheet — still wins wherever it did. Size and colour arrive as
+// custom properties declared on the root by one class each; nothing between
+// the root and its parts sets a data-theme, so the tokens resolve against the
+// same scope they did when the parts named them directly.
+const SxBox = lazySxBox('Switch');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+const SIZE_KEY = { small: 'sm', medium: 'md', large: 'lg' };
+const MOTION_FAST = 'var(--Motion-Duration-Fast, 150ms) var(--Motion-Easing-Standard, cubic-bezier(0.2, 0, 0, 1))';
+const VARIANT_CLASSES = [['default', themedStyles()], ...COLORS.filter((c) => c !== 'default').map((c) => [c, outlineStyles(c)])];
+const variantClass = (resolved) => {
+  const s = buildVariantMap()[resolved];
+  if (!s || s.type === 'themed') return 'default';
+  return s.color.toLowerCase();
+};
+
+registerStaticStyles('omni-switch', [
+  '.omni-sw{display:inline-flex;box-sizing:border-box;position:relative;flex-shrink:0;z-index:0;vertical-align:middle;'
+    + 'width:var(--_sw-tw);min-width:24px;height:var(--_sw-rh);min-height:24px;padding:0;overflow:visible;opacity:1}',
+  // The design dims the WHOLE control rather than its parts.
+  '.omni-sw-off{opacity:var(--Disabled, 0.38)}',
+  '@media print{.omni-sw{print-color-adjust:exact}}',
+  ...Object.entries(SIZE_KEY).map(([size, k]) => {
+    const sc = SIZE_MAP[size];
+    const rootW = Math.max(TOUCH_MIN, sc.trackW);
+    const rootH = Math.max(TOUCH_MIN, sc.trackH);
+    return `.omni-sw-${k}{--_sw-tw:${sc.trackW}px;--_sw-th:${sc.trackH}px;--_sw-rh:${rootH}px;`
+      + `--_sw-top:${(rootH - sc.trackH) / 2}px;--_sw-pr:${rootW - sc.trackW + THUMB_INSET}px;`
+      + `--_sw-dot:${sc.handle}px;--_sw-dot-r:${sc.dotRadius};--_sw-icon:${sc.icon}px}`;
+  }),
+  ...VARIANT_CLASSES.map(([name, s]) => `.omni-sw-v-${name}{--_sw-track-off:${s.trackOff};--_sw-track-off-border:${s.trackOffBorder};`
+    + `--_sw-track-on:${s.trackOn};--_sw-track-on-border:${s.trackOnBorder};--_sw-dot-off:${s.dotOff};--_sw-dot-on:${s.dotOn};`
+    + `--_sw-icon-off:${s.iconOff};--_sw-icon-on:${s.iconOn}}`),
+  /* The switch base: ButtonBase's reset. It FILLS the root and places the
+     thumb with padding, so the <input> hit area is the whole 24px root. */
+  '.omni-sw-base{display:inline-flex;-webkit-box-align:center;align-items:center;-webkit-box-pack:center;justify-content:center;'
+    + 'box-sizing:border-box;-webkit-tap-highlight-color:transparent;background-color:transparent;outline:0;border:0;margin:0;'
+    + 'cursor:pointer;user-select:none;vertical-align:middle;-moz-appearance:none;-webkit-appearance:none;appearance:none;'
+    + 'text-decoration:none;padding:9px;border-radius:50%;position:absolute;top:0;left:0;z-index:1;color:transparent}',
+  '.omni-sw-base::-moz-focus-inner{border-style:none}',
+  '.omni-sw-base.Mui-disabled{pointer-events:none;cursor:default}',
+  '.omni-sw .MuiSwitch-switchBase{' + `position:absolute;top:0;left:0;width:100%;height:100%;display:flex;-webkit-box-pack:start;justify-content:flex-start;`
+    + '-webkit-box-align:center;align-items:center;padding-top:0;padding-bottom:0;padding-left:' + THUMB_INSET + 'px;'
+    + 'padding-right:var(--_sw-pr);color:transparent;'
+    /* KNOWN DEFECT: justify-content is a discrete property, so this
+       transition is inert and the thumb snaps between ends. */
+    + 'transition:justify-content var(--Motion-Duration-Instant, 100ms) var(--Motion-Easing-Standard, cubic-bezier(0.2, 0, 0, 1));'
+    + 'transform:none}',
+  `.omni-sw .MuiSwitch-switchBase .MuiSwitch-input{left:0;top:0;width:100%;height:100%;margin:0}`,
+  `.omni-sw .MuiSwitch-switchBase .MuiSwitch-thumb{width:var(--_sw-dot);height:var(--_sw-dot);border-radius:var(--_sw-dot-r);box-shadow:none;`
+    + 'border-width:medium;border-style:none;border-color:currentcolor;border-image:none;display:flex;'
+    + '-webkit-box-align:center;align-items:center;-webkit-box-pack:center;justify-content:center;'
+    + `transition:background-color ${MOTION_FAST};background-color:var(--_sw-dot-off);color:var(--_sw-icon-off)}`,
+  `.omni-sw .MuiSwitch-switchBase .MuiSwitch-thumb > *{width:var(--_sw-icon);height:var(--_sw-icon);display:block}`,
+  // ON
+  `.omni-sw .MuiSwitch-switchBase.Mui-checked{-webkit-box-pack:end;justify-content:flex-end;transform:none}`,
+  `.omni-sw .MuiSwitch-switchBase.Mui-checked .MuiSwitch-thumb{background-color:var(--_sw-dot-on);color:var(--_sw-icon-on)}`,
+  `.omni-sw .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track{background-color:var(--_sw-track-on);border-color:var(--_sw-track-on-border);opacity:1}`,
+  /* Hover lifts the TRACK — Figma's Buttons-Hover effect style (Level 2).
+     Pressed does not lift, as Button: the toggle is its own feedback. */
+  `.omni-sw .MuiSwitch-switchBase:hover,.omni-sw .MuiSwitch-switchBase.Mui-checked:hover{background-color:transparent}`,
+  `.omni-sw .MuiSwitch-switchBase:hover + .MuiSwitch-track{box-shadow:${SHADOW_LEVEL_2}}`,
+  `.omni-sw .MuiSwitch-switchBase:active + .MuiSwitch-track{box-shadow:none}`,
+  /* Focus ring sits OUTSIDE the track, not on the dot: the house 2px ring,
+     1px clear. */
+  `.omni-sw .MuiSwitch-switchBase.Mui-focusVisible + .MuiSwitch-track{outline-width:2px;outline-style:solid;outline-color:var(--Focus-Visible);outline-offset:1px}`,
+  `.omni-sw .MuiSwitch-switchBase.Mui-disabled + .MuiSwitch-track{opacity:1}`,
+  '.omni-sw-input{cursor:inherit;position:absolute;opacity:0;width:100%;height:100%;top:0;left:0;margin:0;padding:0;z-index:1}',
+  /* The default glyphs, as SvgIcon drew them: 1.5rem, sized down by the
+     thumb's `> *` rule above. */
+  `.omni-sw-glyph{${SVG_ICON_DECLS};font-size:1.5rem}`,
+  /* With no glyph the thumb is MUI's own thumb element, which is border-box. */
+  '.omni-sw-thumb-plain{box-sizing:border-box}',
+  /* MUI's track base sits under the design's track rule, which overrides all
+     of it but the stacking. */
+  '.omni-sw-track{height:100%;width:100%;border-radius:7px;box-sizing:border-box;border:1px solid transparent;z-index:-1;'
+    + 'transition:opacity 150ms cubic-bezier(0.4, 0, 0.2, 1), background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);'
+    + 'background-color:rgb(0, 0, 0);opacity:0.38}',
+  '.omni-sw .MuiSwitch-track{width:var(--_sw-tw);height:var(--_sw-th);border-radius:var(--Sizing-3, 24px);'
+    + 'background-color:var(--_sw-track-off);border-width:1px;border-style:solid;border-color:var(--_sw-track-off-border);'
+    + 'box-sizing:border-box;opacity:1;position:absolute;top:var(--_sw-top);left:0;'
+    + `transition:background-color ${MOTION_FAST},border-color ${MOTION_FAST},box-shadow ${MOTION_FAST}}`,
+  /* The label: the Label style's size and weight; the colour and the dim are
+     two classes deep because the Typography sheet's colour class is one and
+     either sheet may load first. */
+  '.omni-type.omni-sw-text{color:var(--Text);opacity:1}',
+  '.omni-type.omni-sw-text-off{color:var(--Text-Quiet);opacity:var(--Disabled, 0.38)}',
+].join('\n'));
+
+const capFirst = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+const isHandler = (key, v) => /^on[A-Z]/.test(key) && typeof v === 'function';
+function matchesFocusVisible(el) {
+  try { return el.matches(':focus-visible'); } catch (e) { return false; }
+}
+
 // --- Component ---------------------------------------------------------------
 
 export function Switch({
@@ -232,199 +335,140 @@ export function Switch({
   sx = {},
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledby,
+  /* What MUI's SwitchBase routed to the <input> rather than the switch base. */
+  id,
+  inputRef,
+  inputProps,
+  autoFocus,
+  required = false,
+  readOnly,
+  tabIndex,
+  onFocus,
+  onBlur,
+  /* MUI's palette prop. It only ever named a class here — `variant` picks the
+     colour — and still does. */
+  color = 'primary',
   ...props
 }) {
-  const variantMap = buildVariantMap();
+  useStaticStyles('omni-switch');
   const resolvedVariant = normalizeSwitchVariant(variant);
-  const styles = variantMap[resolvedVariant] || variantMap['default'];
-  const sc = SIZE_MAP[size] || SIZE_MAP.medium;
+  const sizeKey = SIZE_MAP[size] ? size : 'medium';
   // The Label type style, as SwitchField's Form-Label sets it.
   const LabelComp = size === 'small' ? LabelSmall : size === 'large' ? LabelLarge : Label;
 
-  /* The handle is a PUBLISHED value, not the track minus its inset.
-     `trackH - THUMB_INSET * 2` gives 20 and 28 at medium and large, which is
-     what the collection holds — and 16 at small, where the collection says 15.
-     The inset is 2.5 there, so the derivation is a rule fitted to two of the
-     three sizes. Two of three agreeing is the same thing that hid the track
-     being wrong, so the number is read rather than recomputed. */
-  const dot      = sc.handle;
-  const rootW    = Math.max(TOUCH_MIN, sc.trackW);
-  const rootH    = Math.max(TOUCH_MIN, sc.trackH);
-  const trackTop = (rootH - sc.trackH) / 2;
+  const { current: isControlled } = useRef(checked !== undefined);
+  const [checkedState, setCheckedState] = useState(Boolean(defaultChecked));
+  const isChecked = isControlled ? checked : checkedState;
+  const [focusVisible, setFocusVisible] = useState(false);
 
-  const thumbBase = {
-    width: dot,
-    height: dot,
-    borderRadius: sc.dotRadius,
-    boxShadow: 'none',
-    border: 'none',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transition: 'background-color var(--Motion-Duration-Fast, 150ms) var(--Motion-Easing-Standard, cubic-bezier(0.2, 0, 0, 1))',
-    '& > *': { width: sc.icon, height: sc.icon, display: 'block' },
+  // The input names the control. role="switch" comes first so a caller's
+  // inputProps can still override it, as MUI merged them.
+  const external = {
+    role: 'switch',
+    ...inputProps,
+    ...(ariaLabel ? { 'aria-label': ariaLabel } : {}),
+    ...(ariaLabelledby ? { 'aria-labelledby': ariaLabelledby } : {}),
+  };
+  const inputHandlers = {};
+  const inputAttrs = {};
+  Object.keys(external).forEach((key) => {
+    if (isHandler(key, external[key])) inputHandlers[key] = external[key];
+    else inputAttrs[key] = external[key];
+  });
+  const { className: inputClassName, ...inputRest } = inputAttrs;
+
+  const handleInputChange = (event) => {
+    if (inputHandlers.onChange) inputHandlers.onChange(event);
+    // Workaround for https://github.com/facebook/react/issues/9023
+    if (event.nativeEvent.defaultPrevented || readOnly) return;
+    const next = event.target.checked;
+    setCheckedState(next);
+    if (onChange) onChange(event, next);
+  };
+  const handleFocus = (event) => {
+    if (matchesFocusVisible(event.target)) setFocusVisible(true);
+    if (onFocus) onFocus(event);
+  };
+  const handleBlur = (event) => {
+    if (!matchesFocusVisible(event.target)) setFocusVisible(false);
+    if (onBlur) onBlur(event);
   };
 
-  const switchSx = {
-    width: sc.trackW,
-    minWidth: TOUCH_MIN,
-    height: rootH,
-    minHeight: TOUCH_MIN,
-    padding: 0,
-    overflow: 'visible',
-    // The design dims the WHOLE control rather than its parts.
-    opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
-
-    // switchBase FILLS the root, and the thumb is placed with padding rather
-    // than by sizing the base to the track.
-    //
-    // Two things depend on this. The hit area is the <input>, which fills
-    // switchBase — sizing it to the track gave a 20x12 target on small, under
-    // the WCAG 2.2 24x24 minimum. And `calc(100% - 4px)` measured the ROOT,
-    // which is 24px wide on small while the track is 20px, so the checked
-    // thumb landed 2px past the track's right edge. Medium and large hid the
-    // bug because their tracks are already wider than the touch minimum.
-    '& .MuiSwitch-switchBase': {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      display: 'flex',
-      justifyContent: 'flex-start',
-      alignItems: 'center',
-      paddingTop: 0,
-      paddingBottom: 0,
-      paddingLeft: THUMB_INSET + 'px',
-      // The track sits at the root's left edge, so any slack between the track
-      // and the root goes on the right.
-      paddingRight: (rootW - sc.trackW + THUMB_INSET) + 'px',
-      color: 'transparent',
-      // KNOWN DEFECT: justify-content is a discrete property, so this
-      // transition is inert and the thumb snaps between ends. Fixing it means
-      // moving the thumb with transform, which needs the switchBase geometry
-      // reworked — see the note in the motion standard.
-      transition: 'justify-content var(--Motion-Duration-Instant, 100ms) var(--Motion-Easing-Standard, cubic-bezier(0.2, 0, 0, 1))',
-      transform: 'none',
-
-      '& .MuiSwitch-input': { left: 0, top: 0, width: '100%', height: '100%', margin: 0 },
-
-      '& .MuiSwitch-thumb': {
-        ...thumbBase,
-        backgroundColor: styles.dotOff,
-        color: styles.iconOff,
-      },
-
-      // ON
-      '&.Mui-checked': {
-        justifyContent: 'flex-end',
-        transform: 'none',
-        '& .MuiSwitch-thumb': {
-          ...thumbBase,
-          backgroundColor: styles.dotOn,
-          color: styles.iconOn,
-        },
-        '& + .MuiSwitch-track': {
-          backgroundColor: styles.trackOn,
-          borderColor: styles.trackOnBorder,
-          opacity: 1,
-        },
-      },
-
-      // Hover lifts the TRACK — Figma's Buttons-Hover effect style (Level 2).
-      // Pressed does not lift, as Button: the toggle is its own feedback.
-      '&:hover, &.Mui-checked:hover': { backgroundColor: 'transparent' },
-      '&:hover + .MuiSwitch-track': { boxShadow: SHADOW_LEVEL_2 },
-      '&:active + .MuiSwitch-track': { boxShadow: 'none' },
-
-      // Focus ring sits OUTSIDE the track, not on the dot: the house 2px ring,
-      // 1px clear (Figma's 48x30 frame at -3 with a 2px inside stroke).
-      '&.Mui-focusVisible + .MuiSwitch-track': {
-        outline: '2px solid var(--Focus-Visible)',
-        outlineOffset: '1px',
-      },
-
-      '&.Mui-disabled + .MuiSwitch-track': { opacity: 1 },
-    },
-
-    '& .MuiSwitch-track': {
-      width: sc.trackW,
-      height: sc.trackH,
-      borderRadius: 'var(--Sizing-3, 24px)',
-      backgroundColor: styles.trackOff,
-      border: '1px solid ' + styles.trackOffBorder,
-      boxSizing: 'border-box',
-      opacity: 1,
-      position: 'absolute',
-      top: trackTop,
-      left: 0,
-      transition: 'background-color var(--Motion-Duration-Fast, 150ms) var(--Motion-Easing-Standard, cubic-bezier(0.2, 0, 0, 1)), border-color var(--Motion-Duration-Fast, 150ms) var(--Motion-Easing-Standard, cubic-bezier(0.2, 0, 0, 1)), box-shadow var(--Motion-Duration-Fast, 150ms) var(--Motion-Easing-Standard, cubic-bezier(0.2, 0, 0, 1))',
-    },
-
-    ...sx,
-  };
-
-  // MUI renders the thumb from its icon / checkedIcon props. Supplying our own
-  // span keeps the .MuiSwitch-thumb class — and therefore every style above —
-  // while giving the glyph somewhere to live.
+  // The thumb holds the glyph — a check ON and a close (×) OFF by default.
   const showIcons = icon !== false && icon !== null;
   const pickGlyph = (side, fallback) => (side !== undefined ? side : (icon !== undefined && icon !== true ? icon : fallback));
-  const glyphOff = showIcons ? pickGlyph(iconOff, <CloseIcon />) : undefined;
-  const glyphOn  = showIcons ? pickGlyph(iconOn, <CheckIcon />) : undefined;
-  const hasGlyph = glyphOff !== undefined || glyphOn !== undefined;
-  const thumbNode = (glyph) => <span className="MuiSwitch-thumb">{glyph}</span>;
+  const glyphOff = showIcons ? pickGlyph(iconOff, <Glyph name="Close" className="omni-sw-glyph" />) : undefined;
+  const glyphOn  = showIcons ? pickGlyph(iconOn, <Glyph name="Check" className="omni-sw-glyph" />) : undefined;
 
-  const switchElement = (
-    <MuiSwitch
-      {...(hasGlyph ? { icon: thumbNode(glyphOff), checkedIcon: thumbNode(glyphOn) } : {})}
-      checked={checked}
-      defaultChecked={defaultChecked}
-      onChange={onChange}
-      disabled={disabled}
-      name={name}
-      value={value}
-      // slotProps.input, NOT inputProps: MUI 7 deprecated inputProps on Switch
-      // and drops it on the floor — it builds the SwitchBase's slotProps from
-      // slotProps.input alone. The old form silently produced an input with no
-      // accessible name, so every unlabelled Switch failed axe.
-      slotProps={{
-        input: {
-          ...(ariaLabel ? { 'aria-label': ariaLabel } : {}),
-          ...(ariaLabelledby ? { 'aria-labelledby': ariaLabelledby } : {}),
-        },
-      }}
-      className={'switch-' + resolvedVariant + ' ' + className}
-      sx={switchSx}
-      disableRipple
+  const switchBase = (
+    <span
+      className={'MuiButtonBase-root MuiSwitch-switchBase MuiSwitch-color' + capFirst(color) + ' PrivateSwitchBase-root'
+        + (isChecked ? ' Mui-checked' : '') + (disabled ? ' Mui-disabled' : '') + (focusVisible ? ' Mui-focusVisible' : '')
+        + ' omni-sw-base'}
       {...props}
-    />
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+    >
+      <input
+        {...inputHandlers}
+        onChange={handleInputChange}
+        autoFocus={autoFocus}
+        checked={checked}
+        defaultChecked={defaultChecked}
+        disabled={disabled}
+        id={id}
+        name={name}
+        readOnly={readOnly}
+        required={required}
+        tabIndex={tabIndex}
+        type="checkbox"
+        {...(value === undefined ? {} : { value })}
+        {...inputRest}
+        className={'PrivateSwitchBase-input MuiSwitch-input omni-sw-input' + (inputClassName ? ' ' + inputClassName : '')}
+        ref={inputRef}
+      />
+      {showIcons
+        ? <span className="MuiSwitch-thumb">{isChecked ? glyphOn : glyphOff}</span>
+        : <span className="MuiSwitch-thumb omni-sw-thumb-plain" />}
+    </span>
   );
+
+  const rootProps = {
+    className: 'MuiSwitch-root MuiSwitch-sizeMedium switch-' + resolvedVariant + ' ' + className
+      + ' omni-sw omni-sw-' + SIZE_KEY[sizeKey] + ' omni-sw-v-' + variantClass(resolvedVariant) + (disabled ? ' omni-sw-off' : ''),
+  };
+  const children = (
+    <>
+      {switchBase}
+      <span className="MuiSwitch-track omni-sw-track" />
+    </>
+  );
+  const switchElement = hasSx(sx)
+    ? <SxBox component="span" sx={sx} {...rootProps}>{children}</SxBox>
+    : <span {...rootProps}>{children}</span>;
 
   if (label) {
     return (
-      <FormControlLabel
+      <ControlLabel
         control={switchElement}
         label={
-          <LabelComp
-            component="span"
-            sx={{
-              // Size and weight are the Label style's (Figma's Dynamic-Label),
-              // as Radio and Checkbox — a hard 15px / 500 here overrode it.
-              color: disabled ? 'var(--Text-Quiet)' : 'var(--Text)',
-              opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
-            }}
-          >
+          // Size and weight are the Label style's (Figma's Dynamic-Label),
+          // as Radio and Checkbox.
+          <LabelComp component="span" className={'MuiBox-root omni-sw-text' + (disabled ? ' omni-sw-text-off' : '')}>
             {label}
           </LabelComp>
         }
+        // FormControlLabel took `disabled` from its control.
+        disabled={disabled}
         labelPlacement={labelPlacement}
-        sx={{ gap: labelGap(size), marginLeft: 0, marginRight: 0 }}
+        size={size === 'small' || size === 'large' ? size : 'medium'}
       />
     );
   }
 
   return switchElement;
 }
+
 
 // ─── Convenience Exports ──────────────────────────────────────────────────────
 

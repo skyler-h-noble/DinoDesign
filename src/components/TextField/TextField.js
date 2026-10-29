@@ -1,37 +1,81 @@
 // src/components/TextField/TextField.js
 import React, { useState } from 'react';
 import { Input } from '../Input/Input';
-import {
-  TextField as MuiTextField,
-  Box,
-  FormHelperText,
-  InputAdornment,
-} from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox, lazyFallback } from '../_lazyFallback';
+import { StaticTextField, FieldAdornment, HelperText } from '../_textFieldBase';
+
+// --- Static sheet ------------------------------------------------------------
+//
+// TextField was MUI's TextField with an sx override. It now renders the same
+// markup from _textFieldBase.js, and its sx became the rules below — the same
+// selectors and weights (one class on the field root, then MUI's part
+// classes), so a caller's sx still lands on top. The focus / error colours
+// that the sx picked from React state are classes on the root.
+const SxBox = lazySxBox('TextField');
+const TextFieldMui = lazyFallback('TextField', () => import('./TextField.mui'));
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+const MUI_ONLY = ['select', 'SelectProps', 'slots', 'slotProps', 'InputProps', 'InputLabelProps', 'FormHelperTextProps', 'inputProps', 'inputComponent', 'children'];
+const OR = ' .MuiOutlinedInput-root';
+
+registerStaticStyles('omni-text-field', [
+  '.omni-tf-box{width:100%}',
+  '.omni-tf-box-auto{width:auto}',
+  '.omni-tf{width:100%}',
+  '.omni-tf-auto{width:auto}',
+  `.omni-tf${OR}{background-color:var(--Background);transition:all 0.2s ease-in-out;color:var(--Text)}`,
+  // Border: --Border at rest, the primary border focused, the error border in error.
+  `.omni-tf${OR} fieldset{border-color:var(--Border);transition:border-color 0.2s ease-in-out}`,
+  `.omni-tf-foc${OR} fieldset{border-color:var(--Buttons-Primary-Border)}`,
+  `.omni-tf-err${OR} fieldset{border-color:var(--Buttons-Error-Border)}`,
+  `.omni-tf${OR}:hover fieldset{border-color:var(--Buttons-Primary-Border)}`,
+  `.omni-tf-err${OR}:hover fieldset{border-color:var(--Buttons-Error-Border)}`,
+  `.omni-tf${OR}.Mui-focused fieldset{border-color:var(--Buttons-Primary-Border);border-width:2px}`,
+  `.omni-tf-err${OR}.Mui-focused fieldset{border-color:var(--Buttons-Error-Border)}`,
+  `.omni-tf${OR}.Mui-disabled{background-color:var(--Background);opacity:var(--Disabled, 0.38)}`,
+  // Label
+  '.omni-tf .MuiInputLabel-root{color:var(--Text-Quiet);transition:all 0.2s ease-in-out;font-size:14px;font-weight:500}',
+  '.omni-tf-foc .MuiInputLabel-root,.omni-tf-err .MuiInputLabel-root{color:var(--Text)}',
+  '.omni-tf .MuiInputLabel-root.Mui-focused{color:var(--Text);font-weight:600}',
+  '.omni-tf .MuiInputLabel-root.Mui-error{color:var(--Text)}',
+  '.omni-tf .MuiInputLabel-root.Mui-disabled{color:var(--Text-Secondary);opacity:var(--Disabled, 0.38)}',
+  // Helper text
+  '.omni-tf .MuiFormHelperText-root{color:var(--Text-Secondary);margin-top:4px;font-size:12px}',
+  '.omni-tf-err .MuiFormHelperText-root{color:var(--Buttons-Error-Border)}',
+  /* The error message under the field. Its colour is the helper's own error
+     rule, which outweighed the override's colour before as well. */
+  '.omni-ht.omni-tf-em{margin-top:4px;font-size:12px;font-weight:500}',
+].join('\n'));
 
 /**
  * TextField Component - Design System Implementation
- * 
- * Uses Material-UI TextField with custom design system styling
- * Implements WCAG 2.1 AA accessibility standards with color contrast requirements:
- * - Border: 3.1:1 contrast ratio against background
- * - Text: 4.5:1 contrast ratio against background
- * - Error state uses error colors
- * 
+ *
+ * MUI's TextField markup and behaviour, styled by the design system:
+ * - Border: 3:1 contrast against the background (--Border)
+ * - Text: 4.5:1 contrast against the background (--Text)
+ * - Error state uses the error colours
+ *
  * @param {string} label - Field label text
  * @param {string} value - Input value
  * @param {function} onChange - Change handler
  * @param {string} placeholder - Placeholder text
- * @param {string} error - Error message (empty = no error)
+ * @param {boolean} error - Error state
+ * @param {string} errorMessage - Message shown under the field in error
  * @param {boolean} disabled - Disabled state
  * @param {string} helperText - Helper text below field
  * @param {string} variant - Variant: outlined, filled, standard (default: outlined)
  * @param {string} size - Size: small, medium (default: medium)
  * @param {string} type - Input type: text, email, password, number, etc
  * @param {boolean} required - Required field
- * @param {object} sx - Additional MUI sx props
- * @param {object} ...props - Other MUI TextField props
+ * @param {object} sx - Additional sx, layered over the field root
+ * @param {object} ...props - Other TextField props
  */
-export function TextField({
+export function TextField(allProps) {
+  if (MUI_ONLY.some((k) => allProps[k] !== undefined)) return <TextFieldMui {...allProps} />;
+  return <TextFieldStatic {...allProps} />;
+}
+
+function TextFieldStatic({
   label,
   value = '',
   onChange,
@@ -49,164 +93,61 @@ export function TextField({
   endAdornment,     // ReactNode rendered inside the input on the right
   sx = {},
   // aria-label / aria-labelledby name the INPUT, not the FormControl wrapper.
-  // Left in ...props they spread onto the wrapper <div>, which is invalid ARIA
-  // (aria-label on a div with no role) AND leaves the input unnamed.
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledby,
   /* Held out of ...props so the spread cannot overwrite the composed handlers
      below — the field tracks its own focus for the border color. */
   onFocus: onFocusProp,
   onBlur: onBlurProp,
+  className,
   ...props
 }) {
+  useStaticStyles('omni-text-field');
   const [isFocused, setIsFocused] = useState(false);
+  const rootClass = 'omni-tf' + (fullWidth ? '' : ' omni-tf-auto') + (isFocused ? ' omni-tf-foc' : '') + (error ? ' omni-tf-err' : '')
+    + (className ? ' ' + className : '');
 
-  // Determine colors based on state
-  const borderColor = error
-    ? 'var(--Buttons-Error-Border)'
-    : isFocused
-    ? 'var(--Buttons-Primary-Border)'
-    : 'var(--Border)';
-
-  const labelColor = error
-    ? 'var(--Text)'
-    : isFocused
-    ? 'var(--Text)'
-    : 'var(--Text-Quiet)';
-
-  const textColor = error ? 'var(--Text)' : 'var(--Text)';
+  const fieldProps = {
+    label,
+    value,
+    onChange,
+    placeholder,
+    disabled,
+    variant,
+    size,
+    type,
+    required,
+    /* Compose, do not replace: a caller's onFocus still runs and the field
+       keeps tracking its own focus for the border color. */
+    onFocus: (e) => { setIsFocused(true); onFocusProp?.(e); },
+    onBlur: (e) => { setIsFocused(false); onBlurProp?.(e); },
+    error,
+    fullWidth,
+    inputProps: {
+      ...(ariaLabel ? { 'aria-label': ariaLabel } : {}),
+      ...(ariaLabelledby ? { 'aria-labelledby': ariaLabelledby } : {}),
+    },
+    InputProps: {
+      // The input is a CONTAINER on whatever surface it sits on: declaring it
+      // brings --Background AND the paired --Text / --Border with it.
+      // Disabled is a different SURFACE (Container-Low), not a different color.
+      'data-surface': disabled ? 'Container-Low' : 'Container',
+      style: { color: 'var(--Text)' },
+      startAdornment: startAdornment ? <FieldAdornment position="start">{startAdornment}</FieldAdornment> : undefined,
+      endAdornment: endAdornment ? <FieldAdornment position="end">{endAdornment}</FieldAdornment> : undefined,
+    },
+    ...props,
+  };
 
   return (
-    <Box sx={{ width: fullWidth ? '100%' : 'auto' }}>
-      <MuiTextField
-        label={label}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        disabled={disabled}
-        variant={variant}
-        size={size}
-        type={type}
-        required={required}
-        /* Compose, do not replace. {...props} spreads below this, so a caller
-           passing onFocus used to overwrite these outright — the handler fired,
-           but isFocused stopped updating and the field lost its focus border
-           while still looking otherwise correct. */
-        onFocus={(e) => { setIsFocused(true); onFocusProp?.(e); }}
-        onBlur={(e) => { setIsFocused(false); onBlurProp?.(e); }}
-        error={error}
-        fullWidth={fullWidth}
-        slotProps={{
-          htmlInput: {
-            ...(ariaLabel ? { 'aria-label': ariaLabel } : {}),
-            ...(ariaLabelledby ? { 'aria-labelledby': ariaLabelledby } : {}),
-          },
-          input: {
-            // The input is a CONTAINER on whatever surface it sits on. Declaring
-            // it here means --Background resolves to the container tone AND the
-            // paired --Text / --Border come with it, instead of naming a surface
-            // token directly and leaving the foregrounds on the parent's tone.
-            //
-            // Disabled is a different SURFACE, not a different color: saying
-            // Container-Low here brings its foregrounds too, where an sx
-            // override of backgroundColor would have left --Text where it was.
-            'data-surface': disabled ? 'Container-Low' : 'Container',
-            style: {
-              color: textColor,
-            },
-            startAdornment: startAdornment
-              ? <InputAdornment position="start">{startAdornment}</InputAdornment>
-              : undefined,
-            endAdornment: endAdornment
-              ? <InputAdornment position="end">{endAdornment}</InputAdornment>
-              : undefined,
-          },
-        }}
-        sx={{
-          width: fullWidth ? '100%' : 'auto',
-          // Outlined variant styling
-          '& .MuiOutlinedInput-root': {
-            backgroundColor: 'var(--Background)',
-            transition: 'all 0.2s ease-in-out',
-            color: textColor,
-
-            // Border color
-            '& fieldset': {
-              borderColor: borderColor,
-              transition: 'border-color 0.2s ease-in-out',
-            },
-
-            // Focus state
-            '&:hover fieldset': {
-              borderColor: error
-                ? 'var(--Buttons-Error-Border)'
-                : 'var(--Buttons-Primary-Border)',
-            },
-
-            // Focused state
-            '&.Mui-focused fieldset': {
-              borderColor: error
-                ? 'var(--Buttons-Error-Border)'
-                : 'var(--Buttons-Primary-Border)',
-              borderWidth: '2px',
-            },
-
-            // Disabled state
-            '&.Mui-disabled': {
-              backgroundColor: 'var(--Background)',
-              opacity: 'var(--Disabled, 0.38)',
-            },
-          },
-
-          // Label styling
-          '& .MuiInputLabel-root': {
-            color: labelColor,
-            transition: 'all 0.2s ease-in-out',
-            fontSize: '14px',
-            fontWeight: 500,
-
-            // Focused/filled state
-            '&.Mui-focused': {
-              color: error ? 'var(--Text)' : 'var(--Text)',
-              fontWeight: 600,
-            },
-
-            '&.Mui-error': {
-              color: 'var(--Text)',
-            },
-
-            // Disabled
-            '&.Mui-disabled': {
-              color: 'var(--Text-Secondary)',
-              opacity: 'var(--Disabled, 0.38)',
-            },
-          },
-
-          // Helper text
-          '& .MuiFormHelperText-root': {
-            color: error ? 'var(--Buttons-Error-Border)' : 'var(--Text-Secondary)',
-            marginTop: '4px',
-            fontSize: '12px',
-          },
-
-          ...sx,
-        }}
-        {...props}
-      />
+    <div className={'MuiBox-root omni-tf-box' + (fullWidth ? '' : ' omni-tf-box-auto')}>
+      {hasSx(sx)
+        ? <SxBox component={StaticTextField} sx={sx} className={rootClass} {...fieldProps} />
+        : <StaticTextField className={rootClass} {...fieldProps} />}
       {error && errorMessage && (
-        <FormHelperText
-          error={true}
-          sx={{
-            color: 'var(--Buttons-Error-Border)',
-            marginTop: '4px',
-            fontSize: '12px',
-            fontWeight: 500,
-          }}
-        >
-          {errorMessage}
-        </FormHelperText>
+        <HelperText error className="omni-tf-em">{errorMessage}</HelperText>
       )}
-    </Box>
+    </div>
   );
 }
 
@@ -370,28 +311,28 @@ export function TextArea({
  * TextFieldGroup Component
  * Multiple text fields grouped together
  */
+registerStaticStyles('omni-text-field-group', [
+  '.omni-tfg{display:flex;flex-direction:column;gap:var(--_tfg-gap);width:100%}',
+].join('\n'));
+const GroupSxBox = lazySxBox('TextFieldGroup');
+
 export function TextFieldGroup({
   fields = [],
   spacing = 2,
   sx = {},
+  className,
+  style,
   ...props
 }) {
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: `var(--Spacing-${spacing})`,
-        width: '100%',
-        ...sx,
-      }}
-      {...props}
-    >
-      {fields.map((field) => (
-        <TextField key={field.id} {...field} />
-      ))}
-    </Box>
-  );
+  useStaticStyles('omni-text-field-group');
+  const groupProps = {
+    className: 'MuiBox-root omni-tfg' + (className ? ' ' + className : ''),
+    style: { '--_tfg-gap': `var(--Spacing-${spacing})`, ...style },
+    ...props,
+  };
+  const children = fields.map((field) => <TextField key={field.id} {...field} />);
+  if (hasSx(sx)) return <GroupSxBox sx={sx} {...groupProps}>{children}</GroupSxBox>;
+  return <div {...groupProps}>{children}</div>;
 }
 
 export default TextField;

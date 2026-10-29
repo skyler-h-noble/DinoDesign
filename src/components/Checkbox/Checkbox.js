@@ -1,11 +1,11 @@
 // src/components/Checkbox/Checkbox.js
-import React from 'react';
-import { Checkbox as MuiCheckbox, FormControlLabel, Box } from '@mui/material';
-import CheckIcon from '@mui/icons-material/Check';
-import RemoveIcon from '@mui/icons-material/Remove';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { Label, LabelSmall, LabelLarge } from '../Typography';
-import { labelGap } from '../_labelGap';
 import { tokenSegment } from '../_shadows';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
+import { ControlLabel } from '../_controlLabel';
+import { Glyph, SVG_ICON_DECLS } from '../_glyph';
 
 /**
  * Checkbox Component
@@ -142,79 +142,106 @@ const SIZE_MAP = {
   large:  { box: 24, icon: 18, touchTarget: 24, LabelComp: LabelLarge },
 };
 
-// --- Custom Icons ------------------------------------------------------------
 
-function CheckboxBoxIcon({ size, variant, checked, indeterminate }) {
-  const styles = stylesFor(variant);
-  const sizeConfig = SIZE_MAP[size] || SIZE_MAP.medium;
+// --- Static sheet ------------------------------------------------------------
+//
+// Checkbox was MUI's Checkbox (SwitchBase on ButtonBase) with an sx override
+// and two MUI Boxes for the box icon. It is now its own markup over the same
+// tokens; this sheet carries both the base MUI gave it and the design's layer
+// on top, so the rendered control is unchanged.
+//
+// Colour arrives as custom properties declared on the root by one class per
+// color (.omni-chk-Primary …). Nothing between the root and the box sets a
+// data-theme, so the tokens resolve against the same scope they did when each
+// part named them directly.
+//
+// State rules weigh what emotion's did — one class plus a pseudo-class or
+// state class — so a caller's sx still wins over them.
+const SxBox = lazySxBox('Checkbox');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+const SIZE_KEY = { small: 'sm', medium: 'md', large: 'lg' };
+const RADIUS = {
+  small: 'var(--Sm-Checkbox-Radius, 3.2px)',
+  medium: 'var(--Checkbox-Radius, 4px)',
+  large: 'var(--Lg-Checkbox-Radius, 4.8px)',
+};
+
+registerStaticStyles('omni-checkbox', [
+  /* The root: ButtonBase's reset, then the touch-target frame. */
+  '.omni-chk{display:inline-flex;-webkit-box-align:center;align-items:center;-webkit-box-pack:center;justify-content:center;position:relative;box-sizing:border-box;'
+    + '-webkit-tap-highlight-color:transparent;background-color:transparent;outline:0;border:0;margin:0;cursor:pointer;'
+    + 'user-select:none;vertical-align:middle;-moz-appearance:none;-webkit-appearance:none;appearance:none;text-decoration:none;'
+    + 'padding:2px;min-width:24px;min-height:24px;border-radius:var(--Checkbox-Radius, 4px);color:inherit;'
+    + 'transition:background-color 0.15s ease-in-out}',
+  ...Object.entries(SIZE_KEY).map(([size, k]) => `.omni-chk-${k}{padding:${(SIZE_MAP[size].touchTarget - SIZE_MAP[size].box) / 2}px}`),
+  '.omni-chk::-moz-focus-inner{border-style:none}',
+  '@media print{.omni-chk{print-color-adjust:exact}}',
+  ...COLORS.map((color) => {
+    const s = colorStyles(color);
+    return `.omni-chk-${s.color}{--_chk-off:${s.borderToken};--_chk-on:${s.activeBorder};--_chk-fill:${s.activeFill};--_chk-glyph:${s.icon}}`;
+  }),
+  /* No ripple halo and no fill change: hover and press move the border. */
+  '.omni-chk:hover{background-color:transparent}',
+  '.omni-chk:hover .omni-chk-box,.omni-chk:active .omni-chk-box{border-color:var(--_chk-on)}',
+  /* Focus: a 2px ring 1px outside the box, as Figma draws it. */
+  '.omni-chk.Mui-focusVisible .omni-chk-box{outline-width:2px;outline-style:solid;outline-color:var(--Focus-Visible);outline-offset:1px}',
+  /* The root dims once; the box carries no opacity of its own. The colour is
+     the one MUI's disabled rule gave the root (nothing paints with it). */
+  '.omni-chk.Mui-disabled{pointer-events:none;cursor:not-allowed;color:rgba(0, 0, 0, 0.26);opacity:var(--Disabled, 0.38)}',
+  /* After the disabled rule, at its weight: a checked or indeterminate root
+     inherits its colour even when disabled, as the sx override made it. */
+  '.omni-chk.Mui-checked,.omni-chk.MuiCheckbox-indeterminate{color:inherit}',
+  /* Validation wins over hover / pressed / focus border moves. */
+  '.omni-chk-err .omni-chk-box,.omni-chk-err:hover .omni-chk-box,.omni-chk-err:active .omni-chk-box,'
+    + '.omni-chk-err.Mui-focusVisible .omni-chk-box{border-color:var(--Icons-Error)}',
+  /* The native input: invisible, covering the root, so it takes the clicks. */
+  '.omni-chk-input{cursor:inherit;position:absolute;opacity:0;width:100%;height:100%;top:0;left:0;margin:0;padding:0;z-index:1}',
+  /* The box — its border sits inside, so the rendered size is the box size. */
+  '.omni-chk-box{width:20px;height:20px;box-sizing:border-box;border-radius:var(--Checkbox-Radius, 4px);'
+    + 'border-width:2px;border-style:solid;border-color:var(--_chk-off);overflow:hidden;flex-shrink:0;'
+    + 'transition:border-color 0.15s ease-in-out}',
+  ...['small', 'large'].map((size) => `.omni-chk-box-${SIZE_KEY[size]}{width:${SIZE_MAP[size].box}px;height:${SIZE_MAP[size].box}px;border-radius:${RADIUS[size]}}`),
+  '.omni-chk-box-on{border-color:var(--_chk-on)}',
+  '.omni-chk-fill{width:100%;height:100%;display:flex;-webkit-box-align:center;align-items:center;-webkit-box-pack:center;justify-content:center;'
+    + 'background-color:var(--Background);color:var(--Text);transition:background-color 0.15s ease-in-out}',
+  '.omni-chk-fill-on{background-color:var(--_chk-fill)}',
+  `.omni-chk-glyph{${SVG_ICON_DECLS};font-size:${SIZE_MAP.medium.icon}px;color:var(--_chk-glyph)}`,
+  ...['small', 'large'].map((size) => `.omni-chk-glyph-${SIZE_KEY[size]}{font-size:${SIZE_MAP[size].icon}px}`),
+  /* The label text. Two classes for the disabled colour: the Typography
+     sheet's color class is one, and either sheet may load first. */
+  '.omni-chk-text{user-select:none}',
+  '.omni-type.omni-chk-text-off{color:var(--Text-Quiet)}',
+].join('\n'));
+
+// --- Box icon ----------------------------------------------------------------
+
+function CheckboxBoxIcon({ size, checked, indeterminate }) {
+  useStaticStyles('omni-checkbox');
+  const k = SIZE_KEY[size];
   const isActive = checked || indeterminate;
-
-  // Unchecked: the quiet box. Checked / indeterminate: the button's border.
-  const outerBorder = isActive ? styles.activeBorder : styles.borderToken;
-
-  // Corner radius scales per size via its own token (the box is 16/20/24px,
-  // radius = 20% of box). Falls back to that default set (Sm 3.2 / Md 4 /
-  // Lg 4.8px) when the brand CSS doesn't define the tokens.
-  const radiusVar =
-    size === 'small' ? 'var(--Sm-Checkbox-Radius, 3.2px)' :
-    size === 'large' ? 'var(--Lg-Checkbox-Radius, 4.8px)' :
-    'var(--Checkbox-Radius, 4px)';
-
-  // No inner data-theme/data-surface. The light variant used to set them, and
-  // with it gone the box INHERITS the surrounding scope — which is what a
-  // control sitting on a card should do anyway.
-
+  // No inner data-theme/data-surface: the box INHERITS the surrounding scope,
+  // which is what a control sitting on a card should do.
   return (
-    <Box
-      className="chk-box-icon"
-      sx={{
-        width: sizeConfig.box,
-        height: sizeConfig.box,
-        // border sits INSIDE the box, so the rendered size equals sizeConfig.box
-        // (e.g. medium = 20×20, not 20 + 2px borders = 24).
-        boxSizing: 'border-box',
-        borderRadius: radiusVar,
-        border: '2px solid ' + outerBorder,
-        overflow: 'hidden',
-        flexShrink: 0,
-        transition: 'border-color 0.15s ease-in-out',
-      }}
-    >
-      {/* Inner themed surface */}
-      <Box
-        sx={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: isActive ? styles.activeFill : 'var(--Background)',
-          color: 'var(--Text)',
-          transition: 'background-color 0.15s ease-in-out',
-        }}
-      >
+    <div className={'chk-box-icon MuiBox-root omni-chk-box' + (k !== 'md' ? ' omni-chk-box-' + k : '') + (isActive ? ' omni-chk-box-on' : '')}>
+      <div className={'MuiBox-root omni-chk-fill' + (isActive ? ' omni-chk-fill-on' : '')}>
         {isActive && (
-          indeterminate ? (
-            <RemoveIcon sx={{ fontSize: sizeConfig.icon, color: styles.icon }} />
-          ) : (
-            <CheckIcon sx={{ fontSize: sizeConfig.icon, color: styles.icon }} />
-          )
+          <Glyph name={indeterminate ? 'Remove' : 'Check'} className={'omni-chk-glyph' + (k !== 'md' ? ' omni-chk-glyph-' + k : '')} />
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }
 
-function UncheckedIcon({ size, variant }) {
-  return <CheckboxBoxIcon size={size} variant={variant} checked={false} indeterminate={false} />;
-}
+// --- Behaviour ---------------------------------------------------------------
 
-function CheckedIcon({ size, variant }) {
-  return <CheckboxBoxIcon size={size} variant={variant} checked={true} indeterminate={false} />;
-}
+const capFirst = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+const isHandler = (key, v) => /^on[A-Z]/.test(key) && typeof v === 'function';
 
-function IndeterminateIcon({ size, variant }) {
-  return <CheckboxBoxIcon size={size} variant={variant} checked={false} indeterminate={true} />;
+/* What MUI's ButtonBase did with focus: the root wears Mui-focusVisible while
+   the input inside it has :focus-visible (keyboard focus), so the ring shows
+   for keyboard users and not on click. */
+function matchesFocusVisible(el) {
+  try { return el.matches(':focus-visible'); } catch (e) { return false; }
 }
 
 // --- Component ---------------------------------------------------------------
@@ -246,14 +273,48 @@ export function Checkbox({
   'aria-labelledby': ariaLabelledBy,
   'aria-describedby': ariaDescribedBy,
   inputProps: inputPropsProp = {},
+  /* What MUI's SwitchBase routed to the <input> rather than the root. */
+  id,
+  inputRef,
+  autoFocus,
+  required = false,
+  readOnly,
+  tabIndex,
+  onFocus,
+  onBlur,
+  slotProps,
+  /* MUI's palette prop. It only ever named a class here — `variant` picks the
+     colour — and still does. */
+  color = 'primary',
   ...props
 }) {
+  useStaticStyles('omni-checkbox');
+  const sizeKey = SIZE_MAP[size] ? size : 'medium';
   const styles = stylesFor(variant);
-  const sizeConfig = SIZE_MAP[size] || SIZE_MAP.medium;
   /* From the table, not a two-way ternary. `size === 'small' ? BodySmall :
      Body` gave a LARGE checkbox the MEDIUM Body component — the third step
      had no branch at all. */
-  const LabelComp = sizeConfig.LabelComp;
+  const LabelComp = SIZE_MAP[sizeKey].LabelComp;
+
+  // Checked state, controlled or not — the decision is made once, as MUI's.
+  const { current: isControlled } = useRef(checked !== undefined);
+  const [checkedState, setCheckedState] = useState(Boolean(defaultChecked));
+  const isChecked = isControlled ? checked : checkedState;
+  const [focusVisible, setFocusVisible] = useState(false);
+
+  /* The native input's own mixed state, alongside aria-checked="mixed".
+     `indeterminate` is a DOM property with no attribute, so React never sets
+     it; without it the input says "not checked" to assistive tech while the
+     attribute says "mixed", and axe reports the mismatch. */
+  const ownInputRef = useRef(null);
+  useLayoutEffect(() => {
+    if (ownInputRef.current) ownInputRef.current.indeterminate = Boolean(indeterminate);
+  });
+  const setInputRef = (node) => {
+    ownInputRef.current = node;
+    if (typeof inputRef === 'function') inputRef(node);
+    else if (inputRef) inputRef.current = node;
+  };
 
   // Pass aria attributes directly to the <input> element
   // This fixes: "aria-label attribute cannot be used on a span with no valid role"
@@ -264,97 +325,93 @@ export function Checkbox({
     ...(ariaDescribedBy && { 'aria-describedby': ariaDescribedBy }),
     ...(error && { 'aria-invalid': true }),
   };
+  /* aria-checked="mixed" while indeterminate, as current MUI Checkbox sets
+     it: a native checkbox's indeterminate is a DOM property React does not
+     set, so the attribute is what tells assistive tech. */
+  const external = {
+    'data-indeterminate': indeterminate,
+    'aria-checked': indeterminate ? 'mixed' : undefined,
+    ...(slotProps?.input ?? mergedInputProps),
+  };
+  const inputHandlers = {};
+  const inputAttrs = {};
+  Object.keys(external).forEach((key) => {
+    if (isHandler(key, external[key])) inputHandlers[key] = external[key];
+    else inputAttrs[key] = external[key];
+  });
+  const { className: inputClassName, ...inputRest } = inputAttrs;
 
-  const checkboxElement = (
-    <MuiCheckbox
-      checked={checked}
-      defaultChecked={defaultChecked}
-      indeterminate={indeterminate}
-      disabled={disabled}
-      onChange={onChange}
-      name={name}
-      value={value}
-      icon={<UncheckedIcon size={size} variant={variant} />}
-      checkedIcon={<CheckedIcon size={size} variant={variant} />}
-      indeterminateIcon={<IndeterminateIcon size={size} variant={variant} />}
-      className={'chk-' + variant + (error ? ' chk-error' : '') + ' ' + className}
-      inputProps={mergedInputProps}
-      disableRipple
-      sx={{
-        padding: (sizeConfig.touchTarget - sizeConfig.box) / 2 + 'px',
-        minWidth: 24,
-        minHeight: 24,
-        borderRadius: 'var(--Checkbox-Radius, 4px)',
-        color: 'inherit',
-        transition: 'background-color 0.15s ease-in-out',
-        '&.Mui-checked, &.MuiCheckbox-indeterminate': { color: 'inherit' },
-        /* Suppressing MUI's ripple halo is right — it is a circle of the wrong
-           color around a square box — but nothing replaced it, so hovering a
-           checkbox did nothing at all. The border is the channel, as on Input:
-           the box interior carries the checked state and must stay readable. */
-        '&:hover': { backgroundColor: 'transparent' },
-        /* Hover and Pressed move the border to the button's border color, as
-           Figma does; the box interior does not change. (It was --Text, and
-           Pressed also painted --Pressed into the box.) */
-        '&:hover .chk-box-icon, &:active .chk-box-icon': {
-          borderColor: 'var(--Buttons-' + styles.color + '-Border)',
-        },
-        /* No opacity on the box itself: the root below already dims, and both
-           together made a disabled checkbox 0.38 x 0.38 = 0.14. */
-        /* Focus: a 2px ring 1px outside the box, as Figma draws it. */
-        '&.Mui-focusVisible .chk-box-icon': {
-          outline: '2px solid var(--Focus-Visible)',
-          outlineOffset: '1px',
-          /* The ring is the focus signal; the border stays where it was —
-             Quiet unchecked, the palette border checked (Figma's Focus-
-             Visible · unchecked keeps Quiet). It used to move to the palette
-             border as Hover does. */
-        },
-        '&.Mui-disabled': {
-          opacity: 'var(--Disabled, 0.38)',
-          cursor: 'not-allowed',
-          pointerEvents: 'none',
-        },
-        ...sx,
-        /* Validation wins over hover / pressed / focus border moves, as
-           Figma's overlay sits on top in every state. */
-        ...(error && {
-          '& .chk-box-icon, &:hover .chk-box-icon, &:active .chk-box-icon, &.Mui-focusVisible .chk-box-icon': {
-            borderColor: 'var(--Icons-Error)',
-          },
-        }),
-      }}
-      {...props}
-    />
+  const handleInputChange = (event) => {
+    if (inputHandlers.onChange) inputHandlers.onChange(event);
+    // Workaround for https://github.com/facebook/react/issues/9023
+    if (event.nativeEvent.defaultPrevented || readOnly) return;
+    const next = event.target.checked;
+    setCheckedState(next);
+    if (onChange) onChange(event, next);
+  };
+  const handleFocus = (event) => {
+    if (matchesFocusVisible(event.target)) setFocusVisible(true);
+    if (onFocus) onFocus(event);
+  };
+  const handleBlur = (event) => {
+    if (!matchesFocusVisible(event.target)) setFocusVisible(false);
+    if (onBlur) onBlur(event);
+  };
+
+  const sk = SIZE_KEY[sizeKey];
+  const rootProps = {
+    className: 'MuiButtonBase-root MuiCheckbox-root' + (indeterminate ? ' MuiCheckbox-indeterminate' : '')
+      + ' MuiCheckbox-color' + capFirst(color) + ' MuiCheckbox-sizeMedium PrivateSwitchBase-root'
+      + (isChecked ? ' Mui-checked' : '') + (disabled ? ' Mui-disabled' : '') + (focusVisible ? ' Mui-focusVisible' : '')
+      + ' chk-' + variant + (error ? ' chk-error' : '') + ' ' + className
+      + ' omni-chk omni-chk-' + styles.color + (sk !== 'md' ? ' omni-chk-' + sk : '') + (error ? ' omni-chk-err' : ''),
+    ...props,
+    onFocus: handleFocus,
+    onBlur: handleBlur,
+  };
+  const children = (
+    <>
+      <input
+        {...inputHandlers}
+        onChange={handleInputChange}
+        autoFocus={autoFocus}
+        checked={checked}
+        defaultChecked={defaultChecked}
+        disabled={disabled}
+        id={id}
+        name={name}
+        readOnly={readOnly}
+        required={required}
+        tabIndex={tabIndex}
+        type="checkbox"
+        {...(value === undefined ? {} : { value })}
+        {...inputRest}
+        className={'PrivateSwitchBase-input omni-chk-input' + (inputClassName ? ' ' + inputClassName : '')}
+        ref={setInputRef}
+      />
+      <CheckboxBoxIcon size={sizeKey} checked={isChecked} indeterminate={indeterminate} />
+    </>
   );
+  const checkboxElement = hasSx(sx)
+    ? <SxBox component="span" sx={sx} {...rootProps}>{children}</SxBox>
+    : <span {...rootProps}>{children}</span>;
 
   if (label) {
     return (
-      <FormControlLabel
+      <ControlLabel
         control={checkboxElement}
         label={
           <LabelComp
             component="span"
-            sx={{
-              color: disabled ? 'var(--Text-Quiet)' : 'var(--Text)',
-              userSelect: 'none',
-            }}
+            className={'MuiBox-root omni-chk-text' + (disabled ? ' omni-chk-text-off' : '')}
           >
             {label}
           </LabelComp>
         }
         disabled={disabled}
         labelPlacement={labelPlacement}
-        sx={{
-          marginLeft: 0,
-          marginRight: 0,
-          gap: labelGap(size),
-          alignItems: 'center',
-          '&.Mui-disabled .MuiTypography-root': {
-            color: 'var(--Text-Quiet)',
-            opacity: 0.6,
-          },
-        }}
+        size={sizeKey}
+        quietDisabled
       />
     );
   }

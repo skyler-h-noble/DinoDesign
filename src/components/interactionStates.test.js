@@ -68,11 +68,14 @@ const code = (src) =>
 const SHARED = /scrimStates\(|TOGGLE_STATES/;
 
 /* `${ON}:hover` and `.omni-card-click:hover` are static component sheet rules
-   (see _staticStyles.js): ON is a component's enabled-state selector. */
+   (see _staticStyles.js): ON is a component's enabled-state selector. A sheet
+   rule may also put the state on a part under its root class —
+   `.omni-sw .MuiSwitch-switchBase:hover`, `.omni-chk.Mui-focusVisible .box` —
+   which is how a converted component keeps the selector weight emotion had. */
 const STATES = {
-  hover:    [/&:hover|\.bottom-nav-item:hover|:hover &|\$\{ON\}:hover|\.omni-[\w-]+:hover/, SHARED],
-  pressed:  [/&:active|&\.Mui-active|\.bottom-nav-item:active|:active &|\$\{ON\}:active|\.omni-[\w-]+:active/, SHARED],
-  focus:    [/&:focus-visible|&\.Mui-focusVisible|&:focus-within|FOCUS_RING|\$\{ON\}:focus-visible|\.omni-[\w-]+:focus-visible/, SHARED],
+  hover:    [/&:hover|\.bottom-nav-item:hover|:hover &|\$\{ON\}:hover|\.omni-[\w-]+:hover|\.omni-[\w-]+[\w .>+~-]*:hover/, SHARED],
+  pressed:  [/&:active|&\.Mui-active|\.bottom-nav-item:active|:active &|\$\{ON\}:active|\.omni-[\w-]+:active|\.omni-[\w-]+[\w .>+~-]*:active/, SHARED],
+  focus:    [/&:focus-visible|&\.Mui-focusVisible|&:focus-within|FOCUS_RING|\$\{ON\}:focus-visible|\.omni-[\w-]+:focus-visible|\.omni-[\w-]+[\w .>+~-]*(?::focus-visible|\.Mui-focusVisible|:focus-within)/, SHARED],
   disabled: [/&:disabled|&\.Mui-disabled|disabled &&|disabled \?|DISABLED_STATE/, SHARED],
 };
 

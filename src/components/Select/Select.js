@@ -1,14 +1,13 @@
 // src/components/Select/Select.js
 import React, { useState, useRef, useEffect, useCallback, useId } from 'react';
 import ReactDOM from 'react-dom';
-import { Box } from '@mui/material';
 import { Swatch } from '../Swatch/Swatch';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import CheckIcon from '@mui/icons-material/Check';
 import { Icon } from '../Icon/Icon';
 import { BodySmall } from '../Typography';
 import { FormLabel } from '../FormLabel/FormLabel';
-import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
+import { Glyph, SVG_ICON_DECLS } from '../_glyph';
 
 /**
  * Select Component
@@ -62,31 +61,102 @@ const FLOATING_SIZE_MAP = {
 
 const DROPDOWN_MAX_HEIGHT = 240;
 
-function getSelectedStyles(selectionStyle, isSelected, colorName) {
-  const C = cap(colorName || 'default');
-  if (!isSelected) {
-    return {
-      color: 'var(--Text)',
-      backgroundColor: 'transparent',
-      border: '1px solid transparent',
-    };
-  }
-  if (selectionStyle === 'solid') {
-    return {
-      backgroundColor: 'var(--Buttons-' + C + '-Button)',
-      color: 'var(--Buttons-' + C + '-Text)',
-      border: '1px solid var(--Buttons-' + C + '-Border)',
-      fontWeight: 600,
-    };
-  }
-  // default selection style
-  return {
-    backgroundColor: 'var(--Buttons-' + C + '-Button)',
-    color: 'var(--Buttons-' + C + '-Text)',
-    border: '1px solid var(--Buttons-' + C + '-Border)',
-    fontWeight: 600,
-  };
-}
+// --- Static sheet --------------------------------------------------------------
+//
+// Select was built from MUI Boxes styled by sx. Each Box is now a plain
+// element with the same classes (MuiBox-root included) and these rules, at the
+// weights the sx had — one class per part, one class plus a pseudo-class for
+// a state, the shell's descendant rule over the trigger — so a caller's sx
+// still wins over them. Size and floating values are one class per mode.
+const SxBox = lazySxBox('Select');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+const SZ = { small: 'sm', medium: 'md', large: 'lg' };
+const px = (v) => (typeof v === 'number' ? v + 'px' : v);
+const MODES = Object.keys(SZ).flatMap((s) => [['s' + SZ[s], SIZE_MAP[s], false], ['f' + SZ[s], FLOATING_SIZE_MAP[s], true]]);
+const longPad = (padding) => {
+  const p = padding.match(/(?:var\([^()]*\)|[^\s])+/g);
+  const [t, r = t, b = t, l = r] = p;
+  return `padding-top:${t};padding-right:${r};padding-bottom:${b};padding-left:${l}`;
+};
+
+registerStaticStyles('omni-select', [
+  '.omni-sel{position:relative;width:auto;display:inline-block;font-family:inherit}',
+  '.omni-sel-full{width:100%}',
+  '.omni-sel-left{display:inline-grid;grid-template-columns:auto minmax(0, 1fr);column-gap:var(--Sizing-1, 8px);-webkit-box-align:center;align-items:center}',
+  '.omni-sel-left-full{display:grid}',
+
+  /* The shell, as Input's. */
+  '.omni-sel-shell{position:relative;border:none;overflow:hidden;background-color:var(--Hover);transition:background-color 0.15s ease;box-shadow:none}',
+  '.omni-sel-shell::after{content:"";position:absolute;inset:0;pointer-events:none;border-width:1px;border-style:solid;border-color:var(--Border);border-radius:inherit}',
+  ...Object.keys(SZ).map((s) => `.omni-sel-shell-${SZ[s]}{border-radius:${SIZE_MAP[s].radius}}`),
+  '.omni-sel-shell-f{border-radius:var(--Input-Radius, var(--Style-Border-Radius))}',
+  '.omni-sel-on:hover{background-color:var(--Pressed)}',
+  '.omni-sel-on:active{background-color:var(--Hover)}',
+  // Pressed, the edge is 2px — Figma's Select (as Input) draws its stroke at 2 there.
+  '.omni-sel-on:active::after{border-width:2px}',
+  '.omni-sel-on:hover .select-trigger,.omni-sel-on:active .select-trigger,.omni-sel-on:focus-within .select-trigger{color:var(--Text)}',
+  '.omni-sel-shell:focus-within{outline-width:2px;outline-style:solid;outline-color:var(--Focus-Visible);outline-offset:1px}',
+  '.omni-sel-shell-off{opacity:var(--Disabled, 0.38)}',
+
+  /* The trigger. The field's text is --Text; only the placeholder is Quiet. */
+  '.omni-sel-trg{display:flex;-webkit-box-align:center;align-items:center;gap:var(--Sizing-1-and-Half, 12px);width:100%;min-width:var(--_sel-minw);'
+    + 'background-color:transparent;border:none;border-radius:0;color:var(--Quiet);font-family:var(--Body-Font-Family, inherit);'
+    + 'cursor:pointer;outline:none;text-align:left;position:relative;transition:color 0.15s ease}',
+  ...MODES.map(([k, sc, flt]) => `.omni-sel-trg-${k}{height:${px(sc.height)};`
+    + (flt ? longPad(sc.padding) : `padding-top:0;padding-right:0;padding-bottom:0;padding-left:${sc.pad}`)
+    + `;font-size:${sc.fontSize}` + (sc.lineHeight ? `;line-height:${sc.lineHeight}` : '') + (flt ? ';gap:8px' : '') + '}'),
+  '.omni-sel-trg-val{color:var(--Text)}',
+  '.omni-sel-trg-off{cursor:not-allowed}',
+  '.omni-sel-deco{display:flex;-webkit-box-align:center;align-items:center;flex-shrink:0;color:inherit}',
+  '.omni-sel-deco-start{color:var(--Text-Quiet)}',
+  /* The floating label. */
+  '.omni-sel-flabel{position:absolute;top:50%;transform:translateY(-50%);transform-origin:top left;color:var(--Quiet);font-weight:400;'
+    + 'pointer-events:none;transition:top 0.15s ease, transform 0.15s ease, color 0.15s ease}',
+  ...Object.keys(SZ).flatMap((s) => {
+    const sc = FLOATING_SIZE_MAP[s];
+    return [`.omni-sel-flabel-${SZ[s]}{left:${(sc.leftPad || 14)}px;font-size:${sc.fontSize}}`,
+      `.omni-sel-flabel-${SZ[s]}-deco{left:${(sc.leftPad || 14) + 32}px}`];
+  }),
+  '.omni-sel-flabel-up{top:6px;transform:scale(0.75)}',
+  '.omni-sel-flabel-open{color:var(--Text)}',
+  '.omni-sel-val{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
+  '.omni-sel-val-up{margin-top:8px}',
+  '.omni-sel-val-down{margin-top:0}',
+  '.omni-sel-colorval{display:flex;-webkit-box-align:center;align-items:center;gap:8px}',
+  '.omni-sel-value{color:inherit;font:inherit}',
+  /* The end decorator: a Button-Height square holding the chevron. */
+  '.omni-sel-dec{display:inline-flex;-webkit-box-align:center;align-items:center;-webkit-box-pack:center;justify-content:center;flex-shrink:0;'
+    + 'color:var(--Icons-Default, var(--Text))}',
+  ...MODES.map(([k, sc, flt]) => `.omni-sel-dec-${k}{width:${flt ? 'auto' : sc.height};height:${flt ? 'auto' : sc.height}}`),
+  '.omni-sel-dec .MuiSvgIcon-root{transform:rotate(0deg);transition:transform 0.2s ease}',
+  ...MODES.map(([k, sc, flt]) => `.omni-sel-dec-${k} .MuiSvgIcon-root{font-size:${flt ? (sc.iconSize || 18) + 'px' : sc.icon}}`),
+  '.omni-sel-dec-open .MuiSvgIcon-root{transform:rotate(180deg)}',
+  `.omni-sel-glyph{${SVG_ICON_DECLS};font-size:1.5rem}`,
+
+  /* The dropdown panel. */
+  '.omni-sel-list{position:fixed;background-color:var(--Hover);border-width:1px;border-style:solid;border-color:var(--Border);'
+    + 'border-radius:var(--Dropdown-Frame-Radius, var(--Input-Radius, var(--Style-Border-Radius, 4px)));box-shadow:none;z-index:99999;'
+    + `max-height:${DROPDOWN_MAX_HEIGHT}px;overflow-y:auto;padding-top:4px;padding-bottom:4px}`,
+  '.omni-sel-opt{display:flex;-webkit-box-align:center;align-items:center;gap:8px;padding-left:12px;padding-right:12px;padding-top:0;padding-bottom:0;'
+    + 'margin-left:4px;margin-right:4px;margin-top:1px;margin-bottom:1px;cursor:pointer;font-family:inherit;border-radius:4px;outline:none;'
+    + 'color:var(--Text);background-color:transparent;border-width:1px;border-style:solid;border-color:transparent;'
+    + 'transition:background-color 0.1s ease}',
+  ...MODES.map(([k, sc]) => `.omni-sel-opt-${k}{min-height:${px(sc.height)};font-size:${sc.fontSize}}`),
+  '.omni-sel-opt-on{background-color:var(--_sel-btn);color:var(--_sel-btn-text);border-color:var(--_sel-btn-border);font-weight:600}',
+  '.omni-sel-opt-off:hover{background-color:var(--_sel-hover);color:var(--_sel-btn-text)}',
+  '.omni-sel-opt-off:active{background-color:var(--_sel-pressed);color:var(--_sel-btn-text)}',
+  '.omni-sel-opt:focus-visible{outline-width:2px;outline-style:solid;outline-color:var(--Focus-Visible);outline-offset:2px}',
+  '.omni-sel-opt-icon{display:inline-flex;-webkit-box-align:center;align-items:center;flex-shrink:0}',
+  '.omni-sel-div{height:1px;background-color:var(--Border);margin-left:8px;margin-right:8px;margin-top:2px;margin-bottom:2px}',
+  '.omni-sel-group{padding-left:12px;padding-right:12px;padding-top:10px;padding-bottom:4px;font-size:11px;font-family:inherit;font-weight:700;'
+    + 'letter-spacing:0.06em;text-transform:uppercase;color:var(--Text-Quiet)}',
+  '.omni-sel-group-first{padding-top:6px}',
+].join('\n'));
+
+/* The selected row: the palette's button fill, label and border, at 600.
+   `default` and `solid` selection styles paint the same row (see the note in
+   the header) — .omni-sel-opt-on in the sheet above. Unselected rows are
+   --Text on transparent, with a transparent 1px border so nothing moves. */
 
 export function Select({
   options = [],
@@ -118,6 +188,7 @@ export function Select({
   sx = {},
   ...props
 }) {
+  useStaticStyles('omni-select');
   const effectiveColor = color;
   const C = cap(effectiveColor);
   /* There was an `isLight = variant === 'light'` here, read by nothing. So
@@ -308,37 +379,29 @@ export function Select({
   // trigger field and doesn't fight saturated brand surfaces. We still
   // carry data-theme so per-palette tokens (Buttons, Border, etc.)
   // resolve correctly against the brand the user picked.
+  //
+  // The row palette arrives as custom properties declared on the listbox,
+  // which carries the same data-theme the rows resolve against.
+  const sk = SZ[size] ? size : 'medium';
+  const modeKey = (isFloating ? 'f' : 's') + SZ[sk];
   const dropdown = open ? ReactDOM.createPortal(
-    <Box
+    <div
       ref={dropdownRef}
       data-select-dropdown
       data-theme={parentTheme || undefined}
       role="listbox"
       aria-label={label || 'Options'}
-      sx={{
-        position: 'fixed',
+      className="MuiBox-root omni-sel-list"
+      style={{
         top: dropdownPos.top ?? 'unset',
         bottom: dropdownPos.bottom ?? 'unset',
         left: dropdownPos.left,
         width: dropdownPos.width + 'px',
-        backgroundColor: 'var(--Hover)',
-        // The trigger's edge: the color marks the selection, not the frame.
-        border: '1px solid var(--Border)',
-        // The floating PANEL, not the trigger. It followed --Input-Radius
-        // uncapped, so a pill-shaped field gave the dropdown 22px+ corners —
-        // and the panel scrolls with full-bleed rows, so a large corner clips
-        // the first and last item's hover highlight into a crescent.
-        //
-        // --Dropdown-Frame-Radius is min(Input-Radius, Card-Radius, 16px).
-        // The nested fallback is required, not defensive: the CSS is frozen
-        // per design system in Storage, so a system published before this
-        // token existed must still resolve.
-        borderRadius: 'var(--Dropdown-Frame-Radius, var(--Input-Radius, var(--Style-Border-Radius, 4px)))',
-        boxShadow: 'none',
-        zIndex: 99999,
-        maxHeight: DROPDOWN_MAX_HEIGHT + 'px',
-        overflowY: 'auto',
-        py: 0.5,
+        '--_sel-btn': 'var(--Buttons-' + C + '-Button)',
+        '--_sel-btn-text': 'var(--Buttons-' + C + '-Text)',
+        '--_sel-btn-border': 'var(--Buttons-' + C + '-Border)',
+        '--_sel-hover': 'var(--Buttons-' + C + '-Hover)',
+        '--_sel-pressed': 'var(--Buttons-' + C + '-Pressed)',
       }}
     >
       {(() => {
@@ -348,53 +411,35 @@ export function Select({
           const optColor = typeof opt === 'object' ? opt.color : null;
           const optIcon = typeof opt === 'object' ? opt.icon : null;
           const isSelected = optValue === currentValue;
-          const styles = getSelectedStyles(effectiveSelectionStyle, isSelected, effectiveColor);
           const isLast = idx === total - 1;
 
           return (
             <React.Fragment key={optValue}>
-              <Box
+              <div
                 role="option"
                 tabIndex={-1}
                 aria-selected={isSelected}
                 aria-label={isColor && !showColorLabels ? optLabel : undefined}
                 onClick={() => handleSelect(optValue)}
                 onKeyDown={(e) => handleOptionKeyDown(e, optValue)}
-                sx={{
-                  display: 'flex', alignItems: 'center', gap: 1,
-                  px: 1.5, py: 0, mx: 0.5, my: '1px',
-                  minHeight: sizeConfig.height,
-                  cursor: 'pointer',
-                  fontSize: sizeConfig.fontSize,
-                  fontFamily: 'inherit',
-                  borderRadius: '4px',
-                  outline: 'none',
-                  ...styles,
-                  transition: 'background-color 0.1s ease',
-                  '&:hover': !isSelected ? { backgroundColor: 'var(--Buttons-' + C + '-Hover)', color: 'var(--Buttons-' + C + '-Text)' } : {},
-                  '&:active': !isSelected ? { backgroundColor: 'var(--Buttons-' + C + '-Pressed)', color: 'var(--Buttons-' + C + '-Text)' } : {},
-                  '&:focus-visible': {
-                    outline: '2px solid var(--Focus-Visible)',
-                    outlineOffset: '2px',
-                  },
-                }}
+                className={'MuiBox-root omni-sel-opt omni-sel-opt-' + modeKey + (isSelected ? ' omni-sel-opt-on' : ' omni-sel-opt-off')}
               >
                 {isColor && optColor && (
                   /* The library's Swatch — the chip Figma's color dropdown
-                     puts in each row (it was a hand-made square here). The row
-                     marks selection with its check, so the chip stays plain. */
+                     puts in each row. The row marks selection with its check,
+                     so the chip stays plain. */
                   <Swatch color={optColor} size={swatchSize} aria-hidden="true" />
                 )}
                 {optIcon && (
-                  <Box aria-hidden="true" sx={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0 }}>{optIcon}</Box>
+                  <div aria-hidden="true" className="MuiBox-root omni-sel-opt-icon">{optIcon}</div>
                 )}
                 {(!isColor || showColorLabels) && (
                   <BodySmall style={{ flex: 1, color: 'inherit', fontWeight: 'inherit' }}>{optLabel}</BodySmall>
                 )}
-                {isSelected && <Icon size="small" sx={{ opacity: 0.6, flexShrink: 0 }}><CheckIcon /></Icon>}
-              </Box>
+                {isSelected && <Icon size="small" sx={{ opacity: 0.6, flexShrink: 0 }}><Glyph name="Check" className="omni-sel-glyph" /></Icon>}
+              </div>
               {showDividers && !isLast && (
-                <Box aria-hidden="true" sx={{ height: '1px', backgroundColor: 'var(--Border)', mx: 1, my: 0.25 }} />
+                <div aria-hidden="true" className="MuiBox-root omni-sel-div" />
               )}
             </React.Fragment>
           );
@@ -406,22 +451,9 @@ export function Select({
             const groupItems = opt.options;
             return (
               <React.Fragment key={'group-' + (opt.label || gIdx)}>
-                <Box
-                  role="presentation"
-                  sx={{
-                    px: 1.5,
-                    pt: gIdx === 0 ? 0.75 : 1.25,
-                    pb: 0.5,
-                    fontSize: '11px',
-                    fontFamily: 'inherit',
-                    fontWeight: 700,
-                    letterSpacing: '0.06em',
-                    textTransform: 'uppercase',
-                    color: 'var(--Text-Quiet)',
-                  }}
-                >
+                <div role="presentation" className={'MuiBox-root omni-sel-group' + (gIdx === 0 ? ' omni-sel-group-first' : '')}>
                   {opt.label}
-                </Box>
+                </div>
                 {groupItems.map((child, cIdx) => renderOption(child, cIdx, groupItems.length))}
               </React.Fragment>
             );
@@ -429,35 +461,27 @@ export function Select({
           return renderOption(opt, gIdx, options.length);
         });
       })()}
-    </Box>,
+    </div>,
     document.body
   ) : null;
 
-  return (
-    <Box
-      ref={wrapperRef}
-      className={
-        'select-wrapper select-' + size +
-        ' select-label-' + labelPosition +
-        ' select-style-' + effectiveSelectionStyle +
-        ' select-variant-' + effectiveVariant +
-        (open ? ' select-open' : '') +
-        (disabled ? ' select-disabled' : '') +
-        (className ? ' ' + className : '')
-      }
-      sx={{
-        position: 'relative', width: fullWidth ? '100%' : 'auto', display: 'inline-block', fontFamily: 'inherit',
-        // Left label: label in its own column, centred on the field — as Input.
-        ...(isLeft && label && {
-          display: fullWidth ? 'grid' : 'inline-grid',
-          gridTemplateColumns: 'auto minmax(0, 1fr)',
-          columnGap: 'var(--Sizing-1, 8px)',
-          alignItems: 'center',
-        }),
-        ...sx,
-      }}
-      {...props}
-    >
+  const raised = hasValue || open;
+  const wrapperProps = {
+    className:
+      'select-wrapper select-' + size +
+      ' select-label-' + labelPosition +
+      ' select-style-' + effectiveSelectionStyle +
+      ' select-variant-' + effectiveVariant +
+      (open ? ' select-open' : '') +
+      (disabled ? ' select-disabled' : '') +
+      (className ? ' ' + className : '') +
+      ' MuiBox-root omni-sel' + (fullWidth ? ' omni-sel-full' : '') +
+      // Left label: label in its own column, centred on the field — as Input.
+      (isLeft && label ? (fullWidth ? ' omni-sel-left omni-sel-left-full' : ' omni-sel-left') : ''),
+    ...props,
+  };
+  const body = (
+    <>
       {/* Top label: the lib's FormLabel, as Input's. The trigger is a
           <button>, which IS labelable, so <label for> names it. */}
       {isTop && label && (
@@ -470,141 +494,81 @@ export function Select({
       {/* Outer shell — Input's: the edge an inside-stroke overlay, the fill
           resting on --Hover, deepening to --Pressed under the pointer and back
           to --Hover while pressed; the 2px ring 1px out; 38% when disabled. */}
-      <Box className="select-shell" sx={{
-        position: 'relative',
-        border: 'none',
-        '&::after': {
-          content: '""', position: 'absolute', inset: 0, pointerEvents: 'none',
-          border: '1px solid var(--Border)', borderRadius: 'inherit',
-        },
-        borderRadius: isFloating ? 'var(--Input-Radius, var(--Style-Border-Radius))' : sizeConfig.radius,
-        overflow: 'hidden',
-        backgroundColor: 'var(--Hover)',
-        transition: 'background-color 0.15s ease',
-        boxShadow: 'none',
-        ...(!disabled && {
-          '&:hover': { backgroundColor: 'var(--Pressed)' },
-          '&:active': { backgroundColor: 'var(--Hover)' },
-          // Pressed, the edge is 2px — Figma's Select (as Input) draws its stroke at 2 there.
-          '&:active::after': { borderWidth: '2px' },
-          '&:hover .select-trigger, &:active .select-trigger, &:focus-within .select-trigger': { color: 'var(--Text)' },
-        }),
-        '&:focus-within': {
-          outline: '2px solid var(--Focus-Visible)',
-          outlineOffset: '1px',
-        },
-        ...(disabled && { opacity: 'var(--Disabled, 0.38)' }),
-      }}>
+      {/* The wrapper is the shell's parent — read from here so it is found
+          whether the wrapper is a plain div or the sx box. */}
+      <div ref={(n) => { wrapperRef.current = n ? n.parentElement : null; }}
+        className={'select-shell MuiBox-root omni-sel-shell omni-sel-shell-' + (isFloating ? 'f' : SZ[sk])
+        + (disabled ? ' omni-sel-shell-off' : ' omni-sel-on')}>
       {/* Inner wrapper — no data-surface so trigger inherits parent scope */}
-      <Box>
+      <div className="MuiBox-root">
 
       {/* Trigger */}
-      <Box
+      <button
         ref={triggerRef}
-        component="button"
         type="button"
         role="combobox"
         aria-expanded={open}
         aria-haspopup="listbox"
         id={triggerId}
         aria-label={isTop && label ? undefined : (label || placeholder)}
-        className="select-trigger"
+        className={'select-trigger MuiBox-root omni-sel-trg omni-sel-trg-' + modeKey
+          + ((hasValue || open) ? ' omni-sel-trg-val' : '') + (disabled ? ' omni-sel-trg-off' : '')}
+        style={{ '--_sel-minw': typeof minWidth === 'number' ? minWidth + 'px' : minWidth }}
         tabIndex={disabled ? -1 : 0}
         onClick={toggleOpen}
         onKeyDown={handleKeyDown}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        sx={{
-          display: 'flex', alignItems: 'center',
-          gap: isFloating ? 1 : 'var(--Sizing-1-and-Half, 12px)',
-          width: '100%', minWidth,
-          height: isFloating ? sizeConfig.height : sizeConfig.height,
-          /* Flush right: Figma's Select, like Input, has no right padding — the
-             chevron's own box is the inset. */
-          padding: isFloating ? sizeConfig.padding : '0 0 0 ' + sizeConfig.pad,
-          backgroundColor: 'transparent',
-          border: 'none',
-          borderRadius: 0,
-          // The field's text is --Text, as Input's; only the placeholder is Quiet.
-          color: (hasValue || open) ? 'var(--Text)' : 'var(--Quiet)',
-          fontSize: sizeConfig.fontSize,
-          lineHeight: sizeConfig.lineHeight,
-          fontFamily: 'var(--Body-Font-Family, inherit)',
-          cursor: disabled ? 'not-allowed' : 'pointer',
-          outline: 'none', textAlign: 'left', position: 'relative',
-          transition: 'color 0.15s ease',
-        }}
       >
         {fieldDecoration && (
-          <Box aria-hidden={startDecoration ? undefined : true}
-               sx={{ display: 'flex', alignItems: 'center', flexShrink: 0, color: startDecoration ? 'var(--Text-Quiet)' : 'inherit' }}>
+          <div aria-hidden={startDecoration ? undefined : true}
+               className={'MuiBox-root omni-sel-deco' + (startDecoration ? ' omni-sel-deco-start' : '')}>
             {fieldDecoration}
-          </Box>
+          </div>
         )}
 
         {/* Floating label */}
         {isFloating && label && (
-          <Box sx={{
-            position: 'absolute',
-            top: hasValue || open ? '6px' : '50%',
-            left: (sizeConfig.leftPad || 14) + (fieldDecoration ? 32 : 0) + 'px',
-            transform: hasValue || open ? 'scale(0.75)' : 'translateY(-50%)',
-            transformOrigin: 'top left',
-            color: open ? activeTextColor : 'var(--Quiet)',
-            fontSize: sizeConfig.fontSize, fontWeight: 400,
-            pointerEvents: 'none',
-            transition: 'top 0.15s ease, transform 0.15s ease, color 0.15s ease',
-          }}>
+          <div className={'MuiBox-root omni-sel-flabel omni-sel-flabel-' + SZ[sk] + (raised ? ' omni-sel-flabel-up' : '')
+            + (open ? ' omni-sel-flabel-open' : '') + (fieldDecoration ? ' omni-sel-flabel-' + SZ[sk] + '-deco' : '')}>
             {label}
-          </Box>
+          </div>
         )}
 
         {/* Value display */}
-        <Box sx={{
-          flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-          ...(isFloating && { mt: hasValue || open ? '8px' : 0 }),
-        }}>
+        <div className={'MuiBox-root omni-sel-val' + (isFloating ? (raised ? ' omni-sel-val-up' : ' omni-sel-val-down') : '')}>
           {isColor && hasValue ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <div className="MuiBox-root omni-sel-colorval">
               {/* selectedOption holds the option object; the trigger shows
                   its color as the same library Swatch the rows use. */}
               <Swatch color={(selectedOption && typeof selectedOption !== 'string' && selectedOption.color) || 'transparent'}
                 size={swatchSize} aria-hidden="true" />
               {showColorLabels && <BodySmall style={{ color: 'inherit', padding: 0 }}>{selectedLabel}</BodySmall>}
-            </Box>
+            </div>
           ) : (
-            <Box component="span" className="select-value" sx={{ color: 'inherit', font: 'inherit' }}>
+            <span className="select-value MuiBox-root omni-sel-value">
               {hasValue ? selectedLabel : (isFloating && label ? '' : placeholder)}
-            </Box>
+            </span>
           )}
-        </Box>
+        </div>
 
         {/* Figma's end decorator: an Input Decorator — a ghost icon button,
             Button-Height square. Drawn, not a <button>: the trigger is already
             one, and buttons do not nest. */}
-        <Box component="span" aria-hidden="true" className="select-decorator" sx={{
-          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-          flexShrink: 0,
-          width: isFloating ? 'auto' : sizeConfig.height,
-          height: isFloating ? 'auto' : sizeConfig.height,
-          color: 'var(--Icons-Default, var(--Text))',
-          '& .MuiSvgIcon-root': {
-            fontSize: isFloating ? (sizeConfig.iconSize || 18) + 'px' : sizeConfig.icon,
-            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.2s ease',
-          },
-        }}>
-          <ExpandMoreIcon />
-        </Box>
-      </Box>
+        <span aria-hidden="true" className={'select-decorator MuiBox-root omni-sel-dec omni-sel-dec-' + modeKey + (open ? ' omni-sel-dec-open' : '')}>
+          <Glyph name="ExpandMore" className="omni-sel-glyph" />
+        </span>
+      </button>
 
-      </Box>{/* end inner themed surface */}
-      </Box>{/* end outer border shell */}
+      </div>{/* end inner themed surface */}
+      </div>{/* end outer border shell */}
 
       {/* Portal dropdown — renders into document.body to escape overflow:hidden */}
       {dropdown}
-    </Box>
+    </>
   );
+  if (hasSx(sx)) return <SxBox sx={sx} {...wrapperProps}>{body}</SxBox>;
+  return <div {...wrapperProps}>{body}</div>;
 }
 
 export default Select;
