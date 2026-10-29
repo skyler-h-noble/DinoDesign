@@ -1,6 +1,7 @@
 // src/components/Slider/Slider.test.js
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { stateRules } from '../_testCss';
 import {
   Slider,
   SliderInput,
@@ -95,10 +96,13 @@ describe('Slider Component', () => {
     expect(rail).toBeInTheDocument();
     /* The fallback used to be `primary`, so `success-light` silently painted
        a primary slider. It is `default` now, matching the default prop. */
-    const css = Array.from(document.styleSheets)
-      .flatMap((sh) => { try { return Array.from(sh.cssRules || []); } catch { return []; } })
-      .map((r) => r.cssText).join('\n');
+    // What the rail, track and root resolve to, private properties followed
+    // down to the real token.
+    const css = [rail, container.querySelector('.MuiSlider-track'), container.querySelector('.MuiSlider-root')]
+      .map((el) => stateRules(el).base).join('\n');
+    expect(css).toContain('--Buttons-Default-Button');
     expect(css).not.toContain('--Buttons-Primary-Button');
+    expect(css).not.toContain('--Buttons-Success');
   });
 
   // --- Sizes ---

@@ -1,11 +1,12 @@
 // src/components/Rating/Rating.js
 import React, { useState } from 'react';
-import { Box } from '@mui/material';
 import StarIcon from '@omni-design/icons/Star';
 import StarBorderIcon from '@omni-design/icons/StarBorder';
 import StarHalfIcon from '@omni-design/icons/StarHalf';
 import { Caption } from '../Typography/Typography';
 import { FormLabel } from '../FormLabel/FormLabel';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 
 /**
  * Rating Component
@@ -59,6 +60,39 @@ const SIZE_MAP = {
   large:  { iconSize: 32, minHit: 36 },
 };
 
+/* Static sheet — the MUI Box sx blocks of the stars, the group and the
+   field, as plain rules. A filled star takes its palette's icon colour by
+   one class per colour; an engaged unselected star turns --Text, one class +
+   one pseudo-class as emotion's rule weighed. */
+const SxBox = lazySxBox('Rating');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+/* Emotion's prefixer wrote the old flexbox aliases next to align-items and
+   justify-content; Chrome still computes them (-webkit-box-align / -pack), so
+   the sheet writes them too. */
+const wk = (css) => css
+  .replace(/(^|[{;])align-items:([^;}]+)/g, '$1-webkit-box-align:$2;align-items:$2')
+  .replace(/(^|[{;])justify-content:([^;}]+)/g, (m, p, v) => p + '-webkit-box-pack:' + v.replace(/^flex-/, '').replace(/^space-between$/, 'justify') + ';justify-content:' + v);
+registerStaticStyles('omni-rating', wk([
+  '.omni-rt-star{position:relative;display:inline-flex;align-items:center;justify-content:center;border:none;background-color:transparent;padding:0;'
+    + 'cursor:default;outline:none;color:var(--Quiet);transition:color 0.1s ease}',
+  ...Object.entries(SIZE_MAP).map(([size, s]) => `.omni-rt-star-${size}{min-width:${s.minHit}px;min-height:${s.minHit}px}`),
+  '.omni-rt-star-int{cursor:pointer}',
+  '.omni-rt-star-off{cursor:not-allowed}',
+  ...Object.values(COLOR_MAP).map((C) => `.omni-rt-on-${C}{color:var(--Icons-${C})}`),
+  // Engaged, an unselected star's glyph turns Text — Hover and Pressed.
+  '.omni-rt-star-live:hover,.omni-rt-star-live:active{color:var(--Text)}',
+  // Figma's Focus-Visible: a 3px ring, 1px in from the box's edge.
+  '.omni-rt-star-int:focus-visible{outline:3px solid var(--Focus-Visible);outline-offset:-4px}',
+  '.omni-rt-star:disabled{cursor:not-allowed;opacity:var(--Disabled, 0.38)}',
+  '.omni-rt-half{position:absolute;top:0;width:50%;height:100%;z-index:1}',
+  '.omni-rt-half-l{left:0}',
+  '.omni-rt-half-r{right:0}',
+  '.omni-rt{display:inline-flex;align-items:center;gap:0;opacity:1;font-family:inherit}',
+  '.omni-rt-off{opacity:var(--Disabled, 0.38)}',
+  '.omni-rt-field{display:inline-flex;flex-direction:column;align-items:flex-start;gap:var(--Sizing-Half, 4px)}',
+].join('\n')));
+
 /* ZONE PROPS — `theme` and `surface`.
  *
  * They become data-theme / data-surface on the root, which redefines
@@ -96,6 +130,7 @@ export function Rating({
   sx = {},
   ...props
 }) {
+  useStaticStyles('omni-rating');
   const max = 5;
   if (maxProp !== undefined && maxProp !== 5 && process.env.NODE_ENV !== 'production' && !warnedMax) {
     warnedMax = true;
@@ -112,8 +147,7 @@ export function Rating({
 
   const C = COLOR_MAP[color] || COLOR_MAP.default;
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
-
-  const starColor = 'var(--Icons-' + C + ')';
+  const sizeKey = SIZE_MAP[size] ? size : 'medium';
 
   const handleClick = (newValue) => {
     if (!isInteractive) return;
@@ -129,13 +163,9 @@ export function Rating({
     setHoverValue(val);
   };
 
-  const starSx = (isFilled, isHalfFilled) => ({
-    // An unselected star is Quiet (Figma's Star), a filled one the icon color.
-    color: isFilled || isHalfFilled ? starColor : 'var(--Quiet)',
-    transition: 'color 0.1s ease',
-    // Engaged, an unselected star's glyph turns Text — Hover and Pressed.
-    ...(isInteractive && !isFilled && !isHalfFilled && { '&:hover, &:active': { color: 'var(--Text)' } }),
-  });
+  // An unselected star is Quiet (Figma's Star), a filled one the icon color.
+  const starClass = (isFilled, isHalfFilled) => (isFilled || isHalfFilled ? ' omni-rt-on-' + C
+    : (isInteractive ? ' omni-rt-star-live' : ''));
 
   const renderStar = (index) => {
     const starValue = index + 1;
@@ -145,19 +175,20 @@ export function Rating({
     const isHalfFilled = displayValue !== null && !isFilled && isHalf && halfValue <= displayValue;
 
     const IconComponent = isHalfFilled ? StarHalfIcon : isFilled ? StarIcon : StarBorderIcon;
-    const starStyles = starSx(isFilled, isHalfFilled);
 
     /* Half precision: the SAME focusable radio as a whole star, with two
        invisible halves over it for the pointer. It used to be a plain box —
        no tab stop, no arrow keys, no focus ring — so a half-star rating could
        not be used from the keyboard at all. */
     const halves = isHalf && isInteractive;
+    const Tag = isInteractive ? 'button' : 'span';
 
     return (
-      <Box
+      <Tag
         key={index}
-        className="rating-star"
-        component={isInteractive ? 'button' : 'span'}
+        className={'MuiBox-root rating-star omni-rt-star omni-rt-star-' + sizeKey
+          + (disabled ? ' omni-rt-star-off' : (isInteractive ? ' omni-rt-star-int' : ''))
+          + starClass(isFilled, isHalfFilled)}
         type={isInteractive ? 'button' : undefined}
         role={isInteractive ? 'radio' : undefined}
         aria-checked={isFilled || isHalfFilled}
@@ -178,60 +209,38 @@ export function Rating({
             handleClick(next || null);
           }
         }}
-        sx={{
-          position: 'relative',
-          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-          border: 'none', backgroundColor: 'transparent', padding: 0,
-          minWidth: s.minHit + 'px',
-          minHeight: s.minHit + 'px',
-          cursor: disabled ? 'not-allowed' : (isInteractive ? 'pointer' : 'default'),
-          outline: 'none',
-          ...starStyles,
-          // Figma's Focus-Visible: a 3px ring, 1px in from the box's edge.
-          '&:focus-visible': isInteractive ? {
-            outline: '3px solid var(--Focus-Visible)',
-            outlineOffset: '-4px',
-          } : {},
-          '&:disabled': {
-            cursor: 'not-allowed',
-            opacity: 'var(--Disabled, 0.38)',
-          },
-        }}
       >
         {halves && (
           <>
-            <Box aria-hidden="true" sx={{ position: 'absolute', left: 0, top: 0, width: '50%', height: '100%', zIndex: 1 }}
+            <div aria-hidden="true" className="MuiBox-root omni-rt-half omni-rt-half-l"
               onMouseEnter={() => handleHalf(index, true)}
               onClick={() => handleClick(halfValue)} />
-            <Box aria-hidden="true" sx={{ position: 'absolute', right: 0, top: 0, width: '50%', height: '100%', zIndex: 1 }}
+            <div aria-hidden="true" className="MuiBox-root omni-rt-half omni-rt-half-r"
               onMouseEnter={() => handleHalf(index, false)}
               onClick={() => handleClick(starValue)} />
           </>
         )}
         <IconComponent sx={{ fontSize: s.iconSize }} />
-      </Box>
+      </Tag>
     );
   };
 
+  const groupProps = {
+    role: isInteractive ? 'radiogroup' : 'img',
+    'aria-label': (label || 'Rating') + (currentValue !== null ? ': ' + currentValue + ' of ' + max + ' stars' : ': ' + emptyLabel),
+    'data-theme': theme || undefined,
+    'data-surface': surface || undefined,
+    className: 'MuiBox-root rating rating-' + color + ' rating-' + size +
+      (readOnly ? ' rating-readonly' : '') +
+      (disabled ? ' rating-disabled' : '') +
+      (currentValue === null ? ' rating-empty' : '') +
+      (className ? ' ' + className : '') +
+      ' omni-rt' + (disabled ? ' omni-rt-off' : ''),
+    ...props,
+  };
+  const GroupTag = hasSx(sx) ? SxBox : 'div';
   const group = (
-    <Box
-      role={isInteractive ? 'radiogroup' : 'img'}
-      aria-label={(label || 'Rating') + (currentValue !== null ? ': ' + currentValue + ' of ' + max + ' stars' : ': ' + emptyLabel)}
-      data-theme={theme || undefined}
-      data-surface={surface || undefined}
-      className={'rating rating-' + color + ' rating-' + size +
-        (readOnly ? ' rating-readonly' : '') +
-        (disabled ? ' rating-disabled' : '') +
-        (currentValue === null ? ' rating-empty' : '') +
-        (className ? ' ' + className : '')}
-      sx={{
-        display: 'inline-flex', alignItems: 'center', gap: 0,
-        opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
-        fontFamily: 'inherit',
-        ...sx,
-      }}
-      {...props}
-    >
+    <GroupTag {...(hasSx(sx) ? { sx } : {})} {...groupProps}>
       {Array.from({ length: max }, (_, i) => renderStar(i))}
       {currentValue === null && !hoverValue && emptyLabel && (
         /* Figma's Value = Empty: Dynamic Caption in Quiet, Sizing-Half after the stars. */
@@ -242,7 +251,7 @@ export function Rating({
           {emptyLabel}
         </Caption>
       )}
-    </Box>
+    </GroupTag>
   );
 
   if (!label) return group;
@@ -253,12 +262,11 @@ export function Rating({
     </FormLabel>
   );
   return (
-    <Box className={'rating-field rating-label-' + labelPosition}
-      sx={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', gap: 'var(--Sizing-Half, 4px)' }}>
+    <div className={'MuiBox-root rating-field rating-label-' + labelPosition + ' omni-rt-field'}>
       {labelPosition !== 'bottom' && labelEl}
       {group}
       {labelPosition === 'bottom' && labelEl}
-    </Box>
+    </div>
   );
 }
 

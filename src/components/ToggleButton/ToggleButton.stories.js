@@ -1,15 +1,14 @@
 // src/components/ToggleButton/ToggleButton.stories.js
+import { ToggleButton, DisabledToggleButton } from './ToggleButton';
 import {
-  ToggleButton,
   ToggleButtonGroup,
   TextFormatToggleGroup,
   AlignmentToggleGroup,
   ViewModeToggleGroup,
   SizeToggleGroup,
   VerticalToggleButtonGroup,
-  DisabledToggleButton,
   ToggleButtonShowcase,
-} from './ToggleButton';
+} from './ToggleButtonPresets';
 import { Box, Paper, Stack, Typography } from '@mui/material';
 import { useState } from 'react';
 

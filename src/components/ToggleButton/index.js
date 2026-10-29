@@ -14,6 +14,7 @@
 // ToggleButton itself stays, and is NOT a duplicate of anything: it is a single
 // control that is on or off (aria-pressed), where a group is a row of segments
 // of which one is selected. Different components, and the Figma library needs a
-// page for this one.
-export { ToggleButton, ToggleButtonShowcase, DisabledToggleButton } from './ToggleButton';
+// page for this one. The presets and the showcase live in ToggleButtonPresets.js.
+export { ToggleButton, DisabledToggleButton } from './ToggleButton';
+export { ToggleButtonShowcase } from './ToggleButtonPresets';
 export { ToggleButton as default } from './ToggleButton';

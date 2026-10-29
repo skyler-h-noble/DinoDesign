@@ -4,6 +4,7 @@ import { render, screen } from '@testing-library/react';
 import { axe } from 'jest-axe';
 import AddIcon from '@omni-design/icons/Add';
 import { FieldButton } from './FieldButton';
+import { stateRules } from '../_testCss';
 
 const allCss = () => Array.from(document.styleSheets).flatMap((s) => Array.from(s.cssRules).map((r) => r.cssText)).join('\n');
 
@@ -21,8 +22,10 @@ describe('FieldButton', () => {
 
   test('outline draws an inset Buttons border; ghost draws none', () => {
     const { unmount } = render(<FieldButton variant="outline" aria-label="Up"><AddIcon /></FieldButton>);
-    expect(allCss()).toContain('inset 0 0 0 1px var(--Buttons-Default-Border)');
+    expect(stateRules(screen.getByRole('button', { name: 'Up' })).base).toContain('box-shadow: inset 0 0 0 1px var(--Buttons-Default-Border);');
     unmount();
+    render(<FieldButton variant="ghost" aria-label="Down"><AddIcon /></FieldButton>);
+    expect(stateRules(screen.getByRole('button', { name: 'Down' })).base).toContain('box-shadow: none;');
   });
 
   test('disabled is a disabled button', () => {

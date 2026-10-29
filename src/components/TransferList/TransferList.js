@@ -1,6 +1,5 @@
 // src/components/TransferList/TransferList.js
 import React, { useState, useCallback } from 'react';
-import { Box } from '@mui/material';
 import ChevronRightIcon from '@omni-design/icons/ChevronRight';
 import ChevronLeftIcon from '@omni-design/icons/ChevronLeft';
 import KeyboardDoubleArrowRightIcon from '@omni-design/icons/KeyboardDoubleArrowRight';
@@ -10,7 +9,8 @@ import { Icon } from '../Icon/Icon';
 import { Checkbox } from '../Checkbox/Checkbox';
 import { Divider } from '../Divider/Divider';
 import { BodySmall, Caption } from '../Typography';
-import { SHADOW_LEVEL_2 } from '../_shadows';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 
 /**
  * TransferList Component — Figma-aligned
@@ -30,6 +30,42 @@ import { SHADOW_LEVEL_2 } from '../_shadows';
  *   basic      2 move buttons (one each direction)
  *   enhanced   4 move buttons + select-all header checkbox
  */
+
+/* Static sheet — the MUI Box sx blocks of the panels, the list and the
+   button column, as plain rules. */
+const SxBox = lazySxBox('TransferList');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+/* Emotion's prefixer wrote the old flexbox aliases next to align-items and
+   justify-content; Chrome still computes them (-webkit-box-align / -pack), so
+   the sheet writes them too. */
+const wk = (css) => css
+  .replace(/(^|[{;])align-items:([^;}]+)/g, '$1-webkit-box-align:$2;align-items:$2')
+  .replace(/(^|[{;])justify-content:([^;}]+)/g, (m, p, v) => p + '-webkit-box-pack:' + v.replace(/^flex-/, '').replace(/^space-between$/, 'justify') + ';justify-content:' + v);
+registerStaticStyles('omni-transferlist', wk([
+  /* TOP-ALIGNED, not centred: the two panels rarely hold the same number of
+     rows, and their headers are the pair a reader compares. Start-aligned
+     whatever the page centres. */
+  '.omni-tl{display:flex;flex-direction:row;align-items:flex-start;justify-content:center;gap:4px;font-family:inherit;text-align:start}',
+  /* OUTER: fill — equal share of the row, never narrower than 200 (or the
+     row, on a phone). */
+  '.omni-tl-slot{flex:1 1 200px;min-width:min(200px, 100%)}',
+  '.omni-tl-hug{border-radius:var(--Card-Radius);box-shadow:none}',
+  '.omni-tl-frame{background-color:var(--Background);border:1px solid var(--Border);border-radius:var(--Card-Radius);overflow:hidden;'
+    + 'display:flex;flex-direction:column;gap:0;opacity:1}',
+  '.omni-tl-frame-off{opacity:var(--Disabled, 0.38)}',
+  /* 40 IS THE HEIGHT, not the height before padding (border-box). */
+  '.omni-tl-head{display:flex;flex-direction:row;align-items:flex-start;justify-content:flex-start;gap:8px;box-sizing:border-box;min-height:40px;padding:12px 16px}',
+  '.omni-tl-list{margin:0;list-style:none;padding:12px 16px;display:flex;flex-direction:column;gap:16px;overflow-y:auto;max-height:240px}',
+  '.omni-tl-item{display:flex;align-items:center;gap:8px;cursor:pointer}',
+  '.omni-tl-item-off{cursor:not-allowed}',
+  /* Two classes: the Checkbox sheet's own pointer-events rules are one (plus
+     a state class), and the row takes the click. */
+  '.omni-tl .omni-tl-check{pointer-events:none}',
+  '.omni-tl-empty{padding:16px;text-align:center}',
+  /* Button Container — centred against the TALLER panel. */
+  '.omni-tl-buttons{display:flex;flex-direction:column;gap:8px;padding:8px;flex-shrink:0;align-self:center}',
+].join('\n')));
 
 function not(a, b) { return a.filter((v) => !b.includes(v)); }
 function intersection(a, b) { return a.filter((v) => b.includes(v)); }
@@ -62,6 +98,7 @@ export function TransferList({
   sx = {},
   ...props
 }) {
+  useStaticStyles('omni-transferlist');
   const isControlled = controlledLeft !== undefined && controlledRight !== undefined;
   const [internalLeft, setInternalLeft] = useState(defaultLeftItems);
   const [internalRight, setInternalRight] = useState(defaultRightItems);
@@ -118,43 +155,17 @@ export function TransferList({
       // never narrower than 200 (or the row, on a phone). Hugging its content,
       // a short list shrank until "Available · 2 items" wrapped onto two lines
       // and the two panels came out different widths.
-      <Box sx={{ flex: '1 1 200px', minWidth: 'min(200px, 100%)' }}>
+      <div className="MuiBox-root omni-tl-slot">
         {/* MIDDLE: hug, Card-Radius, no shadow (inputs & dropdowns are flat) */}
-        <Box sx={{
-          borderRadius: 'var(--Card-Radius)',
-          boxShadow: 'none',
-        }}>
+        <div className="MuiBox-root omni-tl-hug">
           {/* INNER FRAME: Container surface, bg, 1px border, Card-Radius,
               vstack with no gap. Header → Divider → List flow. */}
-          <Box
+          <div
             data-surface="Container"
-            sx={{
-              backgroundColor: 'var(--Background)',
-              border: '1px solid var(--Border)',
-              borderRadius: 'var(--Card-Radius)',
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 0,
-              opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
-            }}
+            className={'MuiBox-root omni-tl-frame' + (disabled ? ' omni-tl-frame-off' : '')}
           >
             {/* HEADER — min-h 40, hstack, left/top aligned */}
-            <Box sx={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'flex-start',
-              justifyContent: 'flex-start',
-              gap: 1,
-              /* 40 IS THE HEIGHT, not the height before padding. Without
-                 border-box the min applies to the CONTENT box and the 12px
-                 above and below are added to it, so a header specified as 40
-                 came out 64 — half again as tall as the design, on both
-                 panels, pushing the lists down. */
-              boxSizing: 'border-box',
-              minHeight: '40px',
-              padding: '12px 16px',
-            }}>
+            <div className="MuiBox-root omni-tl-head">
               {isEnhanced && (
                 <Checkbox
                   size="small"
@@ -174,40 +185,21 @@ export function TransferList({
               <Caption style={{ color: 'var(--Quiet)', whiteSpace: 'nowrap' }}>
                 {countText}
               </Caption>
-            </Box>
+            </div>
 
             {/* DIVIDER — horizontal, default color (resolves to --Border-Variant), small */}
             <Divider orientation="horizontal" color="default" size="small" />
 
             {/* LIST — vstack, gap 16, padding 12px 16px */}
-            <Box
-              component="ul"
-              role="list"
-              sx={{
-                m: 0,
-                listStyle: 'none',
-                padding: '12px 16px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '16px',
-                overflowY: 'auto',
-                maxHeight: 240,
-              }}
-            >
+            <ul role="list" className="MuiBox-root omni-tl-list">
               {items.map((item) => {
                 const isItemChecked = checked.includes(item);
                 return (
-                  <Box
-                    component="li"
+                  <li
                     key={item}
                     role="listitem"
                     onClick={() => handleToggle(item)}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1,
-                      cursor: disabled ? 'not-allowed' : 'pointer',
-                    }}
+                    className={'MuiBox-root omni-tl-item' + (disabled ? ' omni-tl-item-off' : '')}
                   >
                     <Checkbox
                       size="small"
@@ -216,70 +208,44 @@ export function TransferList({
                       onChange={() => handleToggle(item)}
                       disabled={disabled}
                       aria-label={'Select ' + item}
-                      sx={{ pointerEvents: 'none' }}
+                      className="MuiBox-root omni-tl-check"
                     />
                     <BodySmall style={{ color: 'var(--Text)', flex: 1 }}>{item}</BodySmall>
-                  </Box>
+                  </li>
                 );
               })}
               {items.length === 0 && (
-                <Box component="li" sx={{ p: 2, textAlign: 'center' }}>
+                <li className="MuiBox-root omni-tl-empty">
                   <Caption style={{ color: 'var(--Quiet)' }}>No items</Caption>
-                </Box>
+                </li>
               )}
-            </Box>
-          </Box>
-        </Box>
-      </Box>
+            </ul>
+          </div>
+        </div>
+      </div>
     );
   };
 
+  const rootProps = {
+    className:
+      'MuiBox-root transfer-list transfer-list-' + mode +
+      (disabled ? ' transfer-list-disabled' : '') +
+      (className ? ' ' + className : '') + ' omni-tl',
+    'data-theme': theme || undefined,
+    'data-surface': surface || undefined,
+    role: 'group',
+    'aria-label': 'Transfer list',
+    ...props,
+  };
+  const Root = hasSx(sx) ? SxBox : 'div';
+
   return (
-    <Box
-      className={
-        'transfer-list transfer-list-' + mode +
-        (disabled ? ' transfer-list-disabled' : '') +
-        (className ? ' ' + className : '')
-      }
-      data-theme={theme || undefined}
-      data-surface={surface || undefined}
-      role="group"
-      aria-label="Transfer list"
-      sx={{
-        /* TOP-ALIGNED, not centred. The two panels rarely hold the same
-           number of rows — that is the whole point of the component — so
-           centring floated the shorter one down the page and the two headers
-           stopped lining up. Their headers are the pair a reader compares,
-           and they can only be compared if they sit on the same line.
-           The move buttons keep their own centring below, because they belong
-           to the gap between the lists rather than to the top of either. */
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-        gap: '4px',
-        fontFamily: 'inherit',
-        /* Start-aligned whatever the page centres — a centred container
-           centred every row's label between its checkbox and the edge. */
-        textAlign: 'start',
-        ...sx,
-      }}
-      {...props}
-    >
+    <Root {...(hasSx(sx) ? { sx } : {})} {...rootProps}>
       {renderPanel(leftTitle, left, leftChecked)}
 
       {/* Button Container — vstack, gap 8, padding 8. 2 buttons in basic
           mode; 4 buttons (with move-all) in enhanced mode. */}
-      <Box sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '8px',
-        padding: '8px',
-        flexShrink: 0,
-        /* Centred against the TALLER panel, which is what it was getting for
-           free while the row centred everything. */
-        alignSelf: 'center',
-      }}>
+      <div className="MuiBox-root omni-tl-buttons">
         {isEnhanced && (
           <Button iconOnly variant="default-outline" size="small" onClick={moveAllRight}
             disabled={disabled || left.length === 0} aria-label="Move all right">
@@ -300,10 +266,10 @@ export function TransferList({
             <Icon size="small"><KeyboardDoubleArrowLeftIcon /></Icon>
           </Button>
         )}
-      </Box>
+      </div>
 
       {renderPanel(rightTitle, right, rightChecked)}
-    </Box>
+    </Root>
   );
 }
 

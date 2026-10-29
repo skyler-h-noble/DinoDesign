@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { axe } from 'jest-axe';
+import { stateRules } from '../_testCss';
 import { DatePicker, DayCell } from './DatePicker';
 
 const SEPT_15 = new Date(2026, 8, 15, 12);
@@ -130,13 +131,9 @@ describe('DatePicker — keyboard', () => {
 });
 
 describe('DayCell — paint follows the fill', () => {
-  const css = (el) => {
-    const out = [];
-    for (const sheet of document.styleSheets) for (const r of sheet.cssRules) {
-      try { if (el.matches(r.selectorText)) out.push(r.cssText); } catch (e) { /* skip */ }
-    }
-    return out.join('\n');
-  };
+  // What applies to the day at rest and in each state, the private custom
+  // properties its cell declares followed down to the real token.
+  const css = (el) => stateRules(el).all;
 
   test('a filled day takes the palette text paired with the fill', () => {
     const { container } = render(<DayCell day={3} selection="selected" />);

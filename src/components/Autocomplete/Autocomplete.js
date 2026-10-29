@@ -1,13 +1,12 @@
 // src/components/Autocomplete/Autocomplete.js
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Box } from '@mui/material';
 import ExpandMoreIcon from '@omni-design/icons/ExpandMore';
 import CloseIcon from '@omni-design/icons/Close';
 import CheckIcon from '@omni-design/icons/Check';
 import { Icon } from '../Icon/Icon';
 import { Body, BodySmall } from '../Typography';
-import CircularProgress from '@mui/material/CircularProgress';
-import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 
 /**
  * Autocomplete Component
@@ -50,19 +49,86 @@ const FLOATING_SIZE_MAP = {
   large:  { height: '64px', fontSize: '16px', padding: '24px 16px 6px', leftPad: 16 },
 };
 
-function getOptionStyles(isHighlighted, isSelected) {
-  if (isSelected) {
-    return {
-      backgroundColor: 'transparent',
-      color: 'var(--Text)',
-      fontWeight: 600,
-    };
-  }
-  if (isHighlighted) {
-    return { backgroundColor: 'var(--Hover)', color: 'var(--Text)' };
-  }
-  return { backgroundColor: 'transparent', color: 'var(--Text-Quiet)' };
-}
+/* Static sheet — the MUI Box sx blocks this was built from, as plain rules.
+   The size tables generate one class per size (standard and floating); the
+   palette's active text arrives as a custom property declared on the root
+   (--_ac-act). State rules weigh one class + one pseudo-class, as emotion's
+   did. The loading spinner was MUI's CircularProgress (indeterminate, 16px):
+   its markup, classes and animation are reproduced here, so a loading field
+   no longer pulls in MUI. */
+const SxBox = lazySxBox('Autocomplete');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+const RADIUS = {
+  small: 'var(--Sm-Input-Radius, var(--Input-Radius, var(--Style-Border-Radius)))',
+  medium: 'var(--Input-Radius, var(--Style-Border-Radius))',
+  large: 'var(--Lg-Input-Radius, var(--Input-Radius, var(--Style-Border-Radius)))',
+};
+const sizeRules = (tag, map) => Object.entries(map).map(([size, c]) => [
+  `.omni-ac-row-${tag}${size}{min-height:${c.height}}`,
+  `.omni-ac-in-${tag}${size}{font-size:${c.fontSize};padding:${c.padding}}`,
+  `.omni-ac-opt-${tag}${size}{min-height:${c.height};font-size:${c.fontSize}}`,
+  `.omni-ac-msg-${tag}${size}{font-size:${c.fontSize}}`,
+  c.leftPad ? `.omni-ac-fl-${size}{left:${c.leftPad}px;font-size:${c.fontSize}}` : '',
+].filter(Boolean).join('\n')).join('\n');
+
+/* Emotion's prefixer wrote the old flexbox aliases next to align-items and
+   justify-content; Chrome still computes them (-webkit-box-align / -pack), so
+   the sheet writes them too. */
+const wk = (css) => css
+  .replace(/(^|[{;])align-items:([^;}]+)/g, '$1-webkit-box-align:$2;align-items:$2')
+  .replace(/(^|[{;])justify-content:([^;}]+)/g, (m, p, v) => p + '-webkit-box-pack:' + v.replace(/^flex-/, '').replace(/^space-between$/, 'justify') + ';justify-content:' + v);
+registerStaticStyles('omni-autocomplete', wk([
+  '.omni-ac{position:relative;width:auto;display:inline-block;font-family:inherit}',
+  '.omni-ac-full{width:100%}',
+  /* Outer border shell — size-aware Input-Radius so each size rounds by its
+     own height, not the medium button's. */
+  '.omni-ac-shell{border:1px solid var(--Border);overflow:hidden;transition:border-color 0.15s ease;box-shadow:none;opacity:1}',
+  ...Object.entries(RADIUS).map(([size, r]) => `.omni-ac-shell-${size}{border-radius:${r}}`),
+  '.omni-ac-shell-off{opacity:var(--Disabled, 0.38)}',
+  '.omni-ac-shell:focus-within{outline:2px solid var(--Focus-Visible);outline-offset:2px}',
+  /* Input container — uses --Hover for affordance against parent surface. */
+  '.omni-ac-row{position:relative;display:flex;align-items:center;background-color:var(--Hover)}',
+  sizeRules('s', SIZE_MAP),
+  sizeRules('f', FLOATING_SIZE_MAP),
+  '.omni-ac-fl{position:absolute;top:50%;transform:translateY(-50%);transform-origin:top left;color:var(--Quiet);font-weight:400;'
+    + 'pointer-events:none;z-index:1;transition:top 0.15s ease, transform 0.15s ease, color 0.15s ease}',
+  '.omni-ac-fl-up{top:6px;transform:scale(0.75)}',
+  '.omni-ac-fl-focus{color:var(--_ac-act)}',
+  '.omni-ac-in{flex:1;border:none;outline:none;background-color:transparent;color:var(--Quiet);'
+    + 'font-family:var(--Body-Font-Family);font-weight:var(--Body-Font-Weight);min-width:0}',
+  '.omni-ac-in-on{color:var(--_ac-act)}',
+  '.omni-ac-in::placeholder{color:var(--Quiet);opacity:1;font-family:var(--Body-Font-Family);font-weight:var(--Body-Font-Weight)}',
+  '.omni-ac-in:disabled{cursor:not-allowed}',
+  /* MUI CircularProgress, indeterminate — with the sx it was given. */
+  '@keyframes omni-ac-spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}',
+  '@keyframes omni-ac-dash{0%{stroke-dasharray:1px, 200px;stroke-dashoffset:0}50%{stroke-dasharray:100px, 200px;stroke-dashoffset:-15px}'
+    + '100%{stroke-dasharray:1px, 200px;stroke-dashoffset:-126px}}',
+  '.omni-ac-spin{display:inline-block;animation:omni-ac-spin 1.4s linear infinite;color:var(--Quiet);margin-right:8px}',
+  '.omni-ac-spin-svg{display:block}',
+  '.omni-ac-spin-circle{stroke:currentColor;stroke-dasharray:80px, 200px;stroke-dashoffset:0;animation:omni-ac-dash 1.4s ease-in-out infinite}',
+  '.omni-ac-clear{display:flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;margin-right:4px;'
+    + 'border:none;background-color:transparent;color:var(--Quiet);cursor:pointer}',
+  '.omni-ac-clear-hidden{visibility:hidden}',
+  '.omni-ac-clear:hover{color:var(--Text);background-color:var(--Hover)}',
+  '.omni-ac-clear:focus-visible{outline:2px solid var(--Focus-Visible)}',
+  '.omni-ac-chev{display:flex;align-items:center;justify-content:center;width:28px;height:100%;border:none;background-color:transparent;'
+    + 'color:var(--Quiet);cursor:pointer}',
+  '.omni-ac-chev-off{cursor:not-allowed}',
+  '.omni-ac-help{font-size:12px;color:var(--Quiet);margin-top:4px;margin-left:2px}',
+  /* The floating panel's corner, as Select's: min(Input, Card, 16px). */
+  '.omni-ac-list{position:absolute;top:100%;left:0;right:0;margin-top:4px;background-color:var(--Hover);border:1px solid var(--Border);'
+    + 'border-radius:var(--Dropdown-Frame-Radius, var(--Input-Radius, var(--Style-Border-Radius, 4px)));box-shadow:none;'
+    + 'z-index:9999;max-height:240px;overflow-y:auto;padding-top:4px;padding-bottom:4px}',
+  '.omni-ac-msg{padding-left:12px;padding-right:12px;padding-top:16px;padding-bottom:16px;text-align:center;color:var(--Quiet)}',
+  '.omni-ac-opt{display:flex;align-items:center;gap:8px;padding-left:12px;padding-right:12px;padding-top:0px;padding-bottom:0px;'
+    + 'margin-left:4px;margin-right:4px;border-radius:4px;cursor:pointer;font-family:inherit;'
+    + 'background-color:transparent;color:var(--Text-Quiet);transition:background-color 0.1s ease}',
+  '.omni-ac-opt-hl{background-color:var(--Hover);color:var(--Text)}',
+  '.omni-ac-opt-sel{background-color:transparent;color:var(--Text);font-weight:600}',
+  '.omni-ac-opt:active{background-color:var(--Pressed)}',
+  /* Two classes: the Icon's own rule is one. */
+  '.omni-ac .omni-ac-check{opacity:0.6;flex-shrink:0}',
+].join('\n')));
 
 export function Autocomplete({
   options = [],
@@ -87,8 +153,10 @@ export function Autocomplete({
   fullWidth = false,
   className = '',
   sx = {},
+  style,
   ...props
 }) {
+  useStaticStyles('omni-autocomplete');
   const effectiveColor = color === 'default' ? 'primary' : color;
   const C = cap(effectiveColor);
   if (process.env.NODE_ENV !== 'production' && variant === 'light') {
@@ -123,9 +191,8 @@ export function Autocomplete({
   const isFloating = labelPosition === 'floating';
   const isTop = labelPosition === 'top';
   const hasValue = currentInput !== '';
-  const sizeConfig = isFloating
-    ? (FLOATING_SIZE_MAP[size] || FLOATING_SIZE_MAP.medium)
-    : (SIZE_MAP[size] || SIZE_MAP.medium);
+  const sizeKey = (isFloating ? FLOATING_SIZE_MAP : SIZE_MAP)[size] ? size : 'medium';
+  const sz = (isFloating ? 'f' : 's') + sizeKey;
 
   // Filter options
   const filtered = currentInput
@@ -191,16 +258,21 @@ export function Autocomplete({
     }
   };
 
-  return (
-    <Box
-      ref={wrapperRef}
-      className={'autocomplete autocomplete-' + size + ' autocomplete-variant-' + effectiveVariant +
-        (open ? ' autocomplete-open' : '') +
-        (disabled ? ' autocomplete-disabled' : '') +
-        (className ? ' ' + className : '')}
-      sx={{ position: 'relative', width: fullWidth ? '100%' : 'auto', display: 'inline-block', fontFamily: 'inherit', ...sx }}
-      {...props}
-    >
+  const rootProps = {
+    ref: wrapperRef,
+    className: 'MuiBox-root autocomplete autocomplete-' + size + ' autocomplete-variant-' + effectiveVariant +
+      (open ? ' autocomplete-open' : '') +
+      (disabled ? ' autocomplete-disabled' : '') +
+      (className ? ' ' + className : '') +
+      ' omni-ac' + (fullWidth ? ' omni-ac-full' : ''),
+    style: { '--_ac-act': activeTextColor, ...style },
+    ...props,
+  };
+  const radiusKey = size === 'small' || size === 'large' ? size : 'medium';
+  const raised = hasValue || focused;
+
+  const body = (
+    <>
       {/* Top label */}
       {isTop && label && (() => {
         const LabelComp = size === 'small' ? BodySmall : Body;
@@ -221,55 +293,22 @@ export function Autocomplete({
         );
       })()}
 
-      {/* Outer border shell — size-aware Input-Radius so each size rounds
-          by its own height, not the medium button's. */}
-      <Box sx={{
-        border: '1px solid ' + borderToken,
-        borderRadius: size === 'small'
-          ? 'var(--Sm-Input-Radius, var(--Input-Radius, var(--Style-Border-Radius)))'
-          : size === 'large'
-            ? 'var(--Lg-Input-Radius, var(--Input-Radius, var(--Style-Border-Radius)))'
-            : 'var(--Input-Radius, var(--Style-Border-Radius))',
-        overflow: 'hidden',
-        transition: 'border-color 0.15s ease',
-        boxShadow: 'none',
-        opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
-        '&:focus-within': {
-          outline: '2px solid var(--Focus-Visible)',
-          outlineOffset: '2px',
-        },
-      }}>
+      <div className={'MuiBox-root omni-ac-shell omni-ac-shell-' + radiusKey + (disabled ? ' omni-ac-shell-off' : '')}>
 
       {/* Inner wrapper — no data-surface so the field inherits parent
           scope and doesn't drag the brand --Background through. */}
-      <Box>
+      <div className="MuiBox-root">
 
-      {/* Input container — uses --Hover for affordance against parent surface */}
-      <Box sx={{
-        position: 'relative', display: 'flex', alignItems: 'center',
-        minHeight: sizeConfig.height,
-        backgroundColor: 'var(--Hover)',
-      }}>
+      <div className={'MuiBox-root omni-ac-row omni-ac-row-' + sz}>
         {/* Floating label */}
         {isFloating && label && (
-          <Box sx={{
-            position: 'absolute',
-            top: hasValue || focused ? '6px' : '50%',
-            left: (sizeConfig.leftPad || 14) + 'px',
-            transform: hasValue || focused ? 'scale(0.75)' : 'translateY(-50%)',
-            transformOrigin: 'top left',
-            color: focused ? activeTextColor : 'var(--Quiet)',
-            fontSize: sizeConfig.fontSize, fontWeight: 400,
-            pointerEvents: 'none', zIndex: 1,
-            transition: 'top 0.15s ease, transform 0.15s ease, color 0.15s ease',
-          }}>
+          <div className={'MuiBox-root omni-ac-fl omni-ac-fl-' + sizeKey + (raised ? ' omni-ac-fl-up' : '') + (focused ? ' omni-ac-fl-focus' : '')}>
             {label}
-          </Box>
+          </div>
         )}
 
         {/* Text input */}
-        <Box
-          component="input"
+        <input
           ref={inputRef}
           type="text"
           role="combobox"
@@ -285,28 +324,18 @@ export function Autocomplete({
           onBlur={() => setFocused(false)}
           disabled={disabled}
           placeholder={isFloating ? undefined : placeholder}
-          sx={{
-            flex: 1, border: 'none', outline: 'none',
-            backgroundColor: 'transparent',
-            color: (hasValue || focused) ? activeTextColor : 'var(--Quiet)',
-            fontSize: sizeConfig.fontSize,
-            fontFamily: 'var(--Body-Font-Family)',
-            fontWeight: 'var(--Body-Font-Weight)',
-            padding: sizeConfig.padding,
-            minWidth: 0,
-            '&::placeholder': {
-              color: 'var(--Quiet)',
-              opacity: 1,
-              fontFamily: 'var(--Body-Font-Family)',
-              fontWeight: 'var(--Body-Font-Weight)',
-            },
-            '&:disabled': { cursor: 'not-allowed' },
-          }}
+          className={'MuiBox-root omni-ac-in omni-ac-in-' + sz + (raised ? ' omni-ac-in-on' : '')}
         />
 
         {/* Loading spinner */}
         {loading && open && (
-          <CircularProgress size={16} sx={{ mr: 1, color: 'var(--Quiet)' }} />
+          <span className="MuiCircularProgress-root MuiCircularProgress-indeterminate MuiCircularProgress-colorPrimary omni-ac-spin"
+            style={{ width: 16, height: 16 }} role="progressbar">
+            <svg className="MuiCircularProgress-svg omni-ac-spin-svg" viewBox="22 22 44 44">
+              <circle className="MuiCircularProgress-circle MuiCircularProgress-circleIndeterminate omni-ac-spin-circle"
+                cx={44} cy={44} r={20.2} fill="none" strokeWidth={3.6} />
+            </svg>
+          </span>
         )}
 
         {/* Clear button. Its space is ALWAYS reserved, and it only becomes
@@ -315,65 +344,45 @@ export function Autocomplete({
             the first keystroke and shoved everything beside it. Hidden, it is
             out of the tab order and the accessibility tree. */}
         {clearable && !disabled && (
-          <Box component="button" type="button" aria-label="Clear" onClick={clearValue}
+          <button type="button" aria-label="Clear" onClick={clearValue}
             tabIndex={currentInput ? 0 : -1}
             aria-hidden={currentInput ? undefined : true}
-            sx={{
-              visibility: currentInput ? 'visible' : 'hidden',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              width: 20, height: 20, borderRadius: '50%', mr: 0.5,
-              border: 'none', backgroundColor: 'transparent',
-              color: 'var(--Quiet)', cursor: 'pointer',
-              '&:hover': { color: 'var(--Text)', backgroundColor: 'var(--Hover)' },
-              '&:focus-visible': { outline: '2px solid var(--Focus-Visible)' },
-            }}>
+            className={'MuiBox-root omni-ac-clear' + (currentInput ? '' : ' omni-ac-clear-hidden')}>
             <CloseIcon sx={{ fontSize: 14 }} />
-          </Box>
+          </button>
         )}
 
         {/* Chevron */}
-        <Box component="button" type="button" aria-label={open ? 'Close' : 'Open'} tabIndex={-1}
+        <button type="button" aria-label={open ? 'Close' : 'Open'} tabIndex={-1}
           onClick={() => { if (!disabled) setOpen(!open); }}
-          sx={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            width: 28, height: '100%', border: 'none', backgroundColor: 'transparent',
-            color: 'var(--Quiet)', cursor: disabled ? 'not-allowed' : 'pointer',
-          }}>
+          className={'MuiBox-root omni-ac-chev' + (disabled ? ' omni-ac-chev-off' : '')}>
           <ExpandMoreIcon sx={{
-            fontSize: (sizeConfig.iconSize || 18) + 'px',
+            fontSize: ((isFloating ? undefined : SIZE_MAP[sizeKey].iconSize) || 18) + 'px',
             transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
             transition: 'transform 0.2s ease',
           }} />
-        </Box>
-      </Box>
+        </button>
+      </div>
 
-      </Box>{/* end inner themed surface */}
-      </Box>{/* end outer border shell */}
+      </div>{/* end inner themed surface */}
+      </div>{/* end outer border shell */}
 
       {/* Helper text */}
       {helperText && (
-        <Box sx={{ fontSize: '12px', color: 'var(--Quiet)', mt: '4px', ml: '2px' }}>{helperText}</Box>
+        <div className="MuiBox-root omni-ac-help">{helperText}</div>
       )}
 
       {/* Dropdown */}
       {open && (
-        <Box role="listbox" aria-label={label || 'Options'} sx={{
-          position: 'absolute', top: '100%', left: 0, right: 0, mt: 0.5,
-          backgroundColor: 'var(--Hover)',
-          border: '1px solid var(--Border)',
-          // The floating panel's corner, as Select's: min(Input, Card, 16px).
-          borderRadius: 'var(--Dropdown-Frame-Radius, var(--Input-Radius, var(--Style-Border-Radius, 4px)))',
-          boxShadow: 'none',
-          zIndex: 9999, maxHeight: 240, overflowY: 'auto', py: 0.5,
-        }}>
+        <div role="listbox" aria-label={label || 'Options'} className="MuiBox-root omni-ac-list">
           {loading ? (
-            <Box sx={{ px: 1.5, py: 2, textAlign: 'center', fontSize: sizeConfig.fontSize, color: 'var(--Quiet)' }}>
+            <div className={'MuiBox-root omni-ac-msg omni-ac-msg-' + sz}>
               {loadingText}
-            </Box>
+            </div>
           ) : filtered.length === 0 ? (
-            <Box sx={{ px: 1.5, py: 2, textAlign: 'center', fontSize: sizeConfig.fontSize, color: 'var(--Quiet)' }}>
+            <div className={'MuiBox-root omni-ac-msg omni-ac-msg-' + sz}>
               {noOptionsText}
-            </Box>
+            </div>
           ) : (
             filtered.map((opt, idx) => {
               const optLabel = typeof opt === 'string' ? opt : opt.label;
@@ -381,31 +390,24 @@ export function Autocomplete({
               const selectedLabel = currentValue ? (typeof currentValue === 'string' ? currentValue : currentValue.label) : null;
               const isSelected = optLabel === selectedLabel;
               const isHighlighted = idx === highlightIndex;
-              const styles = getOptionStyles(isHighlighted, isSelected);
 
               return (
-                <Box key={optValue || optLabel} role="option" aria-selected={isSelected}
+                <div key={optValue || optLabel} role="option" aria-selected={isSelected}
                   onClick={() => selectOption(opt)}
                   onMouseEnter={() => setHighlightIndex(idx)}
-                  sx={{
-                    display: 'flex', alignItems: 'center', gap: 1,
-                    px: 1.5, py: 0, mx: 0.5, minHeight: sizeConfig.height,
-                    borderRadius: '4px',
-                    cursor: 'pointer', fontSize: sizeConfig.fontSize, fontFamily: 'inherit',
-                    ...styles,
-                    transition: 'background-color 0.1s ease',
-                    '&:active': { backgroundColor: 'var(--Pressed)' },
-                  }}>
+                  className={'MuiBox-root omni-ac-opt omni-ac-opt-' + sz
+                    + (isSelected ? ' omni-ac-opt-sel' : (isHighlighted ? ' omni-ac-opt-hl' : ''))}>
                   <BodySmall style={{ flex: 1, color: 'inherit', fontWeight: 'inherit' }}>{optLabel}</BodySmall>
-                  {isSelected && <Icon size="small" sx={{ opacity: 0.6, flexShrink: 0 }}><CheckIcon /></Icon>}
-                </Box>
+                  {isSelected && <Icon size="small" className="MuiBox-root omni-ac-check"><CheckIcon /></Icon>}
+                </div>
               );
             })
           )}
-        </Box>
+        </div>
       )}
-    </Box>
+    </>
   );
+  return hasSx(sx) ? <SxBox sx={sx} {...rootProps}>{body}</SxBox> : <div {...rootProps}>{body}</div>;
 }
 
 export default Autocomplete;

@@ -1,6 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { Slider } from './Slider';
+import { stateRules } from '../_testCss';
 
 /* The slider's contrast holds by CONSTRUCTION, not by check — each pairing is
    chosen so the required ratio is guaranteed by which tokens meet, and that is
@@ -43,8 +44,9 @@ describe('surface tokens, not the button palette', () => {
        reads the same either way; what changed is which token carries the
        requirement once a color is set. The point it has always defended — that
        the rail HAS an edge, and not a decorative one — is unchanged. */
-    render(<Slider defaultValue={40} />);
-    const c = css().replace(/\s+/g, '');
+    const { container } = render(<Slider defaultValue={40} />);
+    // The rail's own rules, custom properties followed down to the token.
+    const c = stateRules(container.querySelector('.MuiSlider-rail')).base.replace(/\s+/g, '');
     /* Default, as the house rule requires. This read `Primary` and carried a
        note that Slider's default variant contradicted the rule but was left
        alone because changing it would recolour every existing slider. It has
@@ -59,10 +61,10 @@ describe('surface tokens, not the button palette', () => {
   test('the label inverts the surface pair', () => {
     // --Text ground with --Background text: legible on any surface by
     // definition, which a color from the button palette is not.
-    render(<Slider defaultValue={40} valueLabelDisplay="on" />);
-    const c = css().replace(/\s+/g, '');
+    const { container } = render(<Slider defaultValue={40} valueLabelDisplay="on" />);
+    const c = stateRules(container.querySelector('.MuiSlider-valueLabel')).base.replace(/\s+/g, '');
     expect(c).toContain('background-color:var(--Text)');
-    expect(c).toContain('color:var(--Background)');
+    expect(c).toMatch(/(^|;)color:var\(--Background\)/);
   });
 
   test('the label uses a real text style, not hardcoded pixels', () => {

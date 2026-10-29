@@ -1,24 +1,9 @@
 // src/components/ToggleButton/ToggleButton.js
 import React, { useState } from 'react';
-import {
-  ToggleButton as MuiToggleButton,
-  ToggleButtonGroup as MuiToggleButtonGroup,
-  Box,
-  Stack,
-  Typography,
-  Paper,
-} from '@mui/material';
-import FormatBoldIcon from '@omni-design/icons/FormatBold';
-import FormatItalicIcon from '@omni-design/icons/FormatItalic';
-import FormatUnderlinedIcon from '@omni-design/icons/FormatUnderlined';
-import AlignLeftIcon from '@omni-design/icons/FormatAlignLeft';
-import AlignCenterIcon from '@omni-design/icons/FormatAlignCenter';
-import AlignRightIcon from '@omni-design/icons/FormatAlignRight';
-import ViewListIcon from '@omni-design/icons/ViewList';
-import ViewModuleIcon from '@omni-design/icons/ViewModule';
-import GridViewIcon from '@omni-design/icons/GridView';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 
-/* One state table for every toggle in this file.
+/* One state table for every toggle.
 
    These selectors were copy-pasted into seven sx blocks — the single button,
    the generic group, and the five preset groups. That is why hover was the
@@ -33,412 +18,176 @@ import GridViewIcon from '@omni-design/icons/GridView';
      - selected hover repainted --Buttons-Primary-Button, the resting color,
        so a selected segment gave no feedback at all;
      - selected text was the literal '#fff', which is wrong on any brand whose
-       primary is light enough to need dark text. */
-const TOGGLE_STATES = {
-  color: 'var(--Text)',
-  backgroundColor: 'transparent',
-  textTransform: 'none',
-  fontWeight: 500,
-  '&:hover': {
-    backgroundColor: 'var(--Hover)',
-  },
-  '&:active': {
-    backgroundColor: 'var(--Pressed)',
-  },
-  '&.Mui-focusVisible': {
-    outline: '2px solid var(--Focus-Visible)',
-    outlineOffset: '2px',
-    /* Segments sit edge to edge, so an un-raised ring is overdrawn by the
-       neighbour's border on one side and looks like a three-sided box. */
-    zIndex: 1,
-  },
-  '&.Mui-disabled': {
-    color: 'var(--Quiet)',
-    opacity: 'var(--Disabled, 0.38)',
-  },
-  '&.Mui-selected': {
-    backgroundColor: 'var(--Buttons-Primary-Button)',
-    color: 'var(--Buttons-Primary-Text)',
-    '&:hover': {
-      backgroundColor: 'var(--Buttons-Primary-Hover)',
-    },
-    '&:active': {
-      backgroundColor: 'var(--Buttons-Primary-Pressed)',
-    },
-  },
+       primary is light enough to need dark text.
+
+   The group presets that shared it (and the showcase) moved to
+   ToggleButtonPresets.js; they were never part of the package. */
+
+// --- Static sheet ------------------------------------------------------------
+//
+// ToggleButton was MUI's ToggleButton (ButtonBase) with an sx. It is its own
+// <button> now; this sheet carries both layers — what ButtonBase and
+// ToggleButton gave the root, then the design's state table — at the weights
+// emotion's rules had (one class, plus one state for a state rule), in the
+// same order, so a caller's sx still wins over them. Same classes as MUI's
+// (MuiToggleButton-root, Mui-selected …) so a consumer's rule still lands.
+// MUI's press ripple is not drawn (it is not in the Figma set).
+//
+// A caller's sx key that the component's own sx also had REPLACED that whole
+// nested object when both were one sx; .omni-tg-no-<key> drops ours so the
+// caller's alone applies, as it did.
+const SxBox = lazySxBox('ToggleButton');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+const SX_KEYS = { '&:hover': 'hover', '&:active': 'active', '&.Mui-focusVisible': 'focus', '&.Mui-disabled': 'disabled', '&.Mui-selected': 'selected' };
+const solo = (key) => `.omni-tg-solo:where(:not(.omni-tg-no-${key}))`;
+const MUI_FONT = '"Roboto","Helvetica","Arial",sans-serif';
+const capFirst = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+
+/* Emotion's prefixer wrote the old flexbox aliases next to align-items and
+   justify-content; Chrome still computes them (-webkit-box-align / -pack), so
+   the sheet writes them too. */
+const wk = (css) => css
+  .replace(/(^|[{;])align-items:([^;}]+)/g, '$1-webkit-box-align:$2;align-items:$2')
+  .replace(/(^|[{;])justify-content:([^;}]+)/g, (m, p, v) => p + '-webkit-box-pack:' + v.replace(/^flex-/, '').replace(/^space-between$/, 'justify') + ';justify-content:' + v);
+/* A caller's sx key that replaced one of ours kept OUR key's place in the
+   merged object, so our later keys still came after it and won ties. Each
+   later rule is repeated one class heavier for an instance where an earlier
+   key was replaced, which puts it back over the caller's (emotion's, inserted
+   after this sheet). */
+const after = (rule, root, prefix, earlier) => {
+  const i = rule.indexOf('{');
+  const sels = rule.slice(0, i).split(',');
+  const extra = [];
+  for (const k of earlier) for (const sel of sels) if (sel.startsWith(root)) extra.push(root + '.' + prefix + k + sel.slice(root.length));
+  return [...sels, ...extra].join(',') + rule.slice(i);
 };
+registerStaticStyles('omni-toggle-button', wk([
+  /* ButtonBase. */
+  '.omni-tg{display:inline-flex;align-items:center;justify-content:center;position:relative;box-sizing:border-box;'
+    + '-webkit-tap-highlight-color:transparent;background-color:transparent;outline:0;border:0;margin:0;border-radius:0;padding:0;cursor:pointer;'
+    + 'user-select:none;vertical-align:middle;-moz-appearance:none;-webkit-appearance:none;text-decoration:none;color:inherit}',
+  '.omni-tg::-moz-focus-inner{border-style:none}',
+  '.omni-tg.Mui-disabled{pointer-events:none;cursor:default}',
+  '@media print{.omni-tg{print-color-adjust:exact}}',
+  /* ToggleButton (MUI's button type, its divider edge and action colours). */
+  `.omni-tg{font-family:${MUI_FONT};font-weight:500;font-size:0.875rem;line-height:1.75;letter-spacing:0.02857em;text-transform:uppercase;`
+    + 'border-radius:4px;padding:11px;border:1px solid rgba(0, 0, 0, 0.12);color:rgba(0, 0, 0, 0.54)}',
+  '.omni-tg.Mui-disabled{color:rgba(0, 0, 0, 0.26);border:1px solid rgba(0, 0, 0, 0.12)}',
+  '.omni-tg:hover{text-decoration:none;background-color:rgba(0, 0, 0, 0.04)}',
+  '@media (hover: none){.omni-tg:hover{background-color:transparent}}',
+  '.omni-tg-full{width:100%}',
+  '.omni-tg-small{padding:7px;font-size:0.8125rem}',
+  '.omni-tg-large{padding:15px;font-size:0.9375rem}',
+  /* The design's state table. */
+  '.omni-tg-solo{border:1px solid var(--Border);color:var(--Text);background-color:transparent;text-transform:none;font-weight:500}',
+  `${solo('hover')}:hover{background-color:var(--Hover)}`,
+  after(`${solo('active')}:active{background-color:var(--Pressed)}`, '.omni-tg-solo', 'omni-tg-no-', ['hover']),
+  /* Segments sit edge to edge, so an un-raised ring is overdrawn by the
+     neighbour's border on one side and looks like a three-sided box. */
+  after(`${solo('focus')}.Mui-focusVisible{outline:2px solid var(--Focus-Visible);outline-offset:2px;z-index:1}`, '.omni-tg-solo', 'omni-tg-no-', ['hover', 'active']),
+  after(`${solo('disabled')}.Mui-disabled{color:var(--Quiet);opacity:var(--Disabled, 0.38)}`, '.omni-tg-solo', 'omni-tg-no-', ['hover', 'active', 'focus']),
+  after(`${solo('selected')}.Mui-selected{background-color:var(--Buttons-Primary-Button);color:var(--Buttons-Primary-Text)}`, '.omni-tg-solo', 'omni-tg-no-', ['hover', 'active', 'focus', 'disabled']),
+  after(`${solo('selected')}.Mui-selected:hover{background-color:var(--Buttons-Primary-Hover)}`, '.omni-tg-solo', 'omni-tg-no-', ['hover', 'active', 'focus', 'disabled']),
+  after(`${solo('selected')}.Mui-selected:active{background-color:var(--Buttons-Primary-Pressed)}`, '.omni-tg-solo', 'omni-tg-no-', ['hover', 'active', 'focus', 'disabled']),
+].join('\n')));
+
+/* What MUI's ButtonBase did with focus: Mui-focusVisible while the button has
+   :focus-visible (keyboard focus), so the ring shows for keyboard users and
+   not on click. */
+function matchesFocusVisible(el) {
+  try { return el.matches(':focus-visible'); } catch (e) { return false; }
+}
 
 /**
  * ToggleButton Component
  * Single toggle button with design system styling
- * 
+ *
  * Design System Integration:
  * - Border: var(--Border)
  * - Background: Transparent or var(--Buttons-Primary-Button)
  * - Text: var(--Text)
- * 
+ *
  * WCAG 2.1 Accessibility:
- * - Proper ARIA labels
- * - Keyboard accessible
+ * - aria-pressed carries the state
+ * - Keyboard accessible (a native button)
  * - Visual feedback on toggle
  * - Sufficient contrast
- * 
+ *
  * @param {React.ReactNode} children - Button content (text or icon)
  * @param {boolean} selected - Button selected state
- * @param {function} onChange - Selection change handler
+ * @param {function} onChange - Selection change handler, (event, value)
  * @param {string} value - Button value
  * @param {object} props - Additional props
  */
-export function ToggleButton({
+export const ToggleButton = React.forwardRef(function ToggleButton({
   children,
   selected = false,
   onChange,
+  onClick,
   value,
   sx = {},
-  ...props
-}) {
-  return (
-    <MuiToggleButton
-      value={value}
-      selected={selected}
-      onChange={onChange}
-      sx={{
-        border: '1px solid var(--Border)',
-        /* The `selected` prop already puts .Mui-selected on the root, and that
-           selector outranks a root-level backgroundColor — so the ternary this
-           replaced was doing nothing the table does not do. */
-        ...TOGGLE_STATES,
-        ...sx,
-      }}
-      {...props}
-    >
-      {children}
-    </MuiToggleButton>
-  );
-}
-
-/**
- * ToggleButtonGroup Component
- * Group of toggle buttons with exclusive or multiple selection
- * 
- * @param {Array} value - Selected value(s)
- * @param {function} onChange - Selection change handler
- * @param {'exclusive' | 'multiple'} exclusive - Selection mode
- * @param {Array} options - Button options [{value, label, icon?}]
- * @param {boolean} fullWidth - Stretch to full width
- * @param {object} props - Additional props
- */
-export function ToggleButtonGroup({
-  value,
-  onChange,
-  exclusive = true,
-  options = [],
-  fullWidth = false,
-  sx = {},
-  ...props
-}) {
-  return (
-    <MuiToggleButtonGroup
-      value={value}
-      onChange={onChange}
-      exclusive={exclusive}
-      sx={{
-        border: '1px solid var(--Border)',
-        borderRadius: '4px',
-        '& .MuiToggleButton-root': {
-          border: 'none',
-          borderRight: '1px solid var(--Border)',
-          '&:last-child': {
-            borderRight: 'none',
-          },
-          ...TOGGLE_STATES,
-        },
-        ...sx,
-      }}
-      fullWidth={fullWidth}
-      {...props}
-    >
-      {options.map((option) => (
-        <MuiToggleButton
-          key={option.value}
-          value={option.value}
-          aria-label={option.label}
-        >
-          {option.icon && <Box sx={{ mr: option.label ? 1 : 0 }}>{option.icon}</Box>}
-          {option.label}
-        </MuiToggleButton>
-      ))}
-    </MuiToggleButtonGroup>
-  );
-}
-
-/**
- * TextFormatToggleGroup Component
- * Text formatting buttons (bold, italic, underline)
- * 
- * @param {Array} formats - Selected formats
- * @param {function} onChange - Format change handler
- * @param {object} props - Additional props
- */
-export function TextFormatToggleGroup({
-  formats = [],
-  onChange,
-  sx = {},
-  ...props
-}) {
-  const handleFormat = (event, newFormats) => {
-    onChange?.(newFormats);
-  };
-
-  return (
-    <MuiToggleButtonGroup
-      value={formats}
-      onChange={handleFormat}
-      exclusive={false}
-      sx={{
-        border: '1px solid var(--Border)',
-        borderRadius: '4px',
-        '& .MuiToggleButton-root': {
-          border: 'none',
-          borderRight: '1px solid var(--Border)',
-          '&:last-child': {
-            borderRight: 'none',
-          },
-          ...TOGGLE_STATES,
-        },
-        ...sx,
-      }}
-      {...props}
-    >
-      <MuiToggleButton value="bold" aria-label="bold">
-        <FormatBoldIcon />
-      </MuiToggleButton>
-      <MuiToggleButton value="italic" aria-label="italic">
-        <FormatItalicIcon />
-      </MuiToggleButton>
-      <MuiToggleButton value="underlined" aria-label="underlined">
-        <FormatUnderlinedIcon />
-      </MuiToggleButton>
-    </MuiToggleButtonGroup>
-  );
-}
-
-/**
- * AlignmentToggleGroup Component
- * Text alignment buttons (left, center, right)
- * 
- * @param {string} alignment - Selected alignment
- * @param {function} onChange - Alignment change handler
- * @param {object} props - Additional props
- */
-export function AlignmentToggleGroup({
-  alignment = 'left',
-  onChange,
-  sx = {},
-  ...props
-}) {
-  const handleAlignment = (event, newAlignment) => {
-    if (newAlignment !== null) {
-      onChange?.(newAlignment);
-    }
-  };
-
-  return (
-    <MuiToggleButtonGroup
-      value={alignment}
-      onChange={handleAlignment}
-      exclusive
-      sx={{
-        border: '1px solid var(--Border)',
-        borderRadius: '4px',
-        '& .MuiToggleButton-root': {
-          border: 'none',
-          borderRight: '1px solid var(--Border)',
-          '&:last-child': {
-            borderRight: 'none',
-          },
-          ...TOGGLE_STATES,
-        },
-        ...sx,
-      }}
-      {...props}
-    >
-      <MuiToggleButton value="left" aria-label="left aligned">
-        <AlignLeftIcon />
-      </MuiToggleButton>
-      <MuiToggleButton value="center" aria-label="center aligned">
-        <AlignCenterIcon />
-      </MuiToggleButton>
-      <MuiToggleButton value="right" aria-label="right aligned">
-        <AlignRightIcon />
-      </MuiToggleButton>
-    </MuiToggleButtonGroup>
-  );
-}
-
-/**
- * ViewModeToggleGroup Component
- * View mode buttons (list, module, grid)
- * 
- * @param {string} viewMode - Selected view mode
- * @param {function} onChange - View mode change handler
- * @param {object} props - Additional props
- */
-export function ViewModeToggleGroup({
-  viewMode = 'list',
-  onChange,
-  sx = {},
-  ...props
-}) {
-  const handleViewMode = (event, newViewMode) => {
-    if (newViewMode !== null) {
-      onChange?.(newViewMode);
-    }
-  };
-
-  return (
-    <MuiToggleButtonGroup
-      value={viewMode}
-      onChange={handleViewMode}
-      exclusive
-      sx={{
-        border: '1px solid var(--Border)',
-        borderRadius: '4px',
-        '& .MuiToggleButton-root': {
-          border: 'none',
-          borderRight: '1px solid var(--Border)',
-          '&:last-child': {
-            borderRight: 'none',
-          },
-          ...TOGGLE_STATES,
-        },
-        ...sx,
-      }}
-      {...props}
-    >
-      <MuiToggleButton value="list" aria-label="list view">
-        <ViewListIcon />
-      </MuiToggleButton>
-      <MuiToggleButton value="module" aria-label="module view">
-        <ViewModuleIcon />
-      </MuiToggleButton>
-      <MuiToggleButton value="grid" aria-label="grid view">
-        <GridViewIcon />
-      </MuiToggleButton>
-    </MuiToggleButtonGroup>
-  );
-}
-
-/**
- * SizeToggleGroup Component
- * Size selection toggle group
- * 
- * @param {string} size - Selected size
- * @param {function} onChange - Size change handler
- * @param {object} props - Additional props
- */
-export function SizeToggleGroup({
+  /* MUI ToggleButton's own props, which it read rather than forwarded. */
+  color = 'standard',
   size = 'medium',
-  onChange,
-  sx = {},
+  fullWidth = false,
+  disabled = false,
+  disableFocusRipple,
+  disableRipple,
+  tabIndex = 0,
+  className,
+  onFocus,
+  onBlur,
   ...props
-}) {
-  const handleSize = (event, newSize) => {
-    if (newSize !== null) {
-      onChange?.(newSize);
+}, ref) {
+  useStaticStyles('omni-toggle-button');
+  const [focusVisible, setFocusVisible] = useState(false);
+  if (disabled && focusVisible) setFocusVisible(false);
+
+  const handleClick = (event) => {
+    if (onClick) {
+      onClick(event, value);
+      if (event.defaultPrevented) return;
     }
+    if (onChange) onChange(event, value);
+  };
+  const handleFocus = (event) => {
+    if (matchesFocusVisible(event.target)) setFocusVisible(true);
+    if (onFocus) onFocus(event);
+  };
+  const handleBlur = (event) => {
+    if (!matchesFocusVisible(event.target)) setFocusVisible(false);
+    if (onBlur) onBlur(event);
   };
 
-  return (
-    <MuiToggleButtonGroup
-      value={size}
-      onChange={handleSize}
-      exclusive
-      sx={{
-        border: '1px solid var(--Border)',
-        borderRadius: '4px',
-        '& .MuiToggleButton-root': {
-          border: 'none',
-          borderRight: '1px solid var(--Border)',
-          '&:last-child': {
-            borderRight: 'none',
-          },
-          ...TOGGLE_STATES,
-        },
-        ...sx,
-      }}
-      {...props}
-    >
-      <MuiToggleButton value="small" aria-label="small">
-        Small
-      </MuiToggleButton>
-      <MuiToggleButton value="medium" aria-label="medium">
-        Medium
-      </MuiToggleButton>
-      <MuiToggleButton value="large" aria-label="large">
-        Large
-      </MuiToggleButton>
-    </MuiToggleButtonGroup>
-  );
-}
-
-/**
- * VerticalToggleButtonGroup Component
- * Vertical orientation toggle group
- * 
- * @param {Array} value - Selected value(s)
- * @param {function} onChange - Selection change handler
- * @param {Array} options - Button options
- * @param {boolean} exclusive - Exclusive selection
- * @param {object} props - Additional props
- */
-export function VerticalToggleButtonGroup({
-  value,
-  onChange,
-  options = [],
-  exclusive = true,
-  sx = {},
-  ...props
-}) {
-  return (
-    <MuiToggleButtonGroup
-      value={value}
-      onChange={onChange}
-      exclusive={exclusive}
-      orientation="vertical"
-      sx={{
-        border: '1px solid var(--Border)',
-        borderRadius: '4px',
-        '& .MuiToggleButton-root': {
-          border: 'none',
-          borderBottom: '1px solid var(--Border)',
-          '&:last-child': {
-            borderBottom: 'none',
-          },
-          ...TOGGLE_STATES,
-        },
-        ...sx,
-      }}
-      {...props}
-    >
-      {options.map((option) => (
-        <MuiToggleButton
-          key={option.value}
-          value={option.value}
-          aria-label={option.label}
-        >
-          {option.icon && <Box sx={{ mr: 1 }}>{option.icon}</Box>}
-          {option.label}
-        </MuiToggleButton>
-      ))}
-    </MuiToggleButtonGroup>
-  );
-}
+  const replaced = typeof sx === 'object' && sx !== null && !Array.isArray(sx)
+    ? Object.keys(SX_KEYS).filter((k) => k in sx).map((k) => ' omni-tg-no-' + SX_KEYS[k]).join('')
+    : '';
+  const sizeClass = size === 'small' || size === 'large' ? ' omni-tg-' + size : '';
+  const rootProps = {
+    ref,
+    type: 'button',
+    disabled,
+    tabIndex: disabled ? -1 : tabIndex,
+    value,
+    'aria-pressed': selected,
+    className: 'MuiButtonBase-root MuiToggleButton-root' + (selected ? ' Mui-selected' : '') + (disabled ? ' Mui-disabled' : '')
+      + (fullWidth ? ' MuiToggleButton-fullWidth' : '') + ' MuiToggleButton-size' + capFirst(size) + ' MuiToggleButton-' + color
+      + (focusVisible ? ' Mui-focusVisible' : '') + (className ? ' ' + className : '')
+      + ' omni-tg omni-tg-solo' + (fullWidth ? ' omni-tg-full' : '') + sizeClass + replaced,
+    ...props,
+    onClick: handleClick,
+    onFocus: handleFocus,
+    onBlur: handleBlur,
+  };
+  return hasSx(sx)
+    ? <SxBox component="button" sx={sx} {...rootProps}>{children}</SxBox>
+    : <button {...rootProps}>{children}</button>;
+});
 
 /**
  * DisabledToggleButton Component
  * Toggle button in disabled state
- * 
+ *
  * @param {object} props - Toggle button props
  */
 export function DisabledToggleButton({
@@ -447,158 +196,12 @@ export function DisabledToggleButton({
   sx = {},
   ...props
 }) {
+  /* Was a literal 0.5 — one of ten different disabled opacities the lib had
+     picked independently. The token is what Figma binds. */
   return (
-    <MuiToggleButton
-      disabled
-      selected={selected}
-      sx={{
-        border: '1px solid var(--Border)',
-        /* Was a literal 0.5 — one of ten different disabled opacities the lib
-           had picked independently. The token is what Figma binds. */
-        ...TOGGLE_STATES,
-        ...sx,
-      }}
-      {...props}
-    >
+    <ToggleButton disabled selected={selected} sx={sx} {...props}>
       {children}
-    </MuiToggleButton>
-  );
-}
-
-/**
- * ToggleButtonShowcase Component
- * Display all toggle button variants
- */
-export function ToggleButtonShowcase() {
-  const [textFormats, setTextFormats] = useState([]);
-  const [alignment, setAlignment] = useState('left');
-  const [viewMode, setViewMode] = useState('list');
-  const [size, setSize] = useState('medium');
-  const [selected, setSelected] = useState(false);
-
-  const options = [
-    { value: 'option1', label: 'Option 1' },
-    { value: 'option2', label: 'Option 2' },
-    { value: 'option3', label: 'Option 3' },
-  ];
-
-  return (
-    <Stack spacing={4}>
-      {/* Single Toggle Button */}
-      <Box>
-        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
-          Single Toggle Button
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <ToggleButton
-            selected={selected}
-            onChange={() => setSelected(!selected)}
-            value="toggle"
-          >
-            Toggle Me
-          </ToggleButton>
-          <Typography variant="caption" sx={{ color: 'var(--Text-Quiet)', ml: 2 }}>
-            Selected: {selected ? 'Yes' : 'No'}
-          </Typography>
-        </Box>
-      </Box>
-
-      {/* Text Format Group */}
-      <Box>
-        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
-          Text Format (Multiple Selection)
-        </Typography>
-        <TextFormatToggleGroup
-          formats={textFormats}
-          onChange={setTextFormats}
-        />
-        <Typography variant="caption" sx={{ color: 'var(--Text-Quiet)', display: 'block', mt: 1 }}>
-          Selected: {textFormats.length > 0 ? textFormats.join(', ') : 'None'}
-        </Typography>
-      </Box>
-
-      {/* Alignment Group */}
-      <Box>
-        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
-          Text Alignment (Exclusive Selection)
-        </Typography>
-        <AlignmentToggleGroup
-          alignment={alignment}
-          onChange={setAlignment}
-        />
-        <Typography variant="caption" sx={{ color: 'var(--Text-Quiet)', display: 'block', mt: 1 }}>
-          Alignment: {alignment}
-        </Typography>
-      </Box>
-
-      {/* View Mode Group */}
-      <Box>
-        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
-          View Mode (Icon Only)
-        </Typography>
-        <ViewModeToggleGroup
-          viewMode={viewMode}
-          onChange={setViewMode}
-        />
-        <Typography variant="caption" sx={{ color: 'var(--Text-Quiet)', display: 'block', mt: 1 }}>
-          View Mode: {viewMode}
-        </Typography>
-      </Box>
-
-      {/* Size Selection */}
-      <Box>
-        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
-          Size Selection
-        </Typography>
-        <SizeToggleGroup
-          size={size}
-          onChange={setSize}
-        />
-        <Typography variant="caption" sx={{ color: 'var(--Text-Quiet)', display: 'block', mt: 1 }}>
-          Size: {size}
-        </Typography>
-      </Box>
-
-      {/* Generic Toggle Button Group */}
-      <Box>
-        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
-          Custom Toggle Group
-        </Typography>
-        <ToggleButtonGroup
-          value="option1"
-          onChange={(event, newValue) => console.log(newValue)}
-          options={options}
-          fullWidth
-        />
-      </Box>
-
-      {/* Vertical Orientation */}
-      <Box>
-        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
-          Vertical Orientation
-        </Typography>
-        <VerticalToggleButtonGroup
-          value="option1"
-          onChange={(event, newValue) => console.log(newValue)}
-          options={options}
-        />
-      </Box>
-
-      {/* Disabled State */}
-      <Box>
-        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
-          Disabled State
-        </Typography>
-        <Stack direction="row" spacing={1}>
-          <DisabledToggleButton value="disabled">
-            Disabled (Unselected)
-          </DisabledToggleButton>
-          <DisabledToggleButton value="disabled-selected" selected>
-            Disabled (Selected)
-          </DisabledToggleButton>
-        </Stack>
-      </Box>
-    </Stack>
+    </ToggleButton>
   );
 }
 
