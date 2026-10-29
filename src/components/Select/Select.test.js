@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Select } from './Select';
+import { declared } from '../_testCss';
 import SearchIcon from '@mui/icons-material/Search';
 import { axe } from 'jest-axe';
 
@@ -240,20 +241,26 @@ describe('Select label positions (Figma SelectField)', () => {
 });
 
 describe('one look for the field; color only for the list', () => {
-  const cssFor = (el) => {
-    const out = [];
-    for (const sheet of document.styleSheets) for (const r of sheet.cssRules) {
-      try { if (el.matches(r.selectorText)) out.push(r.cssText); } catch (e) { /* skip */ }
+  /* The row paints from custom properties the listbox declares (the listbox
+     carries the data-theme the rows resolve against); follow them through to
+     the token. */
+  const resolve = (el, prop) => {
+    const v = declared(el, prop) || '';
+    const m = /^var\((--_[\w-]+)\)$/.exec(v);
+    if (!m) return v;
+    for (let n = el; n; n = n.parentElement) {
+      const d = declared(n, m[1]);
+      if (d) return d;
     }
-    return out.join('\n');
+    return v;
   };
   test('the selected row defaults to the Default buttons, not Primary', () => {
     render(<Select options={['One', 'Two']} defaultValue="One" aria-label="Pick" />);
     fireEvent.click(screen.getByRole('combobox'));
     const selected = screen.getAllByRole('option').find((o) => o.getAttribute('aria-selected') === 'true');
-    const css = cssFor(selected);
-    expect(css).toContain('--Buttons-Default-');
-    expect(css).not.toContain('--Buttons-Primary-');
+    const paint = ['background-color', 'color', 'border-color'].map((p) => resolve(selected, p));
+    expect(paint).toEqual(['var(--Buttons-Default-Button)', 'var(--Buttons-Default-Text)', 'var(--Buttons-Default-Border)']);
+    expect(paint.join(' ')).not.toContain('--Buttons-Primary-');
   });
 });
 
