@@ -97,7 +97,7 @@ const CORE = [
   ['Typography/Typography', 'TextProps', null, TEXT],
   ['Typography/Typography', 'HeadingProps', null, HEADING],
   ['Icon/Icon', 'IconProps', 'Icon', ['Icon']],
-  ['IconBadge/IconBadge', 'IconBadgeProps', 'IconBadge', ['IconBadge']],
+  ['IconBadge/IconBadge', 'IconBadgeProps', 'IconBadgeEmotion', ['IconBadge']],
   ['Chip/Chip', 'ChipProps', 'Chip', ['Chip']],
   ['Avatar/Avatar', 'AvatarProps', 'Avatar', ['Avatar']],
   ['TextField/TextField', 'TextFieldProps', 'TextField', ['TextField']],
