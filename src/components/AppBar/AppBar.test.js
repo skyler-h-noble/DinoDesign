@@ -138,6 +138,19 @@ describe('DesktopAppBar', () => {
     render(<DesktopAppBar brand="Acme" endSlot={<button type="button">Get started</button>} />);
     expect(screen.queryByLabelText('Open navigation menu')).not.toBeInTheDocument();
   });
+  test('inline links are the system Tabs as links: a nav with aria-current on the current one', () => {
+    render(<DesktopAppBar brand="Acme" navLinks={[{ label: 'Features', href: '#features' }, { label: 'Pricing', href: '#pricing', current: true }]} />);
+    const nav = screen.getAllByRole('navigation', { name: 'Main navigation' })[0];
+    expect(nav.querySelector('a.tab[href="#pricing"]')).toHaveAttribute('aria-current', 'location');
+    expect(nav.querySelector('a.tab[href="#features"]')).not.toHaveAttribute('aria-current');
+    expect(screen.queryByRole('tab')).toBeNull();
+  });
+  test('clicking a link marks it current', () => {
+    render(<DesktopAppBar brand="Acme" navLinks={[{ label: 'Features', href: '#features' }, { label: 'Pricing', href: '#pricing' }]} />);
+    const nav = screen.getAllByRole('navigation', { name: 'Main navigation' })[0];
+    fireEvent.click(nav.querySelector('a[href="#pricing"]'));
+    expect(nav.querySelector('a[href="#pricing"]')).toHaveAttribute('aria-current', 'location');
+  });
   test('expanded nav with 3 links', () => {
     render(<DesktopAppBar menuType="expanded" navLinks={['Home', 'About', 'Help']} />);
     expect(screen.getByLabelText('Main navigation')).toBeInTheDocument();

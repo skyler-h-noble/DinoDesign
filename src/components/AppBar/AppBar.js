@@ -1,5 +1,5 @@
 // src/components/AppBar/AppBar.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -9,7 +9,6 @@ import { Tabs, TabList, Tab } from '../Tabs/Tabs';
 import { Drawer } from '../Drawer/Drawer';
 import { H3 } from '../Typography';
 import { Button } from '../Button/Button';
-import { Link } from '../Link/Link';
 /* Level from the Figma effect style that NAMES this component.
    The five Effect-Levels are the five Figma effect styles, Elevations/Level-1 … Level-5:
      1  Elevations/Level-1 (Card, Accordion, Handle, Alert, Bottom-Sheet)
@@ -136,6 +135,30 @@ function DesktopAppBar({
   const dataTheme = barTheme.theme;
   const dataSurface = barTheme.surface || surface;
   const links = navLinks.map((l) => (typeof l === 'string' ? { label: l } : l));
+  /* Which link is current: an explicit `current` wins; otherwise, for links
+     to sections on this page (#id), the section on screen as you scroll; a
+     click marks its link at once. */
+  const explicit = links.findIndex((l) => l.current);
+  const [spied, setSpied] = useState(-1);
+  const [clicked, setClicked] = useState(-1);
+  const currentIndex = explicit >= 0 ? explicit : (spied >= 0 ? spied : clicked);
+  const setCurrentIndex = (i) => setClicked(i);
+  const hashKey = links.map((l) => l.href || '').join('|');
+  useEffect(() => {
+    if (explicit >= 0 || typeof window === 'undefined' || !('IntersectionObserver' in window)) return undefined;
+    const targets = links.map((l, i) => ({ i, el: l.href && l.href.startsWith('#') && l.href.length > 1 ? document.getElementById(l.href.slice(1)) : null }))
+      .filter((t) => t.el);
+    if (!targets.length) return undefined;
+    const visible = new Map();
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { const t = targets.find((x) => x.el === e.target); if (t) visible.set(t.i, e.isIntersecting); });
+      const on = targets.filter((t) => visible.get(t.i));
+      setSpied(on.length ? on[0].i : -1);
+    }, { rootMargin: '-35% 0px -60% 0px' });
+    targets.forEach((t) => io.observe(t.el));
+    return () => io.disconnect();
+  // eslint-disable-next-line
+  }, [explicit, hashKey]);
   const searchPosition = searchPositionProp ?? (links.length ? 'none' : 'right');
   const effectiveMenu = (menuType === 'expanded' && links.length > 3) ? 'hamburger' : menuType;
   /* The menu button only appears when it opens something: links for the
@@ -163,7 +186,9 @@ function DesktopAppBar({
               variant="ghost"
               size="medium"
               href={link.href}
-              onClick={(e) => { setDrawerOpen(false); if (link.onClick) link.onClick(e); }}
+              aria-current={i === currentIndex ? 'location' : undefined}
+              selected={i === currentIndex}
+              onClick={(e) => { setDrawerOpen(false); setCurrentIndex(i); if (link.onClick) link.onClick(e); }}
               sx={{ justifyContent: 'flex-start', width: '100%' }}
             >
               {link.label}
@@ -367,13 +392,19 @@ function DesktopAppBar({
               {effectiveMenu === 'auto' && links.length > 0 ? (
                 <>
                   <Box sx={{ flex: 1 }} />
-                  <Box
-                    component="nav" aria-label="Main navigation" className="appbar-links"
-                    sx={{ display: 'flex', alignItems: 'center', gap: 'var(--Sizing-3, 24px)', flexShrink: 0, [below]: { display: 'none' } }}
-                  >
-                    {links.map((link, i) => (
-                      <Link key={typeof link.label === 'string' ? link.label : i} href={link.href} onClick={link.onClick}>{link.label}</Link>
-                    ))}
+                  {/* The system's Tabs, as links: same look and selected marker
+                      as every other tab bar, with aria-current on the section
+                      you are at (a site nav goes to a place; it does not
+                      switch a panel, so no tab roles). */}
+                  <Box className="appbar-links" sx={{ display: 'flex', alignItems: 'stretch', alignSelf: 'stretch', flexShrink: 0, [below]: { display: 'none' } }}>
+                    <Tabs navigation value={currentIndex} onChange={setCurrentIndex} baseline={false} size={barSize}
+                          sx={{ alignSelf: 'stretch', display: 'flex', alignItems: 'flex-end' }}>
+                      <TabList aria-label="Main navigation">
+                        {links.map((link, i) => (
+                          <Tab key={typeof link.label === 'string' ? link.label : i} value={i} href={link.href} onClick={link.onClick}>{link.label}</Tab>
+                        ))}
+                      </TabList>
+                    </Tabs>
                   </Box>
                 </>
               ) : null}

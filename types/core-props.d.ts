@@ -344,7 +344,7 @@ export interface FooterProps extends Native {
   children?: React.ReactNode;
 }
 
-export interface AppBarLink { label: React.ReactNode; href?: string; onClick?: React.MouseEventHandler<HTMLElement>; }
+export interface AppBarLink { label: React.ReactNode; href?: string; onClick?: React.MouseEventHandler<HTMLElement>; /** Marks this link as the current page or section (aria-current + the selected marker). */ current?: boolean; }
 export interface AppBarProps {
   /** desktop (default; collapses its links below `collapseAt`) | mobile (an
    *  app-screen bar: search or title — not a site nav). */

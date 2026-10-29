@@ -157,9 +157,10 @@ import HomeIcon from '@mui/icons-material/Home';
 | Center + max width | `Container` | `maxWidth` (`sm`/`md`/`lg`/`xl`) — layout only, paints nothing |
 | Columns | `Grid` | container: `container spacing`; child: `size={{ xs: 12, md: 4 }}` |
 | Stacks | `VStack`, `HStack` | `spacing`, `alignItems`, `justifyContent`, `component` — a list is `<VStack component="ul">` with `<HStack component="li">` |
-| Site nav | `AppBar` | `brand`, `navLinks` (`{ label, href }` — inline on wide screens, a menu button below 900px; change with `collapseAt`), `endSlot`, `barColor`. `mode="mobile"` is an app-screen bar (search / title), not a site nav |
+| Site nav | `AppBar` | `brand`, `navLinks` (`{ label, href, current? }` — the system's Tabs as links: the current one is marked and announced, and for `#section` links it follows the section on screen; a menu button below 900px — change with `collapseAt`), `endSlot`, `barColor`. `mode="mobile"` is an app-screen bar (search / title), not a site nav |
 | Card | `Card` | pads itself; `variant` (`solid`/`light`/`dark`), `color`, `elevated`, `clickable` |
 | Button | `Button` | `variant`, `size` (`small`/`medium`/`large`), `startIcon`, `endIcon`, `fullWidth` |
+| Tabs that go to places (a nav, not panels) | `Tabs navigation` | each `Tab` takes `href`; the current one gets `aria-current` and the selected marker — links, not tab roles |
 | Segmented choice | `ToggleButtonGroup` | `value`, `onChange`; each child `<Button value="…">` (no `variant` on children) |
 | Link | `Link` | `href` or `onClick` |
 | Text | `DisplayLarge`, `DisplaySmall`, `H1`–`H6`, `Body`, `BodyLarge`, `BodySmall`, `Caption`, `Eyebrow` (the small caps line above a heading) | `color` (`quiet`, `primary`, `secondary`, …), `component` (e.g. `component="p"` for a big price) |

@@ -228,6 +228,11 @@ export function Tabs({
      Baseline boolean, which also defaults on. Turned off where the container
      already provides the separation — an AppBar's own edge, for instance. */
   baseline = true,
+  /* NAVIGATION mode: the same look and marker, as a <nav> of links.
+     Tabs switch a panel (role="tab", aria-selected); a site nav goes to a
+     place — WAI-ARIA says links, with aria-current on the one you are at.
+     Each Tab takes an href; the selected one gets aria-current="location". */
+  navigation = false,
   className = '',
   sx = {},
   ...props
@@ -257,7 +262,7 @@ export function Tabs({
   }, [controlled, onChange]);
 
   return (
-    <TabsContext.Provider value={{ value, setValue, variant, color, size, orientation, scrollable: isScroll, overflow, baseline, tabsId }}>
+    <TabsContext.Provider value={{ value, setValue, variant, color, size, orientation, scrollable: isScroll, overflow, baseline, tabsId, navigation }}>
       <Box
         className={'tabs tabs-' + orientation + ' tabs-' + size + ' tabs-' + variant
           + (variant !== 'standard' ? ' tabs-' + color : '')
@@ -288,7 +293,7 @@ export function TabList({
   sx = {},
   ...props
 }) {
-  const { value, setValue, variant, color, size, orientation, scrollable, overflow, baseline, tabsId } = useTabsContext();
+  const { value, setValue, variant, color, size, orientation, scrollable, overflow, baseline, tabsId, navigation } = useTabsContext();
   const tabListRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const moreRef = useRef(null);
@@ -357,6 +362,8 @@ export function TabList({
 
   // Keyboard navigation within tab list
   const handleKeyDown = (e) => {
+    // Links keep the browser's own Tab order; arrow-key roving is for tablists.
+    if (navigation) return;
     const container = scrollable ? scrollContainerRef.current : tabListRef.current;
     // Tabs folded into More are not in the row, so arrows skip them.
     const tabs = container?.querySelectorAll('[role="tab"]:not([aria-disabled="true"]):not(.tab-overflowed)');
@@ -471,6 +478,7 @@ export function TabList({
         + ' ' + className
       }
       onKeyDown={handleKeyDown}
+      component={navigation ? 'nav' : undefined}
       sx={{
         display: 'flex',
         flexDirection: isHorizontal ? 'row' : 'column',
@@ -497,8 +505,8 @@ export function TabList({
       {scrollable ? (
         <Box
           ref={scrollContainerRef}
-          role="tablist"
-          aria-orientation={orientation}
+          role={navigation ? undefined : 'tablist'}
+          aria-orientation={navigation ? undefined : orientation}
           className="tab-list-scroll-container"
           sx={{
             display: 'flex',
@@ -515,8 +523,8 @@ export function TabList({
       ) : (
         <Box
           ref={scrollContainerRef}
-          role="tablist"
-          aria-orientation={orientation}
+          role={navigation ? undefined : 'tablist'}
+          aria-orientation={navigation ? undefined : orientation}
           sx={{
             display: 'flex',
             flexDirection: isHorizontal ? 'row' : 'column',
@@ -575,7 +583,7 @@ export function Tab({
   sx = {},
   ...props
 }) {
-  const { value, setValue, variant, color, size, orientation, tabsId, baseline } = useTabsContext();
+  const { value, setValue, variant, color, size, orientation, tabsId, baseline, navigation } = useTabsContext();
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
   const isHorizontal = isHorizontalOrientation(orientation);
   const isStandard = variant === 'standard';
@@ -611,21 +619,22 @@ export function Tab({
   const tabId = 'tab-' + tabsId + '-' + resolvedValue;
   const panelId = 'tabpanel-' + tabsId + '-' + resolvedValue;
 
-  const handleClick = () => {
+  const { href, onClick: onClickProp, ...restProps } = props;
+  const handleClick = (e) => {
     if (!disabled) setValue(resolvedValue);
+    if (onClickProp) onClickProp(e);
   };
+  /* A link in navigation mode, a tab otherwise — same styles either way. */
+  const semantics = navigation
+    ? { component: 'a', href, 'aria-current': isSelected ? 'location' : undefined, 'aria-disabled': disabled || undefined }
+    : { component: 'button', role: 'tab', id: tabId, 'aria-selected': isSelected, 'aria-controls': panelId,
+        'aria-disabled': disabled || undefined, tabIndex: isSelected ? 0 : -1 };
 
   return (
     <Box
-      component="button"
-      role="tab"
-      id={tabId}
+      {...semantics}
       data-theme={tabDataTheme || undefined}
       data-surface={tabDataSurface || undefined}
-      aria-selected={isSelected}
-      aria-controls={panelId}
-      aria-disabled={disabled || undefined}
-      tabIndex={isSelected ? 0 : -1}
       onClick={handleClick}
       className={
         'tab tab-' + size
@@ -637,6 +646,7 @@ export function Tab({
       }
       sx={{
         display: _overflowed ? 'none' : 'inline-flex',
+        textDecoration: 'none', // a link in navigation mode looks like a tab
         alignItems: 'center',
         justifyContent: 'center',
         gap: TAB_CONTENT_GAP,
@@ -700,7 +710,7 @@ export function Tab({
         }),
         ...sx,
       }}
-      {...props}
+      {...restProps}
     >
       {startDecorator && (
         <Box
