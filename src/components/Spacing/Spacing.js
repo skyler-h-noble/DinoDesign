@@ -118,7 +118,7 @@ export function Spacing() {
               variant="caption" 
               sx={{ color: 'var(--Text-Secondary)' }}
             >
-              Base: {baseValue} (with cognitive multiplier)
+              Base: {baseValue}
             </Typography>
           </Stack>
         </Box>
@@ -188,7 +188,7 @@ export function Spacing() {
           variant="body2" 
           sx={{ mb: 3, color: 'var(--Text-Secondary)' }}
         >
-          Spacing values are multiplied by the cognitive multiplier for accessibility.
+          
           Each spacing value includes a visual reference and text label for clarity.
         </Typography>
         <Stack spacing={1}>

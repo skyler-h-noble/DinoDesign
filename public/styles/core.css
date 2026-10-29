@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:GRAD,ROND,opsz,slnt,wdth,wght@50,0,96,0,72,600..900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@640&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
 :root {
@@ -18,7 +17,6 @@
   --Body-Font-Weight: var(--Set-Font-Family-Body-Weight);
   --Body-Semibold-Font-Weight: var(--Set-Font-Family-Body-Semibold-Weight);
   --Body-Bold-Font-Weight: var(--Set-Font-Family-Body-Bold-Weight);
-  --Cognitive-Multiplier: 1;
   --Dropshadow-Color: 20, 20, 20;  /* fallback; overridden per-theme in Light/Dark-Mode.css */
 }
 
@@ -798,17 +796,4 @@
 }
 [data-typography="decorative-overline"] {
   font-family: var(--Font-Family-Display);
-}
-
-/* Cognitive Accessibility Overrides */
-[data-cognitive="Dyslexia"] {
-  --Cognitive-Multiplier: 1.5;
-  --Body-Font-Family: "OpenDyslexic";
-  --Body-Font-Weight: 400;
-  --Body-Semibold-Font-Weight: 700;
-  --Body-Bold-Font-Weight: 700;
-}
-
-[data-cognitive="ADHD"] {
-  --Cognitive-Multiplier: 1.5;
 }

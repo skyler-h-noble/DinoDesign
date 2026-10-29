@@ -483,12 +483,6 @@ export function TypographyShowcase() {
                           </Caption>
                         </Box>
                         <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
-                          <BodySmall>Cognitive accessibility:</BodySmall>
-                          <Caption style={{ color: 'var(--Text-Quiet)' }}>
-                            All line-heights use var(--Cognitive-Multiplier, 1) for adaptive spacing. Increasing this improves readability for dyslexia or cognitive differences.
-                          </Caption>
-                        </Box>
-                        <Box sx={{ py: 1.5, borderBottom: '1px solid var(--Border)' }}>
                           <BodySmall>noWrap truncation:</BodySmall>
                           <Caption style={{ color: 'var(--Text-Quiet)' }}>
                             Content is clipped with ellipsis but remains accessible to screen readers. Add a title attribute or tooltip for sighted users.

@@ -103,7 +103,7 @@ const ebl = (step) => eb(step, 'Line-Height');
 const ebt = (step) => eb(step, 'Letter-Spacing');
 const fs  = (token) => `var(--${token}-Font-Size)`;
 const fw  = (token) => `var(--${token}-Font-Weight)`;
-const lh  = (token) => `calc(var(--${token}-Line-Height) * var(--Cognitive-Multiplier, 1))`;
+const lh  = (token) => `var(--${token}-Line-Height)`;
 const lhr = (token) => `var(--${token}-Line-Height)`;   // no multiplier (UI chrome)
 const ls  = (token) => `var(--${token}-Letter-Spacing)`;
 

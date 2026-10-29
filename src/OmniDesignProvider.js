@@ -478,9 +478,14 @@ export function OmniDesignProvider({
   // a themeURL nor any individual CSS prop — that case means they're using
   // the Provider only for theme-context (no brand sheets to load), so the
   // hide-during-load rule shouldn't keep the page invisible forever.
+  /* Only the sheets the CURRENT mode needs make the page wait. The other
+     mode's sheet loads on toggle (and is prefetched), so passing just
+     darkModeCSS — light theme bundled in the app's own CSS — must not hide a
+     page that is already styled. A prerendered page depends on this: hidden
+     until JavaScript runs, it would paint no earlier than an unrendered one. */
   const hasAnyCSSSource = !!(
-    themeURL || foundationCSS || coreCSS || typographyCSS
-      || lightModeCSS || darkModeCSS || baseCSS || stylesCSS
+    themeURL || foundationCSS || coreCSS || typographyCSS || baseCSS || stylesCSS
+      || (isDark ? darkModeCSS : lightModeCSS)
   );
   const [cssStatus, setCssStatus] = useState(hasAnyCSSSource ? 'loading' : 'ready');
   const [cssError,  setCssError]  = useState(null);
@@ -587,7 +592,11 @@ export function OmniDesignProvider({
   // network hit happens).
   useEffect(() => {
     const activeSource = isDark ? resolvedSources.darkMode : resolvedSources.lightMode;
-    if (!activeSource) return;
+    /* No sheet for the active mode: the app bundles that mode's theme itself
+       (the fast setup — light theme in the page's own CSS, dark loaded only
+       on toggle). Take any swapped-in mode sheet OUT, or toggling back to
+       light left the dark sheet on top of the bundled light one. */
+    if (!activeSource) { removeStyleTag(TAG.mode); return; }
 
     loadCSSSource(TAG.mode, activeSource, TAG.base)
       .catch(err => console.error('OmniDesignProvider mode CSS error:', err));
