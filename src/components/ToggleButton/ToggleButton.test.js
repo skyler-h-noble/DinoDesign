@@ -1,17 +1,16 @@
 // src/components/ToggleButton/ToggleButton.test.js
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
+import { ToggleButton, DisabledToggleButton } from './ToggleButton';
 import {
-  ToggleButton,
   ToggleButtonGroup,
   TextFormatToggleGroup,
   AlignmentToggleGroup,
   ViewModeToggleGroup,
   SizeToggleGroup,
   VerticalToggleButtonGroup,
-  DisabledToggleButton,
   ToggleButtonShowcase,
-} from './ToggleButton';
+} from './ToggleButtonPresets';
 import { axe } from 'jest-axe';
 
 describe('ToggleButton Component', () => {

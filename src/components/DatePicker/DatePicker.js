@@ -1,11 +1,12 @@
 // src/components/DatePicker/DatePicker.js
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Box } from '@mui/material';
 import ChevronLeftIcon from '@omni-design/icons/ChevronLeft';
 import ChevronRightIcon from '@omni-design/icons/ChevronRight';
 import { Button } from '../Button';
 import { Typography } from '../Typography';
 import { SHADOW_LEVEL_1 } from '../_shadows';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 
 /**
  * DatePicker — a month calendar, single date or a range.
@@ -32,6 +33,63 @@ import { SHADOW_LEVEL_1 } from '../_shadows';
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const PALETTES = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
+
+/* ── static sheet ──────────────────────────────────────────────────────── */
+/* The MUI Box sx blocks of DayCell and the Month, as plain rules. A day's
+   palette arrives as custom properties declared on the cell by one class per
+   palette (.omni-dc-Primary …); nothing between the cell and its button sets a
+   data-theme, so they resolve against the scope the button named them in.
+   Hover / pressed weigh one class + one pseudo-class, as emotion's did, and
+   stay off a disabled day (.omni-dc-off) as the sx left them out. */
+const SxBox = lazySxBox('DatePicker');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+const CELL = 'calc(var(--Button-Height, 32px) + 4px)';
+
+/* Emotion's prefixer wrote the old flexbox aliases next to align-items and
+   justify-content; Chrome still computes them (-webkit-box-align / -pack), so
+   the sheet writes them too. */
+const wk = (css) => css
+  .replace(/(^|[{;])align-items:([^;}]+)/g, '$1-webkit-box-align:$2;align-items:$2')
+  .replace(/(^|[{;])justify-content:([^;}]+)/g, (m, p, v) => p + '-webkit-box-pack:' + v.replace(/^flex-/, '').replace(/^space-between$/, 'justify') + ';justify-content:' + v);
+registerStaticStyles('omni-datepicker', wk([
+  `.omni-dc{position:relative;width:${CELL};height:${CELL};padding:var(--Sizing-Quarter, 2px);box-sizing:border-box;flex-shrink:0}`,
+  '.omni-dc-cell-off{opacity:var(--Disabled, 0.38)}',
+  ...PALETTES.map((p) => {
+    const C = cap(p);
+    return `.omni-dc-${C}{--_dc-bt:var(--Buttons-${C}-Button);--_dc-bd:var(--Buttons-${C}-Border);--_dc-tx:var(--Buttons-${C}-Text);`
+      + `--_dc-q:var(--Buttons-${C}-Outline-Quiet, var(--Outline-Quiet, var(--Quiet)));--_dc-hv:var(--Buttons-${C}-Hover);--_dc-pr:var(--Buttons-${C}-Pressed)}`;
+  }),
+  /* The Button fill at 50%, as Figma's Backfill / Left-Fill / Right-Fill draw
+     it. In the color rather than as layer opacity so a disabled cell's 38%
+     multiplies the band once, not twice. */
+  '.omni-dc-band{position:absolute;top:var(--Sizing-Quarter, 2px);height:var(--Button-Height, 32px);left:0;right:0;'
+    + 'background-color:color-mix(in srgb, var(--_dc-bt) 50%, transparent)}',
+  '.omni-dc-band-right{left:50%}',
+  '.omni-dc-band-left{right:50%}',
+  '.omni-dc-day{position:relative;display:flex;align-items:center;justify-content:center;width:var(--Button-Height, 32px);height:var(--Button-Height, 32px);'
+    + 'margin:0;padding:0;box-sizing:border-box;border-radius:50%;border:none;background-color:transparent;color:var(--_dc-q);'
+    + 'font-family:var(--Font-Family-Button, var(--Font-Family-Body, inherit));font-size:var(--Button-Numbers, 14px);'
+    + 'font-weight:var(--Button-Font-Weight, 600);line-height:1;font-variant-numeric:tabular-nums;cursor:pointer;outline:none;'
+    + 'transition:background-color 0.15s ease, box-shadow 0.15s ease}',
+  '.omni-dc-ring{border:var(--Button-Border-Width, 1px) solid var(--_dc-bd)}',
+  '.omni-dc-fill{background-color:var(--_dc-bt)}',
+  '.omni-dc-ontext{color:var(--_dc-tx)}',
+  '.omni-dc-off{cursor:not-allowed}',
+  /* Hover lifts every day to Level-1 elevation; a filled one also takes the
+     palette's Hover. Pressed drops the lift. */
+  `.omni-dc-day:where(:not(.omni-dc-off)):hover{box-shadow:${SHADOW_LEVEL_1}}`,
+  '.omni-dc-day:where(.omni-dc-fill:not(.omni-dc-off)):hover{background-color:var(--_dc-hv)}',
+  '.omni-dc-day:where(:not(.omni-dc-off)):active{box-shadow:none}',
+  '.omni-dc-day:where(.omni-dc-fill:not(.omni-dc-off)):active{background-color:var(--_dc-pr)}',
+  '.omni-dc-day:focus-visible,.omni-dc-day.Mui-focusVisible{outline:2px solid var(--Focus-Visible);outline-offset:1px}',
+  /* The Month. */
+  `.omni-dp{display:inline-flex;flex-direction:column;width:calc((var(--Button-Height, 32px) + 4px) * 7);background-color:var(--Background);border-radius:4px;overflow:hidden}`,
+  '.omni-dp-header{display:flex;align-items:center;justify-content:space-between;height:48px;background-color:var(--Background);color:var(--Text)}',
+  '.omni-dp-grid{display:flex;flex-direction:column;background-color:var(--Background)}',
+  '.omni-dp-row{display:flex}',
+  `.omni-dp-wd{width:${CELL};height:32px;display:flex;align-items:center;justify-content:center}`,
+  `.omni-dp-blank{width:${CELL};height:${CELL}}`,
+].join('\n')));
 
 /* ── date helpers (local time, no library) ─────────────────────────────── */
 const atNoon = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12);
@@ -76,6 +134,7 @@ export const DayCell = React.forwardRef(function DayCell({
   sx = {},
   ...props
 }, ref) {
+  useStaticStyles('omni-datepicker');
   const C = cap(PALETTES.includes(color) ? color : 'default');
   const filled = selection === 'selected' || selection === 'range-start' || selection === 'range-end';
   const ringed = filled || selection === 'today';
@@ -83,100 +142,42 @@ export const DayCell = React.forwardRef(function DayCell({
     : selection === 'range-start' ? 'right'
     : selection === 'range-end' ? 'left' : null;
 
-  return (
-    <Box
-      {...cellProps}
-      className={'day-cell day-cell-' + selection + ' ' + className}
-      sx={{
-        position: 'relative',
-        width: 'calc(var(--Button-Height, 32px) + 4px)',
-        height: 'calc(var(--Button-Height, 32px) + 4px)',
-        padding: 'var(--Sizing-Quarter, 2px)',
-        boxSizing: 'border-box',
-        flexShrink: 0,
-        ...(disabled && { opacity: 'var(--Disabled, 0.38)' }),
-        ...sx,
-      }}
-    >
+  const cellAttrs = {
+    ...cellProps,
+    className: 'MuiBox-root day-cell day-cell-' + selection + ' ' + className
+      + ' omni-dc omni-dc-' + C + (disabled ? ' omni-dc-cell-off' : ''),
+  };
+  const children = (
+    <>
       {band && (
-        <Box
+        <div
           aria-hidden="true"
-          className="day-cell-band"
-          sx={{
-            position: 'absolute',
-            top: 'var(--Sizing-Quarter, 2px)',
-            height: 'var(--Button-Height, 32px)',
-            left: band === 'right' ? '50%' : 0,
-            right: band === 'left' ? '50%' : 0,
-            /* The Button fill at 50%, as Figma's Backfill / Left-Fill /
-               Right-Fill draw it. In the color rather than as layer opacity so
-               a disabled cell's 38% multiplies the band once, not twice. */
-            backgroundColor: 'color-mix(in srgb, var(--Buttons-' + C + '-Button) 50%, transparent)',
-          }}
+          className={'MuiBox-root day-cell-band omni-dc-band' + (band !== 'full' ? ' omni-dc-band-' + band : '')}
         />
       )}
-      <Box
+      {/* Filled: the text paired with the fill. Unfilled: the outline button's
+          quiet label for this palette — Figma binds Buttons › Outline-Quiet,
+          which is Quiet-<Palette> under Tonal text and the surface's Quiet
+          under Black & White. range-middle sits on the 50% band, where the
+          quiet label fails (4.19:1 on Surf's Up) — it takes the fill's text,
+          as Figma binds. The step number's type: Button-Numbers at the button
+          weight, the button face (see Stepper for why the body face is the
+          2nd step). */}
+      <button
         ref={ref}
-        component="button"
         type="button"
         disabled={disabled}
         tabIndex={focusable ? 0 : -1}
         onClick={onClick}
-        className="day-cell-day"
-        sx={{
-          position: 'relative',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: 'var(--Button-Height, 32px)',
-          height: 'var(--Button-Height, 32px)',
-          margin: 0,
-          padding: 0,
-          boxSizing: 'border-box',
-          borderRadius: '50%',
-          border: ringed ? 'var(--Button-Border-Width, 1px) solid var(--Buttons-' + C + '-Border)' : 'none',
-          backgroundColor: filled ? 'var(--Buttons-' + C + '-Button)' : 'transparent',
-          /* Filled: the text paired with the fill. Unfilled: the outline
-             button's quiet label for this palette — Figma binds
-             Buttons › Outline-Quiet, which is Quiet-<Palette> under Tonal
-             text and the surface's Quiet under Black & White. */
-          /* range-middle sits on the 50% band, where the quiet label fails
-             (4.19:1 on Surf's Up) — it takes the fill's text, as Figma binds. */
-          color: filled || selection === 'range-middle' ? 'var(--Buttons-' + C + '-Text)'
-            : 'var(--Buttons-' + C + '-Outline-Quiet, var(--Outline-Quiet, var(--Quiet)))',
-          /* The step number's type: Button-Numbers at the button weight, the
-             button face (see Stepper for why the body face is the 2nd step). */
-          fontFamily: 'var(--Font-Family-Button, var(--Font-Family-Body, inherit))',
-          fontSize: 'var(--Button-Numbers, 14px)',
-          fontWeight: 'var(--Button-Font-Weight, 600)',
-          lineHeight: 1,
-          fontVariantNumeric: 'tabular-nums',
-          cursor: disabled ? 'not-allowed' : 'pointer',
-          outline: 'none',
-          transition: 'background-color 0.15s ease, box-shadow 0.15s ease',
-          ...(!disabled && {
-            /* Hover lifts every day to Level-1 elevation; a filled one also
-               takes the palette's Hover. Pressed drops the lift. */
-            '&:hover': {
-              boxShadow: SHADOW_LEVEL_1,
-              ...(filled && { backgroundColor: 'var(--Buttons-' + C + '-Hover)' }),
-            },
-            '&:active': {
-              boxShadow: 'none',
-              ...(filled && { backgroundColor: 'var(--Buttons-' + C + '-Pressed)' }),
-            },
-          }),
-          '&:focus-visible, &.Mui-focusVisible': {
-            outline: '2px solid var(--Focus-Visible)',
-            outlineOffset: '1px',
-          },
-        }}
+        className={'day-cell-day MuiBox-root omni-dc-day' + (ringed ? ' omni-dc-ring' : '') + (filled ? ' omni-dc-fill' : '')
+          + (filled || selection === 'range-middle' ? ' omni-dc-ontext' : '') + (disabled ? ' omni-dc-off' : '')}
         {...props}
       >
         {day}
-      </Box>
-    </Box>
+      </button>
+    </>
   );
+  return hasSx(sx) ? <SxBox sx={sx} {...cellAttrs}>{children}</SxBox> : <div {...cellAttrs}>{children}</div>;
 });
 
 /* ── DatePicker ────────────────────────────────────────────────────────── */
@@ -286,31 +287,16 @@ export function DatePicker({
   const fmtDay = new Intl.DateTimeFormat(locale, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
   const fmtWeekday = new Intl.DateTimeFormat(locale, { weekday: 'long' });
   const titleId = useMemo(() => 'dp-title-' + Math.random().toString(36).slice(2, 8), []);
+  useStaticStyles('omni-datepicker');
 
-  return (
-    <Box
-      className={'date-picker ' + className}
-      sx={{
-        display: 'inline-flex',
-        flexDirection: 'column',
-        width: 'calc((var(--Button-Height, 32px) + 4px) * 7)',
-        backgroundColor: 'var(--Background)',
-        /* Figma's Month: an unbound 4px corner. */
-        borderRadius: '4px',
-        overflow: 'hidden',
-        ...sx,
-      }}
-      {...props}
-    >
+  const rootProps = { className: 'MuiBox-root date-picker ' + className + ' omni-dp', ...props };
+  const body = (
+    <>
       {/* Calendar Header — Figma pins it to the Primary theme at Surface-Dim. */}
-      <Box
-        className="date-picker-header"
+      <div
+        className="MuiBox-root date-picker-header omni-dp-header"
         data-theme="Primary"
         data-surface="Surface-Dim"
-        sx={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          height: 48, backgroundColor: 'var(--Background)', color: 'var(--Text)',
-        }}
       >
         <Button iconOnly variant="ghost" aria-label="Previous month" onClick={() => setMonth(addMonths(month, -1))}>
           <ChevronLeftIcon />
@@ -319,33 +305,32 @@ export function DatePicker({
         <Button iconOnly variant="ghost" aria-label="Next month" onClick={() => setMonth(addMonths(month, 1))}>
           <ChevronRightIcon />
         </Button>
-      </Box>
+      </div>
 
       {/* Month Grid — Container-Highest. */}
-      <Box
-        className="date-picker-grid"
+      <div
+        className="MuiBox-root date-picker-grid omni-dp-grid"
         data-surface="Container-Highest"
         role="grid"
         aria-labelledby={titleId}
         onKeyDown={onKeyDown}
-        sx={{ display: 'flex', flexDirection: 'column', backgroundColor: 'var(--Background)' }}
       >
-        <Box role="row" sx={{ display: 'flex' }}>
+        <div role="row" className="MuiBox-root omni-dp-row">
           {weekdays.map((w, i) => (
-            <Box
+            <div
               key={w}
               role="columnheader"
               aria-label={fmtWeekday.format(new Date(2026, 1, 1 + ((i + weekStartsOn) % 7), 12))}
-              sx={{ width: 'calc(var(--Button-Height, 32px) + 4px)', height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              className="MuiBox-root omni-dp-wd"
             >
               <Typography textStyle="label-small" color="quiet">{w}</Typography>
-            </Box>
+            </div>
           ))}
-        </Box>
+        </div>
         {weeks.map((week, wi) => (
-          <Box key={wi} role="row" sx={{ display: 'flex' }}>
+          <div key={wi} role="row" className="MuiBox-root omni-dp-row">
             {week.map((d, di) => {
-              if (!d) return <Box key={di} role="gridcell" sx={{ width: 'calc(var(--Button-Height, 32px) + 4px)', height: 'calc(var(--Button-Height, 32px) + 4px)' }} />;
+              if (!d) return <div key={di} role="gridcell" className="MuiBox-root omni-dp-blank" />;
               const sel = selectionFor(d);
               const chosen = sel === 'selected' || sel === 'range-start' || sel === 'range-end' || sel === 'range-middle';
               return (
@@ -364,11 +349,12 @@ export function DatePicker({
                   />
               );
             })}
-          </Box>
+          </div>
         ))}
-      </Box>
-    </Box>
+      </div>
+    </>
   );
+  return hasSx(sx) ? <SxBox sx={sx} {...rootProps}>{body}</SxBox> : <div {...rootProps}>{body}</div>;
 }
 
 export default DatePicker;

@@ -1,12 +1,13 @@
 // src/components/NumberField/NumberField.js
 import React, { useState, useId, useCallback } from 'react';
-import { Box } from '@mui/material';
 import KeyboardArrowUpIcon from '@omni-design/icons/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@omni-design/icons/KeyboardArrowDown';
 import { Input as TextInput } from '../Input/Input';
 import { FieldButton } from './FieldButton';
 import { FormLabel } from '../FormLabel/FormLabel';
 import { FormHelper } from '../FormHelper/FormHelper';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 
 /**
  * NumberField — Figma's Number (9518:52318) inside NumberField (9518:52593).
@@ -39,6 +40,51 @@ import { FormHelper } from '../FormHelper/FormHelper';
 
 const PREFIX = { small: 'Sm-', medium: '', large: 'Lg-' };
 const NUMBERFIELD_FALLBACK = { small: 50, medium: 67, large: 116 };
+const RADIUS = (p) => 'var(--' + p + 'Input-Radius, var(--Input-Radius, 4px))';
+
+/* Static sheet — the MUI Box sx blocks this was assembled with, as plain
+   rules. The field's own sx (height, trailing corners, no ring of its own)
+   became .omni-nf-field rules: they reach INTO the Input, whose sheet may be
+   inserted after this one, so they carry one class more than emotion's did
+   (which came after every static sheet and won ties). */
+const SxBox = lazySxBox('NumberField');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+const SIZES = Object.keys(PREFIX);
+
+/* Emotion's prefixer wrote the old flexbox aliases next to align-items and
+   justify-content; Chrome still computes them (-webkit-box-align / -pack), so
+   the sheet writes them too. */
+const wk = (css) => css
+  .replace(/(^|[{;])align-items:([^;}]+)/g, '$1-webkit-box-align:$2;align-items:$2')
+  .replace(/(^|[{;])justify-content:([^;}]+)/g, (m, p, v) => p + '-webkit-box-pack:' + v.replace(/^flex-/, '').replace(/^space-between$/, 'justify') + ';justify-content:' + v);
+registerStaticStyles('omni-numberfield', wk([
+  '.omni-nf{display:flex;flex-direction:column;gap:var(--Sizing-Half, 4px);width:auto}',
+  /* Figma's label-left is a 2x2 grid: label | field, the helper under the
+     field Sizing-Half down, the label centred on the field's row. */
+  '.omni-nf-left{display:grid;flex-direction:row;grid-template-columns:auto minmax(0, 1fr);column-gap:var(--Sizing-1, 8px);row-gap:var(--Sizing-Half, 4px);align-items:center}',
+  '.omni-nf-full{width:100%}',
+  '.omni-nf-row{display:flex;align-items:stretch;width:100%}',
+  ...SIZES.map((size) => `.omni-nf-row-${size}{height:var(--${PREFIX[size]}Numberfield, ${NUMBERFIELD_FALLBACK[size]}px);border-radius:${RADIUS(PREFIX[size])}}`),
+  '.omni-nf-row-outlined:focus-within{outline:2px solid var(--Focus-Visible);outline-offset:1px}',
+  '.omni-nf-row-spinner{display:flex;align-items:center;gap:var(--Sizing-1, 8px);width:100%}',
+  '.omni-nf-steppers{position:relative;display:flex;flex-direction:column;margin-left:-1px;padding:1px;box-sizing:border-box;flex-shrink:0;overflow:hidden}',
+  ...SIZES.map((size) => `.omni-nf-steppers-${size}{border-radius:0 ${RADIUS(PREFIX[size])} ${RADIUS(PREFIX[size])} 0}`),
+  '.omni-nf-steppers::after{content:"";position:absolute;inset:0;pointer-events:none;border:1px solid var(--Border);border-radius:inherit}',
+  '.omni-nf-steppers-off{opacity:var(--Disabled, 0.38)}',
+  /* In the stacked column the buttons are square (Figma); the column's corner clips them. */
+  '.omni-nf-steppers .omni-fb{border-radius:0}',
+  '.omni-nf-divider{background-color:var(--Border-Variant);flex-shrink:0}',
+  ...SIZES.map((size) => `.omni-nf-divider-${size}{height:var(--${PREFIX[size]}Divider, 1px)}`),
+  /* The field fills the row's height and gives up its trailing corners: the
+     stepper column carries them, sharing the field's right edge. The ring is
+     the whole control's (field + steppers), drawn on the row. */
+  '.omni-nf .omni-nf-field{flex:1;min-width:0}',
+  '.omni-nf .omni-nf-field-stacked{height:100%}',
+  '.omni-nf .omni-nf-field-stacked .inp-shell{height:100%;border-top-right-radius:0;border-bottom-right-radius:0}',
+  '.omni-nf .omni-nf-field-stacked .inp-shell:focus-within{outline:none}',
+  '.omni-nf .omni-nf-field-stacked .inp-shell > div,.omni-nf .omni-nf-field-stacked .MuiFormControl-root,'
+    + '.omni-nf .omni-nf-field-stacked .MuiOutlinedInput-root{height:100%}',
+].join('\n')));
 
 export function NumberField({
   value: controlledValue,
@@ -71,13 +117,14 @@ export function NumberField({
   'aria-label': ariaLabel,
   ...props
 }) {
+  useStaticStyles('omni-numberfield');
   const [internalValue, setInternalValue] = useState(defaultValue);
   const isControlled = controlledValue !== undefined;
   const current = isControlled ? controlledValue : internalValue;
   const inputId = useId();
   const helperId = inputId + '-helper';
   const hasHelper = !!(helperText || (validation && validationMessage));
-  const p = PREFIX[size] ?? '';
+  const sizeKey = PREFIX[size] !== undefined ? size : 'medium';
 
   const isOutlined = variant !== 'spinner';
   const isFloating = labelPosition === 'floating';
@@ -114,16 +161,16 @@ export function NumberField({
     if (keys[e.key]) { e.preventDefault(); keys[e.key](); }
   };
 
-  // In the stacked column the buttons are square (Figma); the column's corner clips them.
-  const stackedSx = isOutlined ? { borderRadius: 0 } : {};
+  // In the stacked column the buttons are square (Figma); the column's corner
+  // clips them — the sheet's .omni-nf-steppers rule.
   const increase = (
-    <FieldButton variant={isOutlined ? 'ghost' : 'outline'} size={size} aria-label="Increase" tabIndex={-1} data-own-state sx={stackedSx}
+    <FieldButton variant={isOutlined ? 'ghost' : 'outline'} size={size} aria-label="Increase" tabIndex={-1} data-own-state
       disabled={disabled || atMax} onClick={() => commit(num + step)}>
       <KeyboardArrowUpIcon />
     </FieldButton>
   );
   const decrease = (
-    <FieldButton variant={isOutlined ? 'ghost' : 'outline'} size={size} aria-label="Decrease" tabIndex={-1} data-own-state sx={stackedSx}
+    <FieldButton variant={isOutlined ? 'ghost' : 'outline'} size={size} aria-label="Decrease" tabIndex={-1} data-own-state
       disabled={disabled || atMin} onClick={() => commit(num - step)}>
       <KeyboardArrowDownIcon />
     </FieldButton>
@@ -157,69 +204,39 @@ export function NumberField({
         ...(type === 'required' && { 'aria-required': true }),
         ...(hasHelper && { 'aria-describedby': helperId }),
       }}
-      sx={isOutlined ? {
-        /* The field fills the row's height and gives up its trailing corners:
-           the stepper column carries them, sharing the field's right edge. */
-        height: '100%', flex: 1, minWidth: 0,
-        '& .inp-shell': { height: '100%', borderTopRightRadius: 0, borderBottomRightRadius: 0 },
-        // The ring is the whole control's (field + steppers), drawn on the row.
-        '& .inp-shell:focus-within': { outline: 'none' },
-        '& .inp-shell > div, & .MuiFormControl-root, & .MuiOutlinedInput-root': { height: '100%' },
-      } : { flex: 1, minWidth: 0 }}
+      className={'omni-nf-field' + (isOutlined ? ' omni-nf-field-stacked' : '')}
     />
   );
 
   const row = isOutlined ? (
-    <Box className="numberfield-row" sx={{
-      display: 'flex', alignItems: 'stretch',
-      height: 'var(--' + p + 'Numberfield, ' + NUMBERFIELD_FALLBACK[size] + 'px)',
-      width: '100%',
-      /* One focus ring round field AND steppers — the house 2px ring 1px out,
-         following the field's corner. The steppers are out of the tab order
-         (the arrow keys do their job from the field), so they draw none. */
-      borderRadius: 'var(--' + p + 'Input-Radius, var(--Input-Radius, 4px))',
-      '&:focus-within': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px' },
-    }}>
+    /* One focus ring round field AND steppers — the house 2px ring 1px out,
+       following the field's corner. The steppers are out of the tab order
+       (the arrow keys do their job from the field), so they draw none. */
+    <div className={'MuiBox-root numberfield-row omni-nf-row omni-nf-row-outlined omni-nf-row-' + sizeKey}>
       {field}
-      <Box className="numberfield-steppers" sx={{
-        position: 'relative', display: 'flex', flexDirection: 'column',
-        // Overlaps the field's right edge by its 1px, as Figma's gap -1 does.
-        ml: '-1px', p: '1px', boxSizing: 'border-box', flexShrink: 0, overflow: 'hidden',
-        borderRadius: '0 var(--' + p + 'Input-Radius, var(--Input-Radius, 4px)) var(--' + p + 'Input-Radius, var(--Input-Radius, 4px)) 0',
-        '&::after': {
-          content: '""', position: 'absolute', inset: 0, pointerEvents: 'none',
-          border: '1px solid var(--Border)', borderRadius: 'inherit',
-        },
-        ...(disabled && { opacity: 'var(--Disabled, 0.38)' }),
-      }}>
+      {/* Overlaps the field's right edge by its 1px, as Figma's gap -1 does. */}
+      <div className={'MuiBox-root numberfield-steppers omni-nf-steppers omni-nf-steppers-' + sizeKey + (disabled ? ' omni-nf-steppers-off' : '')}>
         {increase}
-        <Box aria-hidden="true" sx={{ height: 'var(--' + p + 'Divider, 1px)', backgroundColor: 'var(--Border-Variant)', flexShrink: 0 }} />
+        <div aria-hidden="true" className={'MuiBox-root omni-nf-divider omni-nf-divider-' + sizeKey} />
         {decrease}
-      </Box>
-    </Box>
+      </div>
+    </div>
   ) : (
-    <Box className="numberfield-row" sx={{ display: 'flex', alignItems: 'center', gap: 'var(--Sizing-1, 8px)', width: '100%' }}>
+    <div className="MuiBox-root numberfield-row omni-nf-row-spinner">
       {decrease}
       {field}
       {increase}
-    </Box>
+    </div>
   );
 
-  return (
-    <Box
-      className={'numberfield numberfield-' + (isOutlined ? 'outlined' : 'spinner') + (disabled ? ' numberfield-disabled' : '') + (className ? ' ' + className : '')}
-      sx={{
-        display: labelPosition === 'left' && showLabel ? 'grid' : 'flex',
-        ...(labelPosition === 'left' && showLabel
-          /* Figma's label-left is a 2x2 grid: label | field, the helper under
-             the field Sizing-Half down, the label centred on the field's row. */
-          ? { gridTemplateColumns: 'auto minmax(0, 1fr)', columnGap: 'var(--Sizing-1, 8px)', rowGap: 'var(--Sizing-Half, 4px)', alignItems: 'center' }
-          : { flexDirection: 'column', gap: 'var(--Sizing-Half, 4px)' }),
-        width: fullWidth ? '100%' : 'auto',
-        ...sx,
-      }}
-      {...props}
-    >
+  const isLeftGrid = labelPosition === 'left' && showLabel;
+  const rootProps = {
+    className: 'MuiBox-root numberfield numberfield-' + (isOutlined ? 'outlined' : 'spinner') + (disabled ? ' numberfield-disabled' : '') + (className ? ' ' + className : '')
+      + ' omni-nf' + (isLeftGrid ? ' omni-nf-left' : '') + (fullWidth ? ' omni-nf-full' : ''),
+    ...props,
+  };
+  const body = (
+    <>
       {showLabel && (
         <FormLabel htmlFor={inputId} disabled={disabled} type={type} moreInfo={moreInfo}
           sx={disabled ? { opacity: 'var(--Disabled, 0.38)' } : undefined}>
@@ -230,10 +247,11 @@ export function NumberField({
       {hasHelper && (
         <FormHelper helperText={helperText} validation={validation || 'none'} validationMessage={validationMessage}
           helperId={helperId} messageId={helperId}
-          sx={labelPosition === 'left' && showLabel ? { gridColumn: 2 } : undefined} />
+          sx={isLeftGrid ? { gridColumn: 2 } : undefined} />
       )}
-    </Box>
+    </>
   );
+  return hasSx(sx) ? <SxBox sx={sx} {...rootProps}>{body}</SxBox> : <div {...rootProps}>{body}</div>;
 }
 
 export default NumberField;

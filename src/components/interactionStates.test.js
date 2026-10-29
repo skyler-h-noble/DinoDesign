@@ -72,10 +72,15 @@ const SHARED = /scrimStates\(|TOGGLE_STATES/;
    rule may also put the state on a part under its root class —
    `.omni-sw .MuiSwitch-switchBase:hover`, `.omni-chk.Mui-focusVisible .box` —
    which is how a converted component keeps the selector weight emotion had. */
+/* A sheet rule may also guard its root with :where(…) (weightless, so a
+   caller's sx still wins) or build its root selector with a helper —
+   `.omni-dc-day:where(:not(.omni-dc-off)):hover`, `${ok('thumb')} .MuiSlider-thumb:hover`. */
+const GUARDED = (state) => new RegExp('\\.omni-[\\w-]+:where\\((?:[^()]|\\([^()]*\\))*\\)[\\w .>+~-]*(?:' + state + ')'
+  + '|\\$\\{\\w+\\([^)]*\\)\\}[\\w .>+~-]*(?:' + state + ')');
 const STATES = {
-  hover:    [/&:hover|\.bottom-nav-item:hover|:hover &|\$\{ON\}:hover|\.omni-[\w-]+:hover|\.omni-[\w-]+[\w .>+~-]*:hover/, SHARED],
-  pressed:  [/&:active|&\.Mui-active|\.bottom-nav-item:active|:active &|\$\{ON\}:active|\.omni-[\w-]+:active|\.omni-[\w-]+[\w .>+~-]*:active/, SHARED],
-  focus:    [/&:focus-visible|&\.Mui-focusVisible|&:focus-within|FOCUS_RING|\$\{ON\}:focus-visible|\.omni-[\w-]+:focus-visible|\.omni-[\w-]+[\w .>+~-]*(?::focus-visible|\.Mui-focusVisible|:focus-within)/, SHARED],
+  hover:    [/&:hover|\.bottom-nav-item:hover|:hover &|\$\{ON\}:hover|\.omni-[\w-]+:hover|\.omni-[\w-]+[\w .>+~-]*:hover/, GUARDED(':hover'), SHARED],
+  pressed:  [/&:active|&\.Mui-active|\.bottom-nav-item:active|:active &|\$\{ON\}:active|\.omni-[\w-]+:active|\.omni-[\w-]+[\w .>+~-]*:active/, GUARDED(':active|\\.Mui-active'), SHARED],
+  focus:    [/&:focus-visible|&\.Mui-focusVisible|&:focus-within|FOCUS_RING|\$\{ON\}:focus-visible|\.omni-[\w-]+:focus-visible|\.omni-[\w-]+[\w .>+~-]*(?::focus-visible|\.Mui-focusVisible|:focus-within)/, GUARDED(':focus-visible|\\.Mui-focusVisible|:focus-within'), SHARED],
   disabled: [/&:disabled|&\.Mui-disabled|disabled &&|disabled \?|DISABLED_STATE|\.omni-[\w-]+:disabled/, SHARED],
 };
 
