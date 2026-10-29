@@ -1,9 +1,8 @@
 // src/components/Charts/PieChart.js
 import React, { useEffect, useState } from 'react';
-import { Box } from '@mui/material';
 import { toNumbers, toLabels, sliceAngles, arcPath } from './geometry';
 import { CHART_LABEL_TYPE, CHART_PALETTES, paletteTokens } from './tokens';
-import { ChartTable, useChartHover, CHART_MOTION } from './a11y';
+import { ChartTable, useChartHover, CHART_MOTION, ChartFigure } from './a11y';
 
 /**
  * PieChart — parts of a whole. Pass `donut` for a ring.
@@ -64,10 +63,10 @@ export function PieChart({
   const paletteFor = (i) => paletteTokens(colors[i % colors.length]);
 
   return (
-    <Box
-      component="figure"
+    <ChartFigure
+      full={false}
       className={'pie-chart ' + className}
-      sx={{ display: 'block', m: 0, position: 'relative', ...sx }}
+      sx={sx}
       {...props}
     >
       <svg
@@ -125,7 +124,7 @@ export function PieChart({
         }
         labels={labels} values={values}
       />
-    </Box>
+    </ChartFigure>
   );
 }
 

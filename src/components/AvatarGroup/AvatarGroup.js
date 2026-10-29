@@ -1,6 +1,7 @@
 // src/components/AvatarGroup/AvatarGroup.js
 import React, { useRef, useState } from 'react';
-import { Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 import { Avatar, AVATAR_SIZE_MAP, resolveSizeName } from '../Avatar/Avatar';
 import { Button } from '../Button/Button';
 import { Popover } from '../Popover/Popover';
@@ -53,22 +54,65 @@ const BUTTON_HEIGHT = {
   large: 'var(--Large-Button-Height, 40px)',
 };
 
+/* ── Static sheet ───────────────────────────────────────────────────────
+   The group, its items, the details card and the "+N" list rows were MUI
+   Boxes with an sx each; they are plain elements on this sheet now. The
+   group's child rules are one class each so that a caller's sx key for the
+   same selector can switch the rule off — the old sx object REPLACED the
+   group's own rule for that key rather than adding to it. */
+const kebab = (k) => (k.startsWith('Webkit') ? '-webkit-' + kebab(k.slice(6).replace(/^./, (c) => c.toLowerCase())) : k.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase()));
+const cssOf = (sel, obj) => {
+  const own = []; const nested = [];
+  for (const [k, v] of Object.entries(obj)) {
+    if (k.startsWith('@')) nested.push(k + '{' + cssOf(sel, v) + '}');
+    else own.push(kebab(k) + ':' + v);
+  }
+  return (own.length ? sel + '{' + own.join(';') + '}' : '') + nested.join('');
+};
+registerStaticStyles('omni-avatar-group', [
+  '.omni-avg{display:inline-flex;align-items:center}',
+  '.omni-avg-step>*:not(:first-of-type){margin-left:var(--_avg-step)}',
+  /* Two classes: an Avatar child is styled by its own sheet, which can sit
+     later in <head> than this one; emotion's group rule came after it. */
+  '.omni-avg.omni-avg-ring>*{position:relative;border-radius:50%;box-shadow:0 0 0 2px var(--Background);display:inline-flex}',
+  '.omni-avg.omni-avg-shaped>*{position:relative;display:inline-flex;isolation:isolate;box-shadow:none;border-radius:0}',
+  '.omni-avg-halo>*::before{content:"";position:absolute;inset:-2px;z-index:-1;background-color:var(--Background)}',
+  ...AVATAR_SHAPES.map((sh) => cssOf(`.omni-avg-halo.omni-avg-sh-${sh}>*::before`, shapeStyle(sh))),
+  '.omni-avg-front>*:hover,.omni-avg-front>*:focus-within{z-index:1}',
+  /* The avatar buttons are circles, as the avatars they hold. Two classes:
+     Button's own corner rule weighs one, and its sheet can come later. */
+  '.omni-btn.omni-avg-round{border-radius:50%}',
+  '.omni-avg-static{display:inline-flex;border-radius:50%}',
+  ...Object.entries(BUTTON_HEIGHT).map(([k, h]) => `.omni-avg-static-${k}{width:${h};height:${h}}`),
+  '.omni-avg-static>.avatar{width:100%;height:100%}',
+  '.omni-avg-static:focus-visible{outline:2px solid var(--Focus-Visible);outline-offset:1px}',
+  '.omni-avg-card{display:flex;align-items:center;gap:var(--Sizing-2, 16px);padding:var(--Sizing-1, 8px)}',
+  '.omni-avg-card-text{display:flex;flex-direction:column;min-width:0}',
+  '.omni-avg-row{display:block;width:100%;text-align:left;border:none;background:transparent;padding:0;margin:0;font:inherit;color:inherit;'
+    + 'border-radius:var(--Menu-Item-Radius, 0px)}',
+  '.omni-avg-row-click{cursor:pointer}',
+  '.omni-avg-row-click:hover{background-color:var(--Hover)}',
+  '.omni-avg-row-click:active{background-color:var(--Pressed)}',
+  '.omni-avg-row-click:focus-visible{outline:3px solid var(--Focus-Visible);outline-offset:-3px}',
+  '.omni-avg-row-link{text-decoration:none}',
+].join('\n'));
+
+const SxBox = lazySxBox('AvatarGroup');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
 /** The details card: a large avatar, the name, the detail line. */
 function PersonCard({ person, shape }) {
+  useStaticStyles('omni-avatar-group');
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 'var(--Sizing-2, 16px)', padding: 'var(--Sizing-1, 8px)' }}>
+    <div className="MuiBox-root omni-avg-card">
       <Avatar size="large" src={person.src} initials={person.initials} alt="" shape={shape} />
-      <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <div className="MuiBox-root omni-avg-card-text">
         {person.name && <Subtitle>{person.name}</Subtitle>}
         {person.detail && <Body>{person.detail}</Body>}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }
-
-/* The avatar buttons are circles, as the avatars they hold. The "+N" is a
-   plain number Button — its own shape, states and contrast, untouched. */
-const ROUND = { borderRadius: '50%' };
 
 let cardSeq = 0;
 
@@ -93,22 +137,19 @@ function GroupItem({ person, onPersonClick, buttonSize, buttonVariant, shape }) 
   const describe = hasCard && open ? idRef.current : undefined;
 
   return (
-    <Box component="span" className="avatar-group-item" {...handlers}>
+    <span className="avatar-group-item MuiBox-root" {...handlers}>
       {target ? (
         <Button ref={ref} contentType="avatar" variant={buttonVariant} size={buttonSize} href={person.href}
           aria-label={person.name || 'Person'} aria-describedby={describe} onClick={click} disabled={person.disabled}
-          sx={ROUND}>
+          className="omni-avg-round">
           {avatar}
         </Button>
       ) : (
-        <Box ref={ref} component="span" role="img" tabIndex={hasCard ? 0 : undefined}
+        <span ref={ref} role="img" tabIndex={hasCard ? 0 : undefined}
           aria-label={person.name || 'Person'} aria-describedby={describe}
-          className="avatar-group-static"
-          sx={{ display: 'inline-flex', borderRadius: '50%', width: BUTTON_HEIGHT[buttonSize], height: BUTTON_HEIGHT[buttonSize],
-            '& > .avatar': { width: '100%', height: '100%' },
-            '&:focus-visible': { outline: '2px solid var(--Focus-Visible)', outlineOffset: '1px' } }}>
+          className={'avatar-group-static MuiBox-root omni-avg-static omni-avg-static-' + buttonSize}>
           {avatar}
-        </Box>
+        </span>
       )}
       {hasCard && (
         <Popover open={open} onClose={() => setOpen(false)} anchorEl={ref.current} placement="bottom-start" arrow
@@ -117,7 +158,7 @@ function GroupItem({ person, onPersonClick, buttonSize, buttonVariant, shape }) 
           <PersonCard person={person} shape={shape} />
         </Popover>
       )}
-    </Box>
+    </span>
   );
 }
 
@@ -166,44 +207,28 @@ export function AvatarGroup({
     step = n + 'px';
   }
 
-  const rowSx = {
-    display: 'block', width: '100%', textAlign: 'left', border: 'none', background: 'transparent',
-    padding: 0, margin: 0, font: 'inherit', color: 'inherit',
-    borderRadius: 'var(--Menu-Item-Radius, 0px)',
+  useStaticStyles('omni-avatar-group');
+  /* A caller's sx key for one of the group's child selectors replaced that
+     rule outright (it was spread into the same object), so the static rule
+     for it is left off and the caller's sx stands alone, as before. */
+  const own = (key) => !(sx && typeof sx === 'object' && !Array.isArray(sx) && key in sx);
+  const groupClass = 'avatar-group' + (interactive ? ' avatar-group-interactive' : '') + (className ? ' ' + className : '')
+    + ' MuiBox-root omni-avg'
+    + (own('& > *:not(:first-of-type)') ? ' omni-avg-step' : '')
+    + (own('& > *') ? (shaped ? ' omni-avg-shaped' : ' omni-avg-ring') : '')
+    + (shaped && own('& > *::before') ? ' omni-avg-halo omni-avg-sh-' + shape : '')
+    + (own('& > *:hover, & > *:focus-within') ? ' omni-avg-front' : '');
+  const groupProps = {
+    role: 'group',
+    'aria-label': 'Avatar group, ' + all.length + (all.length === 1 ? ' person' : ' people'),
+    className: groupClass,
+    ...props,
+    style: { '--_avg-step': step, ...props.style },
   };
-  const clickableRowSx = {
-    ...rowSx,
-    cursor: 'pointer',
-    '&:hover': { backgroundColor: 'var(--Hover)' },
-    '&:active': { backgroundColor: 'var(--Pressed)' },
-    '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '-3px' },
-  };
+  const Root = hasSx(sx) ? SxBox : 'div';
 
   return (
-    <Box
-      role="group"
-      aria-label={'Avatar group, ' + all.length + (all.length === 1 ? ' person' : ' people')}
-      className={'avatar-group' + (interactive ? ' avatar-group-interactive' : '') + (className ? ' ' + className : '')}
-      sx={{
-        display: 'inline-flex', alignItems: 'center',
-        '& > *:not(:first-of-type)': { marginLeft: step },
-        '& > *': { position: 'relative', borderRadius: '50%', boxShadow: '0 0 0 2px var(--Background)', display: 'inline-flex' },
-        /* A shaped group: the ring is a halo of the page's --Background cut to
-           the same shape, 2px larger, behind each avatar — a round ring
-           around a cookie would show the circle the shape replaced. */
-        ...(shaped && {
-          '& > *': { position: 'relative', display: 'inline-flex', isolation: 'isolate', boxShadow: 'none', borderRadius: 0 },
-          '& > *::before': {
-            content: '""', position: 'absolute', inset: '-2px', zIndex: -1,
-            backgroundColor: 'var(--Background)', ...shapeStyle(shape),
-          },
-        }),
-        // Hover or focus brings an avatar to the front, so it shows whole.
-        '& > *:hover, & > *:focus-within': { zIndex: 1 },
-        ...sx,
-      }}
-      {...props}
-    >
+    <Root {...(hasSx(sx) ? { sx } : {})} {...groupProps}>
       {peopleMode
         ? visible.map((p, i) => (
             <GroupItem key={p.key || p.name || i} person={p} onPersonClick={onPersonClick}
@@ -214,7 +239,7 @@ export function AvatarGroup({
             : c))}
 
       {overflow > 0 && (peopleMode ? (
-        <Box component="span" className="avatar-group-item avatar-group-overflow">
+        <span className="avatar-group-item avatar-group-overflow MuiBox-root">
           <Button ref={overflowRef} contentType="letterNumber" variant="neutral" size={buttonSize}
             aria-label={overflow + ' more: ' + hidden.map((p) => p.name).filter(Boolean).join(', ')}
             aria-haspopup="dialog" aria-expanded={listOpen}
@@ -226,28 +251,28 @@ export function AvatarGroup({
             {hidden.map((p, i) => {
               const click = p.onClick || (onPersonClick && (() => onPersonClick(p)));
               if (p.href) return (
-                <Box key={p.key || p.name || i} component="a" href={p.href} className="avatar-group-row"
-                  onClick={() => { setListOpen(false); click?.(); }} sx={{ ...clickableRowSx, textDecoration: 'none' }}>
+                <a key={p.key || p.name || i} href={p.href} className="avatar-group-row MuiBox-root omni-avg-row omni-avg-row-click omni-avg-row-link"
+                  onClick={() => { setListOpen(false); click?.(); }}>
                   <PersonCard person={p} shape={shaped ? shape : undefined} />
-                </Box>
+                </a>
               );
               return click ? (
-                <Box key={p.key || p.name || i} component="button" type="button" className="avatar-group-row"
-                  onClick={() => { setListOpen(false); click(); }} sx={clickableRowSx}>
+                <button key={p.key || p.name || i} type="button" className="avatar-group-row MuiBox-root omni-avg-row omni-avg-row-click"
+                  onClick={() => { setListOpen(false); click(); }}>
                   <PersonCard person={p} shape={shaped ? shape : undefined} />
-                </Box>
+                </button>
               ) : (
-                <Box key={p.key || p.name || i} className="avatar-group-row" sx={rowSx}>
+                <div key={p.key || p.name || i} className="avatar-group-row MuiBox-root omni-avg-row">
                   <PersonCard person={p} shape={shaped ? shape : undefined} />
-                </Box>
+                </div>
               );
             })}
           </Popover>
-        </Box>
+        </span>
       ) : (
         <Avatar initials={'+' + overflow} size={size} color="neutral" defaultPhoto={false} shape={shaped ? shape : undefined} />
       ))}
-    </Box>
+    </Root>
   );
 }
 

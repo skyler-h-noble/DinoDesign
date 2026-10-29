@@ -24,7 +24,8 @@
 // you are choosing and wrong for a clock you are reading: it moves, covers the
 // track and vanishes when you let go. The times sit still under the scrubber.
 import React, { useState } from 'react';
-import { Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 import { Button } from '../Button';
 import { Slider } from '../Slider';
 import { Body, Caption, MobileNavLabel } from '../Typography';
@@ -56,6 +57,25 @@ export function formatTime(seconds) {
 /* Artwork per size: the height of the title and subtitle it sits beside. */
 const ARTWORK = { small: 40, medium: 48, large: 56 };
 let warnedInitials = false;
+
+/* The frame, as plain elements on a static sheet (they were MUI Boxes with an
+   sx each). Slider, Button and Typography are the lib's own, untouched. */
+registerStaticStyles('omni-player', [
+  '.omni-player{display:flex;flex-direction:column;gap:var(--Sizing-3, 24px);padding:var(--Sizing-1, 8px);box-sizing:border-box;width:100%}',
+  '.omni-player-meta{display:flex;align-items:center;gap:var(--Sizing-1, 8px);min-width:0}',
+  /* As tall as the title and subtitle beside it, per size; the brand's
+     corner, capped — a pill brand's 34px would round a 48px cover into a
+     circle, an avatar again. */
+  '.omni-player-art{flex-shrink:0;object-fit:cover;display:block;border-radius:min(var(--Style-Border-Radius, 4px), 8px)}',
+  ...Object.entries(ARTWORK).map(([k, v]) => `.omni-player-art-${k}{width:${v}px;height:${v}px}`),
+  '.omni-player-text{display:flex;flex-direction:column;min-width:0;text-align:start}',
+  '.omni-player-scrub{display:flex;flex-direction:column}',
+  '.omni-player-times{display:flex;justify-content:space-between;gap:var(--Sizing-2, 16px);font-variant-numeric:tabular-nums}',
+  '.omni-player-ctl{display:flex;align-items:center;justify-content:space-between}',
+  '.omni-player-ctl>:only-child{margin-inline:auto}',
+].join('\n'));
+const SxBox = lazySxBox('Player');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
 
 export function Player({
   /* Optional "now playing" line above the scrubber. Figma's Player has none;
@@ -104,6 +124,7 @@ export function Player({
   'aria-label': ariaLabel = 'Audio player',
   ...props
 }) {
+  useStaticStyles('omni-player');
   const [innerPos, setInnerPos] = useState(defaultPosition);
   const [innerPlaying, setInnerPlaying] = useState(defaultPlaying);
 
@@ -144,48 +165,29 @@ export function Player({
     </Button>
   );
 
+  const rootProps = { className: 'player ' + className + ' MuiBox-root omni-player', role: 'group', 'aria-label': ariaLabel, ...props };
+  const Root = hasSx(sx) ? SxBox : 'div';
+
   return (
-    <Box
-      className={'player ' + className}
-      role="group"
-      aria-label={ariaLabel}
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 'var(--Sizing-3, 24px)',
-        padding: 'var(--Sizing-1, 8px)',
-        boxSizing: 'border-box',
-        width: '100%',
-        ...sx,
-      }}
-      {...props}
-    >
+    <Root {...(hasSx(sx) ? { sx } : {})} {...rootProps}>
       {hasMeta && (
-        <Box className="player-meta" sx={{ display: 'flex', alignItems: 'center', gap: 'var(--Sizing-1, 8px)', minWidth: 0 }}>
+        <div className="player-meta MuiBox-root omni-player-meta">
           {artwork && (
-            <Box component="img" className="player-artwork" src={artwork}
-                 alt={imageAlt ?? (title ? `Artwork for ${title}` : '')}
-                 sx={{
-                   /* As tall as the title and subtitle beside it, per size. */
-                   width: ARTWORK[size] || ARTWORK.medium, height: ARTWORK[size] || ARTWORK.medium,
-                   flexShrink: 0, objectFit: 'cover', display: 'block',
-                   /* The brand's corner, capped: a pill brand's 34px would
-                      round a 48px cover into a circle — an avatar again. */
-                   borderRadius: 'min(var(--Style-Border-Radius, 4px), 8px)',
-                 }} />
+            <img className={'player-artwork MuiBox-root omni-player-art omni-player-art-' + (ARTWORK[size] ? size : 'medium')} src={artwork}
+                 alt={imageAlt ?? (title ? `Artwork for ${title}` : '')} />
           )}
           {/* minWidth:0, or a long title refuses to shrink: a flex item's
               default min-width is its content, the whole string. */}
           {/* Start-aligned whatever the page's text-align: in a centred
               container the title and subtitle centred against each other. */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 0, textAlign: 'start' }}>
+          <div className="MuiBox-root omni-player-text">
             {title && <Body style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</Body>}
             {subtitle && <Caption color="quiet" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{subtitle}</Caption>}
-          </Box>
-        </Box>
+          </div>
+        </div>
       )}
 
-      <Box className="player-scrubber" sx={{ display: 'flex', flexDirection: 'column' }}>
+      <div className="player-scrubber MuiBox-root omni-player-scrub">
         <Slider
           variant={variant}
           size="small"
@@ -208,25 +210,24 @@ export function Player({
         {showTime && (
           /* tabular-nums, so the times do not shuffle every time a digit
              changes — the one thing that makes a running clock look broken. */
-          <Box className="player-times" sx={{ display: 'flex', justifyContent: 'space-between', gap: 'var(--Sizing-2, 16px)', fontVariantNumeric: 'tabular-nums' }}>
+          <div className="player-times MuiBox-root omni-player-times">
             {/* Figma's plain "Mobile Nav Label" style binds Body-Font-Weight;
                 MobileNavLabel is the NAV label, whose weight token is 600. */}
             <MobileNavLabel component="span" color="quiet" className="player-elapsed"
-                            sx={{ fontWeight: 'var(--Body-Font-Weight, 400)' }}>{formatTime(pos)}</MobileNavLabel>
+                            style={{ fontWeight: 'var(--Body-Font-Weight, 400)' }}>{formatTime(pos)}</MobileNavLabel>
             <MobileNavLabel component="span" color="quiet" className="player-remaining"
-                            sx={{ fontWeight: 'var(--Body-Font-Weight, 400)' }}
+                            style={{ fontWeight: 'var(--Body-Font-Weight, 400)' }}
                             aria-label={formatTime(duration - pos) + ' remaining'}>
               {'-' + formatTime(duration - pos)}
             </MobileNavLabel>
-          </Box>
+          </div>
         )}
-      </Box>
+      </div>
 
       {/* Spread across the row, each button its own 32 — Figma's group. */}
       {/* Spread when there are several; a lone play / pause sits centred
           (Figma's Controls = 1) — space-between would pin it to the left. */}
-      <Box className="player-controls" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        '& > :only-child': { marginInline: 'auto' } }}>
+      <div className="player-controls MuiBox-root omni-player-ctl">
         {onPrevious && control('previous', 'Previous track', <SkipPreviousIcon />, onPrevious)}
         {onSkip && control('back', `Back ${skipSeconds} seconds`, <Replay10Icon />, () => skip(-skipSeconds))}
         {/* The one control that is always here, and the only one that says what
@@ -234,8 +235,8 @@ export function Player({
         {control('play', isPlaying ? 'Pause' : 'Play', isPlaying ? <PauseIcon /> : <PlayArrowIcon />, togglePlay, true)}
         {onSkip && control('forward', `Forward ${skipSeconds} seconds`, <Forward10Icon />, () => skip(skipSeconds))}
         {onNext && control('next', 'Next track', <SkipNextIcon />, onNext)}
-      </Box>
-    </Box>
+      </div>
+    </Root>
   );
 }
 

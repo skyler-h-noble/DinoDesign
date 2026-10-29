@@ -1,6 +1,7 @@
 // src/components/Charts/a11y.js
 import React from 'react';
-import { Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 
 /**
  * The text equivalent of a chart.
@@ -32,9 +33,36 @@ export const VISUALLY_HIDDEN = {
   border: 0,
 };
 
+/* The charts' static sheet: the figure, the visually hidden table and the
+   hit-target overlay, as plain classes over the same tokens. One sheet for
+   all three charts — they share every part but the figure's width. */
+const kebab = (k) => k.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase());
+registerStaticStyles('omni-chart', [
+  '.omni-chart{display:block;margin:0;position:relative}',
+  '.omni-chart-full{width:100%}',
+  /* `border: 0` in an sx is MUI's border shorthand, `0px solid` — kept. */
+  '.omni-chart-sr{' + Object.entries(VISUALLY_HIDDEN).map(([k, v]) => kebab(k) + ':' + (k === 'border' ? '0px solid' : v)).join(';') + '}',
+  '.omni-chart-hits{position:absolute;inset:0;display:block;pointer-events:none}',
+  '.omni-chart-hit{position:absolute;top:0;height:100%;left:var(--_ch-l);width:var(--_ch-w);padding:0;margin:0;border:0px solid;'
+    + 'background:transparent;cursor:pointer;pointer-events:auto}',
+  '.omni-chart-hit:focus-visible{outline:2px solid var(--Focus-Visible);outline-offset:-2px;border-radius:4px}',
+].join('\n'));
+
+const SxBox = lazySxBox('Chart');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+/** A chart's <figure>: static classes, plus the caller's sx when there is one. */
+export function ChartFigure({ full = true, className = '', sx, children, ...props }) {
+  useStaticStyles('omni-chart');
+  const cls = 'MuiBox-root omni-chart' + (full ? ' omni-chart-full' : '') + (className ? ' ' + className : '');
+  if (hasSx(sx)) return <SxBox component="figure" sx={sx} className={cls} {...props}>{children}</SxBox>;
+  return <figure className={cls} {...props}>{children}</figure>;
+}
+
 export function ChartTable({ caption, labels, values, valueHeader = 'Value' }) {
+  useStaticStyles('omni-chart');
   return (
-    <Box component="table" sx={VISUALLY_HIDDEN}>
+    <table className="MuiBox-root omni-chart-sr">
       <caption>{caption}</caption>
       <thead>
         <tr>
@@ -50,7 +78,7 @@ export function ChartTable({ caption, labels, values, valueHeader = 'Value' }) {
           </tr>
         ))}
       </tbody>
-    </Box>
+    </table>
   );
 }
 
@@ -106,39 +134,24 @@ export function useChartHover(count) {
  * to scale with it.
  */
 export function ChartHitTargets({ count, width, centres, bandWidth, labels, values, handlers }) {
+  useStaticStyles('omni-chart');
   if (!count) return null;
   return (
-    <Box
-      sx={{
-        position: 'absolute', inset: 0,
-        display: 'block', pointerEvents: 'none',
-      }}
-    >
+    <div className="MuiBox-root omni-chart-hits">
       {Array.from({ length: count }, (_, i) => (
-        <Box
-          component="button"
+        <button
           type="button"
           key={i}
+          className="MuiBox-root omni-chart-hit"
           aria-label={`${labels[i]}: ${values[i]}`}
           {...handlers(i)}
-          sx={{
-            position: 'absolute',
-            top: 0, height: '100%',
-            left: `${((centres[i] - bandWidth / 2) / width) * 100}%`,
-            width: `${(bandWidth / width) * 100}%`,
-            padding: 0, margin: 0, border: 0,
-            background: 'transparent',
-            cursor: 'pointer',
-            pointerEvents: 'auto',
-            '&:focus-visible': {
-              outline: '2px solid var(--Focus-Visible)',
-              outlineOffset: '-2px',
-              borderRadius: '4px',
-            },
+          style={{
+            '--_ch-l': `${((centres[i] - bandWidth / 2) / width) * 100}%`,
+            '--_ch-w': `${(bandWidth / width) * 100}%`,
           }}
         />
       ))}
-    </Box>
+    </div>
   );
 }
 

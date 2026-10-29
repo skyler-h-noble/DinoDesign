@@ -38,4 +38,11 @@ function GridMui({
   );
 }
 
+/* MUI's Grid as it is, for the helpers in Grid.js (GridContainer, …) when
+   they are handed a prop only MUI's Grid understands. Unlike GridMui above it
+   does NOT map xs / md / item to size: the helpers never did. */
+export const RawGrid = React.forwardRef(function RawGrid(props, ref) {
+  return <MuiGrid ref={ref} {...props} />;
+});
+
 export default GridMui;

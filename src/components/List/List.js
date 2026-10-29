@@ -1,6 +1,7 @@
 // src/components/List/List.js
 import React from 'react';
-import { Box, Checkbox, Radio } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 import { EyebrowSmall, Eyebrow, EyebrowLarge, SubtitleSmall, Subtitle, SubtitleLarge, BodySmall, Body, BodyLarge } from '../Typography';
 import { Ghost } from '../_ghost';
 import { Button } from '../Button/Button';
@@ -52,7 +53,118 @@ const SIZE_MAP = {
   large:  { py: 1.5, px: 2.5, fontSize: '16px', iconSize: 24, decoratorSize: 40, gap: 2, checkSize: 'medium' },
 };
 
+/* ── Static sheet ───────────────────────────────────────────────────────
+   List and ListItem were MUI Boxes with an sx each; the selection marks were
+   MUI's Checkbox and Radio. All of it is plain markup now, styled from this
+   sheet over the same tokens. Every rule weighs what emotion's did — one class,
+   one class + a state — so a caller's sx (through the lazy Box) still wins. */
+const SIZE_KEY = { small: 'sm', large: 'lg' };
+const sizeKey = (size) => SIZE_KEY[size] || 'md';
+registerStaticStyles('omni-list', [
+  '.omni-list{display:flex;flex-direction:column;box-sizing:border-box;align-items:stretch;gap:0;margin:0;padding:0;'
+    + 'background-color:transparent;color:var(--Text);border-radius:0;width:100%;list-style:none}',
+  '.omni-list-h{flex-direction:row}',
+  '.omni-list-click{gap:var(--Sizing-1)}',
+  '.omni-list-painted{padding:8px;background-color:var(--Background);border-radius:var(--Style-Border-Radius)}',
+  '.omni-list-h>.list-item{flex:1 1 0;width:auto}',
+  '.omni-list-msg{list-style:none}',
+  '.omni-list-sep{height:1px;background-color:var(--Border)}',
+  '.omni-list-sep-h{width:1px;align-self:stretch;background-color:var(--Border);flex-shrink:0}',
+  '.omni-li{display:flex;flex-direction:row;align-items:flex-start;justify-content:flex-start;width:100%;box-sizing:border-box;'
+    + 'gap:var(--_li-gap);padding:var(--_li-pad);min-height:var(--Sizing-4, 32px);font-size:var(--_li-fs);font-family:inherit;'
+    + 'color:var(--Text);list-style:none;cursor:default;opacity:1;position:relative;'
+    + 'transition:background-color 0.15s ease, box-shadow 0.15s ease;background-color:transparent}',
+  ...['sm', 'md', 'lg'].map((k) => {
+    const size = k === 'sm' ? 'small' : k === 'lg' ? 'large' : 'medium';
+    return `.omni-li-${k}{--_li-gap:${liVar(size, 'Gap', ({ small: '4px', large: '12px' })[size] || '8px')};`
+      + `--_li-pad:${liVar(size, 'Padding', '12px')};--_li-fs:${SIZE_MAP[size].fontSize};`
+      + `--_li-rad:${liVar(size, 'Radius', 'var(--Input-Radius)')};--_li-frad:${liVar(size, 'Focus-Radius', 'var(--Input-Inner-Focus-Visible)')}}`;
+  }),
+  '.omni-li-f,.omni-li-fc{cursor:pointer}',
+  '.omni-li-off{opacity:var(--Disabled, 0.38)}',
+  '.omni-li-click{box-shadow:inset 0 0 0 1px var(--Border);border-radius:var(--_li-rad)}',
+  '.omni-li-bb{box-shadow:inset 0 -1px 0 var(--Border-Variant)}',
+  '.omni-li-rb{box-shadow:inset -1px 0 0 var(--Border-Variant)}',
+  '.omni-li-bbrb{box-shadow:inset 0 -1px 0 var(--Border-Variant), inset -1px 0 0 var(--Border-Variant)}',
+  '.omni-li-sel::before{content:"";position:absolute;inset:0;border:2px solid var(--Border);border-radius:var(--_li-rad);pointer-events:none}',
+  '.omni-li-f:hover{background-color:var(--Hover);box-shadow:var(--Effect-Level-2)}',
+  '.omni-li-f:active{background-color:var(--Pressed);box-shadow:var(--Effect-Level-1)}',
+  '.omni-li-fc:hover{background-color:var(--Hover);box-shadow:inset 0 0 0 1px var(--Border), var(--Effect-Level-2)}',
+  '.omni-li-fc:active{background-color:var(--Pressed);box-shadow:inset 0 0 0 1px var(--Border), var(--Effect-Level-1)}',
+  '.omni-li:focus-visible{outline:none}',
+  '.omni-li:focus-visible::after{content:"";position:absolute;inset:1px;border:3px solid var(--Focus-Visible);border-radius:var(--_li-frad);pointer-events:none}',
+  '.omni-li-text{flex:1 1 auto;width:100%;min-width:0;display:flex;flex-direction:column;gap:0}',
+  '.omni-li-img{width:var(--List-Item-Default-Image-Width, 80px);aspect-ratio:1 / 1;flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center}',
+  '.omni-li-img>img{width:100%;height:100%;object-fit:cover;display:block}',
+  '.omni-li-dec{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}',
+  /* The selection mark: MUI's Checkbox / Radio (ButtonBase + SwitchBase) with
+     the item's sx (no padding, the row's color), as markup. MUI's default
+     primary hover wash and its disabled grey are MUI's own values, kept. */
+  '.omni-li-ctl{display:inline-flex;align-items:center;justify-content:center;position:relative;box-sizing:border-box;'
+    + '-webkit-tap-highlight-color:transparent;background-color:transparent;outline:0;border:0;margin:0;cursor:pointer;user-select:none;'
+    + 'vertical-align:middle;-moz-appearance:none;-webkit-appearance:none;appearance:none;text-decoration:none;border-radius:50%;padding:0;color:inherit}',
+  '.omni-li-ctl:hover{background-color:rgba(25, 118, 210, 0.04)}',
+  '@media (hover: none){.omni-li-ctl:hover{background-color:transparent}}',
+  '@media print{.omni-li-ctl{-webkit-print-color-adjust:exact;print-color-adjust:exact}}',
+  /* Disabled before checked: the item's checked color (inherit) came last
+     in MUI's rules, so a disabled, selected mark keeps the row's color. */
+  '.omni-li-ctl.Mui-disabled{pointer-events:none;cursor:default;color:rgba(0, 0, 0, 0.26)}',
+  '.omni-li-ctl.Mui-checked{color:inherit}',
+  '.omni-li-ctl-in{cursor:inherit;position:absolute;opacity:0;width:100%;height:100%;top:0;left:0;margin:0;padding:0;z-index:1}',
+  '.omni-li-ctl-svg{user-select:none;width:1em;height:1em;display:inline-block;flex-shrink:0;'
+    + 'transition:fill 200ms cubic-bezier(0.4, 0, 0.2, 1);fill:currentColor;font-size:1.5rem}',
+  '.omni-li-ctl-svg.MuiSvgIcon-fontSizeSmall{font-size:1.25rem}',
+  '.omni-li-ctl-dot{position:relative;display:flex}',
+  '.omni-li-ctl-dot>.omni-li-ctl-svg{transform:scale(1)}',
+  '.omni-li-ctl-dot>.omni-li-ctl-svg+.omni-li-ctl-svg{left:0;position:absolute;transform:scale(0);transition:transform 150ms cubic-bezier(0.4, 0, 1, 1)}',
+  '.Mui-checked>.omni-li-ctl-dot>.omni-li-ctl-svg+.omni-li-ctl-svg{transform:scale(1);transition:transform 150ms cubic-bezier(0, 0, 0.2, 1)}',
+].join('\n'));
+
+const SxBox = lazySxBox('List');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+const PATHS = {
+  CheckBoxOutlineBlankIcon: 'M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z',
+  CheckBoxIcon: 'M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z',
+  RadioButtonUncheckedIcon: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z',
+  RadioButtonCheckedIcon: 'M8.465 8.465C9.37 7.56 10.62 7 12 7C14.76 7 17 9.24 17 12C17 13.38 16.44 14.63 15.535 15.535C14.63 16.44 13.38 17 12 17C9.24 17 7 14.76 7 12C7 10.62 7.56 9.37 8.465 8.465Z',
+};
+const capS = (x) => x.charAt(0).toUpperCase() + x.slice(1);
+function MarkIcon({ name, size }) {
+  return (
+    <svg className={'MuiSvgIcon-root MuiSvgIcon-fontSize' + capS(size) + ' omni-li-ctl-svg'} focusable="false" aria-hidden="true"
+      viewBox="0 0 24 24" data-testid={name}>
+      <path d={PATHS[name]} />
+    </svg>
+  );
+}
+
+/* The row's selection mark: MUI's Checkbox / Radio markup and class names
+   (MuiCheckbox-root, PrivateSwitchBase-input, Mui-checked, …), a real
+   checkbox / radio input over the icon, out of the tab order — the row is the
+   control. The press ripple is gone, as everywhere in the lib. */
+function SelectionMark({ type, checked, disabled, size, label, onSelect }) {
+  const isRadio = type === 'radio';
+  const Base = isRadio ? 'MuiRadio' : 'MuiCheckbox';
+  const cls = ['MuiButtonBase-root', Base + '-root', Base + '-colorPrimary',
+    (!isRadio || size !== 'medium') && Base + '-size' + capS(size), 'PrivateSwitchBase-root',
+    checked && 'Mui-checked', disabled && 'Mui-disabled', 'omni-li-ctl'].filter(Boolean).join(' ');
+  return (
+    <span className={cls} onClick={(e) => e.stopPropagation()}>
+      <input tabIndex={-1} className="PrivateSwitchBase-input omni-li-ctl-in" type={type} checked={checked} disabled={disabled}
+        onChange={() => onSelect?.()} aria-label={label} {...(isRadio ? {} : { 'data-indeterminate': 'false' })} />
+      {isRadio ? (
+        <span className="omni-li-ctl-dot">
+          <MarkIcon name="RadioButtonUncheckedIcon" size={size} />
+          <MarkIcon name="RadioButtonCheckedIcon" size={size} />
+        </span>
+      ) : <MarkIcon name={checked ? 'CheckBoxIcon' : 'CheckBoxOutlineBlankIcon'} size={size} />}
+    </span>
+  );
+}
+
 export function ListItemDecorator({ children, size = 'medium', isButton = false, onAction, ariaLabel, disabled = false }) {
+  useStaticStyles('omni-list');
   // Both decorator paths now hug their content — no forced width/height. The
   // consumer passes a sized child (Icon size="small", Avatar size="medium",
   // Ratio ratio="1:1" with maxWidth, etc.) and the slot wraps it tightly.
@@ -67,16 +179,15 @@ export function ListItemDecorator({ children, size = 'medium', isButton = false,
         aria-label={ariaLabel || 'Action'} disabled={disabled}
         onClick={(e) => { e.stopPropagation(); onAction?.(e); }}
         onKeyDown={(e) => e.stopPropagation()}
-        sx={{ flexShrink: 0 }}>
+        style={{ flexShrink: 0 }}>
         {children}
       </Button>
     );
   }
   return (
-    <Box className="list-item-decorator"
-      sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+    <div className="list-item-decorator MuiBox-root omni-li-dec">
       {children}
-    </Box>
+    </div>
   );
 }
 
@@ -133,126 +244,50 @@ export function ListItem({
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(e); }
   };
 
-  return (
-    <Box component={component} role={getRole()} tabIndex={isFocusable ? 0 : undefined}
-      aria-disabled={disabled || undefined}
-      aria-selected={isSelectable ? selected : (selected || undefined)}
-      aria-checked={selectionMode === 'checkbox' ? selected : undefined}
-      onClick={handleClick} onKeyDown={isFocusable ? handleKeyDown : undefined}
-      className={'list-item' + (selected ? ' list-item-selected' : '') + (disabled ? ' list-item-disabled' : '')
-        + (isClickable ? ' list-item-clickable' : '') + (isSelectable ? ' list-item-selectable' : '')}
-      sx={{
-        // hstack, top-left aligned, fill width, with Sizing-1-and-Half (12px)
-        // gap between Start slot → Text frame → End slot.
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        justifyContent: 'flex-start',
-        width: '100%',
-        // Include padding in the 100% width so the row fills — not overflows —
-        // its parent (without this, width:100% + 16px L/R padding spills 32px).
-        boxSizing: 'border-box',
-        /* Figma binds the row's padding, gap and corner to Component-Size
-           List-item/List-Item-Padding / -Gap / -Radius. */
-        /* Gap is the space INSIDE the row (image, text, decorators), a fixed
-           4 / 8 / 12 — the fallback matches, for a system made before it. */
-        gap: liVar(size, 'Gap', ({ small: '4px', large: '12px' })[size] || '8px'),
-        padding: liVar(size, 'Padding', '12px'),
-        minHeight: 'var(--Sizing-4, 32px)',
-        fontSize: s.fontSize, fontFamily: 'inherit', color: 'var(--Text)', listStyle: 'none',
-        cursor: isFocusable ? 'pointer' : 'default', opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
-        position: 'relative',
-        transition: 'background-color 0.15s ease, box-shadow 0.15s ease',
-        // Card chrome — only when the row is clickable. Non-clickable rows
-        // stay bare so they sit flat in a stack; non-clickable dividers
-        // (bottomBorder / rightBorder) handle row separation instead.
-        // Card chrome when clickable: Figma's inside 1px --Border stroke (an
-        // inset ring, so it takes no space) at the List-Item-Radius corner.
-        // No resting shadow — Figma's Default row has none.
-        ...(isClickable ? {
-          boxShadow: 'inset 0 0 0 1px var(--Border)',
-          borderRadius: liVar(size, 'Radius', 'var(--Input-Radius)'),
-        } : {}),
-        // Non-clickable separators — single hairline at the edge the user
-        // requested. Mutually exclusive with card chrome above.
-        /* Drawn INSIDE the row, as Figma's divider overlays the row's bottom
-           edge: an inset shadow, so it adds no height (a border made every row
-           1px taller than the design and pushed each next row down). */
-        ...(!isClickable && (bottomBorder || rightBorder) ? {
-          boxShadow: [
-            bottomBorder && 'inset 0 -1px 0 var(--Border-Variant)',
-            rightBorder && 'inset -1px 0 0 var(--Border-Variant)',
-          ].filter(Boolean).join(', '),
-        } : {}),
-        backgroundColor: 'transparent',
-        /* Selected is a RING, not a tint: a 2px Border ring INSIDE the row
-           (Figma 7022:49393 — the Selected frame, stroke 2 Inside, Surface
-           Border, the row's own corner). The edges step 1 → 2 → 3: resting
-           1px Border, selected 2px Border, focus a 3px Focus-Visible ring —
-           the same 1 → 2 thickening Input and Select use, so selection reads
-           without relying on color, and stays distinct from focus.
-
-           It drew a 1px outline OUTSIDE the row until Figma settled the ring.
-
-           Border from SURFACE, not from Buttons — held by
-           ListSelectedRing.test.js.
-
-           A tint would conflate hover with selection; a ring and a tint can
-           coexist, two tints cannot.
-
-           ::before, because focus owns ::after and `outline: none`, so a row
-           that is both selected and focused shows both rings. */
-        ...(selected ? {
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            inset: 0,
-            border: '2px solid var(--Border)',
-            borderRadius: liVar(size, 'Radius', 'var(--Input-Radius)'),
-            pointerEvents: 'none',
-          },
-        } : {}),
-        // The inset edge rides along with the state shadows, or a hovered row
-        // would lose its border.
-        '&:hover':         isFocusable ? { backgroundColor: 'var(--Hover)',  boxShadow: (isClickable ? 'inset 0 0 0 1px var(--Border), ' : '') + 'var(--Effect-Level-2)' } : {},
-        '&:active':        isFocusable ? { backgroundColor: 'var(--Pressed)', boxShadow: (isClickable ? 'inset 0 0 0 1px var(--Border), ' : '') + 'var(--Effect-Level-1)' } : {},
-        // Inset focus ring rendered as a pseudo-element so the corner
-        // radius (--Input-Inner-Focus-Visible = Input-Radius minus 1px)
-        // can differ from the row's outer radius. A CSS `outline` follows
-        // the element's own border-radius and can't be tuned per-state.
-        '&:focus-visible': { outline: 'none' },
-        '&:focus-visible::after': {
-          content: '""',
-          position: 'absolute',
-          inset: '1px',
-          border: '3px solid var(--Focus-Visible)',
-          borderRadius: liVar(size, 'Focus-Radius', 'var(--Input-Inner-Focus-Visible)'),
-          pointerEvents: 'none',
-        },
-        ...sx }}
-      {...props}>
-      {selectionMode === 'checkbox' && (
-        <Checkbox checked={selected} disabled={disabled} size={s.checkSize} tabIndex={-1}
-          onClick={(e) => e.stopPropagation()} onChange={() => onSelect?.()}
-          sx={{ p: 0, mr: 0, color: 'inherit', '&.Mui-checked': { color: 'inherit' } }}
-          inputProps={{ 'aria-label': 'Select ' + (typeof children === 'string' ? children : 'item') }} />
-      )}
-      {selectionMode === 'radio' && (
-        <Radio checked={selected} disabled={disabled} size={s.checkSize} tabIndex={-1}
-          onClick={(e) => e.stopPropagation()} onChange={() => onSelect?.()}
-          sx={{ p: 0, mr: 0, color: 'inherit', '&.Mui-checked': { color: 'inherit' } }}
-          inputProps={{ 'aria-label': 'Select ' + (typeof children === 'string' ? children : 'item') }} />
+  useStaticStyles('omni-list');
+  const k = sizeKey(size);
+  const sep = !isClickable && (bottomBorder || rightBorder)
+    ? (bottomBorder && rightBorder ? ' omni-li-bbrb' : bottomBorder ? ' omni-li-bb' : ' omni-li-rb') : '';
+  const rootProps = {
+    role: getRole(),
+    tabIndex: isFocusable ? 0 : undefined,
+    'aria-disabled': disabled || undefined,
+    'aria-selected': isSelectable ? selected : (selected || undefined),
+    'aria-checked': selectionMode === 'checkbox' ? selected : undefined,
+    onClick: handleClick,
+    onKeyDown: isFocusable ? handleKeyDown : undefined,
+    className: 'list-item' + (selected ? ' list-item-selected' : '') + (disabled ? ' list-item-disabled' : '')
+      + (isClickable ? ' list-item-clickable' : '') + (isSelectable ? ' list-item-selectable' : '')
+      /* hstack, top-left aligned, fill width (padding inside the 100%), the
+         Component-Size List-item gap / padding / radius. Card chrome — an
+         inset 1px --Border ring at the row's corner — only when clickable;
+         otherwise the optional inset hairline dividers. Selected is a 2px
+         Border RING inside the row on ::before (Figma 7022:49393), so it
+         reads without color and stays distinct from the 3px focus ring on
+         ::after; Border from SURFACE, not Buttons — held by
+         ListSelectedRing.test.js. Hover / pressed only when focusable, with
+         the inset edge riding along so a hovered row keeps its border. */
+      ,
+    ...props,
+  };
+  /* A caller's className replaced the list-item-* names (it was spread after
+     them) — kept; the static classes are added either way. */
+  rootProps.className = (rootProps.className ? rootProps.className + ' ' : '') + 'MuiBox-root omni-li omni-li-' + k
+    + (isFocusable ? (isClickable ? ' omni-li-fc' : ' omni-li-f') : '')
+    + (disabled ? ' omni-li-off' : '') + (isClickable ? ' omni-li-click' : '') + sep + (selected ? ' omni-li-sel' : '');
+  const markLabel = 'Select ' + (typeof children === 'string' ? children : 'item');
+  const content = (
+    <>
+      {(selectionMode === 'checkbox' || selectionMode === 'radio') && (
+        <SelectionMark type={selectionMode} checked={selected} disabled={disabled} size={s.checkSize}
+          label={markLabel} onSelect={onSelect} />
       )}
       {image && (
-        <Box className="list-item-image" sx={{
-          width: 'var(--List-Item-Default-Image-Width, 80px)', aspectRatio: '1 / 1', flexShrink: 0, overflow: 'hidden',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          '& > img': { width: '100%', height: '100%', objectFit: 'cover', display: 'block' },
-        }}>
+        <div className="list-item-image MuiBox-root omni-li-img">
           {typeof image === 'string'
             ? <img src={image} alt={imageAlt} />
             : image === true ? <ImagePlaceholder sx={{ width: '100%', height: '100%' }} /> : image}
-        </Box>
+        </div>
       )}
       {startDecorator && (
         <ListItemDecorator size={size} isButton={startDecoratorIsButton}
@@ -262,10 +297,10 @@ export function ListItem({
       )}
       {(() => {
         // Text frame — flex-fills the remaining horizontal space between
-        // start decorator and end decorator. The text frame ITSELF fills,
-        // and each line wraps naturally rather than ellipsis-truncating.
-        // Order is top→bottom: eyebrow (kicker) → children (title) →
-        // secondary (body).
+        // start decorator and end decorator (min-width 0, so long text wraps
+        // rather than overflowing). Order is top→bottom: eyebrow (kicker) →
+        // children (title) → secondary (body), stacked with NO gap —
+        // line-height carries the rhythm, as the Figma text frame does.
         const Layers = LAYERS_BY_SIZE[size] || LAYERS_BY_SIZE.medium;
         const kicker = eyebrow ?? overline;
         const lineSx = {
@@ -278,19 +313,7 @@ export function ListItem({
           overflowWrap: 'anywhere',
         };
         return (
-          <Box sx={{
-            // Fill the remaining horizontal space. minWidth:0 lets flex
-            // shrink past the children's intrinsic size so wrapping works
-            // (without it, long unbroken text would overflow the row).
-            flex: '1 1 auto',
-            width: '100%',
-            minWidth: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            // Text layers (eyebrow → title → secondary) stack with NO gap —
-            // line-height carries the rhythm; matches the Figma text frame.
-            gap: 0,
-          }}>
+          <div className="MuiBox-root omni-li-text">
             {kicker && (
               <Layers.eyebrow style={lineSx}>
                 {kicker}
@@ -306,7 +329,7 @@ export function ListItem({
                 {secondary}
               </Layers.secondary>
             )}
-          </Box>
+          </div>
         );
       })()}
       {endDecorator && (
@@ -315,8 +338,11 @@ export function ListItem({
           {endDecorator}
         </ListItemDecorator>
       )}
-    </Box>
+    </>
   );
+  if (hasSx(sx)) return <SxBox component={component} sx={sx} {...rootProps}>{content}</SxBox>;
+  const Tag = component;
+  return <Tag {...rootProps}>{content}</Tag>;
 }
 
 export function List({
@@ -328,6 +354,7 @@ export function List({
   selectedIndices = [], onSelectionChange, clickable = false,
   component = 'ul', className = '', sx = {}, ...props
 }) {
+  useStaticStyles('omni-list');
   const isHorizontal = orientation === 'horizontal';
   const isSelectable = selectionMode === 'checkbox' || selectionMode === 'radio';
   const isSolid = variant === 'solid';
@@ -363,7 +390,7 @@ export function List({
       /* Real ListItems, ghosted, so the row height and decorator positions are
          the ones the data will land in. */
       return (
-        <Box component="li" sx={{ listStyle: 'none' }}>
+        <li className="MuiBox-root omni-list-msg">
           <Ghost label="Loading">
             {/* `component="div"`: these rows sit inside the wrapper <li>
                 above, and Ghost puts a <div> between, so rendering them as
@@ -377,14 +404,14 @@ export function List({
               </ListItem>
             ))}
           </Ghost>
-        </Box>
+        </li>
       );
     }
     /* The message is a <li> because the parent is a <ul>: a bare <div> in a
        list is invalid and some screen readers drop it, so the one thing the
        user needs to hear would be the thing not announced. */
-    if (dataState === 'error') return <Box component="li" sx={{ listStyle: 'none' }}>{error}</Box>;
-    if (dataState === 'empty') return <Box component="li" sx={{ listStyle: 'none' }}>{empty}</Box>;
+    if (dataState === 'error') return <li className="MuiBox-root omni-list-msg">{error}</li>;
+    if (dataState === 'empty') return <li className="MuiBox-root omni-list-msg">{empty}</li>;
 
     if (items && items.length > 0) {
       const elements = [];
@@ -412,10 +439,8 @@ export function List({
         );
         if (dividers && index < items.length - 1) {
           elements.push(
-            <Box key={'div-' + index} component="li" role="separator" aria-hidden="true"
-              sx={isHorizontal
-                ? { width: '1px', alignSelf: 'stretch', backgroundColor: 'var(--Border)', flexShrink: 0 }
-                : { height: '1px', backgroundColor: 'var(--Border)' }} />
+            <li key={'div-' + index} role="separator" aria-hidden="true"
+              className={'MuiBox-root ' + (isHorizontal ? 'omni-list-sep-h' : 'omni-list-sep')} />
           );
         }
       });
@@ -429,10 +454,8 @@ export function List({
         elements.push(child);
         if (index < childArray.length - 1) {
           elements.push(
-            <Box key={'div-' + index} component="li" role="separator" aria-hidden="true"
-              sx={isHorizontal
-                ? { width: '1px', alignSelf: 'stretch', backgroundColor: 'var(--Border)', flexShrink: 0 }
-                : { height: '1px', backgroundColor: 'var(--Border)' }} />
+            <li key={'div-' + index} role="separator" aria-hidden="true"
+              className={'MuiBox-root ' + (isHorizontal ? 'omni-list-sep-h' : 'omni-list-sep')} />
           );
         }
       });
@@ -441,50 +464,25 @@ export function List({
     return null;
   };
 
-  return (
-    <Box component={component} role={isSelectable ? 'listbox' : 'list'}
-      aria-busy={dataState === 'loading' ? 'true' : undefined}
-      aria-multiselectable={selectionMode === 'checkbox' ? true : undefined}
-      {...wrapperDataAttrs}
-      className={'list-container list-' + variant + ' list-' + color + ' ' + className}
-      sx={{ display: 'flex', flexDirection: isHorizontal ? 'row' : 'column',
-        boxSizing: 'border-box',
-        // Stretch in both orientations:
-        //   • vertical → items span full width
-        //   • horizontal → items match the tallest sibling's height, so
-        //     a row of items all have a uniform bottom edge and the
-        //     content within each item is top-aligned.
-        alignItems: 'stretch',
-        // Clickable Lists separate their card-chromed items with 8px to
-        // keep individual borders + shadows visually distinct. Non-clickable
-        // Lists keep gap:0 — rows are visually joined by hairlines or just
-        // sit flush against each other.
-        gap: clickable ? 'var(--Sizing-1)' : 0,
-        m: 0,
-        p: isDefault ? 0 : 1,
-        backgroundColor: isDefault ? 'transparent' : 'var(--Background)',
-        color: 'var(--Text)',
-        // The List container has NO border by itself. Visual separation
-        // between rows is the responsibility of ListItem (via clickable
-        // chrome OR bottomBorder/rightBorder dividers).
-        borderRadius: isDefault ? 0 : 'var(--Style-Border-Radius)',
-        // List fills its parent's width. No overflow:hidden — items'
-        // shadows and focus rings (which can extend slightly beyond the
-        // row edge) shouldn't be clipped at the container boundary.
-        width: '100%',
-        listStyle: 'none',
-        // In horizontal mode, every direct child item flexes equally so a
-        // row of items has uniform column widths. width:100% on the item
-        // works for vertical stacks but in a row it'd force each item to
-        // 100% of the container; flex:1 1 0 distributes evenly instead.
-        ...(isHorizontal ? {
-          '& > .list-item': { flex: '1 1 0', width: 'auto' },
-        } : {}),
-        ...sx }}
-      {...props}>
-      {renderItems()}
-    </Box>
-  );
+  const rootProps = {
+    role: isSelectable ? 'listbox' : 'list',
+    'aria-busy': dataState === 'loading' ? 'true' : undefined,
+    'aria-multiselectable': selectionMode === 'checkbox' ? true : undefined,
+    ...wrapperDataAttrs,
+    /* A flex column (a row when horizontal), items stretched: full width in a
+       column, matched heights in a row, where each item flexes equally. A
+       clickable List parts its card-chromed items by Sizing-1; otherwise rows
+       sit flush. The container draws no border and clips nothing, so item
+       shadows and focus rings are not cut off; solid / light paint the zone's
+       Background. */
+    className: 'list-container list-' + variant + ' list-' + color + ' ' + className
+      + ' MuiBox-root omni-list' + (isHorizontal ? ' omni-list-h' : '') + (clickable ? ' omni-list-click' : '')
+      + (isDefault ? '' : ' omni-list-painted'),
+    ...props,
+  };
+  if (hasSx(sx)) return <SxBox component={component} sx={sx} {...rootProps}>{renderItems()}</SxBox>;
+  const Tag = component;
+  return <Tag {...rootProps}>{renderItems()}</Tag>;
 }
 
 export const DefaultList = (p) => <List variant="default" {...p} />;

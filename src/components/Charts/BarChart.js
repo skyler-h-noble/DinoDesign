@@ -1,9 +1,8 @@
 // src/components/Charts/BarChart.js
 import React, { useEffect, useState } from 'react';
-import { Box } from '@mui/material';
 import { toNumbers, toLabels, extent, slots, scaleY } from './geometry';
 import { CHART_TOKENS, CHART_LABEL_TYPE } from './tokens';
-import { ChartTable, ChartReadout, ChartHitTargets, useChartHover, CHART_MOTION } from './a11y';
+import { ChartTable, ChartReadout, ChartHitTargets, useChartHover, CHART_MOTION, ChartFigure } from './a11y';
 
 /**
  * BarChart — single-series bars in a track.
@@ -61,10 +60,9 @@ export function BarChart({
   const slotW = values.length ? width / values.length : 0;
 
   return (
-    <Box
-      component="figure"
+    <ChartFigure
       className={'bar-chart ' + className}
-      sx={{ display: 'block', width: '100%', m: 0, position: 'relative', ...sx }}
+      sx={sx}
       {...props}
     >
       <svg
@@ -146,7 +144,7 @@ export function BarChart({
         caption={label || `Bar chart, ${values.length} values`}
         labels={labels} values={values}
       />
-    </Box>
+    </ChartFigure>
   );
 }
 

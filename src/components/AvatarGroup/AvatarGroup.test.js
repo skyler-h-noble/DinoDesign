@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
+import { stateRules } from '../_testCss';
 import { AvatarGroup } from './AvatarGroup';
 
 const PEOPLE = [
@@ -54,10 +55,8 @@ describe('AvatarGroup with people', () => {
   test('clickable avatars keep 24px showing: the step is capped in CSS', () => {
     const { container } = render(<AvatarGroup people={PEOPLE} max={3} />);
     const g = container.querySelector('.avatar-group');
-    const cls = [...g.classList].find((c) => c.startsWith('css-'));
-    const css = [...document.styleSheets]
-      .flatMap((sheet) => { try { return [...sheet.cssRules]; } catch { return []; } })
-      .map((r) => r.cssText).filter((t) => t.includes(cls)).join(' ');
+    // The step is the second avatar's margin, followed down to its value.
+    const css = stateRules(g.children[1]).base;
     expect(css).toMatch(/margin-left:\s*max\(/);
     expect(css).toContain('24px');
   });

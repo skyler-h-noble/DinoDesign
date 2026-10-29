@@ -1,8 +1,7 @@
 // src/components/Stack/Stack.js
 import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
 import React, { useMemo } from 'react';
-import { Stack as MuiStack, Box } from '@mui/material';
-import { lazyFallback } from '../_lazyFallback';
+import { lazyFallback, lazySxBox } from '../_lazyFallback';
 const OmniStackMui = lazyFallback('Stack', () => import('./Stack.mui'));
 
 /**
@@ -102,6 +101,9 @@ registerStaticStyles('omni-stack', `
 .omni-stack{display:flex;box-sizing:border-box}
 .omni-stack[data-surface],.omni-stack[data-theme]{background:var(--Background)}
 .omni-stack-min-gap-enforced::before{display:none}
+.omni-stack-inset{padding-left:16px;padding-right:16px}
+.omni-stack-scroll{overflow-y:auto}
+.omni-stack-divider{border-bottom:1px solid var(--Border);width:100%}
 `);
 const plain = (v) => v === undefined || v === null || typeof v === 'string' || typeof v === 'number';
 const muiGap = (g) => (typeof g === 'number' ? g * 8 + 'px' : g);
@@ -168,14 +170,27 @@ export const ResponsiveStack = ({ breakpoint = 'sm', ...p }) => (
 
 export const Stack        = OmniStack;
 export const GridStack    = WrapStack;
-export const StackDivider = (p) => (
-  <Box sx={{ borderBottom: '1px solid var(--Border)', width: '100%' }} {...p} />
+/* A caller's sx REPLACED this helper's own sx (it was spread after it), so a
+   divider given sx drew no border at all. That is kept: with sx it is the
+   bare Box and the caller's sx, without it the static rule. */
+const SxBox = lazySxBox('StackDivider');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+export const StackDivider = ({ sx, className, ...p }) => {
+  useStaticStyles('omni-stack');
+  if (sx !== undefined) {
+    return <SxBox sx={sx} className={(className ? className + ' ' : '') + 'MuiBox-root'} {...p} />;
+  }
+  return <div className={(className ? className + ' ' : '') + 'MuiBox-root omni-stack-divider'} {...p} />;
+};
+/* The padding / overflow is a class, so these stay static; a caller's sx
+   still goes to the Stack and still wins over it, as it did when the two were
+   merged into one sx object. */
+const withClass = (cls, className) => cls + (className ? ' ' + className : '');
+export const InsetStack  = ({ sx: sxProp, className, ...p }) => (
+  <OmniStack className={withClass('omni-stack-inset', className)} sx={hasSx(sxProp) ? sxProp : undefined} {...p} />
 );
-export const InsetStack  = ({ sx: sxProp, ...p }) => (
-  <OmniStack sx={{ px: 2, ...sxProp }} {...p} />
-);
-export const ScrollStack = ({ sx: sxProp, ...p }) => (
-  <OmniStack sx={{ overflowY: 'auto', ...sxProp }} {...p} />
+export const ScrollStack = ({ sx: sxProp, className, ...p }) => (
+  <OmniStack className={withClass('omni-stack-scroll', className)} sx={hasSx(sxProp) ? sxProp : undefined} {...p} />
 );
 
 export default OmniStack;
