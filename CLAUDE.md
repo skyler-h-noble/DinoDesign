@@ -75,9 +75,18 @@ function ModeToggle() {
 }
 ```
 
-- **Contrast and focus:** text, borders and focus rings meet WCAG AA on every
-  theme and surface in both modes. You do not need to check them; you need
-  only not override colors.
+- **Contrast and focus are built in.** Every text, border and focus-ring
+  color is chosen by the design system to meet WCAG AA on every theme and
+  surface, in light and dark. It can only fail if your code overrides a
+  color. So confirm it by checking for overrides, not by scanning pixels —
+  one search, no browser contrast scripts needed:
+
+  ```bash
+  grep -rnE "#[0-9a-fA-F]{3,8}\b|rgba?\(|(color|background|borderColor)\s*:" src/
+  ```
+
+  No hits (or only layout styles) means the page passes. Your own images and
+  any colors you add yourself are yours to check.
 
 ## 5. A page
 
@@ -134,19 +143,19 @@ import HomeIcon from '@mui/icons-material/Home';
 | Region with a background | `Section` | `theme`, `surface`, `padding`, `as`, `id` |
 | Center + max width | `Container` | `maxWidth` (`sm`/`md`/`lg`/`xl`) — layout only, paints nothing |
 | Columns | `Grid` | container: `container spacing`; child: `size={{ xs: 12, md: 4 }}` |
-| Stacks | `VStack`, `HStack` | `spacing`, `alignItems`, `justifyContent` |
+| Stacks | `VStack`, `HStack` | `spacing`, `alignItems`, `justifyContent`, `component` — a list is `<VStack component="ul">` with `<HStack component="li">` |
 | Site nav | `AppBar` | `brand`, `navLinks` (`{ label, href }` — inline on wide screens, a menu button below 900px; change with `collapseAt`), `endSlot`, `barColor`. `mode="mobile"` is an app-screen bar (search / title), not a site nav |
 | Card | `Card` | pads itself; `variant` (`solid`/`light`/`dark`), `color`, `elevated`, `clickable` |
 | Button | `Button` | `variant`, `size` (`small`/`medium`/`large`), `startIcon`, `endIcon`, `fullWidth` |
 | Segmented choice | `ToggleButtonGroup` | `value`, `onChange`; each child `<Button value="…">` (no `variant` on children) |
 | Link | `Link` | `href` or `onClick` |
-| Text | `DisplayLarge`, `H1`–`H6`, `Body`, `BodyLarge`, `BodySmall`, `Caption`, `Eyebrow` | `color` (`quiet`, `primary`, `secondary`, …), `component` |
+| Text | `DisplayLarge`, `DisplaySmall`, `H1`–`H6`, `Body`, `BodyLarge`, `BodySmall`, `Caption`, `Eyebrow` (the small caps line above a heading) | `color` (`quiet`, `primary`, `secondary`, …), `component` (e.g. `component="p"` for a big price) |
 | Bold body text | `Subtitle` | Body has no bold — Subtitle is Body at 700 |
-| Icon on a tile | `IconBadge` | `color`, `variant`, `size`, `shape` |
+| Icon on a tile | `IconBadge` | `color` (any Button color), `variant` (`solid` / `light` / `dark`), `size` (`small` / `medium` / `large`), `shape` |
 | Tag | `Chip` | `label`, `startDecorator` (or `icon`), `selected` |
 | Person / step number | `Avatar` | `initials`, `color` |
 | Form field | `TextField` | `label`, `value`, `onChange`, `type`, `helperText` |
-| Footer | `Footer` | `brand`, `columns`, `copyrightName` |
+| Footer | `Footer` | `brand`, `columns` (`[{ title, links: [{ label, href }] }]`, up to 3), `copyrightName`, `color` (`default` dark band / `primary` / `white` / `black`) |
 
 The core components above have exact TypeScript types: an editor lists the
 allowed values for `theme`, `surface`, `variant`, `color` and `size`, and a
@@ -170,8 +179,12 @@ is gone; `EnergySavingsLeaf` replaces it), or the build fails. Use
   `tertiary`, `neutral`, `info`, `success`, `warning`, `error`,
   `black-white`) plus `-outline`, or `ghost` / `text`. Use `default` unless the
   design calls for another. There is no `-light`.
-- **Color balance:** mostly one theme, one or two `Secondary` sections, and
-  `Tertiary` only as accents (avatars, an icon) — never a Tertiary section.
+- **Color balance:** mostly `Default` and `Primary` sections, one or two
+  `Secondary` sections, and `Tertiary` only as accents (avatars, an icon) —
+  never a Tertiary section. To separate neighbouring sections, alternate the
+  `theme`; neighbouring `surface` levels can look nearly the same.
+- **Build warning you can ignore:** Vite may warn about a large `BrandIcon`
+  chunk. It is loaded only when a Footer social link names a brand.
 - **Do not import components from `@mui/material`** — the package re-exports
   the ones it supports, themed.
 

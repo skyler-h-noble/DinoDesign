@@ -38,6 +38,9 @@ export function Page() {
               <Card><CardContent><H3>With content</H3></CardContent></Card>
             </Grid>
           </Grid>
+          <VStack component="ul" spacing={1}>
+            <HStack component="li" spacing={1}><Caption>List item</Caption></HStack>
+          </VStack>
           <Divider />
           <Chip label="Chip" />
           <Avatar initials="1" color="tertiary" />

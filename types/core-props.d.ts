@@ -109,6 +109,8 @@ export interface GridProps extends Native {
 }
 
 export interface StackProps extends Native {
+  /** Render as another element — a list is component="ul" / "li". */
+  component?: React.ElementType;
   /** MUI spacing units (8px) or a CSS length. */
   spacing?: number | string;
   gap?: number | string;
