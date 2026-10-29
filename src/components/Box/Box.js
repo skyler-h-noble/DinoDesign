@@ -1,6 +1,5 @@
 // src/components/Box/Box.js
 import React from 'react';
-import { Box as MuiBox } from '@mui/material';
 import { SHADOWS } from '../_shadows';
 import { RATIO_MAP } from '../Ratio/Ratio';
 import { registerStaticStyles, useStaticStyles } from '../_staticStyles';

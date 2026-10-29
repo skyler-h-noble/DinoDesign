@@ -1,6 +1,5 @@
 // src/components/IconBadge/IconBadge.js
 import React from 'react';
-import { Box } from '@mui/material';
 import { shapeStyle, ICON_SHAPES } from '../Shape/shapes';
 import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
 import { lazyFallback } from '../_lazyFallback';
