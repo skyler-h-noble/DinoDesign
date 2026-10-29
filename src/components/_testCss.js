@@ -59,3 +59,83 @@ export function declared(el, prop) {
   if (inline) for (const m of ('{' + inline).matchAll(re)) value = m[1].trim();
   return value;
 }
+
+/* The style rules in every sheet, flattened out of @supports / @media blocks
+   that apply in jsdom (it applies neither, so their contents are skipped). */
+function styleRules() {
+  const out = [];
+  for (const sheet of Array.from(document.styleSheets)) {
+    let list; try { list = Array.from(sheet.cssRules || []); } catch (e) { continue; }
+    for (const r of list) if (r.selectorText && r.style) out.push(r);
+  }
+  return out;
+}
+
+const STATE_RE = /:(hover|active|focus-visible|disabled)\b|\.Mui-(focusVisible|disabled)\b/;
+const STATE_NAME = { 'focus-visible': 'focusVisible' };
+
+/** What applies to an element at rest and in each interaction state — the
+ *  WINNING declaration per property (selector weight, then source order),
+ *  with private custom properties (--_x) replaced by what the element
+ *  declares for them, so a test sees the real token.
+ *
+ *  Returns { base, states: { hover, active, focusVisible, disabled } }, each a
+ *  `prop: value;` text, plus `all`: every part as `:state{…}` rules, for tests
+ *  that match a state and a value together. Emotion's rules and static sheet
+ *  rules read the same way. */
+export function stateRules(el) {
+  const buckets = { base: [] };
+  let order = 0;
+  for (const r of styleRules()) {
+    for (const part of r.selectorText.split(',').map((x) => x.trim())) {
+      if (part.includes('::')) continue;
+      const m = part.match(STATE_RE);
+      const state = m ? (STATE_NAME[m[1]] || m[1] || m[2]) : 'base';
+      const bare = part.replace(new RegExp(STATE_RE.source, 'g'), '') || '*';
+      let hit = false; try { hit = el.matches(bare); } catch (e) { hit = false; }
+      if (!hit) continue;
+      const weight = specificity(part);
+      const o = order++;
+      for (let i = 0; i < r.style.length; i++) {
+        const prop = r.style[i];
+        (buckets[state] = buckets[state] || []).push({
+          prop, value: r.style.getPropertyValue(prop).trim(), important: r.style.getPropertyPriority(prop) === 'important', weight, order: o,
+        });
+      }
+    }
+  }
+  const inline = el.getAttribute && el.getAttribute('style');
+  if (inline) {
+    for (const m of inline.matchAll(/(--[\w-]+|[a-z-]+)\s*:\s*([^;]+)/g)) buckets.base.push({ prop: m[1], value: m[2].trim(), weight: [9, 0, 0], order: order++ });
+  }
+  const winners = (list) => {
+    const best = new Map();
+    for (const d of list || []) {
+      const cur = best.get(d.prop);
+      const beats = !cur
+        || (d.important && !cur.important)
+        || (d.important === cur.important && (heavier(d.weight, cur.weight) > 0 || (heavier(d.weight, cur.weight) === 0 && d.order > cur.order)));
+      if (beats) best.set(d.prop, d);
+    }
+    return best;
+  };
+  const baseWin = winners(buckets.base);
+  const priv = (v, depth = 0) => (depth > 4 ? v : v.replace(/var\((--_[\w-]+)\)/g, (all, name) => {
+    const d = baseWin.get(name); return d ? priv(d.value, depth + 1) : all;
+  }));
+  const text = (map) => [...map.values()].filter((d) => !d.prop.startsWith('--_'))
+    .map((d) => `${d.prop}: ${priv(d.value)}${d.important ? ' !important' : ''};`).join(' ');
+  /* An !important rest declaration holds in every state, so it competes with
+     each state's own rules — and wins, as it does in the browser. */
+  const restImportant = (buckets.base || []).filter((d) => d.important);
+  const states = {};
+  for (const k of Object.keys(buckets)) {
+    if (k === 'base') continue;
+    const own = new Set(buckets[k].map((d) => d.prop));
+    states[k] = text(winners([...restImportant.filter((d) => own.has(d.prop)), ...buckets[k]]));
+  }
+  if (states.focusVisible !== undefined) states['focus-visible'] = states.focusVisible;
+  const base = text(baseWin);
+  const all = ['{' + base + '}', ...Object.entries(states).map(([k, v]) => `:${k}{${v}}`)].join('\n');
+  return { base, states, all };
+}

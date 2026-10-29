@@ -2,10 +2,15 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { Button } from './Button';
+import { declared, stateRules } from '../_testCss';
+import { Avatar } from '../Avatar/Avatar';
 
+/* Every sheet's text, plus each rendered control's resolved declarations —
+   Button's values travel as custom properties, so the tokens show up there
+   (see _testCss). */
 const allRules = () => Array.from(document.styleSheets).flatMap((sh) => {
   try { return Array.from(sh.cssRules || []).map((r) => r.cssText); } catch { return []; }
-}).join('\n');
+}).concat([...document.querySelectorAll('button, a, [role="button"]')].map((el) => stateRules(el).all)).join('\n');
 
 describe('selected border', () => {
   it.each(['default', 'default-outline'])('%s: an inner ring when selected, the border unchanged', (variant) => {
@@ -77,7 +82,12 @@ describe('selected border', () => {
     expect(css).not.toContain('var(--Button-Icon-Only)');
   });
   it('in a selected outline, an avatar decorator ring follows the label color', () => {
-    render(<Button variant="default-outline" selected>On</Button>);
-    expect(allRules()).toMatch(/\.avatar\s*\{[^}]*border-color:\s*var\(--Buttons-Default-Text\)/);
+    const { container } = render(
+      <Button variant="default-outline" selected startDecorator={<Avatar initials="A" />}>On</Button>,
+    );
+    const button = container.querySelector('button');
+    // The ring rule reads --_b-avring, which the button sets to its label color.
+    expect(declared(container.querySelector('.avatar'), 'border-color')).toBe('var(--_b-avring)');
+    expect(declared(button, '--_b-avring')).toBe('var(--Buttons-Default-Text)');
   });
 });

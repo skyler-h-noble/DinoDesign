@@ -3,6 +3,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Pagination } from './Pagination';
 import { axe } from 'jest-axe';
+import { stateRules } from '../_testCss';
 
 /* ─── Helpers ─── */
 const renderPagination = (props = {}) => render(<Pagination count={10} {...props} />);
@@ -295,15 +296,8 @@ describe('Pagination — Accessibility (jest-axe)', () => {
  * Text-vs-Outline-Quiet label are what keep the current page distinct.
  */
 describe('the current page is distinguishable', () => {
-  const cssFor = (el) => {
-    const cls = (el.className || '').split(/\s+/).find((c) => c.startsWith('css-'));
-    if (!cls) return '';
-    return Array.from(document.styleSheets)
-      .flatMap((sheet) => Array.from(sheet.cssRules || []))
-      .filter((r) => (r.selectorText || '').includes('.' + cls))
-      .map((r) => r.cssText)
-      .join('\n');
-  };
+  // Resolved rest + state declarations: Button's palette arrives as custom properties.
+  const cssFor = (el) => stateRules(el).all;
 
   // The others are painted in the surface's own color (--Background), so an
   // outline button's elevation reads; they used to be transparent.

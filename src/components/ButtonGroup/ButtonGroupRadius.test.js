@@ -24,6 +24,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { ToggleButtonGroup } from '../ToggleButtonGroup/ToggleButtonGroup';
 import { Button } from '../Button/Button';
+import { stateRules } from '../_testCss';
 
 function radiiOf(orientation) {
   const { container } = render(
@@ -33,18 +34,10 @@ function radiiOf(orientation) {
       <Button value="c">C</Button>
     </ToggleButtonGroup>
   );
+  /* The corner that wins at rest, followed through the segment's own
+     --_seg-r to the token (see _testCss). */
   return Array.from(container.querySelectorAll('button')).map((el) => {
-    const classes = Array.from(el.classList);
-    const out = [];
-    for (const sheet of Array.from(document.styleSheets)) {
-      let list; try { list = sheet.cssRules; } catch { continue; }
-      for (const r of Array.from(list || [])) {
-        const sel = r.selectorText;
-        if (sel && !/:hover|:active|focus/.test(sel)
-            && classes.some((c) => sel.includes('.' + c))) out.push(r.cssText);
-      }
-    }
-    const m = out.join('\n').match(/border-radius:\s*([^;}]+)/);
+    const m = stateRules(el).base.match(/border-radius:\s*([^;]+);/);
     return m ? m[1].trim() : null;
   });
 }
@@ -108,16 +101,7 @@ function focusCssOf(orientation, index) {
     </ToggleButtonGroup>
   );
   const el = Array.from(container.querySelectorAll('button'))[index];
-  const classes = Array.from(el.classList);
-  const out = [];
-  for (const sheet of Array.from(document.styleSheets)) {
-    let list; try { list = sheet.cssRules; } catch { continue; }
-    for (const r of Array.from(list || [])) {
-      const sel = r.selectorText || '';
-      if (/focus/i.test(sel) && classes.some((c) => sel.includes('.' + c))) out.push(r.cssText);
-    }
-  }
-  return out.join('\n');
+  return stateRules(el).states.focusVisible;
 }
 
 describe('the focus ring follows the corner it surrounds', () => {

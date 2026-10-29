@@ -17,18 +17,10 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { Button } from './Button';
+import { stateRules } from '../_testCss';
 
-const cssFor = (el) => {
-  const classes = Array.from(el.classList);
-  const out = [];
-  for (const sheet of Array.from(document.styleSheets)) {
-    let list; try { list = sheet.cssRules; } catch { continue; }
-    for (const r of Array.from(list || [])) {
-      if (r.selectorText && classes.some((c) => r.selectorText.includes('.' + c))) out.push(r.cssText);
-    }
-  }
-  return out.join('\n');
-};
+/* Resolved rest + state declarations for the element (see _testCss). */
+const cssFor = (el) => stateRules(el).all;
 const btnCss = (jsx) => cssFor(render(jsx).container.querySelector('button'));
 
 describe('outline button label', () => {

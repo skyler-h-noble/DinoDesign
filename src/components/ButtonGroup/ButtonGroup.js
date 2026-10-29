@@ -1,6 +1,7 @@
 // src/components/ButtonGroup/ButtonGroup.js
 import React, { useState } from 'react';
-import { Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 import { tokenSegment } from '../_shadows';
 
 /**
@@ -143,6 +144,41 @@ function warnSegmentShape(props = {}, separated = false) {
   }
 }
 
+/* The segment sheet. A segment used to be styled by an sx merged into its
+   Button's own style object, which REPLACED the Button's hover and pressed
+   rules on an unselected segment. Button now takes its colors from custom
+   properties, so a segment re-points those through `style` (see segmentVars)
+   and these rules carry the rest: the joined corners and overlap, the
+   selected freeze, the no-lift, the focus ring.
+
+   Written against `.omni-btn.omni-seg…` (two classes): this sheet lands ahead
+   of Button's in <head>, so it needs the extra weight to win a tie, as the
+   merged sx did by coming last. */
+const SxBox = lazySxBox('ButtonGroup');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+registerStaticStyles('omni-button-group', [
+  '.omni-btn.omni-seg-fill{flex:1 1 0;min-width:0}',
+  '.omni-btn.omni-seg-joined{border-radius:var(--_seg-r);position:relative}',
+  '.omni-btn.omni-seg-mh{margin-left:calc(-1 * var(--Button-Border-Width))}',
+  '.omni-btn.omni-seg-mv{margin-top:calc(-1 * var(--Button-Border-Width))}',
+  '.omni-btn.omni-seg-joined:hover,.omni-btn.omni-seg-joined:focus-visible{z-index:1}',
+  /* A segment must not LIFT: segments share edges, and one rising breaks the
+     shared border and shifts its baseline against its neighbours. */
+  '.omni-btn.omni-seg-nolift,.omni-btn.omni-seg-nolift:hover,.omni-btn.omni-seg-nolift:active,.omni-btn.omni-seg-nolift:focus-visible{transform:none !important}',
+  /* Selected: the fill and edge frozen across every state, the label held at
+     the pair's Text end. --Buttons-{C}-Hover is a lighter tone, so a selected
+     segment lightened on hover and read as deselecting. */
+  '.omni-btn.omni-seg-sel{background-color:var(--_seg-bg) !important;border-color:var(--_seg-bd) !important;color:var(--_seg-fg) !important}',
+  '.omni-btn.omni-seg-un:hover{z-index:1}',
+  /* Ghost: an unselected segment draws no border. */
+  '.omni-btn.omni-seg-ghostoff,.omni-btn.omni-seg-ghostoff:hover{border:none !important}',
+  /* The ring every control wears, 2px out here, following the segment's own
+     corner; last, so nothing shadows it. */
+  '.omni-btn.omni-seg:focus-visible{outline:2px solid var(--Focus-Visible);outline-offset:2px;z-index:2}',
+  '.omni-btn.omni-seg-fr:focus-visible{border-radius:var(--_seg-fr)}',
+].join('\n'));
+
 export function ButtonGroup({
   variant = 'outlined',    // 'outlined' | 'light' | 'ghost'
   color = 'default',       // 'default' | 'primary' | 'secondary' | …
@@ -207,10 +243,12 @@ export function ButtonGroup({
 
   children,
   className = '',
-  sx = {},
+  sx,
+  style,
   'aria-label': ariaLabel,
   ...props
 }) {
+  useStaticStyles('omni-button-group');
   const askedForSelection = controlledValue !== undefined || defaultValue !== undefined
       || onChange !== undefined || multiple;
 
@@ -392,176 +430,67 @@ export function ButtonGroup({
       }
     }
 
-    // ── Per-button sx ─────────────────────────────────────────────────────
-    const positionalSx = isConnected && count > 1 ? {
-      borderRadius,
-      ...(!isFirst && (isHorizontal ? { marginLeft: 'calc(-1 * var(--Button-Border-Width))' } : { marginTop: 'calc(-1 * var(--Button-Border-Width))' })),
-      position: 'relative',
-      '&:hover, &:focus-visible': { zIndex: 1 },
-    } : {};
+    // ── Per-segment classes and custom properties ─────────────────────────
+    const joined = isConnected && count > 1;
+    const segClasses = ['omni-seg'];
+    const segVars = {};
+    /* Fill + horizontal: the SEGMENTS have to grow, not just the container. A
+       vertical group's column already stretches them; flex-grow there would
+       distribute HEIGHT, which Fit=Fill does not mean. minWidth:0 so a long
+       label shrinks rather than forcing the group wider than its container. */
+    if (isFill && isHorizontal) segClasses.push('omni-seg-fill');
+    if (joined) {
+      segClasses.push('omni-seg-joined');
+      segVars['--_seg-r'] = borderRadius;
+      if (!isFirst) segClasses.push(isHorizontal ? 'omni-seg-mh' : 'omni-seg-mv');
+    }
 
-    // ── Selected styles ───────────────────────────────────────────────────
-    /* Selection escalates by ONE step, and where it lands depends on the group
-       style. An outlined (or light) group goes outline -> SOLID; a ghost group
-       goes ghost -> OUTLINE, not ghost -> solid. A ghost group is chosen when
-       the control should stay quiet, and filling a segment undoes exactly
-       that; an outline still reads clearly against two borderless neighbours.
-       (This used to fill on both: the variant stayed 'ghost' while the rules
-       below painted btnBg at !important, so a selected ghost segment rendered
-       as a solid fill with no border.)
+    /* The segment treatment — selected / unselected paint, ghost borders, no
+       lift — is a TOGGLE's. A plain group of actions owns no selection, so
+       here its buttons stay ordinary Buttons, lift on hover included (they are
+       spaced apart, with no shared edge for a lift to break). */
+    if (hasSelection || isConnected) segClasses.push('omni-seg-nolift');
 
-       Either way the segment is "on" and must NOT react to hover. Without the
-       freeze it inherits the Button's own &:hover — var(--Buttons-{C}-Hover),
-       a near-white scrim — and flips light on hover. Frozen across active and
-       focus for the same reason. The focus RING still shows: it is an
-       `outline`, which none of these three properties touch. */
-    /* A selected segment rests on its pair's QUIET end and moves to Text on
-       interaction — the same rest/interaction split as every other label in
-       the system. Figma binds Buttons/Quiet on selected/Default and
-       selected/Disabled, and Buttons/Text on Hover, Pressed and Focus.
+    if (hasSelection && isSelected) {
+      /* Selection escalates by ONE step: an outlined (or light) group goes
+         outline -> SOLID; a ghost group goes ghost -> OUTLINE, which keeps the
+         surface fill and marks selection with its border. The label holds
+         Text at rest and on interaction: a selected segment is the engaged
+         one, and muting it would make the chosen option read quieter than the
+         options beside it. The FILL stays frozen across the pointer states and
+         the label does not move either; Figma does move the fill (selected/
+         Hover binds Buttons/Hover), so this is a deliberate divergence. */
+      segClasses.push('omni-seg-sel');
+      segVars['--_seg-bg'] = isGhost ? 'var(--Background)' : btnBg;
+      segVars['--_seg-bd'] = btnBorder;
+      segVars['--_seg-fg'] = isGhost ? btnOutlineText : btnText;
+    }
 
-       Ghost keeps the OUTLINE pair because selected ghost gains no fill: it
-       marks selection with a border alone and leaves the label where it was.
-       So there is no filled pair for it to swap to. */
-    const selectedPaint = isGhost
-      ? {
-          // The `-outline` variant's own paint, pinned so hover cannot move it.
-          backgroundColor: 'var(--Background) !important',
-          borderColor:     btnBorder + ' !important',
-        }
-      : {
-          backgroundColor: btnBg + ' !important',
-          borderColor:     btnBorder + ' !important',
-        };
+    if (hasSelection && !isSelected) {
+      /* The FILLS stay on the surface and the LABELS come from the buttons
+         table, which is what Figma does: an unselected segment has no fill of
+         its own, so its hover and pressed tints are the surface's scrims — but
+         its label belongs to the group's palette, the only thing that tells a
+         success group from an error one while nothing is selected. Hover and
+         pressed keep the resting shadow: the segment's states replace the
+         Button's, they do not add to them. Focus-Visible is one of the three
+         active states in Figma, so it takes the interaction label too. */
+      segClasses.push('omni-seg-un');
+      Object.assign(segVars, {
+        '--_b-fg': btnOutlineQuiet,
+        '--_b-bg': 'transparent',
+        '--_b-bg-h': 'var(--Hover)', '--_b-fg-h': btnOutlineText, '--_b-sh-h': 'var(--_b-sh)',
+        '--_b-bg-a': 'var(--Pressed)', '--_b-fg-a': btnOutlineText, '--_b-sh-a': 'var(--_b-sh)',
+        '--_b-fg-f': btnOutlineText,
+      });
+      if (isGhost) segClasses.push('omni-seg-ghostoff');
+    }
 
-    /* Text at rest AND on interaction. A selected segment is the engaged one,
-       so muting it would make the chosen option read quieter than the options
-       beside it — which inverts what the group is for. */
-    const selectedRest   = isGhost ? btnOutlineText : btnText;
-    const selectedActive = selectedRest;
-
-    /* The FILL stays frozen across the pointer states and the LABEL does not.
-       The freeze is here because --Buttons-{C}-Hover is a lighter tone, so a
-       selected segment lightened on hover and read as deselecting. Keeping
-       the fill still while the label moves gives the feedback without that.
-       Figma does move the fill (selected/Hover binds Buttons/Hover), so this
-       is a deliberate divergence rather than an oversight — recorded here
-       because the next person to compare them will find it. */
-    const selectedSx = isSelected ? {
-      ...selectedPaint,
-      color: selectedRest + ' !important',
-      '&:hover, &:active, &.Mui-focusVisible, &:focus-visible': {
-        ...selectedPaint,
-        color: selectedActive + ' !important',
-      },
-    } : {};
-
-    // ── Unselected styles ─────────────────────────────────────────────────
-    /* The FILLS stay on the surface and the LABELS come from the buttons
-       table, which is what Figma does and is not a mix-up: an unselected
-       segment has no fill of its own, so its hover and pressed tints are the
-       surface's scrims — but its label belongs to the group's palette, which
-       is the only thing distinguishing a success group from an error one
-       while nothing is selected.
-
-       The pressed label was --Buttons-Default-Text once, pinned to the
-       DEFAULT palette whatever color the group was. It was corrected to
-       --Text, which fixed the pinning and lost the palette; Outline-Text is
-       the token that was wanted both times — it follows the group's color
-       AND is contrast-checked against the surface rather than against a
-       button fill. */
-    const unselectedSx = !isSelected ? {
-      color:           btnOutlineQuiet,
-      backgroundColor: 'transparent',
-      '&:hover': {
-        backgroundColor: 'var(--Hover)',
-        color:           btnOutlineText,
-        zIndex:          1,
-      },
-      '&:active': {
-        backgroundColor: 'var(--Pressed)',
-        color:           btnOutlineText,
-      },
-      /* Focus-Visible is one of the three active states in Figma, and it was
-         the only one here with no label of its own — so keyboard focus said
-         less than hover did. */
-      '&.Mui-focusVisible, &:focus-visible': {
-        color:           btnOutlineText,
-      },
-    } : {};
-
-    /* Ghost: no border on individual buttons — UNSELECTED ones only.
-       This is spread AFTER selectedSx, so an unscoped `border: none` erased
-       the border that IS the selected ghost segment's whole treatment. */
-    const ghostSx = isGhost && !isSelected ? {
-      border: 'none !important',
-      '&:hover': { border: 'none !important' },
-    } : {};
-
-    /* A segment must not LIFT on hover.
-     *
-     * Button raises itself 1px on hover — right for a standalone button, wrong
-     * for a segmented control, where the segments share edges. One segment
-     * rising breaks the shared border, shifts its own baseline against its
-     * neighbours, and reads as the group resizing rather than as a hover.
-     *
-     * Suppressed for every state, not just hover: :active restores
-     * translateY(0), which is a no-op here but would otherwise leave the two
-     * declarations disagreeing about who owns the transform. */
-    const noLiftSx = {
-      transform: 'none !important',
-      '&:hover, &:active, &:focus-visible': { transform: 'none !important' },
-    };
-
-    const buttonSx = {
-      /* Fill + horizontal: the SEGMENTS have to grow, not just the container.
- 
-         `useGrid` is `isEqual && isHorizontal`, so fill takes the flex branch —
-         where the container got width:100% and the children got nothing. The
-         group stretched and the buttons stayed their natural width, bunched at
-         the start, which is not what Fit=Fill draws.
- 
-         Only horizontal needs this. A vertical group is a column, and
-         alignItems:stretch already makes its segments full width; adding
-         flex-grow there would distribute HEIGHT instead, which Fit=Fill does
-         not mean. minWidth:0 so a long label shrinks rather than forcing the
-         group wider than its container. */
-      ...(isFill && isHorizontal && { flex: '1 1 0', minWidth: 0 }),
-      // Grid items stretch to fill their 1fr cell via the default
-      // justify-self:stretch — do NOT set width:100% here. An explicit
-      // width:100% fixes each segment to exactly the cell width, so the
-      // -Button-Border-Width marginLeft only makes neighbors TOUCH (two 2px
-      // borders side by side = a 4px double border). Letting them stretch lets
-      // that negative margin OVERLAP the shared edge into a single border —
-      // the same collapse the flex (hug/fill) modes already get.
-      ...positionalSx,
-      /* The segment treatment — selected / unselected paint, ghost borders,
-         no lift — is a TOGGLE's. A plain group of actions owns no selection,
-         so every segment counted as "unselected" and was repainted as one:
-         transparent fill and the quiet outline label over the solid variant
-         chosen above. Figma's ButtonGroup is three ordinary solid Buttons, so
-         here its buttons stay ordinary Buttons, lift on hover included (they
-         are spaced apart, with no shared edge for a lift to break). */
-      ...((hasSelection || isConnected) && noLiftSx),
-      ...(hasSelection && selectedSx),
-      ...(hasSelection && unselectedSx),
-      ...(hasSelection && ghostSx),
-      /* The focus ring's own corner, set HERE and not in positionalSx.
-         `unselectedSx` carries a '&.Mui-focusVisible, &:focus-visible' key of
-         its own for the label color, and it is spread later — so the same
-         key in positionalSx was replaced wholesale on every UNSELECTED
-         segment and the radius silently vanished. Only the selected one kept
-         it, which is the hardest version to notice: the group looked right
-         wherever you happened to be looking.
-         This block is last, so nothing can shadow it. */
-      '&:focus-visible, &.Mui-focusVisible': {
-        outline:       '2px solid var(--Focus-Visible)',
-        outlineOffset: '2px',
-        zIndex:        2,
-        ...(focusRadius ? { borderRadius: focusRadius } : {}),
-      },
-      ...child.props.sx,
-    };
+    /* The focus ring's own corner, on every segment that has one. */
+    if (focusRadius) {
+      segClasses.push('omni-seg-fr');
+      segVars['--_seg-fr'] = focusRadius;
+    }
 
     warnSegmentShape(child.props, separated);
 
@@ -598,20 +527,21 @@ export function ButtonGroup({
          turn on — "Delete, not pressed" — which is a promise the button does
          not keep. Omitted entirely unless the group owns a selection. */
       ...(hasSelection ? { 'aria-pressed': isSelected } : {}),
-      sx: buttonSx,
+      className: segClasses.join(' ') + (child.props.className ? ' ' + child.props.className : ''),
+      style: { ...segVars, ...child.props.style },
     });
 
     // ── Light variant: wrap unselected buttons in themed Box ──────────────
     if (isLight && hasSelection && !isSelected) {
       return (
-        <Box
+        <div
           key={index}
           data-theme={lightTheme}
           data-surface={LIGHT_SURFACE}
-          sx={{ display: 'contents' }}
+          style={{ display: 'contents' }}
         >
           {clonedButton}
-        </Box>
+        </div>
       );
     }
 
@@ -621,57 +551,47 @@ export function ButtonGroup({
   // ── Container — no border on the outer wrapper ──────────────────────────
   const containerBorder = 'none';
 
-  return (
-    <Box
-      /* role="group" only when the group has a NAME.
-       *
-       * An unnamed group is announced as "group" and nothing else — a word
-       * that tells a screen-reader user a boundary exists and not what is
-       * inside it. For a plain row of actions that boundary is decoration:
-       * the buttons already announce themselves, and the grouping is visual.
-       * So an unnamed ButtonGroup is not a group to the accessibility tree,
-       * which is the honest answer to "is this anything?".
-       *
-       * Name it — aria-label="Text formatting" — and it becomes worth
-       * announcing, because then the boundary carries information.
-       *
-       * ToggleButtonGroup always passes a name, and should: there the group IS
-       * the control, and the options are only meaningful as a set. */
-      role={ariaLabel ? 'group' : undefined}
-      aria-label={ariaLabel}
-      className={'btn-group btn-group-' + variant + ' btn-group-' + color + ' ' + className}
-      sx={{
-        ...(useGrid
-          ? {
-              // equal-width-hug: inline-grid, equal 1fr columns → every button
-              // matches the widest; inline-grid shrink-wraps so the group hugs.
-              display:        isFill ? 'grid' : 'inline-grid',
-              gridAutoFlow:   'column',
-              gridAutoColumns:'1fr',
-              justifyItems:   'stretch',   // buttons fill their column width (equal)
-              alignItems:     'stretch',   // buttons fill the row height → if one
-                                           // wraps to 2 lines, all match the tallest
-              width:          isFill ? '100%' : 'fit-content',
-            }
-          : {
-              display:        isFill ? 'flex' : 'inline-flex',
-              flexDirection:  isHorizontal ? 'row' : 'column',
-              alignItems:     'stretch',
-              width:          isFill ? '100%' : 'auto',
-            }),
-        gap:            isConnected ? 0 : effectiveSpacing,
-        border:         containerBorder,
-        borderRadius:   'var(--Style-Border-Radius)',
-        // No overflow:hidden — would clip button borders, focus rings, and
-        // the outline-offset on focus-visible. Connected-mode corner shaping
-        // is already handled per-button via the borderRadius logic above.
-        ...sx,
-      }}
-      {...props}
-    >
-      {wrappedChildren}
-    </Box>
-  );
+  /* A numeric spacing is MUI's 8px unit, as it was when this was an sx. */
+  const gap = isConnected ? 0 : (typeof effectiveSpacing === 'number' ? effectiveSpacing * 8 + 'px' : effectiveSpacing);
+  const containerStyle = {
+    ...(useGrid
+      ? {
+          // equal-width-hug: inline-grid, equal 1fr columns → every button
+          // matches the widest; inline-grid shrink-wraps so the group hugs.
+          display:         isFill ? 'grid' : 'inline-grid',
+          gridAutoFlow:    'column',
+          gridAutoColumns: '1fr',
+          justifyItems:    'stretch',
+          // Buttons fill the row height: if one wraps to 2 lines, all match.
+          alignItems:      'stretch',
+          width:           isFill ? '100%' : 'fit-content',
+        }
+      : {
+          display:       isFill ? 'flex' : 'inline-flex',
+          flexDirection: isHorizontal ? 'row' : 'column',
+          alignItems:    'stretch',
+          width:         isFill ? '100%' : 'auto',
+        }),
+    gap,
+    border:       containerBorder,
+    borderRadius: 'var(--Style-Border-Radius)',
+    // No overflow:hidden — it would clip button borders and focus rings.
+    ...style,
+  };
+  const groupProps = {
+    /* role="group" only when the group has a NAME. An unnamed group is
+     * announced as "group" and nothing else; named — aria-label="Text
+     * formatting" — the boundary carries information. ToggleButtonGroup always
+     * passes a name: there the group IS the control. */
+    role: ariaLabel ? 'group' : undefined,
+    'aria-label': ariaLabel,
+    className: 'btn-group btn-group-' + variant + ' btn-group-' + color + ' ' + className,
+    style: containerStyle,
+    ...props,
+  };
+
+  if (hasSx(sx)) return <SxBox sx={sx} {...groupProps}>{wrappedChildren}</SxBox>;
+  return <div {...groupProps}>{wrappedChildren}</div>;
 }
 
 // ─── Convenience Exports ──────────────────────────────────────────────────────

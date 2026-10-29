@@ -1,7 +1,8 @@
 // src/components/Button/Button.js
 import React from 'react';
-import { Button as MuiButton, Avatar as MuiAvatar, Box, GlobalStyles } from '@mui/material';
-import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography, ButtonExtraSmall as ButtonExtraSmallTypography, CAP_HEIGHT_TRIM } from '../Typography';
+import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography, ButtonExtraSmall as ButtonExtraSmallTypography } from '../Typography';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 import { Avatar as DDAvatar } from '../Avatar/Avatar';
 import { Icon as DDIcon, ICON_SIZE_MAP } from '../Icon/Icon';
 import { Badge as DDBadge } from '../Badge/Badge';
@@ -644,6 +645,164 @@ function getSizingStyles({ size, iconOnly, letterNumber, avatar, swatch }) {
   };
 }
 
+// ─── Static sheet ─────────────────────────────────────────────────────────────
+//
+// Button used to be MUI's Button with an sx on top; it is its own <button> now,
+// so this sheet carries both layers: the reset MUI's ButtonBase and Button gave
+// it, then the design's own rules over the same tokens. There is no ripple —
+// the Figma Button set draws none; Pressed is the palette's Pressed fill.
+//
+// COLOR / SHAPE / STATE: the style builders above still compute every value
+// (they are the one place the variant logic lives), and the values travel to
+// the element as custom properties — --_b-bg / -fg / -bd / -sh at rest, then
+// -h (hover), -a (pressed) and -f (focus). A handful of fixed rules read them.
+// The values resolve on the button itself, exactly where the sx did.
+//
+// SIZE x TYPE: a generated class each (15 of them), from getSizingStyles.
+//
+// State rules weigh one class + one pseudo-class, as emotion's did, so a
+// caller's sx state rule still wins over them.
+
+const SxBox = lazySxBox('Button');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+const kebab = (k) => (k.startsWith('--') ? k : k.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase()));
+/** A style object (camelCase, nested '&…' selectors) as CSS rules under `sel`. */
+function toCss(sel, obj) {
+  const own = []; const nested = [];
+  for (const [k, v] of Object.entries(obj)) {
+    if (v && typeof v === 'object') nested.push(...toCss(k.split(',').map((part) => part.trim().replace(/&/g, sel)).join(','), v));
+    else if (v !== undefined && v !== false) own.push(`${kebab(k)}:${v}`);
+  }
+  return (own.length ? [`${sel}{${own.join(';')}}`] : []).concat(nested);
+}
+
+const SIZES = ['small', 'medium', 'large'];
+const TYPES = ['text', 'letter', 'icon', 'avatar', 'swatch'];
+const radiusFor = (type, size) => {
+  if (type === 'avatar') {
+    return size === 'small' ? 'var(--Small-Button-Height, var(--Button-Height))'
+      : size === 'large' ? 'var(--Large-Button-Height, var(--Button-Height))' : 'var(--Button-Height)';
+  }
+  if (type === 'icon' || type === 'swatch') {
+    return size === 'small' ? 'var(--Sm-Button-Icon-Radius, var(--Button-Icon-Radius))'
+      : size === 'large' ? 'var(--Lg-Button-Icon-Radius, var(--Button-Icon-Radius))' : 'var(--Button-Icon-Radius)';
+  }
+  return size === 'small' ? 'var(--Sm-Button-Radius, var(--Button-Radius))'
+    : size === 'large' ? 'var(--Lg-Button-Radius, var(--Button-Radius))' : 'var(--Button-Radius)';
+};
+const sizingFor = (type, size) => getSizingStyles({
+  size,
+  iconOnly: type === 'icon' || type === 'avatar' || type === 'swatch',
+  letterNumber: type === 'letter',
+  avatar: type === 'avatar',
+  swatch: type === 'swatch',
+});
+
+/* What MUI's root carried that still shows: its font stack and tracking reach
+   any child that is not the label (a raw node, an icon's text). Kept as they
+   rendered; the label sets its own face and tracking from the Button tokens. */
+const MUI_FONT = '"Roboto","Helvetica","Arial",sans-serif';
+const TRIM = 'text-box-trim:trim-both;text-box-edge:cap alphabetic;padding-top:0;padding-bottom:0';
+
+registerStaticStyles('omni-button', [
+  /* The icon slots, as the library has always restated them over MUI's own
+     margins and per-size icon sizes: --Button-Icon (16 / 20 / 32) is the size
+     generated for an icon in a button, not the generic Icon ramp. */
+  '[class*="btn-"] .MuiButton-startIcon,[class*="btn-"] .MuiButton-icon{margin-left:0px !important;margin-right:2px !important}',
+  '[class*="btn-"] .MuiButton-endIcon{margin-left:2px !important;margin-right:0px !important}',
+  '[class*="btn-"] .MuiButton-iconSizeSmall .MuiSvgIcon-root,[class*="btn-"] .MuiButton-iconSizeSmall > *{font-size:var(--Sm-Button-Icon) !important}',
+  '[class*="btn-"] .MuiButton-iconSizeMedium .MuiSvgIcon-root,[class*="btn-"] .MuiButton-iconSizeMedium > *{font-size:var(--Button-Icon) !important}',
+  '[class*="btn-"] .MuiButton-iconSizeLarge .MuiSvgIcon-root,[class*="btn-"] .MuiButton-iconSizeLarge > *{font-size:var(--Lg-Button-Icon) !important}',
+  // The reset (MUI ButtonBase + Button), then the base every button shares.
+  '.omni-btn{display:inline-flex;align-items:center;justify-content:center;position:relative;box-sizing:border-box;'
+    + '-webkit-tap-highlight-color:transparent;background-color:transparent;outline:0;border:0;margin:0;border-radius:0;padding:0;'
+    + 'cursor:pointer;user-select:none;vertical-align:middle;-moz-appearance:none;-webkit-appearance:none;text-decoration:none;color:inherit;'
+    + `font-family:${MUI_FONT};font-size:0.875rem;letter-spacing:0.02857em;min-width:64px;`
+    + 'text-transform:none;font-weight:inherit;line-height:1;white-space:nowrap;flex-shrink:0;'
+    + 'transition:background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, transform 0.15s ease-in-out;'
+    /* _bevel = (Button-Bevel% x height) / 100, capped at 20% of height so the
+       inset highlight/lowlight never bleeds into the text band. */
+    + '--_bevel:min(calc(var(--Button-Bevel) * var(--_height) / 100), calc(var(--_height) / 5))}',
+  '.omni-btn::-moz-focus-inner{border-style:none}',
+  '@media print{.omni-btn{color-adjust:exact}}',
+  /* A zero-width character before a button with a start icon, as MUI drew it:
+     it gives the row a text baseline. */
+  '.omni-btn-hasstart::before{content:"\\200b";width:0;overflow:hidden}',
+  /* Small button — hit target without a size change. --Target is the platform
+     minimum (24 desktop, 44 iOS, 48 Android); a centred ::before carries it,
+     so Button's DOM does not change. */
+  '.omni-btn-small{position:relative}',
+  '.omni-btn-small::before{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);width:100%;height:100%;min-width:var(--Target, 0px);min-height:var(--Target, 0px)}',
+  /* The rules that reach INTO the button (an icon-only button sizing its
+     icon) carry .omni-btn as well: the child may still be styled by emotion,
+     which appends its rules after this sheet, and the button's rule has to
+     win that tie as it did when both were emotion's. */
+  ...SIZES.flatMap((size) => TYPES.flatMap((type) => {
+    const sel = `.omni-btn-z-${type}-${size}`;
+    return toCss(sel, { borderRadius: radiusFor(type, size), ...sizingFor(type, size) })
+      .map((rule) => (rule.startsWith(sel + '{') ? rule : rule.split(sel).join('.omni-btn' + sel)));
+  })),
+  // Color / shape / state, from the builders' values.
+  '.omni-btn-v{background-color:var(--_b-bg);color:var(--_b-fg);border:var(--_b-bd);box-shadow:var(--_b-sh)}',
+  '.omni-btn-solid{position:relative;z-index:1}',
+  '.omni-btn-solid .MuiTypography-root,.omni-btn-solid .MuiButton-icon{z-index:1}',
+  '.omni-btn-ghost{text-decoration:none}',
+  '.omni-btn-avring .avatar{border-color:var(--_b-avring)}',
+  '.omni-btn-v:hover{background-color:var(--_b-bg-h);color:var(--_b-fg-h);box-shadow:var(--_b-sh-h)}',
+  '.omni-btn-lift:hover{transform:translateY(-1px)}',
+  '.omni-btn-v:active{background-color:var(--_b-bg-a);color:var(--_b-fg-a);box-shadow:var(--_b-sh-a)}',
+  '.omni-btn-lift:active{transform:translateY(0)}',
+  '.omni-btn-v:focus-visible{background-color:var(--_b-bg-f);color:var(--_b-fg-f);outline:2px solid var(--Focus-Visible);outline-offset:1px}',
+  // Icon slots inside this button.
+  '.omni-btn .MuiButton-startIcon{display:inherit;color:inherit;margin-left:0px !important;margin-right:2px !important}',
+  '.omni-btn-avatar .MuiButton-startIcon{margin-right:0px !important}',
+  '.omni-btn-avatar .MuiAvatar-root{font-size:var(--_b-avtext)}',
+  '.omni-btn .MuiButton-endIcon{display:inherit;color:inherit;margin-left:2px !important;margin-right:0px !important}',
+  '.omni-btn .MuiSvgIcon-root{color:inherit}',
+  '.omni-btn:focus-visible{outline:2px solid var(--Focus-Visible);outline-offset:1px}',
+  /* Disabled is the RESTING button with opacity applied, and nothing else —
+     Figma's Disabled variant of every Type is its Default with opacity 0.38 on
+     the whole component, effects included. */
+  '.omni-btn:disabled,.omni-btn.Mui-disabled{opacity:var(--Disabled, 0.38);cursor:not-allowed;pointer-events:none;background-color:var(--_b-bg-d);color:var(--_b-fg-d);border:var(--_b-bd-d)}',
+  // The retired swatch type: its overrides replaced the variant's states.
+  '.omni-btn-swatch{border:var(--Button-Border-Width) solid var(--Border);min-width:unset;min-height:unset;box-shadow:none;--_bevel:0;background-color:transparent !important}',
+  '.omni-btn-swatch:hover{background-color:transparent !important;box-shadow:none;color:var(--_b-fg);transform:none}',
+  '.omni-btn-swatch:active{box-shadow:none;color:var(--_b-fg);background-color:var(--_b-bg);transform:none}',
+  '.omni-btn-swatch:hover .btn-swatch-inner{filter:brightness(0.9)}',
+  '.omni-btn-full{width:100%}',
+  // The decorator avatar MUI drew for an avatar button with text.
+  `.omni-btn-muiavatar{position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:${MUI_FONT};`
+    + 'line-height:1;border-radius:50%;overflow:hidden;user-select:none;width:var(--_b-avsize);height:var(--_b-avsize);'
+    + 'background-color:inherit;color:inherit;font-size:var(--_b-avtext)}',
+  // The label and the letter / number, centred on their cap height.
+  '.omni-btn-textbox{display:inline-flex;align-items:center}',
+  ...SIZES.map((size) => `.omni-btn-textbox-${size}{padding:${LABEL_PADDING_BY_SIZE[size]}}`),
+  '.omni-btn .omni-btn-letter{display:inline-block;text-align:center;padding:4px calc(4px - var(--Button-Border-Width));line-height:1}',
+  /* Figma binds Dynamic-Button-Number-Font-Size: 12 / 14 / 16. The generator
+     emits no variable for it yet, so the fallbacks carry it. */
+  '.omni-btn .omni-btn-letter-small{font-size:var(--Sm-Button-Number-Font-Size, 12px)}',
+  '.omni-btn .omni-btn-letter-medium{font-size:var(--Button-Number-Font-Size, 14px)}',
+  '.omni-btn .omni-btn-letter-large{font-size:var(--Lg-Button-Number-Font-Size, 16px)}',
+  `@supports (text-box-edge: cap alphabetic){.omni-btn .omni-btn-letter{${TRIM}}.omni-btn .omni-btn-label{${TRIM}}}`,
+].join('\n'));
+
+/** The variant's values as the custom properties the sheet reads. */
+function variantVars(v) {
+  const h = v['&:hover'] || {}; const a = v['&:active'] || {}; const f = v['&.Mui-focusVisible'] || {};
+  return {
+    '--_b-bg': v.backgroundColor, '--_b-fg': v.color, '--_b-bd': v.border, '--_b-sh': v.boxShadow || 'none',
+    '--_b-bg-h': h.backgroundColor, '--_b-fg-h': h.color, '--_b-sh-h': h.boxShadow || 'none',
+    '--_b-bg-a': a.backgroundColor, '--_b-fg-a': a.color, '--_b-sh-a': a.boxShadow || 'none',
+    '--_b-bg-f': f.backgroundColor, '--_b-fg-f': f.color,
+    /* The disabled look restates the VARIANT's rest values on their own names,
+       so a parent that re-points --_b-bg / -fg (a ButtonGroup segment) does
+       not change how the disabled button reads. */
+    '--_b-bg-d': v.backgroundColor, '--_b-fg-d': v.color, '--_b-bd-d': v.border,
+    ...(v['& .avatar'] ? { '--_b-avring': v['& .avatar'].borderColor } : {}),
+  };
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 /* forwardRef, and it is not a nicety.
@@ -652,12 +811,7 @@ function getSizingStyles({ size, iconOnly, letterNumber, avatar, swatch }) {
  * Popover takes an `anchorRef` and reads getBoundingClientRect off it. With a
  * plain function component both fail — React warns "Function components
  * cannot be given refs", the ref stays null, and the tooltip or panel has
- * nothing to anchor to.
- *
- * The cost was already being paid in the library's own TooltipShowcase, which
- * wraps a raw MUI Button hand-styled with brand tokens rather than using this
- * component. That is the project's one rule broken inside the project, and it
- * was not a styling preference — it was the only way to get a ref. */
+ * nothing to anchor to. */
 export const Button = React.forwardRef(function Button({
   variant = 'default',
   size = 'medium',
@@ -669,29 +823,16 @@ export const Button = React.forwardRef(function Button({
   fullWidth = false,
   disabled = false,
   /* Figma's TYPE axis — one dropdown, four exclusive values.
- 
+
      Named `contentType` and not `type` because `type` is the HTML button
-     attribute: it is undeclared here, so it falls through to the DOM, and a
-     form's `type="submit"` must keep working. The doc records the mapping.
- 
-     The three booleans below are what this replaces. They are independent, so
-     the code could express combinations the design has no drawing for —
-     `iconOnly` and `avatar` together is undefined, not a third thing. They are
-     still accepted, so nothing breaks, and warn once. */
+     attribute: a form's `type="submit"` must keep working. The three booleans
+     below are what this replaces; they are still accepted and warn once. */
   contentType,
   iconOnly = false,
   letterNumber = false,
   avatar = false,
-  /* RETIRED — use the Swatch component.
- 
-     A swatch was never a kind of button. Button's two axes are STYLE (solid /
-     outline / ghost) and COLOR (the nine palettes), and a swatch uses neither:
-     "outline swatch" means nothing, and its color is arbitrary data from a
-     picker rather than a palette choice. It is a circle with a color in it.
- 
-     Figma now draws Swatch as its own component, so Button/Button-Swatch has no
-     component left to serve. These props still render — the studio's color
-     picker uses them and a missing prop is a broken page — and warn once. */
+  /* RETIRED — use the Swatch component. Still rendered (the studio's color
+     picker uses it), and warns once. */
   swatch = false,
   swatchColor,
   startIcon,
@@ -699,25 +840,26 @@ export const Button = React.forwardRef(function Button({
   startDecorator,
   endDecorator,
   // Badge — optional count/status indicator anchored to the button corner.
-  // When `badge` is true, the rendered button is wrapped in the design-system
-  // Badge so positioning, colors, and theming match the standalone component.
   badge = false,
   badgeContent,
   badgeVariant = 'error',
-  // Badge has ONE size as of 0.9.0. This is forwarded as the caller gave it —
-  // undefined when they said nothing — so Badge's own warning fires only when
-  // someone actually passes the removed prop. Button used to DERIVE a size from
-  // its own, which meant every `<Button badge>` tripped that warning for a
-  // value the caller never wrote.
+  // Forwarded as the caller gave it, so Badge's own warning fires only when
+  // someone actually passes the removed prop.
   badgeSize,
   badgeDot = false,
   badgeMax = 99,
   badgeAnchorOrigin = { vertical: 'top', horizontal: 'right' },
+  /* The element to render. A button, or an <a> when there is an href. */
+  component,
+  type,
+  tabIndex,
+  style,
   children,
   className = '',
-  sx = {},
+  sx,
   ...props
 }, ref) {
+  useStaticStyles('omni-button');
   /* contentType wins when given; otherwise the booleans are read as before. */
   if (swatch) warnSwatchOnce();
   const t = resolveContentType(contentType, { iconOnly, letterNumber, avatar });
@@ -728,27 +870,12 @@ export const Button = React.forwardRef(function Button({
   const isIconOnly     = iconOnly || avatar || swatch;
 
   /* Types that render NO readable text, and therefore need an accessible name.
-   * Kept separate from isIconOnly, which drives SIZING — letterNumber sizes
-   * like a labelled button but reads like an unlabelled one.
-   *
-   * letterNumber is the dangerous one and was missing here. An unnamed avatar
-   * announces as nothing, which gets noticed; an unnamed letterNumber announces
-   * as "123, button", which sounds deliberate and so never gets investigated. */
+   * letterNumber is the dangerous one: an unnamed letterNumber announces as
+   * "123, button", which sounds deliberate and so never gets investigated. */
   const isLabelless    = isIconOnly || letterNumber;
 
-  /*
-   * Accessible naming for icon buttons.
-   *
-   * Rule: the BUTTON carries the name; the icons inside carry none. Give both
-   * a name and a screen reader announces the control twice — "Delete, Delete
-   * button". Give neither and an icon-only button is announced as just
-   * "button", which tells the user nothing.
-   *
-   * The lib's <Icon> already sets aria-hidden unless you pass it an aria-label,
-   * so the common case is correct by default. The failure modes left are a raw
-   * MUI SvgIcon with titleAccess, and an icon-only button with no name at all —
-   * both silent, and both invisible unless you use a screen reader.
-   */
+  /* Accessible naming for icon buttons: the BUTTON carries the name; the icons
+   * inside carry none. Both named announces twice; neither announces "button". */
   if (process.env.NODE_ENV !== 'production') {
     const named =
       props['aria-label'] || props['aria-labelledby'] || props.title;
@@ -779,81 +906,30 @@ export const Button = React.forwardRef(function Button({
   const isTextContent  = !isIconOnly;
   const effectiveFullWidth = fullWidth && !isIconOnly && !letterNumber;
 
-  /* No fallback. Figma draws every TYPE against every STYLE — 4 x 3, all 75
-     variants — including Type=Avatar, Style=ghost, which is an avatar you can
-     press with no button chrome around it. This forced ghost and text avatars
-     to `primary`, so the design had a shape the code could not render and the
-     substitution was silent: you asked for ghost and got a solid fill.
- 
-     The `swatch` half of the condition went with the prop; a swatch is its own
-     component now. */
+  /* Figma draws every TYPE against every STYLE, including Type=Avatar,
+     Style=ghost, so there is no fallback shape for any type. */
   const effectiveVariant = normalizeButtonVariant(variant);
 
   const variantMap     = buildVariantMap(isTextContent, elevated, selected, size);
-  /* An unknown variant used to fall through to solid default SILENTLY, which
-     is how `primary-ghost` — not yet a variant then — rendered as a filled pink
-     button in the gallery's own example and nobody noticed. {color}-ghost is
-     real now (the Buttons palette, as solid / outline take it); anything else
-     still warns rather than painting something plausible. */
+  /* An unknown variant warns rather than painting something plausible. */
   const variantStyles  = variantMap[effectiveVariant] || warnUnknownVariant(effectiveVariant, variantMap);
-  const sizingStyles   = getSizingStyles({ size, iconOnly: isIconOnly, letterNumber, avatar, swatch });
+  const sizeKey = SIZES.includes(size) ? size : 'medium';
+  const typeKey = swatch ? 'swatch' : avatar ? 'avatar' : isIconOnly ? 'icon' : letterNumber ? 'letter' : 'text';
+  const shape = variantStyles.zIndex === 1 ? 'solid' : variantStyles.textDecoration === 'none' ? 'ghost' : 'outline';
 
   const TypographyComp = size === 'small' ? ButtonSmallTypography : ButtonTypography;
 
   const renderChildren = () => {
-    /* In Figma a Type=Avatar button IS an avatar: the Avatar instance is bound
-       to Button-Height, so it fills the button edge to edge. An Avatar passed
-       here was left at its own default size instead, which drew a small circle
-       floating inside a larger one. Decorator avatars are sized by
-       resolveDecorator; this is the type, so it takes the whole square. */
-    if (avatar) {
-      /* 100%, not a pixel size: SIZE_HEIGHT holds CSS custom properties
-         (`var(--Button-Height)`), so there is no number to pass as customSize —
-         the height is whatever the brand's token resolves to. Filling the
-         button gets the same result and keeps following the token. */
-      return React.Children.map(children, (node) => (
-        React.isValidElement(node) && node.type === DDAvatar
-          ? React.cloneElement(node, {
-              sx: { ...(node.props.sx || {}), width: '100%', height: '100%' },
-            })
-          : node
-      ));
-    }
-
     if (isIconOnly) return children;
 
     if (letterNumber) {
       const LetterComp = size === 'small' ? ButtonExtraSmallTypography : TypographyComp;
+      /* inline-BLOCK, not inline-flex: text-box-trim applies only to a block
+         container. The number button has no outer padding to absorb the
+         border, so the label's 4px gives it up — then a 32px number button is
+         32px. */
       return (
-        <LetterComp
-          component="span"
-          sx={{
-            /* inline-BLOCK, not inline-flex: text-box-trim (CAP_HEIGHT_TRIM
-               below) applies only to a block container, so on a flex box it
-               was silently ignored and the number kept a 14px line box where
-               Figma trims it to the 10px cap height. The button is already a
-               flex row that centers this, so nothing here needs flex. */
-            display: 'inline-block',
-            textAlign: 'center',
-            /* The number button has no outer padding to absorb the border, so
-               the label's 4px gives it up — Figma's label frame sits 1px in from
-               each edge for exactly that. Then a 32px number button is 32px. */
-            padding: '4px calc(4px - var(--Button-Border-Width))',
-            color: 'inherit',
-            /* Figma binds Dynamic-Typography/Dynamic-Button-Number-Font-Size:
-               12 / 14 / 16. Not the 10 / 12 / 16 Button-Numbers ramp (that is
-               Badge's and Stepper's), and not the 16 the button text style
-               gave, which made a 32px number button 37px wide. The generator
-               emits no variable for it yet, so the fallbacks carry it. */
-            fontSize: size === 'small' ? 'var(--Sm-Button-Number-Font-Size, 12px)'
-              : size === 'large' ? 'var(--Lg-Button-Number-Font-Size, 16px)'
-              : 'var(--Button-Number-Font-Size, 14px)',
-            lineHeight: 1,
-            // Trim to cap height / baseline so the letter or number centres on
-            // its own form rather than on the font's ascender-to-descender box.
-            ...CAP_HEIGHT_TRIM,
-          }}
-        >
+        <LetterComp component="span" color="inherit" className={'omni-btn-letter omni-btn-letter-' + sizeKey}>
           {children}
         </LetterComp>
       );
@@ -861,32 +937,13 @@ export const Button = React.forwardRef(function Button({
 
     if (typeof children === 'string' || typeof children === 'number') {
       return (
-        <Box
-          component="span"
-          className="btn-text-content"
-          sx={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            padding: LABEL_PADDING_BY_SIZE[size] || LABEL_PADDING_BY_SIZE.medium,
-          }}
-        >
-          <TypographyComp
-            component="span"
-            sx={{
-              color: 'inherit',
-              // line-height and letter-spacing come from the Button-* type
-              // tokens, not from MUI's root. Inheriting them pulled in MUI's
-              // 0.02857em tracking, which rendered as 0.371px where the token
-              // says 0.
-              // Figma's "cap height to baseline" vertical trim. The label then
-              // centres on its cap height, which is what makes a button's text
-              // look centred rather than measured-and-centred.
-              ...CAP_HEIGHT_TRIM,
-            }}
-          >
+        <span className={'btn-text-content omni-btn-textbox omni-btn-textbox-' + sizeKey}>
+          {/* line-height and letter-spacing come from the Button-* type tokens.
+              The label centres on its cap height (Figma's vertical trim). */}
+          <TypographyComp component="span" color="inherit" className="omni-btn-label">
             {children}
           </TypographyComp>
-        </Box>
+        </span>
       );
     }
     return children;
@@ -894,21 +951,7 @@ export const Button = React.forwardRef(function Button({
 
   const renderStartIcon = () => {
     if (avatar && children) {
-      const avatarSize     = SIZE_HEIGHT[size] || SIZE_HEIGHT.medium;
-      const avatarFontSize = avatarTextFor(size);
-      return (
-        <MuiAvatar
-          sx={{
-            width: avatarSize,
-            height: avatarSize,
-            backgroundColor: 'inherit',
-            color: 'inherit',
-            fontSize: avatarFontSize,
-          }}
-        >
-          {children}
-        </MuiAvatar>
-      );
+      return <div className="MuiAvatar-root MuiAvatar-circular omni-btn-muiavatar">{children}</div>;
     }
     return startIcon;
   };
@@ -920,208 +963,58 @@ export const Button = React.forwardRef(function Button({
   const resolvedEndDecorator = endDecorator !== undefined
     ? resolveDecorator(endDecorator, size)
     : undefined;
+  const startNode = resolvedStartDecorator !== undefined
+    ? resolvedStartDecorator
+    : (avatar ? renderStartIcon() : startIcon);
+  const endNode = resolvedEndDecorator !== undefined ? resolvedEndDecorator : endIcon;
+  const SizeCap = cap(sizeKey);
 
-  const out = (
+  const Tag = component || (props.href ? 'a' : 'button');
+  const isNativeButton = Tag === 'button';
+  const vars = {
+    ...variantVars(variantStyles),
+    ...(avatar ? { '--_b-avtext': avatarTextFor(size), '--_b-avsize': SIZE_HEIGHT[size] || SIZE_HEIGHT.medium } : {}),
+  };
+
+  const rootProps = {
+    ref,
+    ...(isNativeButton ? { type: type === undefined ? 'button' : type, disabled } : { type }),
+    tabIndex: disabled ? -1 : (tabIndex ?? 0),
+    ...(!isNativeButton && disabled ? { 'aria-disabled': true } : {}),
+    /* A button with href renders an <a>: it is a LINK, and saying role="button"
+       on it told a screen reader the opposite. */
+    role: props.href ? undefined : 'button',
+    /* effectiveVariant, not variant: the class must name what actually PAINTED. */
+    className:
+      'MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-size' + SizeCap
+      + ' MuiButton-textSize' + SizeCap + ' MuiButton-colorPrimary'
+      + (effectiveFullWidth ? ' MuiButton-fullWidth' : '') + (disabled ? ' Mui-disabled' : '')
+      + ' omni-btn omni-btn-v omni-btn-' + shape + ' omni-btn-z-' + typeKey + '-' + sizeKey
+      + (sizeKey === 'small' ? ' omni-btn-small' : '')
+      + (startNode ? ' omni-btn-hasstart' : '')
+      + (!selected ? ' omni-btn-lift' : '')
+      + (vars['--_b-avring'] ? ' omni-btn-avring' : '')
+      + (avatar ? ' omni-btn-avatar' : '')
+      + (swatch ? ' omni-btn-swatch' : '')
+      + (effectiveFullWidth ? ' omni-btn-full' : '')
+      + ' btn-' + effectiveVariant + ' ' + className,
+    // A swatch's own background is fixed transparent, as it always was.
+    style: { ...vars, ...(swatch ? { backgroundColor: 'transparent' } : style) },
+    ...props,
+  };
+
+  const content = (
     <>
-      <GlobalStyles styles={{
-        '[class*="btn-"] .MuiButton-startIcon, [class*="btn-"] .MuiButton-icon': {
-          marginLeft: '0px !important',
-          marginRight: '2px !important',
-        },
-        '[class*="btn-"] .MuiButton-endIcon': {
-          marginLeft: '2px !important',
-          marginRight: '0px !important',
-        },
-        // MUI sizes icons per BUTTON size (18/20/22), which silently overrode
-        // the design system's own scale. Restate it here — and specifically as
-        // --Button-Icon (16 / 20 / 32), the size generated for an icon sitting
-        // in a button, rather than the generic Icon ramp (16 / 24 / 32). The
-        // two only differ at medium, which is why it went unnoticed.
-        '[class*="btn-"] .MuiButton-iconSizeSmall .MuiSvgIcon-root, [class*="btn-"] .MuiButton-iconSizeSmall > *': {
-          fontSize: 'var(--Sm-Button-Icon) !important',
-        },
-        '[class*="btn-"] .MuiButton-iconSizeMedium .MuiSvgIcon-root, [class*="btn-"] .MuiButton-iconSizeMedium > *': {
-          fontSize: 'var(--Button-Icon) !important',
-        },
-        '[class*="btn-"] .MuiButton-iconSizeLarge .MuiSvgIcon-root, [class*="btn-"] .MuiButton-iconSizeLarge > *': {
-          fontSize: 'var(--Lg-Button-Icon) !important',
-        },
-      }} />
-      <MuiButton
-      ref={ref}
-      size={size}
-      {...(effectiveFullWidth && { fullWidth: true })}
-      disabled={disabled}
-      // Icons inside a button are DECORATION. The button owns the accessible
-      // name; anything in these slots must not contribute a second one, or a
-      // screen-reader user hears the control announced twice ("Delete, Delete
-      // button"). Wrapping enforces it structurally — the lib's own <Icon> is
-      // already aria-hidden by default, but a raw SvgIcon with titleAccess, an
-      // emoji, or a bare string in the slot would otherwise be read out.
-      startIcon={resolvedStartDecorator !== undefined
-        ? resolvedStartDecorator
-        : (avatar ? renderStartIcon() : startIcon)}
-      endIcon={resolvedEndDecorator !== undefined ? resolvedEndDecorator : endIcon}
-      // effectiveVariant, not variant: the class must name what actually
-      // PAINTED. `primary-light` normalises to solid primary, and a ghost
-      // avatar/swatch normalises to primary — emitting the raw name put a
-      // `btn-primary-light` (a shape that no longer exists) and a
-      // `btn-ghost` (on a solid button) into the DOM for consumer CSS and
-      // tests to match on.
-      className={`btn-${effectiveVariant} ${className}`}
-      /* A button with href renders an <a>: it is a LINK, and saying
-         role="button" on it told a screen reader the opposite. */
-      role={props.href ? undefined : 'button'}
-      sx={{
-        // Size-aware radius — pulls the Sm/Lg variant so each button size
-        // gets the percent-of-its-own-height pixel value. Falls back to the
-        // medium token if the size variants aren't defined.
-        /* An avatar button is a circle the size of the button, so the radius is
-           the button's OWN height — which is what Figma binds (Button-Container
-           radius -> Button/Button-Height). This read --Large-Button-Height at
-           every size: still a circle, because any radius past half the height
-           rounds fully, but wrong by a token, and wrong in the direction that
-           stops the two sides being comparable. */
-        borderRadius: avatar
-          ? (size === 'small'
-              ? 'var(--Small-Button-Height, var(--Button-Height))'
-              : size === 'large'
-                ? 'var(--Large-Button-Height, var(--Button-Height))'
-                : 'var(--Button-Height)')
-          : (iconOnly || swatch)
-            ? (size === 'small'
-                ? 'var(--Sm-Button-Icon-Radius, var(--Button-Icon-Radius))'
-                : size === 'large'
-                  ? 'var(--Lg-Button-Icon-Radius, var(--Button-Icon-Radius))'
-                  : 'var(--Button-Icon-Radius)')
-            : (size === 'small'
-                ? 'var(--Sm-Button-Radius, var(--Button-Radius))'
-                : size === 'large'
-                  ? 'var(--Lg-Button-Radius, var(--Button-Radius))'
-                  : 'var(--Button-Radius)'),
-        textTransform: 'none',
-        fontWeight: 'inherit',
-        lineHeight: 1,
-        whiteSpace: 'nowrap',
-        flexShrink: 0,
-        transition: 'background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, transform 0.15s ease-in-out',
-        // _bevel = (Button-Bevel% × height) / 100, capped at 20% of height
-        // so the inset highlight/lowlight can never bleed into the text band.
-        // Text occupies the middle ~60% of a button; a 20% inset on each side
-        // (40% total) leaves the text safely clear regardless of bevel%.
-        '--_bevel': 'min(calc(var(--Button-Bevel) * var(--_height) / 100), calc(var(--_height) / 5))',
-
-        // Small button — hit target without a size change.
-        //
-        // The small button stays 24px on every platform; what grows is the
-        // area that responds to a tap. --Target is the platform minimum
-        // (24 desktop, 44 iOS, 48 Android) and --Platform-Spacer is the room
-        // reserved around the button so the enlarged target doesn't sit on
-        // top of whatever is next to it.
-        //
-        // Done with a centred ::before rather than a wrapper element: a
-        // wrapper would change Button's DOM, and every consumer positioning,
-        // measuring or flex-ing a Button would have to learn about it.
-        ...(size === 'small' && {
-          position: 'relative',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '100%',
-            height: '100%',
-            minWidth: 'var(--Target, 0px)',
-            minHeight: 'var(--Target, 0px)',
-          },
-        }),
-
-        ...sizingStyles,
-        ...variantStyles,
-
-        // Force padding override
-        '&.MuiButton-root': {
-          padding: sizingStyles.padding ?? '0 var(--Sizing-1)',
-        },
-
-        // Icon margins + color inheritance
-        // No padding on the slots: the design spaces them with the 2px gap
-        // alone, and the extra 2px each side made the icon sit 4px wider than
-        // its glyph.
-        '& .MuiButton-startIcon': {
-          display: 'inherit',
-          color: 'inherit',
-          marginLeft: '0px !important',
-          marginRight: avatar ? '0px !important' : '2px !important',
-        },
-        ...(avatar && {
-          '& .MuiAvatar-root': {
-            fontSize: avatarTextFor(size),
-          },
-        }),
-        '& .MuiButton-endIcon': {
-          display: 'inherit',
-          color: 'inherit',
-          marginLeft: '2px !important',
-          marginRight: '0px !important',
-        },
-        '& .MuiSvgIcon-root': { color: 'inherit' },
-
-        '&:focus-visible, &.Mui-focusVisible': {
-          outline: '2px solid var(--Focus-Visible)',
-          outlineOffset: '1px',
-        },
-
-        /* Disabled is the RESTING button with opacity applied, and nothing
-           else. Figma says it the same way: the Disabled variant of every
-           Type is its Default variant with opacity 0.38 on the component, no
-           fill or label rebound. The three restatements below are there only
-           because MUI's own Mui-disabled rule would otherwise grey them out.
-
-           `boxShadow: 'none'` was the one thing that did not follow that
-           rule — it deleted the bevel instead of letting it fade with
-           everything else, so a disabled button was not a dimmer version of
-           itself but a flatter one. Figma applies the opacity to the whole
-           component, effects included. */
-        '&.Mui-disabled': {
-          opacity: 'var(--Disabled, 0.38)',
-          cursor: 'not-allowed',
-          pointerEvents: 'none',
-          backgroundColor: variantStyles.backgroundColor,
-          color: variantStyles.color,
-          border: variantStyles.border,
-        },
-
-        ...(swatch && {
-          border: 'var(--Button-Border-Width) solid var(--Border)',
-          padding: '1px',
-          width: SIZE_HEIGHT[size] || SIZE_HEIGHT.medium,
-          height: SIZE_HEIGHT[size] || SIZE_HEIGHT.medium,
-          minWidth: 'unset',
-          minHeight: 'unset',
-          boxShadow: 'none',
-          '--_bevel': '0',
-          backgroundColor: 'transparent !important',
-          '&:hover': { backgroundColor: 'transparent !important', boxShadow: 'none' },
-          '&:active': { boxShadow: 'none' },
-          '&:hover .btn-swatch-inner': { filter: 'brightness(0.9)' },
-        }),
-        ...(effectiveFullWidth && { width: '100%' }),
-        ...sx,
-      }}
-      {...props}
-      {...(swatch ? { style: { backgroundColor: 'transparent' } } : {})}
-    >
+      {startNode && (
+        <span className={'MuiButton-icon MuiButton-startIcon MuiButton-iconSize' + SizeCap}>{startNode}</span>
+      )}
       {avatar ? null : swatch ? (
-        <Box
+        <div
           className="btn-swatch-inner"
           style={{
             width: '100%',
             height: '100%',
-            // Inner swatch fill — use the size-aware Inner-Radius token
-            // so it stays concentric with the outer button corner. Falls
-            // back to the old calc() if the new tokens aren't in CSS.
+            // Concentric with the outer corner.
             borderRadius: size === 'small'
               ? 'var(--Sm-Button-Icon-Inner-Radius, calc(var(--Button-Icon-Radius) - 2px))'
               : size === 'large'
@@ -1131,13 +1024,17 @@ export const Button = React.forwardRef(function Button({
           }}
         />
       ) : renderChildren()}
-    </MuiButton>
+      {endNode && (
+        <span className={'MuiButton-icon MuiButton-endIcon MuiButton-iconSize' + SizeCap}>{endNode}</span>
+      )}
     </>
   );
 
-  // Wrap in Badge if requested. Done after assembly so all the button-internal
-  // styling (variant, size, sizing overrides, focus, etc.) is unaffected — the
-  // badge just decorates the corner.
+  const out = hasSx(sx)
+    ? <SxBox component={Tag} sx={sx} {...rootProps}>{content}</SxBox>
+    : <Tag {...rootProps}>{content}</Tag>;
+
+  // Wrap in Badge if requested — the badge just decorates the corner.
   if (badge) {
     return (
       <DDBadge

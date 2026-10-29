@@ -15,26 +15,12 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { ButtonGroup } from './ButtonGroup';
 import { Button } from '../Button/Button';
+import { stateRules } from '../_testCss';
 
 /** Rules for an element, split by whether the selector has a pseudo-class. */
-function rulesFor(el) {
-  const classes = Array.from(el.classList);
-  const base = [];
-  const states = {};
-  for (const sheet of Array.from(document.styleSheets)) {
-    let list; try { list = sheet.cssRules; } catch { continue; }
-    for (const r of Array.from(list || [])) {
-      const sel = r.selectorText;
-      if (!sel || !classes.some((c) => sel.includes('.' + c))) continue;
-      const m = sel.match(/:(hover|active)\b|\.Mui-(focusVisible)\b|:(focus-visible)\b/);
-      if (m) {
-        const key = m[1] || m[2] || m[3];
-        states[key] = (states[key] || '') + r.cssText;
-      } else base.push(r.cssText);
-    }
-  }
-  return { base: base.join('\n'), states };
-}
+/* The winning declarations at rest and per state, private custom properties
+   resolved to the tokens they carry (see _testCss). */
+const rulesFor = (el) => stateRules(el);
 
 const colorIn = (css) =>
   [...String(css).matchAll(/(?:^|[;{])\s*color:\s*([^;}]+)/g)].map(m => m[1].trim()).join(' | ');

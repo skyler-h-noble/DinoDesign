@@ -150,6 +150,11 @@ export interface CardProps extends Native<HTMLElement, 'onClick'> {
 // ─── Actions ─────────────────────────────────────────────────────────────────
 
 export interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'color' | 'title'> {
+  /** The element to render; a <button>, or an <a> when there is an href. */
+  component?: React.ElementType;
+  /** The HTML button type. Defaults to "button", so a Button in a form does not submit it. */
+  type?: 'button' | 'submit' | 'reset';
+  tabIndex?: number;
   variant?: ButtonVariant;
   size?: Size;
   elevated?: boolean;

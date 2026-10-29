@@ -5,6 +5,7 @@ import { ButtonGroup } from './ButtonGroup';
 import { Button } from '../Button/Button';
 import { ToggleButtonGroup } from '../ToggleButtonGroup';
 import { axe } from 'jest-axe';
+import { stateRules } from '../_testCss';
 
 describe('ButtonGroup Component', () => {
   // Render tests
@@ -425,8 +426,8 @@ describe('selection escalates one step from the group style', () => {
        unscoped `border: none !important` erased the border while the class
        still said `-outline`. Assert the rule that actually reaches the
        element. */
-    expect(emotionCss(selected)).not.toContain('border: none');
-    expect(emotionCss(unselected)).toContain('border: none');
+    expect(stateRules(selected).base).not.toContain('border: none');
+    expect(stateRules(unselected).base).toContain('border: none');
   });
 });
 
@@ -484,7 +485,7 @@ describe('ButtonGroup without a selection keeps its Buttons solid', () => {
       </ButtonGroup>
     );
     const btn = screen.getByText('One').closest('button');
-    expect(btn).not.toHaveStyle({ backgroundColor: 'transparent' });
+    expect(stateRules(btn).base).not.toMatch(/background-color:\s*transparent/);
     expect(btn).not.toHaveAttribute('aria-pressed');
   });
 

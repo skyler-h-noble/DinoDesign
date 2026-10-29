@@ -9,6 +9,8 @@
 import React from 'react';
 import { Box } from '@mui/material';
 
-export default function SxBox(props) {
-  return <Box {...props} />;
-}
+const SxBox = React.forwardRef(function SxBox(props, ref) {
+  return <Box {...props} ref={ref} />;
+});
+
+export default SxBox;

@@ -3,6 +3,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { axe } from 'jest-axe';
 import { Button, normalizeButtonVariant } from './Button';
+import { stateRules } from '../_testCss';
 
 // ─── Render ───────────────────────────────────────────────────────────────────
 
@@ -263,13 +264,8 @@ describe('Button variant -light removal', () => {
 });
 
 describe('ghost takes the Buttons palette', () => {
-  const cssFor = (el) => {
-    const out = [];
-    for (const sheet of document.styleSheets) for (const r of sheet.cssRules) {
-      try { if (el.matches(r.selectorText)) out.push(r.cssText); } catch (e) { /* skip */ }
-    }
-    return out.join('\n');
-  };
+  // Resolved rest + state declarations: the palette arrives as custom properties.
+  const cssFor = (el) => stateRules(el).all;
   test('variant="ghost" is the Default palette', () => {
     const { container } = render(<Button variant="ghost">Go</Button>);
     expect(cssFor(container.querySelector('button'))).toContain('--Buttons-Default-Outline-Quiet');

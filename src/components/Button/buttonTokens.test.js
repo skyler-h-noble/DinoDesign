@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { Button } from './Button';
 import { Dropdown, MenuButton, Menu, MenuItem } from '../Menu/Menu';
+import { declared } from '../_testCss';
 
 /**
  * The size-moded tokens must actually REACH the DOM.
@@ -33,7 +34,8 @@ describe('Button reads the size-moded tokens', () => {
     ['large', 'var(--Lg-Button-Text)'],
   ])('%s label size comes from %s', (size, token) => {
     render(<Button size={size}>Go</Button>);
-    expect(screen.getByRole('button')).toHaveStyle(`font-size: ${token}`);
+    // Read as declared: jsdom drops a var() font-size and computes the base.
+    expect(declared(screen.getByRole('button'), 'font-size')).toBe(token);
   });
 
   // The label-wrapper padding uses the same sx mechanism as the font-size
