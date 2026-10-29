@@ -76,7 +76,7 @@ const STATES = {
   hover:    [/&:hover|\.bottom-nav-item:hover|:hover &|\$\{ON\}:hover|\.omni-[\w-]+:hover|\.omni-[\w-]+[\w .>+~-]*:hover/, SHARED],
   pressed:  [/&:active|&\.Mui-active|\.bottom-nav-item:active|:active &|\$\{ON\}:active|\.omni-[\w-]+:active|\.omni-[\w-]+[\w .>+~-]*:active/, SHARED],
   focus:    [/&:focus-visible|&\.Mui-focusVisible|&:focus-within|FOCUS_RING|\$\{ON\}:focus-visible|\.omni-[\w-]+:focus-visible|\.omni-[\w-]+[\w .>+~-]*(?::focus-visible|\.Mui-focusVisible|:focus-within)/, SHARED],
-  disabled: [/&:disabled|&\.Mui-disabled|disabled &&|disabled \?|DISABLED_STATE/, SHARED],
+  disabled: [/&:disabled|&\.Mui-disabled|disabled &&|disabled \?|DISABLED_STATE|\.omni-[\w-]+:disabled/, SHARED],
 };
 
 /**
@@ -147,7 +147,9 @@ const REGISTRY = [
     control: 'BottomNavItem',
     file: 'BottomNavigation/BottomNavigation.js',
     // The control this test was redesigned around — see the header note.
-    within: ['function BottomNavItem', 'function BottomNavFab'],
+    // Its states are the static sheet's item rules (.omni-bn-item and the
+    // holder it rings), so the slice is that part of the sheet.
+    within: ['.omni-bn-item{', '.omni-bn-fabslot{'],
   },
   // The FAB's actions are the library's SpeedDial now — its states are SpeedDial's / Fab's.
 ];

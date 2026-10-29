@@ -8,6 +8,7 @@ import SendIcon from '@omni-design/icons/Send';
 import FavoriteIcon from '@omni-design/icons/Favorite';
 import SettingsIcon from '@omni-design/icons/Settings';
 import { axe } from 'jest-axe';
+import { stateRules } from '../_testCss';
 
 const ITEMS = [
   { icon: <HomeIcon />, label: 'Home' },
@@ -268,11 +269,12 @@ describe('the items are centred in the rail', () => {
 });
 
 describe('Rail expanded width', () => {
+  /* The winning width, with the rail's private custom property followed down
+     to the length it carries. */
   const widthOf = (c) => {
     const el = c.querySelector('.rail') || c.firstChild;
-    const rules = [...document.styleSheets].flatMap((sh) => { try { return [...sh.cssRules]; } catch (e) { return []; } })
-      .filter((r) => r.selectorText && [...el.classList].some((k) => r.selectorText.includes('.' + k)));
-    return rules.map((r) => r.style.width).filter(Boolean).pop();
+    const m = stateRules(el).base.match(/(?:^|\s)width: ([^;]+);/);
+    return m ? m[1] : undefined;
   };
   test('one width: 240 by default, any width when given', () => {
     const items = [{ icon: <span />, label: 'A' }];

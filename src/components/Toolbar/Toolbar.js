@@ -1,6 +1,7 @@
 // src/components/Toolbar/Toolbar.js
 import React, { useState, useCallback } from 'react';
-import { Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 import { Button } from '../Button/Button';
 import { Icon } from '../Icon/Icon';
 import { Fab } from '../Fab/Fab';
@@ -77,6 +78,37 @@ export const TOOLBAR_SURFACES = [
   'Surface-Bright', 'Surface-Brightest',
 ];
 
+const SxBox = lazySxBox('Toolbar');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+/* What emotion's prefixer added beside align-items / justify-content — the
+   legacy -webkit-box spellings — so the computed style stays exactly what it
+   was. They only act on display:-webkit-box, which nothing here uses. */
+const webkitBox = (css) => css
+  .replace(/([;{])align-items:([^;}]+)/g, '$1-webkit-box-align:$2;align-items:$2')
+  .replace(/([;{])justify-content:([^;}]+)/g, (m, p, v) => p + '-webkit-box-pack:'
+    + v.replace(/^flex-/, '').replace(/^space-between$/, 'justify') + ';justify-content:' + v);
+
+/* The static sheet — what the bar handed emotion, as classes over the same
+   tokens.
+   HUGS ITS CONTENT, and says so in a way a parent cannot undo: `inline-flex`
+   shrink-wraps only while the cross size is `auto`, so in a flex column
+   `align-items: stretch` would span the bar across. An explicit fit-content
+   width is not auto.
+   THE PADDING TURNS WITH THE BAR. A pill needs room at its rounded ENDS,
+   which is the long axis — 16 across and 8 through, and the other way round
+   when vertical. */
+registerStaticStyles('omni-toolbar', webkitBox([
+  '.omni-tb{display:inline-flex;flex-direction:row;align-items:center;gap:4px;width:fit-content;background-color:var(--Background);'
+    + 'border:1px solid var(--Border-Variant);border-radius:var(--Style-Border-Radius);padding:8px;font-family:inherit;flex-shrink:0}',
+  '.omni-tb-v{flex-direction:column}',
+  `.omni-tb-float{border-radius:56px;padding:8px 16px;box-shadow:${SHADOW_LEVEL_2}}`,
+  '.omni-tb-float.omni-tb-v{padding:16px 8px}',
+  '.omni-icon.omni-tb-ic{color:inherit}',
+  '.omni-tb-fabrow{display:inline-flex;flex-direction:row;align-items:center;gap:8px}',
+  '.omni-tb-fabrow-v{flex-direction:column}',
+].join('\n')));
+
 export function Toolbar({
   items = [],
   value: controlledValue,
@@ -97,6 +129,7 @@ export function Toolbar({
   sx = {},
   ...props
 }) {
+  useStaticStyles('omni-toolbar');
   const [internalValue, setInternalValue] = useState(defaultValue ?? null);
   const isControlled = controlledValue !== undefined;
   const activeIndex = isControlled ? controlledValue : internalValue;
@@ -115,42 +148,17 @@ export function Toolbar({
   const isVertical = orientation === 'vertical';
   const isFloating = type === 'floating';
 
+  const Root = hasSx(sx) ? SxBox : 'div';
   const toolbar = (
-    <Box
+    <Root
+      {...(Root === 'div' ? {} : { sx })}
       role="toolbar"
       aria-orientation={orientation}
       aria-label="Toolbar"
       data-theme={dataTheme}
       data-surface={dataSurface}
-      className={'toolbar toolbar-' + type + ' toolbar-' + orientation + ' toolbar-' + (color || 'nav-bar') + ' ' + className}
-      sx={{
-        display: 'inline-flex',
-        flexDirection: isVertical ? 'column' : 'row',
-        alignItems: 'center',
-        gap: '4px',
-        /* HUGS ITS CONTENT, and says so in a way a parent cannot undo.
-           `inline-flex` already shrink-wraps, but only while the cross size is
-           `auto` — drop the bar into a flex column, which is what a stacked
-           sample or a sidebar is, and `align-items: stretch` makes it span the
-           full width with the actions bunched at one end. An explicit
-           fit-content width is not auto, so stretch no longer applies. */
-        width: 'fit-content',
-        backgroundColor: 'var(--Background)',
-        border: '1px solid var(--Border-Variant)',
-        borderRadius: isFloating ? '56px' : 'var(--Style-Border-Radius)',
-        /* THE PADDING TURNS WITH THE BAR. A pill needs room at its rounded
-           ENDS, which is the long axis — 16 across and 8 through. Vertically
-           that is the same two numbers the other way round; leaving them put
-           padded the short axis instead and the vertical bar came out wider
-           than its own buttons needed. */
-        padding: isFloating
-          ? (isVertical ? '16px 8px' : '8px 16px')
-          : '8px',
-        fontFamily: 'inherit',
-        flexShrink: 0,
-        ...(isFloating && { boxShadow: SHADOW_LEVEL_2 }),
-        ...sx,
-      }}
+      className={'toolbar toolbar-' + type + ' toolbar-' + orientation + ' toolbar-' + (color || 'nav-bar') + ' ' + className
+        + ' MuiBox-root omni-tb' + (isVertical ? ' omni-tb-v' : '') + (isFloating ? ' omni-tb-float' : '')}
       {...props}
     >
       {items.map((item, index) => {
@@ -166,17 +174,17 @@ export function Toolbar({
             aria-checked={isSelected}
             role="radio"
           >
-            <Icon size="small" sx={{ color: 'inherit' }}>{item.icon}</Icon>
+            <Icon size="small" className="omni-tb-ic">{item.icon}</Icon>
           </Button>
         );
       })}
-    </Box>
+    </Root>
   );
 
   // With FAB: toolbar + FAB side by side
   if (fab && isFloating) {
     return (
-      <Box sx={{ display: 'inline-flex', flexDirection: isVertical ? 'column' : 'row', alignItems: 'center', gap: 1 }}>
+      <div className={'MuiBox-root omni-tb-fabrow' + (isVertical ? ' omni-tb-fabrow-v' : '')}>
         {toolbar}
         {/* THE Fab COMPONENT, not a Button pretending to be one.
             This was a Button forced round with a hardcoded 56x56 — the large
@@ -195,7 +203,7 @@ export function Toolbar({
         >
           {fab.icon}
         </Fab>
-      </Box>
+      </div>
     );
   }
 

@@ -1,6 +1,7 @@
 // src/components/Stepper/Stepper.js
 import React, { createContext, useContext } from 'react';
-import { Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 import { Label } from '../Typography';
 import { SHADOW_LEVEL_1 } from '../_shadows';
 
@@ -75,6 +76,93 @@ const SIZE_MAP = {
             connectorThickness: 'var(--Lg-Step-Bar, 4px)', gap: 0 },
 };
 
+const SxBox = lazySxBox('Stepper');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
+/** A part's root: static classes, plus an MUI box only when given sx. */
+function Part({ sx, component: Tag = 'div', ...props }) {
+  if (hasSx(sx)) return <SxBox component={Tag} sx={sx} {...props} />;
+  return <Tag {...props} />;
+}
+
+/* ─── Static sheet ───
+   Every declaration the parts used to hand emotion per render, as classes
+   over the same tokens. The indicator's status colours differ per step and
+   per palette, so they arrive as custom properties set on the indicator
+   itself (--_st-bd / -bg / -fg / -hv / -pr) — declared there, so the Buttons
+   and surface tokens resolve against the indicator's own theme and surface,
+   as they did when emotion wrote them on it. Sizes are modifier classes.
+
+   The digit wears the BUTTON face (see the notes in Step): Figma binds
+   Buttons/Button-Font-Family on the step number, and --Font-Family-Body is a
+   real second step because the lib's bundled CSS leaves --Font-Family-Button
+   guaranteed-invalid. The weight is the button's, for the same reason.
+
+   State rules weigh one class + one pseudo-class, as emotion's did. */
+const sizeEntries = Object.entries(SIZE_MAP);
+/* What emotion's prefixer added beside align-items / justify-content — the
+   legacy -webkit-box spellings — so the computed style stays exactly what it
+   was. They only act on display:-webkit-box, which nothing here uses. */
+const webkitBox = (css) => css
+  .replace(/([;{])align-items:([^;}]+)/g, '$1-webkit-box-align:$2;align-items:$2')
+  .replace(/([;{])justify-content:([^;}]+)/g, (m, p, v) => p + '-webkit-box-pack:'
+    + v.replace(/^flex-/, '').replace(/^space-between$/, 'justify') + ';justify-content:' + v);
+
+registerStaticStyles('omni-stepper', webkitBox([
+  '.omni-st{display:flex;list-style:none;margin:0;padding:0;width:100%;gap:0}',
+  '.omni-st-h{flex-direction:row;align-items:flex-start}',
+  '.omni-st-v{flex-direction:column;align-items:stretch}',
+  '.omni-st-ind{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;'
+    + 'border:var(--Button-Border-Width, 1px) solid var(--_st-bd);background-color:var(--_st-bg);color:var(--_st-fg);'
+    + 'font-family:var(--Font-Family-Button, var(--Font-Family-Body, inherit));'
+    + 'font-weight:var(--Button-Font-Weight, var(--Button-Small-Font-Weight, 700));line-height:1;flex-shrink:0;'
+    + 'box-sizing:border-box;position:relative;'
+    + 'transition:background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;'
+    + 'cursor:default;outline:none;padding:0}',
+  // The CURRENT step's ring is 2px — it is the outline that carries "you are here".
+  '.omni-st-ind-cur{border:2px solid var(--_st-bd)}',
+  '.omni-st-ind-click{cursor:pointer}',
+  '.omni-st-ind-off{cursor:not-allowed;opacity:var(--Disabled, 0.38)}',
+  ...sizeEntries.map(([k, v]) => `.omni-st-ind-${k}{width:${v.indicator}px;height:${v.indicator}px;min-width:${v.indicator}px;min-height:${v.indicator}px;font-size:${v.fontSize}}`),
+  ...sizeEntries.map(([k, v]) => `.omni-st-ind-dot-${k}{width:${v.dot};height:${v.dot};min-width:${v.dot};min-height:${v.dot};font-size:${v.fontSize}}`),
+  // 24×24 minimum touch target via ::after for the small size
+  '.omni-st-ind-small::after,.omni-st-ind-dot-small::after{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);width:24px;height:24px;border-radius:50%}',
+  /* Figma's Hover step wears Level-1 elevation (on Button-Effect); Pressed
+     drops back to none. 2px focus ring, 1px out, as every control. */
+  `.omni-st-ind-click:hover{background-color:var(--_st-hv);box-shadow:${SHADOW_LEVEL_1}}`,
+  '.omni-st-ind-click:active{background-color:var(--_st-pr);box-shadow:none}',
+  '.omni-st-ind-click:focus-visible{outline:2px solid var(--Focus-Visible);outline-offset:1px}',
+  '.omni-st-band{display:flex;align-items:center;justify-content:center;flex-shrink:0}',
+  ...sizeEntries.map(([k, v]) => `.omni-st-band-${k}{width:${v.indicator}px;height:${v.indicator}px}`),
+  ...sizeEntries.map(([k, v]) => `.omni-st-band-dot-h-${k}{width:${v.dot};height:${v.indicator}px}`),
+  ...sizeEntries.map(([k, v]) => `.omni-st-band-dot-v-${k}{width:${v.dot};height:${v.dot}}`),
+  '.omni-st-con{flex:1;transition:background-color 0.15s ease}',
+  '.omni-st-con-done{background-color:var(--_st-line)}',
+  '.omni-st-con-todo{background-color:var(--Quiet)}',
+  ...sizeEntries.map(([k, v]) => `.omni-st-con-h-${k}{height:${v.connectorThickness};min-width:20px;align-self:flex-start;margin-top:calc(${v.indicator / 2}px - ${v.connectorThickness} / 2)}`),
+  ...sizeEntries.map(([k, v]) => `.omni-st-con-v-${k}{width:${v.connectorThickness};min-height:24px;margin-left:calc(${v.indicator / 2}px - ${v.connectorThickness} / 2)}`),
+  ...sizeEntries.map(([k, v]) => `.omni-st-con-v-dot-${k}{width:${v.connectorThickness};min-height:24px;margin-left:calc(${v.dot} / 2 - ${v.connectorThickness} / 2)}`),
+  /* 2 on, 2 off across and 4/4 down, copied from the file's dash arrays. */
+  '.omni-st-con-dash-h{background-color:transparent;background-image:repeating-linear-gradient(90deg, var(--Quiet) 0px, var(--Quiet) 2px, transparent 2px, transparent 4px);background-size:4px 100%}',
+  '.omni-st-con-dash-v{background-color:transparent;background-image:repeating-linear-gradient(180deg, var(--Quiet) 0px, var(--Quiet) 4px, transparent 4px, transparent 8px);background-size:100% 8px}',
+  '.omni-st-col{display:flex;flex-direction:column;align-items:center;flex-shrink:0}',
+  ...sizeEntries.map(([k, v]) => `.omni-st-col-${k}{width:${v.indicator}px}`),
+  ...sizeEntries.map(([k, v]) => `.omni-st-col-dot-${k}{width:${v.dot}}`),
+  '.omni-st-lbl{margin-top:var(--Sizing-Half);width:100%;display:flex;justify-content:center}',
+  '.omni-st-lbl-dot{margin-top:0}',
+  '.omni-st-row{display:flex;align-items:center;gap:var(--Sizing-1);flex-shrink:0}',
+  ...sizeEntries.map(([k, v]) => `.omni-st-row-dot-${k}{height:${v.dot};overflow:visible}`),
+  '.omni-st-step-h{display:flex;align-items:flex-start;flex:1}',
+  '.omni-st-step-last{flex:none}',
+  '.omni-st-step-v{display:flex;flex-direction:column;align-items:flex-start}',
+  /* While the step is hovered, pressed or focused its label reads --Text, at
+     every status — Figma's Hover / Pressed / Focus-Visible variants all bind
+     Surface › Text on the label. The label's colour is an inline style, so
+     the important flag is on purpose. */
+  '.omni-st-step-click:has(.step-indicator:hover) .step-label,.omni-st-step-click:has(.step-indicator:active) .step-label,'
+    + '.omni-st-step-click:has(.step-indicator:focus-visible) .step-label{color:var(--Text) !important}',
+].join('\n')));
+
 /* ─── Context ─── */
 const StepperContext = createContext({
   orientation: 'horizontal',
@@ -133,36 +221,28 @@ export function Stepper({
   sx = {},
   ...props
 }) {
+  useStaticStyles('omni-stepper');
   const items = React.Children.toArray(children).filter(React.isValidElement);
   const totalSteps = items.length;
   const isHorizontal = orientation === 'horizontal';
 
   return (
     <StepperContext.Provider value={{ orientation, size, color, activeStep, clickable, onStepClick, dashedIncomplete, totalSteps, variant, labelPosition }}>
-      <Box
+      <Part
         component="ol"
         role="list"
         aria-label="Progress"
         data-theme={theme || undefined}
         data-surface={surface || undefined}
-        className={'stepper stepper-' + orientation + ' stepper-' + size + ' stepper-' + color + ' ' + className}
-        sx={{
-          display: 'flex',
-          flexDirection: isHorizontal ? 'row' : 'column',
-          alignItems: isHorizontal ? 'flex-start' : 'stretch',
-          listStyle: 'none',
-          margin: 0,
-          padding: 0,
-          width: '100%',
-          gap: 0,
-          ...sx,
-        }}
+        className={'stepper stepper-' + orientation + ' stepper-' + size + ' stepper-' + color + ' ' + className
+          + ' MuiBox-root omni-st ' + (isHorizontal ? 'omni-st-h' : 'omni-st-v')}
+        sx={sx}
         {...props}
       >
         {items.map((child, index) =>
           React.cloneElement(child, { _index: index, key: child.key || index })
         )}
-      </Box>
+      </Part>
     </StepperContext.Provider>
   );
 }
@@ -180,6 +260,7 @@ export function Step({
   sx = {},
   ...props
 }) {
+  useStaticStyles('omni-stepper');
   const { orientation, size, color, activeStep, clickable: groupClickable, onStepClick, dashedIncomplete, totalSteps, variant, labelPosition } = useStepperContext();
   /* `clickable` is a Stepper-level switch, so before this a step you cannot
      reach yet was styled and announced exactly like one you can. Folding
@@ -195,7 +276,7 @@ export function Step({
     console.warn('[Stepper] clickable is ignored with variant="noCount": dots are progress, not navigation. '
       + 'Use variant="count" for a stepper you can jump around in.');
   }
-  const s = SIZE_MAP[size] || SIZE_MAP.medium;
+  const sizeKey = SIZE_MAP[size] ? size : 'medium';
   const C = COLOR_LABEL_MAP[color] || 'Default';
   const isHorizontal = orientation === 'horizontal';
   const labelBelow = labelPosition ? labelPosition === 'bottom' : isHorizontal;
@@ -262,9 +343,26 @@ export function Step({
   const activeToken = isFilled ? 'var(--Buttons-' + C + '-Pressed)' : 'var(--Pressed)';
   const isDot       = variant === 'noCount';
 
+  /* The indicator's geometry and status, as classes (see the sheet):
+     - `dot` is a token string and `indicator` a number, so the 'px' goes on
+       the number only — appending it to a var() would emit
+       `var(--No-Count-Step, 12px)px`, which the browser drops silently.
+     - The COMPLETE ring is 1px (--Button-Border-Width) and the CURRENT one
+       2px: the current step is an outline, and its ring is what carries
+       "you are here". A literal in the file as well as here — Button-Fill's
+       strokeWeight is a plain 2, bound to nothing — so it cannot follow a
+       brand that moves its border width. Flagged in docs/figma-parity.md.
+     - The BUTTON face and weight, not whatever is around it: the count step
+       IS a Button in the file. `inherit` took the page's face, so the digit
+       came out in the body font on a docs page.
+     - line-height 1: the digit is centred by the flex box, so the line box
+       only has to not add leading of its own.
+     - border-box: the border counts inside the 32px. A <button> gets
+       border-box from the UA sheet and a <div> does not, so a step that was
+       not clickable — every disabled one — drew 2px wider. */
+  const IndicatorTag = clickable ? 'button' : 'div';
   const indicatorEl = (
-    <Box
-      component={clickable ? 'button' : 'div'}
+    <IndicatorTag
       onClick={clickable ? () => onStepClick?.(_index) : undefined}
       onKeyDown={clickable ? (e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onStepClick?.(_index); }
@@ -280,120 +378,17 @@ export function Step({
         + (isCompleted ? ' step-indicator-completed' : '')
         + (isIncomplete ? ' step-indicator-incomplete' : '')
         + (clickable ? ' step-indicator-clickable' : '')
+        + ' MuiBox-root omni-st-ind ' + (isDot ? 'omni-st-ind-dot-' : 'omni-st-ind-') + sizeKey
+        + (isActive ? ' omni-st-ind-cur' : '')
+        + (disabled ? ' omni-st-ind-off' : clickable ? ' omni-st-ind-click' : '')
       }
-      sx={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        /* `dot` is a token string and `indicator` a number, so the 'px' goes
-           on the number only — appending it to a var() would emit
-           `var(--No-Count-Step, 12px)px`, which the browser drops silently. */
-        width: isDot ? s.dot : s.indicator + 'px',
-        height: isDot ? s.dot : s.indicator + 'px',
-        minWidth: isDot ? s.dot : s.indicator + 'px',
-        minHeight: isDot ? s.dot : s.indicator + 'px',
-        borderRadius: '50%',
-        /* ONE border width. It was 2px on the current step and 1px elsewhere,
-           carrying a distinction the fill now makes far more clearly; the
-           design system has a single --Button-Border-Width (1px) and this is
-           the same ring. */
-        /* The COMPLETE ring is 2px and the other two are 1. A literal in the
-           file as well as here — Button-Fill's strokeWeight is a plain 2 on
-           all five complete states, bound to nothing — so it cannot follow a
-           brand that moves its border width. Flagged in docs/figma-parity.md.
-           This file previously consolidated to one width on the grounds that
-           the fill already carries the distinction; that was right about the
-           CURRENT step, which is filled, and wrong about the complete one,
-           which is an outline and has only its ring to say so. */
-        // The CURRENT step's ring is 2px — it is the outline that carries "you are here".
-        border: (isActive ? '2px' : 'var(--Button-Border-Width, 1px)')
-                + ' solid ' + borderToken,
-        backgroundColor: bgToken,
-        color: textToken,
-        fontSize: s.fontSize,
-        /* The BUTTON face, not whatever is around it.
-           Figma binds the step number to `Buttons/Button-Font-Family` — the
-           count step IS a Button in the file, so its digit wears the button's
-           typeface. `inherit` took the face from the page instead, so the
-           number came out in the body font on a docs page and in whatever the
-           host set everywhere else: a different-looking digit in a circle the
-           right size, which reads as the whole component being wrong. */
-        /* --Font-Family-Body is a REAL second step, not belt-and-braces.
-           typography-tokens.css declares
-             --Font-Family-Button: var(--Platform-Font-Families-Body);
-           with no fallback, while --Font-Family-Body gets
-             var(--Platform-Font-Families-Body, var(--Set-Font-Family-Body)).
-           Nothing defines --Platform-Font-Families-Body outside a brand's own
-           device blocks, so in the library's bundled CSS the Button one is
-           the guaranteed-invalid value and the Body one is Poppins. A single
-           `var(--Font-Family-Button, inherit)` therefore dropped straight to
-           the page's font and the digit came out in whatever the host set.
-           Naming the body face second is also correct rather than merely
-           safe: the generator defines the button face AS the body face. */
-        fontFamily: 'var(--Font-Family-Button, var(--Font-Family-Body, inherit))',
-        /* The design binds Typography/Buttons/Small to the step's digit, so
-           the weight comes from there rather than a literal 700 — a brand that
-           picks a lighter button face moved the design's numbers and not the
-           lib's. */
-        /* The button's weight, for the same reason as the family. The old
-           token was Button-Small's, which is one size's weight standing in for
-           the ramp's. */
-        fontWeight: 'var(--Button-Font-Weight, var(--Button-Small-Font-Weight, 700))',
-        /* The digit is centred by the flex box above, so the line box only has
-           to not add leading of its own. Figma trims cap-height-to-baseline;
-           text-box-trim is the CSS equivalent and falls back to this. */
-        lineHeight: 1,
-        flexShrink: 0,
-        /* The border counts inside the 32px. A <button> gets border-box from
-           the UA sheet and a <div> does not, so a step that was not clickable
-           — every disabled one — drew 2px wider (4px when complete). */
-        boxSizing: 'border-box',
-        position: 'relative',
-        transition: 'background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
-        cursor: disabled ? 'not-allowed' : clickable ? 'pointer' : 'default',
-        outline: 'none',
-        padding: 0,
-        ...(disabled && { opacity: 'var(--Disabled, 0.38)' }),
-
-        // 24×24 minimum touch target via ::after for small size
-        ...(size === 'small' && {
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '24px',
-            height: '24px',
-            borderRadius: '50%',
-          },
-        }),
-
-        ...(clickable && {
-          /* Figma's Hover step wears Level-1 elevation (on Button-Effect);
-             Pressed drops back to none. */
-          '&:hover': {
-            backgroundColor: hoverToken,
-            boxShadow: SHADOW_LEVEL_1,
-          },
-          '&:active': {
-            backgroundColor: activeToken,
-            boxShadow: 'none',
-          },
-          '&:focus-visible': {
-            /* 2px, matching the design and the 35 other components that use
-               2px — this was one of the 21 on 3px. The 1px offset is what
-               makes the ring's radius 3 against a 4 outer corner elsewhere in
-               the system; on a circular step it simply keeps the ring clear of
-               the border without swallowing it. */
-            outline: '2px solid var(--Focus-Visible)',
-            outlineOffset: '1px',
-          },
-        }),
+      style={{
+        '--_st-bd': borderToken, '--_st-bg': bgToken, '--_st-fg': textToken,
+        ...(clickable && { '--_st-hv': hoverToken, '--_st-pr': activeToken }),
       }}
     >
       {isDot ? null : displayContent}
-    </Box>
+    </IndicatorTag>
   );
 
   /* THE BAND. Every step — numbered circle or bare dot — sits in a slot one
@@ -405,24 +400,31 @@ export function Step({
      edge — a 12px dot at x 0 and the line starting at x 12. Vertically the
      slot is the full Button-Height, so the rule running down the column
      passes through the dot's centre. */
+  /* A dot's slot is the dot either way: Figma's No-Count Step is the 12px
+     dot at x 0 with its label 8px beyond, and a rule down a column of dots
+     still passes through their centres. */
   const bandedIndicator = (
-    <Box sx={{
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      flexShrink: 0,
-      /* A dot's slot is the dot either way: Figma's No-Count Step is the 12px
-         dot at x 0 with its label 8px beyond, and a rule down a column of
-         dots still passes through their centres. */
-      width:  isDot ? s.dot : s.indicator + 'px',
-      height: isHorizontal ? s.indicator + 'px' : (isDot ? s.dot : s.indicator + 'px'),
-    }}>
+    <div className={'MuiBox-root omni-st-band '
+      + (isDot ? (isHorizontal ? 'omni-st-band-dot-h-' : 'omni-st-band-dot-v-') : 'omni-st-band-') + sizeKey}>
       {indicatorEl}
-    </Box>
+    </div>
   );
 
   // Connector line
   const connectorTraversed = _index < activeStep;
+  /* Horizontally the rule sits at half the BAND, for count and noCount alike
+     — measured in the file, the dot's Ellipse sits at relY 10 of a 32 row
+     (centre 16) and the rule centres on 16 too: the dot is not centred on
+     itself, it is centred in the band. calc, not arithmetic: the thickness
+     is a token. Vertically it runs through the CENTRE of what it joins: a
+     32px circle's 16, or a dot's half-width.
+     Step-Line binds its stroke to Border when complete and Quiet when not.
+     Border is a BUTTONS token and Quiet a SURFACE one, so a traversed
+     segment follows the palette and an untravelled one follows the page.
+     Dashed: 2 on, 2 off across and 4/4 down, copied from the file's dash
+     arrays. */
   const connectorEl = !isLast ? (
-    <Box
+    <div
       className={
         /* A connector is about the SEGMENT between two steps, not about the
            step it hangs off — so it is traversed or not, with no third case.
@@ -434,58 +436,13 @@ export function Step({
         'step-connector'
         + (connectorTraversed ? ' step-connector-completed' : ' step-connector-incomplete')
         + (dashedIncomplete && !connectorTraversed ? ' step-connector-dashed' : '')
+        + ' MuiBox-root omni-st-con '
+        + (isHorizontal ? 'omni-st-con-h-' : isDot ? 'omni-st-con-v-dot-' : 'omni-st-con-v-') + sizeKey
+        + (connectorTraversed ? ' omni-st-con-done' : ' omni-st-con-todo')
+        + (dashedIncomplete && !connectorTraversed ? (isHorizontal ? ' omni-st-con-dash-h' : ' omni-st-con-dash-v') : '')
       }
+      style={connectorTraversed ? { '--_st-line': 'var(--Buttons-' + C + '-Border)' } : undefined}
       aria-hidden="true"
-      sx={{
-        flex: 1,
-        ...(isHorizontal
-          ? {
-              height: s.connectorThickness,
-              minWidth: '20px',
-              alignSelf: 'flex-start',
-              /* calc, not arithmetic: connectorThickness is a token now, so
-                 `indicator / 2 - thickness / 2` would produce NaN. The maths
-                 moves into CSS, where the variable can actually resolve. */
-              /* Half the BAND, for count and noCount alike. Briefly this
-                 halved the DOT instead, which put the rule through the middle
-                 of a 12px dot and therefore above the middle of the 32px row
-                 the dot sits in. Measured in the file, the dot's Ellipse sits
-                 at relY 10 of a 32 row (centre 16) and the rule centres on 16
-                 too — the dot is not centred on itself, it is centred in the
-                 band. */
-              marginTop: `calc(${s.indicator / 2}px - ${s.connectorThickness} / 2)`,
-            }
-          : {
-              width: s.connectorThickness,
-              minHeight: '24px',
-              /* Through the CENTRE of what it joins: a 32px circle's 16, or a
-                 dot's half-width. It used the circle's half for dots too, so a
-                 vertical noCount rule ran 10px right of every dot it joined. */
-              marginLeft: isDot
-                ? `calc(${s.dot} / 2 - ${s.connectorThickness} / 2)`
-                : `calc(${s.indicator / 2}px - ${s.connectorThickness} / 2)`,
-            }),
-        /* Step-Line binds its stroke to Border when complete and Quiet when
-           not. Border is a BUTTONS token and Quiet a SURFACE one, so the two
-           sides of the connector come from different collections — which is
-           why a traversed segment follows the palette and an untravelled one
-           follows the page. The lib had --Buttons-{C}-Button for traversed,
-           a full-strength fill where the design draws a border tone. */
-        backgroundColor: connectorTraversed
-          ? 'var(--Buttons-' + C + '-Border)'
-          : 'var(--Quiet)',
-        ...(dashedIncomplete && !connectorTraversed && {
-          backgroundColor: 'transparent',
-          /* 2 on, 2 off across and 4/4 down, copied from the file's dash
-             arrays. It was 6/6 both ways, which at a 2px rule reads as a row
-             of dashes rather than the dotted line the design draws. */
-          backgroundImage: isHorizontal
-            ? 'repeating-linear-gradient(90deg, var(--Quiet) 0px, var(--Quiet) 2px, transparent 2px, transparent 4px)'
-            : 'repeating-linear-gradient(180deg, var(--Quiet) 0px, var(--Quiet) 4px, transparent 4px, transparent 8px)',
-          backgroundSize: isHorizontal ? '4px 100%' : '100% 8px',
-        }),
-        transition: 'background-color 0.15s ease',
-      }}
     />
   ) : null;
 
@@ -507,11 +464,7 @@ export function Step({
      Surface › Text on the label. The indicator is the button and the label
      its sibling, hence :has on the step. Inline style would beat this, so
      the important flag is on purpose. */
-  const labelInteractionSx = clickable ? {
-    '&:has(.step-indicator:hover) .step-label, &:has(.step-indicator:active) .step-label, &:has(.step-indicator:focus-visible) .step-label': {
-      color: 'var(--Text) !important',
-    },
-  } : {};
+  const labelInteractionClass = clickable ? ' omni-st-step-click' : '';
   const labelEl = displayLabel ? (
     <Label className="step-label" style={{
       /* No fontWeight: Label's own (the Label ramp) at every status. The
@@ -531,11 +484,7 @@ export function Step({
   /* The circle and its label, laid out by labelPosition — under it or beside
      it — independently of which way the steps run. */
   const indicatorAndLabel = labelBelow ? (
-    <Box sx={{
-      display: 'flex', flexDirection: 'column', alignItems: 'center',
-      flexShrink: 0,
-      width: isDot ? s.dot : s.indicator + 'px',
-    }}>
+    <div className={'MuiBox-root omni-st-col ' + (isDot ? 'omni-st-col-dot-' : 'omni-st-col-') + sizeKey}>
       {bandedIndicator}
       {/* width 100% so the nowrap label centres on the circle and spills
           evenly both ways; it adds height to the column but never width. */}
@@ -546,34 +495,27 @@ export function Step({
           caption read as shifted right of its circle. A flex container
           with justify-content: center centres the item on the box and
           lets it overflow both ways, whatever the child's display. */}
+      {/* A dot's label sits right under its 32px band (Figma: gap 0). */}
       {labelEl && (
-        <Box sx={{
-          // A dot's label sits right under its 32px band (Figma: gap 0).
-          mt: isDot ? 0 : 'var(--Sizing-Half)', width: '100%',
-          display: 'flex', justifyContent: 'center',
-        }}>{labelEl}</Box>
+        <div className={'MuiBox-root omni-st-lbl' + (isDot ? ' omni-st-lbl-dot' : '')}>{labelEl}</div>
       )}
-    </Box>
+    </div>
   ) : (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 'var(--Sizing-1)', flexShrink: 0, ...(isDot && { height: s.dot, overflow: 'visible' }) }}>
+    <div className={'MuiBox-root omni-st-row' + (isDot ? ' omni-st-row-dot-' + sizeKey : '')}>
       {bandedIndicator}
       {labelEl}
-    </Box>
+    </div>
   );
 
   if (isHorizontal) {
     return (
-      <Box
+      <Part
         component="li"
         className={'step step-' + size + ' step-horizontal' +
           (isActive ? ' step-active' : '') + (isCompleted ? ' step-completed' : '') +
-          (isIncomplete ? ' step-incomplete' : '') + ' ' + className}
-        sx={{
-          display: 'flex', alignItems: 'flex-start',
-          flex: !isLast ? 1 : 'none',
-          ...labelInteractionSx,
-          ...sx,
-        }}
+          (isIncomplete ? ' step-incomplete' : '') + ' ' + className
+          + ' MuiBox-root omni-st-step-h' + (isLast ? ' omni-st-step-last' : '') + labelInteractionClass}
+        sx={sx}
         {...props}
       >
         {/* THE STEP IS ONE CIRCLE WIDE AND THE LABEL HANGS OUT OF IT.
@@ -589,18 +531,19 @@ export function Step({
         {indicatorAndLabel}
         {/* Connector — centered to circle via negative margin for label height */}
         {connectorEl}
-      </Box>
+      </Part>
     );
   }
 
   // Vertical
   return (
-    <Box
+    <Part
       component="li"
       className={'step step-' + size + ' step-vertical' +
         (isActive ? ' step-active' : '') + (isCompleted ? ' step-completed' : '') +
-        (isIncomplete ? ' step-incomplete' : '') + ' ' + className}
-      sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', ...labelInteractionSx, ...sx }}
+        (isIncomplete ? ' step-incomplete' : '') + ' ' + className
+        + ' MuiBox-root omni-st-step-v' + labelInteractionClass}
+      sx={sx}
       {...props}
     >
       {/* Step and Right Label binds itemSpacing -> Sizing-1. */}
@@ -608,7 +551,7 @@ export function Step({
           Figma's Step and Right Label is 12 tall with its 24px label at y -6. */}
       {indicatorAndLabel}
       {connectorEl}
-    </Box>
+    </Part>
   );
 }
 

@@ -3,6 +3,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Stepper, Step } from './Stepper';
 import { axe } from 'jest-axe';
+import { stateRules } from '../_testCss';
 
 /* ─── Helpers ─── */
 const LABELS = ['Order', 'Processing', 'Shipped', 'Delivered'];
@@ -377,15 +378,9 @@ describe('Stepper — Accessibility (jest-axe)', () => {
  * column of unreached steps reading as a row of buttons.
  */
 describe('the status ladder', () => {
-  const cssFor = (el) => {
-    const cls = (el.className || '').split(/\s+/).find((c) => c.startsWith('css-'));
-    if (!cls) return '';
-    return Array.from(document.styleSheets)
-      .flatMap((sheet) => Array.from(sheet.cssRules || []))
-      .filter((r) => (r.selectorText || '').includes('.' + cls))
-      .map((r) => r.cssText)
-      .join('\n');
-  };
+  /* What applies at rest and in each state, with the indicator's private
+     custom properties followed down to the real token. */
+  const cssFor = (el) => stateRules(el).all;
 
   const threeSteps = (extra = {}) => render(
     <Stepper activeStep={1} color="primary" {...extra}>
@@ -602,15 +597,9 @@ describe('the status ladder', () => {
  * always rendered `icon || index+1` inside a 24/32/40 circle, so an 8px dot
  * was unreachable. Diameters are Component-Size `No Count Step` (8/12/16). */
 describe('variant="noCount" draws dots', () => {
-  const cssFor = (el) => {
-    const cls = (el.className || '').split(/\s+/).find((c) => c.startsWith('css-'));
-    if (!cls) return '';
-    return Array.from(document.styleSheets)
-      .flatMap((sheet) => Array.from(sheet.cssRules || []))
-      .filter((r) => (r.selectorText || '').includes('.' + cls))
-      .map((r) => r.cssText)
-      .join('\n');
-  };
+  /* What applies at rest and in each state, with the indicator's private
+     custom properties followed down to the real token. */
+  const cssFor = (el) => stateRules(el).all;
 
   /* Token AND fallback: the number alone would pass on a hardcoded literal,
      the variable alone on a wrong fallback. */
@@ -647,15 +636,9 @@ describe('variant="noCount" draws dots', () => {
 describe('the step reads its type and focus from tokens', () => {
   /* Same technique the dot tests use: emotion puts sx into a generated class,
      so the value is in the stylesheet rather than the inline style. */
-  const cssFor = (el) => {
-    const cls = (el.className || '').split(/\s+/).find((c) => c.startsWith('css-'));
-    if (!cls) return '';
-    return Array.from(document.styleSheets)
-      .flatMap((sheet) => Array.from(sheet.cssRules || []))
-      .filter((r) => (r.selectorText || '').includes('.' + cls))
-      .map((r) => r.cssText)
-      .join('\n');
-  };
+  /* What applies at rest and in each state, with the indicator's private
+     custom properties followed down to the real token. */
+  const cssFor = (el) => stateRules(el).all;
 
   it('takes the digit weight from the Button-Small type style, not a literal', () => {
     /* The design binds Typography/Buttons/Small to the step's digit. It was a
@@ -676,10 +659,15 @@ describe('the step reads its type and focus from tokens', () => {
     /* 2px is what the design draws and what 35 other components use; this was
        one of the 21 on 3px. The 1px offset keeps the ring clear of the step's
        own border without swallowing it. */
-    const src = require('fs').readFileSync(__dirname + '/Stepper.js', 'utf8');
-    expect(src).toContain("outline: '2px solid var(--Focus-Visible)'");
-    expect(src).toContain("outlineOffset: '1px'");
-    expect(src).not.toContain("outline: '3px solid var(--Focus-Visible)'");
+    const { container } = render(
+      <Stepper activeStep={1} clickable onStepClick={() => {}}>
+        {LABELS.map((l, i) => <Step key={i} label={l} />)}
+      </Stepper>,
+    );
+    const focus = stateRules(container.querySelector('.step-indicator-clickable')).states.focusVisible;
+    expect(focus).toContain('outline: 2px solid var(--Focus-Visible)');
+    expect(focus).toContain('outline-offset: 1px');
+    expect(focus).not.toContain('3px solid var(--Focus-Visible)');
   });
 
   it('carries no dead size config', () => {

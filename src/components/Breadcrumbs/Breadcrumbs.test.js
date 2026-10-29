@@ -3,6 +3,7 @@ import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import { Breadcrumbs, BreadcrumbItem } from './Breadcrumbs';
 import { axe } from 'jest-axe';
+import { cssFor } from '../_testCss';
 
 /* ─── Helpers ─── */
 const CRUMBS = ['Home', 'Products', 'Electronics', 'Computers', 'Laptops', 'MacBook Pro'];
@@ -140,12 +141,13 @@ describe('Condense', () => {
   });
 
   // The "…" opens a Popover listing the hidden crumbs, as AvatarGroup's +N.
-  test('clicking the ellipsis opens a panel of the hidden pages', () => {
+  // The panel's module loads on first use, so the dialog arrives a tick later.
+  test('clicking the ellipsis opens a panel of the hidden pages', async () => {
     renderBreadcrumbs({ condense: true, maxItems: 4 });
     const btn = screen.getByRole('button', { name: /hidden pages/ });
     expect(btn).toHaveAttribute('aria-expanded', 'false');
     fireEvent.click(btn);
-    const panel = screen.getByRole('dialog', { name: 'Hidden pages' });
+    const panel = await screen.findByRole('dialog', { name: 'Hidden pages' });
     expect(panel).toHaveTextContent('Electronics');
     expect(panel).toHaveTextContent('Computers');
     expect(panel).not.toHaveTextContent('Home');
@@ -266,16 +268,6 @@ describe('Breadcrumbs — Accessibility (jest-axe)', () => {
  * separator is a 24px channel that breaks a trail into separate words.
  */
 describe('the separator gap does not scale with size', () => {
-  const cssFor = (el) => {
-    const cls = (el.className || '').split(/\s+/).find((c) => c.startsWith('css-'));
-    if (!cls) return '';
-    return Array.from(document.styleSheets)
-      .flatMap((sheet) => Array.from(sheet.cssRules || []))
-      .filter((r) => (r.selectorText || '').includes('.' + cls))
-      .map((r) => r.cssText)
-      .join('\n');
-  };
-
   test.each(['small', 'medium', 'large'])('%s uses var(--Sizing-1)', (size) => {
     const { container } = render(
       <Breadcrumbs size={size}>
@@ -306,16 +298,6 @@ describe('the separator gap does not scale with size', () => {
  * to move this with it.
  */
 describe('the current crumb is semibold', () => {
-  const cssFor = (el) => {
-    const cls = (el.className || '').split(/\s+/).find((c) => c.startsWith('css-'));
-    if (!cls) return '';
-    return Array.from(document.styleSheets)
-      .flatMap((sheet) => Array.from(sheet.cssRules || []))
-      .filter((r) => (r.selectorText || '').includes('.' + cls))
-      .map((r) => r.cssText)
-      .join('\n');
-  };
-
   test('reads the semibold token, not a hardcoded weight', () => {
     const { container } = render(
       <Breadcrumbs><span>Home</span><span>Products</span><span>Shoes</span></Breadcrumbs>

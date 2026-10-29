@@ -8,6 +8,7 @@ import PersonIcon from '@omni-design/icons/Person';
 import StarIcon from '@omni-design/icons/Star';
 import SearchIcon from '@omni-design/icons/Search';
 import { axe } from 'jest-axe';
+import { stateRules } from '../_testCss';
 
 const ITEMS_3 = [
   { icon: <HomeIcon />, label: 'Home' },
@@ -238,15 +239,11 @@ describe('BottomNavigation — Accessibility (jest-axe)', () => {
 
 /* --- Padding: the current Nav-Bar set's, per style --- */
 describe('Padding', () => {
-  /* jsdom drops var() from computed padding, so read the injected rule. */
+  /* jsdom drops var() from computed padding, so read what wins in the
+     stylesheet for the bar itself. */
   const ruleOf = (props) => {
     const { container } = renderNav(props);
-    const bar = container.querySelector('.bottom-nav');
-    const cls = [...bar.classList].find((c) => c.startsWith('css-'));
-    return [...document.styleSheets]
-      .flatMap((sheet) => { try { return [...sheet.cssRules]; } catch { return []; } })
-      .map((r) => r.cssText)
-      .find((t) => t.startsWith('.' + cls)) || '';
+    return stateRules(container.querySelector('.bottom-nav')).base;
   };
 
   test('fixed: Sizing-1-and-Half down, Sizing-4 across', () => {
