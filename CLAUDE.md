@@ -52,10 +52,11 @@ headings, borders, buttons — picks the right contrast-checked colors.
 
 ## 4. Phones, light and dark — already handled
 
-- **Phones:** `AppBar` folds its links — and every `endSlot` action but the
-  last — into a menu button below 900px. Pass `endSlot` as a fragment of
-  buttons, primary action last. Text keeps its desktop sizes, so for a hero
-  headline on a phone use `DisplaySmall` below 600px instead of `DisplayLarge`.
+- **Phones:** type follows the screen — the phone ramp below 600px, tablet
+  below 900px (smaller headings; body text is semibold on phones by design —
+  do not override it). `AppBar` folds its links, and every `endSlot` action
+  but the last, into a menu button below 900px. Pass `endSlot` as a fragment
+  of buttons, primary action last. Nothing to set up.
 - **Light / dark:** a toggle is three lines; every component and color
   follows, with contrast already checked in both modes:
 

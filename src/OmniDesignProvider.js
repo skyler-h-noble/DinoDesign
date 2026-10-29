@@ -337,7 +337,7 @@ async function fetchThemeManifest(themeURL) {
  * @param {boolean}  props.darkMode
  * @param {function} props.onDarkModeChange
  *
- * Device type ramp (off by default — the ramps describe native apps):
+ * Device type ramp ('auto' by default — guarded; false to opt out):
  * @param {false|'auto'|'IOS-Mobile'|'IOS-Tablet'|'Android-Mobile'|'Android-Tablet'|'Desktop'} [props.device]
  *
  * DOM:
@@ -384,16 +384,18 @@ export function OmniDesignProvider({
   darkMode: controlledDarkMode,
   onDarkModeChange,
 
-  /* Which device type ramp the page uses. OFF by default (false).
-     'auto' follows the screen — below 600px a phone ramp, 600–899 a tablet
-     ramp — and a device name pins one. It was the default in 0.25.0 and was
-     withdrawn in 0.25.1: the device ramps describe NATIVE apps (platform
-     faces, their weights — SF Pro's 600 is not a brand face's 600), so a web
-     page at phone width got semibold body copy, and with a design system
-     that predates the --Platform-Font-Families-* hooks, no body font at all.
-     A web phone is not an iOS app. Only ever applied when nothing else has
-     set data-device on <html>. */
-  device = false,
+  /* Which device type ramp the page uses. 'auto' (default) follows the
+     screen — below 600px the phone ramp, 600–899 the tablet ramp, 900+
+     desktop — so a phone gets phone sizes, not a 72px display headline. The
+     device ramps use the BRAND faces (data-fonts="System" is what swaps in
+     the platform's), with the design's own phone weights.
+     GUARDED: applied only once the theme has loaded, and only if the ramp
+     then resolves a body font. A design system published before the
+     --Platform-Font-Families-* hooks has a phone ramp pointing at nothing
+     (text fell back to Times in 0.25.0); such a theme stays on desktop sizes.
+     A device name pins one; false leaves data-device alone. Never applied
+     when something else has set data-device on <html>. */
+  device = 'auto',
 
   // DOM
   className,
@@ -428,43 +430,6 @@ export function OmniDesignProvider({
     mountedRef.current = true;
     return () => { mountedRef.current = false; };
   }, []);
-
-  // ── EFFECT: data-device from the screen width ───────────────────────────
-  useEffect(() => {
-    if (device === false || typeof document === 'undefined') return undefined;
-    const root = document.documentElement;
-    // Someone else owns it: leave it alone, now and on every resize.
-    if (root.hasAttribute('data-device') && root.getAttribute('data-omni-device') !== 'auto') return undefined;
-    const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
-    let written = root.getAttribute('data-device');
-    const set = (value) => {
-      // Stop if anything changed it since our last write.
-      if (root.getAttribute('data-device') !== written) return false;
-      if (value) {
-        root.setAttribute('data-device', value);
-        root.setAttribute('data-platform', value); // systems published before the rename
-      } else {
-        root.removeAttribute('data-device');
-        root.removeAttribute('data-platform');
-      }
-      root.setAttribute('data-omni-device', 'auto');
-      written = value || null;
-      return true;
-    };
-    if (device !== 'auto') { set(device === 'Desktop' ? 'Desktop' : device); return undefined; }
-    if (typeof window === 'undefined' || !window.matchMedia) return undefined;
-    const phone = window.matchMedia('(max-width: 599.98px)');
-    const tablet = window.matchMedia('(max-width: 899.98px)');
-    const apply = () => {
-      const kind = phone.matches ? 'Mobile' : tablet.matches ? 'Tablet' : null;
-      const ok = set(kind ? (isAndroid ? 'Android-' : 'IOS-') + kind : null);
-      if (!ok) { phone.removeEventListener('change', apply); tablet.removeEventListener('change', apply); }
-    };
-    apply();
-    phone.addEventListener('change', apply);
-    tablet.addEventListener('change', apply);
-    return () => { phone.removeEventListener('change', apply); tablet.removeEventListener('change', apply); };
-  }, [device]);
 
   // ── EFFECT: Fetch manifest if themeURL provided ────────────────────────────
   useEffect(() => {
@@ -534,6 +499,51 @@ export function OmniDesignProvider({
   );
   const [cssStatus, setCssStatus] = useState(hasAnyCSSSource ? 'loading' : 'ready');
   const [cssError,  setCssError]  = useState(null);
+
+  // ── EFFECT: data-device from the screen width ───────────────────────────
+  useEffect(() => {
+    if (device === false || typeof document === 'undefined') return undefined;
+    if (device === 'auto' && cssStatus !== 'ready') return undefined;
+    const root = document.documentElement;
+    // Someone else owns it: leave it alone, now and on every resize.
+    if (root.hasAttribute('data-device') && root.getAttribute('data-omni-device') !== 'auto') return undefined;
+    const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
+    let written = root.getAttribute('data-device');
+    const set = (value) => {
+      // Stop if anything changed it since our last write.
+      if (root.getAttribute('data-device') !== written) return false;
+      if (value) {
+        root.setAttribute('data-device', value);
+        root.setAttribute('data-platform', value); // systems published before the rename
+      } else {
+        root.removeAttribute('data-device');
+        root.removeAttribute('data-platform');
+      }
+      root.setAttribute('data-omni-device', 'auto');
+      written = value || null;
+      return true;
+    };
+    if (device !== 'auto') { set(device === 'Desktop' ? 'Desktop' : device); return undefined; }
+    if (typeof window === 'undefined' || !window.matchMedia) return undefined;
+    const phone = window.matchMedia('(max-width: 599.98px)');
+    const tablet = window.matchMedia('(max-width: 899.98px)');
+    const stop = () => { phone.removeEventListener('change', apply); tablet.removeEventListener('change', apply); };
+    function apply() {
+      const kind = phone.matches ? 'Mobile' : tablet.matches ? 'Tablet' : null;
+      if (!set(kind ? (isAndroid ? 'Android-' : 'IOS-') + kind : null)) { stop(); return; }
+      // The guard: a ramp that resolves no body font is worse than desktop sizes.
+      if (kind && !getComputedStyle(root).getPropertyValue('--Font-Family-Body').trim()) {
+        set(null);
+        root.removeAttribute('data-omni-device');
+        stop();
+      }
+    }
+    apply();
+    phone.addEventListener('change', apply);
+    tablet.addEventListener('change', apply);
+    return () => { phone.removeEventListener('change', apply); tablet.removeEventListener('change', apply); };
+  }, [device, cssStatus]);
+
 
   // ── DEV WARNING: no design-system CSS anywhere on the page ────────────────
   // Passing no CSS is legitimate when the app injects its own sheets (the

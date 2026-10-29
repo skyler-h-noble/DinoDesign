@@ -1495,3 +1495,182 @@
 .typography-h6 {
   font-variation-settings: var(--Font-Variation-Header);
 }
+
+/* Added 2026-10-28 — the platform font hooks the device ramps read.
+   This bundled theme predates them: every phone/tablet block sets
+   --Font-Family-Body: var(--Platform-Font-Families-Body) with no fallback,
+   and nothing defined it, so phone text fell back to Times. Copied verbatim
+   from the studio generator (platformFontFamilyCSS): under the brand face
+   the platform families ARE the brand tokens. Only defines what was
+   undefined; no existing value changes. */
+/* Platform font families — Devices-Type, both faces. */
+[data-device="Desktop"],
+[data-platform="Desktop"] {
+  --Platform-Font-Families-Header: var(--Set-Font-Family-Header);
+  --Platform-Font-Families-Body: var(--Set-Font-Family-Body);
+  --Platform-Font-Families-Decorative: var(--Set-Font-Family-Display, var(--Set-Font-Family-Decorative));
+  --Platform-Font-Families-Eyebrow: Inter, sans-serif;
+  --Font-Family-Eyebrow: var(--Platform-Font-Families-Eyebrow);
+  --Font-Family-Overline: var(--Font-Family-Eyebrow);
+}
+[data-device="IOS-Mobile"],
+[data-platform="IOS-Mobile"] {
+  --Platform-Font-Families-Header: var(--Set-Font-Family-Header);
+  --Platform-Font-Families-Body: var(--Set-Font-Family-Body);
+  --Platform-Font-Families-Decorative: var(--Set-Font-Family-Display, var(--Set-Font-Family-Decorative));
+  --Platform-Font-Families-Eyebrow: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Helvetica Neue", Arial, sans-serif;
+  --Font-Family-Eyebrow: var(--Platform-Font-Families-Eyebrow);
+  --Font-Family-Overline: var(--Font-Family-Eyebrow);
+}
+[data-device="Android-Mobile"],
+[data-platform="Android-Mobile"],
+[data-device="Android"],
+[data-platform="Android"] {
+  --Platform-Font-Families-Header: var(--Set-Font-Family-Header);
+  --Platform-Font-Families-Body: var(--Set-Font-Family-Body);
+  --Platform-Font-Families-Decorative: var(--Set-Font-Family-Display, var(--Set-Font-Family-Decorative));
+  --Platform-Font-Families-Eyebrow: Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+  --Font-Family-Eyebrow: var(--Platform-Font-Families-Eyebrow);
+  --Font-Family-Overline: var(--Font-Family-Eyebrow);
+}
+[data-device="IOS-Tablet-Vertical"],
+[data-platform="IOS-Tablet-Vertical"],
+[data-device="IOS-Tablet"],
+[data-platform="IOS-Tablet"] {
+  --Platform-Font-Families-Header: var(--Set-Font-Family-Header);
+  --Platform-Font-Families-Body: var(--Set-Font-Family-Body);
+  --Platform-Font-Families-Decorative: var(--Set-Font-Family-Display, var(--Set-Font-Family-Decorative));
+  --Platform-Font-Families-Eyebrow: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Helvetica Neue", Arial, sans-serif;
+  --Font-Family-Eyebrow: var(--Platform-Font-Families-Eyebrow);
+  --Font-Family-Overline: var(--Font-Family-Eyebrow);
+}
+[data-device="IOS-Tablet-Horizontal"],
+[data-platform="IOS-Tablet-Horizontal"] {
+  --Platform-Font-Families-Header: var(--Set-Font-Family-Header);
+  --Platform-Font-Families-Body: var(--Set-Font-Family-Body);
+  --Platform-Font-Families-Decorative: var(--Set-Font-Family-Display, var(--Set-Font-Family-Decorative));
+  --Platform-Font-Families-Eyebrow: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Helvetica Neue", Arial, sans-serif;
+  --Font-Family-Eyebrow: var(--Platform-Font-Families-Eyebrow);
+  --Font-Family-Overline: var(--Font-Family-Eyebrow);
+}
+[data-device="Android-Tablet-Vertical"],
+[data-platform="Android-Tablet-Vertical"] {
+  --Platform-Font-Families-Header: var(--Set-Font-Family-Header);
+  --Platform-Font-Families-Body: var(--Set-Font-Family-Body);
+  --Platform-Font-Families-Decorative: var(--Set-Font-Family-Display, var(--Set-Font-Family-Decorative));
+  --Platform-Font-Families-Eyebrow: Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+  --Font-Family-Eyebrow: var(--Platform-Font-Families-Eyebrow);
+  --Font-Family-Overline: var(--Font-Family-Eyebrow);
+}
+[data-device="Android-Tablet-Horizontal"],
+[data-platform="Android-Tablet-Horizontal"] {
+  --Platform-Font-Families-Header: var(--Set-Font-Family-Header);
+  --Platform-Font-Families-Body: var(--Set-Font-Family-Body);
+  --Platform-Font-Families-Decorative: var(--Set-Font-Family-Display, var(--Set-Font-Family-Decorative));
+  --Platform-Font-Families-Eyebrow: Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+  --Font-Family-Eyebrow: var(--Platform-Font-Families-Eyebrow);
+  --Font-Family-Overline: var(--Font-Family-Eyebrow);
+}
+[data-device="Desktop"][data-typography="System"],
+[data-platform="Desktop"][data-typography="System"],
+[data-device="Desktop"][data-fonts="System"],
+[data-platform="Desktop"][data-fonts="System"],
+[data-device="Desktop"][data-fonts="Default"],
+[data-platform="Desktop"][data-fonts="Default"] {
+  --Platform-Font-Families-Header: var(--Set-Font-Family-Header);
+  --Platform-Font-Families-Body: var(--Set-Font-Family-Body);
+  --Platform-Font-Families-Decorative: var(--Set-Font-Family-Display, var(--Set-Font-Family-Decorative));
+  --Platform-Font-Families-Eyebrow: Inter, sans-serif;
+  --Font-Family-Eyebrow: var(--Platform-Font-Families-Eyebrow);
+  --Font-Family-Overline: var(--Font-Family-Eyebrow);
+}
+[data-device="IOS-Mobile"][data-typography="System"],
+[data-platform="IOS-Mobile"][data-typography="System"],
+[data-device="IOS-Mobile"][data-fonts="System"],
+[data-platform="IOS-Mobile"][data-fonts="System"],
+[data-device="IOS-Mobile"][data-fonts="Default"],
+[data-platform="IOS-Mobile"][data-fonts="Default"] {
+  --Platform-Font-Families-Header: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Helvetica Neue", Arial, sans-serif;
+  --Platform-Font-Families-Body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Helvetica Neue", Arial, sans-serif;
+  --Platform-Font-Families-Decorative: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Helvetica Neue", Arial, sans-serif;
+  --Platform-Font-Families-Eyebrow: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Helvetica Neue", Arial, sans-serif;
+  --Font-Family-Eyebrow: var(--Platform-Font-Families-Eyebrow);
+  --Font-Family-Overline: var(--Font-Family-Eyebrow);
+}
+[data-device="Android-Mobile"][data-typography="System"],
+[data-platform="Android-Mobile"][data-typography="System"],
+[data-device="Android"][data-typography="System"],
+[data-platform="Android"][data-typography="System"],
+[data-device="Android-Mobile"][data-fonts="System"],
+[data-platform="Android-Mobile"][data-fonts="System"],
+[data-device="Android"][data-fonts="System"],
+[data-platform="Android"][data-fonts="System"],
+[data-device="Android-Mobile"][data-fonts="Default"],
+[data-platform="Android-Mobile"][data-fonts="Default"],
+[data-device="Android"][data-fonts="Default"],
+[data-platform="Android"][data-fonts="Default"] {
+  --Platform-Font-Families-Header: Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+  --Platform-Font-Families-Body: Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+  --Platform-Font-Families-Decorative: Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+  --Platform-Font-Families-Eyebrow: Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+  --Font-Family-Eyebrow: var(--Platform-Font-Families-Eyebrow);
+  --Font-Family-Overline: var(--Font-Family-Eyebrow);
+}
+[data-device="IOS-Tablet-Vertical"][data-typography="System"],
+[data-platform="IOS-Tablet-Vertical"][data-typography="System"],
+[data-device="IOS-Tablet"][data-typography="System"],
+[data-platform="IOS-Tablet"][data-typography="System"],
+[data-device="IOS-Tablet-Vertical"][data-fonts="System"],
+[data-platform="IOS-Tablet-Vertical"][data-fonts="System"],
+[data-device="IOS-Tablet"][data-fonts="System"],
+[data-platform="IOS-Tablet"][data-fonts="System"],
+[data-device="IOS-Tablet-Vertical"][data-fonts="Default"],
+[data-platform="IOS-Tablet-Vertical"][data-fonts="Default"],
+[data-device="IOS-Tablet"][data-fonts="Default"],
+[data-platform="IOS-Tablet"][data-fonts="Default"] {
+  --Platform-Font-Families-Header: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Helvetica Neue", Arial, sans-serif;
+  --Platform-Font-Families-Body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Helvetica Neue", Arial, sans-serif;
+  --Platform-Font-Families-Decorative: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Helvetica Neue", Arial, sans-serif;
+  --Platform-Font-Families-Eyebrow: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Helvetica Neue", Arial, sans-serif;
+  --Font-Family-Eyebrow: var(--Platform-Font-Families-Eyebrow);
+  --Font-Family-Overline: var(--Font-Family-Eyebrow);
+}
+[data-device="IOS-Tablet-Horizontal"][data-typography="System"],
+[data-platform="IOS-Tablet-Horizontal"][data-typography="System"],
+[data-device="IOS-Tablet-Horizontal"][data-fonts="System"],
+[data-platform="IOS-Tablet-Horizontal"][data-fonts="System"],
+[data-device="IOS-Tablet-Horizontal"][data-fonts="Default"],
+[data-platform="IOS-Tablet-Horizontal"][data-fonts="Default"] {
+  --Platform-Font-Families-Header: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Helvetica Neue", Arial, sans-serif;
+  --Platform-Font-Families-Body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Helvetica Neue", Arial, sans-serif;
+  --Platform-Font-Families-Decorative: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Helvetica Neue", Arial, sans-serif;
+  --Platform-Font-Families-Eyebrow: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Helvetica Neue", Arial, sans-serif;
+  --Font-Family-Eyebrow: var(--Platform-Font-Families-Eyebrow);
+  --Font-Family-Overline: var(--Font-Family-Eyebrow);
+}
+[data-device="Android-Tablet-Vertical"][data-typography="System"],
+[data-platform="Android-Tablet-Vertical"][data-typography="System"],
+[data-device="Android-Tablet-Vertical"][data-fonts="System"],
+[data-platform="Android-Tablet-Vertical"][data-fonts="System"],
+[data-device="Android-Tablet-Vertical"][data-fonts="Default"],
+[data-platform="Android-Tablet-Vertical"][data-fonts="Default"] {
+  --Platform-Font-Families-Header: Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+  --Platform-Font-Families-Body: Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+  --Platform-Font-Families-Decorative: Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+  --Platform-Font-Families-Eyebrow: Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+  --Font-Family-Eyebrow: var(--Platform-Font-Families-Eyebrow);
+  --Font-Family-Overline: var(--Font-Family-Eyebrow);
+}
+[data-device="Android-Tablet-Horizontal"][data-typography="System"],
+[data-platform="Android-Tablet-Horizontal"][data-typography="System"],
+[data-device="Android-Tablet-Horizontal"][data-fonts="System"],
+[data-platform="Android-Tablet-Horizontal"][data-fonts="System"],
+[data-device="Android-Tablet-Horizontal"][data-fonts="Default"],
+[data-platform="Android-Tablet-Horizontal"][data-fonts="Default"] {
+  --Platform-Font-Families-Header: Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+  --Platform-Font-Families-Body: Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+  --Platform-Font-Families-Decorative: Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+  --Platform-Font-Families-Eyebrow: Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+  --Font-Family-Eyebrow: var(--Platform-Font-Families-Eyebrow);
+  --Font-Family-Overline: var(--Font-Family-Eyebrow);
+}
