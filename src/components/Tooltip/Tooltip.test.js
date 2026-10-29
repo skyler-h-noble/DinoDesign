@@ -1,8 +1,24 @@
 // src/components/Tooltip/Tooltip.test.js
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import { Tooltip, SolidTooltip } from './Tooltip';
 import { axe } from 'jest-axe';
+import { declared, stateRules } from '../_testCss';
+
+/* An open tooltip's parts, rendered — the bubble (the design's), the arrow
+   and the box MUI's Tooltip drew around them. */
+const openParts = (props = {}) => {
+  render(<Tooltip open title="Tip" {...props}><button type="button">Anchor</button></Tooltip>);
+  return {
+    bubble: document.querySelector('.tooltip-content'),
+    arrow: document.querySelector('.MuiTooltip-arrow'),
+    box: document.querySelector('.MuiTooltip-tooltip'),
+  };
+};
+const resolved = (el, prop) => {
+  const m = stateRules(el).base.match(new RegExp('(?:^|; |^)' + prop + ': ([^;]+);'));
+  return m ? m[1] : undefined;
+};
 
 // MUI Tooltip uses Popper; tests use open={true} for synchronous rendering
 
@@ -252,7 +268,8 @@ describe('Tooltip — elevation is a token', () => {
   const source = require('fs').readFileSync(require.resolve('./Tooltip.js'), 'utf8');
 
   it('reads --Effect-Level-2 for its shadow', () => {
-    expect(source).toContain("boxShadow: 'var(--Effect-Level-2)'");
+    const { bubble } = openParts();
+    expect(declared(bubble, 'box-shadow')).toBe('var(--Effect-Level-2)');
   });
 
   it('hardcodes no rgba/rgb shadow', () => {
@@ -295,15 +312,21 @@ describe('Tooltip — color source and arrow default', () => {
   });
 
   it('gives the arrow the bubble’s own fill', () => {
-    expect(source).toContain('const arrowColor = tooltipBg;');
+    const { bubble, arrow } = openParts();
+    const fill = resolved(bubble, 'background-color');
+    expect(fill).toBe('var(--Buttons-BlackWhite-Button)');
+    expect(resolved(arrow, 'color')).toBe(fill);
+    expect(stateRules(arrow).all).not.toMatch(/--Background|--Text\)/);
   });
 
   it('no longer reads the surface for its fill or label', () => {
-    for (const decl of ['const tooltipBg', 'const tooltipText', 'const arrowColor']) {
-      const line = source.split('\n').find((l) => l.trim().startsWith(decl));
-      expect(line).toBeTruthy();
-      expect(line).not.toMatch(/--Background|--Text\)/);
+    const { bubble, arrow } = openParts({ color: 'primary' });
+    for (const v of [resolved(bubble, 'background-color'), resolved(bubble, 'color'), resolved(arrow, 'color')]) {
+      expect(v).toBeTruthy();
+      expect(v).not.toMatch(/--Background|--Text\)/);
     }
+    expect(resolved(bubble, 'background-color')).toBe('var(--Buttons-Primary-Button)');
+    expect(resolved(bubble, 'color')).toBe('var(--Buttons-Primary-Text)');
   });
 
   it('has no ternary whose branches are identical', () => {
@@ -356,11 +379,11 @@ describe('Tooltip — arrow takes width and height separately', () => {
 
   it('no longer drives the arrow through fontSize', () => {
     /* `fontSize` on the arrow slot is what made the two dimensions inseparable.
-       The bubble still has one for its type size, and each SIZE_MAP entry has
-       one; what must not come back is a fontSize inside the arrow slot. */
-    const arrowAt = source.indexOf('arrow: {');
-    expect(arrowAt).toBeGreaterThan(-1);
-    expect(source.slice(arrowAt)).not.toMatch(/fontSize\s*:/);
+       The bubble still has one for its type size; what must not come back is a
+       font size on the arrow, or an em-sized arrow. */
+    const { arrow } = openParts();
+    expect(declared(arrow, 'font-size')).toBeUndefined();
+    expect(stateRules(arrow).all).not.toMatch(/\d(\.\d+)?em\b/);
   });
 
   it('has no arrowSize left anywhere', () => {
@@ -374,9 +397,13 @@ describe('Tooltip — arrow takes width and height separately', () => {
   });
 
   it('swaps the axes for left/right, as MUI and the design both do', () => {
-    expect(source).toContain('const sideways = isSideways(placement);');
-    expect(source).toContain('width: sideways ? s.arrowVisible : s.arrowW');
-    expect(source).toContain('height: sideways ? s.arrowW : s.arrowVisible');
+    const { arrow } = openParts({ placement: 'right' });
+    expect(resolved(arrow, 'width')).toBe('var(--Tooltip-Visible-Arrow-Height, 6px)');
+    expect(resolved(arrow, 'height')).toBe('var(--Tooltip-Arrow-Width, 16px)');
+    cleanup();
+    const below = openParts({ placement: 'bottom' });
+    expect(resolved(below.arrow, 'width')).toBe('var(--Tooltip-Arrow-Width, 16px)');
+    expect(resolved(below.arrow, 'height')).toBe('var(--Tooltip-Visible-Arrow-Height, 6px)');
   });
 
   it('every size names a width token whose fallback is 2x its height fallback', () => {
@@ -391,7 +418,9 @@ describe('Tooltip — arrow takes width and height separately', () => {
   });
 
   it('applies the design’s gap token to the bubble', () => {
-    expect(source).toContain('gap: s.gap');
+    expect(declared(openParts().bubble, 'gap')).toBe('var(--Tooltip-Gap, 4px)');
+    cleanup();
+    expect(declared(openParts({ size: 'small' }).bubble, 'gap')).toBe('var(--Sm-Tooltip-Gap, 2px)');
   });
 
   it('renders at every size and placement without crashing', () => {
@@ -410,15 +439,16 @@ describe('Tooltip — radius is the flat design token', () => {
   const source = require('fs').readFileSync(require.resolve('./Tooltip.js'), 'utf8');
 
   it('reads --Tooltip-Radius, falling back to the old brand radius', () => {
-    expect(source).toContain("borderRadius: 'var(--Tooltip-Radius, var(--Style-Border-Radius))'");
+    expect(declared(openParts().bubble, 'border-radius')).toBe('var(--Tooltip-Radius, var(--Style-Border-Radius))');
   });
 
   it('does not read --Style-Border-Radius on its own', () => {
     /* It did, and that is a BRAND value that moves per design system, while the
        design pins the tooltip corner flat at 8. The two disagreed for every
        brand whose radius was not 8 — silently, since both sides resolved. */
-    const line = source.split('\n').find((l) => l.includes('borderRadius:'));
-    expect(line).toContain('--Tooltip-Radius');
+    const radius = declared(openParts().bubble, 'border-radius');
+    expect(radius).toContain('--Tooltip-Radius');
+    expect(radius).not.toBe('var(--Style-Border-Radius)');
   });
 });
 
