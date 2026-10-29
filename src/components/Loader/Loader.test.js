@@ -1,6 +1,7 @@
 // src/components/Loader/Loader.test.js
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { cssFor } from '../_testCss';
 import {
   Loader,
   LinearLoader,
@@ -235,8 +236,7 @@ describe('Loader styles (Figma Loader Styles)', () => {
     render(<Loader type={t} message="" />);
     expect(screen.getByRole('progressbar', { name: 'Loading' })).toBeInTheDocument();
   });
-  const cssFor = (el) => [...document.styleSheets].flatMap((sh) => { try { return [...sh.cssRules]; } catch (e) { return []; } })
-    .filter((r) => r.selectorText && [...el.classList].some((c) => r.selectorText.includes('.' + c))).map((r) => r.cssText).join('\n');
+  // Each piece's rules and its own inline style (the tone is per piece).
   const piecesCss = (c) => [...c.querySelectorAll('.loader-graphic *')].map(cssFor).join('\n');
   test('multicolor paints Primary, Secondary and Tertiary', () => {
     const { container } = render(<Loader type="orbit" multicolor message="" />);

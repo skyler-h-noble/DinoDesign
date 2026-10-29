@@ -77,6 +77,11 @@ registerStaticStyles('omni-loader', [
   /* The loader styles. Geometry is per piece, inline (k = size / 32). */
   '.omni-ld-g{position:relative;width:var(--_lg-d);height:var(--_lg-d);flex-shrink:0}',
   '.omni-ld-p{position:absolute;box-sizing:border-box}',
+  /* A piece's tone arrives as a custom property (--_ld-tone, its palette's
+     Border), declared on the piece itself. */
+  '.omni-ld-bg{background-color:var(--_ld-tone)}',
+  '.omni-ld-bd{border-color:var(--_ld-tone)}',
+  '.omni-ld-arc{border-top-color:var(--_ld-tone);border-bottom-color:var(--_ld-tone)}',
   '@keyframes omni-loader-turn{to{transform:rotate(360deg)}}',
   '@keyframes omni-loader-turn-back{to{transform:rotate(-360deg)}}',
   '@keyframes omni-loader-pop{0%,100%{transform:scale(.6)}50%{transform:scale(1)}}',
@@ -151,6 +156,7 @@ function LoaderGraphic({ type, d, color, multicolor, ...rest }) {
   useStaticStyles('omni-loader');
   const rootStyle = { '--_lg-d': d + 'px', '--omni-loader-k': k };
   const P = 'MuiBox-root omni-ld-p';
+  const BG = P + ' omni-ld-bg';
 
   if (type === 'orbit') {
     return (
@@ -158,7 +164,7 @@ function LoaderGraphic({ type, d, color, multicolor, ...rest }) {
         <div aria-hidden="true" className={P} style={{ inset: 0, animation: 'omni-loader-turn 1.2s linear infinite' }}>
           {[0, 1, 2].map((i) => {
             const a = (-90 + i * 120) * Math.PI / 180;
-            return <div key={i} className={P} style={{ width: px(8), height: px(8), borderRadius: '50%', backgroundColor: tone(i),
+            return <div key={i} className={BG} style={{ '--_ld-tone': tone(i), width: px(8), height: px(8), borderRadius: '50%',
               left: px(16 + 11 * Math.cos(a) - 4), top: px(16 + 11 * Math.sin(a) - 4),
               animation: 'omni-loader-pop 1.2s ease-in-out ' + (i * -0.4) + 's infinite' }} />;
           })}
@@ -170,7 +176,7 @@ function LoaderGraphic({ type, d, color, multicolor, ...rest }) {
     return (
       <div className="loader-graphic loader-bounce MuiBox-root omni-ld-g" style={rootStyle} {...rest}>
         {[0, 1, 2].map((i) => (
-          <div key={i} aria-hidden="true" className={P} style={{ width: px(8), height: px(8), borderRadius: '50%', backgroundColor: tone(i),
+          <div key={i} aria-hidden="true" className={BG} style={{ '--_ld-tone': tone(i), width: px(8), height: px(8), borderRadius: '50%',
             left: px(i * 12), top: px(12), animation: 'omni-loader-hop .9s ' + (i * 0.12) + 's infinite' }} />
         ))}
       </div>
@@ -180,21 +186,21 @@ function LoaderGraphic({ type, d, color, multicolor, ...rest }) {
     return (
       <div className="loader-graphic loader-ripple MuiBox-root omni-ld-g" style={rootStyle} {...rest}>
         {[0, 1, 2].map((i) => (
-          <div key={i} aria-hidden="true" className={P} style={{ inset: px(13), borderRadius: '50%', border: px(2) + ' solid ' + tone(i),
+          <div key={i} aria-hidden="true" className={P + ' omni-ld-bd'} style={{ '--_ld-tone': tone(i), inset: px(13), borderRadius: '50%', borderWidth: px(2), borderStyle: 'solid',
             opacity: 0, animation: 'omni-loader-ripple 1.8s linear ' + (i * -0.6) + 's infinite' }} />
         ))}
       </div>
     );
   }
   if (type === 'dual-ring') {
-    const arcs = (c) => ({ borderTopColor: c, borderBottomColor: c, borderLeftColor: 'transparent', borderRightColor: 'transparent' });
+    const arcs = (c) => ({ '--_ld-tone': c, borderLeftColor: 'transparent', borderRightColor: 'transparent' });
     return (
       <div className="loader-graphic loader-dual-ring MuiBox-root omni-ld-g" style={rootStyle} {...rest}>
-        <div aria-hidden="true" className={P} style={{ inset: 0, borderRadius: '50%', borderWidth: px(3), borderStyle: 'solid', ...arcs(tone(0)),
+        <div aria-hidden="true" className={P + ' omni-ld-arc'} style={{ inset: 0, borderRadius: '50%', borderWidth: px(3), borderStyle: 'solid', ...arcs(tone(0)),
           animation: 'omni-loader-turn 1.1s linear infinite' }} />
-        <div aria-hidden="true" className={P} style={{ inset: px(6), borderRadius: '50%', borderWidth: px(3), borderStyle: 'solid', ...arcs(tone(1)),
+        <div aria-hidden="true" className={P + ' omni-ld-arc'} style={{ inset: px(6), borderRadius: '50%', borderWidth: px(3), borderStyle: 'solid', ...arcs(tone(1)),
           transform: 'rotate(45deg)', animation: 'omni-loader-turn-back .9s linear infinite' }} />
-        <div aria-hidden="true" className={P} style={{ left: px(13), top: px(13), width: px(6), height: px(6), borderRadius: '50%', backgroundColor: tone(2),
+        <div aria-hidden="true" className={BG} style={{ '--_ld-tone': tone(2), left: px(13), top: px(13), width: px(6), height: px(6), borderRadius: '50%',
           animation: 'omni-loader-pop 1.1s ease-in-out infinite' }} />
       </div>
     );
@@ -203,8 +209,8 @@ function LoaderGraphic({ type, d, color, multicolor, ...rest }) {
     return (
       <div className="loader-graphic loader-bars MuiBox-root omni-ld-g" style={rootStyle} {...rest}>
         {[0, 1, 2].map((i) => (
-          <div key={i} aria-hidden="true" className={P} style={{ left: px(2 + i * 11), top: px(3), width: px(6), height: px(26), borderRadius: px(3),
-            backgroundColor: tone(i), transformOrigin: 'center', transform: 'scaleY(.3)',
+          <div key={i} aria-hidden="true" className={BG} style={{ '--_ld-tone': tone(i), left: px(2 + i * 11), top: px(3), width: px(6), height: px(26), borderRadius: px(3),
+            transformOrigin: 'center', transform: 'scaleY(.3)',
             animation: 'omni-loader-bar .9s ease-in-out ' + (i * 0.15) + 's infinite' }} />
         ))}
       </div>

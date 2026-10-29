@@ -1,6 +1,7 @@
 // src/components/LinearProgress/LinearProgress.test.js
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { stateRules } from '../_testCss';
 import { LinearProgress } from './LinearProgress';
 import { axe } from 'jest-axe';
 
@@ -223,7 +224,8 @@ describe('Matches Figma', () => {
 
   test('the indicator is Buttons-Border with a Background ring inside', () => {
     const { container } = render(<LinearProgress value={40} />);
-    const c = cssFor(container.querySelector('.linear-progress-bar'));
+    // The fill is a custom property; stateRules follows it to the token.
+    const c = stateRules(container.querySelector('.linear-progress-bar')).base;
     expect(c).toContain('background-color: var(--Buttons-Default-Border)');
     expect(c).toContain('box-shadow: inset 0 0 0 1px var(--Background)');
   });

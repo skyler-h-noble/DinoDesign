@@ -1,6 +1,7 @@
 // src/components/Container/Container.test.js
 import React from 'react';
 import { render } from '@testing-library/react';
+import { stateRules } from '../_testCss';
 import {
   Container,
   CenteredContainer,
@@ -260,7 +261,8 @@ describe('GridContainer Component', () => {
         </GridContainer>
       );
       const element = container.firstChild;
-      expect(element).toHaveStyle(`grid-template-columns: repeat(${col}, 1fr)`);
+      // Columns arrive as a custom property; stateRules follows it to the value.
+      expect(stateRules(element).base).toContain(`grid-template-columns: repeat(${col}, 1fr)`);
     });
   });
 
@@ -305,7 +307,7 @@ describe('StackContainer Component', () => {
       </StackContainer>
     );
     const element = container.firstChild;
-    expect(element).toHaveStyle('flex-direction: column');
+    expect(stateRules(element).base).toContain('flex-direction: column;');
   });
 
   test('renders with row direction', () => {
@@ -315,7 +317,7 @@ describe('StackContainer Component', () => {
       </StackContainer>
     );
     const element = container.firstChild;
-    expect(element).toHaveStyle('flex-direction: row');
+    expect(stateRules(element).base).toContain('flex-direction: row;');
   });
 
   test('renders with different spacing sizes', () => {
@@ -339,7 +341,7 @@ describe('StackContainer Component', () => {
         </StackContainer>
       );
       const element = container.firstChild;
-      expect(element).toHaveStyle(`align-items: ${align}`);
+      expect(stateRules(element).base).toContain(`align-items: ${align};`);
     });
   });
 });

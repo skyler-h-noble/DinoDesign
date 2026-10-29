@@ -72,8 +72,10 @@ const cssOf = (sel, obj) => {
 registerStaticStyles('omni-avatar-group', [
   '.omni-avg{display:inline-flex;align-items:center}',
   '.omni-avg-step>*:not(:first-of-type){margin-left:var(--_avg-step)}',
-  '.omni-avg-ring>*{position:relative;border-radius:50%;box-shadow:0 0 0 2px var(--Background);display:inline-flex}',
-  '.omni-avg-shaped>*{position:relative;display:inline-flex;isolation:isolate;box-shadow:none;border-radius:0}',
+  /* Two classes: an Avatar child is styled by its own sheet, which can sit
+     later in <head> than this one; emotion's group rule came after it. */
+  '.omni-avg.omni-avg-ring>*{position:relative;border-radius:50%;box-shadow:0 0 0 2px var(--Background);display:inline-flex}',
+  '.omni-avg.omni-avg-shaped>*{position:relative;display:inline-flex;isolation:isolate;box-shadow:none;border-radius:0}',
   '.omni-avg-halo>*::before{content:"";position:absolute;inset:-2px;z-index:-1;background-color:var(--Background)}',
   ...AVATAR_SHAPES.map((sh) => cssOf(`.omni-avg-halo.omni-avg-sh-${sh}>*::before`, shapeStyle(sh))),
   '.omni-avg-front>*:hover,.omni-avg-front>*:focus-within{z-index:1}',

@@ -106,8 +106,10 @@ registerStaticStyles('omni-list', [
   '.omni-li-ctl:hover{background-color:rgba(25, 118, 210, 0.04)}',
   '@media (hover: none){.omni-li-ctl:hover{background-color:transparent}}',
   '@media print{.omni-li-ctl{-webkit-print-color-adjust:exact;print-color-adjust:exact}}',
-  '.omni-li-ctl.Mui-checked{color:inherit}',
+  /* Disabled before checked: the item's checked color (inherit) came last
+     in MUI's rules, so a disabled, selected mark keeps the row's color. */
   '.omni-li-ctl.Mui-disabled{pointer-events:none;cursor:default;color:rgba(0, 0, 0, 0.26)}',
+  '.omni-li-ctl.Mui-checked{color:inherit}',
   '.omni-li-ctl-in{cursor:inherit;position:absolute;opacity:0;width:100%;height:100%;top:0;left:0;margin:0;padding:0;z-index:1}',
   '.omni-li-ctl-svg{user-select:none;width:1em;height:1em;display:inline-block;flex-shrink:0;'
     + 'transition:fill 200ms cubic-bezier(0.4, 0, 0.2, 1);fill:currentColor;font-size:1.5rem}',
@@ -265,11 +267,14 @@ export function ListItem({
          ::after; Border from SURFACE, not Buttons — held by
          ListSelectedRing.test.js. Hover / pressed only when focusable, with
          the inset edge riding along so a hovered row keeps its border. */
-      + ' MuiBox-root omni-li omni-li-' + k
-      + (isFocusable ? (isClickable ? ' omni-li-fc' : ' omni-li-f') : '')
-      + (disabled ? ' omni-li-off' : '') + (isClickable ? ' omni-li-click' : '') + sep + (selected ? ' omni-li-sel' : ''),
+      ,
     ...props,
   };
+  /* A caller's className replaced the list-item-* names (it was spread after
+     them) — kept; the static classes are added either way. */
+  rootProps.className = (rootProps.className ? rootProps.className + ' ' : '') + 'MuiBox-root omni-li omni-li-' + k
+    + (isFocusable ? (isClickable ? ' omni-li-fc' : ' omni-li-f') : '')
+    + (disabled ? ' omni-li-off' : '') + (isClickable ? ' omni-li-click' : '') + sep + (selected ? ' omni-li-sel' : '');
   const markLabel = 'Select ' + (typeof children === 'string' ? children : 'item');
   const content = (
     <>

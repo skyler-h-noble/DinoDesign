@@ -40,9 +40,10 @@ const kebab = (k) => k.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase());
 registerStaticStyles('omni-chart', [
   '.omni-chart{display:block;margin:0;position:relative}',
   '.omni-chart-full{width:100%}',
-  '.omni-chart-sr{' + Object.entries(VISUALLY_HIDDEN).map(([k, v]) => kebab(k) + ':' + v).join(';') + '}',
+  /* `border: 0` in an sx is MUI's border shorthand, `0px solid` — kept. */
+  '.omni-chart-sr{' + Object.entries(VISUALLY_HIDDEN).map(([k, v]) => kebab(k) + ':' + (k === 'border' ? '0px solid' : v)).join(';') + '}',
   '.omni-chart-hits{position:absolute;inset:0;display:block;pointer-events:none}',
-  '.omni-chart-hit{position:absolute;top:0;height:100%;left:var(--_ch-l);width:var(--_ch-w);padding:0;margin:0;border:0;'
+  '.omni-chart-hit{position:absolute;top:0;height:100%;left:var(--_ch-l);width:var(--_ch-w);padding:0;margin:0;border:0px solid;'
     + 'background:transparent;cursor:pointer;pointer-events:auto}',
   '.omni-chart-hit:focus-visible{outline:2px solid var(--Focus-Visible);outline-offset:-2px;border-radius:4px}',
 ].join('\n'));
