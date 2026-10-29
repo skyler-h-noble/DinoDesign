@@ -120,8 +120,20 @@ export function stateRules(el) {
     return best;
   };
   const baseWin = winners(buckets.base);
+  /* A private property the element does not declare is INHERITED — read it
+     off the nearest ancestor that does (a tab's label reads the tab's). */
+  const fromAncestor = (name) => {
+    for (let a = el.parentElement; a; a = a.parentElement) {
+      const v = declared(a, name);
+      if (v !== undefined) return v;
+    }
+    return undefined;
+  };
   const priv = (v, depth = 0) => (depth > 4 ? v : v.replace(/var\((--_[\w-]+)\)/g, (all, name) => {
-    const d = baseWin.get(name); return d ? priv(d.value, depth + 1) : all;
+    const d = baseWin.get(name);
+    if (d) return priv(d.value, depth + 1);
+    const up = fromAncestor(name);
+    return up !== undefined ? priv(up, depth + 1) : all;
   }));
   const text = (map) => [...map.values()].filter((d) => !d.prop.startsWith('--_'))
     .map((d) => `${d.prop}: ${priv(d.value)}${d.important ? ' !important' : ''};`).join(' ');

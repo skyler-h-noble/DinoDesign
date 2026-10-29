@@ -1,7 +1,8 @@
 // src/components/Tabs/Tabs.js
 import React, { createContext, useContext, useState, useRef, useCallback, useId, useEffect, useLayoutEffect } from 'react';
-import { Box } from '@mui/material';
-import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography, CAP_HEIGHT_TRIM, Body } from '../Typography';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
+import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography, Body } from '../Typography';
 import { Button } from '../Button/Button';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -210,6 +211,76 @@ const TabsContext = createContext({
 });
 export const useTabsContext = () => useContext(TabsContext);
 
+/* ─── Static sheet ───
+   Every declaration the parts used to hand emotion per render, as classes
+   over the same tokens. A tab's per-instance values (padding, height,
+   indicator color and thickness) arrive as custom properties; the indicator
+   EDGE is a class per orientation. The indicator color itself is switched by
+   class — --_tab-ind is transparent, the selected color, or the 50% hover
+   preview — so a :hover rule can change it, which an inline value would not
+   allow. State rules weigh what emotion's did. */
+const SxBox = lazySxBox('Tabs');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+const EDGES = ['Bottom', 'Left', 'Right'];
+const TRIM = 'text-box-trim:trim-both;text-box-edge:cap alphabetic;padding-top:0;padding-bottom:0';
+
+registerStaticStyles('omni-tabs', [
+  '.omni-tabs{display:flex;flex-direction:column;width:100%;overflow:hidden}',
+  '.omni-tabs-v{flex-direction:row}',
+  /* Figma's Tabs frame has no padding: the tabs sit flush and the baseline
+     runs the full width. The 4px is for the variants that paint a surface
+     behind the tabs, where a selected tab's background would otherwise touch
+     the container's edge. */
+  '.omni-tablist{display:flex;flex-direction:row;gap:0;position:relative;background-color:var(--Background);padding:4px;overflow:hidden;border-radius:0}',
+  '.omni-tablist-v{flex-direction:column}',
+  '.omni-tablist-std{padding:0}',
+  ...EDGES.map((e) => `.omni-tablist-bl-${e}{border-${e.toLowerCase()}:${BASELINE_THICKNESS} solid var(--Border-Variant)}`),
+  '.omni-tabs-row{display:flex;flex-direction:row;flex:1}',
+  '.omni-tabs-row-v{flex-direction:column}',
+  '.omni-tabs-scroll{display:flex;flex-direction:row;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}',
+  '.omni-tabs-scroll-v{flex-direction:column;overflow-x:visible;overflow-y:auto;min-height:0}',
+  '.omni-tabs-scroll::-webkit-scrollbar{display:none}',
+  // Tab
+  '.omni-tab{--_tab-ind:transparent;display:inline-flex;text-decoration:none;align-items:center;justify-content:center;gap:' + TAB_CONTENT_GAP + ';'
+    + 'padding:var(--_tab-pad);min-height:var(--_tab-minh);font-family:inherit;color:var(--Quiet);background-color:transparent;border:none;'
+    + 'cursor:pointer;opacity:1;position:relative;outline:none;transition:color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;'
+    + 'flex-shrink:0;white-space:nowrap}',
+  /* The indicator sits on ONE edge, chosen by orientation. Transparent when
+     unselected rather than absent, so selecting a tab cannot change its size.
+     A tab overlaps the baseline by its 1px so the rule runs UNDER the tabs. */
+  ...EDGES.map((e) => `.omni-tab-e-${e}{border-${e.toLowerCase()}:var(--_tab-th) solid var(--_tab-ind)}`),
+  ...EDGES.map((e) => `.omni-tab-bl-${e}{margin-${e.toLowerCase()}:-${BASELINE_THICKNESS}}`),
+  '.omni-tab-sel{--_tab-ind:var(--_tab-c);color:var(--Text)}',
+  '.omni-tab-off{cursor:not-allowed;opacity:var(--Disabled, 0.38)}',
+  '.omni-tab-hidden{display:none}',
+  /* Engaged, the label turns Text and the fill stays (Figma's Tab draws no
+     Hover / Pressed fill); hover previews the selector at 50%. */
+  '.omni-tab-on:hover{color:var(--Text)}',
+  '.omni-tab-hov:hover{--_tab-ind:var(--_tab-hov)}',
+  '.omni-tab-on:active{color:var(--Text)}',
+  // 3px ring + 1px gap.
+  '.omni-tab-on:focus-visible{color:var(--Text);outline:3px solid var(--Focus-Visible);outline-offset:-4px}',
+  '.omni-tab-dec{display:inline-flex;font-size:var(--_tab-icon);line-height:1;flex-shrink:0}',
+  '.omni-tab-label{display:inline-flex;align-items:center;padding:4px var(--_tab-tpad)}',
+  `@supports (text-box-edge: cap alphabetic){.omni-tab .omni-tab-text{${TRIM}}}`,
+  '.omni-tabpanel{padding-top:16px;font-size:var(--_tp-fs);font-family:inherit;color:var(--Text)}',
+  // More
+  '.omni-tabs-more-menu{display:flex;flex-direction:column;padding:var(--Sizing-1, 8px);min-width:160px}',
+  '.omni-tabs-more-item{display:flex;align-items:center;gap:var(--Sizing-1, 8px);width:100%;border:none;background:transparent;font:inherit;'
+    + 'color:var(--Text);text-align:left;padding:var(--Sizing-1, 8px) var(--Sizing-1-and-Half, 12px);cursor:pointer;border-radius:var(--Menu-Item-Radius, 0px)}',
+  '.omni-tabs-more-item:hover{background-color:var(--Hover)}',
+  '.omni-tabs-more-item:active{background-color:var(--Pressed)}',
+  '.omni-tabs-more-item:focus-visible{outline:3px solid var(--Focus-Visible);outline-offset:-3px}',
+  '.omni-tabs-more-item:disabled{opacity:var(--Disabled, 0.38);cursor:not-allowed}',
+  '.omni-tabs-more-icon{display:inline-flex;flex-shrink:0}',
+].join('\n'));
+
+/** A part's root: static classes, plus an MUI box only when given sx. */
+const Part = React.forwardRef(function Part({ sx, component: Tag = 'div', ...props }, ref) {
+  if (hasSx(sx)) return <SxBox component={Tag} sx={sx} ref={ref} {...props} />;
+  return <Tag ref={ref} {...props} />;
+});
+
 let warnedVerticalMore = false;
 /* The … Button's square, per size — what the More measurement reserves before
    the button exists. Button-Height, as Button's own icon-only square. */
@@ -239,9 +310,10 @@ export function Tabs({
      Each Tab takes an href; the selected one gets aria-current="location". */
   navigation = false,
   className = '',
-  sx = {},
+  sx,
   ...props
 }) {
+  useStaticStyles('omni-tabs');
   const [internalValue, setInternalValue] = useState(defaultValue);
   const controlled = controlledValue !== undefined;
   const value = controlled ? controlledValue : internalValue;
@@ -268,21 +340,16 @@ export function Tabs({
 
   return (
     <TabsContext.Provider value={{ value, setValue, variant, color, size, orientation, scrollable: isScroll, overflow, baseline, tabsId, navigation }}>
-      <Box
+      <Part
         className={'tabs tabs-' + orientation + ' tabs-' + size + ' tabs-' + variant
           + (variant !== 'standard' ? ' tabs-' + color : '')
-          + (isScroll ? ' tabs-scrollable' : '') + (overflow === 'more' ? ' tabs-more' : '') + ' ' + className}
-        sx={{
-          display: 'flex',
-          flexDirection: isHorizontalOrientation(orientation) ? 'column' : 'row',
-          width: '100%',
-          overflow: 'hidden',
-          ...sx,
-        }}
+          + (isScroll ? ' tabs-scrollable' : '') + (overflow === 'more' ? ' tabs-more' : '')
+          + ' omni-tabs' + (isHorizontalOrientation(orientation) ? '' : ' omni-tabs-v') + ' ' + className}
+        sx={sx}
         {...props}
       >
         {children}
-      </Box>
+      </Part>
     </TabsContext.Provider>
   );
 }
@@ -295,9 +362,10 @@ export function TabList({
      doesn't leak `rounded` onto the DOM; renders square and warns once. */
   rounded,
   className = '',
-  sx = {},
+  sx,
   ...props
 }) {
+  useStaticStyles('omni-tabs');
   const { value, setValue, variant, color, size, orientation, scrollable, overflow, baseline, tabsId, navigation } = useTabsContext();
   const tabListRef = useRef(null);
   const scrollContainerRef = useRef(null);
@@ -322,7 +390,6 @@ export function TabList({
 
   /* The baseline goes on the same edge the indicator does, so the 2px
      indicator lands on top of the 1px rule rather than beside it. */
-  const baselineSx = baselineStyle(orientation, baseline);
 
   // Theme/surface for the TabList (and individual Tabs inherit via context)
   const dataTheme = isStandard ? undefined
@@ -447,13 +514,13 @@ export function TabList({
   /* Overlap the baseline by its 1px, as a Tab does, so the arrows and the …
      sit on the rule instead of adding a pixel to the bar (33 against Figma's 32)
      and centre across the whole width of a vertical list. */
-  const btnSx = { flexShrink: 0, alignSelf: 'center', ...(baseline && { ['margin' + edgeFor(orientation)]: '-' + BASELINE_THICKNESS }) };
+  const btnStyle = { flexShrink: 0, alignSelf: 'center', ...(baseline && { ['margin' + edgeFor(orientation)]: '-' + BASELINE_THICKNESS }) };
   const scrollButton = (dir) => (
     <Button iconOnly variant="ghost" size={btnSize}
       aria-label={isHorizontal ? (dir < 0 ? 'Scroll tabs left' : 'Scroll tabs right') : (dir < 0 ? 'Scroll tabs up' : 'Scroll tabs down')}
       onClick={() => scrollBy(dir)} disabled={dir < 0 ? !canScrollLeft : !canScrollRight}
       className={'tab-list-scroll-btn tab-list-scroll-btn-' + (dir < 0 ? (isHorizontal ? 'left' : 'up') : (isHorizontal ? 'right' : 'down'))}
-      sx={btnSx}>
+      style={btnStyle}>
       {isHorizontal ? (dir < 0 ? <ChevronLeftIcon /> : <ChevronRightIcon />) : (dir < 0 ? <ExpandLessIcon /> : <ExpandMoreIcon />)}
     </Button>
   );
@@ -462,46 +529,24 @@ export function TabList({
     React.cloneElement(child, { _index: index, _overflowed: index >= shown, key: child.key || index })
   );
 
-  const rowSx = {
-    display: 'flex', alignItems: 'center', gap: 'var(--Sizing-1, 8px)', width: '100%',
-    border: 'none', background: 'transparent', font: 'inherit', color: 'var(--Text)', textAlign: 'left',
-    padding: 'var(--Sizing-1, 8px) var(--Sizing-1-and-Half, 12px)', cursor: 'pointer',
-    borderRadius: 'var(--Menu-Item-Radius, 0px)',
-    '&:hover': { backgroundColor: 'var(--Hover)' },
-    '&:active': { backgroundColor: 'var(--Pressed)' },
-    '&:focus-visible': { outline: '3px solid var(--Focus-Visible)', outlineOffset: '-3px' },
-    '&:disabled': { opacity: 'var(--Disabled, 0.38)', cursor: 'not-allowed' },
-  };
 
   return (
-    <Box
+    <Part
       ref={tabListRef}
+      component={navigation ? 'nav' : 'div'}
+      sx={sx}
       data-theme={dataTheme || undefined}
       data-surface={dataSurface || undefined}
       className={
         'tab-list tab-list-' + variant + ' tab-list-' + size + ' tab-list-' + orientation
         + (scrollable ? ' tab-list-scrollable' : '') + (isMore ? ' tab-list-more' : '')
+        + ' omni-tablist' + (isHorizontal ? '' : ' omni-tablist-v') + (isStandard ? ' omni-tablist-std' : '')
+        /* The baseline goes on the same edge the indicator does, so the 2px
+           indicator lands on top of the 1px rule rather than beside it. */
+        + (baseline ? ' omni-tablist-bl-' + edgeFor(orientation) : '')
         + ' ' + className
       }
       onKeyDown={handleKeyDown}
-      component={navigation ? 'nav' : undefined}
-      sx={{
-        display: 'flex',
-        flexDirection: isHorizontal ? 'row' : 'column',
-        gap: 0,
-        position: 'relative',
-        backgroundColor: 'var(--Background)',
-        ...baselineSx,
-        /* Figma's Tabs frame has no padding: the tabs sit flush and the
-           baseline runs the full width. The 4px is for the variants that
-           paint a surface behind the tabs, where a selected tab's background
-           would otherwise touch the container's edge. Standard has no such
-           background, so it takes Figma's zero. */
-        padding: isStandard ? 0 : '4px',
-        overflow: 'hidden',
-        borderRadius: 0,
-        ...sx,
-      }}
       {...props}
     >
       {/* Scroll back button */}
@@ -509,36 +554,23 @@ export function TabList({
 
       {/* Scrollable container or static list */}
       {scrollable ? (
-        <Box
+        <div
           ref={scrollContainerRef}
           role={navigation ? undefined : 'tablist'}
           aria-orientation={navigation ? undefined : orientation}
-          className="tab-list-scroll-container"
-          sx={{
-            display: 'flex',
-            flexDirection: isHorizontal ? 'row' : 'column',
-            ...(isHorizontal ? { overflowX: 'auto' } : { overflowY: 'auto', minHeight: 0 }),
-            scrollbarWidth: 'none',
-            '&::-webkit-scrollbar': { display: 'none' },
-            flex: 1,
-            minWidth: 0,
-          }}
+          className={'tab-list-scroll-container omni-tabs-scroll' + (isHorizontal ? '' : ' omni-tabs-scroll-v')}
         >
           {tabListContent}
-        </Box>
+        </div>
       ) : (
-        <Box
+        <div
           ref={scrollContainerRef}
           role={navigation ? undefined : 'tablist'}
           aria-orientation={navigation ? undefined : orientation}
-          sx={{
-            display: 'flex',
-            flexDirection: isHorizontal ? 'row' : 'column',
-            flex: 1,
-          }}
+          className={'omni-tabs-row' + (isHorizontal ? '' : ' omni-tabs-row-v')}
         >
           {tabListContent}
-        </Box>
+        </div>
       )}
 
       {/* Scroll forward button */}
@@ -552,28 +584,28 @@ export function TabList({
             className="tab-list-more-btn" aria-haspopup="dialog" aria-expanded={moreOpen}
             aria-label={overflowed.length + ' more tabs' + (selectedHidden && typeof selectedHidden.label === 'string' ? ', ' + selectedHidden.label + ' selected' : '')}
             onPointerEnter={loadPopover} onFocus={loadPopover}
-            onClick={() => { setMoreWanted(true); setMoreOpen((o) => !o); }} sx={btnSx}>
+            onClick={() => { setMoreWanted(true); setMoreOpen((o) => !o); }} style={btnStyle}>
             <MoreHorizIcon />
           </Button>
           {moreWanted && <React.Suspense fallback={null}>
           <Popover open={moreOpen} onClose={() => setMoreOpen(false)} anchorEl={moreRef.current}
             placement="bottom-end" arrow width="auto" theme={null} aria-label="More tabs">
-            <Box className="tab-list-more-menu" sx={{ display: 'flex', flexDirection: 'column', p: 'var(--Sizing-1, 8px)', minWidth: 160 }}>
+            <div className="tab-list-more-menu omni-tabs-more-menu">
               {overflowed.map((o) => (
-                <Box key={'more-' + o.index} component="button" type="button" className="tab-list-more-item"
+                <button key={'more-' + o.index} type="button" className="tab-list-more-item omni-tabs-more-item"
                   aria-current={o.value === value ? 'true' : undefined} disabled={o.disabled}
-                  onClick={() => { setValue(o.value); setMoreOpen(false); }} sx={rowSx}>
-                  {o.icon && <Box component="span" sx={{ display: 'inline-flex', flexShrink: 0 }}>{o.icon}</Box>}
-                  <Body component="span" sx={{ flex: 1, color: 'inherit', fontWeight: o.value === value ? 600 : undefined }}>{o.label}</Body>
-                  {o.value === value && <CheckIcon aria-hidden="true" sx={{ fontSize: 'var(--Button-Icon, 20px)' }} />}
-                </Box>
+                  onClick={() => { setValue(o.value); setMoreOpen(false); }}>
+                  {o.icon && <span className="omni-tabs-more-icon">{o.icon}</span>}
+                  <Body component="span" color="inherit" style={{ flex: 1, fontWeight: o.value === value ? 600 : undefined }}>{o.label}</Body>
+                  {o.value === value && <CheckIcon aria-hidden="true" style={{ fontSize: 'var(--Button-Icon, 20px)' }} />}
+                </button>
               ))}
-            </Box>
+            </div>
           </Popover>
           </React.Suspense>}
         </>
       )}
-    </Box>
+    </Part>
   );
 }
 
@@ -589,9 +621,11 @@ export function Tab({
   endDecorator,
   iconOnly = false,
   className = '',
-  sx = {},
+  style,
+  sx,
   ...props
 }) {
+  useStaticStyles('omni-tabs');
   const { value, setValue, variant, color, size, orientation, tabsId, baseline, navigation } = useTabsContext();
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
   const isHorizontal = isHorizontalOrientation(orientation);
@@ -639,9 +673,38 @@ export function Tab({
     : { component: 'button', role: 'tab', id: tabId, 'aria-selected': isSelected, 'aria-controls': panelId,
         'aria-disabled': disabled || undefined, tabIndex: isSelected ? 0 : -1 };
 
+  /* Padding: horizontal only, height from min-height with the content
+     centred. The indicator border takes layout space; Figma's Selector does not
+     (it is positioned over the tab), so the space is given back — on the top
+     edge when horizontal, so the content centres in the full height; out of the
+     bar edge's own padding when vertical (an icon-only tab has none, so it goes
+     on the opposite edge). */
+  const edge = edgeFor(orientation);
+  const side = iconOnly ? '0' : s.px;
+  const pad = { Top: '0', Right: side, Bottom: '0', Left: side };
+  if (isHorizontal) pad.Top = s.indicatorThickness;
+  else if (iconOnly) pad[edge === 'Left' ? 'Right' : 'Left'] = s.indicatorThickness;
+  else pad[edge] = 'calc(' + s.px + ' - ' + s.indicatorThickness + ')';
+
+  const tabStyle = {
+    '--_tab-pad': [pad.Top, pad.Right, pad.Bottom, pad.Left].join(' '),
+    '--_tab-minh': s.minHeight,
+    '--_tab-th': s.indicatorThickness,
+    '--_tab-c': indicatorColor,
+    /* Hover previews the indicator at half strength, in the SAME token as the
+       selector — color-mix, not opacity, which would fade the label too. */
+    '--_tab-hov': 'color-mix(in srgb, ' + indicatorColor + ' 50%, transparent)',
+    '--_tab-icon': s.iconSize,
+    '--_tab-tpad': s.textPad,
+    ...style,
+  };
+  const { component: Tag, ...semanticProps } = semantics;
+
   return (
-    <Box
-      {...semantics}
+    <Part
+      component={Tag}
+      sx={sx}
+      {...semanticProps}
       data-theme={tabDataTheme || undefined}
       data-surface={tabDataSurface || undefined}
       onClick={handleClick}
@@ -651,109 +714,30 @@ export function Tab({
         + (disabled ? ' tab-disabled' : '')
         + (iconOnly ? ' tab-icon-only' : '')
         + (_overflowed ? ' tab-overflowed' : '')
+        + ' omni-tab omni-tab-e-' + edge
+        + (baseline ? ' omni-tab-bl-' + edge : '')
+        + (isSelected ? ' omni-tab-sel' : '')
+        + (disabled ? ' omni-tab-off' : ' omni-tab-on' + (isSelected ? '' : ' omni-tab-hov'))
+        + (_overflowed ? ' omni-tab-hidden' : '')
         + ' ' + className
       }
-      sx={{
-        display: _overflowed ? 'none' : 'inline-flex',
-        textDecoration: 'none', // a link in navigation mode looks like a tab
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: TAB_CONTENT_GAP,
-        /* Horizontal padding only. Height comes from minHeight with the
-           content centred, which is how the design builds it — a vertical
-           padding on top of a min-height specifies the same measurement twice
-           and the two disagree the moment either changes. */
-        padding: '0 ' + (iconOnly ? '0' : s.px),
-        minHeight: s.minHeight,
-        fontFamily: 'inherit',
-        color: isSelected ? 'var(--Text)' : 'var(--Quiet)',
-        /* Transparent, over the list's Background. A tab overlaps the
-           baseline by its 1px (below) so the rule runs UNDER the tabs as in
-           Figma — visible through an unselected tab, covered by a selected
-           one's indicator — instead of beside them, where it pushed a
-           Vertical-Left list's tabs 1px in. An opaque tab would hide it. */
-        backgroundColor: 'transparent',
-        ...(baseline && { ['margin' + edgeFor(orientation)]: '-' + BASELINE_THICKNESS }),
-        border: 'none',
-        /* The indicator sits on ONE edge, chosen by orientation — bottom when
-           horizontal, left or right when vertical. Transparent when
-           unselected rather than absent, so selecting a tab cannot change its
-           size; Figma gets the same result by absolutely positioning the
-           Selector with an edge constraint, which is why all fifteen of its
-           Tab variants measure the same. */
-        ...indicatorStyle(orientation, isSelected, s.indicatorThickness, indicatorColor),
-        /* The indicator border takes layout space; Figma's Selector does not
-           (it is positioned over the tab). Give the space back so the content
-           sits where Figma's does: horizontally, the same amount on the top
-           edge, so the content centres in the full height; vertically, out of
-           the bar edge's own padding (an icon-only tab has none, so it goes on
-           the opposite edge). */
-        ...(isHorizontal
-          ? { paddingTop: s.indicatorThickness }
-          : iconOnly
-            ? { ['padding' + (edgeFor(orientation) === 'Left' ? 'Right' : 'Left')]: s.indicatorThickness }
-            : { ['padding' + edgeFor(orientation)]: 'calc(' + s.px + ' - ' + s.indicatorThickness + ')' }),
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 'var(--Disabled, 0.38)' : 1,
-        position: 'relative',
-        outline: 'none',
-        transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease',
-        flexShrink: 0,
-        whiteSpace: 'nowrap',
-
-
-        ...(!disabled && {
-          /* Engaged, the label turns Text and the fill stays (Figma's Tab draws
-             no Hover / Pressed fill); hover previews the selector at 50%. */
-          '&:hover': {
-            color: 'var(--Text)',
-            ...hoverIndicatorStyle(orientation, isSelected, s.indicatorThickness, indicatorColor),
-          },
-          '&:active': { color: 'var(--Text)' },
-          '&:focus-visible': {
-            color: 'var(--Text)',
-            outline: '3px solid var(--Focus-Visible)',
-            // 3px ring + 1px gap; see the note on the TabList ring above.
-            outlineOffset: '-4px',
-          },
-        }),
-        ...sx,
-      }}
+      style={tabStyle}
       {...restProps}
     >
-      {startDecorator && (
-        <Box
-          className="tab-start-decorator"
-          sx={{ display: 'inline-flex', fontSize: s.iconSize, lineHeight: 1, flexShrink: 0 }}
-        >
-          {startDecorator}
-        </Box>
-      )}
+      {startDecorator && <span className="tab-start-decorator omni-tab-dec">{startDecorator}</span>}
       {!iconOnly && children && (() => {
         // The Button type style (Figma's Dynamic Button), cap-height trimmed as
         // Button's own label is — a tab is a button in a row.
         const LabelComp = size === 'small' ? ButtonSmallTypography : ButtonTypography;
-        /* The label's own padding, matching the design's Typography Holder.
-           It is what separates the text from an icon beside it without moving
-           the icon away from the tab's edge — which a single gap would do. */
+        /* The label's own padding, matching the design's Typography Holder. */
         return (
-          <Box
-            className="tab-label"
-            sx={{ display: 'inline-flex', alignItems: 'center', padding: '4px ' + s.textPad }}
-          >
-            <LabelComp component="span" sx={{ color: 'inherit', ...CAP_HEIGHT_TRIM }}>{children}</LabelComp>
-          </Box>
+          <span className="tab-label omni-tab-label">
+            <LabelComp component="span" color="inherit" className="omni-tab-text">{children}</LabelComp>
+          </span>
         );
       })()}
-      {endDecorator && (
-        <Box
-          className="tab-end-decorator"
-          sx={{ display: 'inline-flex', fontSize: s.iconSize, lineHeight: 1, flexShrink: 0 }}
-        >
-          {endDecorator}
-        </Box>
-      )}
-    </Box>
+      {endDecorator && <span className="tab-end-decorator omni-tab-dec">{endDecorator}</span>}
+    </Part>
   );
 }
 
@@ -762,9 +746,11 @@ export function TabPanel({
   children,
   value: panelValue,
   className = '',
-  sx = {},
+  style,
+  sx,
   ...props
 }) {
+  useStaticStyles('omni-tabs');
   const { value, size, tabsId } = useTabsContext();
   const s = SIZE_MAP[size] || SIZE_MAP.medium;
   const isActive = value === panelValue;
@@ -775,23 +761,16 @@ export function TabPanel({
   if (!isActive) return null;
 
   return (
-    <Box
+    <Part
       role="tabpanel"
       id={panelId}
       aria-labelledby={tabId}
-      className={'tab-panel tab-panel-' + size + ' ' + className}
-      sx={{
-        paddingTop: '16px',
-        fontSize: s.fontSize,
-        fontFamily: 'inherit',
-        color: 'var(--Text)',
-        ...sx,
-      }}
+      className={'tab-panel tab-panel-' + size + ' omni-tabpanel ' + className}
+      style={{ '--_tp-fs': s.fontSize, ...style }}
+      sx={sx}
       {...props}
     >
       {children}
-    </Box>
+    </Part>
   );
 }
-
-export default Tabs;

@@ -1,15 +1,20 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { Tabs, TabList, Tab } from './Tabs';
+import { stateRules } from '../_testCss';
 
 /* A tab is built from BUTTON metrics — that is what keeps it the same size and
    type as the buttons beside it in a nav bar. They were hardcoded, so a design
    system that changed its button padding moved every button and left the tabs
    where they were, and nothing reported the drift. */
 
+/* Every sheet's text, plus each rendered element's resolved declarations: a
+   tab's metrics travel as custom properties, so the tokens appear there. */
 const css = () => Array.from(document.styleSheets)
   .flatMap(ss => { try { return Array.from(ss.cssRules); } catch { return []; } })
-  .map(r => r.cssText).join('');
+  .map(r => r.cssText)
+  .concat([...document.body.querySelectorAll('*')].map((el) => stateRules(el).all))
+  .join('');
 
 const renderTabs = (size) => render(
   <Tabs value="a" size={size}>
@@ -58,7 +63,9 @@ describe('tab metrics come from the button tokens', () => {
     // either changes.
     renderTabs('medium');
     const c = css().replace(/\s+/g, '');
-    expect(c).toContain('padding:0var(--Button-Padding,8px)');
+    // Horizontal padding only; the 2px top is the indicator's space given back.
+    expect(c).toContain('padding:2pxvar(--Button-Padding,8px)0var(--Button-Padding,8px)');
+    expect(c).toContain('min-height:var(--Button-Height,32px)');
   });
 
   test('no bare pixel padding survives', () => {
