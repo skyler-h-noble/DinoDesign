@@ -4,7 +4,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { Avatar } from './Avatar';
 import { AvatarGroup } from '../AvatarGroup/AvatarGroup';
 import { axe } from 'jest-axe';
-import { declared } from '../_testCss';
+import { declared, stateRules } from '../_testCss';
 
 const renderAvatar = (props = {}) => render(<Avatar {...props} />);
 
@@ -168,11 +168,8 @@ describe('Avatar — Accessibility (jest-axe)', () => {
 describe('AvatarGroup overlap', () => {
   const stepOf = (container) => {
     const g = container.querySelector('.avatar-group');
-    const cls = [...g.classList].find((c) => c.startsWith('css-'));
-    const rules = [...document.styleSheets]
-      .flatMap((sheet) => { try { return [...sheet.cssRules]; } catch { return []; } })
-      .map((r) => r.cssText).filter((t) => t.startsWith('.' + cls));
-    const m = rules.join(' ').match(/margin-left:\s*(-?[\d.]+)px/);
+    // The step is the second avatar's margin, followed down to its value.
+    const m = stateRules(g.children[1]).base.match(/margin-left:\s*(-?[\d.]+)px/);
     return m ? Number(m[1]) : null;
   };
   const three = (props = {}) => [1, 2, 3].map((i) => <Avatar key={i} initials={'A' + i} {...props} />);
