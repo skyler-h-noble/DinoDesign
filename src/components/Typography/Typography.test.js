@@ -1,6 +1,6 @@
 // src/components/Typography/Typography.test.js
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import {
   Typography, H1, H2, H3, H4, H5, H6,
   Body, BodySmall, BodyLarge, BodySemibold, BodyBold,
@@ -286,7 +286,8 @@ describe('Subtitle color', () => {
     try { return Array.from(sh.cssRules || []).map((r) => r.cssText); } catch { return []; }
   }).join('\n');
   const ownColor = (el) => {
-    const cls = [...el.classList].find((c) => c.startsWith('css-'));
+    // The color class from the static sheet (omni-type-ch-* / omni-type-ct-*).
+    const cls = [...el.classList].find((c) => /^omni-type-c[ht]-/.test(c));
     const rule = allRules().split('\n').find((t) => t.startsWith('.' + cls + ' ') || t.startsWith('.' + cls + '{')) || '';
     return (rule.match(/(?:^|[;{\s])color:\s*([^;]+);/) || [])[1];
   };
@@ -300,5 +301,24 @@ describe('Subtitle color', () => {
   test('a heading still defaults to --Header', () => {
     render(<H3>Heading</H3>);
     expect(ownColor(screen.getByText('Heading'))).toMatch(/--Header/);
+  });
+});
+
+describe('static styling', () => {
+  test('renders without emotion and keeps the static classes', () => {
+    render(<H2>Static</H2>);
+    const el = screen.getByText('Static');
+    expect([...el.classList].some((c) => c.startsWith('css-'))).toBe(false);
+    expect(el).toHaveClass('omni-type', 'omni-type-h2', 'omni-type-ch-header');
+  });
+
+  test('sx still applies, through the on-demand MUI box', async () => {
+    render(<Body sx={{ marginTop: '7px' }}>With sx</Body>);
+    // The static element shows at once; the MUI box replaces it when it loads.
+    expect(screen.getByText('With sx')).toHaveClass('omni-type-body');
+    await waitFor(() => expect([...screen.getByText('With sx').classList].some((c) => c.startsWith('css-'))).toBe(true));
+    const el = screen.getByText('With sx');
+    expect(el.tagName).toBe('P');
+    expect(el).toHaveClass('omni-type-body');
   });
 });

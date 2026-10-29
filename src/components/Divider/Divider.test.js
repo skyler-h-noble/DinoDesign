@@ -9,6 +9,7 @@ import {
   ErrorDivider,
 } from './Divider';
 import { axe } from 'jest-axe';
+import { cssFor } from '../_testCss';
 
 describe('Divider Component', () => {
   test('renders without crashing', () => {
@@ -132,15 +133,6 @@ describe('Divider — Accessibility (jest-axe)', () => {
  * by the browser on 1x. That is the usual hairline trade, not a rounding bug.
  */
 describe('thickness follows the Divider ramp, not the step bar ramp', () => {
-  const cssFor = (el) => {
-    const cls = (el.className || '').split(/\s+/).find((c) => c.startsWith('css-'));
-    if (!cls) return '';
-    return Array.from(document.styleSheets)
-      .flatMap((sheet) => Array.from(sheet.cssRules || []))
-      .filter((r) => (r.selectorText || '').includes('.' + cls))
-      .map((r) => r.cssText)
-      .join('\n');
-  };
 
   /* Read from the token, with the design's number as the fallback — so the
      assertion is on BOTH: the right variable, and the right value behind it.
@@ -153,7 +145,9 @@ describe('thickness follows the Divider ramp, not the step bar ramp', () => {
   ])('vertical %s reads %s', (size, expected) => {
     const { container } = render(<Divider orientation="vertical" size={size} />);
     const el = container.querySelector('.divider-vertical');
-    expect(cssFor(el)).toContain('width: ' + expected);
+    // The width reads the instance's thickness, which holds the token.
+    expect(cssFor(el)).toContain('width: var(--_dv-t)');
+    expect(cssFor(el)).toContain('--_dv-t: ' + expected);
   });
 
   test('large falls back to 2px, not the 4px the step bar uses', () => {
@@ -161,8 +155,8 @@ describe('thickness follows the Divider ramp, not the step bar ramp', () => {
     const el = container.querySelector('.divider-vertical');
     /* The indicator pill's own radius is 12px, so match the WIDTH declaration
        rather than the string 4px anywhere in the rule. */
-    expect(cssFor(el)).not.toContain('width: var(--Lg-Divider, 4px)');
-    expect(cssFor(el)).toContain('width: var(--Lg-Divider, 2px)');
+    expect(cssFor(el)).not.toContain('var(--Lg-Divider, 4px)');
+    expect(cssFor(el)).toContain('--_dv-t: var(--Lg-Divider, 2px)');
   });
 });
 

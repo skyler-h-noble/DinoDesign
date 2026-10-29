@@ -13,17 +13,36 @@ import React, { Suspense, lazy } from 'react';
 
 const warned = new Set();
 
-export function lazyFallback(name, load) {
+export function lazyFallback(name, load, { placeholder: Placeholder = null, warn = true } = {}) {
   const Mui = lazy(load);
   function Fallback(props) {
-    if (process.env.NODE_ENV !== 'production' && !warned.has(name)) {
+    if (warn && process.env.NODE_ENV !== 'production' && !warned.has(name)) {
       warned.add(name);
       // eslint-disable-next-line no-console
       console.warn(`[OmniDesign] ${name} was given an MUI-only prop (sx or a responsive value), `
         + 'so its MUI version loads on demand. For layout, style / className keep it static.');
     }
-    return <Suspense fallback={null}><Mui {...props} /></Suspense>;
+    return (
+      <Suspense fallback={Placeholder ? <Placeholder {...props} /> : null}>
+        <Mui {...props} />
+      </Suspense>
+    );
   }
   Fallback.displayName = name + 'Fallback';
   return Fallback;
+}
+
+/* The plain element, minus sx: what an sx-carrying component shows while its
+   MUI box loads. It already wears every static class, so the first frame is
+   the component as designed and only the sx override arrives a moment later —
+   rather than a blank where the text should be. */
+function StaticBox({ component: Tag = 'div', sx, ...props }) {
+  return <Tag {...props} />;
+}
+
+/** An MUI Box that adds a caller's sx on top of a component's static classes.
+ *  sx is supported API on these components (and lib components pass it), so
+ *  there is no warning. */
+export function lazySxBox(name) {
+  return lazyFallback(name, () => import('./_sxBox.mui'), { placeholder: StaticBox, warn: false });
 }

@@ -16,6 +16,7 @@ import { render } from '@testing-library/react';
 import { BottomNavigation } from './BottomNavigation';
 import { Rail } from '../Rail';
 import HomeIcon from '@mui/icons-material/Home';
+import { cssFor } from '../_testCss';
 
 const ITEMS = [
   { label: 'Home', icon: <HomeIcon /> },
@@ -24,16 +25,6 @@ const ITEMS = [
 
 /* className on an SVG is an SVGAnimatedString, not a string, and these trees
    are full of icons — so read the attribute rather than the property. */
-const cssFor = (el) => {
-  const raw = el.getAttribute ? (el.getAttribute('class') || '') : '';
-  const cls = raw.split(/\s+/).find((c) => c.startsWith('css-'));
-  if (!cls) return '';
-  return Array.from(document.styleSheets)
-    .flatMap((sheet) => Array.from(sheet.cssRules || []))
-    .filter((r) => (r.selectorText || '').includes('.' + cls))
-    .map((r) => r.cssText)
-    .join('\n');
-};
 
 describe('the nav caption reads Mobile-Nav-Label', () => {
   test('BottomNavigation', () => {

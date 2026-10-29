@@ -1,6 +1,9 @@
 // src/components/Divider/Divider.js
 import React from 'react';
-import { Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
+
+const SxBox = lazySxBox('Divider');
 
 /**
  * Divider Component
@@ -65,29 +68,34 @@ function getLineColor(color, colored) {
 }
 
 let warnedLight = false;
-function getIndicatorStyles(color, indicatorStyle, colored) {
+function warnIfLight(indicatorStyle) {
   if (indicatorStyle === 'light' && process.env.NODE_ENV !== 'production' && !warnedLight) {
     warnedLight = true;
-    // eslint-disable-next-line no-console
     console.warn('[Divider] indicatorStyle="light" was removed: the pill has one style (Figma Divider-Pill).');
   }
-  return { bg: 'var(--Background)', text: 'var(--Text)', border: '1px solid ' + getLineColor(color, colored) };
 }
 
-/* Figma's Divider-Pill: Mobile Nav Label Semibold, Sizing-1 sides, Sizing-2 corners. */
-const pillSx = (ind) => ({
-  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-  flexShrink: 0, px: 'var(--Sizing-1, 8px)', py: 0,
-  borderRadius: 'var(--Sizing-2, 16px)',
-  fontFamily: 'var(--Body-Font-Family, inherit)',
-  fontSize: 'var(--Mobile-Nav-Label-Font-Size, 11px)',
-  lineHeight: 'var(--Mobile-Nav-Label-Line-Height, 16.5px)',
-  letterSpacing: 'var(--Mobile-Nav-Label-Letter-Spacing, 0)',
-  fontWeight: 'var(--Body-Semibold-Font-Weight, 600)',
-  whiteSpace: 'nowrap',
-  backgroundColor: ind.bg, color: ind.text, border: ind.border,
-  boxSizing: 'border-box',
-});
+/* The static sheet. The per-instance values — the line color and thickness —
+   arrive as custom properties on the root (--_dv-c, --_dv-t), so one set of
+   rules serves every color, size and orientation, and the line segments and
+   the pill border inherit them. */
+registerStaticStyles('omni-divider', [
+  '.omni-divider-h{width:100%;height:var(--_dv-t);background-color:var(--_dv-c);flex-shrink:0}',
+  '.omni-divider-v{display:inline-block;width:var(--_dv-t);align-self:stretch;min-height:24px;background-color:var(--_dv-c);flex-shrink:0}',
+  '.omni-divider-hi{display:flex;align-items:center;width:100%}',
+  '.omni-divider-vi{display:inline-flex;flex-direction:column;align-items:center;align-self:stretch;min-height:24px;flex-shrink:0}',
+  '.omni-divider-hi>.omni-divider-seg{height:var(--_dv-t);background-color:var(--_dv-c)}',
+  '.omni-divider-vi>.omni-divider-seg{width:var(--_dv-t);background-color:var(--_dv-c)}',
+  /* Figma's Divider-Pill: Mobile Nav Label Semibold, Sizing-1 sides, Sizing-2 corners. */
+  '.omni-divider-pill{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;'
+    + 'padding:0 var(--Sizing-1, 8px);border-radius:var(--Sizing-2, 16px);'
+    + 'font-family:var(--Body-Font-Family, inherit);font-size:var(--Mobile-Nav-Label-Font-Size, 11px);'
+    + 'line-height:var(--Mobile-Nav-Label-Line-Height, 16.5px);letter-spacing:var(--Mobile-Nav-Label-Letter-Spacing, 0);'
+    + 'font-weight:var(--Body-Semibold-Font-Weight, 600);white-space:nowrap;'
+    + 'background-color:var(--Background);color:var(--Text);border:1px solid var(--_dv-c);box-sizing:border-box}',
+].join('\n'));
+
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
 
 /* Start / end: flush, no line before (after) the pill. */
 const alignOf = (a) => (a === 'left' || a === 'top' || a === 'start' ? 'start' : a === 'right' || a === 'bottom' || a === 'end' ? 'end' : 'center');
@@ -128,113 +136,51 @@ export function Divider({
   indicatorStyle = 'outline',
   textAlign = 'center',
   className = '',
-  sx = {},
+  sx,
+  style,
   ...props
 }) {
+  useStaticStyles('omni-divider');
   if (color === 'border' && process.env.NODE_ENV !== 'production' && !warnedBorder) {
     warnedBorder = true;
-    // eslint-disable-next-line no-console
     console.warn('[Divider] color="border" was removed: a divider is decorative, so it draws Border-Variant '
       + '(Figma Color = Default). For a colored rule use colored + color="<palette>".');
   }
-  const lineColor = getLineColor(color, colored);
   const thickness = SIZE_MAP[size] || SIZE_MAP.small;
   const hasIndicator = !!(children || indicatorText);
   const displayText = children || indicatorText;
   const isVertical = orientation === 'vertical';
+  if (hasIndicator) warnIfLight(indicatorStyle);
 
-  // --- Vertical without indicator ---
-  if (isVertical && !hasIndicator) {
-    return (
-      <Box
-        role="separator"
-        aria-orientation="vertical"
-        className={'divider-vertical divider-' + color + (isColored(color, colored) ? ' divider-colored' : '') + ' ' + className}
-        sx={{
-          display: 'inline-block',
-          width: thickness,
-          alignSelf: 'stretch',
-          minHeight: 24,
-          backgroundColor: lineColor,
-          flexShrink: 0,
-          ...sx,
-        }}
-        {...props}
-      />
+  const root = {
+    role: 'separator',
+    'aria-orientation': isVertical ? 'vertical' : 'horizontal',
+    className:
+      (isVertical ? 'divider-vertical' : 'divider-horizontal') + ' divider-' + color +
+      (isColored(color, colored) ? ' divider-colored' : '') +
+      (hasIndicator ? ' divider-indicator' : '') +
+      ' omni-divider-' + (isVertical ? 'v' : 'h') + (hasIndicator ? 'i' : '') +
+      ' ' + className,
+    style: { '--_dv-c': getLineColor(color, colored), '--_dv-t': thickness, ...style },
+    ...props,
+  };
+
+  let content = null;
+  if (hasIndicator) {
+    const [before, after] = flexes(textAlign);
+    content = (
+      <>
+        <div className="omni-divider-seg" style={{ flex: before }} />
+        <div className="divider-pill omni-divider-pill">{displayText}</div>
+        <div className="omni-divider-seg" style={{ flex: after }} />
+      </>
     );
   }
 
-  // --- Vertical with indicator ---
-  if (isVertical && hasIndicator) {
-    const indStyles = getIndicatorStyles(color, indicatorStyle, colored);
-    const [topFlex, bottomFlex] = flexes(textAlign);
-
-    return (
-      <Box
-        role="separator"
-        aria-orientation="vertical"
-        className={'divider-vertical divider-' + color + (isColored(color, colored) ? ' divider-colored' : '') + ' divider-indicator ' + className}
-        sx={{
-          display: 'inline-flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          alignSelf: 'stretch',
-          minHeight: 24,
-          flexShrink: 0,
-          ...sx,
-        }}
-        {...props}
-      >
-        <Box sx={{ flex: topFlex, width: thickness, backgroundColor: lineColor }} />
-        <Box className="divider-pill" sx={pillSx(indStyles)}>
-          {displayText}
-        </Box>
-        <Box sx={{ flex: bottomFlex, width: thickness, backgroundColor: lineColor }} />
-      </Box>
-    );
-  }
-
-  // --- Horizontal without indicator ---
-  if (!hasIndicator) {
-    return (
-      <Box
-        role="separator"
-        aria-orientation="horizontal"
-        className={'divider-horizontal divider-' + color + (isColored(color, colored) ? ' divider-colored' : '') + ' ' + className}
-        sx={{
-          width: '100%',
-          height: thickness,
-          backgroundColor: lineColor,
-          flexShrink: 0,
-          ...sx,
-        }}
-        {...props}
-      />
-    );
-  }
-
-  // --- Horizontal with indicator ---
-  const indStyles = getIndicatorStyles(color, indicatorStyle, colored);
-  const [leftFlex, rightFlex] = flexes(textAlign);
-
-  return (
-    <Box
-      role="separator"
-      aria-orientation="horizontal"
-      className={'divider-horizontal divider-' + color + (isColored(color, colored) ? ' divider-colored' : '') + ' divider-indicator ' + className}
-      sx={{ display: 'flex', alignItems: 'center', width: '100%', ...sx }}
-      {...props}
-    >
-      <Box sx={{ flex: leftFlex, height: thickness, backgroundColor: lineColor }} />
-      <Box className="divider-pill" sx={pillSx(indStyles)}>
-        {displayText}
-      </Box>
-      <Box sx={{ flex: rightFlex, height: thickness, backgroundColor: lineColor }} />
-    </Box>
-  );
+  if (hasSx(sx)) return <SxBox sx={sx} {...root}>{content}</SxBox>;
+  return <div {...root}>{content}</div>;
 }
 
-// Convenience Exports
 export const DefaultDivider   = (p) => <Divider color="default"   {...p} />;
 export const PrimaryDivider   = (p) => <Divider color="primary"   {...p} />;
 export const SecondaryDivider = (p) => <Divider color="secondary" {...p} />;

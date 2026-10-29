@@ -1,6 +1,9 @@
 // src/components/Link/Link.js
 import React from 'react';
-import { Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
+
+const SxBox = lazySxBox('Link');
 
 /**
  * Link Component
@@ -132,6 +135,38 @@ function warnQuietOnce() {
   console.warn('[Link] color="quiet" was removed — a subdued link is hard to find. Rendering color="standard".');
 }
 
+/* The static sheet: every declaration the component used to hand emotion per
+   render, as plain classes over the same tokens. State rules sit in :where()
+   so they weigh what emotion's `&:hover` did (one class + one pseudo-class)
+   and a caller's sx state rule still wins over them. */
+const kebab = (k) => k.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase());
+const decls = (o) => Object.entries(o).map(([k, v]) => `${kebab(k)}:${v}`).join(';');
+const ON = '.omni-link:where(:not(.omni-link-off))';
+
+registerStaticStyles('omni-link', [
+  // Always underlined; inline-flex so min-height / min-width give the WCAG
+  // 2.5.8 touch target while the link still flows in text.
+  '.omni-link{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;cursor:pointer;opacity:1;pointer-events:auto;display:inline-flex;align-items:center;min-height:24px;min-width:24px;transition:color 0.15s ease, text-decoration-color 0.15s ease}',
+  ...Object.entries(STYLE_MAP).map(([k, t]) => `.omni-link-s-${k}{${decls(t)}}`),
+  ...Object.entries(COLOR_MAP).flatMap(([k, c]) => [
+    `.omni-link-c-${k}{color:${c.base}}`,
+    `.omni-link-c-${k}-v{color:${c.visited}}`,
+    `${ON}.omni-link-c-${k}:visited,${ON}.omni-link-c-${k}-v:visited{color:${c.visited}}`,
+  ]),
+  '.omni-link-off{cursor:not-allowed;opacity:var(--Disabled, 0.38);pointer-events:none}',
+  // No color change on hover — deliberate. The design system emits no hover
+  // tone for links, and inventing one would put an unverified color on text
+  // that has a contrast requirement. The underline going away carries the
+  // change instead (Figma's Hover and Pressed draw none). Focus keeps the
+  // underline: a keyboard user lands on a link that still looks like one.
+  `${ON}:hover,${ON}:active{text-decoration:none}`,
+  // The ring every control wears: 2px, 1px outside. Square — a link's text
+  // box has no corner to follow.
+  `${ON}:focus-visible{outline:2px solid var(--Focus-Visible);outline-offset:1px}`,
+].join('\n'));
+
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
 export function Link({
   children,
   href,
@@ -147,94 +182,39 @@ export function Link({
   visited = false,
   onClick,
   className = '',
-  sx = {},
+  sx,
   ...props
 }) {
+  useStaticStyles('omni-link');
   if (color === 'quiet') warnQuietOnce();
-  const typo   = STYLE_MAP[textStyle] || STYLE_MAP.body;
+  const styleKey = STYLE_MAP[textStyle] ? textStyle : 'body';
   const effColor = color === 'quiet' ? 'standard' : color;
-  const colors = COLOR_MAP[effColor]  || COLOR_MAP.primary;
+  const colorKey = COLOR_MAP[effColor] ? effColor : 'primary';
 
   const resolvedRel = target === '_blank'
     ? (rel || 'noopener noreferrer')
     : rel;
 
-  return (
-    <Box
-      component="a"
-      href={disabled ? undefined : href}
-      target={target}
-      rel={resolvedRel}
-      onClick={disabled ? (e) => e.preventDefault() : onClick}
-      aria-disabled={disabled || undefined}
-      tabIndex={disabled ? -1 : undefined}
-      className={
-        'link link-' + textStyle + ' link-color-' + effColor +
-        (disabled ? ' link-disabled' : '') +
-        (visited ? ' link-visited' : '') +
-        ' ' + className
-      }
-      sx={{
-        // ── Typography ───────────────────────────────────────────
-        fontFamily:    typo.fontFamily,
-        lineHeight:    typo.lineHeight,
-        fontSize:      typo.fontSize,
-        fontWeight:    typo.fontWeight,
-        letterSpacing: typo.letterSpacing,
+  const linkProps = {
+    href: disabled ? undefined : href,
+    target,
+    rel: resolvedRel,
+    onClick: disabled ? (e) => e.preventDefault() : onClick,
+    'aria-disabled': disabled || undefined,
+    tabIndex: disabled ? -1 : undefined,
+    className:
+      'link link-' + textStyle + ' link-color-' + effColor +
+      (disabled ? ' link-disabled' : '') +
+      (visited ? ' link-visited' : '') +
+      ' omni-link omni-link-s-' + styleKey +
+      ' omni-link-c-' + colorKey + (visited ? '-v' : '') +
+      (disabled ? ' omni-link-off' : '') +
+      ' ' + className,
+    ...props,
+  };
 
-        // ── Always underlined ────────────────────────────────────
-        textDecoration:          'underline',
-        textUnderlineOffset:     '3px',
-        textDecorationThickness: '1px',
-
-        // ── Color ────────────────────────────────────────────────
-        color:         visited ? colors.visited : colors.base,
-        cursor:        disabled ? 'not-allowed' : 'pointer',
-        opacity:       disabled ? 'var(--Disabled, 0.38)' : 1,
-        pointerEvents: disabled ? 'none' : 'auto',
-
-        // ── Touch target (WCAG 2.5.8) ────────────────────────────
-        // inline-flex keeps the link flowing in text while allowing
-        // min-height / min-width to take effect on the element box.
-        display:     'inline-flex',
-        alignItems:  'center',
-        minHeight:   '24px',
-        minWidth:    '24px',
-
-        // ── Transitions ──────────────────────────────────────────
-        transition: 'color 0.15s ease, text-decoration-color 0.15s ease',
-
-        // ── States ───────────────────────────────────────────────
-        ...(!disabled && {
-          // No color change on hover — deliberate. The design system emits no
-          // hover tone for links, and inventing one would put an unverified
-          // color on text that has a contrast requirement. The underline
-          // going away carries the change instead (Figma's Hover and Pressed
-          // draw none) — a non-color cue, and the resting link keeps its
-          // underline, so it never relies on color to be found. Focus keeps
-          // the underline: a keyboard user lands on a link that still looks
-          // like one, with the ring around it.
-          '&:hover, &:active': {
-            textDecoration: 'none',
-          },
-          '&:visited': {
-            color: colors.visited,
-          },
-          // The ring every control wears: 2px, 1px outside. Square — a link's
-          // text box has no corner to follow.
-          '&:focus-visible': {
-            outline:       '2px solid var(--Focus-Visible)',
-            outlineOffset: '1px',
-          },
-        }),
-
-        ...sx,
-      }}
-      {...props}
-    >
-      {children}
-    </Box>
-  );
+  if (hasSx(sx)) return <SxBox component="a" sx={sx} {...linkProps}>{children}</SxBox>;
+  return <a {...linkProps}>{children}</a>;
 }
 
 export default Link;

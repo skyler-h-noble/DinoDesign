@@ -1,7 +1,10 @@
 // src/components/Typography/Typography.js
 import React from 'react';
-import { Box } from '@mui/material';
-import { useGhost, ghostBlockSx } from '../_ghost';
+import { useGhost } from '../_ghost';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
+
+const SxBox = lazySxBox('Typography');
 
 /**
  * Typography Component
@@ -742,13 +745,6 @@ const HEADING_STYLES = new Set([
   'alt-display-large', 'alt-display-medium', 'alt-display-small',
 ]);
 
-function resolveColor(textStyle, color, defaultColor) {
-  const isHeading = HEADING_STYLES.has(textStyle);
-  const colorMap = isHeading ? HEADER_COLOR_MAP : TEXT_COLOR_MAP;
-  const key = color || defaultColor;
-  return colorMap[key] || (isHeading ? HEADER_COLOR_MAP.header : TEXT_COLOR_MAP.standard);
-}
-
 // ─── Exports for Showcase ─────────────────────────────────────────────────────
 
 export const TYPOGRAPHY_STYLES = Object.keys(STYLE_MAP);
@@ -781,6 +777,65 @@ export const STYLE_DEFAULT_COLOR = Object.fromEntries(
 export const HEADER_COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
 export const TEXT_COLORS   = ['default', 'quiet', 'eyebrow', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
 
+// ─── Static sheet ─────────────────────────────────────────────────────────────
+//
+// Every style, color and modifier as a plain class, generated once from the
+// maps above — the same declarations the component used to hand emotion on
+// every render. The values are all var() reads, so a theme, surface, mode or
+// device change still restyles the text through the cascade; only the
+// delivery changed.
+
+const kebab = (k) => k.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase());
+const decls = (o) => Object.entries(o).map(([k, v]) => `${kebab(k)}:${v}`).join(';');
+
+function styleDecls(config) {
+  // The size token (e.g. "Body-Medium") from the fontSize var, so
+  // text-decoration and text-transform can be overridden per style through
+  // custom properties without baking them into STYLE_MAP entries.
+  const m = typeof config.fontSize === 'string' ? config.fontSize.match(/--([\w-]+)-Font-Size/) : null;
+  const size = m ? m[1] : null;
+  const over = (prop, fallback) => (size ? `var(--${size}-${prop}, ${fallback})` : fallback);
+  return {
+    fontFamily: config.fontFamily,
+    fontVariationSettings: config.fontVariationSettings || 'normal',
+    fontSize: config.fontSize,
+    fontWeight: config.fontWeight,
+    lineHeight: config.lineHeight,
+    letterSpacing: config.letterSpacing,
+    textDecoration: over('Text-Decoration', config.textDecoration || 'none'),
+    textTransform: over('Text-Transform', config.textTransform || 'none'),
+    fontVariantNumeric: config.fontVariantNumeric || 'normal',
+  };
+}
+
+const colorClass = (isHeading, key) => `omni-type-c${isHeading ? 'h' : 't'}-${key}`;
+
+registerStaticStyles('omni-typography', [
+  '.omni-type{margin:0;padding:0}',
+  ...Object.entries(STYLE_MAP).map(([name, cfg]) => `.omni-type-${name}{${decls(styleDecls(cfg))}}`),
+  ...Object.entries(HEADER_COLOR_MAP).map(([k, v]) => `.${colorClass(true, k)}{color:${v}}`),
+  ...Object.entries(TEXT_COLOR_MAP).map(([k, v]) => `.${colorClass(false, k)}{color:${v}}`),
+  /* Alt Display is PAINTED, not colored: a two-stop gradient clipped to the
+     glyphs. Both stops resolve from Figma's Alt-Display collection, so Default
+     and Colored come out solid (their stops are equal) and only Gradient
+     ramps — which is why there is no `gradient` prop: the mode decides.
+     `color: transparent` reveals the clipped background, so this rule comes
+     after the color classes. The fallback ends at --Header, so a brand with
+     no alt color set still paints a visible, themed heading. */
+  '.omni-type-alt{background-image:linear-gradient(90deg, var(--Alt-Display-Color-Stop-1, var(--Header)), var(--Alt-Display-Color-Stop-2, var(--Header)));-webkit-background-clip:text;background-clip:text;color:transparent}',
+  '.omni-type-fill{display:block;width:100%}',
+  '.omni-type-hug{display:inline;width:auto}',
+  '.omni-type-gutter{margin-bottom:0.5em}',
+  '.omni-type-nowrap{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
+  /* Inside a <Ghost> region: the block from _ghost.js. The text keeps its box
+     (transparent, not removed) so nothing reflows when the data lands. */
+  '.omni-type-ghost{background-color:var(--Border-Variant);border-radius:var(--Ghost-Radius, 4px);color:transparent;user-select:none;pointer-events:none}',
+  '.omni-type-ghost-anim{background-image:linear-gradient(90deg, transparent 0%, var(--Background) 50%, transparent 100%);background-size:200% 100%;background-repeat:no-repeat;animation:omni-ghost-sweep 1.4s linear infinite}',
+  '@media (prefers-reduced-motion: reduce){.omni-type-ghost-anim{background-image:none;animation:none}}',
+].join('\n'));
+
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+
 // ─── Core Component ───────────────────────────────────────────────────────────
 
 export function Typography({
@@ -794,24 +849,15 @@ export function Typography({
   noWrap = false,
   gutterBottom = false,
   className = '',
-  sx = {},
+  sx,
   ...props
 }) {
+  useStaticStyles('omni-typography');
+
   // overline-* resolves to the eyebrow style it was renamed to.
   const style  = STYLE_ALIASES[textStyle] || textStyle;
+  const known  = Boolean(STYLE_MAP[style]);
   const config = STYLE_MAP[style] || STYLE_MAP.body;
-
-  // Derive the size token (e.g. "Body-Medium") from the fontSize var, so
-  // `text-decoration` and `text-transform` can be overridden per style via
-  // CSS custom properties without baking them into STYLE_MAP entries.
-  const sizeTokenMatch = typeof config.fontSize === 'string' ? config.fontSize.match(/--([\w-]+)-Font-Size/) : null;
-  const sizeToken = sizeTokenMatch ? sizeTokenMatch[1] : null;
-  const textDecorationValue = sizeToken
-    ? 'var(--' + sizeToken + '-Text-Decoration, ' + (config.textDecoration || 'none') + ')'
-    : (config.textDecoration || 'none');
-  const textTransformValue = sizeToken
-    ? 'var(--' + sizeToken + '-Text-Transform, ' + (config.textTransform || 'none') + ')'
-    : (config.textTransform || 'none');
 
   /* Inside a <Ghost> region the text keeps its box and loses its ink. Reading
      the region from context rather than taking a prop is what keeps call sites
@@ -819,83 +865,40 @@ export function Typography({
      edit, and there is no per-element prop to forget. */
   const ghost = useGhost();
 
-  const colorValue = resolveColor(style, color, config.defaultColor);
+  const isHeading = HEADING_STYLES.has(style);
+  const colorKey = color || config.defaultColor;
+  const colorMap = isHeading ? HEADER_COLOR_MAP : TEXT_COLOR_MAP;
+  const resolvedColorKey = colorMap[colorKey] ? colorKey : 'default';
   const resolvedWidth = width || config.defaultWidth;
   const isFill = resolvedWidth === 'fill';
-  const resolvedComponent = component || config.component;
-  const colorKey = color || config.defaultColor;
+  const Tag = component || config.component || 'div';
 
   /* The Alt Display mode, as an attribute the CSS already understands.
      typography-tokens.css emits [data-alt-display="default"|"colored"|
      "gradient"] and the three set Color-Stop-1/-2 differently — so swapping
-     mode needs nothing but the attribute. No new token, no new rule, and the
-     same three names Figma's Alt-Display collection uses.
-     Unset by default, so it INHERITS: a brand picks its mode once on a wrapper
-     and every Alt Display under it follows, which is how the Figma mode
-     behaves too. */
+     mode needs nothing but the attribute. Unset by default, so it INHERITS: a
+     brand picks its mode once on a wrapper and every Alt Display under it
+     follows, which is how the Figma mode behaves too. */
   const altModeAttr = altMode ? { 'data-alt-display': altMode } : {};
 
-  return (
-    <Box
-      component={resolvedComponent}
-      {...altModeAttr}
-      className={
-        'typography typography-' + style +
-        (LEGACY_CLASS[style] ? ' typography-' + LEGACY_CLASS[style] : '') +
-        ' typography-color-' + colorKey +
-        ' typography-width-' + resolvedWidth +
-        ' ' + className
-      }
-      sx={{
-        fontFamily:        config.fontFamily,
-        fontVariationSettings: config.fontVariationSettings || 'normal',
-        fontSize:          config.fontSize,
-        fontWeight:        config.fontWeight,
-        lineHeight:        config.lineHeight,
-        letterSpacing:     config.letterSpacing,
-        textDecoration:    textDecorationValue,
-        textTransform:     textTransformValue,
-        fontVariantNumeric: config.fontVariantNumeric || 'normal',
-        color:             colorValue,
-        /* Alt Display is PAINTED, not colored.
-           A two-stop gradient clipped to the glyphs. Both stops resolve from
-           Figma's Alt-Display collection, so Default and Colored come out
-           solid (their stops are equal) and only Gradient actually ramps —
-           which is why there is no `gradient` prop: the mode decides, and this
-           paints whatever the tokens say.
+  const classes =
+    'typography typography-' + style +
+    (LEGACY_CLASS[style] ? ' typography-' + LEGACY_CLASS[style] : '') +
+    ' typography-color-' + colorKey +
+    ' typography-width-' + resolvedWidth +
+    ' omni-type omni-type-' + (known ? style : 'body') +
+    ' ' + colorClass(isHeading, resolvedColorKey) +
+    (config.altDisplay ? ' omni-type-alt' : '') +
+    (isFill ? ' omni-type-fill' : ' omni-type-hug') +
+    (gutterBottom ? ' omni-type-gutter' : '') +
+    (noWrap ? ' omni-type-nowrap' : '') +
+    (ghost ? ' omni-type-ghost' + (ghost.animate ? ' omni-type-ghost-anim' : '') : '') +
+    ' ' + className;
 
-           `color: transparent` is what reveals the clipped background, so it
-           has to come AFTER the color above. The fallback chain in the CSS
-           ends at --Header, so a brand with no alt color set still paints a
-           visible, correctly-themed heading rather than an invisible one. */
-        ...(config.altDisplay ? {
-          backgroundImage:
-            'linear-gradient(90deg, var(--Alt-Display-Color-Stop-1, var(--Header)),'
-            + ' var(--Alt-Display-Color-Stop-2, var(--Header)))',
-          WebkitBackgroundClip: 'text',
-          backgroundClip: 'text',
-          color: 'transparent',
-          /* Without this a descender can be clipped by the painted box. */
-          paddingBottom: '0.08em',
-        } : {}),
-        display:           isFill ? 'block' : 'inline',
-        width:             isFill ? '100%' : 'auto',
-        margin:            0,
-        marginBottom:      gutterBottom ? '0.5em' : 0,
-        padding:           0,
-        ...(noWrap && {
-          overflow:     'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace:   'nowrap',
-        }),
-        ...(ghost ? ghostBlockSx({ animate: ghost.animate }) : {}),
-        ...sx,
-      }}
-      {...props}
-    >
-      {children}
-    </Box>
-  );
+  if (hasSx(sx)) {
+    return <SxBox component={Tag} {...altModeAttr} className={classes} sx={sx} {...props}>{children}</SxBox>;
+  }
+  return <Tag {...altModeAttr} className={classes} {...props}>{children}</Tag>;
 }
 
 // ─── Cap-height trim ──────────────────────────────────────────────────────────

@@ -1,7 +1,6 @@
 // src/components/Section/Section.js
 import React from 'react';
-import { keyframes } from '@emotion/react';
-import { Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
 import { EDGE_NAMES, edgeMaskURL, edgeTile, edgeDefaultHeight, EDGE_SIZES, SIZED_EDGES } from './edges';
 
 /**
@@ -55,17 +54,34 @@ import { EDGE_NAMES, edgeMaskURL, edgeTile, edgeDefaultHeight, EDGE_SIZES, SIZED
  * For wrapping without painting (e.g. AppBar's themed zone), use ThemedZone
  * instead.
  */
-/* Stretched edges cannot slide, so they breathe: the edge grows from its
+/* The edge's static sheet. The per-edge values — height, mask, tile width —
+   go inline as custom properties; the keyframes read them, so one drift and
+   one swell serve every edge.
+
+   Stretched edges cannot slide, so they breathe: the edge grows from its
    baseline and settles back. scaleY keeps the shape and only changes how far
    it reaches. */
-const swell = (flip) => keyframes`from { transform: scaleY(${flip ? -0.7 : 0.7}); } to { transform: scaleY(${flip ? -1 : 1}); }`;
-
-const drift = (tile) => keyframes`from { -webkit-mask-position: 0 0; mask-position: 0 0; } to { -webkit-mask-position: ${tile}px 0; mask-position: ${tile}px 0; }`;
+registerStaticStyles('omni-section-edge', [
+  /* The section's own --Background: the edge is the section, so it can never
+     disagree with it. */
+  '.omni-section-edge{position:absolute;left:0;right:0;background-color:var(--Background);pointer-events:none;z-index:1}',
+  '.omni-section-edge-top{bottom:100%}',
+  '.omni-section-edge-bottom{top:100%;transform:scaleY(-1)}',
+  '@keyframes omni-edge-drift{from{-webkit-mask-position:0 0;mask-position:0 0}to{-webkit-mask-position:var(--_edge-tile) 0;mask-position:var(--_edge-tile) 0}}',
+  '@keyframes omni-edge-swell{from{transform:scaleY(0.7)}to{transform:scaleY(1)}}',
+  '@keyframes omni-edge-swell-flip{from{transform:scaleY(-0.7)}to{transform:scaleY(-1)}}',
+  '@media (prefers-reduced-motion: no-preference){'
+    + '.omni-section-edge-drift{animation:omni-edge-drift var(--_edge-dur) linear infinite}'
+    /* From the baseline, so it grows out of the section rather than floating. */
+    + '.omni-section-edge-swell{transform-origin:bottom;animation:omni-edge-swell 5s ease-in-out infinite alternate}'
+    + '.omni-section-edge-swell.omni-section-edge-bottom{animation-name:omni-edge-swell-flip}}',
+].join('\n'));
 
 const warned = new Set();
 
 /** The section's own color, shaped, reaching into its neighbour. */
 function SectionEdge({ name, side, height, animate, seed }) {
+  useStaticStyles('omni-section-edge');
   if (!EDGE_NAMES.includes(name)) {
     if (process.env.NODE_ENV !== 'production' && !warned.has(name)) {
       warned.add(name);
@@ -77,33 +93,17 @@ function SectionEdge({ name, side, height, animate, seed }) {
   const tile = edgeTile(name, height);
   const url = edgeMaskURL(name, seed);
   const mask = url + (tile ? ' 0 0 / ' + tile + 'px 100% repeat-x' : ' center / 100% 100% no-repeat');
+  const motion = animate ? (tile ? ' omni-section-edge-drift' : ' omni-section-edge-swell') : '';
   return (
-    <Box
+    <div
       aria-hidden="true"
-      className={'section-edge section-edge-' + side + ' section-edge-' + name}
-      sx={{
-        position: 'absolute',
-        left: 0,
-        right: 0,
+      className={'section-edge section-edge-' + side + ' section-edge-' + name
+        + ' omni-section-edge omni-section-edge-' + side + motion}
+      style={{
         height,
-        ...(side === 'top' ? { bottom: '100%' } : { top: '100%', transform: 'scaleY(-1)' }),
-        /* The section's own --Background: the edge is the section, so it can
-           never disagree with it. */
-        backgroundColor: 'var(--Background)',
         WebkitMask: mask,
         mask,
-        pointerEvents: 'none',
-        zIndex: 1,
-        ...(animate && {
-          '@media (prefers-reduced-motion: no-preference)': tile
-            ? { animation: drift(tile) + ' ' + Math.round(tile / 12) + 's linear infinite' }
-            : {
-                /* From the baseline, so it grows out of the section rather
-                   than floating. */
-                transformOrigin: 'bottom',
-                animation: swell(side === 'bottom') + ' 5s ease-in-out infinite alternate',
-              },
-        }),
+        ...(tile ? { '--_edge-tile': tile + 'px', '--_edge-dur': Math.round(tile / 12) + 's' } : {}),
       }}
     />
   );

@@ -1,16 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { FormLabel } from './FormLabel';
+import { cssFor } from '../_testCss';
 
-const cssFor = (el) => {
-  const raw = el.getAttribute ? (el.getAttribute('class') || '') : '';
-  const cls = raw.split(/\s+/).find((c) => c.startsWith('css-'));
-  if (!cls) return '';
-  return Array.from(document.styleSheets)
-    .flatMap((s) => Array.from(s.cssRules || []))
-    .filter((r) => (r.selectorText || '').includes('.' + cls))
-    .map((r) => r.cssText).join('\n');
-};
 
 /* THE WHOLE REASON THIS COMPONENT EXISTS. Not one form component in the
    library read the Label type style — Input, Select and NumberField render

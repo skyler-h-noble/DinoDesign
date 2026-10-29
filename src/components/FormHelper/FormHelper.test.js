@@ -2,16 +2,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { FormHelper, FORM_HELPER_VALIDATIONS, useFormHelperIds } from './FormHelper';
 import { InputMessage, INPUT_MESSAGE_TYPES } from '../InputMessage';
+import { cssFor } from '../_testCss';
 
-const cssFor = (el) => {
-  const raw = el.getAttribute ? (el.getAttribute('class') || '') : '';
-  const cls = raw.split(/\s+/).find((c) => c.startsWith('css-'));
-  if (!cls) return '';
-  return Array.from(document.styleSheets)
-    .flatMap((s) => Array.from(s.cssRules || []))
-    .filter((r) => (r.selectorText || '').includes('.' + cls))
-    .map((r) => r.cssText).join('\n');
-};
 
 /* A THEMED ZONE, not a coloured box. Figma wraps each message in a
    Theme-{State} frame pinning Theme and Surface=Surface-Brightest and fills it
