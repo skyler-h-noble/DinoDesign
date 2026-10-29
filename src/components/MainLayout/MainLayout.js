@@ -32,6 +32,19 @@ import InfoIcon from '@omni-design/icons/Info';
 import HelpIcon from '@omni-design/icons/Help';
 import { scrimStates } from '../_states';
 import { IconButton } from '../Button/Button';
+
+/* RETIRED (2026-10-29). Not in the Figma file and used nowhere in the lib or
+   the studio; side navigation is Rail (+ Drawer for the slide-out), the app
+   frame is AppBar, and the Adaptive Nav add-on joins them across breakpoints.
+   Kept working so no import breaks; removed in the next major. */
+const warnedRetired = new Set();
+function warnRetired(name) {
+  if (process.env.NODE_ENV === 'production' || warnedRetired.has(name)) return;
+  warnedRetired.add(name);
+  // eslint-disable-next-line no-console
+  console.warn('[OmniDesign] <' + name + '> is retired and will be removed in the next major version. Build the frame from AppBar, Rail and Drawer (the Adaptive Nav add-on generates one across breakpoints).');
+}
+
 /* The lib's own icon button — <Button iconOnly> — not MUI's, so hover,
    pressed, focus-visible and disabled all come from Button rather than
    being re-derived at each call site. */
@@ -64,6 +77,7 @@ export function MainLayout({
   sx = {},
   ...props
 }) {
+  warnRetired('MainLayout');
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
@@ -325,6 +339,7 @@ export function DefaultMainLayout({
   sx = {},
   ...props
 }) {
+  warnRetired('DefaultMainLayout');
   return (
     <MainLayout
       layout={layout}

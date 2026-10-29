@@ -578,7 +578,7 @@ import {
   Avatar, AvatarGroup, Badge, Divider, List, Table, Tooltip,
 
   // App Structure
-  AppBar, Footer, Sidebar, MainLayout, Accordion,
+  AppBar, Footer, Rail, Drawer, Accordion,
 
   // Utilities
   Link, SkeletonLoader,

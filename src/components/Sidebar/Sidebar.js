@@ -21,6 +21,19 @@ import ExpandMoreIcon from '@omni-design/icons/ExpandMore';
 import ChevronRightIcon from '@omni-design/icons/ChevronRight';
 import { scrimStates } from '../_states';
 import { IconButton } from '../Button/Button';
+
+/* RETIRED (2026-10-29). Not in the Figma file and used nowhere in the lib or
+   the studio; side navigation is Rail (+ Drawer for the slide-out), the app
+   frame is AppBar, and the Adaptive Nav add-on joins them across breakpoints.
+   Kept working so no import breaks; removed in the next major. */
+const warnedRetired = new Set();
+function warnRetired(name) {
+  if (process.env.NODE_ENV === 'production' || warnedRetired.has(name)) return;
+  warnedRetired.add(name);
+  // eslint-disable-next-line no-console
+  console.warn('[OmniDesign] <' + name + '> is retired and will be removed in the next major version. Use Rail for side navigation (with Drawer for a slide-out panel), and AppBar for the top bar.');
+}
+
 /* The lib's own icon button — <Button iconOnly> — not MUI's, so hover,
    pressed, focus-visible and disabled all come from Button rather than
    being re-derived at each call site. */
@@ -61,6 +74,7 @@ export function Sidebar({
   sx = {},
   ...props
 }) {
+  warnRetired('Sidebar');
   const [selectedItem, setSelectedItem] = useState(null);
   const [expandedItems, setExpandedItems] = useState({});
 
@@ -309,6 +323,7 @@ export function CollapsibleSidebar({
   sx = {},
   ...props
 }) {
+  warnRetired('CollapsibleSidebar');
   const [selectedItem, setSelectedItem] = useState(null);
   const width = collapsed ? 80 : 280;
 
@@ -447,6 +462,7 @@ export function UserProfileSidebar({
   sx = {},
   ...props
 }) {
+  warnRetired('UserProfileSidebar');
   const [selectedItem, setSelectedItem] = useState(null);
 
   const handleItemClick = (item, index) => {
@@ -612,6 +628,7 @@ export function MinimalSidebar({
   sx = {},
   ...props
 }) {
+  warnRetired('MinimalSidebar');
   const [selectedItem, setSelectedItem] = useState(null);
 
   const handleItemClick = (item, index) => {
