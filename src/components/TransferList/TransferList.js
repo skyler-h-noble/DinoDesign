@@ -1,10 +1,10 @@
 // src/components/TransferList/TransferList.js
 import React, { useState, useCallback } from 'react';
 import { Box } from '@mui/material';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
-import KeyboardDoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
+import ChevronRightIcon from '@omni-design/icons/ChevronRight';
+import ChevronLeftIcon from '@omni-design/icons/ChevronLeft';
+import KeyboardDoubleArrowRightIcon from '@omni-design/icons/KeyboardDoubleArrowRight';
+import KeyboardDoubleArrowLeftIcon from '@omni-design/icons/KeyboardDoubleArrowLeft';
 import { Button } from '../Button/Button';
 import { Icon } from '../Icon/Icon';
 import { Checkbox } from '../Checkbox/Checkbox';

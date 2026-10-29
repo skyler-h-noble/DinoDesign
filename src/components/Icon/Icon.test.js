@@ -2,7 +2,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Icon } from './Icon';
-import HomeIcon from '@mui/icons-material/Home';
+import HomeIcon from '@omni-design/icons/Home';
 import { axe } from 'jest-axe';
 
 /* ─── Helpers ─── */

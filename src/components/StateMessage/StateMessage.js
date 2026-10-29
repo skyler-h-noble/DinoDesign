@@ -1,9 +1,9 @@
 // src/components/StateMessage/StateMessage.js
 import React, { useId } from 'react';
 import { Box } from '@mui/material';
-import InboxOutlinedIcon from '@mui/icons-material/InboxOutlined';
-import SearchOffOutlinedIcon from '@mui/icons-material/SearchOffOutlined';
-import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
+import InboxOutlinedIcon from '@omni-design/icons/InboxOutlined';
+import SearchOffOutlinedIcon from '@omni-design/icons/SearchOffOutlined';
+import ErrorOutlineOutlinedIcon from '@omni-design/icons/ErrorOutlineOutlined';
 import { Icon } from '../Icon/Icon';
 import { Subtitle, Body, BodySmall } from '../Typography';
 

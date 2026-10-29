@@ -4,8 +4,8 @@ import { A11yScopeNote } from '../a11yPanel';
 import { ShowcaseHeader } from '../ShowcaseHeader';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack, Grid } from '@mui/material';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import CheckIcon from '@mui/icons-material/Check';
+import ContentCopyIcon from '@omni-design/icons/ContentCopy';
+import CheckIcon from '@omni-design/icons/Check';
 import { Tag, TAG_COLORS, TAG_COLOR_TOKEN_MAP } from './Tag';
 
 // Grouped color picker — mirrors the Button showcase pattern:

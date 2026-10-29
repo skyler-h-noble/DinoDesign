@@ -2,9 +2,9 @@
 import React from 'react';
 import { Tooltip } from './Tooltip';
 import { Stack, Box, Button, IconButton } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AddIcon from '@mui/icons-material/Add';
-import InfoIcon from '@mui/icons-material/Info';
+import DeleteIcon from '@omni-design/icons/Delete';
+import AddIcon from '@omni-design/icons/Add';
+import InfoIcon from '@omni-design/icons/Info';
 
 export default { title: 'Data Display/Tooltip', component: Tooltip };
 

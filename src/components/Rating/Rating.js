@@ -1,9 +1,9 @@
 // src/components/Rating/Rating.js
 import React, { useState } from 'react';
 import { Box } from '@mui/material';
-import StarIcon from '@mui/icons-material/Star';
-import StarBorderIcon from '@mui/icons-material/StarBorder';
-import StarHalfIcon from '@mui/icons-material/StarHalf';
+import StarIcon from '@omni-design/icons/Star';
+import StarBorderIcon from '@omni-design/icons/StarBorder';
+import StarHalfIcon from '@omni-design/icons/StarHalf';
 import { Caption } from '../Typography/Typography';
 import { FormLabel } from '../FormLabel/FormLabel';
 

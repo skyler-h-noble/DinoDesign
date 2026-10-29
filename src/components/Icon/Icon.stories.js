@@ -2,13 +2,13 @@
 import React from 'react';
 import { Icon } from './Icon';
 import { Box, Stack } from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home';
-import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
-import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
-import HomeTwoToneIcon from '@mui/icons-material/HomeTwoTone';
-import HomeSharpIcon from '@mui/icons-material/HomeSharp';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import FavoriteTwoToneIcon from '@mui/icons-material/FavoriteTwoTone';
+import HomeIcon from '@omni-design/icons/Home';
+import HomeOutlinedIcon from '@omni-design/icons/HomeOutlined';
+import HomeRoundedIcon from '@omni-design/icons/HomeRounded';
+import HomeTwoToneIcon from '@omni-design/icons/HomeTwoTone';
+import HomeSharpIcon from '@omni-design/icons/HomeSharp';
+import FavoriteIcon from '@omni-design/icons/Favorite';
+import FavoriteTwoToneIcon from '@omni-design/icons/FavoriteTwoTone';
 
 export default { title: 'Data Display/Icon', component: Icon };
 

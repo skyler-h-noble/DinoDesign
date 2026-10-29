@@ -2,11 +2,11 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Rail } from './Rail';
-import HomeIcon from '@mui/icons-material/Home';
-import InboxIcon from '@mui/icons-material/Inbox';
-import SendIcon from '@mui/icons-material/Send';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import SettingsIcon from '@mui/icons-material/Settings';
+import HomeIcon from '@omni-design/icons/Home';
+import InboxIcon from '@omni-design/icons/Inbox';
+import SendIcon from '@omni-design/icons/Send';
+import FavoriteIcon from '@omni-design/icons/Favorite';
+import SettingsIcon from '@omni-design/icons/Settings';
 import { axe } from 'jest-axe';
 
 const ITEMS = [

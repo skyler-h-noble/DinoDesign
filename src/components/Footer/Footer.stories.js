@@ -1,9 +1,9 @@
 // src/components/Footer/Footer.stories.js
 import React from 'react';
 import { Footer } from './Footer';
-import TwitterIcon from '@mui/icons-material/Twitter';
-import GitHubIcon from '@mui/icons-material/GitHub';
-import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import TwitterIcon from '@omni-design/icons/Twitter';
+import GitHubIcon from '@omni-design/icons/GitHub';
+import LinkedInIcon from '@omni-design/icons/LinkedIn';
 
 export default {
   title: 'Components/Footer',

@@ -1,6 +1,7 @@
 // src/components/Badge/Badge.js
 import React from 'react';
-import { Badge as MuiBadge, Box } from '@mui/material';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 
 /**
  * Badge Component
@@ -143,6 +144,39 @@ function warnRemovedSize(size) {
 
 // --- Component ---------------------------------------------------------------
 
+/* The static sheet. Badge used to be MUI's Badge with an sx; it is its own
+   markup now, carrying MUI's positioning (the four anchor corners, the 14%
+   inset for a circular child, the scale-to-zero hide) and the design's counter
+   on top, over the same tokens. */
+const SxBox = lazySxBox('Badge');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+const ANCHORS = [];
+for (const v of ['top', 'bottom']) for (const h of ['left', 'right']) for (const o of ['rectangular', 'circular']) ANCHORS.push([v, h, o]);
+
+registerStaticStyles('omni-badge', [
+  '.omni-badge{position:relative;display:inline-flex;vertical-align:middle;flex-shrink:0}',
+  '.omni-badge-b{display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;align-content:center;align-items:center;'
+    + 'position:absolute;box-sizing:border-box;z-index:1;'
+    + `min-width:${BADGE.size};height:${BADGE.size};padding:0 ${BADGE.padX};border-radius:${BADGE.size};`
+    + 'font-family:var(--Badge-Font-Family, var(--Button-Small-Font-Family));font-weight:var(--Badge-Font-Weight, var(--Button-Small-Font-Weight));'
+    + 'line-height:var(--Badge-Line-Height, 12px);letter-spacing:var(--Badge-Letter-Spacing, var(--Button-Small-Letter-Spacing));'
+    + 'font-size:var(--Badge-Font-Size, 11px);'
+    /* No ring: the Figma set (3156:5150) has just the 1px stroke in the
+       badge's own color. */
+    + 'background-color:var(--_bd-c);color:var(--_bd-on);border:1px solid var(--_bd-c);'
+    + 'transition:transform 0.2s ease, opacity 0.2s ease;'
+    + 'transform:scale(1) translate(var(--Badge-translateX), var(--Badge-translateY))}',
+  ...COLORS.map((c) => `.omni-badge-c-${c}{--_bd-c:var(--Icons-${cap(c)});--_bd-on:var(--Icons-On-${cap(c)})}`),
+  `.omni-badge-dot{min-width:${BADGE.dot};height:${BADGE.dot};padding:0;border-radius:${BADGE.dot}}`,
+  ...ANCHORS.map(([v, h, o]) => {
+    const off = o === 'circular' ? '14%' : '0';
+    return `.omni-badge-a-${v}-${h}-${o}{--Badge-translateX:${h === 'right' ? '50%' : '-50%'};--Badge-translateY:${v === 'top' ? '-50%' : '50%'};`
+      + `top:${v === 'top' ? off : 'initial'};bottom:${v === 'bottom' ? off : 'initial'};right:${h === 'right' ? off : 'initial'};left:${h === 'left' ? off : 'initial'};`
+      + `transform-origin:${h === 'right' ? '100%' : '0%'} ${v === 'top' ? '0%' : '100%'}}`;
+  }),
+  '.omni-badge-b.omni-badge-hide{transform:scale(0) translate(var(--Badge-translateX), var(--Badge-translateY))}',
+].join('\n'));
+
 export function Badge({
   /* 'error' — Figma's Badge Counter resolves in the Icons Error mode: the red
      notification badge. It defaulted to primary. */
@@ -158,9 +192,10 @@ export function Badge({
   anchorOrigin = { vertical: 'top', horizontal: 'right' },
   children,
   className = '',
-  sx = {},
+  sx,
   ...props
 }) {
+  useStaticStyles('omni-badge');
   const variantMap = buildVariantMap();
   const effectiveVariant = normalizeBadgeVariant(variant);
   const styles = variantMap[effectiveVariant] || variantMap['primary'];
@@ -185,67 +220,35 @@ export function Badge({
   // Visibility
   const isInvisible = invisible || (!isStatus && !showZero && (badgeContent === 0 || badgeContent === undefined || badgeContent === null));
 
-  const badgeSx = {
-    '& .MuiBadge-badge': {
-      // Sizing
-      minWidth: isStatus ? sc.dot : sc.size,
-      height: isStatus ? sc.dot : sc.size,
-      padding: isStatus ? 0 : '0 ' + sc.padX,
-      // Type: the design's own Badge style, 11/12. This was composed from
-      // --Button-Small-* plus --Sm-Button-Numbers, which resolves to 10 with a
-      // 14 leading — a pixel small on a leading too loose. 11 is not a rung of
-      // the Button-Numbers ladder either (10 / 12 / 16 at the three button
-      // heights), so no Button token can carry it; face, weight and tracking
-      // still come from the Buttons/Small role, which is what the style binds.
-      fontFamily:    'var(--Badge-Font-Family, var(--Button-Small-Font-Family))',
-      fontWeight:    'var(--Badge-Font-Weight, var(--Button-Small-Font-Weight))',
-      lineHeight:    'var(--Badge-Line-Height, 12px)',
-      letterSpacing: 'var(--Badge-Letter-Spacing, var(--Button-Small-Letter-Spacing))',
-      fontSize:      'var(--Badge-Font-Size, 11px)',
-      // Fully round. The design binds the radius to the SAME token as the
-      // size — --Sizing-2 on a 16px counter, --Sizing-1 on an 8px dot — so any
-      // value at or above half the height reads as a pill. Matching that
-      // binding keeps the two in step if the scale is ever retuned.
-      borderRadius: isStatus ? sc.dot : sc.size,
+  const colorKey = variantMap[effectiveVariant] ? effectiveVariant : 'primary';
+  void styles;
+  const v = anchorOrigin && anchorOrigin.vertical === 'bottom' ? 'bottom' : 'top';
+  const h = anchorOrigin && anchorOrigin.horizontal === 'left' ? 'left' : 'right';
+  const o = overlap === 'circular' ? 'circular' : 'rectangular';
+  const shown = isStatus ? undefined : displayContent;
+  const hidden = isInvisible || (!isStatus && (shown === undefined || shown === null));
+  /* While hidden, the badge keeps what it last SHOWED, so it scales away with
+     its number rather than emptying first — as MUI's did. A badge hidden from
+     the start has shown nothing, so it is empty. */
+  const last = React.useRef(undefined);
+  if (!hidden) last.current = shown;
+  const Cap = (x) => x.charAt(0).toUpperCase() + x.slice(1);
 
-      // Colors
-      backgroundColor: styles.bg,
-      color: styles.text,
-      border: styles.border,
-      boxSizing: 'border-box',
-
-      /* No ring. This drew a 1px ring in the BACKGROUND color to cut the badge
-         out of what it overlaps; the Figma set (3156:5150) has none — just the
-         1px stroke in the badge's own color. Matched to Figma 2026-10-20. */
-
-      // Transition
-      transition: 'transform 0.2s ease, opacity 0.2s ease',
-    },
-
-    ...sx,
-  };
-
-  return (
-    <MuiBadge
-      badgeContent={isStatus ? '' : displayContent}
-      max={max}
-      showZero={showZero}
-      invisible={isInvisible}
-      overlap={overlap}
-      anchorOrigin={anchorOrigin}
-      variant={isStatus ? 'dot' : 'standard'}
-      className={'badge-' + effectiveVariant + ' ' + className}
-      sx={badgeSx}
-      {...props}
-    >
-      {children}
-    </MuiBadge>
+  const badge = (
+    <span className={'MuiBadge-badge MuiBadge-' + (isStatus ? 'dot' : 'standard')
+      + ' MuiBadge-anchorOrigin' + Cap(v) + Cap(h) + Cap(o) + ' MuiBadge-overlap' + Cap(o)
+      + (hidden ? ' MuiBadge-invisible' : '')
+      + ' omni-badge-b omni-badge-c-' + colorKey + ' omni-badge-a-' + v + '-' + h + '-' + o
+      + (isStatus ? ' omni-badge-dot' : '') + (hidden ? ' omni-badge-hide' : '')}>
+      {isStatus ? undefined : (hidden ? last.current : shown)}
+    </span>
   );
+  const rootProps = { className: 'MuiBadge-root badge-' + effectiveVariant + ' omni-badge ' + className, ...props };
+  if (hasSx(sx)) return <SxBox component="span" sx={sx} {...rootProps}>{children}{badge}</SxBox>;
+  return <span {...rootProps}>{children}{badge}</span>;
 }
 
-// ─── Convenience Exports ──────────────────────────────────────────────────────
 
-// Solid
 export const PrimaryBadge    = (p) => <Badge variant="primary"    {...p} />;
 export const SecondaryBadge  = (p) => <Badge variant="secondary"  {...p} />;
 export const TertiaryBadge   = (p) => <Badge variant="tertiary"   {...p} />;

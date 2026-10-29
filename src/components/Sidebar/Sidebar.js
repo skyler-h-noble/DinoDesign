@@ -16,9 +16,9 @@ import {
   Avatar,
   Stack,
 } from '@mui/material';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ExpandLessIcon from '@omni-design/icons/ExpandLess';
+import ExpandMoreIcon from '@omni-design/icons/ExpandMore';
+import ChevronRightIcon from '@omni-design/icons/ChevronRight';
 import { scrimStates } from '../_states';
 import { IconButton } from '../Button/Button';
 /* The lib's own icon button — <Button iconOnly> — not MUI's, so hover,

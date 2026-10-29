@@ -1,8 +1,8 @@
 // src/components/SearchField/SearchField.js
 import React, { useState, useRef } from 'react';
 import { Box } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import CloseIcon from '@mui/icons-material/Close';
+import SearchIcon from '@omni-design/icons/Search';
+import CloseIcon from '@omni-design/icons/Close';
 import { Icon } from '../Icon/Icon';
 import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
 

@@ -5,8 +5,8 @@
 // states have been matched to Figma on the parity page — the rows mirror that
 // set's State axis, so the gallery shows what the design shows.
 import React from 'react';
-import HomeIcon from '@mui/icons-material/Home';
-import BackspaceIcon from '@mui/icons-material/Backspace';
+import HomeIcon from '@omni-design/icons/Home';
+import BackspaceIcon from '@omni-design/icons/Backspace';
 import { Input as TextInput } from '../components/Input/Input';
 import { InputDecorator } from '../components/Input/InputDecorator';
 import { Select } from '../components/Select/Select';

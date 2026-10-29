@@ -1,8 +1,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { Toolbar, TOOLBAR_COLORS, TOOLBAR_SURFACES } from './Toolbar';
-import FormatBoldIcon from '@mui/icons-material/FormatBold';
-import AddIcon from '@mui/icons-material/Add';
+import FormatBoldIcon from '@omni-design/icons/FormatBold';
+import AddIcon from '@omni-design/icons/Add';
 
 const ITEMS = [
   { icon: <FormatBoldIcon />, label: 'Bold' },

@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import AttachMoneyIcon from '@omni-design/icons/AttachMoney';
 import { Input, floatingLabelGeometry, ADORNMENT_GAP, FLOATING_SIZE_MAP } from './Input';
 import { declared } from '../_testCss';
 

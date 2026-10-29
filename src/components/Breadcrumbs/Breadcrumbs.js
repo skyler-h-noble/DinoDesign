@@ -3,8 +3,8 @@ import React, { Children, isValidElement } from 'react';
 import { Box } from '@mui/material';
 import { Popover } from '../Popover/Popover';
 import { Button } from '../Button/Button';
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import MoreHorizIcon from '@omni-design/icons/MoreHoriz';
+import ArrowBackIcon from '@omni-design/icons/ArrowBack';
 import { Icon } from '../Icon/Icon';
 import { BodySmall, Caption } from '../Typography';
 

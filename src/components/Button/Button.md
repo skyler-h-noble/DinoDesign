@@ -207,7 +207,7 @@ import { IconButton, LetterButton, AvatarButton, SwatchButton } from '@/componen
 
 ```jsx
 import { Button } from '@/components/Button';
-import AddIcon from '@mui/icons-material/Add';
+import AddIcon from '@omni-design/icons/Add';
 
 // Solid primary, medium, left icon
 <Button

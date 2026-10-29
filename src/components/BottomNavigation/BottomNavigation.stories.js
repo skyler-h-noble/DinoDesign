@@ -2,11 +2,11 @@
 import React from 'react';
 import { BottomNavigation } from './BottomNavigation';
 import { Box, Stack } from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home';
-import ExploreIcon from '@mui/icons-material/Explore';
-import RadioIcon from '@mui/icons-material/Radio';
-import LibraryMusicIcon from '@mui/icons-material/LibraryMusic';
-import FavoriteIcon from '@mui/icons-material/Favorite';
+import HomeIcon from '@omni-design/icons/Home';
+import ExploreIcon from '@omni-design/icons/Explore';
+import RadioIcon from '@omni-design/icons/Radio';
+import LibraryMusicIcon from '@omni-design/icons/LibraryMusic';
+import FavoriteIcon from '@omni-design/icons/Favorite';
 
 export default { title: 'Navigation/BottomNavigation', component: BottomNavigation };
 

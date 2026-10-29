@@ -1,9 +1,9 @@
 // src/components/IconBadge/IconBadge.stories.js
 import React from 'react';
 import { IconBadge } from './IconBadge';
-import HomeIcon from '@mui/icons-material/Home';
-import CodeIcon from '@mui/icons-material/Code';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import HomeIcon from '@omni-design/icons/Home';
+import CodeIcon from '@omni-design/icons/Code';
+import CheckCircleOutlineIcon from '@omni-design/icons/CheckCircleOutline';
 
 export default {
   title: 'Components/IconBadge',

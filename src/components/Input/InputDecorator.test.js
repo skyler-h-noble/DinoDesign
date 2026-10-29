@@ -1,7 +1,7 @@
 // src/components/Input/InputDecorator.test.js
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import BackspaceIcon from '@mui/icons-material/Backspace';
+import BackspaceIcon from '@omni-design/icons/Backspace';
 import { InputDecorator } from './InputDecorator';
 import { Input } from './Input';
 

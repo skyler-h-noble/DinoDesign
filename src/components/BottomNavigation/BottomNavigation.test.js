@@ -2,11 +2,11 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BottomNavigation } from './BottomNavigation';
-import HomeIcon from '@mui/icons-material/Home';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import PersonIcon from '@mui/icons-material/Person';
-import StarIcon from '@mui/icons-material/Star';
-import SearchIcon from '@mui/icons-material/Search';
+import HomeIcon from '@omni-design/icons/Home';
+import FavoriteIcon from '@omni-design/icons/Favorite';
+import PersonIcon from '@omni-design/icons/Person';
+import StarIcon from '@omni-design/icons/Star';
+import SearchIcon from '@omni-design/icons/Search';
 import { axe } from 'jest-axe';
 
 const ITEMS_3 = [

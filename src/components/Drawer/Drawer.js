@@ -1,7 +1,7 @@
 // src/components/Drawer/Drawer.js
 import React, { useEffect, useRef, useCallback } from 'react';
 import { Box } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from '@omni-design/icons/Close';
 import { Button } from '../Button/Button';
 import { Icon } from '../Icon/Icon';
 import { useOmniDesign } from '../../OmniDesignProvider';

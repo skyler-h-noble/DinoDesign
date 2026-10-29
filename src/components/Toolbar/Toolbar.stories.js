@@ -2,16 +2,16 @@
 import React from 'react';
 import { Toolbar } from './Toolbar';
 import { Box, Stack } from '@mui/material';
-import UndoIcon from '@mui/icons-material/Undo';
-import RedoIcon from '@mui/icons-material/Redo';
-import AddIcon from '@mui/icons-material/Add';
-import TextFieldsIcon from '@mui/icons-material/TextFields';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import FormatBoldIcon from '@mui/icons-material/FormatBold';
-import FormatItalicIcon from '@mui/icons-material/FormatItalic';
-import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import UndoIcon from '@omni-design/icons/Undo';
+import RedoIcon from '@omni-design/icons/Redo';
+import AddIcon from '@omni-design/icons/Add';
+import TextFieldsIcon from '@omni-design/icons/TextFields';
+import MoreVertIcon from '@omni-design/icons/MoreVert';
+import FormatBoldIcon from '@omni-design/icons/FormatBold';
+import FormatItalicIcon from '@omni-design/icons/FormatItalic';
+import FormatUnderlinedIcon from '@omni-design/icons/FormatUnderlined';
+import ArrowBackIcon from '@omni-design/icons/ArrowBack';
+import ArrowForwardIcon from '@omni-design/icons/ArrowForward';
 
 export default { title: 'Navigation/Toolbar', component: Toolbar };
 

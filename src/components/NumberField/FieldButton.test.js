@@ -2,7 +2,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { axe } from 'jest-axe';
-import AddIcon from '@mui/icons-material/Add';
+import AddIcon from '@omni-design/icons/Add';
 import { FieldButton } from './FieldButton';
 
 const allCss = () => Array.from(document.styleSheets).flatMap((s) => Array.from(s.cssRules).map((r) => r.cssText)).join('\n');

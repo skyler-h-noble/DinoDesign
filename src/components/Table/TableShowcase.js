@@ -11,8 +11,8 @@ import {
 } from '@mui/material';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import CheckIcon from '@mui/icons-material/Check';
+import ContentCopyIcon from '@omni-design/icons/ContentCopy';
+import CheckIcon from '@omni-design/icons/Check';
 import { Table } from './Table';
 import {
   H3, H4, H5, Body, BodySmall, Caption, Label, EyebrowSmall

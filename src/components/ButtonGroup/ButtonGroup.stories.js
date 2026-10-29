@@ -3,14 +3,14 @@ import React from 'react';
 import { Stack, Box } from '@mui/material';
 import { ButtonGroup } from './ButtonGroup';
 import { Button } from '../Button/Button';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SaveIcon from '@mui/icons-material/Save';
-import SendIcon from '@mui/icons-material/Send';
-import EditIcon from '@mui/icons-material/Edit';
-import FormatBoldIcon from '@mui/icons-material/FormatBold';
-import FormatItalicIcon from '@mui/icons-material/FormatItalic';
-import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
+import AddIcon from '@omni-design/icons/Add';
+import DeleteIcon from '@omni-design/icons/Delete';
+import SaveIcon from '@omni-design/icons/Save';
+import SendIcon from '@omni-design/icons/Send';
+import EditIcon from '@omni-design/icons/Edit';
+import FormatBoldIcon from '@omni-design/icons/FormatBold';
+import FormatItalicIcon from '@omni-design/icons/FormatItalic';
+import FormatUnderlinedIcon from '@omni-design/icons/FormatUnderlined';
 
 export default {
   title: 'Components/ButtonGroup',

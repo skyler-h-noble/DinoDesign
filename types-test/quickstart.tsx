@@ -5,7 +5,7 @@ import {
   AppBar, Section, Container, Grid, VStack, Card, Button, Footer,
   DisplayLarge, H2, Subtitle, Body, BodySmall, Eyebrow, IconBadge,
 } from '@omni-design/components';
-import HomeIcon from '@mui/icons-material/Home';
+import HomeIcon from '@omni-design/icons/Home';
 
 
 export function QuickstartPage() {

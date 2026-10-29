@@ -2,9 +2,9 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
 import { lazySxBox } from '../_lazyFallback';
-import MenuIcon from '@mui/icons-material/Menu';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import MenuIcon from '@omni-design/icons/Menu';
+import ArrowBackIcon from '@omni-design/icons/ArrowBack';
+import AccountCircleIcon from '@omni-design/icons/AccountCircle';
 import { Tabs, TabList, Tab } from '../Tabs/Tabs';
 import { H3 } from '../Typography';
 import { Button } from '../Button/Button';

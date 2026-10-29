@@ -30,7 +30,14 @@ describe('consumer setup', () => {
 
   it('pins MUI to 7, the major the components are built against', () => {
     expect(pkg.peerDependencies['@mui/material']).toBe('^7.0.0');
-    expect(pkg.peerDependencies['@mui/icons-material']).toBe('^7.0.0');
+  });
+
+  it('draws icons from @omni-design/icons, not @mui/icons-material', () => {
+    /* The lib's own icons are plain SVG from @omni-design/icons, so a
+       consumer no longer installs MUI's icon package (or its styling engine)
+       for them. */
+    expect(pkg.dependencies['@omni-design/icons']).toMatch(/^\^0\./);
+    expect(pkg.peerDependencies['@mui/icons-material']).toBeUndefined();
   });
 
   it('Grid maps MUI 5 breakpoint props to MUI 7 size', () => {

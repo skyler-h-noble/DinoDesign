@@ -11,11 +11,11 @@ import {
 } from '@mui/material';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import CheckIcon from '@mui/icons-material/Check';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AddIcon from '@mui/icons-material/Add';
-import InfoIcon from '@mui/icons-material/Info';
+import ContentCopyIcon from '@omni-design/icons/ContentCopy';
+import CheckIcon from '@omni-design/icons/Check';
+import DeleteIcon from '@omni-design/icons/Delete';
+import AddIcon from '@omni-design/icons/Add';
+import InfoIcon from '@omni-design/icons/Info';
 import { Tooltip } from './Tooltip';
 import { tokenSegment } from '../_shadows';
 import {

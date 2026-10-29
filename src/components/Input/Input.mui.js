@@ -12,10 +12,10 @@ import {
   InputAdornment,
   Box,
 } from '@mui/material';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import CheckCircleOutlineIcon from '@omni-design/icons/CheckCircleOutline';
+import WarningAmberIcon from '@omni-design/icons/WarningAmber';
+import ErrorOutlineIcon from '@omni-design/icons/ErrorOutline';
+import InfoOutlinedIcon from '@omni-design/icons/InfoOutlined';
 import { FormLabel } from '../FormLabel/FormLabel';
 import { SHADOW_LEVEL_1, SHADOW_LEVEL_2 } from '../_shadows';
 

@@ -12,7 +12,7 @@ import {
   Dialog as MuiDialog,
   Slide, Grow, Fade, Zoom,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from '@omni-design/icons/Close';
 import { Box } from '@mui/material';
 import { useOmniDesign } from '../../OmniDesignProvider';
 import { IconButton } from '../Button/Button';

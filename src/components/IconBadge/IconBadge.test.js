@@ -2,7 +2,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { IconBadge } from './IconBadge';
-import HomeIcon from '@mui/icons-material/Home';
+import HomeIcon from '@omni-design/icons/Home';
 
 /* ─── Helpers ─── */
 const renderBadge = (props = {}) =>

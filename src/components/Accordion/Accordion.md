@@ -359,8 +359,8 @@ const items = ['Section A', 'Section B', 'Section C'];
 ### Custom expand icon
 
 ```jsx
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
+import AddIcon from '@omni-design/icons/Add';
+import RemoveIcon from '@omni-design/icons/Remove';
 
 // The expandIcon prop replaces the default chevron.
 // The component still applies rotate(180deg) — account for this in icon choice.

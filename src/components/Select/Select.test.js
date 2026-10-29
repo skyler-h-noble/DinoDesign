@@ -3,7 +3,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Select } from './Select';
 import { declared } from '../_testCss';
-import SearchIcon from '@mui/icons-material/Search';
+import SearchIcon from '@omni-design/icons/Search';
 import { axe } from 'jest-axe';
 
 const OPTIONS = [

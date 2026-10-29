@@ -2,8 +2,8 @@
 import React from 'react';
 import { Select } from './Select';
 import { Box, Stack, Avatar } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import PersonIcon from '@mui/icons-material/Person';
+import SearchIcon from '@omni-design/icons/Search';
+import PersonIcon from '@omni-design/icons/Person';
 
 export default { title: 'Inputs/Select', component: Select };
 

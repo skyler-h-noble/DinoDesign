@@ -20,9 +20,9 @@ import { Icon } from '../components/Icon';
 import { VStack, HStack } from '../components/Stack';
 import { Caption, Body } from '../components/Typography';
 import { PALETTES, SIZES, Cell } from './samples';
-import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
-import FormatAlignCenterIcon from '@mui/icons-material/FormatAlignCenter';
-import FormatAlignRightIcon from '@mui/icons-material/FormatAlignRight';
+import FormatAlignLeftIcon from '@omni-design/icons/FormatAlignLeft';
+import FormatAlignCenterIcon from '@omni-design/icons/FormatAlignCenter';
+import FormatAlignRightIcon from '@omni-design/icons/FormatAlignRight';
 
 const BOX = 360;
 

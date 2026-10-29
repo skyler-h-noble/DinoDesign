@@ -2,13 +2,13 @@
 import React, { useState } from 'react';
 import { List, ListItem } from './List';
 import { Stack, Box, Avatar } from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home';
-import InboxIcon from '@mui/icons-material/Inbox';
-import SettingsIcon from '@mui/icons-material/Settings';
-import FolderIcon from '@mui/icons-material/Folder';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import DeleteIcon from '@mui/icons-material/Delete';
-import StarIcon from '@mui/icons-material/Star';
+import HomeIcon from '@omni-design/icons/Home';
+import InboxIcon from '@omni-design/icons/Inbox';
+import SettingsIcon from '@omni-design/icons/Settings';
+import FolderIcon from '@omni-design/icons/Folder';
+import ChevronRightIcon from '@omni-design/icons/ChevronRight';
+import DeleteIcon from '@omni-design/icons/Delete';
+import StarIcon from '@omni-design/icons/Star';
 
 export default { title: 'Data Display/List', component: List };
 

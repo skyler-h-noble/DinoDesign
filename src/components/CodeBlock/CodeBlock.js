@@ -19,8 +19,8 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Box, Tooltip } from '@mui/material';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import CheckIcon from '@mui/icons-material/Check';
+import ContentCopyIcon from '@omni-design/icons/ContentCopy';
+import CheckIcon from '@omni-design/icons/Check';
 import { Caption } from '../Typography/Typography';
 import { IconButton } from '../Button/Button';
 /* The lib's own icon button — <Button iconOnly> — not MUI's, so hover,

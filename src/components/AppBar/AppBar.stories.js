@@ -2,11 +2,11 @@
 import React from 'react';
 import { AppBar } from './AppBar';
 import { Box, Stack } from '@mui/material';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import SettingsIcon from '@mui/icons-material/Settings';
-import CheckIcon from '@mui/icons-material/Check';
-import AddIcon from '@mui/icons-material/Add';
-import BookmarkIcon from '@mui/icons-material/Bookmark';
+import NotificationsIcon from '@omni-design/icons/Notifications';
+import SettingsIcon from '@omni-design/icons/Settings';
+import CheckIcon from '@omni-design/icons/Check';
+import AddIcon from '@omni-design/icons/Add';
+import BookmarkIcon from '@omni-design/icons/Bookmark';
 
 export default { title: 'Navigation/AppBar', component: AppBar };
 

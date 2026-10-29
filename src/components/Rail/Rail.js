@@ -1,8 +1,8 @@
 // src/components/Rail/Rail.js
 import React, { useState, useCallback } from 'react';
 import { Box } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import CloseIcon from '@mui/icons-material/Close';
+import MenuIcon from '@omni-design/icons/Menu';
+import CloseIcon from '@omni-design/icons/Close';
 import { Button } from '../Button/Button';
 import { Fab } from '../Fab/Fab';
 import { Badge } from '../Badge/Badge';

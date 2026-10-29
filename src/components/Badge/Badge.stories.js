@@ -1,9 +1,9 @@
 // src/components/Badge/Badge.stories.js
 import { Badge } from './Badge';
 import { Stack, Box } from '@mui/material';
-import MailIcon from '@mui/icons-material/Mail';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import MailIcon from '@omni-design/icons/Mail';
+import NotificationsIcon from '@omni-design/icons/Notifications';
+import ShoppingCartIcon from '@omni-design/icons/ShoppingCart';
 
 export default {
   title: 'Data Display/Badge',

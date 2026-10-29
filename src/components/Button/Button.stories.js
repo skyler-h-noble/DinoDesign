@@ -2,11 +2,11 @@
 import React from 'react';
 import { Stack, Box } from '@mui/material';
 import { Button } from './Button';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SaveIcon from '@mui/icons-material/Save';
-import SendIcon from '@mui/icons-material/Send';
-import DownloadIcon from '@mui/icons-material/FileDownload';
+import AddIcon from '@omni-design/icons/Add';
+import DeleteIcon from '@omni-design/icons/Delete';
+import SaveIcon from '@omni-design/icons/Save';
+import SendIcon from '@omni-design/icons/Send';
+import DownloadIcon from '@omni-design/icons/FileDownload';
 
 export default {
   title: 'Components/Button',

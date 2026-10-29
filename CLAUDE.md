@@ -7,10 +7,10 @@ component or token not covered here.
 ## 1. Install
 
 ```bash
-npm install @omni-design/components @mui/material@^7 @mui/icons-material@^7 @emotion/react @emotion/styled
+npm install @omni-design/components @omni-design/icons @mui/material@^7 @emotion/react @emotion/styled
 ```
 
-Pin MUI to 7. MUI 9 removed icons this package imports, and the build fails.
+Pin MUI to 7: the parts still built on MUI (and any `sx` you pass) are built against it. Icons come from `@omni-design/icons`, not MUI.
 
 ## 2. Provider
 
@@ -75,8 +75,8 @@ headings, borders, buttons — picks the right contrast-checked colors.
 
 ```jsx
 import { useOmniDesign, Button } from '@omni-design/components';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@omni-design/icons/DarkMode';
+import LightModeIcon from '@omni-design/icons/LightMode';
 
 function ModeToggle() {
   const { isDark, toggleDarkMode } = useOmniDesign();
@@ -108,7 +108,7 @@ import {
   AppBar, Section, Container, Grid, VStack, Card, Button, Footer,
   DisplayLarge, H2, Subtitle, Body, BodySmall, Eyebrow, IconBadge,
 } from '@omni-design/components';
-import HomeIcon from '@mui/icons-material/Home';
+import HomeIcon from '@omni-design/icons/Home';
 
 <>
   <AppBar brand="Acme"
@@ -176,9 +176,12 @@ allowed values for `theme`, `surface`, `variant`, `color` and `size`, and a
 value TypeScript rejects is one the component does not support. The shared
 names are exported too: `Theme`, `Surface`, `Color`, `ButtonVariant`, `…Props`.
 
-Icons: `@mui/icons-material` (MUI 7) — use names that exist in v7 (e.g. `Eco`
-is gone; `EnergySavingsLeaf` replaces it), or the build fails. Use
-`<Icon color="primary">` to give one a brand color.
+Icons: `@omni-design/icons` — the Material Icons as plain SVG, same names as
+`@mui/icons-material` v7 (`import HomeIcon from '@omni-design/icons/Home'`,
+plus `…Outlined` / `…Rounded` / `…Sharp` / `…TwoTone`) without MUI's styling
+engine. Use names that exist in v7 (e.g. `Eco` is gone; `EnergySavingsLeaf`
+replaces it), or the build fails. Use `<Icon color="primary">` to give one a
+brand color.
 
 ## 7. Rules
 

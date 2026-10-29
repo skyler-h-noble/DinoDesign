@@ -2,7 +2,7 @@
 import React, { forwardRef } from 'react';
 import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
 import { lazySxBox } from '../_lazyFallback';
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from '@omni-design/icons/Close';
 import { Button } from '../Button/Button';
 import { SHADOW_LEVEL_1 } from '../_shadows';
 

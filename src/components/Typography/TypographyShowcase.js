@@ -5,8 +5,8 @@ import { ShowcaseHeader } from '../ShowcaseHeader';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { TypographySummary } from '../Foundations/TypographySummary';
 import { Box, Stack, Grid } from '@mui/material';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import CheckIcon from '@mui/icons-material/Check';
+import ContentCopyIcon from '@omni-design/icons/ContentCopy';
+import CheckIcon from '@omni-design/icons/Check';
 import { Typography, HEADER_COLORS, TEXT_COLORS } from './Typography';
 import {
   H3, H5, BodySmall, Caption, Label, EyebrowSmall

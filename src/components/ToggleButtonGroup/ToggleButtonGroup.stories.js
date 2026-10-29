@@ -1,13 +1,13 @@
 // src/components/ToggleButtonGroup/ToggleButtonGroup.stories.js
 import { ToggleButtonGroup, ToggleButton } from './ToggleButtonGroup';
 import { Stack, Box } from '@mui/material';
-import FormatBoldIcon from '@mui/icons-material/FormatBold';
-import FormatItalicIcon from '@mui/icons-material/FormatItalic';
-import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
-import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
-import FormatAlignCenterIcon from '@mui/icons-material/FormatAlignCenter';
-import FormatAlignRightIcon from '@mui/icons-material/FormatAlignRight';
-import FormatAlignJustifyIcon from '@mui/icons-material/FormatAlignJustify';
+import FormatBoldIcon from '@omni-design/icons/FormatBold';
+import FormatItalicIcon from '@omni-design/icons/FormatItalic';
+import FormatUnderlinedIcon from '@omni-design/icons/FormatUnderlined';
+import FormatAlignLeftIcon from '@omni-design/icons/FormatAlignLeft';
+import FormatAlignCenterIcon from '@omni-design/icons/FormatAlignCenter';
+import FormatAlignRightIcon from '@omni-design/icons/FormatAlignRight';
+import FormatAlignJustifyIcon from '@omni-design/icons/FormatAlignJustify';
 
 export default {
   title: 'Forms/ToggleButtonGroup',

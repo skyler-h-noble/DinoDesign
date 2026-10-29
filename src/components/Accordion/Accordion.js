@@ -1,7 +1,7 @@
 // src/components/Accordion/Accordion.js
 import React, { useState, createContext, useContext } from 'react';
 import { Box } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandMoreIcon from '@omni-design/icons/ExpandMore';
 import { Icon } from '../Icon/Icon';
 import {
   EyebrowSmall, BodyLarge, Body, BodySmall,

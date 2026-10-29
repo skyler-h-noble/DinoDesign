@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useOmniDesign } from '../OmniDesignProvider';
 import { Box, Stack, Divider } from '@mui/material';
-import { Settings as SettingsIcon, Close as CloseIcon } from '@mui/icons-material';
+import { Settings as SettingsIcon, Close as CloseIcon } from '@omni-design/icons';
 import { Button } from './Button/Button';
 import { Drawer } from './Drawer/Drawer';
 import { H5, BodySmall, Caption, EyebrowSmall } from './Typography';

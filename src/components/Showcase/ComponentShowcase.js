@@ -14,7 +14,7 @@ import {
   CardActionArea,
   Button,
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
+import SearchIcon from '@omni-design/icons/Search';
 import { showcaseConfig } from './showcaseConfig';
 
 export function ComponentShowcase({ onSelectComponent }) {

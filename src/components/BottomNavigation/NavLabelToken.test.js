@@ -15,7 +15,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { BottomNavigation } from './BottomNavigation';
 import { Rail } from '../Rail';
-import HomeIcon from '@mui/icons-material/Home';
+import HomeIcon from '@omni-design/icons/Home';
 import { cssFor } from '../_testCss';
 
 const ITEMS = [

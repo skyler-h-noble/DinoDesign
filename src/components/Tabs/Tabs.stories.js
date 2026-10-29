@@ -2,10 +2,10 @@
 import React from 'react';
 import { Tabs, TabList, Tab, TabPanel } from './Tabs';
 import { Box, Stack } from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home';
-import SettingsIcon from '@mui/icons-material/Settings';
-import PersonIcon from '@mui/icons-material/Person';
-import FavoriteIcon from '@mui/icons-material/Favorite';
+import HomeIcon from '@omni-design/icons/Home';
+import SettingsIcon from '@omni-design/icons/Settings';
+import PersonIcon from '@omni-design/icons/Person';
+import FavoriteIcon from '@omni-design/icons/Favorite';
 
 export default { title: 'Navigation/Tabs', component: Tabs };
 

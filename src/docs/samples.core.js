@@ -14,7 +14,7 @@ import { Alert } from '../components/Alert';
 import { Avatar } from '../components/Avatar';
 import { Player } from '../components/Player';
 import { Box } from '../components/Box';
-import FormatBoldIcon from '@mui/icons-material/FormatBold';
+import FormatBoldIcon from '@omni-design/icons/FormatBold';
 import { ToggleButton } from '../components/ToggleButton';
 import { LinearProgress } from '../components/LinearProgress';
 import { CircularProgress } from '../components/CircularProgress';
@@ -35,9 +35,9 @@ import { CodeBlock } from '../components/CodeBlock';
 import { VStack, HStack } from '../components/Stack';
 import { Caption, Body, Typography } from '../components/Typography';
 import { PALETTES, SIZES, Axis, AxisStack, Toggle, Cell } from './samples';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
-import MailIcon from '@mui/icons-material/Mail';
+import AddIcon from '@omni-design/icons/Add';
+import DeleteIcon from '@omni-design/icons/Delete';
+import MailIcon from '@omni-design/icons/Mail';
 
 /* A stand-in photo for shape samples: image CONTENT, so its colors are its own. */
 const SAMPLE_PHOTO = 'data:image/svg+xml;utf8,' + encodeURIComponent(
@@ -45,7 +45,7 @@ const SAMPLE_PHOTO = 'data:image/svg+xml;utf8,' + encodeURIComponent(
   + '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fc7d8"/><stop offset=".55" stop-color="#cfe2dc"/></linearGradient></defs>'
   + '<rect width="96" height="96" fill="url(#g)"/><circle cx="68" cy="28" r="10" fill="#f6d58a"/>'
   + '<path d="M0 62 L30 40 L52 58 L70 46 L96 64 V96 H0Z" fill="#5e8f7c"/><path d="M0 78 Q40 66 96 80 V96 H0Z" fill="#2f5a4c"/></svg>');
-import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteIcon from '@omni-design/icons/Favorite';
 
 const SNIPPET = 'npm install @omni-design/components';
 

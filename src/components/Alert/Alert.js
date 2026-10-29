@@ -3,10 +3,10 @@ import React from 'react';
 import { Box } from '@mui/material';
 import { Typography } from '../Typography';
 import { Icon } from '../Icon/Icon';
-import InfoIcon from '@mui/icons-material/Info';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import WarningIcon from '@mui/icons-material/Warning';
-import ErrorIcon from '@mui/icons-material/Error';
+import InfoIcon from '@omni-design/icons/Info';
+import CheckCircleIcon from '@omni-design/icons/CheckCircle';
+import WarningIcon from '@omni-design/icons/Warning';
+import ErrorIcon from '@omni-design/icons/Error';
 /* Level from the Figma effect style that NAMES this component.
    The five Effect-Levels are the five Figma effect styles, Elevations/Level-1 … Level-5:
      1  Elevations/Level-1 (Card, Accordion, Handle, Alert, Bottom-Sheet)

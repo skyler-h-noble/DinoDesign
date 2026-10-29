@@ -1,7 +1,7 @@
 // src/components/Quote/Quote.js
 import React from 'react';
 import { Box } from '@mui/material';
-import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
+import FormatQuoteIcon from '@omni-design/icons/FormatQuote';
 import { H3, H4, H5, Subtitle, Caption } from '../Typography';
 import { Avatar } from '../Avatar';
 import { Icon } from '../Icon/Icon';

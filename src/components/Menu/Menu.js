@@ -8,7 +8,7 @@
      5  Elevations/Level-5 (Dialog & Modal) */
 import React, { createContext, useContext, useState, useRef, useEffect, useCallback, useId } from 'react';
 import { Box } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandMoreIcon from '@omni-design/icons/ExpandMore';
 import { Button } from '../Button/Button';
 import { BodySmall, Body, BodyLarge } from '../Typography';
 import { SHADOW_LEVEL_2 } from '../_shadows';

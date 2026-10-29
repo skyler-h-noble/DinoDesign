@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Box } from '@mui/material';
 import { Tooltip } from '../Tooltip/Tooltip';
-import AddIcon from '@mui/icons-material/Add';
+import AddIcon from '@omni-design/icons/Add';
 import { Fab } from '../Fab/Fab';
 
 /**

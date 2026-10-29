@@ -7,16 +7,16 @@ import {
 } from './Sidebar';
 import { useState } from 'react';
 import { Box, Stack, Typography, Paper, AppBar, Toolbar } from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home';
-import SettingsIcon from '@mui/icons-material/Settings';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import LogoutIcon from '@mui/icons-material/Logout';
-import HelpIcon from '@mui/icons-material/Help';
-import MenuIcon from '@mui/icons-material/Menu';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import AnalyticsIcon from '@mui/icons-material/Analytics';
-import StorageIcon from '@mui/icons-material/Storage';
+import HomeIcon from '@omni-design/icons/Home';
+import SettingsIcon from '@omni-design/icons/Settings';
+import NotificationsIcon from '@omni-design/icons/Notifications';
+import AccountCircleIcon from '@omni-design/icons/AccountCircle';
+import LogoutIcon from '@omni-design/icons/Logout';
+import HelpIcon from '@omni-design/icons/Help';
+import MenuIcon from '@omni-design/icons/Menu';
+import DashboardIcon from '@omni-design/icons/Dashboard';
+import AnalyticsIcon from '@omni-design/icons/Analytics';
+import StorageIcon from '@omni-design/icons/Storage';
 import IconButton from '@mui/material/IconButton';
 
 export default {

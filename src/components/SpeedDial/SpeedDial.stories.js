@@ -2,12 +2,12 @@
 import React from 'react';
 import { SpeedDial } from './SpeedDial';
 import { Box, Stack } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import ShareIcon from '@mui/icons-material/Share';
-import DeleteIcon from '@mui/icons-material/Delete';
-import PrintIcon from '@mui/icons-material/Print';
-import SaveIcon from '@mui/icons-material/Save';
-import FavoriteIcon from '@mui/icons-material/Favorite';
+import EditIcon from '@omni-design/icons/Edit';
+import ShareIcon from '@omni-design/icons/Share';
+import DeleteIcon from '@omni-design/icons/Delete';
+import PrintIcon from '@omni-design/icons/Print';
+import SaveIcon from '@omni-design/icons/Save';
+import FavoriteIcon from '@omni-design/icons/Favorite';
 
 export default { title: 'Navigation/SpeedDial', component: SpeedDial };
 

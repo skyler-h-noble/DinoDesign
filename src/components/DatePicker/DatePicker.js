@@ -1,8 +1,8 @@
 // src/components/DatePicker/DatePicker.js
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Box } from '@mui/material';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ChevronLeftIcon from '@omni-design/icons/ChevronLeft';
+import ChevronRightIcon from '@omni-design/icons/ChevronRight';
 import { Button } from '../Button';
 import { Typography } from '../Typography';
 import { SHADOW_LEVEL_1 } from '../_shadows';

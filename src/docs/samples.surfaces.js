@@ -94,9 +94,9 @@ import { Box } from '../components/Box';
 import { Container } from '../components/Container';
 import { Tag } from '../components/Tag';
 import { SpeedDial } from '../components/SpeedDial';
-import AddIcon from '@mui/icons-material/Add';
-import PersonIcon from '@mui/icons-material/Person';
-import SettingsIcon from '@mui/icons-material/Settings';
+import AddIcon from '@omni-design/icons/Add';
+import PersonIcon from '@omni-design/icons/Person';
+import SettingsIcon from '@omni-design/icons/Settings';
 import { Sheet } from '../components/Sheet';
 
 /* A stand-in photo for shape samples: image CONTENT, so its colors are its own. */

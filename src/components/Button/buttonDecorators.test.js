@@ -4,7 +4,7 @@ import { render } from '@testing-library/react';
 import { Button } from './Button';
 import { Avatar } from '../Avatar/Avatar';
 import { Icon } from '../Icon/Icon';
-import HomeIcon from '@mui/icons-material/Home';
+import HomeIcon from '@omni-design/icons/Home';
 
 /**
  * A button's decorators have their OWN size ramp — Button-Avatar and

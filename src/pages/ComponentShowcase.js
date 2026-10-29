@@ -7,7 +7,7 @@ import {
   Drawer,
 } from '@mui/material';
 
-import * as MuiIcons from '@mui/icons-material';
+import * as MuiIcons from '@omni-design/icons';
 import { ButtonShowcase } from '../components/Button/ButtonShowcase';
 import { FoundationsShowcase, FOUNDATION_TOPICS } from '../components/Foundations/FoundationsShowcase';
 import { BrandIconShowcase } from '../components/BrandIcon/BrandIconShowcase';

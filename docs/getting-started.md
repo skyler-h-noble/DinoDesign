@@ -23,25 +23,26 @@ a brand requires only replacing the token CSS files; no component code changes.
 `@omni-design/components` is built on MUI and uses Emotion for styling. These must be installed in your app — they are not bundled inside the package:
 
 ```bash
-npm install @mui/material @mui/icons-material @emotion/react @emotion/styled
+npm install @mui/material@^7 @emotion/react @emotion/styled
 ```
 
 ### 2. Install OmniDesign
 
 ```bash
-npm install @omni-design/components
+npm install @omni-design/components @omni-design/icons
 ```
 
 > **Why peer dependencies?** MUI is not bundled inside `@omni-design/components` to avoid shipping duplicate copies of React and MUI in apps that already use them. Your app provides MUI; OmniDesign provides the token-driven theme layer on top of it. You never need to configure MUI directly — `OmniDesignProvider` handles all of that automatically.
 
 ### Required peer dependency versions
 
+Icons are `@omni-design/icons` (plain SVG, the same names as `@mui/icons-material` v7); MUI's icon package is not needed.
+
 | Package | Minimum Version |
 |---------|----------------|
 | `react` | `18.0.0` |
 | `react-dom` | `18.0.0` |
-| `@mui/material` | `5.0.0` |
-| `@mui/icons-material` | `5.0.0` |
+| `@mui/material` | `7.0.0` |
 | `@emotion/react` | `11.0.0` |
 | `@emotion/styled` | `11.0.0` |
 

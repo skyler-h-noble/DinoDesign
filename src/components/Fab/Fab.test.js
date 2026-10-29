@@ -2,7 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Fab } from './Fab';
-import EditIcon from '@mui/icons-material/Edit';
+import EditIcon from '@omni-design/icons/Edit';
 import { axe } from 'jest-axe';
 
 const renderFab = (props = {}) =>

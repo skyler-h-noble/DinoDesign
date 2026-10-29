@@ -1,7 +1,7 @@
 // src/components/TreeView/TreeView.js
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Box } from '@mui/material';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ChevronRightIcon from '@omni-design/icons/ChevronRight';
 import { Icon } from '../Icon/Icon';
 import { Body, Caption } from '../Typography';
 import { MiniSwatch } from '../MiniSwatch/MiniSwatch';

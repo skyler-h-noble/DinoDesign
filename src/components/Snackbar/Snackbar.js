@@ -1,7 +1,7 @@
 // src/components/Snackbar/Snackbar.js
 import React, { useEffect, useRef, useCallback } from 'react';
 import { Box } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from '@omni-design/icons/Close';
 import { Button } from '../Button/Button';
 import { Body, BodySmall, BodyLarge } from '../Typography';
 import { SHADOW_LEVEL_3 } from '../_shadows';

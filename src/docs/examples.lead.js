@@ -39,7 +39,7 @@ import { Player } from '../components/Player';
 import { Shape } from '../components/Shape';
 import { Quote } from '../components/Quote';
 import { ShapeButton } from '../components/ShapeButton/ShapeButton';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import FavoriteBorderIcon from '@omni-design/icons/FavoriteBorder';
 import { Ratio } from '../components/Ratio';
 import { SearchField } from '../components/SearchField';
 import { Select } from '../components/Select';
@@ -61,15 +61,15 @@ import { ButtonGroup } from '../components/ButtonGroup';
 import { Body, H3, Caption, Subtitle, BodySmall } from '../components/Typography';
 import { VStack } from '../components/Stack';
 
-import HomeIcon from '@mui/icons-material/Home';
-import SearchIcon from '@mui/icons-material/Search';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import PersonIcon from '@mui/icons-material/Person';
-import SettingsIcon from '@mui/icons-material/Settings';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import FormatBoldIcon from '@mui/icons-material/FormatBold';
-import FormatItalicIcon from '@mui/icons-material/FormatItalic';
-import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
+import HomeIcon from '@omni-design/icons/Home';
+import SearchIcon from '@omni-design/icons/Search';
+import FavoriteIcon from '@omni-design/icons/Favorite';
+import PersonIcon from '@omni-design/icons/Person';
+import SettingsIcon from '@omni-design/icons/Settings';
+import NotificationsIcon from '@omni-design/icons/Notifications';
+import FormatBoldIcon from '@omni-design/icons/FormatBold';
+import FormatItalicIcon from '@omni-design/icons/FormatItalic';
+import FormatUnderlinedIcon from '@omni-design/icons/FormatUnderlined';
 import { Sheet } from '../components/Sheet';
 
 /* A stand-in photo for shape samples: image CONTENT, so its colors are its own. */

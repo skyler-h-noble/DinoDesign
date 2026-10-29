@@ -8,15 +8,15 @@ import {
   Typography,
   Paper,
 } from '@mui/material';
-import FormatBoldIcon from '@mui/icons-material/FormatBold';
-import FormatItalicIcon from '@mui/icons-material/FormatItalic';
-import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
-import AlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
-import AlignCenterIcon from '@mui/icons-material/FormatAlignCenter';
-import AlignRightIcon from '@mui/icons-material/FormatAlignRight';
-import ViewListIcon from '@mui/icons-material/ViewList';
-import ViewModuleIcon from '@mui/icons-material/ViewModule';
-import GridViewIcon from '@mui/icons-material/GridView';
+import FormatBoldIcon from '@omni-design/icons/FormatBold';
+import FormatItalicIcon from '@omni-design/icons/FormatItalic';
+import FormatUnderlinedIcon from '@omni-design/icons/FormatUnderlined';
+import AlignLeftIcon from '@omni-design/icons/FormatAlignLeft';
+import AlignCenterIcon from '@omni-design/icons/FormatAlignCenter';
+import AlignRightIcon from '@omni-design/icons/FormatAlignRight';
+import ViewListIcon from '@omni-design/icons/ViewList';
+import ViewModuleIcon from '@omni-design/icons/ViewModule';
+import GridViewIcon from '@omni-design/icons/GridView';
 
 /* One state table for every toggle in this file.
 

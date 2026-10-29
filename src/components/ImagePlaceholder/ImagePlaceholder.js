@@ -1,7 +1,7 @@
 // src/components/ImagePlaceholder/ImagePlaceholder.js
 import React from 'react';
 import { Box } from '@mui/material';
-import ImageIcon from '@mui/icons-material/Image';
+import ImageIcon from '@omni-design/icons/Image';
 
 /**
  * ImagePlaceholder — Figma's `Image Placeholder` (7251:1985): where an image

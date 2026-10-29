@@ -1,7 +1,7 @@
 // src/components/BottomNavigation/BottomNavigation.js
 import React, { useState, useCallback } from 'react';
 import { Box } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
+import AddIcon from '@omni-design/icons/Add';
 import { MobileNavLabel } from '../Typography';
 import { SpeedDial } from '../SpeedDial/SpeedDial';
 import { Fab } from '../Fab/Fab';

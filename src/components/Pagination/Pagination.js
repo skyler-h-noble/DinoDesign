@@ -1,11 +1,11 @@
 // src/components/Pagination/Pagination.js
 import React, { useState, useCallback } from 'react';
 import { Box } from '@mui/material';
-import ChevronLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
-import ChevronRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import FirstPageIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
-import LastPageIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import ChevronLeftIcon from '@omni-design/icons/KeyboardArrowLeft';
+import ChevronRightIcon from '@omni-design/icons/KeyboardArrowRight';
+import FirstPageIcon from '@omni-design/icons/KeyboardDoubleArrowLeft';
+import LastPageIcon from '@omni-design/icons/KeyboardDoubleArrowRight';
+import MoreHorizIcon from '@omni-design/icons/MoreHoriz';
 import { Button } from '../Button/Button';
 import { Icon } from '../Icon/Icon';
 

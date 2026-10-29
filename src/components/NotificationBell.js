@@ -3,7 +3,7 @@
 
 import React, { useState, useRef } from 'react';
 import { Box } from '@mui/material';
-import NotificationsIcon from '@mui/icons-material/Notifications';
+import NotificationsIcon from '@omni-design/icons/Notifications';
 import { useNotifications } from './NotificationProvider';
 import { Popover } from './Popover/Popover';
 import { Button } from './Button/Button';

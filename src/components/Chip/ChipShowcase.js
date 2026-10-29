@@ -12,11 +12,11 @@ import {
 } from '@mui/material';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import CheckIcon from '@mui/icons-material/Check';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import * as MuiIcons from '@mui/icons-material';
+import ContentCopyIcon from '@omni-design/icons/ContentCopy';
+import CheckIcon from '@omni-design/icons/Check';
+import ExpandMoreIcon from '@omni-design/icons/ExpandMore';
+import ExpandLessIcon from '@omni-design/icons/ExpandLess';
+import * as MuiIcons from '@omni-design/icons';
 import { Chip } from './Chip';
 import {
   H3, H4, H5, Body, BodySmall, BodyBold, Caption, Label, EyebrowSmall

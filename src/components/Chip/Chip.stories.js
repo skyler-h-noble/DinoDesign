@@ -1,9 +1,9 @@
 // src/components/Chip/Chip.stories.js
 import { Chip } from './Chip';
 import { Stack, Box, Avatar } from '@mui/material';
-import FaceIcon from '@mui/icons-material/Face';
-import CheckIcon from '@mui/icons-material/Check';
-import StarIcon from '@mui/icons-material/Star';
+import FaceIcon from '@omni-design/icons/Face';
+import CheckIcon from '@omni-design/icons/Check';
+import StarIcon from '@omni-design/icons/Star';
 
 export default {
   title: 'Data Display/Chip',

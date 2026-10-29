@@ -1,9 +1,9 @@
 // src/components/Autocomplete/Autocomplete.js
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Box } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import CloseIcon from '@mui/icons-material/Close';
-import CheckIcon from '@mui/icons-material/Check';
+import ExpandMoreIcon from '@omni-design/icons/ExpandMore';
+import CloseIcon from '@omni-design/icons/Close';
+import CheckIcon from '@omni-design/icons/Check';
 import { Icon } from '../Icon/Icon';
 import { Body, BodySmall } from '../Typography';
 import CircularProgress from '@mui/material/CircularProgress';

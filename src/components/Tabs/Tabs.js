@@ -4,12 +4,12 @@ import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
 import { lazySxBox } from '../_lazyFallback';
 import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography, Body } from '../Typography';
 import { Button } from '../Button/Button';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import CheckIcon from '@mui/icons-material/Check';
+import ChevronLeftIcon from '@omni-design/icons/ChevronLeft';
+import ChevronRightIcon from '@omni-design/icons/ChevronRight';
+import ExpandLessIcon from '@omni-design/icons/ExpandLess';
+import ExpandMoreIcon from '@omni-design/icons/ExpandMore';
+import MoreHorizIcon from '@omni-design/icons/MoreHoriz';
+import CheckIcon from '@omni-design/icons/Check';
 
 /* The More menu's panel, loaded the first time it is wanted: most tab lists
    never overflow, so Popover stays out of their download. Pointing at or

@@ -14,7 +14,7 @@ import { IconBadge } from './IconBadge';
 import { ICON_SHAPES } from '../Shape/shapes';
 import { shapeOptions } from '../Shape/shapeOptions';
 import { Select } from '../Select/Select';
-import HomeIcon from '@mui/icons-material/Home';
+import HomeIcon from '@omni-design/icons/Home';
 
 const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral', 'info', 'success', 'warning', 'error'];
 const VARIANTS = ['solid', 'light', 'dark'];

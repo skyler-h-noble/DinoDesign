@@ -145,7 +145,7 @@ the cascade do the rest.
 
 **MUI peer dependencies must be installed in the consuming app — MUI 7:**
 ```bash
-npm install @omni-design/components @mui/material@^7 @mui/icons-material@^7 @emotion/react @emotion/styled
+npm install @omni-design/components @omni-design/icons @mui/material@^7 @emotion/react @emotion/styled
 ```
 
 Pin `^7`. A bare `npm install @mui/material` now gets MUI 9, which removed

@@ -24,12 +24,12 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import CloseIcon from '@mui/icons-material/Close';
-import HomeIcon from '@mui/icons-material/Home';
-import SettingsIcon from '@mui/icons-material/Settings';
-import InfoIcon from '@mui/icons-material/Info';
-import HelpIcon from '@mui/icons-material/Help';
+import MenuIcon from '@omni-design/icons/Menu';
+import CloseIcon from '@omni-design/icons/Close';
+import HomeIcon from '@omni-design/icons/Home';
+import SettingsIcon from '@omni-design/icons/Settings';
+import InfoIcon from '@omni-design/icons/Info';
+import HelpIcon from '@omni-design/icons/Help';
 import { scrimStates } from '../_states';
 import { IconButton } from '../Button/Button';
 /* The lib's own icon button — <Button iconOnly> — not MUI's, so hover,

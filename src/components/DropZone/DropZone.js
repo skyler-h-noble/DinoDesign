@@ -1,7 +1,7 @@
 // src/components/DropZone/DropZone.js
 import React, { useState, useRef, useCallback } from 'react';
 import { Box } from '@mui/material';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import CloudUploadIcon from '@omni-design/icons/CloudUpload';
 import { BodySmall, Caption } from '../Typography';
 
 /**

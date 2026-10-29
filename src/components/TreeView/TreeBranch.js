@@ -1,7 +1,7 @@
 // src/components/TreeView/TreeBranch.js
 import React from 'react';
 import { Box } from '@mui/material';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ChevronRightIcon from '@omni-design/icons/ChevronRight';
 import { Icon } from '../Icon/Icon';
 import { BodySmallSemibold } from '../Typography';
 

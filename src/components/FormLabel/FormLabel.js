@@ -39,7 +39,7 @@ import { Box } from '@mui/material';
 import { Label } from '../Typography/Typography';
 import { Link } from '../Link/Link';
 import { Icon } from '../Icon/Icon';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import InfoOutlinedIcon from '@omni-design/icons/InfoOutlined';
 
 /** The design's literal strings, including its leading space before the star. */
 export const FORM_LABEL_MARKERS = {

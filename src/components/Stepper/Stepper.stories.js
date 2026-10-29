@@ -2,9 +2,9 @@
 import React from 'react';
 import { Stepper, Step } from './Stepper';
 import { Box, Stack } from '@mui/material';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import PaymentIcon from '@mui/icons-material/Payment';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import ShoppingCartIcon from '@omni-design/icons/ShoppingCart';
+import PaymentIcon from '@omni-design/icons/Payment';
+import LocalShippingIcon from '@omni-design/icons/LocalShipping';
 
 export default { title: 'Navigation/Stepper', component: Stepper };
 

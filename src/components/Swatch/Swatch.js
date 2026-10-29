@@ -30,7 +30,7 @@
 // the buttons beside it use.
 import React from 'react';
 import { Box } from '@mui/material';
-import CheckIcon from '@mui/icons-material/Check';
+import CheckIcon from '@omni-design/icons/Check';
 import { Radio } from '../Radio/Radio';
 
 const SIZE_HEIGHT = {

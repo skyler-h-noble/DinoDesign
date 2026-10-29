@@ -29,12 +29,12 @@ import { Button } from '../Button';
 import { Slider } from '../Slider';
 import { Body, Caption, MobileNavLabel } from '../Typography';
 
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import PauseIcon from '@mui/icons-material/Pause';
-import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
-import SkipNextIcon from '@mui/icons-material/SkipNext';
-import Replay10Icon from '@mui/icons-material/Replay10';
-import Forward10Icon from '@mui/icons-material/Forward10';
+import PlayArrowIcon from '@omni-design/icons/PlayArrow';
+import PauseIcon from '@omni-design/icons/Pause';
+import SkipPreviousIcon from '@omni-design/icons/SkipPrevious';
+import SkipNextIcon from '@omni-design/icons/SkipNext';
+import Replay10Icon from '@omni-design/icons/Replay10';
+import Forward10Icon from '@omni-design/icons/Forward10';
 
 /**
  * Seconds as m:ss, or h:mm:ss once it runs past an hour.

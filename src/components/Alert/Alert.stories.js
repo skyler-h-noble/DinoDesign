@@ -2,11 +2,11 @@
 import React from 'react';
 import { Alert } from './Alert';
 import { Box, Stack } from '@mui/material';
-import InfoIcon from '@mui/icons-material/Info';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import WarningIcon from '@mui/icons-material/Warning';
-import ErrorIcon from '@mui/icons-material/Error';
-import CloseIcon from '@mui/icons-material/Close';
+import InfoIcon from '@omni-design/icons/Info';
+import CheckCircleIcon from '@omni-design/icons/CheckCircle';
+import WarningIcon from '@omni-design/icons/Warning';
+import ErrorIcon from '@omni-design/icons/Error';
+import CloseIcon from '@omni-design/icons/Close';
 
 export default { title: 'Feedback/Alert', component: Alert };
 

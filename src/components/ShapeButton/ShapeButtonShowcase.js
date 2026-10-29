@@ -16,7 +16,7 @@ import { Switch } from '../Switch/Switch';
 import { AVATAR_SHAPES, MORPH_TARGET_SHAPES } from '../Shape/shapes';
 import { shapeOptions } from '../Shape/shapeOptions';
 import { Select } from '../Select/Select';
-import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteIcon from '@omni-design/icons/Favorite';
 
 const COLORS = ['default', 'primary', 'secondary', 'tertiary', 'neutral'];
 /* A stand-in photo: image CONTENT, so its colors are its own. */

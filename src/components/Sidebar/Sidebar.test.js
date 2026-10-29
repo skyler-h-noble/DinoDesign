@@ -7,8 +7,8 @@ import {
   UserProfileSidebar,
   MinimalSidebar,
 } from './Sidebar';
-import HomeIcon from '@mui/icons-material/Home';
-import SettingsIcon from '@mui/icons-material/Settings';
+import HomeIcon from '@omni-design/icons/Home';
+import SettingsIcon from '@omni-design/icons/Settings';
 import { axe } from 'jest-axe';
 
 const mockItems = [

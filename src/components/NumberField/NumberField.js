@@ -1,8 +1,8 @@
 // src/components/NumberField/NumberField.js
 import React, { useState, useId, useCallback } from 'react';
 import { Box } from '@mui/material';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@omni-design/icons/KeyboardArrowUp';
+import KeyboardArrowDownIcon from '@omni-design/icons/KeyboardArrowDown';
 import { Input as TextInput } from '../Input/Input';
 import { FieldButton } from './FieldButton';
 import { FormLabel } from '../FormLabel/FormLabel';

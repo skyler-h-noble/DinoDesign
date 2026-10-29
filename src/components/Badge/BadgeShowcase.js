@@ -12,11 +12,11 @@ import {
 } from '@mui/material';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';
 import { DocSummary, DocChanges } from '../../docs/DocPanels';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import CheckIcon from '@mui/icons-material/Check';
-import MailIcon from '@mui/icons-material/Mail';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import ContentCopyIcon from '@omni-design/icons/ContentCopy';
+import CheckIcon from '@omni-design/icons/Check';
+import MailIcon from '@omni-design/icons/Mail';
+import NotificationsIcon from '@omni-design/icons/Notifications';
+import ShoppingCartIcon from '@omni-design/icons/ShoppingCart';
 import { Badge } from './Badge';
 import {
   H3, H4, H5, Body, BodySmall, Caption, Label, EyebrowSmall

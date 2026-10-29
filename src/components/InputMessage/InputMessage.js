@@ -25,10 +25,10 @@ import React from 'react';
 import { Box } from '@mui/material';
 import { LegalSemibold } from '../Typography';
 import { Icon } from '../Icon/Icon';
-import ErrorIcon from '@mui/icons-material/Error';
-import WarningIcon from '@mui/icons-material/Warning';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import InfoIcon from '@mui/icons-material/Info';
+import ErrorIcon from '@omni-design/icons/Error';
+import WarningIcon from '@omni-design/icons/Warning';
+import CheckCircleIcon from '@omni-design/icons/CheckCircle';
+import InfoIcon from '@omni-design/icons/Info';
 
 /** Figma's Message Icons set (8580:22896): one glyph per notification. */
 export const MESSAGE_ICONS = {

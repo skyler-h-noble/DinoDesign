@@ -2,10 +2,10 @@
 import React from 'react';
 import { Fab } from './Fab';
 import { Box, Stack } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import NavigationIcon from '@mui/icons-material/Navigation';
-import FavoriteIcon from '@mui/icons-material/Favorite';
+import AddIcon from '@omni-design/icons/Add';
+import EditIcon from '@omni-design/icons/Edit';
+import NavigationIcon from '@omni-design/icons/Navigation';
+import FavoriteIcon from '@omni-design/icons/Favorite';
 
 export default { title: 'Inputs/Fab', component: Fab };
 

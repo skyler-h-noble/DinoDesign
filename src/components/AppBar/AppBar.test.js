@@ -2,7 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AppBar, DesktopAppBar, MobileAppBar } from './AppBar';
-import CheckIcon from '@mui/icons-material/Check';
+import CheckIcon from '@omni-design/icons/Check';
 import { axe } from 'jest-axe';
 import { stateRules } from '../_testCss';
 

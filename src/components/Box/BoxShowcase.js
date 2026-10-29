@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import { ShowcaseHeader } from '../ShowcaseHeader';
 import { Grid, Stack } from '@mui/material';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import CheckIcon from '@mui/icons-material/Check';
+import ContentCopyIcon from '@omni-design/icons/ContentCopy';
+import CheckIcon from '@omni-design/icons/Check';
 import { Box } from './Box';
 import { Button } from '../Button/Button';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs/Tabs';

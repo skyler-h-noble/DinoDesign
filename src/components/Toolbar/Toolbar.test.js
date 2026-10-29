@@ -2,9 +2,9 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Toolbar } from './Toolbar';
-import UndoIcon from '@mui/icons-material/Undo';
-import RedoIcon from '@mui/icons-material/Redo';
-import AddIcon from '@mui/icons-material/Add';
+import UndoIcon from '@omni-design/icons/Undo';
+import RedoIcon from '@omni-design/icons/Redo';
+import AddIcon from '@omni-design/icons/Add';
 import { axe } from 'jest-axe';
 
 const ITEMS = [

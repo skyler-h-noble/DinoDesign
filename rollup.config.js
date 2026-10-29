@@ -21,7 +21,9 @@ const babelConfig = {
    A list of bare names missed subpaths: Section imported `@mui/system`,
    which matched nothing here, so a second copy of MUI's core was bundled
    into the package and shipped to every consumer alongside their own. */
-const external = (id) => /^(react|react-dom)(\/.*)?$/.test(id) || /^@(mui|emotion)\//.test(id);
+/* @omni-design/icons is its own package: each icon import stays an import,
+   so a consumer's bundler keeps only the icons actually used. */
+const external = (id) => /^(react|react-dom)(\/.*)?$/.test(id) || /^@(mui|emotion)\//.test(id) || /^@omni-design\/icons(\/.*)?$/.test(id);
 
 /* Writes the package version into OMNI_DEFAULT_THEME_URL, so the default
    theme it points at is the one published with these components. */

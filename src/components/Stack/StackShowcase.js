@@ -2,10 +2,10 @@
 import React, { useState } from 'react';
 import { ShowcaseHeader } from '../ShowcaseHeader';
 import { Box, Grid } from '@mui/material';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import CheckIcon from '@mui/icons-material/Check';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import ContentCopyIcon from '@omni-design/icons/ContentCopy';
+import CheckIcon from '@omni-design/icons/Check';
+import WarningAmberIcon from '@omni-design/icons/WarningAmber';
+import CheckCircleOutlineIcon from '@omni-design/icons/CheckCircleOutline';
 import { OmniStack } from './Stack';
 import { Button } from '../Button/Button';
 import { Switch } from '../Switch/Switch';

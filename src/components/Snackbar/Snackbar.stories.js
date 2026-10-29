@@ -2,9 +2,9 @@
 import React from 'react';
 import { Snackbar } from './Snackbar';
 import { Box, Stack } from '@mui/material';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import CheckCircleOutlineIcon from '@omni-design/icons/CheckCircleOutline';
+import ErrorOutlineIcon from '@omni-design/icons/ErrorOutline';
+import InfoOutlinedIcon from '@omni-design/icons/InfoOutlined';
 
 export default { title: 'Feedback/Snackbar', component: Snackbar };
 

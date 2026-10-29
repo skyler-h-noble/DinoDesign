@@ -2,7 +2,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { Button } from './Button';
-import SearchIcon from '@mui/icons-material/Search';
+import SearchIcon from '@omni-design/icons/Search';
 
 /**
  * A ghost button has no fill and no border, so the ONLY thing separating its

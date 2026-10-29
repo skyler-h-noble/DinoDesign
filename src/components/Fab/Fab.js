@@ -1,7 +1,7 @@
 // src/components/Fab/Fab.js
 import React from 'react';
 import { Box } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
+import AddIcon from '@omni-design/icons/Add';
 import { SHADOW_LEVEL_3, SHADOW_LEVEL_4, bevelShadow, tokenSegment } from '../_shadows';
 
 /**

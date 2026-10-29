@@ -9,7 +9,7 @@
 import { SHADOW_SCRIM_LEVEL_5 } from '../_shadows';
 import React, { useEffect, useRef, useState } from 'react';
 import { Box } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from '@omni-design/icons/Close';
 import { useOmniDesign } from '../../OmniDesignProvider';
 import { Button } from '../Button/Button';
 import { Body, Eyebrow, H3 } from '../Typography/Typography';

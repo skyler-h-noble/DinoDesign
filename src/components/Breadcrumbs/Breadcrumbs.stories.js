@@ -2,7 +2,7 @@
 import React from 'react';
 import { Breadcrumbs, BreadcrumbItem } from './Breadcrumbs';
 import { Box, Stack } from '@mui/material';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import NavigateNextIcon from '@omni-design/icons/NavigateNext';
 
 export default { title: 'Navigation/Breadcrumbs', component: Breadcrumbs };
 

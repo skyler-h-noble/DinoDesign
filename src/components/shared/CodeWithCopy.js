@@ -1,8 +1,8 @@
 // src/components/shared/CodeWithCopy.js
 import React, { useState } from 'react';
 import { Box, Tooltip } from '@mui/material';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import CheckIcon from '@mui/icons-material/Check';
+import ContentCopyIcon from '@omni-design/icons/ContentCopy';
+import CheckIcon from '@omni-design/icons/Check';
 import { IconButton } from '../Button/Button';
 /* The lib's own icon button — <Button iconOnly> — not MUI's, so hover,
    pressed, focus-visible and disabled all come from Button rather than

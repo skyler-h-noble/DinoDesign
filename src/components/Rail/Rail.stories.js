@@ -2,14 +2,14 @@
 import React from 'react';
 import { Rail } from './Rail';
 import { Box, Stack } from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home';
-import InboxIcon from '@mui/icons-material/Inbox';
-import SendIcon from '@mui/icons-material/Send';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SettingsIcon from '@mui/icons-material/Settings';
-import PersonIcon from '@mui/icons-material/Person';
-import EditIcon from '@mui/icons-material/Edit';
+import HomeIcon from '@omni-design/icons/Home';
+import InboxIcon from '@omni-design/icons/Inbox';
+import SendIcon from '@omni-design/icons/Send';
+import FavoriteIcon from '@omni-design/icons/Favorite';
+import DeleteIcon from '@omni-design/icons/Delete';
+import SettingsIcon from '@omni-design/icons/Settings';
+import PersonIcon from '@omni-design/icons/Person';
+import EditIcon from '@omni-design/icons/Edit';
 
 export default { title: 'Navigation/Rail', component: Rail };
 

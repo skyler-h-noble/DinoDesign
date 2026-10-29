@@ -2,8 +2,8 @@
 // the quickstart must compile against the published types.
 
 import { useOmniDesign, Button } from '@omni-design/components';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@omni-design/icons/DarkMode';
+import LightModeIcon from '@omni-design/icons/LightMode';
 
 export function ModeToggle() {
   const { isDark, toggleDarkMode } = useOmniDesign();
