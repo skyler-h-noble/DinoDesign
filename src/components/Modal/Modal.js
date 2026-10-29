@@ -7,8 +7,9 @@
      4  Elevations/Level-4 (FAB-Hover, Elevated-Card-Drag)
      5  Elevations/Level-5 (Dialog & Modal) */
 import { SHADOW_SCRIM_LEVEL_5 } from '../_shadows';
-import React, { useEffect, useRef, useState } from 'react';
-import { Box } from '@mui/material';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { lazySxBox } from '../_lazyFallback';
 import CloseIcon from '@omni-design/icons/Close';
 import { useOmniDesign } from '../../OmniDesignProvider';
 import { Button } from '../Button/Button';
@@ -94,15 +95,36 @@ const TRANSITION_KEYFRAMES = {
   },
 };
 
-function buildKeyframeCSS(transition) {
-  const config = TRANSITION_KEYFRAMES[transition];
-  if (!config) return '';
-  const { from, to } = config.enter;
-  const fromStr = Object.entries(from).map(([k, v]) => k + ':' + v).join(';');
-  const toStr = Object.entries(to).map(([k, v]) => k + ':' + v).join(';');
-  return '@keyframes ' + config.name + ' { from {' + fromStr + '} to {' + toStr + '} }' +
-    '@keyframes ' + config.name + '-backdrop { from { opacity: 0 } to { opacity: 1 } }';
-}
+const SxBox = lazySxBox('Modal');
+const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx) || Object.keys(sx).length > 0);
+const decl = (o) => Object.entries(o).map(([k, v]) => k + ':' + v).join(';');
+
+/* ─── Static sheet ───
+   The four enter animations (and the backdrop's fade) live here rather than
+   in a <style> the modal rendered beside itself. The speed is per instance,
+   so it arrives as --_md-speed. */
+registerStaticStyles('omni-modal', [
+  ...Object.values(TRANSITION_KEYFRAMES).map((t) => `@keyframes ${t.name}{from{${decl(t.enter.from)}}to{${decl(t.enter.to)}}}`
+    + `@keyframes ${t.name}-backdrop{from{opacity:0}to{opacity:1}}`),
+  '.omni-md-backdrop{position:fixed;inset:0;z-index:10000000;background-color:rgba(0,0,0,0.5)}',
+  ...Object.values(TRANSITION_KEYFRAMES).map((t) => `.omni-md-backdrop.omni-md-a-${t.name}{animation:${t.name}-backdrop var(--_md-speed) ease-out forwards}`),
+  `.omni-md{position:fixed;z-index:10000001;outline:none;box-sizing:border-box;box-shadow:${SHADOW_SCRIM_LEVEL_5};`
+    + 'display:flex;flex-direction:column;overflow:hidden}',
+  ...Object.values(TRANSITION_KEYFRAMES).map((t) => `.omni-md.omni-md-a-${t.name}{animation:${t.name} var(--_md-speed) ease-out forwards}`),
+  '.omni-md-full{inset:0;border-radius:0}',
+  /* Figma's frame: the 1px edge in the PAGE's Background, the Modal-Radius
+     corners and the Level 5 shadow (neutral: it always sits over the black
+     backdrop). */
+  '.omni-md-center{top:50%;left:50%;transform:translate(-50%, -50%);max-width:var(--_md-max);width:calc(100% - 32px);max-height:calc(100vh - 64px);'
+    + 'border-radius:var(--Modal-Radius, var(--Style-Border-Radius));border:1px solid var(--Background)}',
+  ...Object.entries(SIZE_MAP).map(([k, v]) => `.omni-md-${k}{--_md-max:${v.maxWidth}}`),
+  '.omni-md-content{display:flex;flex-direction:column;flex:1;min-height:var(--Card-Min-Height, auto);overflow-y:auto;border-radius:inherit}',
+  '.omni-md-content[data-surface]{background-color:var(--Background);color:var(--Text)}',
+  `.omni-md-header{display:flex;align-items:flex-start;gap:var(--Sizing-1, 8px);padding:${PAD};flex-shrink:0}`,
+  '.omni-md-title{display:flex;flex-direction:column;gap:var(--Sizing-Half, 4px);flex:1;min-width:0}',
+  `.omni-md-body{display:flex;flex-direction:column;gap:var(--Sizing-Half, 4px);padding:var(--Sizing-2, 16px) ${PAD};flex:1}`,
+  `.omni-md-footer{display:flex;flex-direction:column;gap:var(--Sizing-Half, 4px);padding:${PAD};flex-shrink:0}`,
+].join('\n'));
 
 export function Modal({
   open,
@@ -122,10 +144,19 @@ export function Modal({
   closeOnBackdrop = true,
   showCloseButton = true,
   className = '',
-  sx = {},
+  sx,
   ...props
 }) {
+  useStaticStyles('omni-modal');
   const modalRef = useRef(null);
+  /* With sx the frame is an MUI box that loads on demand, and it REPLACES the
+     plain one when it arrives — taking the focus placed on it. Once focused,
+     a new frame takes the focus back, so it ends where it always did. */
+  const focusedRef = useRef(false);
+  const setModalRef = useCallback((node) => {
+    modalRef.current = node;
+    if (node && focusedRef.current && !node.contains(document.activeElement)) node.focus();
+  }, []);
   const previousFocusRef = useRef(null);
   const [visible, setVisible] = useState(false);
 
@@ -145,7 +176,7 @@ export function Modal({
   const dataTheme = (isSolid || isSoft) ? THEME_MAP[color] : null;
   const dataSurface = VARIANT_SURFACE[variant] || VARIANT_SURFACE.default;
 
-  const s = SIZE_MAP[size] || SIZE_MAP.medium;
+  const sizeKey = SIZE_MAP[size] ? size : 'medium';
   const transConfig = TRANSITION_KEYFRAMES[transition];
   const animationName = transConfig ? transConfig.name : undefined;
   const speed = transitionSpeed + 'ms';
@@ -158,11 +189,13 @@ export function Modal({
       // Focus trap
       requestAnimationFrame(() => {
         modalRef.current?.focus();
+        focusedRef.current = true;
       });
       // Prevent body scroll
       document.body.style.overflow = 'hidden';
     } else {
       setVisible(false);
+      focusedRef.current = false;
       document.body.style.overflow = '';
       previousFocusRef.current?.focus();
     }
@@ -181,111 +214,69 @@ export function Modal({
 
   if (!open && !visible) return null;
 
+  const anim = animationName ? ' omni-md-a-' + animationName : '';
+  const speedVar = animationName ? { '--_md-speed': speed } : undefined;
+  const modalProps = {
+    role: 'dialog',
+    'aria-modal': 'true',
+    'aria-label': title || 'Modal',
+    ref: setModalRef,
+    tabIndex: -1,
+    'data-style': providerStyle,
+    className: 'modal modal-' + variant + ' modal-' + size + ' modal-' + layout +
+      (isSoft || isSolid ? ' modal-' + color : '') +
+      ' omni-md omni-md-' + sizeKey + (isFullscreen ? ' omni-md-full' : ' omni-md-center') + anim +
+      (className ? ' ' + className : ''),
+    ...props,
+    style: speedVar || props.style ? { ...speedVar, ...props.style } : undefined,
+  };
+  const content = (
+    /* Modal Content — Container-Highest (No data-theme on `default`:
+       inherit, do not pin. Naming the provider's theme here made a default
+       modal opened from a themed section snap back to the app's theme.) */
+    <div className="modal-content omni-md-content" data-surface={dataSurface} data-theme={dataTheme || undefined}>
+      {/* Header: the title slot and the close Button, Modal-Padding round. */}
+      {(title || eyebrow || showCloseButton) && (
+        <div className="modal-header omni-md-header">
+          <div className="modal-title omni-md-title">
+            {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
+            {title && <H3 component="h2">{title}</H3>}
+          </div>
+          {/* Button keeps itself from shrinking (flex-shrink: 0). */}
+          {showCloseButton && (
+            <Button iconOnly variant="ghost" aria-label="Close modal" onClick={onClose} className="modal-close">
+              <CloseIcon />
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* Body slot: Sizing-2 above and below, Modal-Padding either side. */}
+      <div className="modal-body omni-md-body">
+        {typeof children === 'string' ? <Body>{children}</Body> : children}
+      </div>
+
+      {/* Footer slot: Modal-Padding round. */}
+      {actions && (
+        <div className="modal-footer omni-md-footer">
+          {actions}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <>
-      {transition !== 'none' && <style>{buildKeyframeCSS(transition)}</style>}
-
       {/* Backdrop */}
-      <Box
+      <div
         aria-hidden="true"
         onClick={closeOnBackdrop ? onClose : undefined}
-        sx={{
-          position: 'fixed', inset: 0, zIndex: 10000000,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          ...(animationName && {
-            animation: animationName + '-backdrop ' + speed + ' ease-out forwards',
-          }),
-        }}
+        className={'omni-md-backdrop' + anim}
+        style={speedVar}
       />
-
-      {/* Modal — Figma's frame: the 1px edge in the PAGE's Background, the
-          Modal-Radius corners and the Level 5 shadow (neutral: it always sits
-          over the black backdrop). The content inside is its own zone. */}
-      <Box
-        role="dialog"
-        aria-modal="true"
-        aria-label={title || 'Modal'}
-        ref={modalRef}
-        tabIndex={-1}
-        data-style={providerStyle}
-        className={'modal modal-' + variant + ' modal-' + size + ' modal-' + layout +
-          (isSoft || isSolid ? ' modal-' + color : '') +
-          (className ? ' ' + className : '')}
-        sx={{
-          position: 'fixed',
-          zIndex: 10000001,
-          outline: 'none',
-          boxSizing: 'border-box',
-          ...(isFullscreen ? {
-            inset: 0,
-            borderRadius: 0,
-          } : {
-            top: '50%', left: '50%',
-            transform: 'translate(-50%, -50%)',
-            maxWidth: s.maxWidth,
-            width: 'calc(100% - 32px)',
-            maxHeight: 'calc(100vh - 64px)',
-            borderRadius: 'var(--Modal-Radius, var(--Style-Border-Radius))',
-            border: '1px solid var(--Background)',
-          }),
-          boxShadow: SHADOW_SCRIM_LEVEL_5,
-          display: 'flex', flexDirection: 'column',
-          overflow: 'hidden',
-          ...(animationName && {
-            animation: animationName + ' ' + speed + ' ease-out forwards',
-          }),
-          ...sx,
-        }}
-        {...props}
-      >
-        {/* Modal Content — Container-Highest (No data-theme on `default`:
-            inherit, do not pin. Naming the provider's theme here made a
-            default modal opened from a themed section snap back to the app's
-            theme.) */}
-        <Box
-          className="modal-content"
-          data-surface={dataSurface}
-          data-theme={dataTheme || undefined}
-          sx={{
-            '&[data-surface]': { backgroundColor: 'var(--Background)', color: 'var(--Text)' },
-            display: 'flex', flexDirection: 'column',
-            flex: 1, minHeight: 'var(--Card-Min-Height, auto)',
-            overflowY: 'auto',
-            borderRadius: 'inherit',
-          }}
-        >
-          {/* Header: the title slot and the close Button, Modal-Padding round. */}
-          {(title || eyebrow || showCloseButton) && (
-            <Box className="modal-header" sx={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--Sizing-1, 8px)', padding: PAD, flexShrink: 0 }}>
-              <Box className="modal-title" sx={{ display: 'flex', flexDirection: 'column', gap: 'var(--Sizing-Half, 4px)', flex: 1, minWidth: 0 }}>
-                {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
-                {title && <H3 component="h2">{title}</H3>}
-              </Box>
-              {showCloseButton && (
-                <Button iconOnly variant="ghost" aria-label="Close modal" onClick={onClose} className="modal-close" sx={{ flexShrink: 0 }}>
-                  <CloseIcon />
-                </Button>
-              )}
-            </Box>
-          )}
-
-          {/* Body slot: Sizing-2 above and below, Modal-Padding either side. */}
-          <Box className="modal-body" sx={{
-            display: 'flex', flexDirection: 'column', gap: 'var(--Sizing-Half, 4px)',
-            padding: 'var(--Sizing-2, 16px) ' + PAD,
-            flex: 1,
-          }}>
-            {typeof children === 'string' ? <Body>{children}</Body> : children}
-          </Box>
-
-          {/* Footer slot: Modal-Padding round. */}
-          {actions && (
-            <Box className="modal-footer" sx={{ display: 'flex', flexDirection: 'column', gap: 'var(--Sizing-Half, 4px)', padding: PAD, flexShrink: 0 }}>
-              {actions}
-            </Box>
-          )}
-        </Box>
-      </Box>
+      {hasSx(sx)
+        ? <SxBox sx={sx} {...modalProps}>{content}</SxBox>
+        : <div {...modalProps}>{content}</div>}
     </>
   );
 }
