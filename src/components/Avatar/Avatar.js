@@ -1,11 +1,10 @@
 // src/components/Avatar/Avatar.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { shapePath, shapeStyle, AVATAR_SHAPES } from '../Shape/shapes';
 import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
 import { lazySxBox } from '../_lazyFallback';
 import { AvatarGlyph } from './AvatarGlyph';
 import { NumberSmall, NumberMedium, NumberLarge } from '../Typography';
-import { DEFAULT_AVATAR_SRC } from './defaultAvatar';
 import { useGhost } from '../_ghost';
 
 /**
@@ -254,6 +253,25 @@ function Root({ sx, component: Tag, ...props }) {
   return <Tag {...props} />;
 }
 
+/* The default photo is loaded on first use, not bundled with Avatar: most
+   avatars show a person's own photo, initials or the glyph. Loaded once and
+   kept, so every later default-photo avatar has it at once. */
+let defaultPhotoSrc = null;
+let defaultPhotoLoad = null;
+function useDefaultPhoto(wanted) {
+  const [src, setSrc] = useState(defaultPhotoSrc);
+  useEffect(() => {
+    if (!wanted || src) return undefined;
+    let live = true;
+    if (!defaultPhotoLoad) {
+      defaultPhotoLoad = import('./defaultAvatar').then((m) => { defaultPhotoSrc = m.DEFAULT_AVATAR_SRC; return defaultPhotoSrc; });
+    }
+    defaultPhotoLoad.then((s) => { if (live) setSrc(s); });
+    return () => { live = false; };
+  }, [wanted, src]);
+  return wanted ? src : null;
+}
+
 export function Avatar({
   src,
   // The DEFAULT avatar IS the photo: a bare <Avatar /> shows the lib's built-in
@@ -297,10 +315,16 @@ export function Avatar({
   // but only when there's no initials and no explicit icon, so those two
   // variants still take precedence over the default photo.
   if (_retiredIcon !== undefined) warnIconOnce();
-  const effectiveSrc = src || (defaultPhoto && !initials ? DEFAULT_AVATAR_SRC : undefined);
+  const wantsDefaultPhoto = !src && defaultPhoto && !initials;
+  const defaultPhotoReady = useDefaultPhoto(wantsDefaultPhoto);
+  const effectiveSrc = src || defaultPhotoReady || undefined;
+  /* While the default photo loads, the avatar is a photo avatar without its
+     image yet — the empty ringed circle any slow photo shows — rather than
+     flashing the person glyph and then swapping. */
+  const photoPending = wantsDefaultPhoto && !defaultPhotoReady;
   const hasSrc = effectiveSrc && !imgError;
   const hasInitials = !hasSrc && initials;
-  const isFallback = !hasSrc && !hasInitials;
+  const isFallback = !hasSrc && !hasInitials && !photoPending;
   const isClickable = clickable || !!onClick;
 
   /* The Default style is the person glyph ALONE: Figma's Button-Theme-Avatar
@@ -342,9 +366,9 @@ export function Avatar({
       {...(ghost ? { 'data-ghost-block': 'true' } : {})}
       className={'avatar avatar-' + size + ' avatar-' + color +
         (isClickable ? ' avatar-clickable' : '') +
-        (hasSrc ? ' avatar-image' : hasInitials ? ' avatar-initials' : ' avatar-fallback') +
+        (hasSrc || photoPending ? ' avatar-image' : hasInitials ? ' avatar-initials' : ' avatar-fallback') +
         ' omni-av omni-av-c-' + C +
-        (hasSrc ? ' omni-av-photo' : glyphOnly ? ' omni-av-glyph' : '') +
+        (hasSrc || photoPending ? ' omni-av-photo' : glyphOnly ? ' omni-av-glyph' : '') +
         (ghost ? ' omni-av-ghost' + (ghost.animate ? ' omni-av-ghost-anim' : '') : '') +
         (insideButton ? ' omni-av-inbtn' : '') +
         (isClickable ? ' omni-av-click' : '') +

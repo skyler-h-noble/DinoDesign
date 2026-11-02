@@ -185,7 +185,12 @@ function isURL(source) {
 function injectLinkTag(id, href, beforeId) {
   const existing = document.getElementById(id);
   if (existing) {
-    if (existing.tagName === 'LINK' && existing.getAttribute('href') !== href) {
+    /* Compare RESOLVED addresses: a link already in the page's HTML says
+       "/styles/core.css" where the manifest resolves to the full URL. Read as
+       text they differ, the href was swapped, and the browser fetched the
+       same sheet twice. */
+    const same = (a, b) => { try { return new URL(a, document.baseURI).href === new URL(b, document.baseURI).href; } catch (e) { return a === b; } };
+    if (existing.tagName === 'LINK' && !same(existing.getAttribute('href'), href)) {
       // Swap href in place — browser refetches. Use the existing onload so
       // callers can still await readiness on a mode swap.
       return new Promise((resolve, reject) => {
@@ -603,24 +608,52 @@ export function OmniDesignProvider({
 
   }, [isDark, resolvedSources.lightMode, resolvedSources.darkMode]);
 
-  // ── EFFECT: Prefetch the OTHER mode sheet once the page is ready ─────────
-  // The first toggle used to wait on the network: Dark-Mode.css (≈550 KB
-  // raw, ≈17 KB compressed) was only requested when the user asked for it,
-  // so the page sat light for about a second. A low-priority prefetch after
-  // the page settles puts it in the HTTP cache, and the swap above is
-  // instant. URLs only — a raw-CSS source has nothing to fetch.
+  // ── EFFECT: Prefetch the OTHER mode sheet once everything else is done ───
+  // The first toggle used to wait on the network: Dark-Mode.css was only
+  // requested when the user asked for it, so the page sat light for about a
+  // second. Prefetching puts it in the HTTP cache so the swap above is
+  // instant — but it must not compete with the page itself, so it waits for
+  // the window's load event, then for the page's fonts, then for the browser
+  // to go idle. A toggle before that simply loads the sheet
+  // through the mode effect above, as it always could. URLs only — a raw-CSS
+  // source has nothing to fetch.
   useEffect(() => {
     if (cssStatus !== 'ready' || typeof document === 'undefined') return undefined;
     const other = isDark ? resolvedSources.lightMode : resolvedSources.darkMode;
     if (!other || !/^(https?:)?\/\/|^\//.test(other)) return undefined;
-    if (document.querySelector('link[rel="prefetch"][href="' + other + '"]')) return undefined;
-    const link = document.createElement('link');
-    link.rel = 'prefetch';
-    link.as = 'style';
-    link.href = other;
-    link.setAttribute('data-omni', 'prefetch');
-    document.head.appendChild(link);
-    return undefined;
+    let cancelled = false;
+    let idleId = null;
+    const prefetch = () => {
+      if (cancelled || document.querySelector('link[rel="prefetch"][href="' + other + '"]')) return;
+      const link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.as = 'style';
+      link.href = other;
+      link.setAttribute('data-omni', 'prefetch');
+      document.head.appendChild(link);
+    };
+    const whenIdle = () => {
+      if (cancelled) return;
+      if (typeof window.requestIdleCallback === 'function') idleId = window.requestIdleCallback(prefetch, { timeout: 5000 });
+      else idleId = setTimeout(prefetch, 1500);
+    };
+    // Fonts are requested only once the theme CSS has parsed, so they can
+    // still be downloading after the load event: wait for them too.
+    const afterFonts = () => {
+      const fonts = document.fonts && document.fonts.ready;
+      if (fonts && typeof fonts.then === 'function') fonts.then(whenIdle, whenIdle);
+      else whenIdle();
+    };
+    if (document.readyState === 'complete') afterFonts();
+    else window.addEventListener('load', afterFonts, { once: true });
+    return () => {
+      cancelled = true;
+      window.removeEventListener('load', afterFonts);
+      if (idleId !== null) {
+        if (typeof window.cancelIdleCallback === 'function') window.cancelIdleCallback(idleId);
+        clearTimeout(idleId);
+      }
+    };
   }, [cssStatus, isDark, resolvedSources.lightMode, resolvedSources.darkMode]);
 
   // Cleanup mode tag on unmount
