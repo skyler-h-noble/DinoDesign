@@ -6,7 +6,7 @@ fonts.googleapis.com. The `@font-face` rules that point at them live in
 
 | Files | Family | What was done |
 | --- | --- | --- |
-| `google-sans-flex-640-w72-*.woff2` | Google Sans Flex | Static instance (wdth 72, wght 640) cut from the variable font with fontTools, then split per alphabet. Google serves the full 136 KB variable font however the axes are pinned; the Latin file here is 23 KB. |
+| `google-sans-flex-{640,600}-w72-*.woff2` | Google Sans Flex | Two static instances (width 72; weight 640 for desktop headers, 600 for tablet and phone) cut from the variable font with fontTools, then split per alphabet. Google serves the full 136 KB variable font however the axes are pinned; each Latin file here is 23 KB, and a page downloads only the weight it uses. |
 | `poppins-{400,600,700}-*.woff2` | Poppins | Google Fonts' own per-alphabet files, unchanged. |
 | `raleway-400-*.woff2` | Raleway | Google Fonts' own per-alphabet files, unchanged. |
 
