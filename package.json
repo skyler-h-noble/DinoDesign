@@ -11,10 +11,11 @@
     "dist",
     "public/styles",
     "docs/REFERENCE.md",
+    "docs/API.md",
     ".cursorrules",
     "CLAUDE.md",
     "README.md",
-    ".claude"
+    ".claude/commands"
   ],
   "exports": {
     ".": {

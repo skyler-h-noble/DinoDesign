@@ -54,7 +54,7 @@ export function renderApiDoc(model, defaultsFor) {
     'GENERATED from `types/` by `scripts/build-api-doc.mjs` — the same files the published ' +
     '.d.ts come from, so this cannot drift from the types. Do not edit by hand. ' +
     'Do not open `dist/` to learn a prop: if it is not here, the component does not take it. ' +
-    'Rules (colour, surfaces, layout) are in `CLAUDE.md`.');
+    'Rules (color, surfaces, layout) are in `CLAUDE.md`.');
   out.push('');
   out.push('Read a section, not the file: search for `### Name`. ' + total + ' components.');
   out.push('');
