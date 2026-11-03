@@ -197,6 +197,43 @@ describe('Link card', () => {
     expect(card.tagName).toBe('A');
     expect(card).toHaveAttribute('href', 'https://example.com');
   });
+
+  /* A link card is a link: no button role, no forced tabIndex, and Enter is
+     left to the browser, which follows the href. It used to be a "button"
+     whose key handler swallowed Enter, so keyboard users could not follow it. */
+  test('is a real link: no button role, no tabIndex, no aria-pressed', () => {
+    const { container } = renderCard({ href: '/case-study', selected: true });
+    const card = container.querySelector('.card');
+    expect(card).not.toHaveAttribute('role');
+    expect(card).not.toHaveAttribute('tabindex');
+    expect(card).not.toHaveAttribute('aria-pressed');
+  });
+
+  test('Enter is not swallowed, and onClick still runs on click', () => {
+    const onClick = jest.fn();
+    const { container } = renderCard({ href: '/case-study', onClick });
+    const card = container.querySelector('.card');
+    const enter = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+    card.dispatchEvent(enter);
+    expect(enter.defaultPrevented).toBe(false);
+    expect(onClick).not.toHaveBeenCalled();
+    fireEvent.click(card);
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  test('a disabled link card cannot be followed', () => {
+    const { container } = renderCard({ href: '/case-study', disabled: true });
+    const card = container.querySelector('.card');
+    expect(card).not.toHaveAttribute('href');
+    expect(card).toHaveAttribute('aria-disabled', 'true');
+  });
+
+  test('a clickable card without href is still a button', () => {
+    const { container } = renderCard({ clickable: true });
+    const card = container.querySelector('.card');
+    expect(card).toHaveAttribute('role', 'button');
+    expect(card).toHaveAttribute('tabindex', '0');
+  });
 });
 
 /* ─── Sub-components ─── */

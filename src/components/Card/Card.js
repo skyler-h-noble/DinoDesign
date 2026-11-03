@@ -183,6 +183,7 @@ export function Card({
      that merely LOOKED disabled but kept role="button" and tabIndex={0} would
      still be reachable by keyboard and still fire. */
   const isClickable = !disabled && (clickable || !!onClick || !!href || selected || isDraggable);
+  const isLink = !!href && !disabled;
 
   const cap = (str) => str.charAt(0).toUpperCase() + str.slice(1);
   const selBorder = `var(--Buttons-${cap(color === 'default' ? 'Default' : color)}-Border)`;
@@ -194,11 +195,18 @@ export function Card({
       <Part
         component={href ? 'a' : 'div'}
         sx={sx}
-        href={href || undefined}
+        /* A link card is a real link. It used to get role="button", a forced
+           tabIndex and the button key handler below, which swallowed Enter and
+           called onClick — so a keyboard user could focus a link card and never
+           follow it. An <a href> is already focusable and Enter already follows
+           it; the browser's behavior is the right one. A DISABLED link card
+           drops its href, so it cannot be followed while it says it is off. */
+        href={isLink ? href : undefined}
         onClick={isClickable ? onClick : undefined}
-        role={isClickable ? 'button' : undefined}
-        tabIndex={isClickable ? 0 : undefined}
-        aria-pressed={selected ? true : undefined}
+        role={isClickable && !isLink ? 'button' : undefined}
+        tabIndex={isClickable && !isLink ? 0 : undefined}
+        /* aria-pressed is a button state; a link has none. */
+        aria-pressed={selected && !isLink ? true : undefined}
         aria-disabled={disabled || undefined}
         draggable={isDraggable || undefined}
         className={
@@ -217,8 +225,8 @@ export function Card({
           + ' ' + className
         }
         style={selStyle || style ? { ...selStyle, ...style } : undefined}
-        onKeyDown={isClickable ? (e) => {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick?.(); }
+        onKeyDown={isClickable && !isLink ? (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick?.(e); }
         } : undefined}
         {...props}
       >
