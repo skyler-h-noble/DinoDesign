@@ -10,7 +10,7 @@ import { lazySxBox } from '../_lazyFallback';
      3  Elevations/Level-3 (FAB, Snackbar, Card-Drag, Elevated-Card-Hover)
      4  Elevations/Level-4 (FAB-Hover, Elevated-Card-Drag)
      5  Elevations/Level-5 (Dialog & Modal) */
-import { SHADOW_LEVEL_2 } from '../_shadows';
+import { SHADOW_LEVEL_2, SHADOW_NEUTRAL_LEVEL_2 } from '../_shadows';
 
 /**
  * Popover Component
@@ -76,8 +76,12 @@ const sizeValue = (v) => (typeof v === 'number' ? (v > 0 && v <= 1 ? v * 100 + '
 registerStaticStyles('omni-popover', [
   '.omni-pop{position:fixed;top:var(--_pop-top);left:var(--_pop-left);visibility:var(--_pop-vis);z-index:2000000000;'
     + 'width:var(--_pop-w);box-sizing:border-box;background-color:var(--Background);color:var(--Text);border:1px solid var(--Border);'
-    + `border-radius:${RADIUS};box-shadow:${SHADOW_LEVEL_2};outline:none}`,
-  '.omni-pop-inplace{position:relative;top:auto;left:auto;z-index:auto}',
+    + `border-radius:${RADIUS};box-shadow:${SHADOW_NEUTRAL_LEVEL_2};outline:none}`,
+  /* Portaled, the panel is fixed over the whole page and takes the BLACK set:
+     a surface-tinted shadow would read as a colored halo over every color it
+     is not. With disablePortal it is position:relative in the flow, sitting
+     on its parent's surface like a card, so it keeps that surface's tint. */
+  `.omni-pop-inplace{position:relative;top:auto;left:auto;z-index:auto;box-shadow:${SHADOW_LEVEL_2}}`,
   /* arrowX is measured from the panel's outer edge; the arrow sits in its
      padding box, 1px in. */
   `.omni-pop > .popover-arrow{position:absolute;width:${ARROW_BOX}px;height:${ARROW_BOX}px;box-sizing:border-box;left:var(--_pop-ax);`

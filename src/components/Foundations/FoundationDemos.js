@@ -84,6 +84,15 @@ export function ElevationDemo() {
           </VStack>
         ))}
       </HStack>
+      {/* The tinted/black split, stated where the levels are shown, because
+          nothing on the samples above would tell a reader it exists. */}
+      <BodySmall color="quiet">
+        These shadows are tinted by the surface they sit on (--Effect-Level-N). Anything
+        fixed or floating over the whole page — Tooltip, Menu, Popover, Snackbar, Dialog,
+        Modal, Drawer, Sheet, FAB, the floating Toolbar and a sticky AppBar — uses the black
+        set, --Effect-Level-N-Neutral: same levels and geometry, pure black. It passes over
+        every color on the page, so a tinted shadow would show as a colored halo.
+      </BodySmall>
     </VStack>
   );
 }

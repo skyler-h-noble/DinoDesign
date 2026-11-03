@@ -6,7 +6,7 @@
      3  Elevations/Level-3 (FAB, Snackbar, Card-Drag, Elevated-Card-Hover)
      4  Elevations/Level-4 (FAB-Hover, Elevated-Card-Drag)
      5  Elevations/Level-5 (Dialog & Modal) */
-import { SHADOW_LEVEL_5, SHADOW_SCRIM_LEVEL_5 } from '../_shadows';
+import { SHADOW_NEUTRAL_LEVEL_5 } from '../_shadows';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import CloseIcon from '@omni-design/icons/Close';
@@ -129,10 +129,14 @@ registerStaticStyles('omni-dialog', [
   '.omni-dlg-container-body::after{content:"";display:inline-block;vertical-align:middle;height:100%;width:0}',
   '.omni-dlg-paper{transition:box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1);background-image:var(--Paper-overlay);margin:32px;position:relative;'
     + 'background-color:var(--Background);color:var(--Text);border:1px solid var(--Background);'
-    + `border-radius:var(--Card-Radius, var(--Style-Border-Radius));box-shadow:${SHADOW_SCRIM_LEVEL_5};overflow:hidden;box-sizing:border-box;`
+    + `border-radius:var(--Card-Radius, var(--Style-Border-Radius));box-shadow:${SHADOW_NEUTRAL_LEVEL_5};overflow:hidden;box-sizing:border-box;`
     + 'max-width:calc(100% - 64px);width:calc(100% - 64px)}',
   '@media print{.omni-dlg-paper{overflow-y:visible;box-shadow:none}}',
-  `.omni-dlg-paper-flat{box-shadow:${SHADOW_LEVEL_5}}`,
+  /* A non-modal dialog (no scrim) is black too. It used to take the page's
+     tint, but it is still a fixed panel over the whole page, passing over
+     every section's color, which is exactly when a tinted shadow reads as a
+     colored halo. */
+  `.omni-dlg-paper-flat{box-shadow:${SHADOW_NEUTRAL_LEVEL_5}}`,
   '.omni-dlg-paper-paper{display:flex;flex-direction:column;max-height:calc(100% - 64px)}',
   '.omni-dlg-paper-body{display:inline-block;vertical-align:middle;text-align:initial}',
   `.omni-dlg-paper-dialog{max-width:${DIALOG_WIDTH}}`,

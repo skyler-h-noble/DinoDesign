@@ -295,8 +295,8 @@ export const TOOLTIP_DOC = {
     variesWith: 'Buttons mode + surface',
     figma: 'Buttons → Border'
   }, {
-    name: '--Effect-Level-2',
-    sets: 'the drop shadow',
+    name: '--Effect-Level-2-Neutral',
+    sets: 'the drop shadow — the black set, because the bubble floats over the page',
     variesWith: 'elevation mode',
     figma: 'Component-Elevations → AppBar, Toolbars, Menus'
   }],

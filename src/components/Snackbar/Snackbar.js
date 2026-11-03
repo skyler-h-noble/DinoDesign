@@ -5,7 +5,10 @@ import { lazySxBox } from '../_lazyFallback';
 import CloseIcon from '@omni-design/icons/Close';
 import { Button } from '../Button/Button';
 import { Body, BodySmall, BodyLarge } from '../Typography';
-import { SHADOW_LEVEL_3 } from '../_shadows';
+/* The BLACK set: a snackbar is fixed to the viewport and the page scrolls
+   under it, so a surface-tinted shadow would read as a colored halo over every
+   section that is not its own. */
+import { SHADOW_NEUTRAL_LEVEL_3 } from '../_shadows';
 
 /**
  * Snackbar (Toast) Component
@@ -62,7 +65,7 @@ const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx)
 registerStaticStyles('omni-snackbar', [
   '@keyframes snackbar-slide-in{from{transform:var(--_sb-from)}to{transform:var(--_sb-to)}}',
   `.omni-sb{position:fixed;z-index:1400;width:min(520px, calc(100vw - 2 * ${MARGIN}));box-sizing:border-box;`
-    + `border-radius:${RADIUS};box-shadow:${SHADOW_LEVEL_3};overflow:hidden;animation:snackbar-slide-in 0.3s ease forwards}`,
+    + `border-radius:${RADIUS};box-shadow:${SHADOW_NEUTRAL_LEVEL_3};overflow:hidden;animation:snackbar-slide-in 0.3s ease forwards}`,
   /* Offset from the edge the snackbar is anchored to — see the note in the
      render on --SnackBar-Top / --SnackBar-Bottom. */
   `.omni-sb-right{right:${MARGIN}}`,

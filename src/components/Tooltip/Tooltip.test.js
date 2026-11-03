@@ -267,9 +267,14 @@ describe('Tooltip — elevation is a token', () => {
   // eslint-disable-next-line global-require
   const source = require('fs').readFileSync(require.resolve('./Tooltip.js'), 'utf8');
 
-  it('reads --Effect-Level-2 for its shadow', () => {
+  /* Was `var(--Effect-Level-2)`, the tinted set. A tooltip floats over the
+     page, so it now reads the BLACK set at the same level: a tinted shadow
+     showed as a colored halo over the colors that were not its own. */
+  it('reads --Effect-Level-2-Neutral (the black set) for its shadow', () => {
     const { bubble } = openParts();
-    expect(declared(bubble, 'box-shadow')).toBe('var(--Effect-Level-2)');
+    const shadow = declared(bubble, 'box-shadow');
+    expect(shadow.startsWith('var(--Effect-Level-2-Neutral, ')).toBe(true);
+    expect(shadow).not.toContain('--Dropshadow-Color');
   });
 
   it('hardcodes no rgba/rgb shadow', () => {
