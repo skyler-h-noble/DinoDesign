@@ -15,8 +15,10 @@
 //
 // Plus: React 19's types drop the global JSX namespace, so `JSX.Element`
 // becomes `import("react").JSX.Element`, which resolves on React 18 and 19.
-import { readdirSync, readFileSync, writeFileSync, statSync, copyFileSync } from 'fs';
+import { readdirSync, readFileSync, writeFileSync, statSync, copyFileSync, mkdirSync } from 'fs';
+import { loadModel, acceptedProps, destructured, resolveExports, srcPathOf, typeFiles, TYPES_DIR, ROOT, ts } from './lib/api-model.mjs';
 import { join, relative, dirname } from 'path';
+import { buildApiDoc, API_DOC } from './build-api-doc.mjs';
 
 const root = new URL('../dist/types', import.meta.url).pathname;
 const files = [];
@@ -71,130 +73,146 @@ for (const file of files) {
 console.log(`fix-dts: ${stats.files} files — ${stats.wholeParam} whole-param types replaced, `
   + `${stats.optional} props made optional, ${stats.jsx} JSX.Element references qualified`);
 
-// ─── Exact prop types for the core components ────────────────────────────────
-// types/core-props.d.ts holds hand-written props for the components a page is
-// built from. Each export below gets `(props: XProps)` in place of the
-// inferred signature, and the build FAILS if the component destructures a
-// prop the hand-written type does not declare — so the file cannot drift.
-const srcRoot = new URL('../src/components', import.meta.url).pathname;
-copyFileSync(new URL('../types/core-props.d.ts', import.meta.url).pathname, join(root, 'core-props.d.ts'));
-const coreProps = readFileSync(join(root, 'core-props.d.ts'), 'utf8');
-
-const TEXT = ['Body', 'BodyLarge', 'BodySmall', 'Caption', 'Eyebrow', 'EyebrowSmall', 'EyebrowLarge',
-  'Subtitle', 'SubtitleLarge', 'SubtitleSmall', 'Label', 'Overline'];
-const HEADING = ['DisplayLarge', 'DisplayMedium', 'DisplaySmall', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6'];
-// file → [type, the source function whose props it must cover, exports]
-const CORE = [
-  ['Section/Section', 'SectionProps', 'Section', ['Section']],
-  ['Container/Container', 'ContainerProps', 'ContainerMui', ['Container'], 'Container/Container.mui'],
-  ['Grid/Grid', 'GridProps', 'GridMui', ['Grid'], 'Grid/Grid.mui'],
-  ['Stack/Stack', 'StackProps', 'OmniStackMui', ['VStack', 'HStack', 'Stack'], 'Stack/Stack.mui'],
-  ['Card/Card', 'CardProps', 'Card', ['Card']],
-  ['Button/Button', 'ButtonProps', 'Button', ['Button']],
-  ['ToggleButtonGroup/ToggleButtonGroup', 'ToggleButtonGroupProps', 'ToggleButtonGroup', ['ToggleButtonGroup']],
-  ['Link/Link', 'LinkProps', 'Link', ['Link']],
-  ['Typography/Typography', 'TypographyProps', 'Typography', ['Typography']],
-  ['Typography/Typography', 'TextProps', null, TEXT],
-  ['Typography/Typography', 'HeadingProps', null, HEADING],
-  ['Icon/Icon', 'IconProps', 'Icon', ['Icon']],
-  ['IconBadge/IconBadge', 'IconBadgeProps', 'IconBadgeEmotion', ['IconBadge'], 'IconBadge/IconBadge.mui'],
-  ['Chip/Chip', 'ChipProps', 'Chip', ['Chip']],
-  ['Avatar/Avatar', 'AvatarProps', 'Avatar', ['Avatar']],
-  ['TextField/TextField', 'TextFieldProps', 'TextField', ['TextField']],
-  ['Footer/Footer', 'FooterProps', 'Footer', ['Footer']],
-  ['AppBar/AppBar', 'AppBarProps', 'DesktopAppBar', ['AppBar']],
-  ['AppBar/AppBar', 'AppBarProps', 'MobileAppBar', []],
-];
-
-/** Every member a props interface declares, following `extends` of local
- *  interfaces (TypographyBase). Inherited native attributes are not listed —
- *  they are the passthrough, not the component's own props. */
-function declaredProps(type) {
-  const m = coreProps.match(new RegExp('interface ' + type + '(?: extends ([\\w<>, |\'.]+))? \\{([\\s\\S]*?)\\n\\}'))
-    || coreProps.match(new RegExp('interface ' + type + '(?: extends ([^{]+))? \\{([^}]*)\\}'));
-  if (!m) throw new Error('fix-dts: core-props.d.ts has no interface ' + type);
-  const own = [...m[2].matchAll(/^\s*([A-Za-z_$][\w$]*)\??:/gm)].map((x) => x[1]);
-  const inline = [...m[2].matchAll(/(?:^|;)\s*([A-Za-z_$][\w$]*)\??:/g)].map((x) => x[1]);
-  const base = (m[1] || '').split(/[ ,<]/).map((t) => t.trim()).filter((t) => /^[A-Z]\w*$/.test(t) && coreProps.includes('interface ' + t + ' '));
-  return new Set([...own, ...inline, ...base.flatMap((b) => [...declaredProps(b)])]);
+// ─── Exact prop types for every component ────────────────────────────────────
+// types/ holds hand-written props for every exported component (see
+// scripts/lib/api-model.mjs for the format). Each component's inferred
+// declaration is replaced by one typed with its props interface, and the build
+// FAILS when:
+//   - a component destructures a prop its type does not declare (the type is
+//     behind the source — add the prop), or
+//   - an @exports name does not exist in the package (the type is ahead).
+// So the types cannot drift from the components, and docs/API.md, generated
+// from the same files, cannot drift from either.
+const model = loadModel();
+const typesOut = root;
+for (const f of typeFiles()) {
+  const dest = join(typesOut, relative(TYPES_DIR, f));
+  mkdirSync(dirname(dest), { recursive: true });
+  copyFileSync(f, dest);
 }
 
-/** The props a source function destructures: `function X({ a, b = 1, ...rest })`. */
-function destructured(file, fn) {
-  const src = readFileSync(join(srcRoot, file + '.js'), 'utf8');
-  const at = [new RegExp('function ' + fn + '\\s*\\('), new RegExp(fn + '\\s*=\\s*(?:React\\.)?forwardRef\\(\\s*function\\s*\\w*\\s*\\(')]
-    .map((re) => src.search(re)).find((i) => i >= 0);
-  if (at === undefined) throw new Error('fix-dts: no function ' + fn + ' in ' + file);
-  const open = src.indexOf('({', at);
-  let depth = 0, i = open;
-  for (; i < src.length; i++) {
-    const c = src[i];
-    if (c === '(' || c === '{' || c === '[') depth++;
-    else if (c === ')' || c === '}' || c === ']') { depth--; if (depth === 0) break; }
+/** Index just past the `;` that ends a declaration starting at `from`,
+ *  skipping over nested (), {}, [] and <> so an object type's own `;` does
+ *  not end it early. */
+function declEnd(text, from) {
+  let depth = 0;
+  for (let i = from; i < text.length; i++) {
+    const c = text[i];
+    if ('({['.includes(c)) depth++;
+    else if (')}]'.includes(c)) depth--;
+    else if (c === ';' && depth === 0) return i + 1;
   }
-  const body = src.slice(open + 2, i - 1).replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
-  const names = []; let d = 0, cur = '';
-  for (const c of body) {
-    if ('({['.includes(c)) d++; else if (')}]'.includes(c)) d--;
-    if (c === ',' && d === 0) { names.push(cur); cur = ''; } else cur += c;
-  }
-  names.push(cur);
-  return names.map((n) => n.trim()).filter((n) => n && !n.startsWith('...'))
-    .map((n) => n.split(/[=:]/)[0].trim().replace(/^['"]|['"]$/g, '')).filter(Boolean)
-    // aria-* and data-* come with the native attributes every props type extends.
-    .filter((n) => !/^(aria|data)-/.test(n));
+  return text.length;
 }
 
-/** Replace `export function Name(...)...;` or `export const Name: ...;`. */
-function replaceDecl(text, name, decl) {
-  const fnAt = text.search(new RegExp('^export function ' + name + '\\(', 'm'));
-  if (fnAt >= 0) {
-    let depth = 0, i = text.indexOf('(', fnAt);
-    for (; i < text.length; i++) {
-      const c = text[i];
-      if (c === '(' || c === '{') depth++;
-      else if (c === ')' || c === '}') { depth--; if (depth === 0) break; }
-    }
-    const end = text.indexOf(';', i) + 1;
-    return text.slice(0, fnAt) + decl + text.slice(end);
+/** Remove every declaration of `name` — function overloads, consts, and
+ *  (for a const replacement) namespaces — returning the stripped text. tsc
+ *  sometimes emits the same function several times (the ToggleButtonGroup
+ *  presets came out as nine copies of one name), so all of them go. */
+function stripDecls(text, name, dropNamespaces) {
+  const starts = [
+    new RegExp('^export (?:declare )?function ' + name + '\\b', 'm'),
+    new RegExp('^export (?:declare )?const ' + name + '\\s*:', 'm'),
+    ...(dropNamespaces ? [new RegExp('^export (?:declare )?namespace ' + name + ' \\{[^}]*\\}\\n?', 'm')] : []),
+  ];
+  for (;;) {
+    let hit = -1, re = null;
+    for (const r of starts) { const i = text.search(r); if (i >= 0 && (hit < 0 || i < hit)) { hit = i; re = r; } }
+    if (hit < 0) break;
+    const end = /namespace/.test(re.source) ? hit + text.slice(hit).match(re)[0].length : declEnd(text, hit);
+    text = text.slice(0, hit) + text.slice(end).replace(/^\n/, '');
   }
-  const constRe = new RegExp('^export const ' + name + ': [^;]*;', 'm');
-  if (constRe.test(text)) return text.replace(constRe, decl);
-  return null;
+  // Keep one copy of a namespace that merges with the function.
+  const nsRe = new RegExp('^export namespace ' + name + ' \\{ \\}\\n', 'gm');
+  let n = 0;
+  text = text.replace(nsRe, (m) => (n++ ? '' : m));
+  return text;
 }
 
+const where = resolveExports(root);
+const claimed = new Map();   // file#local → type, so two types cannot claim one component
+const perFile = new Map();   // file → [{ local, decl }]
+const problems = [];
 let typed = 0;
-const drift = [];
-for (const [file, type, fn, names, source] of CORE) {
-  const dts = join(root, 'components', file + '.d.ts');
-  let text = readFileSync(dts, 'utf8');
-  const rel = relative(dirname(dts), join(root, 'core-props')).split('\\').join('/');
-  const T = 'import("' + (rel.startsWith('.') ? rel : './' + rel) + '").' + type;
-  if (fn) {
-    const declared = declaredProps(type);
-    const missing = destructured(source || file, fn).filter((p) => !declared.has(p) && !['className', 'style'].includes(p));
-    if (missing.length) drift.push(fn + ' takes ' + missing.join(', ') + ' — not in ' + type);
+const SKIP_DRIFT = new Set(['className', 'style']);
+
+for (const e of model.entries) {
+  const accepted = acceptedProps(model, e);
+  const checkedSources = new Set();
+  for (const name of e.exports) {
+    const at = where.get(name);
+    if (!at) { problems.push(e.type + ': @exports ' + name + ' — the package exports no such name'); continue; }
+    const key = at.file + '#' + at.local;
+    if (claimed.has(key)) {
+      if (claimed.get(key) !== e.type) problems.push(name + ' is claimed by both ' + claimed.get(key) + ' and ' + e.type);
+      continue;
+    }
+    claimed.set(key, e.type);
+    const rel = relative(dirname(at.file), join(typesOut, relative(TYPES_DIR, e.file).replace(/\.d\.ts$/, ''))).split('\\').join('/');
+    const T = 'import("' + (rel.startsWith('.') ? rel : './' + rel) + '").' + e.type;
+    const decl = e.ref
+      ? 'export declare const ' + at.local + ': import("react").ForwardRefExoticComponent<' + T + ' & import("react").RefAttributes<' + e.ref + '>>;'
+      : 'export declare function ' + at.local + '(props: ' + T + '): import("react").JSX.Element;';
+    if (!perFile.has(at.file)) perFile.set(at.file, []);
+    perFile.get(at.file).push({ local: at.local, decl, isConst: !!e.ref });
+
+    // Drift: what the source destructures must be accepted by the type.
+    const sources = e.sources.length ? e.sources : [srcPathOf(root, at.file) + '#' + at.local];
+    for (const s of sources) {
+      if (s === 'none' || checkedSources.has(s)) continue;
+      checkedSources.add(s);
+      const [file, fn] = s.split('#');
+      const got = destructured(file, fn);
+      if (got === undefined && e.sources.length) problems.push(e.type + ': @source ' + s + ' — no such function');
+      if (!got) continue;
+      const missing = got.map((p) => p.name)
+        .filter((p) => !accepted.has(p) && !SKIP_DRIFT.has(p) && !/^(aria|data)-/.test(p));
+      if (missing.length) problems.push(fn + ' takes ' + missing.join(', ') + ' — not in ' + e.type + ' (' + relative(ROOT, e.file) + ')');
+    }
   }
-  for (const name of names) {
-    const isButton = name === 'Button' && type === 'ButtonProps';
-    const decl = isButton
-      ? 'export const Button: import("react").ForwardRefExoticComponent<' + T + ' & import("react").RefAttributes<HTMLButtonElement>>;'
-      : 'export function ' + name + '(props: ' + T + '): import("react").JSX.Element;';
-    const next = replaceDecl(text, name, decl);
-    if (next !== null) { text = next; typed++; }
-  }
-  writeFileSync(dts, text);
 }
-if (drift.length) {
-  console.error('fix-dts: types/core-props.d.ts is behind the components:\n  ' + drift.join('\n  '));
+
+for (const [file, list] of perFile) {
+  let text = readFileSync(file, 'utf8');
+  for (const { local, isConst } of list) text = stripDecls(text, local, isConst);
+  text = text.replace(/\n*$/, '\n') + list.map((x) => x.decl).join('\n') + '\n';
+  writeFileSync(file, text);
+  typed += list.length;
+}
+
+if (problems.length) {
+  console.error('fix-dts: the prop types in types/ do not match the package:\n  ' + problems.join('\n  '));
   process.exit(1);
 }
 
-// Export the vocabulary so consumers can type their own wrappers.
+// Export the vocabulary and every props interface, so consumers can type
+// their own wrappers (`function MyCard(p: CardProps)`).
 const indexDts = join(root, 'components', 'index.d.ts');
-writeFileSync(indexDts, readFileSync(indexDts, 'utf8')
-  + '\nexport type { Theme, Surface, Color, Size, ButtonVariant, TextColor, HeadingColor, IconShape, AvatarShape, '
-  + 'SectionProps, ContainerProps, GridProps, StackProps, CardProps, ButtonProps, ToggleButtonGroupProps, LinkProps, '
-  + 'TextProps, HeadingProps, TypographyProps, IconProps, IconBadgeProps, ChipProps, AvatarProps, TextFieldProps, '
-  + 'FooterProps, FooterColumn, FooterLink, FooterSocialLink, AppBarProps, AppBarLink } from "../core-props";\n');
-console.log('fix-dts: ' + typed + ' core components given exact prop types');
+const byFile = new Map();
+for (const [name, a] of model.aliases) {
+  if (!byFile.has(a.file)) byFile.set(a.file, new Set());
+  byFile.get(a.file).add(name);
+}
+for (const [name, d] of model.decls) {
+  const exported = (d.node.modifiers || []).some((m) => m.kind === ts.SyntaxKind.ExportKeyword);
+  if (!exported) continue;
+  if (!byFile.has(d.sf.fileName)) byFile.set(d.sf.fileName, new Set());
+  byFile.get(d.sf.fileName).add(name);
+}
+const seenTypes = new Set();
+let typeExports = '';
+for (const [file, names] of byFile) {
+  const fresh = [...names].filter((n) => !seenTypes.has(n));
+  fresh.forEach((n) => seenTypes.add(n));
+  if (!fresh.length) continue;
+  const rel = relative(join(root, 'components'), join(typesOut, relative(TYPES_DIR, file).replace(/\.d\.ts$/, ''))).split('\\').join('/');
+  typeExports += 'export type { ' + fresh.sort().join(', ') + ' } from "' + rel + '";\n';
+}
+writeFileSync(indexDts, readFileSync(indexDts, 'utf8') + '\n' + typeExports);
+console.log('fix-dts: ' + typed + ' component declarations given exact prop types from types/');
+
+// The reference is generated from the same model, in the same step, so a
+// build that ships new types always ships the matching docs/API.md.
+const doc = buildApiDoc(root, model);
+writeFileSync(API_DOC, doc);
+console.log('fix-dts: wrote docs/API.md (' + doc.length + ' chars, ~' + Math.round(doc.length / 4) + ' tokens)');
