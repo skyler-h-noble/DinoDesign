@@ -149,7 +149,10 @@ export function loadModel() {
       // Native<HTMLButtonElement> — the shared helper; its argument names the element.
       if (h.expression.getText(sf) === 'Native') return t === 'Native' ? 'Native<HTMLDivElement>' : t;
       if (decls.has(h.expression.getText(sf))) {
-        const inner = nativeOf(decls.get(h.expression.getText(sf)).node, sf);
+        const d = decls.get(h.expression.getText(sf));
+        // A local alias (`type SvgText = Omit<React.SVGAttributes<…>, …>`): its target names the element.
+        if (ts.isTypeAliasDeclaration(d.node)) return d.node.type.getText(d.sf);
+        const inner = nativeOf(d.node, d.sf);
         if (inner) return inner;
         continue;
       }

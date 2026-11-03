@@ -1,4 +1,5 @@
 // Each line must be a TYPE ERROR — selection controls and the button family.
+import type * as React from 'react';
 import { Checkbox, Switch, Slider, Rating, DatePicker, Fab, SpeedDial, Toolbar, PrimaryToggleButtonGroup } from '@omni-design/components';
 
 export const rejectsB = (

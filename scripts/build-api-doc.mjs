@@ -24,7 +24,8 @@ const CATEGORIES = [
 /** Shared unions written once at the top instead of in every table. */
 const VOCAB = ['Theme', 'Surface', 'Color', 'Size', 'ButtonVariant', 'TextColor', 'HeadingColor', 'TextStyle', 'IconShape', 'AvatarShape', 'Breakpoint', 'Sx'];
 
-const cell = (s) => String(s).replace(/\|/g, '\\|').replace(/\n/g, ' ');
+// No tables, so no pipe escaping: `a | b` stays readable as a union.
+const cell = (s) => String(s).replace(/\n/g, ' ');
 // React.ReactNode → ReactNode: the namespace is noise in a table read per token.
 const tidy = (s) => String(s).replace(/\bReact\./g, '');
 const code = (s) => { const t = cell(tidy(s)); return t.includes('`') ? '`` ' + t + ' ``' : '`' + t + '`'; };
@@ -36,10 +37,15 @@ function shortDefault(d) {
   return code(s);
 }
 
-function nativeLabel(native) {
+function nativeLabel(native, model) {
   if (!native) return '';
+  // Built on another component's props (`Omit<ButtonProps, 'variant'>`): say so,
+  // rather than guessing an element.
+  const base = model && model.entries.find((x) => new RegExp('\\b' + x.type + '\\b').test(native));
+  if (base) return { text: 'all `' + base.exports[0] + '` props' };
+  if (/SVG/.test(native)) return '<svg>';
   const m = native.match(/HTML(\w*?)Element/) || [null, 'Div'];
-  const el = { Button: 'button', Anchor: 'a', Input: 'input', TextArea: 'textarea', Div: 'div', Span: 'span', Paragraph: 'p', Heading: 'h1–h6', Image: 'img', UList: 'ul', LI: 'li', Select: 'select', Form: 'form' }[m && m[1]];
+  const el = { Button: 'button', Anchor: 'a', Input: 'input', TextArea: 'textarea', Div: 'div', Span: 'span', Paragraph: 'p', Heading: 'h1–h6', Image: 'img', UList: 'ul', OList: 'ol', HR: 'hr', LI: 'li', Table: 'table', Select: 'select', Form: 'form' }[m && m[1]];
   return el ? '<' + el + '>' : 'HTML element';
 }
 
@@ -58,9 +64,9 @@ export function renderApiDoc(model, defaultsFor) {
   out.push('');
   out.push('Read a section, not the file: search for `### Name`. ' + total + ' components.');
   out.push('');
-  out.push('Conventions: every prop is optional unless marked **required**. "+ `<div>`" means the ' +
-    'native attributes of that element pass through (id, className, style, aria-*, data-*, on*). ' +
-    'Defaults come from the component source.');
+  out.push('Format: `` `name?: type` = default — meaning``. No `?` means required. "+ `children`" means it ' +
+    'takes children; "+ `<div>`" means the native attributes of that element pass through (id, className, ' +
+    'style, aria-*, data-*, on*). Defaults come from the component source.');
   out.push('');
   out.push('## Shared types');
   out.push('');
@@ -124,22 +130,26 @@ export function renderApiDoc(model, defaultsFor) {
       const owner = e.sameAs && (model.entries.find((x) => x.type === e.sameAs) || printedBase.get(e.sameAs));
       const ownerName = owner && (owner.exports ? owner.exports[0] : owner);
       if (e.sameAs && !owner) printedBase.set(e.sameAs, primary);
-      const rows = ownerName ? [] : e.props.filter((p) => p.name !== 'sx' || e.props.length < 3);
+      // `_index` / `__selectionOwner` are set by a parent, never by a user; they
+      // stay in the type (the drift check needs them) but not in the reference.
+      const rows = ownerName ? [] : e.props.filter((p) => (p.name !== 'sx' || e.props.length < 3) && !p.name.startsWith('_'));
       if (ownerName) out.push('', 'Props: same as `' + ownerName + '`.');
-      if (rows.length) {
-        out.push('');
-        out.push('| Prop | Type | Default | Meaning |');
-        out.push('|---|---|---|---|');
-        for (const p of rows) {
-          const def = p.default !== undefined ? code(p.default) : shortDefault(defaults.get(p.name));
-          let meaning = p.doc || '';
-          if (p.deprecated) meaning = '**Deprecated.** ' + (typeof p.deprecated === 'string' ? p.deprecated + ' ' : '') + meaning;
-          if (!p.optional) meaning = '**required.** ' + meaning;
-          out.push('| ' + code(p.name) + ' | ' + code(p.type) + ' | ' + def + ' | ' + cell(meaning.trim()) + ' |');
-        }
+      // One line per prop, not a table: a table row spends ~10 characters on
+      // separators and every entry repeats a header — about a fifth of the
+      // file. `name?: type` reads as the TypeScript it mirrors.
+      const plainChildren = rows.find((p) => p.name === 'children' && !p.doc && /^React\.ReactNode$|^ReactNode$/.test(p.type));
+      const listed = rows.filter((p) => p !== plainChildren);
+      if (listed.length) out.push('');
+      for (const p of listed) {
+        const def = p.default !== undefined ? code(p.default) : shortDefault(defaults.get(p.name));
+        let meaning = p.doc || '';
+        if (p.deprecated) meaning = '**Deprecated.** ' + (typeof p.deprecated === 'string' ? p.deprecated + ' ' : '') + meaning;
+        const sig = code(p.name + (p.optional ? '?' : '') + ': ' + p.type);
+        out.push('- ' + sig + (def ? ' = ' + def : '') + (meaning.trim() ? ' — ' + meaning.trim().replace(/\n/g, ' ') : ''));
       }
-      const nat = nativeLabel(e.native);
-      if (nat && !ownerName) out.push((rows.length ? '' : '\n') + '+ `' + nat + '`');
+      const nat = nativeLabel(e.native, model);
+      const extras = [plainChildren ? '`children`' : '', nat && !ownerName ? (nat.text || '`' + nat + '`') : ''].filter(Boolean);
+      if (extras.length) out.push((listed.length ? '' : '\n') + '+ ' + extras.join(', '));
       if (e.example) {
         out.push('');
         out.push('```jsx');

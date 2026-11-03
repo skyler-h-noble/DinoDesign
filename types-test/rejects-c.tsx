@@ -1,5 +1,6 @@
 // Each line must be a TYPE ERROR (fork C: navigation). `@ts-expect-error`
 // fails the build if the line compiles.
+import type * as React from 'react';
 import { Tabs, Menu, Pagination, Stepper, BottomNavigation } from '@omni-design/components';
 
 export const rejectsC = (
