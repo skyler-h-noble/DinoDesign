@@ -1,6 +1,6 @@
 # Component API — @omni-design/components
 
-Every exported component: purpose, props, required parent, one example. GENERATED from `types/` by `scripts/build-api-doc.mjs` — the same files the published .d.ts come from, so this cannot drift from the types. Do not edit by hand. Do not open `dist/` to learn a prop: if it is not here, the component does not take it. Rules (colour, surfaces, layout) are in `CLAUDE.md`.
+Every exported component: purpose, props, required parent, one example. GENERATED from `types/` by `scripts/build-api-doc.mjs` — the same files the published .d.ts come from, so this cannot drift from the types. Do not edit by hand. Do not open `dist/` to learn a prop: if it is not here, the component does not take it. Rules (color, surfaces, layout) are in `CLAUDE.md`.
 
 Read a section, not the file: search for `### Name`. 72 components.
 
@@ -20,6 +20,13 @@ Conventions: every prop is optional unless marked **required**. "+ `<div>`" mean
 - `AvatarShape` = `'circle' \| 'squircle' \| 'rounded' \| 'cookie-4' \| 'cookie-6' \| 'cookie-7' \| 'cookie-9' \| 'cookie-12' \| 'flower' \| 'gem' \| 'puffy' \| 'bun'`
 - `Breakpoint` = `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl'`
 - `Sx` = `Record<string, unknown> \| Array<Record<string, unknown>>` — MUI's `sx` style object. Layout only — never color, background or radius.
+
+## Helper types
+
+- `AppBarLink` = `{ label: ReactNode; href?: string; onClick?: MouseEventHandler<HTMLElement>; current?: boolean }`
+- `FooterColumn` = `{ title: ReactNode; links: FooterLink[] }`
+- `FooterLink` = `{ label: ReactNode; href?: string; onClick?: MouseEventHandler<HTMLElement> }`
+- `FooterSocialLink` = `{ url: string; label?: string; name?: string; brand?: string; icon?: ReactNode }`
 
 Sections: Layout · Text · Buttons · Inputs · Surfaces · Navigation · Data display · App structure
 
@@ -164,17 +171,7 @@ Display and heading styles, in --Header colors. H1–H6 render h1–h6; Display*
 ### AltDisplayLarge · AltDisplayMedium · AltDisplaySmall
 Display sizes painted with the brand's Alt-Display color or gradient (`altMode`, or an ancestor's data-alt-display).
 
-| Prop | Type | Default | Meaning |
-|---|---|---|---|
-| `color` | `HeadingColor` |  | Header color role (3:1). |
-| `component` | `ElementType` |  | Element to render (keep one h1 per page: `<DisplayLarge component="h1">`). |
-| `textStyle` | `TextStyle` |  | Text style by name; the named components set it for you. |
-| `altMode` | `'default' \| 'colored' \| 'gradient'` |  | Alt Display only: default \| colored \| gradient. |
-| `width` | `'fill' \| 'hug' \| (string & {}) \| number` |  | 'fill' = block, full width; 'hug' = inline. |
-| `noWrap` | `boolean` |  | One line with an ellipsis. |
-| `gutterBottom` | `boolean` |  | Margin below. |
-| `children` | `ReactNode` |  |  |
-+ `<div>`
+Props: same as `DisplayLarge`.
 
 ```jsx
 <AltDisplayLarge component="h1" altMode="gradient">Big idea</AltDisplayLarge>
@@ -202,17 +199,7 @@ Body copy, in standard and semibold. Body has no true bold — use Subtitle. `*B
 ### Subtitle · SubtitleSmall · SubtitleMedium · SubtitleLarge · Subtitle1 · Subtitle2
 Bold body text (Body at 700), in --Text. Subtitle = SubtitleMedium; Subtitle1 = SubtitleLarge, Subtitle2 = Subtitle.
 
-| Prop | Type | Default | Meaning |
-|---|---|---|---|
-| `color` | `TextColor` |  | Color role. Never `style={{ color }}`. |
-| `component` | `ElementType` |  | Element to render (keep one h1 per page: `<DisplayLarge component="h1">`). |
-| `textStyle` | `TextStyle` |  | Text style by name; the named components set it for you. |
-| `altMode` | `'default' \| 'colored' \| 'gradient'` |  | Alt Display only: default \| colored \| gradient. |
-| `width` | `'fill' \| 'hug' \| (string & {}) \| number` |  | 'fill' = block, full width; 'hug' = inline. |
-| `noWrap` | `boolean` |  | One line with an ellipsis. |
-| `gutterBottom` | `boolean` |  | Margin below. |
-| `children` | `ReactNode` |  |  |
-+ `<div>`
+Props: same as `Body`.
 
 ```jsx
 <Subtitle>Card title</Subtitle>
@@ -221,17 +208,7 @@ Bold body text (Body at 700), in --Text. Subtitle = SubtitleMedium; Subtitle1 = 
 ### Caption · CaptionBold · Legal · LegalSemibold
 Small print: Caption for captions and metadata, Legal for fine print.
 
-| Prop | Type | Default | Meaning |
-|---|---|---|---|
-| `color` | `TextColor` |  | Color role. Never `style={{ color }}`. |
-| `component` | `ElementType` |  | Element to render (keep one h1 per page: `<DisplayLarge component="h1">`). |
-| `textStyle` | `TextStyle` |  | Text style by name; the named components set it for you. |
-| `altMode` | `'default' \| 'colored' \| 'gradient'` |  | Alt Display only: default \| colored \| gradient. |
-| `width` | `'fill' \| 'hug' \| (string & {}) \| number` |  | 'fill' = block, full width; 'hug' = inline. |
-| `noWrap` | `boolean` |  | One line with an ellipsis. |
-| `gutterBottom` | `boolean` |  | Margin below. |
-| `children` | `ReactNode` |  |  |
-+ `<div>`
+Props: same as `Body`.
 
 ```jsx
 <Caption color="quiet">Updated 2 hours ago</Caption>
@@ -240,17 +217,7 @@ Small print: Caption for captions and metadata, Legal for fine print.
 ### Label · LabelExtraSmall · LabelSmall · LabelLarge · MobileNavLabel
 The Label type style as text. For a form field's label use FormLabel.
 
-| Prop | Type | Default | Meaning |
-|---|---|---|---|
-| `color` | `TextColor` |  | Color role. Never `style={{ color }}`. |
-| `component` | `ElementType` |  | Element to render (keep one h1 per page: `<DisplayLarge component="h1">`). |
-| `textStyle` | `TextStyle` |  | Text style by name; the named components set it for you. |
-| `altMode` | `'default' \| 'colored' \| 'gradient'` |  | Alt Display only: default \| colored \| gradient. |
-| `width` | `'fill' \| 'hug' \| (string & {}) \| number` |  | 'fill' = block, full width; 'hug' = inline. |
-| `noWrap` | `boolean` |  | One line with an ellipsis. |
-| `gutterBottom` | `boolean` |  | Margin below. |
-| `children` | `ReactNode` |  |  |
-+ `<div>`
+Props: same as `Body`.
 
 ```jsx
 <Label>Shipping</Label>
@@ -259,17 +226,7 @@ The Label type style as text. For a form field's label use FormLabel.
 ### Eyebrow · EyebrowSmall · EyebrowMedium · EyebrowLarge · Overline · OverlineSmall · OverlineMedium · OverlineLarge
 The small line above a heading. Takes its color from the section (Primary→Secondary, …) — do not recolor. Overline* are its old names.
 
-| Prop | Type | Default | Meaning |
-|---|---|---|---|
-| `color` | `TextColor` |  | Color role. Never `style={{ color }}`. |
-| `component` | `ElementType` |  | Element to render (keep one h1 per page: `<DisplayLarge component="h1">`). |
-| `textStyle` | `TextStyle` |  | Text style by name; the named components set it for you. |
-| `altMode` | `'default' \| 'colored' \| 'gradient'` |  | Alt Display only: default \| colored \| gradient. |
-| `width` | `'fill' \| 'hug' \| (string & {}) \| number` |  | 'fill' = block, full width; 'hug' = inline. |
-| `noWrap` | `boolean` |  | One line with an ellipsis. |
-| `gutterBottom` | `boolean` |  | Margin below. |
-| `children` | `ReactNode` |  |  |
-+ `<div>`
+Props: same as `Body`.
 
 ```jsx
 <VStack spacing={1}><Eyebrow>New</Eyebrow><H2>Title</H2></VStack>
@@ -278,17 +235,7 @@ The small line above a heading. Takes its color from the section (Primary→Seco
 ### NumberSmall · NumberMedium · NumberLarge
 Tabular figures for stats and prices.
 
-| Prop | Type | Default | Meaning |
-|---|---|---|---|
-| `color` | `TextColor` |  | Color role. Never `style={{ color }}`. |
-| `component` | `ElementType` |  | Element to render (keep one h1 per page: `<DisplayLarge component="h1">`). |
-| `textStyle` | `TextStyle` |  | Text style by name; the named components set it for you. |
-| `altMode` | `'default' \| 'colored' \| 'gradient'` |  | Alt Display only: default \| colored \| gradient. |
-| `width` | `'fill' \| 'hug' \| (string & {}) \| number` |  | 'fill' = block, full width; 'hug' = inline. |
-| `noWrap` | `boolean` |  | One line with an ellipsis. |
-| `gutterBottom` | `boolean` |  | Margin below. |
-| `children` | `ReactNode` |  |  |
-+ `<div>`
+Props: same as `Body`.
 
 ```jsx
 <NumberLarge component="p">$49</NumberLarge>
@@ -297,17 +244,7 @@ Tabular figures for stats and prices.
 ### ButtonText · ButtonSmall
 The button label style as plain text (not a button). ButtonText is Typography's `Button`, renamed so it does not clash with the real Button.
 
-| Prop | Type | Default | Meaning |
-|---|---|---|---|
-| `color` | `TextColor` |  | Color role. Never `style={{ color }}`. |
-| `component` | `ElementType` |  | Element to render (keep one h1 per page: `<DisplayLarge component="h1">`). |
-| `textStyle` | `TextStyle` |  | Text style by name; the named components set it for you. |
-| `altMode` | `'default' \| 'colored' \| 'gradient'` |  | Alt Display only: default \| colored \| gradient. |
-| `width` | `'fill' \| 'hug' \| (string & {}) \| number` |  | 'fill' = block, full width; 'hug' = inline. |
-| `noWrap` | `boolean` |  | One line with an ellipsis. |
-| `gutterBottom` | `boolean` |  | Margin below. |
-| `children` | `ReactNode` |  |  |
-+ `<div>`
+Props: same as `Body`.
 
 ```jsx
 <ButtonText>Label</ButtonText>

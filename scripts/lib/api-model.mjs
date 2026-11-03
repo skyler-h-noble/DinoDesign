@@ -174,10 +174,15 @@ export function loadModel() {
       example: (doc.tags.example || [])[0],
       native: nativeOf(node, sf),
       props: members(name),
+      // `interface X extends Y {}` — nothing of its own; the reference prints
+      // "same props as" rather than repeating Y's table.
+      sameAs: ts.isInterfaceDeclaration(node) && node.members.length === 0
+        && (node.heritageClauses || []).flatMap((h) => h.types).length === 1
+        ? node.heritageClauses[0].types[0].getText(sf) : undefined,
       node, sf,
     });
   }
-  return { entries, program, checker, decls, aliases };
+  return { entries, program, checker, decls, aliases, ts };
 }
 
 /** Every prop name the type accepts, inherited native attributes included —

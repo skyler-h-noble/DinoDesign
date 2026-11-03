@@ -71,6 +71,33 @@ export function renderApiDoc(model, defaultsFor) {
   }
   out.push('');
 
+  // Named helper types a prop refers to (TableColumn, SelectOption, …),
+  // expanded once here so a table cell naming one is never a dead end.
+  const entryTypes = new Set(model.entries.map((e) => e.type));
+  const skip = new Set([...VOCAB, 'Native', 'TypographyBase', 'TextProps', 'HeadingProps', 'GridSize']);
+  const helpers = new Map();
+  const visit = (text) => {
+    for (const m of String(text).matchAll(/\b([A-Z]\w+)\b/g)) {
+      const n = m[1];
+      if (helpers.has(n) || skip.has(n) || entryTypes.has(n) || !model.decls.has(n)) continue;
+      const { node, sf } = model.decls.get(n);
+      let body;
+      if (model.ts.isInterfaceDeclaration(node)) {
+        body = '{ ' + node.members.map((x) => x.getText(sf).replace(/\/\*\*[\s\S]*?\*\/\s*/g, '').replace(/[;,]\s*$/, '')).join('; ') + ' }';
+      } else body = node.type.getText(sf);
+      body = body.replace(/\s+/g, ' ');
+      helpers.set(n, body);
+      visit(body);
+    }
+  };
+  for (const e of model.entries) for (const p of e.props) visit(p.type);
+  if (helpers.size) {
+    out.push('## Helper types');
+    out.push('');
+    for (const [n, body] of [...helpers].sort((a, b) => a[0].localeCompare(b[0]))) out.push('- `' + n + '` = ' + code(body));
+    out.push('');
+  }
+
   const byCat = new Map();
   for (const e of model.entries) {
     if (!byCat.has(e.category)) byCat.set(e.category, []);
@@ -80,6 +107,7 @@ export function renderApiDoc(model, defaultsFor) {
   out.push('Sections: ' + cats.map((c) => c).join(' · '));
   out.push('');
 
+  const printedBase = new Map();
   for (const cat of cats) {
     out.push('## ' + cat);
     out.push('');
@@ -91,7 +119,13 @@ export function renderApiDoc(model, defaultsFor) {
       if (e.ref) meta.push('Ref: `' + e.ref + '`.');
       out.push(meta.filter(Boolean).join(' '));
       const defaults = defaultsFor(e);
-      const rows = e.props.filter((p) => p.name !== 'sx' || e.props.length < 3);
+      // A type that only renames another prints its table once: the first
+      // entry with that base gets the table, the rest point at it.
+      const owner = e.sameAs && (model.entries.find((x) => x.type === e.sameAs) || printedBase.get(e.sameAs));
+      const ownerName = owner && (owner.exports ? owner.exports[0] : owner);
+      if (e.sameAs && !owner) printedBase.set(e.sameAs, primary);
+      const rows = ownerName ? [] : e.props.filter((p) => p.name !== 'sx' || e.props.length < 3);
+      if (ownerName) out.push('', 'Props: same as `' + ownerName + '`.');
       if (rows.length) {
         out.push('');
         out.push('| Prop | Type | Default | Meaning |');
@@ -105,7 +139,7 @@ export function renderApiDoc(model, defaultsFor) {
         }
       }
       const nat = nativeLabel(e.native);
-      if (nat) out.push((rows.length ? '' : '\n') + '+ `' + nat + '`');
+      if (nat && !ownerName) out.push((rows.length ? '' : '\n') + '+ `' + nat + '`');
       if (e.example) {
         out.push('');
         out.push('```jsx');
