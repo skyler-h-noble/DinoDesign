@@ -1,9 +1,9 @@
 ---
-description: Share a MISSING-LIB-COMPONENT with the DynoDesign admin dashboard for review
+description: Share a MISSING-LIB-COMPONENT with the OmniDesign admin dashboard for review
 ---
 
 The user wants to share an inline component (tagged `MISSING-LIB-COMPONENT`)
-with the DynoDesign maintainers. Submissions are posted to a cloud function
+with the OmniDesign maintainers. Submissions are posted to a cloud function
 and reviewed in the admin dashboard at /admin/proposals.
 
 **Endpoint:**
@@ -39,7 +39,7 @@ Workflow:
      Source:    <file path>:<line>
      Version:   <lib version>
 
-   This will POST to the DynoDesign admin dashboard. The submission is
+   This will POST to the OmniDesign admin dashboard. The submission is
    anonymous (no auth required) but the endpoint logs your IP for
    rate-limiting purposes (10 submissions / 24h per IP).
 
@@ -79,7 +79,7 @@ Workflow:
    ```
 
 7. **Report the result.**
-   - **201**: `Submitted as proposal <proposalId>. The DynoDesign team will review
+   - **201**: `Submitted as proposal <proposalId>. The OmniDesign team will review
      and reply via the admin dashboard. <remainingToday> submissions remaining
      today from this IP.`
    - **400**: relay the validation errors from the response body and offer to
@@ -98,7 +98,7 @@ Workflow:
 ### Fallback markdown format (only used when API call fails)
 
 ````markdown
-# DynoDesign component proposal: <ComponentName>
+# OmniDesign component proposal: <ComponentName>
 
 ## Use case
 <paraphrased>

@@ -11,10 +11,11 @@ matching Figma library.
 ## Install
 
 ```bash
-npm install @omni-design/components @mui/material@^7 @mui/icons-material@^7 @emotion/react @emotion/styled
+npm install @omni-design/components @omni-design/icons @mui/material@^7 @emotion/react @emotion/styled
 ```
 
-MUI 7 is required.
+MUI 7 is required. Icons come from `@omni-design/icons` (the Material Icons
+as plain SVG, same names), not `@mui/icons-material`.
 
 ## Use
 
@@ -35,7 +36,9 @@ export default function App() {
 ```
 
 `OMNI_DEFAULT_THEME_URL` is the package's own theme. For your brand, pass
-your design system's `theme.json` URL from the studio instead.
+your design system's `theme.json` URL from the studio instead. The studio also
+gives you a CLAUDE.md for that system — its page background, bars, buttons and
+cards — to put next to this package's in your project.
 
 ## Docs
 

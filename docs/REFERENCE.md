@@ -52,8 +52,15 @@ Every component's visual output is driven by three HTML attributes on ancestor e
 `Default` · `Primary` · `Secondary` · `Tertiary` · `Neutral` · `Info` ·
 `Success` · `Warning` · `Error`
 
-Plus three a component sets for itself rather than something you choose:
-`App-Bar`, `Nav-Bar`, `Status`.
+Plus three bar themes that carry the designer's bar choices: `App-Bar`,
+`Nav-Bar`, `Status`. `AppBar`, `BottomNavigation` and `Toolbar` set them for
+themselves; use them yourself only for a bar you build (see *Navigation
+chrome* below).
+
+`Default` is not a fourth brand color. It is the page background the designer
+picked in the studio (white, black, a Primary tint…), and the provider puts it
+on the root with `Surface`. A region with no `theme` inherits it; write
+`theme="Default"` to return to it inside another theme.
 
 **That is the whole list.** Lightness and darkness are NOT themes — they are
 the surface axis. These do not exist and resolve to nothing:
@@ -72,12 +79,13 @@ is worth getting right the first time.
 
 ### `data-style` — sets the shape language
 ```jsx
-<div data-style="Professional">   // 4px border-radius
-<div data-style="Modern">         // 8px border-radius
-<div data-style="Bold">           // 16px border-radius
-<div data-style="Playful">        // 40px border-radius
+<div data-style="Professional">
+<div data-style="Modern">
+<div data-style="Bold">
+<div data-style="Playful">
 ```
-Set once on the root. Cascades to every component automatically.
+The provider sets it on the root from the design system; you rarely set it.
+The radii themselves come from the design system's CSS, not from the name.
 
 ### `data-surface` — sets background depth AND lightness
 
@@ -87,7 +95,7 @@ Five page surfaces, darkest to brightest:
 <div data-surface="Surface-Dimmest">   // darkest — black under Neutral
 <div data-surface="Surface-Dim">       // slightly recessed
 <div data-surface="Surface">           // base page background
-<div data-surface="Surface-Bright">    // elevated (AppBar)
+<div data-surface="Surface-Bright">    // slightly raised
 <div data-surface="Surface-Brightest"> // brightest — white under Neutral
 ```
 
@@ -107,7 +115,7 @@ white one.
 
 `data-surface` is the **only** way to change a region's background. Setting
 it exposes the full set of paired tokens — `--Background`, `--Text`,
-`--Quiet`, `--Header`, `--Border`, `--Border-Variant`, `--Hover`, `--Active`,
+`--Quiet`, `--Header`, `--Border`, `--Border-Variant`, `--Hover`, `--Pressed`,
 `--Hotlink`, and the per-palette `--Buttons-*-Border/Highlight/Lowlight`
 overrides — all tuned for that surface's tone. Every nested component reads
 those automatically.
@@ -250,9 +258,13 @@ var(--Container-High)      /* modals live here */
 ### Text
 ```css
 var(--Text)                /* primary body text */
-var(--Text-Quiet)          /* secondary / muted text */
+var(--Quiet)               /* secondary / muted text */
 var(--Header)              /* Display and H1-H3 only - see below */
-var(--Hotlink)             /* links */
+var(--Text-Primary)        /* colored text, contrast-checked on every surface; */
+var(--Text-Secondary)      /*   also -Tertiary and the states. Reach them with */
+var(--Text-Tertiary)       /*   the Typography `color` prop, not by hand */
+var(--Eyebrow)             /* the eyebrow's role — see Eyebrow below */
+var(--Hotlink)             /* links — no hover color: the underline goes instead */
 ```
 
 `--Header` is a DISPLAY role, not a heading role. `<DisplayLarge>`,
@@ -267,7 +279,7 @@ level of hierarchy. Both defaults are applied by the component - don't pass a
 var(--Border)
 var(--Border-Variant)      /* subtle borders */
 var(--Hover)               /* hover overlay */
-var(--Active)              /* pressed state overlay */
+var(--Pressed)             /* pressed state overlay */
 var(--Focus-Visible)       /* keyboard focus ring */
 ```
 
@@ -279,7 +291,7 @@ var(--Buttons-{Color}-Button)   /* fill color */
 var(--Buttons-{Color}-Text)     /* label color */
 var(--Buttons-{Color}-Border)   /* border + thumb color */
 var(--Buttons-{Color}-Hover)    /* hover fill */
-var(--Buttons-{Color}-Active)   /* pressed fill */
+var(--Buttons-{Color}-Pressed)  /* pressed fill */
 ```
 
 There are no `-Light` button tokens. A lighter button is the same family on a
@@ -296,8 +308,14 @@ var(--Icons-{Family}-Variant)    /* two-tone secondary fill */
 ### Style & Shape
 ```css
 var(--Style-Border-Radius)       /* set by data-style — use everywhere */
-var(--Shadow-1)                  /* subtle shadow */
-var(--Shadow-2)                  /* elevated shadow */
+var(--Effect-Level-1) … var(--Effect-Level-5)
+                                 /* shadows tinted by the surface: for things
+                                    that sit ON one surface (Card, inputs) */
+var(--Effect-Level-1-Neutral) … var(--Effect-Level-5-Neutral)
+                                 /* pure black: for anything fixed or floating
+                                    over the page (Menu, Popover, Dialog, Fab,
+                                    a sticky AppBar). Components already pick;
+                                    this matters only when you hand-roll one */
 var(--Style-Gradient-Color-1)
 var(--Style-Gradient-Color-2)
 var(--Style-Gradient-Angle)
@@ -430,12 +448,12 @@ themed regions inside it. Type tokens have no such requirement; they resolve at
 The alternative to a `body` rule is `class="typography-body"` on the elements
 that want it — same tokens, explicit rather than global.
 
-**`data-platform` is OPTIONAL.** `core.css` defines every `--Font-Family-*` at
-`:root`, so text resolves without it. `typography-tokens.css` additionally
-publishes per-platform ramps under `[data-platform="Desktop"|"IOS-Mobile"|
-"IOS-Tablet"|"Android"]`; set the attribute only when you want a platform's
-ramp instead of the default. Text rendering with the wrong family is almost
-never a missing `data-platform` — check that `core.css` is loaded first.
+**`data-device` is OPTIONAL.** The phone and tablet type ramps apply by
+screen width (`@media … :root:not([data-device])`). Set
+`data-device="IOS-Mobile"` (or `IOS-Tablet` / `Android-Mobile` /
+`Android-Tablet` / `Desktop`) only to pin a device on purpose. Text rendering
+with the wrong family is almost never a missing attribute — check that the
+provider loaded the design system first.
 
 ### Eyebrow — the style formerly called Overline
 
@@ -519,21 +537,27 @@ to the right brand token. **Do not write `style={{ color: 'var(--Text-…)' }}`
 on typography** — set the prop instead:
 
 ```jsx
-<Body color="quiet">…</Body>        // var(--Text-Quiet)
+<Body color="quiet">…</Body>        // var(--Quiet)
 <Body color="primary">…</Body>      // var(--Text-Primary)
 <Body color="secondary">…</Body>    // var(--Text-Secondary)
 <Body color="success">…</Body>      // semantic tokens
 ```
 
-Available values: `standard` (default), `quiet`, `primary`, `secondary`,
-`tertiary`, `neutral`, `info`, `success`, `warning`, `error`. Same list for
-headings.
+Available values: `standard` (default), `quiet`, `eyebrow`, `inherit`,
+`primary`, `secondary`, `tertiary`, `neutral`, `info`, `success`, `warning`,
+`error`. Headings take the same list minus `quiet` and `eyebrow`.
+
+`primary` / `secondary` / `tertiary` are the design system's color ROLES, and
+every one is contrast-checked on every theme and surface. Use them for short
+emphasis — a stat, a label, a word in a heading — rather than building a page
+from one accent and grays. Not for whole paragraphs (see the 60/30/10 pass).
 
 ---
 
 ## Component Imports
 
-All 49 components import from `./components` (or `@omni-design/components` if installed as a package):
+Everything imports from `@omni-design/components`; icons from
+`@omni-design/icons` (`import HomeIcon from '@omni-design/icons/Home'`).
 
 ```jsx
 import {
@@ -562,11 +586,11 @@ import {
 
   // Navigation
   Tabs, TabList, Tab, TabPanel,
-  Breadcrumbs, Pagination, Dropdown, Menu, MenuItem,
+  Breadcrumbs, Pagination, Dropdown, MenuButton, Menu, MenuItem, MenuDivider,
   BottomNavigation, Stepper, SpeedDial,
 
-  // Surfaces
-  Card, Paper,
+  // Surfaces and theming
+  Card, Paper, Section, ThemedZone, Popover,
 
   // Dialogs
   Dialog, Modal, Drawer,
@@ -581,7 +605,7 @@ import {
   AppBar, Footer, Rail, Drawer, Accordion,
 
   // Utilities
-  Link, SkeletonLoader,
+  Link, SkeletonLoader, CodeBlock, CopyButton, Icon, IconBadge,
 } from '@omni-design/components';
 ```
 
@@ -613,6 +637,10 @@ import {
   Save Changes
 </Button>
 <Button variant="primary-outline">Cancel</Button>
+
+// Icon-only: the BUTTON carries the name, the icon none. Name the action.
+// Both labelled announces it twice; neither announces just "button".
+<Button iconOnly aria-label="Delete item"><DeleteIcon /></Button>
 
 // black-white resolves itself against whatever it is placed on: black on a
 // light surface, white on a dark one, with a label that always clears 4.5:1.
@@ -650,24 +678,27 @@ import {
 ```jsx
 // Sets its own data-surface and pads itself (--Card-Padding) — put content
 // straight inside. CardContent / CardActions are optional sections.
-// variant: 'solid' (default) | 'light' | 'dark'
+// variant: default (a Container card, colored the way the designer picked:
+// tonal, white or black) | 'solid' | 'light' | 'dark' (the `color` palette
+// at Surface / Surface-Brightest / Surface-Dimmest)
 <Card>
   <Subtitle>Title</Subtitle>
   <BodySmall color="quiet">Description.</BodySmall>
 </Card>
 <Card style={{ height: '100%' }}>…</Card>   // equal heights in a grid row
+
+// With href it is a real link: an <a>, followed by Enter, no button role.
+<Card href="/case-studies/acme">…</Card>
 ```
 
 ### Alert
 ```jsx
-// variant: 'standard' | 'outline' | 'light' | 'solid'
-// color: 8 brand colors
-// Wrap in ThemedZone for semantic coloring:
-<ThemedZone theme="Success" surface="Surface-Bright">
-  <Alert variant="light" color="success">
-    Operation completed successfully.
-  </Alert>
-</ThemedZone>
+// variant: 'light' (default, the color's brightest surface) | 'solid' | …
+// color: info (default) | success | warning | error | the brand colors.
+// Alert themes itself from `color` — no ThemedZone needed.
+<Alert color="success" title="Saved">
+  Operation completed successfully.
+</Alert>
 ```
 
 ### Switch
@@ -742,6 +773,42 @@ import {
 // unselected chip IS the outline look; `selected` fills it.
 <Chip label="Figma library" startDecorator={<CheckIcon />} />
 // MUI's `icon` prop works too and means the same thing.
+```
+
+### Tabs as site navigation
+```jsx
+// A Tab is a button unless its Tabs is in navigation mode: an href on a plain
+// Tab is dropped (with a dev warning). For links that go places:
+<Tabs navigation value={current}>
+  <TabList aria-label="Main navigation">
+    <Tab value="work" href="/work">Work</Tab>
+    <Tab value="about" href="/about">About</Tab>
+  </TabList>
+</Tabs>
+// Renders a <nav> of links; the current one gets aria-current.
+```
+
+### Menu — always under its Dropdown
+```jsx
+<Dropdown>
+  <MenuButton>Actions</MenuButton>
+  <Menu>
+    <MenuItem onClick={…}>Profile</MenuItem>
+    <MenuDivider />
+    <MenuItem disabled>Settings</MenuItem>
+  </Menu>
+</Dropdown>
+```
+`Menu` reads its open state from `Dropdown`; on its own it renders nothing,
+with no warning. It does not portal, so inside a scroll area or a clipped card
+use `Popover` (below).
+
+### CodeBlock — code, commands, copyable URLs
+```jsx
+<CodeBlock code={installCmd} language="bash" />
+// language is the header label; showCopy / showHeader default true;
+// maxHeight scrolls, wrap wraps. It brings its own copy button and
+// confirmation — do not hand-roll a <pre> with a copy button.
 ```
 
 Use `<ThemedZone>` for the case where you want the attributes but NOT the
@@ -949,26 +1016,14 @@ are the components the library still needs to grow.
 Four rules an agent gets wrong without being told, because each failure renders
 something plausible rather than an error.
 
-### Type switches on `data-device`, not on width
+### Type follows the screen — do not set `data-device`
 
-Omni has four device types — **Desktop, Tablet Horizontal, Tablet Vertical,
-Mobile** — and the tablets and phones each have an iOS and an Android
-platform. Type sizes differ per platform, not just per width: the bottom-nav
-label is 11px / 600 on Desktop, **10px / 500 on iOS** (Apple's tab bar) and
-**12px / 500 on Android** (Material's Label Medium).
-
-The CSS switches those on the root's `data-device`, never on a media query:
-
-```jsx
-// Set once, on the app root, from the platform you are running on.
-<html data-device="IOS-Mobile">      // IOS-Mobile | IOS-Tablet | Android-Mobile | Android-Tablet
-                                     // Desktop is the default — set nothing.
-```
-
-A width breakpoint cannot stand in for it: an iPad and an Android tablet are
-the same width and want different type. Without `data-device` every phone
-draws Desktop's type, which looks *almost* right — that is the trap. Layout
-(which parts of a nav show) still switches on width; type switches on device.
+Type sizes differ per device: the phone ramp applies below 600px and the
+tablet ramp below 900px, straight from the theme's CSS
+(`@media … :root:not([data-device])`), so nothing has to run first. Leave
+`data-device` unset. Set it (`IOS-Mobile` | `IOS-Tablet` | `Android-Mobile` |
+`Android-Tablet` | `Desktop`) only to pin a device on purpose — a phone mockup,
+or an app shell that knows its platform.
 
 ### Navigation chrome wears `App-Bar` and `Nav-Bar` — never a palette you pick
 
@@ -976,8 +1031,12 @@ The design system already chose what its bars look like. Use those themes:
 
 | Part | Theme |
 | --- | --- |
-| Top app bar, and a side rail beside it | `data-theme="App-Bar"` |
-| Phone bottom navigation bar | `data-theme="Nav-Bar"` (the component sets it) |
+| Top app bar, and a side rail beside it | `data-theme="App-Bar"` (`AppBar` sets it when `barColor` is unset) |
+| Phone bottom navigation bar | `data-theme="Nav-Bar"` (`BottomNavigation` / `Toolbar` set it) |
+| Phone status bar (mockups) | `data-theme="Status"` |
+
+Each bar theme's `Surface` level IS the theme and level the designer picked for
+that bar, so `surface="Surface"` reproduces it; another level moves off it.
 
 ```jsx
 // ✅ the system's own bar color
@@ -1064,7 +1123,7 @@ should be centred — a hero headline — set `textAlign` on that text element.
 ```jsx
 // Always use OmniDesign components for layout and interaction — never raw HTML
 <HStack spacing={2}>            // instead of <div style={{ display: 'flex', gap: 16 }}>
-<Button variant="outline" color="default">  // instead of <button style={{ border: '1px solid var(--Border)' }}>
+<Button variant="default-outline">  // instead of <button style={{ border: '1px solid var(--Border)' }}>
 <Body>                          // instead of <p> or <span>
 <BodySmall>                     // instead of <span style={{ fontSize: 14 }}>
 <Caption>                       // instead of <small> or <span style={{ fontSize: 12 }}>
@@ -1087,9 +1146,6 @@ style={{ borderRadius: 'var(--Style-Border-Radius)' }}
 
 // Import components from the library
 import { Button, Card, Alert, H2, Body, HStack } from '@omni-design/components';
-
-// Set the device on the root so type matches the platform
-<html data-device="IOS-Mobile">
 
 // Bars wear the system's own chrome themes
 <ThemedZone theme="App-Bar" surface="Surface" as="header">
@@ -1155,8 +1211,9 @@ import Button from '@mui/material/Button'; // ← bypasses the token system
 ```jsx
 function MyPage() {
   return (
-    // Root: set by OmniDesignProvider — don't add data-theme here again
-    <main data-surface="Surface-Dim" style={{ minHeight: '100vh' }}>
+    // Root: OmniDesignProvider sets data-theme="Default" + data-surface="Surface"
+    // — the designer's page background. Don't restate or override it here.
+    <main style={{ minHeight: '100vh' }}>
 
       <AppBar mode="desktop" brand="My App" />
 
@@ -1172,12 +1229,8 @@ function MyPage() {
           </CardActions>
         </Card>
 
-        {/* Semantic alert zones */}
-        <ThemedZone theme="Warning" surface="Surface-Bright">
-          <Alert variant="light" color="warning">
-            Please review before continuing.
-          </Alert>
-        </ThemedZone>
+        {/* Alert themes itself from color */}
+        <Alert color="warning">Please review before continuing.</Alert>
 
       </Container>
     </main>
@@ -1193,9 +1246,9 @@ function MyPage() {
 // Toggle dark mode from any component inside the Provider
 const { isDark, toggleDarkMode } = useOmniDesign();
 
-<button onClick={toggleDarkMode}>
-  {isDark ? 'Switch to Light' : 'Switch to Dark'}
-</button>
+<Button variant="ghost" onClick={toggleDarkMode}>
+  {isDark ? 'Switch to light' : 'Switch to dark'}
+</Button>
 ```
 
 Dark mode swaps `Light-Mode.css` for `Dark-Mode.css` — all token values update automatically. No component code changes needed.
@@ -1205,11 +1258,12 @@ Dark mode swaps `Light-Mode.css` for `Dark-Mode.css` — all token values update
 ## CSS Load Order (do not change)
 
 ```
-1. foundation.css   — primitives
-2. core.css         — component base styles
-3. Light-Mode.css   — OR Dark-Mode.css (never both)
-4. base.css         — data-style / data-surface rules
-5. styles.css       — final overrides
+1. foundation.css         — primitives
+2. core.css               — text, border and icon roles
+3. typography-tokens.css  — the type ramps
+4. Light-Mode.css         — OR Dark-Mode.css (never both)
+5. base.css               — data-style / data-surface rules
+6. styles.css             — final overrides
 ```
 
 The `OmniDesignProvider` manages this automatically. Do not add `<link>` tags for these files in `index.html` — the Provider handles injection.

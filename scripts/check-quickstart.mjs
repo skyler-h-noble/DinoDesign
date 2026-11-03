@@ -21,3 +21,15 @@ const page = block('## 5. A page');
 const at = page.indexOf('<>');
 write('quickstart.tsx', header(5) + page.slice(0, at)
   + '\nexport function QuickstartPage() {\n  return (\n' + page.slice(at) + '  );\n}\n');
+
+// Every theme and surface the types allow must be named in CLAUDE.md. The doc
+// listed nine themes while the types had twelve, so an AI tool reading it
+// never learned App-Bar / Nav-Bar existed and picked a palette for its bars.
+const types = readFileSync(new URL('../types/core-props.d.ts', import.meta.url), 'utf8');
+const union = (name) => {
+  const m = types.match(new RegExp('export type ' + name + ' =([^;]+);'));
+  if (!m) throw new Error('check-quickstart: core-props.d.ts has no type ' + name);
+  return [...m[1].matchAll(/'([^']+)'/g)].map((x) => x[1]);
+};
+const missing = [...union('Theme'), ...union('Surface')].filter((v) => !doc.includes('`' + v + '`'));
+if (missing.length) throw new Error('check-quickstart: CLAUDE.md does not name ' + missing.join(', '));

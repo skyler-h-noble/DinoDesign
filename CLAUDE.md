@@ -51,16 +51,33 @@ body {
 
 ## 3. Color comes from two attributes
 
-- `theme` — `Default` · `Primary` · `Secondary` · `Tertiary` · `Neutral` ·
-  `Info` · `Success` · `Warning` · `Error`. There are no `-Light` / `-Dark`
-  themes.
-- `surface` — page levels `Surface-Dimmest` · `Surface-Dim` · `Surface` ·
-  `Surface-Bright` · `Surface-Brightest`; containers `Container-Lowest` …
-  `Container-Highest`. Light and dark live here.
+- `theme` — the palette: `Default` · `Primary` · `Secondary` · `Tertiary` ·
+  `Neutral` · `Info` · `Success` · `Warning` · `Error`, plus the bar themes
+  `App-Bar` · `Nav-Bar` · `Status`. `Default` is the page background the
+  designer picked; the provider puts it on the root. There are no `-Light` /
+  `-Medium` / `-Dark` themes.
+- `surface` — how light it sits. Page levels, darkest to brightest:
+  `Surface-Dimmest` · `Surface-Dim` · `Surface` · `Surface-Bright` ·
+  `Surface-Brightest`. Card levels: `Container-Lowest` · `Container-Low` ·
+  `Container` · `Container-High` · `Container-Highest`. A pale tint is
+  `Surface-Brightest` (what `Primary-Light` used to be); a deep band is
+  `Surface-Dimmest`. Light and dark mode live in the stylesheet, not here.
 
 Set them with `<Section theme surface>` (paints the region) or
-`<ThemedZone theme surface>` (attributes only). Everything inside — text,
-headings, borders, buttons — picks the right contrast-checked colors.
+`<ThemedZone theme surface>` (attributes only, for something that paints
+itself). Everything inside — text, headings, borders, buttons — picks the
+right contrast-checked colors. Never paint with `background: var(--Surface)`,
+`var(--Container)` or a hex: that colors the box but leaves its text and
+borders on the parent's tone.
+
+Bars already wear the designer's choice: `AppBar` is `App-Bar`;
+`BottomNavigation` and `Toolbar` are `Nav-Bar`. Leave their color props unset.
+A bar or side rail you build yourself is
+`<ThemedZone theme="App-Bar" surface="Surface">` — never a palette you pick.
+
+If your project has the studio's file for your design system (CLAUDE.md /
+DINO-TOKENS.md from the OmniDesign studio), it names that system's background,
+bars, buttons and cards. Follow it.
 
 ## 4. Phones, light and dark — already handled
 
@@ -158,12 +175,16 @@ import HomeIcon from '@omni-design/icons/Home';
 | Columns | `Grid` | container: `container spacing`; child: `size={{ xs: 12, md: 4 }}` |
 | Stacks | `VStack`, `HStack` | `spacing`, `alignItems`, `justifyContent`, `component` — a list is `<VStack component="ul">` with `<HStack component="li">` |
 | Site nav | `AppBar` | `brand`, `navLinks` (`{ label, href, current? }` — the system's Tabs as links: the current one is marked and announced, and for `#section` links it follows the section on screen; a menu button below 900px — change with `collapseAt`), `endSlot`, `barColor`. `mode="mobile"` is an app-screen bar (search / title), not a site nav |
-| Card | `Card` | pads itself; `variant` (`solid`/`light`/`dark`), `color`, `elevated`, `clickable` |
+| Card | `Card` | pads itself on a `Container` level; `variant` (`solid`/`light`/`dark`), `color`, `elevated`, `clickable`; `href` makes it a real link |
 | Button | `Button` | `variant`, `size` (`small`/`medium`/`large`), `startIcon`, `endIcon`, `fullWidth` |
 | Tabs that go to places (a nav, not panels) | `Tabs navigation` | each `Tab` takes `href`; the current one gets `aria-current` and the selected marker — links, not tab roles |
 | Segmented choice | `ToggleButtonGroup` | `value`, `onChange`; each child `<Button value="…">` (no `variant` on children) |
-| Link | `Link` | `href` or `onClick` |
-| Text | `DisplayLarge`, `DisplaySmall`, `H1`–`H6`, `Body`, `BodyLarge`, `BodySmall`, `Caption`, `Eyebrow` (the small caps line above a heading) | `color` (`quiet`, `primary`, `secondary`, …), `component` (e.g. `component="p"` for a big price) |
+| Link | `Link` | `href` or `onClick`. Links do not change color on hover (the underline goes) — do not add one |
+| Status message | `Alert` | `color` (`info`/`success`/`warning`/`error`), `title` — themes itself |
+| Menu | `Dropdown` › `MenuButton` + `Menu` › `MenuItem`, `MenuDivider` | `Menu` without its `Dropdown` renders nothing. It does not portal: inside a scroll area or clipped card use `Popover` |
+| Anything floating (account panel, hover card) | `Popover` | `open`, `onClose`, `anchorRef`, `placement`; `role="tooltip"` + `autoFocus={false}` for a hover card |
+| Code, a shell command, a copyable URL | `CodeBlock` | `code`, `language`, `wrap`, `maxHeight` — brings its own copy button |
+| Text | `DisplayLarge`, `DisplaySmall`, `H1`–`H6`, `Body`, `BodyLarge`, `BodySmall`, `Caption`, `Eyebrow` (the small caps line above a heading; `Overline` is its old name) | `color` (`quiet`, `primary`, `secondary`, `tertiary`, …), `component` (e.g. `component="p"` for a big price) |
 | Bold body text | `Subtitle` | Body has no bold — Subtitle is Body at 700 |
 | Icon on a tile | `IconBadge` | `color` (any Button color), `variant` (`solid` / `light` / `dark`), `size` (`small` / `medium` / `large`), `shape` |
 | Tag | `Chip` | `label`, `startDecorator` (or `icon`), `selected` |
@@ -194,12 +215,22 @@ brand color.
   it is a gap in the package — say so rather than inlining it.
 - **Button variants:** a color (`default`, `primary`, `secondary`,
   `tertiary`, `neutral`, `info`, `success`, `warning`, `error`,
-  `black-white`) plus `-outline`, or `ghost` / `text`. Use `default` unless the
-  design calls for another. There is no `-light`.
-- **Color balance:** mostly `Default` and `Primary` sections, one or two
-  `Secondary` sections, and `Tertiary` only as accents (avatars, an icon) —
-  never a Tertiary section. To separate neighbouring sections, alternate the
-  `theme`; neighbouring `surface` levels can look nearly the same.
+  `black-white`) plus `-outline`, or `ghost` / `text`. Use `default` — the
+  designer's button — unless the design calls for another. Button, Chip and
+  Badge have no `-light`.
+- **Icon-only buttons:** the button carries the name, the icon none —
+  `<Button iconOnly aria-label="Delete item"><DeleteIcon /></Button>`. Name the
+  action, not the picture.
+- **Color roles — use all three.** Primary, Secondary and Tertiary are roles,
+  each with contrast-checked text, buttons, icons and a whole theme on every
+  surface. Do not build a page from one accent and grays. Mostly `Default` and
+  `Primary` sections, one or two `Secondary` sections, and `Tertiary` only as
+  accents (avatars, an `IconBadge`, a stat) — never a Tertiary section.
+  Colored text is the `color` prop (`primary` / `secondary` / `tertiary`), for
+  short emphasis, not paragraphs. `Eyebrow` already takes its color from the
+  section (Primary → Secondary, Secondary → Tertiary, …) — do not recolor it.
+  To separate neighboring sections, alternate the `theme`; neighboring
+  `surface` levels can look nearly the same.
 - **Build warning you can ignore:** Vite may warn about a large `BrandIcon`
   chunk. It is loaded only when a Footer social link names a brand.
 - **Do not import components from `@mui/material`** — the package re-exports
