@@ -67,16 +67,21 @@ section 10.
 - [`CLAUDE.md`](./CLAUDE.md) — the short guide: setup, the components you
   will use, the rules. Written for AI coding tools and just as useful for
   people.
-- [`docs/REFERENCE.md`](./docs/REFERENCE.md) — every component, token and
-  rule in full.
+- [`docs/API.md`](./docs/API.md) — the component API: every exported
+  component's props, defaults, required parent and an example. Generated
+  from the same source as the TypeScript types, so it matches them. Read
+  this instead of opening `dist/`.
+- [`docs/REFERENCE.md`](./docs/REFERENCE.md) — tokens, theming and rules in
+  full.
 
-TypeScript types ship with the package.
+TypeScript types ship with the package, for every component.
 
 ## Developing this package
 
 ```bash
 npm start            # component gallery at http://localhost:3000
 npm test             # unit tests
-npm run build:lib    # dist/ + type declarations
-npm run test:types   # compiles a strict TypeScript consumer page against dist/types
+npm run build:lib    # dist/ + type declarations + docs/API.md (from types/)
+npm run test:types   # compiles a strict TypeScript consumer page against dist/types,
+                     # checks no component's props are `any`, and that docs/API.md is current
 ```

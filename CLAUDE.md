@@ -1,8 +1,17 @@
 # CLAUDE.md — OmniDesign (@omni-design/components)
 
-How to build UI with this package. This page is enough for most pages; the
-long form is `docs/REFERENCE.md` in this package — open it only for a
-component or token not covered here.
+How to build UI with this package. This page is the rules and the
+components most pages need.
+
+- **Component API: `docs/API.md`** — every exported component's props
+  (type, allowed values, default, meaning), required parent and one example.
+  Read the component's section there (search `### Name`) instead of opening
+  `dist/`.
+- **Do not read `dist/`** to learn a prop. The types and `docs/API.md` come
+  from the same source and are checked against the components on every
+  build: if a prop is not in `docs/API.md`, the component does not take it.
+- Long form on tokens and theming: `docs/REFERENCE.md` — open it only for a
+  token or rule not covered here.
 
 ## 1. Install
 
@@ -192,10 +201,11 @@ import HomeIcon from '@omni-design/icons/Home';
 | Form field | `TextField` | `label`, `value`, `onChange`, `type`, `helperText` |
 | Footer | `Footer` | `brand`, `columns` (`[{ title, links: [{ label, href }] }]`, up to 3), `copyrightName`, `color` (`default` dark band / `primary` / `white` / `black`) |
 
-The core components above have exact TypeScript types: an editor lists the
-allowed values for `theme`, `surface`, `variant`, `color` and `size`, and a
-value TypeScript rejects is one the component does not support. The shared
-names are exported too: `Theme`, `Surface`, `Color`, `ButtonVariant`, `…Props`.
+Every component has exact TypeScript types: an editor lists the allowed
+values for `theme`, `surface`, `variant`, `color` and `size`, and a value
+TypeScript rejects is one the component does not support. The shared names
+are exported too: `Theme`, `Surface`, `Color`, `ButtonVariant`, `…Props`.
+Any component not in this table: `docs/API.md`.
 
 Icons: `@omni-design/icons` — the Material Icons as plain SVG, same names as
 `@mui/icons-material` v7 (`import HomeIcon from '@omni-design/icons/Home'`,

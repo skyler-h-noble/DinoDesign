@@ -1,7 +1,9 @@
 # OmniDesign — full reference
 
 The short version is `CLAUDE.md` at the package root: read that first. This file
-is the long form — read the section you need, not the whole file.
+is the long form — read the section you need, not the whole file. For a
+component's exact props, defaults and required parent, use `docs/API.md`
+(generated from the types) rather than this file or `dist/`.
 
 
 

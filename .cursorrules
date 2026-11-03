@@ -2,6 +2,8 @@ This project uses the @omni-design/components design system.
 
 Read node_modules/@omni-design/components/CLAUDE.md before writing any UI.
 It is the contract; the rules below are the ones most often broken.
+Component props (types, allowed values, defaults, parents, examples):
+docs/API.md — read it instead of opening dist/.
 Long form, for anything CLAUDE.md does not cover: docs/REFERENCE.md.
 If the project has the studio's CLAUDE.md / DINO-TOKENS.md for its design
 system, that file names the system's own background, bars, buttons and cards.

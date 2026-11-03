@@ -1,0 +1,203 @@
+// scripts/build-api-doc.mjs — writes docs/API.md from the prop types in types/.
+//
+// Run by fix-dts.mjs at the end of build:types, so the reference is rebuilt
+// from the same files as the published .d.ts every time the package builds.
+// It is generated rather than written because a hand-kept prop list drifts:
+// an AI tool that cannot trust the list opens dist/ to check, which is the
+// cost this file exists to remove (80 lookups into dist/ in one clean-room
+// build before it existed).
+//
+//   node scripts/build-api-doc.mjs           regenerate (needs dist/types)
+//   node scripts/build-api-doc.mjs --check   fail if docs/API.md is stale
+import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { join, relative } from 'path';
+import { loadModel, resolveExports, destructured, srcPathOf, ROOT } from './lib/api-model.mjs';
+
+export const API_DOC = join(ROOT, 'docs/API.md');
+
+/** The order sections appear in — CLAUDE.md's grouping. */
+const CATEGORIES = [
+  'Provider', 'Layout', 'Text', 'Buttons', 'Inputs', 'Selection', 'Dates', 'Surfaces',
+  'Navigation', 'Overlays', 'Feedback', 'Data display', 'Media', 'Charts', 'App structure', 'Utilities',
+];
+
+/** Shared unions written once at the top instead of in every table. */
+const VOCAB = ['Theme', 'Surface', 'Color', 'Size', 'ButtonVariant', 'TextColor', 'HeadingColor', 'TextStyle', 'IconShape', 'AvatarShape', 'Breakpoint', 'Sx'];
+
+// No tables, so no pipe escaping: `a | b` stays readable as a union.
+const cell = (s) => String(s).replace(/\n/g, ' ');
+// React.ReactNode → ReactNode: the namespace is noise in a table read per token.
+const tidy = (s) => String(s).replace(/\bReact\./g, '');
+const code = (s) => { const t = cell(tidy(s)); return t.includes('`') ? '`` ' + t + ' ``' : '`' + t + '`'; };
+
+function shortDefault(d) {
+  if (d === undefined || d === null || d === '') return '';
+  const s = String(d).replace(/\s+/g, ' ');
+  if (s.length > 28 || /=>|function|\{\s*\w+\s*:/.test(s)) return '';
+  return code(s);
+}
+
+function nativeLabel(native, model) {
+  if (!native) return '';
+  // Built on another component's props (`Omit<ButtonProps, 'variant'>`): say so,
+  // rather than guessing an element.
+  const base = model && model.entries.find((x) => new RegExp('\\b' + x.type + '\\b').test(native));
+  if (base) return { text: 'all `' + base.exports[0] + '` props' };
+  if (/SVG/.test(native)) return '<svg>';
+  const m = native.match(/HTML(\w*?)Element/) || [null, 'Div'];
+  const el = { Button: 'button', Anchor: 'a', Input: 'input', TextArea: 'textarea', Div: 'div', Span: 'span', Paragraph: 'p', Heading: 'h1–h6', Image: 'img', UList: 'ul', OList: 'ol', HR: 'hr', LI: 'li', Table: 'table', Select: 'select', Form: 'form' }[m && m[1]];
+  return el ? '<' + el + '>' : 'HTML element';
+}
+
+/** Render the whole reference. `defaultsFor(entry)` returns name → default
+ *  text read from the component source. */
+export function renderApiDoc(model, defaultsFor) {
+  const out = [];
+  const total = model.entries.reduce((n, e) => n + e.exports.length, 0);
+  out.push('# Component API — @omni-design/components');
+  out.push('');
+  out.push('Every exported component: purpose, props, required parent, one example. ' +
+    'GENERATED from `types/` by `scripts/build-api-doc.mjs` — the same files the published ' +
+    '.d.ts come from, so this cannot drift from the types. Do not edit by hand. ' +
+    'Do not open `dist/` to learn a prop: if it is not here, the component does not take it. ' +
+    'Rules (color, surfaces, layout) are in `CLAUDE.md`.');
+  out.push('');
+  out.push('Read a section, not the file: search for `### Name`. ' + total + ' components.');
+  out.push('');
+  out.push('Format: `` `name?: type` = default — meaning``. No `?` means required. "+ `children`" means it ' +
+    'takes children; "+ `<div>`" means the native attributes of that element pass through (id, className, ' +
+    'style, aria-*, data-*, on*). Defaults come from the component source.');
+  out.push('');
+  out.push('## Shared types');
+  out.push('');
+  for (const name of VOCAB) {
+    const a = model.aliases.get(name);
+    if (!a) continue;
+    out.push('- `' + name + '` = ' + code(a.text.replace(/^\| /, '')) + (a.doc ? ' — ' + a.doc : ''));
+  }
+  out.push('');
+
+  // Named helper types a prop refers to (TableColumn, SelectOption, …),
+  // expanded once here so a table cell naming one is never a dead end.
+  const entryTypes = new Set(model.entries.map((e) => e.type));
+  const skip = new Set([...VOCAB, 'Native', 'TypographyBase', 'TextProps', 'HeadingProps', 'GridSize']);
+  const helpers = new Map();
+  const visit = (text) => {
+    for (const m of String(text).matchAll(/\b([A-Z]\w+)\b/g)) {
+      const n = m[1];
+      if (helpers.has(n) || skip.has(n) || entryTypes.has(n) || !model.decls.has(n)) continue;
+      const { node, sf } = model.decls.get(n);
+      let body;
+      if (model.ts.isInterfaceDeclaration(node)) {
+        body = '{ ' + node.members.map((x) => x.getText(sf).replace(/\/\*\*[\s\S]*?\*\/\s*/g, '').replace(/[;,]\s*$/, '')).join('; ') + ' }';
+      } else body = node.type.getText(sf);
+      body = body.replace(/\s+/g, ' ');
+      helpers.set(n, body);
+      visit(body);
+    }
+  };
+  for (const e of model.entries) for (const p of e.props) visit(p.type);
+  if (helpers.size) {
+    out.push('## Helper types');
+    out.push('');
+    for (const [n, body] of [...helpers].sort((a, b) => a[0].localeCompare(b[0]))) out.push('- `' + n + '` = ' + code(body));
+    out.push('');
+  }
+
+  const byCat = new Map();
+  for (const e of model.entries) {
+    if (!byCat.has(e.category)) byCat.set(e.category, []);
+    byCat.get(e.category).push(e);
+  }
+  const cats = [...CATEGORIES.filter((c) => byCat.has(c)), ...[...byCat.keys()].filter((c) => !CATEGORIES.includes(c))];
+  out.push('Sections: ' + cats.map((c) => c).join(' · '));
+  out.push('');
+
+  const printedBase = new Map();
+  for (const cat of cats) {
+    out.push('## ' + cat);
+    out.push('');
+    for (const e of byCat.get(cat)) {
+      const [primary, ...rest] = e.exports;
+      out.push('### ' + [primary, ...rest].join(' · '));
+      const meta = [e.purpose];
+      if (e.parent) meta.push('**Parent:** ' + e.parent);
+      if (e.ref) meta.push('Ref: `' + e.ref + '`.');
+      out.push(meta.filter(Boolean).join(' '));
+      const defaults = defaultsFor(e);
+      // A type that only renames another prints its table once: the first
+      // entry with that base gets the table, the rest point at it.
+      const owner = e.sameAs && (model.entries.find((x) => x.type === e.sameAs) || printedBase.get(e.sameAs));
+      const ownerName = owner && (owner.exports ? owner.exports[0] : owner);
+      if (e.sameAs && !owner) printedBase.set(e.sameAs, primary);
+      // `_index` / `__selectionOwner` are set by a parent, never by a user; they
+      // stay in the type (the drift check needs them) but not in the reference.
+      const rows = ownerName ? [] : e.props.filter((p) => (p.name !== 'sx' || e.props.length < 3) && !p.name.startsWith('_'));
+      if (ownerName) out.push('', 'Props: same as `' + ownerName + '`.');
+      // One line per prop, not a table: a table row spends ~10 characters on
+      // separators and every entry repeats a header — about a fifth of the
+      // file. `name?: type` reads as the TypeScript it mirrors.
+      const plainChildren = rows.find((p) => p.name === 'children' && !p.doc && /^React\.ReactNode$|^ReactNode$/.test(p.type));
+      const listed = rows.filter((p) => p !== plainChildren);
+      if (listed.length) out.push('');
+      for (const p of listed) {
+        const def = p.default !== undefined ? code(p.default) : shortDefault(defaults.get(p.name));
+        let meaning = p.doc || '';
+        if (p.deprecated) meaning = '**Deprecated.** ' + (typeof p.deprecated === 'string' ? p.deprecated + ' ' : '') + meaning;
+        const sig = code(p.name + (p.optional ? '?' : '') + ': ' + p.type);
+        out.push('- ' + sig + (def ? ' = ' + def : '') + (meaning.trim() ? ' — ' + meaning.trim().replace(/\n/g, ' ') : ''));
+      }
+      const nat = nativeLabel(e.native, model);
+      const extras = [plainChildren ? '`children`' : '', nat && !ownerName ? (nat.text || '`' + nat + '`') : ''].filter(Boolean);
+      if (extras.length) out.push((listed.length ? '' : '\n') + '+ ' + extras.join(', '));
+      if (e.example) {
+        out.push('');
+        out.push('```jsx');
+        out.push(e.example.trim());
+        out.push('```');
+      }
+      out.push('');
+    }
+  }
+  return out.join('\n').replace(/\n{3,}/g, '\n\n');
+}
+
+/** name → source default, across every function the entry's exports name. */
+export function makeDefaultsFor(where, distTypes) {
+  return (e) => {
+    const map = new Map();
+    const sources = e.sources.filter((s) => s !== 'none');
+    const list = sources.length ? sources
+      : e.exports.map((n) => where.get(n)).filter(Boolean).map((at) => srcPathOf(distTypes, at.file) + '#' + at.local);
+    for (const s of list) {
+      const [file, fn] = s.split('#');
+      for (const p of destructured(file, fn) || []) if (!map.has(p.name) && p.default !== undefined) map.set(p.name, p.default);
+    }
+    return map;
+  };
+}
+
+export function buildApiDoc(distTypes, model = loadModel()) {
+  const where = resolveExports(distTypes);
+  return renderApiDoc(model, makeDefaultsFor(where, distTypes));
+}
+
+if (import.meta.url === 'file://' + process.argv[1]) {
+  const distTypes = join(ROOT, 'dist/types');
+  if (!existsSync(join(distTypes, 'components/index.d.ts'))) {
+    console.error('build-api-doc: run `npm run build:types` first (needs dist/types)');
+    process.exit(1);
+  }
+  const doc = buildApiDoc(distTypes);
+  if (process.argv.includes('--check')) {
+    const have = existsSync(API_DOC) ? readFileSync(API_DOC, 'utf8') : '';
+    if (have !== doc) {
+      console.error('build-api-doc: docs/API.md is stale — run `npm run build:types` and commit it');
+      process.exit(1);
+    }
+    console.log('build-api-doc: docs/API.md is current');
+  } else {
+    writeFileSync(API_DOC, doc);
+    console.log('build-api-doc: wrote ' + relative(ROOT, API_DOC) + ' (' + doc.length + ' chars)');
+  }
+}
