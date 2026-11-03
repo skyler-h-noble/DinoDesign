@@ -42,9 +42,10 @@
  *     "styles": "styles.css",
  *     "defaultTheme": "Default",
  *     "defaultStyle": "Modern",
- *     "defaultSurface": "Surface",
- *     "darkTheme": "Neutral"
+ *     "defaultSurface": "Surface"
  *   }
+ *
+ *   A "darkTheme" field in theme.json is ignored (see fetchThemeManifest).
  *
  *   All fields are optional — only include the files you have.
  *   Props passed directly to the Provider always override theme.json values.
@@ -302,7 +303,15 @@ async function fetchThemeManifest(themeURL) {
     defaultTheme:   manifest.defaultTheme   ?? null,
     defaultStyle:   manifest.defaultStyle   ?? null,
     defaultSurface: manifest.defaultSurface ?? null,
-    darkTheme:      manifest.darkTheme      ?? null,
+    /* darkTheme is NOT read from theme.json. The studio wrote
+       "darkTheme": "Neutral" into every published system — a hard-coded
+       value, not the designer's choice — and obeying it switched the root
+       from Default to Neutral in dark mode. That bypassed the Default theme,
+       which is what carries the chosen page background into dark mode (its
+       own palette at tone 2), so a Primary-background system went neutral.
+       A darkTheme passed as a PROP is still honored: that is a developer's
+       explicit choice. Published files are frozen, so this is fixed here. */
+    darkTheme:      null,
     // Human-readable design system name — surfaced on the context so consumers
     // (AppBar brand, page headers, etc.) can display it.
     name:           manifest.name           ?? null,
@@ -336,7 +345,9 @@ async function fetchThemeManifest(themeURL) {
  *
  * Dark mode — uncontrolled:
  * @param {boolean}  props.defaultDarkMode   Initial dark mode (default: false)
- * @param {string}   props.darkTheme         data-theme in dark mode (default: 'Neutral')
+ * @param {string}   props.darkTheme         data-theme in dark mode (default: none — the
+ *                                           root keeps its theme; Default carries the
+ *                                           page background into dark mode itself)
  *
  * Dark mode — controlled:
  * @param {boolean}  props.darkMode
