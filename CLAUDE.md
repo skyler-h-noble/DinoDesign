@@ -260,3 +260,46 @@ Tag it where you would have used it, so it can be added to the package:
 // MISSING-LIB-COMPONENT: <Name>
 // Needed for: <one line>
 ```
+
+## 10. Client-side routing
+
+With React Router, Next.js or any client-side router, give the provider the
+router's link component. Every component that takes `href` — `Button`, `Card`,
+`Link`, `Tab` in `<Tabs navigation>`, `BreadcrumbItem`, and through them
+`AppBar`, `Footer` and `AvatarGroup` — then renders it for internal links:
+the page changes without a reload, and the link stays a real `<a href>`
+(right-click, open in new tab, copy link). No wrapper or `useLinkProps`
+helper is needed.
+
+```jsx
+// React Router — the provider can sit inside or outside <BrowserRouter>
+import { Link as RouterLink } from 'react-router-dom';
+
+<BrowserRouter>
+  <OmniDesignProvider themeURL={OMNI_DEFAULT_THEME_URL} linkComponent={RouterLink}>
+    <App />   {/* <Button href="/cart">Cart</Button> now routes */}
+  </OmniDesignProvider>
+</BrowserRouter>
+```
+
+```jsx
+// Next.js (App Router): in your own 'use client' providers file
+'use client';
+import NextLink from 'next/link';
+
+export function Providers({ children }) {
+  return <OmniDesignProvider themeURL={OMNI_DEFAULT_THEME_URL} linkComponent={NextLink}>{children}</OmniDesignProvider>;
+}
+```
+
+The link component receives every anchor prop plus `href` and `to` (routers
+name it one or the other), and the ref. Without a link component you can pass
+`navigate={(href, event) => …}` instead: the library keeps a plain `<a>` and
+calls it on an unmodified left click.
+
+These always stay plain `<a>` and let the browser handle them: full URLs
+(`https://…`, even on your own site — write internal links as paths),
+`mailto:` / `tel:`, `#section` links, `target="_blank"`, `download`, and
+cmd / ctrl / shift / middle clicks. To force a full page load on one link
+(a path your router does not own), add `reloadDocument`:
+`<Link href="/legacy" reloadDocument>`.

@@ -1,6 +1,7 @@
 // src/components/AvatarGroup/AvatarGroup.js
 import React, { useRef, useState } from 'react';
 import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { useRouterLink } from '../_routerLink';
 import { lazySxBox } from '../_lazyFallback';
 import { Avatar, AVATAR_SIZE_MAP, resolveSizeName } from '../Avatar/Avatar';
 import { Button } from '../Button/Button';
@@ -117,6 +118,19 @@ function PersonCard({ person, shape }) {
 let cardSeq = 0;
 
 /** One avatar in the group, with its ring, its front-on-hover and its card. */
+/* A person row in the overflow list that links to their page. Its own
+   component because the rows are drawn in a loop and the router decision is a
+   hook; it goes through the same helper as Button and Link so an internal
+   profile URL uses the app's router. */
+function PersonRowLink({ href, onClick, children }) {
+  const { Tag, props } = useRouterLink('a', {
+    href,
+    className: 'avatar-group-row MuiBox-root omni-avg-row omni-avg-row-click omni-avg-row-link',
+    onClick,
+  });
+  return <Tag {...props}>{children}</Tag>;
+}
+
 function GroupItem({ person, onPersonClick, buttonSize, buttonVariant, shape }) {
   const ref = useRef(null);
   const [open, setOpen] = useState(false);
@@ -251,10 +265,10 @@ export function AvatarGroup({
             {hidden.map((p, i) => {
               const click = p.onClick || (onPersonClick && (() => onPersonClick(p)));
               if (p.href) return (
-                <a key={p.key || p.name || i} href={p.href} className="avatar-group-row MuiBox-root omni-avg-row omni-avg-row-click omni-avg-row-link"
+                <PersonRowLink key={p.key || p.name || i} href={p.href}
                   onClick={() => { setListOpen(false); click?.(); }}>
                   <PersonCard person={p} shape={shaped ? shape : undefined} />
-                </a>
+                </PersonRowLink>
               );
               return click ? (
                 <button key={p.key || p.name || i} type="button" className="avatar-group-row MuiBox-root omni-avg-row omni-avg-row-click"

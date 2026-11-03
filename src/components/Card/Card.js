@@ -1,6 +1,7 @@
 // src/components/Card/Card.js
 import React, { createContext, useContext } from 'react';
 import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { useRouterLink } from '../_routerLink';
 import { lazySxBox } from '../_lazyFallback';
 import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3, SHADOW_LEVEL_4 } from '../_shadows';
 
@@ -154,6 +155,8 @@ export function Card({
   onClick,
   disabled = false,
   href,
+  /* Follow href with a full page load even when the app has a router. */
+  reloadDocument = false,
   className = '',
   style,
   sx,
@@ -189,47 +192,48 @@ export function Card({
   const selBorder = `var(--Buttons-${cap(color === 'default' ? 'Default' : color)}-Border)`;
   const selStyle = selected ? { '--_cd-sel': selBorder } : null;
 
+  /* The outer shell's props, built as an object so the shared router helper
+     can decide whether an internal link renders through the app's router. */
+  const shell = useRouterLink(href ? 'a' : 'div', {
+    /* A link card is a real link. It used to get role="button", a forced
+       tabIndex and the button key handler below, which swallowed Enter and
+       called onClick — so a keyboard user could focus a link card and never
+       follow it. An <a href> is already focusable and Enter already follows
+       it; the browser's behavior is the right one. A DISABLED link card
+       drops its href, so it cannot be followed while it says it is off. */
+    href: isLink ? href : undefined,
+    onClick: isClickable ? onClick : undefined,
+    role: isClickable && !isLink ? 'button' : undefined,
+    tabIndex: isClickable && !isLink ? 0 : undefined,
+    /* aria-pressed is a button state; a link has none. */
+    'aria-pressed': selected && !isLink ? true : undefined,
+    'aria-disabled': disabled || undefined,
+    draggable: isDraggable || undefined,
+    className:
+      'card card-' + variant + ' card-' + size + ' card-' + orientation
+      + (isClickable ? ' card-clickable' : '')
+      + (selected   ? ' card-selected'  : '')
+      + (elevated   ? ' card-elevated'  : '')
+      + (isDraggable ? ' card-draggable' : '')
+      + ' omni-card'
+      + (elevated ? ' omni-card-elev' : '')
+      + (isClickable ? ' omni-card-ia' : '')
+      + (selected ? ' omni-card-sel' : '')
+      + (disabled ? ' omni-card-off' : '')
+      + (isClickable && !isDraggable ? ' omni-card-click' : '')
+      + (isDraggable ? ' omni-card-drag' : '')
+      + ' ' + className,
+    style: selStyle || style ? { ...selStyle, ...style } : undefined,
+    onKeyDown: isClickable && !isLink ? (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick?.(e); }
+    } : undefined,
+    ...props,
+  }, { reloadDocument });
+
   return (
     <CardContext.Provider value={{ variant, color, size, orientation }}>
       {/* Outer shell — no data-surface, inherits parent dropshadow-color */}
-      <Part
-        component={href ? 'a' : 'div'}
-        sx={sx}
-        /* A link card is a real link. It used to get role="button", a forced
-           tabIndex and the button key handler below, which swallowed Enter and
-           called onClick — so a keyboard user could focus a link card and never
-           follow it. An <a href> is already focusable and Enter already follows
-           it; the browser's behavior is the right one. A DISABLED link card
-           drops its href, so it cannot be followed while it says it is off. */
-        href={isLink ? href : undefined}
-        onClick={isClickable ? onClick : undefined}
-        role={isClickable && !isLink ? 'button' : undefined}
-        tabIndex={isClickable && !isLink ? 0 : undefined}
-        /* aria-pressed is a button state; a link has none. */
-        aria-pressed={selected && !isLink ? true : undefined}
-        aria-disabled={disabled || undefined}
-        draggable={isDraggable || undefined}
-        className={
-          'card card-' + variant + ' card-' + size + ' card-' + orientation
-          + (isClickable ? ' card-clickable' : '')
-          + (selected   ? ' card-selected'  : '')
-          + (elevated   ? ' card-elevated'  : '')
-          + (isDraggable ? ' card-draggable' : '')
-          + ' omni-card'
-          + (elevated ? ' omni-card-elev' : '')
-          + (isClickable ? ' omni-card-ia' : '')
-          + (selected ? ' omni-card-sel' : '')
-          + (disabled ? ' omni-card-off' : '')
-          + (isClickable && !isDraggable ? ' omni-card-click' : '')
-          + (isDraggable ? ' omni-card-drag' : '')
-          + ' ' + className
-        }
-        style={selStyle || style ? { ...selStyle, ...style } : undefined}
-        onKeyDown={isClickable && !isLink ? (e) => {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick?.(e); }
-        } : undefined}
-        {...props}
-      >
+      <Part component={shell.Tag} sx={sx} {...shell.props}>
         {/* Inner content — scoped theme and surface. The outer has
             overflow:hidden, so nested images/media get clipped to its rounded
             corners without extra math here. */}

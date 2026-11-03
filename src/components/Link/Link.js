@@ -1,6 +1,7 @@
 // src/components/Link/Link.js
 import React from 'react';
 import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { useRouterLink } from '../_routerLink';
 import { lazySxBox } from '../_lazyFallback';
 
 const SxBox = lazySxBox('Link');
@@ -180,6 +181,9 @@ export function Link({
      a page cannot force or read :visited. Hover, pressed, focus and disabled
      apply on top, as in the Figma set. */
   visited = false,
+  /* Follow href with a full page load even when the app has a router
+     (OmniDesignProvider linkComponent / navigate). */
+  reloadDocument = false,
   onClick,
   className = '',
   sx,
@@ -213,8 +217,12 @@ export function Link({
     ...props,
   };
 
-  if (hasSx(sx)) return <SxBox component="a" sx={sx} {...linkProps}>{children}</SxBox>;
-  return <a {...linkProps}>{children}</a>;
+  /* An internal href goes through the app's router when one is configured;
+     otherwise this hands back 'a' and linkProps unchanged. */
+  const { Tag, props: finalProps } = useRouterLink('a', linkProps, { reloadDocument });
+
+  if (hasSx(sx)) return <SxBox component={Tag} sx={sx} {...finalProps}>{children}</SxBox>;
+  return <Tag {...finalProps}>{children}</Tag>;
 }
 
 export default Link;

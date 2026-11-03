@@ -40,6 +40,28 @@ your design system's `theme.json` URL from the studio instead. The studio also
 gives you a CLAUDE.md for that system — its page background, bars, buttons and
 cards — to put next to this package's in your project.
 
+## Client-side routing
+
+Pass your router's link component to the provider and every component with an
+`href` (Button, Card, Link, Tabs in navigation mode, Breadcrumbs, and the
+AppBar / Footer links built from them) navigates through it — no page reload,
+and still a real, right-clickable `<a href>`:
+
+```jsx
+import { Link as RouterLink } from 'react-router-dom';   // or: import NextLink from 'next/link'
+
+<OmniDesignProvider themeURL={OMNI_DEFAULT_THEME_URL} linkComponent={RouterLink}>
+  <Button href="/cart">Cart</Button>
+</OmniDesignProvider>
+```
+
+External links (`https://…`, `mailto:`, `tel:`), `#section` links,
+`target="_blank"` and `download` stay plain anchors, as do cmd / ctrl / middle
+clicks. Add `reloadDocument` to a component to force a full page load. If you
+would rather not hand over a component, `navigate={(href, event) => …}` is
+called on plain left clicks instead. Details: [`CLAUDE.md`](./CLAUDE.md),
+section 10.
+
 ## Docs
 
 - [`CLAUDE.md`](./CLAUDE.md) — the short guide: setup, the components you

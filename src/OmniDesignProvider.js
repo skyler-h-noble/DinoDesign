@@ -81,6 +81,7 @@ import React, {
   useMemo,
 } from 'react';
 import { chartColorVisionCSS } from './components/Charts/colorVision';
+import { OmniLinkContext } from './components/_routerLink';
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 
@@ -353,6 +354,14 @@ async function fetchThemeManifest(themeURL) {
  * @param {boolean}  props.darkMode
  * @param {function} props.onDarkModeChange
  *
+ * Client-side routing (see components/_routerLink.js):
+ * @param {React.ElementType} props.linkComponent  The router's link (react-router's
+ *                                           `Link`, Next's `Link`). Internal hrefs on
+ *                                           Button, Card, Link, Tab, … render through it.
+ * @param {(href: string, event: React.MouseEvent) => void} props.navigate  Called on a plain left
+ *                                           click of an internal link when there is no
+ *                                           linkComponent.
+ *
  * DOM:
  * @param {string}   props.className
  * @param {object}   props.style
@@ -402,6 +411,10 @@ export function OmniDesignProvider({
   className,
   style: styleProp,
   fullHeight = true,
+
+  // Client-side routing
+  linkComponent,
+  navigate,
 
   children,
 }) {
@@ -718,6 +731,16 @@ export function OmniDesignProvider({
     manifestThemeConfig.name,
   ]);
 
+  /* Routing. A nested provider that sets neither prop (a themed sub-tree, a
+     preview) keeps its parent's router rather than switching links back to
+     full page loads inside it. Memoized so a re-render of the provider does
+     not re-render every link. */
+  const parentLink = useContext(OmniLinkContext);
+  const linkValue = useMemo(
+    () => (linkComponent || navigate ? { linkComponent: linkComponent || null, navigate: navigate || null } : parentLink),
+    [linkComponent, navigate, parentLink],
+  );
+
   // ── Render ─────────────────────────────────────────────────────────────────
   // The inline <style> below is rendered as part of the React tree so the
   // hide rule is in the DOM before paint — without it, the consumer would
@@ -728,6 +751,7 @@ export function OmniDesignProvider({
   // the consumer can render a fallback message.
   return (
     <OmniDesignContext.Provider value={contextValue}>
+     <OmniLinkContext.Provider value={linkValue}>
       <style data-omni="hide-during-load">{`[data-omni-css="loading"]{visibility:hidden}`}</style>
       <div
         data-theme={activeTheme}
@@ -739,6 +763,7 @@ export function OmniDesignProvider({
       >
         {children}
       </div>
+     </OmniLinkContext.Provider>
     </OmniDesignContext.Provider>
   );
 }

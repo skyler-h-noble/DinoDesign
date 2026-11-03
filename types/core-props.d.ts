@@ -142,6 +142,8 @@ export interface CardProps extends Native<HTMLElement, 'onClick'> {
   disabled?: boolean;
   /** Makes the whole card a link. */
   href?: string;
+  /** Follow `href` with a full page load even when OmniDesignProvider has a `linkComponent` / `navigate` router. */
+  reloadDocument?: boolean;
   onClick?: React.MouseEventHandler<HTMLElement>;
   sx?: Sx;
   children?: React.ReactNode;
@@ -183,6 +185,8 @@ export interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonE
   badgeAnchorOrigin?: { vertical: 'top' | 'bottom'; horizontal: 'left' | 'right' };
   /** Makes it a link. */
   href?: string;
+  /** Follow `href` with a full page load even when OmniDesignProvider has a `linkComponent` / `navigate` router. */
+  reloadDocument?: boolean;
   sx?: Sx;
   children?: React.ReactNode;
 }
@@ -209,6 +213,8 @@ export interface LinkProps extends Omit<React.AnchorHTMLAttributes<HTMLAnchorEle
   href?: string;
   target?: string;
   rel?: string;
+  /** Follow `href` with a full page load even when OmniDesignProvider has a `linkComponent` / `navigate` router. */
+  reloadDocument?: boolean;
   /** Without href, the link renders as a button that runs this. */
   onClick?: React.MouseEventHandler<HTMLElement>;
   textStyle?: string;

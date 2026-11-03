@@ -1,6 +1,7 @@
 // src/components/Tabs/Tabs.js
 import React, { createContext, useContext, useState, useRef, useCallback, useId, useEffect, useLayoutEffect } from 'react';
 import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { useRouterLink } from '../_routerLink';
 import { lazySxBox } from '../_lazyFallback';
 import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography, Body } from '../Typography';
 import { Button } from '../Button/Button';
@@ -624,6 +625,9 @@ export function Tab({
   startDecorator,
   endDecorator,
   iconOnly = false,
+  /* In <Tabs navigation>: follow href with a full page load even when the
+     app has a router (OmniDesignProvider linkComponent / navigate). */
+  reloadDocument = false,
   className = '',
   style,
   sx,
@@ -707,32 +711,33 @@ export function Tab({
     '--_tab-tpad': s.textPad,
     ...style,
   };
-  const { component: Tag, ...semanticProps } = semantics;
+  const { component: SemanticTag, ...semanticProps } = semantics;
+
+  /* Same props, same order as before; built as an object so the shared router
+     helper can send an internal navigation link through the app's router. */
+  const tabLink = useRouterLink(SemanticTag, {
+    ...semanticProps,
+    'data-theme': tabDataTheme || undefined,
+    'data-surface': tabDataSurface || undefined,
+    onClick: handleClick,
+    className:
+      'tab tab-' + size
+      + (isSelected ? ' tab-selected' : '')
+      + (disabled ? ' tab-disabled' : '')
+      + (iconOnly ? ' tab-icon-only' : '')
+      + (_overflowed ? ' tab-overflowed' : '')
+      + ' omni-tab omni-tab-e-' + edge
+      + (baseline ? ' omni-tab-bl-' + edge : '')
+      + (isSelected ? ' omni-tab-sel' : '')
+      + (disabled ? ' omni-tab-off' : ' omni-tab-on' + (isSelected ? '' : ' omni-tab-hov'))
+      + (_overflowed ? ' omni-tab-hidden' : '')
+      + ' ' + className,
+    style: tabStyle,
+    ...restProps,
+  }, { reloadDocument });
 
   return (
-    <Part
-      component={Tag}
-      sx={sx}
-      {...semanticProps}
-      data-theme={tabDataTheme || undefined}
-      data-surface={tabDataSurface || undefined}
-      onClick={handleClick}
-      className={
-        'tab tab-' + size
-        + (isSelected ? ' tab-selected' : '')
-        + (disabled ? ' tab-disabled' : '')
-        + (iconOnly ? ' tab-icon-only' : '')
-        + (_overflowed ? ' tab-overflowed' : '')
-        + ' omni-tab omni-tab-e-' + edge
-        + (baseline ? ' omni-tab-bl-' + edge : '')
-        + (isSelected ? ' omni-tab-sel' : '')
-        + (disabled ? ' omni-tab-off' : ' omni-tab-on' + (isSelected ? '' : ' omni-tab-hov'))
-        + (_overflowed ? ' omni-tab-hidden' : '')
-        + ' ' + className
-      }
-      style={tabStyle}
-      {...restProps}
-    >
+    <Part component={tabLink.Tag} sx={sx} {...tabLink.props}>
       {startDecorator && <span className="tab-start-decorator omni-tab-dec">{startDecorator}</span>}
       {!iconOnly && children && (() => {
         // The Button type style (Figma's Dynamic Button), cap-height trimmed as

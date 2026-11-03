@@ -1,6 +1,7 @@
 // src/components/Breadcrumbs/Breadcrumbs.js
 import React, { Children, isValidElement } from 'react';
 import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { useRouterLink } from '../_routerLink';
 import { lazySxBox } from '../_lazyFallback';
 import { Button } from '../Button/Button';
 import MoreHorizIcon from '@omni-design/icons/MoreHoriz';
@@ -276,17 +277,18 @@ export function Breadcrumbs({
    `color: var(--Link-Hover)`, a variable nothing defines, which made a hovered
    breadcrumb link stop looking like a link.) The Link rule: hover and pressed
    REMOVE the underline, focus keeps it — Figma's Link set. */
-export function BreadcrumbItem({ children, href, className = '', sx = {}, ...props }) {
+export function BreadcrumbItem({ children, href, reloadDocument = false, className = '', sx = {}, ...props }) {
   useStaticStyles('omni-breadcrumbs');
   const isLink = !!href;
+  /* An internal href goes through the app's router when one is configured
+     (OmniDesignProvider linkComponent / navigate); reloadDocument opts out. */
+  const link = useRouterLink(isLink ? 'a' : 'span', {
+    href: href || undefined,
+    className: 'breadcrumb-link ' + className + ' MuiBox-root omni-bc-link' + (isLink ? ' omni-bc-link-a' : ''),
+    ...props,
+  }, { reloadDocument });
   return (
-    <Part
-      component={isLink ? 'a' : 'span'}
-      href={href || undefined}
-      className={'breadcrumb-link ' + className + ' MuiBox-root omni-bc-link' + (isLink ? ' omni-bc-link-a' : '')}
-      sx={sx}
-      {...props}
-    >
+    <Part component={link.Tag} sx={sx} {...link.props}>
       {children}
     </Part>
   );

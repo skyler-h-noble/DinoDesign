@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography, ButtonExtraSmall as ButtonExtraSmallTypography } from '../Typography';
 import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { useRouterLink } from '../_routerLink';
 import { lazySxBox } from '../_lazyFallback';
 import { Avatar as DDAvatar } from '../Avatar/Avatar';
 import { Icon as DDIcon, ICON_SIZE_MAP } from '../Icon/Icon';
@@ -851,6 +852,10 @@ export const Button = React.forwardRef(function Button({
   badgeAnchorOrigin = { vertical: 'top', horizontal: 'right' },
   /* The element to render. A button, or an <a> when there is an href. */
   component,
+  /* Follow this href with a full page load even when the app has a router
+     (OmniDesignProvider linkComponent / navigate) — for a path the router
+     does not own. */
+  reloadDocument = false,
   type,
   tabIndex,
   style,
@@ -1030,9 +1035,14 @@ export const Button = React.forwardRef(function Button({
     </>
   );
 
+  /* An internal href goes through the app's router when one is configured;
+     otherwise this hands back Tag and rootProps unchanged. */
+  const link = useRouterLink(Tag, rootProps, { reloadDocument });
+  const LinkTag = link.Tag;
+
   const out = hasSx(sx)
-    ? <SxBox component={Tag} sx={sx} {...rootProps}>{content}</SxBox>
-    : <Tag {...rootProps}>{content}</Tag>;
+    ? <SxBox component={LinkTag} sx={sx} {...link.props}>{content}</SxBox>
+    : <LinkTag {...link.props}>{content}</LinkTag>;
 
   // Wrap in Badge if requested — the badge just decorates the corner.
   if (badge) {
