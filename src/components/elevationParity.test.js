@@ -41,8 +41,8 @@ const read = (f) => fs.readFileSync(path.join(__dirname, f), 'utf8');
 describe('elevation matches the Figma effect styles', () => {
   it.each(EXPECTED)('%s rests on Level %i (%s)', (file, level) => {
     const src = read(file);
-    // The scrim variant (neutral, over a backdrop) is the same level's geometry.
-    const uses = src.includes(`SHADOW_LEVEL_${level}`) || src.includes(`SHADOW_SCRIM_LEVEL_${level}`);
+    // The black set (floating components) is the same level's geometry.
+    const uses = src.includes(`SHADOW_LEVEL_${level}`) || src.includes(`SHADOW_NEUTRAL_LEVEL_${level}`);
     expect(`${file} uses SHADOW_LEVEL_${level}: ${uses}`)
       .toBe(`${file} uses SHADOW_LEVEL_${level}: true`);
   });

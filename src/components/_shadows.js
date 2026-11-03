@@ -82,23 +82,6 @@ const _token = (level, literal) =>
  * Wrapping here fixes all twelve at once and keeps SHADOWS identical, so no
  * consumer has to change. */
 export const SHADOW_LEVEL_0 = 'none';
-/* Over a SCRIM — a modal, dialog or drawer with its neutral black backdrop —
-   the shadow is neutral too. The surface-tinted shadow, painted onto a grey
-   overlay, read as a coloured glow round the panel (Popsicles' modal had a
-   purple halo). The design system publishes --Effect-Level-N-Neutral: the
-   brand's own geometry in black. The literal is the same table, in black, for
-   a consumer with no design system loaded. */
-function _buildNeutralShadow(level) {
-  return _LEVEL_LAYERS[level]
-    .map(function (t) {
-      return t[0] + 'px ' + t[1] + 'px ' + t[2] + 'px ' + t[3] + 'px rgba(0, 0, 0, ' + t[4] + ')';
-    })
-    .join(', ');
-}
-const _scrimToken = (level) => 'var(--Effect-Level-' + level + '-Neutral, ' + _buildNeutralShadow(level) + ')';
-export const SHADOW_SCRIM_LEVEL_3 = _scrimToken(3);
-export const SHADOW_SCRIM_LEVEL_5 = _scrimToken(5);
-
 export const SHADOW_LEVEL_1 = _token(1, _buildShadow(1));
 export const SHADOW_LEVEL_2 = _token(2, _buildShadow(2));
 export const SHADOW_LEVEL_3 = _token(3, _buildShadow(3));
@@ -114,6 +97,51 @@ export const SHADOWS = {
   4: SHADOW_LEVEL_4,
   5: SHADOW_LEVEL_5,
 };
+
+// ─── The black set: for anything FIXED or FLOATING over the page ────────────
+//
+// The tinted set above is right for something that sits ON one surface: a card
+// on a Primary section takes that section's --Dropshadow-Color and reads as
+// part of it. Something that floats over the whole page (a tooltip, a menu
+// panel, a dialog, a sticky app bar) passes over every color on the page at
+// once. Tinted by the one surface it happens to sit in, its shadow shows up as
+// a colored halo over all the others; Popsicles' modal had a purple glow round
+// it over a grey backdrop. Black reads as a shadow over any color.
+//
+// The design system publishes --Effect-Level-1-Neutral … -5-Neutral: the
+// brand's own geometry, pure black alpha. Token first so the brand wins; the
+// literal is the same geometry table in black, for a consumer with no design
+// system loaded (the one case a var() fallback fires) — mirroring _token above.
+function _buildNeutralShadow(level) {
+  return _LEVEL_LAYERS[level]
+    .map(function (t) {
+      return t[0] + 'px ' + t[1] + 'px ' + t[2] + 'px ' + t[3] + 'px rgba(0, 0, 0, ' + t[4] + ')';
+    })
+    .join(', ');
+}
+const _neutralToken = (level) =>
+  level === 0 ? 'none' : 'var(--Effect-Level-' + level + '-Neutral, ' + _buildNeutralShadow(level) + ')';
+
+export const SHADOW_NEUTRAL_LEVEL_0 = 'none';
+export const SHADOW_NEUTRAL_LEVEL_1 = _neutralToken(1);
+export const SHADOW_NEUTRAL_LEVEL_2 = _neutralToken(2);
+export const SHADOW_NEUTRAL_LEVEL_3 = _neutralToken(3);
+export const SHADOW_NEUTRAL_LEVEL_4 = _neutralToken(4);
+export const SHADOW_NEUTRAL_LEVEL_5 = _neutralToken(5);
+
+// Keyed map for dynamic level lookup, like SHADOWS.
+export const NEUTRAL_SHADOWS = {
+  0: SHADOW_NEUTRAL_LEVEL_0,
+  1: SHADOW_NEUTRAL_LEVEL_1,
+  2: SHADOW_NEUTRAL_LEVEL_2,
+  3: SHADOW_NEUTRAL_LEVEL_3,
+  4: SHADOW_NEUTRAL_LEVEL_4,
+  5: SHADOW_NEUTRAL_LEVEL_5,
+};
+
+// This set replaces SHADOW_SCRIM_LEVEL_3 / _5, from when only the panels over a
+// scrim (modal, dialog, drawer) were black. The rule is wider than the scrim:
+// anything floating over the page is black, backdrop or not.
 
 // ─── Bevel Shadow (chained inset shadows for Button-style highlight/lowlight)
 //

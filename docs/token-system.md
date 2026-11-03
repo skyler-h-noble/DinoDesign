@@ -375,6 +375,27 @@ Box shadows are also tokenized and assigned per surface type:
 
 Components apply effects via `box-shadow: var(--Effects)`.
 
+### Floating elements cast black shadows
+
+`--Effect-Level-1` … `-5` are TINTED: each layer is
+`rgba(var(--Dropshadow-Color), a)`, so a card on a Primary section casts a
+Primary-tinted shadow and reads as part of that section. The design system
+also publishes a BLACK set with the same levels and geometry:
+`--Effect-Level-1-Neutral` … `--Effect-Level-5-Neutral`, every layer
+`rgba(0, 0, 0, a)`.
+
+Anything fixed or floating over the whole page uses the black set: Tooltip,
+Menu panel, Popover (portaled), Snackbar, Dialog, Modal, Drawer, Sheet, FAB,
+the floating Toolbar, and the AppBar while it is sticky. Such an element passes
+over every color on the page, so a shadow tinted by one surface shows up as a
+colored halo over the others. In-flow elements (Card, Box, Chip, inputs,
+Accordion, Alert, a non-sticky AppBar, a Popover rendered with
+`disablePortal`) sit on one surface and keep the tinted set.
+
+In the lib the two sets are `SHADOW_LEVEL_N` and `SHADOW_NEUTRAL_LEVEL_N` in
+`src/components/_shadows.js`; each reads the token first and falls back to the
+lib's own geometry table (tinted or black) when no design system is loaded.
+
 ---
 
 ## Using the System in a Consumer App

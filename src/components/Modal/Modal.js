@@ -6,7 +6,7 @@
      3  Elevations/Level-3 (FAB, Snackbar, Card-Drag, Elevated-Card-Hover)
      4  Elevations/Level-4 (FAB-Hover, Elevated-Card-Drag)
      5  Elevations/Level-5 (Dialog & Modal) */
-import { SHADOW_SCRIM_LEVEL_5 } from '../_shadows';
+import { SHADOW_NEUTRAL_LEVEL_5 } from '../_shadows';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
 import { lazySxBox } from '../_lazyFallback';
@@ -108,7 +108,7 @@ registerStaticStyles('omni-modal', [
     + `@keyframes ${t.name}-backdrop{from{opacity:0}to{opacity:1}}`),
   '.omni-md-backdrop{position:fixed;inset:0;z-index:10000000;background-color:rgba(0,0,0,0.5)}',
   ...Object.values(TRANSITION_KEYFRAMES).map((t) => `.omni-md-backdrop.omni-md-a-${t.name}{animation:${t.name}-backdrop var(--_md-speed) ease-out forwards}`),
-  `.omni-md{position:fixed;z-index:10000001;outline:none;box-sizing:border-box;box-shadow:${SHADOW_SCRIM_LEVEL_5};`
+  `.omni-md{position:fixed;z-index:10000001;outline:none;box-sizing:border-box;box-shadow:${SHADOW_NEUTRAL_LEVEL_5};`
     + 'display:flex;flex-direction:column;overflow:hidden}',
   ...Object.values(TRANSITION_KEYFRAMES).map((t) => `.omni-md.omni-md-a-${t.name}{animation:${t.name} var(--_md-speed) ease-out forwards}`),
   '.omni-md-full{inset:0;border-radius:0}',

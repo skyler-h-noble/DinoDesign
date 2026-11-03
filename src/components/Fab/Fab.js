@@ -3,7 +3,11 @@ import React from 'react';
 import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
 import { lazySxBox } from '../_lazyFallback';
 import AddIcon from '@omni-design/icons/Add';
-import { SHADOW_LEVEL_3, SHADOW_LEVEL_4, bevelShadow, tokenSegment } from '../_shadows';
+/* The BLACK set (--Effect-Level-N-Neutral). A floating action button is, by
+   name, placed over the page and stays put while sections of every color
+   scroll under it, so a surface-tinted shadow would read as a colored halo.
+   The bevel is not a drop shadow and keeps the button's own colors. */
+import { SHADOW_NEUTRAL_LEVEL_3, SHADOW_NEUTRAL_LEVEL_4, bevelShadow, tokenSegment } from '../_shadows';
 
 /**
  * Fab (Floating Action Button) Component
@@ -101,7 +105,7 @@ registerStaticStyles('omni-fab', [
   '@keyframes fab-pulse{0%{box-shadow:0 0 0 0 var(--fab-pulse-color)}50%{box-shadow:0 0 0 8px var(--fab-pulse-color)}100%{box-shadow:0 0 0 8px transparent}}',
   '.omni-fab{display:inline-flex;-webkit-box-align:center;align-items:center;-webkit-box-pack:center;justify-content:center;gap:0;'
     + 'background-color:var(--_fab-bg);color:var(--_fab-fg);border:var(--Button-Border-Width) solid var(--_fab-bd);'
-    + `box-shadow:var(--_fab-bevel), ${SHADOW_LEVEL_3};`
+    + `box-shadow:var(--_fab-bevel), ${SHADOW_NEUTRAL_LEVEL_3};`
     + 'font-family:inherit;font-weight:600;cursor:pointer;opacity:1;outline:none;flex-shrink:0;'
     + 'transition:background-color 0.15s ease, box-shadow 0.2s ease, transform 0.1s ease}',
   /* Bevel sizing — height feeds --_bevel via --Button-Bevel % (matches Button
@@ -116,10 +120,10 @@ registerStaticStyles('omni-fab', [
   ...Object.entries(SIZE_MAP).map(([k, v]) => `.omni-fab-c-${k}{width:${v.size}px;border-radius:50%}`),
   ...Object.entries(SIZE_MAP).map(([k, v]) => `.omni-fab-x-${k}{border-radius:${v.size / 2}px;padding-left:${v.px}px;padding-right:${v.px}px;gap:${v.gap}px}`),
   '.omni-fab-off{cursor:not-allowed;opacity:var(--Disabled, 0.38)}',
-  `.omni-fab-h:hover{background-color:var(--_fab-h);box-shadow:var(--_fab-bevel), ${SHADOW_LEVEL_4}}`,
+  `.omni-fab-h:hover{background-color:var(--_fab-h);box-shadow:var(--_fab-bevel), ${SHADOW_NEUTRAL_LEVEL_4}}`,
   /* Pressed changes the fill only. Figma's Pressed FAB keeps the resting FAB
      elevation and its full size. */
-  `.omni-fab-a:active{background-color:var(--_fab-a);box-shadow:var(--_fab-bevel), ${SHADOW_LEVEL_3}}`,
+  `.omni-fab-a:active{background-color:var(--_fab-a);box-shadow:var(--_fab-bevel), ${SHADOW_NEUTRAL_LEVEL_3}}`,
   /* 2px ring 1px outside — the same ring as every other component. */
   '.omni-fab-f:focus-visible,.omni-fab-f.Mui-focusVisible{outline:2px solid var(--Focus-Visible);outline-offset:1px}',
   /* 50% of the button's own color — Figma's Start and Middle both sit at

@@ -205,7 +205,23 @@ brand color.
 - **Do not import components from `@mui/material`** — the package re-exports
   the ones it supports, themed.
 
-## 8. When something is missing
+## 8. Floating elements cast black shadows
+
+Shadows come in two sets with the same levels and geometry:
+
+- `--Effect-Level-1` … `-5` — tinted by the surface (`--Dropshadow-Color`).
+  For things that sit ON one surface: Card, Box, Chip, inputs, Accordion,
+  Alert, a non-sticky `AppBar`, a `Popover` with `disablePortal`.
+- `--Effect-Level-1-Neutral` … `-5-Neutral` — pure black. For anything fixed
+  or floating over the whole page: Tooltip, Menu, Popover, Snackbar, Dialog,
+  Modal, Drawer, Sheet, Fab, the floating Toolbar, and the AppBar while sticky.
+
+Why: a floating element passes over every color on the page, so a shadow
+tinted by one surface shows up as a colored halo over the others. The
+components above already pick the right set. If a design system predates the
+black set, they fall back to the same geometry in black.
+
+## 9. When something is missing
 
 Tag it where you would have used it, so it can be added to the package:
 

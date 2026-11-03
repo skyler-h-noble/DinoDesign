@@ -13,7 +13,7 @@
      3  Elevations/Level-3 (FAB, Snackbar, Card-Drag, Elevated-Card-Hover)
      4  Elevations/Level-4 (FAB-Hover, Elevated-Card-Drag)
      5  Elevations/Level-5 (Dialog & Modal) */
-import { SHADOW_LEVEL_5, SHADOW_SCRIM_LEVEL_5 } from '../_shadows';
+import { SHADOW_NEUTRAL_LEVEL_5 } from '../_shadows';
 import React, { forwardRef } from 'react';
 import {
   Dialog as MuiDialog,
@@ -77,14 +77,15 @@ const TRANSITION_MAP = {
 
 /* ─── Styled tokens ─── */
 /* Figma's Dialog: Dialog-Width wide, Card-Radius corners, a 1px edge in the
-   Background of its Container-Highest zone, the Level 5 shadow. The content
-   inside is its own Container zone (see the render). */
+   Background of its Container-Highest zone, the Level 5 shadow (the black set:
+   a dialog floats over the whole page). The content inside is its own
+   Container zone (see the render). */
 const paperSx = {
   backgroundColor: 'var(--Background)',
   color: 'var(--Text)',
   border: '1px solid var(--Background)',
   borderRadius: 'var(--Card-Radius, var(--Style-Border-Radius))',
-  boxShadow: SHADOW_LEVEL_5,
+  boxShadow: SHADOW_NEUTRAL_LEVEL_5,
   overflow: 'hidden',
   // The 1px edge is INSIDE the width, as Figma's stroke is: 560 overall, not 562.
   boxSizing: 'border-box',
@@ -199,8 +200,10 @@ export function Dialog({
         'data-surface': 'Container-Highest',
         sx: {
           ...paperSx,
-          // Neutral over the backdrop; a non-modal dialog sits on the page and keeps its tint.
-          boxShadow: nonModal ? SHADOW_LEVEL_5 : SHADOW_SCRIM_LEVEL_5,
+          /* Black with or without the backdrop: a non-modal dialog is still a
+             fixed panel over every color on the page, not something sitting
+             on one surface. */
+          boxShadow: SHADOW_NEUTRAL_LEVEL_5,
           ...(maxWidth === 'dialog' && !fullScreen && { maxWidth: DIALOG_WIDTH }),
           ...(fullScreen && { borderRadius: 0, border: 'none' }),
           ...PaperProps.sx,
