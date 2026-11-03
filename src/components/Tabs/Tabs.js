@@ -281,6 +281,10 @@ const Part = React.forwardRef(function Part({ sx, component: Tag = 'div', ...pro
   return <Tag ref={ref} {...props} />;
 });
 
+/* A Tab is a button unless its Tabs is in navigation mode, so an href passed to
+   one is dropped — nothing errors and the tab looks right, but the link goes
+   nowhere. Said once, in development, because it is invisible otherwise. */
+let warnedTabHref = false;
 let warnedVerticalMore = false;
 /* The … Button's square, per size — what the More measurement reserves before
    the button exists. Button-Height, as Button's own icon-only square. */
@@ -663,6 +667,11 @@ export function Tab({
   const panelId = 'tabpanel-' + tabsId + '-' + resolvedValue;
 
   const { href, onClick: onClickProp, ...restProps } = props;
+  if (href != null && !navigation && process.env.NODE_ENV !== 'production' && !warnedTabHref) {
+    warnedTabHref = true;
+    // eslint-disable-next-line no-console
+    console.warn('[OmniDesign] <Tab href="' + href + '"> is ignored — a Tab is a button unless <Tabs navigation> is set. For a site nav of links, add navigation to Tabs.');
+  }
   const handleClick = (e) => {
     if (!disabled) setValue(resolvedValue);
     if (onClickProp) onClickProp(e);

@@ -618,3 +618,27 @@ describe('Tabs overflow', () => {
     expect(container.querySelector('.tab-list-scroll-btn-right')).toBeTruthy();
   });
 });
+
+describe('Tab href outside navigation mode', () => {
+  test('is dropped and warns once', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const { container } = render(
+      <Tabs defaultValue="a"><TabList><Tab value="a" href="#a">A</Tab><Tab value="b" href="#b">B</Tab></TabList></Tabs>
+    );
+    expect(container.querySelector('[href]')).toBeNull();
+    const hrefWarnings = warn.mock.calls.filter(([m]) => String(m).includes('<Tab href='));
+    expect(hrefWarnings).toHaveLength(1);
+    expect(hrefWarnings[0][0]).toContain('<Tabs navigation>');
+    warn.mockRestore();
+  });
+
+  test('navigation mode keeps the href and does not warn', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const { container } = render(
+      <Tabs navigation defaultValue="a"><TabList><Tab value="a" href="#a">A</Tab></TabList></Tabs>
+    );
+    expect(container.querySelector('a[href="#a"]')).not.toBeNull();
+    expect(warn.mock.calls.some(([m]) => String(m).includes('<Tab href='))).toBe(false);
+    warn.mockRestore();
+  });
+});
