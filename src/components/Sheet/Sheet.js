@@ -1,7 +1,7 @@
 // src/components/Sheet/Sheet.js
 import React from 'react';
 import { Drawer } from '../Drawer/Drawer';
-import { SHADOW_NEUTRAL_LEVEL_1 } from '../_shadows';
+import { SHADOW_LEVEL_1 } from '../_shadows';
 
 /**
  * Sheet — a bottom sheet. Figma's Sheet (8326:2842): a panel that rises from
@@ -11,9 +11,9 @@ import { SHADOW_NEUTRAL_LEVEL_1 } from '../_shadows';
  *   corners   16px on the top two — the bottom edge sits on the screen's
  *   padding   Sizing-2 (16), and the same gap between children
  *   height    var(--Sheet, 540px) — Figma's Component-Size/Other/Sheet
- *   shadow    Level 1, the Elevations/Level-1 style, from the BLACK set
- *             (--Effect-Level-1-Neutral): the sheet is fixed over the whole
- *             page, so a surface-tinted shadow would read as a colored halo
+ *   shadow    Level 1, the Elevations/Level-1 style, from the surface-tinted
+ *             set (--Effect-Level-1). Only Modal, Dialog, Toast and Popover
+ *             use the black set
  *
  * Built on Drawer (anchor="bottom"): the scrim, Escape, the focus trap and
  * the slide come from there, so a sheet is a dialog like a drawer is.
@@ -53,7 +53,7 @@ export function Sheet({
         borderRadius: '16px 16px 0 0',
         padding: 'var(--Sizing-2, 16px)',
         gap: 'var(--Sizing-2, 16px)',
-        boxShadow: SHADOW_NEUTRAL_LEVEL_1,
+        boxShadow: SHADOW_LEVEL_1,
         ...sx,
       }}
       {...props}

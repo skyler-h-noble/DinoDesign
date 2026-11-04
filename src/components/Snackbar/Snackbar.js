@@ -5,9 +5,9 @@ import { lazySxBox } from '../_lazyFallback';
 import CloseIcon from '@omni-design/icons/Close';
 import { Button } from '../Button/Button';
 import { Body, BodySmall, BodyLarge } from '../Typography';
-/* The BLACK set: a snackbar is fixed to the viewport and the page scrolls
-   under it, so a surface-tinted shadow would read as a colored halo over every
-   section that is not its own. */
+/* The BLACK set — one of the four that use it (Modal, Dialog, Toast,
+   Popover): a toast is laid over whatever the page shows, so a surface tint
+   would be the wrong color. */
 import { SHADOW_NEUTRAL_LEVEL_3 } from '../_shadows';
 
 /**

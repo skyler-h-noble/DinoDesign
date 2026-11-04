@@ -15,7 +15,7 @@ import { Button } from '../Button/Button';
      3  Elevations/Level-3 (FAB, Snackbar, Card-Drag, Elevated-Card-Hover)
      4  Elevations/Level-4 (FAB-Hover, Elevated-Card-Drag)
      5  Elevations/Level-5 (Dialog & Modal) */
-import { SHADOW_LEVEL_2, SHADOW_NEUTRAL_LEVEL_2 } from '../_shadows';
+import { SHADOW_LEVEL_2 } from '../_shadows';
 
 /* Loaded only when used. Most bars never open the drawer and many show no
    search, so neither belongs in the first download. The drawer starts loading
@@ -38,9 +38,10 @@ function useNavDrawer() {
 /**
  * AppBar Component
  *
- * Always: bg var(--Background), text var(--Text), box-shadow Level 2 —
- * var(--Effect-Level-2-Neutral) (black) while sticky, var(--Effect-Level-2)
- * (surface-tinted) with sticky={false}
+ * Always: bg var(--Background), text var(--Text), box-shadow Level 2 (Figma's
+ * Component-Elevations → "AppBar, Toolbars, Menus") — var(--Effect-Level-2),
+ * the surface-tinted set, sticky or not. Only Modal, Dialog, Toast (Snackbar)
+ * and Popover cast the black set (owner rule, 2026-11-04).
  *
  * BAR COLORS (sets data-theme):
  *   default        data-theme="App-Bar"
@@ -95,12 +96,11 @@ const hasSx = (sx) => sx != null && (typeof sx !== 'object' || Array.isArray(sx)
 
 registerStaticStyles('omni-appbar', [
   `.omni-ab{background-color:var(--Background);color:var(--Text);box-shadow:${SHADOW_LEVEL_2};font-family:inherit}`,
-  /* A sticky bar floats: the whole page scrolls under it, every section's
-     color in turn, so its shadow is the black set. A tinted one shows as a
-     colored halo over every section that is not its own. With sticky={false}
-     the bar scrolls away with its section and sits on it like any in-flow
-     element, so it keeps the tinted shadow above. Same level either way. */
-  `.omni-ab-sticky{position:sticky;top:0;z-index:1100;box-shadow:${SHADOW_NEUTRAL_LEVEL_2}}`,
+  /* Sticky or not, the bar keeps the tinted Level-2 shadow from .omni-ab: it
+     belongs to the bar's own theme and surface. It used to switch to the black
+     set while sticky; the rule since 2026-11-04 is that only Modal, Dialog,
+     Toast and Popover are black. */
+  '.omni-ab-sticky{position:sticky;top:0;z-index:1100}',
   '.omni-ab-rel{position:relative}',
   '.omni-ab-desk{display:flex;align-items:center;height:var(--_ab-h);padding-left:16px;padding-right:16px;gap:16px}',
   // The Margin padding sits INSIDE the bar's width, as in Figma.

@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { tokenSegment } from '../_shadows';
-import { SHADOW_NEUTRAL_LEVEL_2 } from '../_shadows';
+import { SHADOW_LEVEL_2 } from '../_shadows';
 import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
 import { lazySxBox, lazyFallback } from '../_lazyFallback';
 import { computePosition } from './position';
@@ -168,13 +168,12 @@ registerStaticStyles('omni-tooltip', [
      flat at 8 at every size and brand; the fallback keeps older systems on
      what they shipped with. The face is the Body style (Figma's Dynamic Body),
      not MUI's Roboto. Elevation 2 — the resting level of the AppBar, Toolbars,
-     Menus group a tooltip shares — from the BLACK set: the bubble is portaled
-     and floats over whatever the anchor sits near, so a surface-tinted shadow
-     would show as a colored halo over the other colors on the page. */
+     Menus group a tooltip shares — from the surface-tinted set. Only Modal,
+     Dialog, Toast and Popover use the black set. */
   '.omni-tt-bubble.omni-tt-bubble,.omni-tt-bubble[data-surface],.omni-tt-bubble[data-theme][data-surface]{background-color:var(--_tt-fill);color:var(--_tt-ink)}',
   '.omni-tt-bubble{border:none;border-radius:var(--Tooltip-Radius, var(--Style-Border-Radius));'
     + 'font-family:var(--Body-Font-Family, var(--Font-Family-Body, inherit));display:flex;-webkit-box-align:center;align-items:center;'
-    + `box-shadow:${SHADOW_NEUTRAL_LEVEL_2}}`,
+    + `box-shadow:${SHADOW_LEVEL_2}}`,
   ...Object.entries(SIZE_MAP).map(([k, v]) => {
     const b = BODY_STEP[k];
     return `.omni-tt-bubble-${k}{font-size:var(--${b}-Font-Size, ${v.fontSize});font-weight:var(--${b}-Font-Weight, 400);`

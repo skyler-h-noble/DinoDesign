@@ -485,3 +485,15 @@
 [data-theme][data-surface="Container-Highest"] {
   --Background: var(--Container-Highest);
 }
+
+/* The tinted shadow recipes again, on every themed scope. A custom property's
+   var() is substituted where it is DECLARED, so the :root copy alone gave every
+   element the root's --Dropshadow-Color; re-declared here, each band resolves
+   it against its own. (Emitted by the studio generator from 2026-11-04.) */
+[data-theme], [data-surface] {
+  --Effect-Level-1: 0.3px 0.5px 0.5px 0px rgba(var(--Dropshadow-Color), 0.31), 1px 2px 2.1px -3.7px rgba(var(--Dropshadow-Color), 0.31);
+  --Effect-Level-2: 0.3px 0.5px 0.5px 0px rgba(var(--Dropshadow-Color), 0.243), 0.7px 1.4px 1.4px -1.9px rgba(var(--Dropshadow-Color), 0.243), 2.3px 4.5px 4.6px -3.7px rgba(var(--Dropshadow-Color), 0.243);
+  --Effect-Level-3: 0.3px 0.5px 0.5px 0px rgba(var(--Dropshadow-Color), 0.286), 1.3px 2.6px 2.7px -1.9px rgba(var(--Dropshadow-Color), 0.286), 5px 10px 10.3px -3.7px rgba(var(--Dropshadow-Color), 0.286);
+  --Effect-Level-4: 0.3px 0.5px 0.5px 0px rgba(var(--Dropshadow-Color), 0.235), 1.1px 2.2px 2.3px -0.9px rgba(var(--Dropshadow-Color), 0.235), 2.7px 5.4px 5.6px -1.9px rgba(var(--Dropshadow-Color), 0.235), 5.7px 11.3px 11.7px -2.8px rgba(var(--Dropshadow-Color), 0.235), 11.2px 22.4px 23.1px -3.7px rgba(var(--Dropshadow-Color), 0.235);
+  --Effect-Level-5: 0.3px 0.5px 0.5px 0px rgba(var(--Dropshadow-Color), 0.267), 1.7px 3.4px 3.5px -0.7px rgba(var(--Dropshadow-Color), 0.267), 4.1px 8.1px 8.4px -1.5px rgba(var(--Dropshadow-Color), 0.267), 8px 15.9px 16.4px -2.2px rgba(var(--Dropshadow-Color), 0.267), 14.4px 28.8px 29.7px -3px rgba(var(--Dropshadow-Color), 0.267), 25px 50px 51.6px -3.7px rgba(var(--Dropshadow-Color), 0.267);
+}

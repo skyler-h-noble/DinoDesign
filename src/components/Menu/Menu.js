@@ -12,7 +12,7 @@ import { lazySxBox } from '../_lazyFallback';
 import ExpandMoreIcon from '@omni-design/icons/ExpandMore';
 import { Button } from '../Button/Button';
 import { BodySmall, Body, BodyLarge } from '../Typography';
-import { SHADOW_NEUTRAL_LEVEL_2 } from '../_shadows';
+import { SHADOW_LEVEL_2 } from '../_shadows';
 
 /**
  * Menu Component Suite
@@ -53,10 +53,10 @@ registerStaticStyles('omni-menu', [
   /* "Menus" sits in the Level 2 style, with App bars, Toolbars and Tooltip.
      Edges are the neutral --Border: the color marks the SELECTION, not the
      frame, so field and panel read as one control at the 3:1 an edge needs.
-     The shadow is the BLACK set: the panel drops over whatever is below the
-     button, so a surface-tinted shadow would read as a colored halo there. */
+     The shadow is the surface-tinted set: only Modal, Dialog, Toast and
+     Popover use the black one. */
   '.omni-menu{position:absolute;top:100%;left:0;right:auto;z-index:99999;margin-top:4px;border:1px solid var(--Border);'
-    + `border-radius:${FRAME_RADIUS};box-shadow:${SHADOW_NEUTRAL_LEVEL_2};overflow:hidden}`,
+    + `border-radius:${FRAME_RADIUS};box-shadow:${SHADOW_LEVEL_2};overflow:hidden}`,
   '.omni-menu-end{left:auto;right:0}',
   /* The TreeView panel's padding: a menu is a list of Menu Item rows. Its
      corner sits 1px inside the frame, so it tracks the SAME token. */

@@ -311,13 +311,13 @@ var(--Icons-{Family}-Variant)    /* two-tone secondary fill */
 ```css
 var(--Style-Border-Radius)       /* set by data-style — use everywhere */
 var(--Effect-Level-1) … var(--Effect-Level-5)
-                                 /* shadows tinted by the surface: for things
-                                    that sit ON one surface (Card, inputs) */
+                                 /* shadows tinted by the surface: everything
+                                    except the four below (Card, inputs,
+                                    AppBar, Menu, Tooltip, Drawer, Fab, …) */
 var(--Effect-Level-1-Neutral) … var(--Effect-Level-5-Neutral)
-                                 /* pure black: for anything fixed or floating
-                                    over the page (Menu, Popover, Dialog, Fab,
-                                    a sticky AppBar). Components already pick;
-                                    this matters only when you hand-roll one */
+                                 /* pure black: only Modal, Dialog, Toast and
+                                    Popover. Components already pick; this
+                                    matters only when you hand-roll one */
 var(--Style-Gradient-Color-1)
 var(--Style-Gradient-Color-2)
 var(--Style-Gradient-Angle)

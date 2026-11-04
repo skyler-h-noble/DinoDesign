@@ -8,7 +8,7 @@
 // dropping the convenience export.
 import React from 'react';
 import { Tooltip as MuiTooltip, Box } from '@mui/material';
-import { tokenSegment, SHADOW_NEUTRAL_LEVEL_2 } from '../_shadows';
+import { tokenSegment, SHADOW_LEVEL_2 } from '../_shadows';
 
 /**
  * Tooltip Component
@@ -247,10 +247,9 @@ export function Tooltip({
                  surface, and painted the same shadow in dark mode as in light.
                  The geometry is close to what it was, so this is not a
                  redesign.
-                 It is the BLACK set (--Effect-Level-2-Neutral): the bubble
-                 floats over the page, so a surface-tinted shadow would show as
-                 a colored halo over the colors that are not its own. */
-              boxShadow: SHADOW_NEUTRAL_LEVEL_2,
+                 It is the surface-tinted set (--Effect-Level-2): only Modal,
+                 Dialog, Toast and Popover use the black set. */
+              boxShadow: SHADOW_LEVEL_2,
               ...sx,
             }}
           >

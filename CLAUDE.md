@@ -277,21 +277,33 @@ brand color.
 - **Do not import components from `@mui/material`** — the package re-exports
   the ones it supports, themed.
 
-## 8. Floating elements cast black shadows
+## 8. Only Modal, Dialog, Toast and Popover cast black shadows
 
 Shadows come in two sets with the same levels and geometry:
 
 - `--Effect-Level-1` … `-5` — tinted by the surface (`--Dropshadow-Color`).
-  For things that sit ON one surface: Card, Box, Chip, inputs, Accordion,
-  Alert, a non-sticky `AppBar`, a `Popover` with `disablePortal`.
-- `--Effect-Level-1-Neutral` … `-5-Neutral` — pure black. For anything fixed
-  or floating over the whole page: Tooltip, Menu, Popover, Snackbar, Dialog,
-  Modal, Drawer, Sheet, Fab, the floating Toolbar, and the AppBar while sticky.
+  Everything uses this set except the four below: Card, Box, Chip, inputs,
+  Accordion, Alert, `AppBar` (sticky or not), `Toolbar`, `Tooltip`, the
+  `Menu` panel, `Drawer`, `Sheet`, `Fab`.
+- `--Effect-Level-1-Neutral` … `-5-Neutral` — pure black. Only `Modal`,
+  `Dialog`, `Snackbar` (Toast) and a portaled `Popover`.
 
-Why: a floating element passes over every color on the page, so a shadow
-tinted by one surface shows up as a colored halo over the others. The
-components above already pick the right set. If a design system predates the
-black set, they fall back to the same geometry in black.
+Why: these four interrupt the page. A modal or dialog sits over a scrim, a
+toast and a popover panel are transient messages laid over whatever is there —
+none of them belongs to the surface below it, so a shadow tinted by that
+surface would be the wrong color, and Popsicles' modal had a purple glow round
+it over a grey backdrop. Everything else (AppBar sticky or not, Toolbar,
+Tooltip, Menu panel, Drawer, Sheet, Fab, cards) is part of its own theme and
+surface, and its shadow carries that tint like a card's does.
+
+The components already pick the right set. If a design system predates the
+black set, those four fall back to the same geometry in black.
+
+Hand-rolling a shadow, write `box-shadow: var(--Effect-Level-2)` on the element
+itself; it takes the tint of the nearest `data-theme` / `data-surface` scope.
+(The design system re-declares the recipes on those scopes. A system published
+before 2026-11-04 declared them only at `:root`, so every shadow took the
+page's color; regenerate it to get band-tinted shadows.)
 
 ## 9. When something is missing
 

@@ -375,7 +375,7 @@ Box shadows are also tokenized and assigned per surface type:
 
 Components apply effects via `box-shadow: var(--Effects)`.
 
-### Floating elements cast black shadows
+### Only Modal, Dialog, Toast and Popover cast black shadows
 
 `--Effect-Level-1` … `-5` are TINTED: each layer is
 `rgba(var(--Dropshadow-Color), a)`, so a card on a Primary section casts a
@@ -384,13 +384,16 @@ also publishes a BLACK set with the same levels and geometry:
 `--Effect-Level-1-Neutral` … `--Effect-Level-5-Neutral`, every layer
 `rgba(0, 0, 0, a)`.
 
-Anything fixed or floating over the whole page uses the black set: Tooltip,
-Menu panel, Popover (portaled), Snackbar, Dialog, Modal, Drawer, Sheet, FAB,
-the floating Toolbar, and the AppBar while it is sticky. Such an element passes
-over every color on the page, so a shadow tinted by one surface shows up as a
-colored halo over the others. In-flow elements (Card, Box, Chip, inputs,
-Accordion, Alert, a non-sticky AppBar, a Popover rendered with
-`disablePortal`) sit on one surface and keep the tinted set.
+Owner rule (2026-11-04, replacing "anything floating over the page is black"):
+only Modal, Dialog, Snackbar (Toast) and a portaled Popover use the black set.
+These four interrupt the page. A modal or dialog sits over a scrim, a
+toast and a popover panel are transient messages laid over whatever is there —
+none of them belongs to the surface below it, so a shadow tinted by that
+surface would be the wrong color, and Popsicles' modal had a purple glow round
+it over a grey backdrop. Everything else (AppBar sticky or not, Toolbar,
+Tooltip, Menu panel, Drawer, Sheet, Fab, cards) is part of its own theme and
+surface, and its shadow carries that tint like a card's does.
+A Popover rendered with `disablePortal` sits in the flow and is tinted too.
 
 In the lib the two sets are `SHADOW_LEVEL_N` and `SHADOW_NEUTRAL_LEVEL_N` in
 `src/components/_shadows.js`; each reads the token first and falls back to the

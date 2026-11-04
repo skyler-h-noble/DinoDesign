@@ -65,6 +65,16 @@ function _buildShadow(level) {
  * design system loaded sees, which is the one case a var() fallback fires.
  *
  * A var() fallback may contain commas, so a multi-layer recipe nests safely.
+ *
+ * The brand token reintroduces the trap described at the top of this file:
+ * --Effect-Level-N holds var(--Dropshadow-Color), and declared only at :root it
+ * is substituted THERE, so every element would inherit the root's shadow color
+ * (a card in a Secondary band cast the Default page's grey). The design system
+ * therefore re-declares the five recipes on `[data-theme], [data-surface]`, so
+ * each themed scope re-substitutes them and a card shell inherits its band's
+ * tint. Studio generators from 2026-11-04 emit that block (and
+ * public/styles/base.css carries it); a system published before then needs
+ * regenerating to get band-tinted shadows.
  */
 const _token = (level, literal) =>
   level === 0 ? 'none' : 'var(--Effect-Level-' + level + ', ' + literal + ')';
@@ -98,15 +108,17 @@ export const SHADOWS = {
   5: SHADOW_LEVEL_5,
 };
 
-// ─── The black set: for anything FIXED or FLOATING over the page ────────────
+// ─── The black set: ONLY Modal, Dialog, Toast (Snackbar) and Popover ───────
 //
-// The tinted set above is right for something that sits ON one surface: a card
-// on a Primary section takes that section's --Dropshadow-Color and reads as
-// part of it. Something that floats over the whole page (a tooltip, a menu
-// panel, a dialog, a sticky app bar) passes over every color on the page at
-// once. Tinted by the one surface it happens to sit in, its shadow shows up as
-// a colored halo over all the others; Popsicles' modal had a purple glow round
-// it over a grey backdrop. Black reads as a shadow over any color.
+// Owner rule, 2026-11-04, replacing "anything floating over the page is
+// black". The tinted set above is right for everything that belongs to a
+// surface — cards, and also the AppBar (sticky or not), Toolbar, Tooltip, Menu
+// panel, Drawer, Sheet and Fab, whose shadows carry their own theme's tint.
+// The four that interrupt the page — a modal or dialog over a scrim, a toast,
+// a popover panel — belong to no surface below them, so a tint would be the
+// wrong color (Popsicles' modal had a purple glow round it over a grey
+// backdrop). Black reads as a shadow over any color.
+// floatingShadows.test.js pins exactly which files import this set.
 //
 // The design system publishes --Effect-Level-1-Neutral … -5-Neutral: the
 // brand's own geometry, pure black alpha. Token first so the brand wins; the
@@ -139,9 +151,8 @@ export const NEUTRAL_SHADOWS = {
   5: SHADOW_NEUTRAL_LEVEL_5,
 };
 
-// This set replaces SHADOW_SCRIM_LEVEL_3 / _5, from when only the panels over a
-// scrim (modal, dialog, drawer) were black. The rule is wider than the scrim:
-// anything floating over the page is black, backdrop or not.
+// This set replaced SHADOW_SCRIM_LEVEL_3 / _5, from when only the panels over a
+// scrim (modal, dialog, drawer) were black.
 
 // ─── Bevel Shadow (chained inset shadows for Button-style highlight/lowlight)
 //

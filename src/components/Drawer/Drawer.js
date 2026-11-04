@@ -6,7 +6,7 @@ import CloseIcon from '@omni-design/icons/Close';
 import { Button } from '../Button/Button';
 import { Icon } from '../Icon/Icon';
 import { useOmniDesign } from '../../OmniDesignProvider';
-import { SHADOW_NEUTRAL_LEVEL_3 } from '../_shadows';
+import { SHADOW_LEVEL_3 } from '../_shadows';
 
 /**
  * Drawer Component
@@ -49,13 +49,12 @@ registerStaticStyles('omni-drawer', [
   '@keyframes drawer-slide-in{from{transform:var(--_dr-from)}to{transform:translate(0, 0)}}',
   '.omni-dr-backdrop{position:fixed;inset:0;z-index:10000000;background-color:rgba(0, 0, 0, 0.5);transition:opacity 0.3s ease}',
   '.omni-dr{position:fixed;z-index:10000001;background-color:var(--Background);color:var(--Text);'
-    + `box-shadow:${SHADOW_NEUTRAL_LEVEL_3};display:flex;flex-direction:column;outline:none;overflow:hidden;`
+    + `box-shadow:${SHADOW_LEVEL_3};display:flex;flex-direction:column;outline:none;overflow:hidden;`
     + 'animation:drawer-slide-in 0.3s ease forwards}',
-  /* Black with or without the backdrop. Without one (hideBackdrop) the drawer
-     used to take the page's tint, but it is still position:fixed over the
-     whole page, so it passes over every section's color — the case the black
-     set exists for. */
-  `.omni-dr-flat{box-shadow:${SHADOW_NEUTRAL_LEVEL_3}}`,
+  /* Level 3, surface-tinted, with or without the backdrop. The drawer was on
+     the black set; since 2026-11-04 only Modal, Dialog, Toast and Popover
+     are. */
+  `.omni-dr-flat{box-shadow:${SHADOW_LEVEL_3}}`,
   '.omni-dr-left{top:0;left:0;bottom:0}',
   '.omni-dr-right{top:0;right:0;bottom:0}',
   '.omni-dr-top{top:0;left:0;right:0}',
