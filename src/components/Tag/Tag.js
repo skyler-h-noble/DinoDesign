@@ -90,6 +90,13 @@ registerBoxStyles('omni-tag', [
   /* Two classes: the label's own Typography rules are one class each, in a
      sheet inserted after this one. */
   '.omni-tag>.omni-tag-label{color:inherit;white-space:nowrap;text-transform:uppercase}',
+  /* All caps has no descenders, so the untrimmed line box sat the label
+     ~0.75px high. Trim to cap height + baseline where supported (same as
+     Button / Tab) — and hold the tag at its Figma height (the label's line
+     plus Sizing-Quarter top and bottom) so trimming centres the text rather
+     than shrinking the tag (28px -> 15px without the min-height). */
+  '@supports (text-box-edge: cap alphabetic){.omni-tag{min-height:calc(var(--Label-Medium-Line-Height, 20px) + 2 * var(--Sizing-Quarter, 2px));box-sizing:border-box}'
+    + '.omni-tag>.omni-tag-label{text-box-trim:trim-both;text-box-edge:cap alphabetic}}',
 ].join('\n'));
 
 export function Tag({
