@@ -3,6 +3,7 @@ import React, { createContext, useContext } from 'react';
 import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
 import { useRouterLink } from '../_routerLink';
 import { lazySxBox } from '../_lazyFallback';
+import { labelInName } from '../_labelInName';
 import { SHADOW_LEVEL_1, SHADOW_LEVEL_2, SHADOW_LEVEL_3, SHADOW_LEVEL_4 } from '../_shadows';
 
 const SxBox = lazySxBox('Card');
@@ -135,9 +136,9 @@ registerStaticStyles('omni-card', [
 ].join('\n'));
 
 /** A part's root: static classes, plus an MUI box only when given sx. */
-function Part({ sx, component: Tag = 'div', ...props }) {
-  if (hasSx(sx)) return <SxBox component={Tag} sx={sx} {...props} />;
-  return <Tag {...props} />;
+function Part({ sx, component: Tag = 'div', nodeRef, ...props }) {
+  if (hasSx(sx)) return <SxBox component={Tag} sx={sx} ref={nodeRef} {...props} />;
+  return <Tag ref={nodeRef} {...props} />;
 }
 
 /* --- Card --- */
@@ -188,6 +189,13 @@ export function Card({
   const isClickable = !disabled && (clickable || !!onClick || !!href || selected || isDraggable);
   const isLink = !!href && !disabled;
 
+  /* A clickable or link card is named by everything it shows. An aria-label
+     that does not contain that text ("Linen Throw, $40" on a card reading
+     "Sale Linen Throw $40") fails WCAG 2.5.3: dropped in production, warned
+     about in development. A static card is not a control and is left alone. */
+  const guard = isClickable ? labelInName('Card', props, children) : null;
+  const ownProps = guard ? guard.props : props;
+
   const cap = (str) => str.charAt(0).toUpperCase() + str.slice(1);
   const selBorder = `var(--Buttons-${cap(color === 'default' ? 'Default' : color)}-Border)`;
   const selStyle = selected ? { '--_cd-sel': selBorder } : null;
@@ -227,13 +235,13 @@ export function Card({
     onKeyDown: isClickable && !isLink ? (e) => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick?.(e); }
     } : undefined,
-    ...props,
+    ...ownProps,
   }, { reloadDocument });
 
   return (
     <CardContext.Provider value={{ variant, color, size, orientation }}>
       {/* Outer shell — no data-surface, inherits parent dropshadow-color */}
-      <Part component={shell.Tag} sx={sx} {...shell.props}>
+      <Part component={shell.Tag} sx={sx} nodeRef={guard ? guard.ref : undefined} {...shell.props}>
         {/* Inner content — scoped theme and surface. The outer has
             overflow:hidden, so nested images/media get clipped to its rounded
             corners without extra math here. */}

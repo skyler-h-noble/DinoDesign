@@ -3,7 +3,7 @@
 
 import {
   AppBar, Section, Container, Grid, VStack, Card, Button, Footer,
-  DisplayLarge, H2, Subtitle, Body, BodySmall, Eyebrow, IconBadge,
+  DisplayLarge, AutoHeading, Body, BodySmall, Eyebrow, IconBadge,
 } from '@omni-design/components';
 import HomeIcon from '@omni-design/icons/Home';
 
@@ -31,12 +31,12 @@ export function QuickstartPage() {
 
   <Section theme="Secondary" surface="Surface" padding="large" id="features">
     <Container maxWidth="lg">
-      <H2>Features</H2>
+      <AutoHeading>Features</AutoHeading>   {/* h2: one Section deep */}
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 4 }}>
           <Card style={{ height: '100%' }}>
             <IconBadge color="primary"><HomeIcon /></IconBadge>
-            <Subtitle>Card title</Subtitle>
+            <AutoHeading size="h5">Card title</AutoHeading>   {/* h2 tag, h5 look */}
             <BodySmall color="quiet">One sentence.</BodySmall>
           </Card>
         </Grid>

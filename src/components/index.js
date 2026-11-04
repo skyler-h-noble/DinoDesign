@@ -5,7 +5,7 @@
  */
 
 // ========== DESIGN FOUNDATION ==========
-export { Typography, CAP_HEIGHT_TRIM, Heading, DisplayLarge, DisplayMedium, AltDisplayLarge, AltDisplayMedium, AltDisplaySmall, DisplaySmall, H1, H2, H3, H4, H5, H6, Body, Body1, Body2, BodySemibold, BodyBold, BodySmall, BodySmallSemibold, BodySmallBold, BodyLarge, BodyLargeSemibold, BodyLargeBold, Caption, CaptionBold, Subtitle, Subtitle1, Subtitle2, SubtitleSmall, SubtitleMedium, SubtitleLarge, Legal, LegalSemibold, Label, LabelExtraSmall, MobileNavLabel, LabelSmall, LabelLarge, Eyebrow, EyebrowSmall, EyebrowMedium, EyebrowLarge, // Overline — former name for Eyebrow, kept as an alias.
+export { Typography, CAP_HEIGHT_TRIM, Heading, AutoHeading, AUTO_HEADING_SIZES, HeadingLevel, useHeadingLevel, DisplayLarge, DisplayMedium, AltDisplayLarge, AltDisplayMedium, AltDisplaySmall, DisplaySmall, H1, H2, H3, H4, H5, H6, Body, Body1, Body2, BodySemibold, BodyBold, BodySmall, BodySmallSemibold, BodySmallBold, BodyLarge, BodyLargeSemibold, BodyLargeBold, Caption, CaptionBold, Subtitle, Subtitle1, Subtitle2, SubtitleSmall, SubtitleMedium, SubtitleLarge, Legal, LegalSemibold, Label, LabelExtraSmall, MobileNavLabel, LabelSmall, LabelLarge, Eyebrow, EyebrowSmall, EyebrowMedium, EyebrowLarge, // Overline — former name for Eyebrow, kept as an alias.
   Overline, OverlineSmall, OverlineMedium, OverlineLarge, NumberSmall, NumberMedium, NumberLarge, Button as ButtonText, ButtonSmall } from './Typography';
 export { Colors } from './Colors';
 export { Spacing } from './Spacing';

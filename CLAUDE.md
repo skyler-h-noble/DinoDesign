@@ -139,7 +139,7 @@ function ModeToggle() {
 ```jsx
 import {
   AppBar, Section, Container, Grid, VStack, Card, Button, Footer,
-  DisplayLarge, H2, Subtitle, Body, BodySmall, Eyebrow, IconBadge,
+  DisplayLarge, AutoHeading, Body, BodySmall, Eyebrow, IconBadge,
 } from '@omni-design/components';
 import HomeIcon from '@omni-design/icons/Home';
 
@@ -164,12 +164,12 @@ import HomeIcon from '@omni-design/icons/Home';
 
   <Section theme="Secondary" surface="Surface" padding="large" id="features">
     <Container maxWidth="lg">
-      <H2>Features</H2>
+      <AutoHeading>Features</AutoHeading>   {/* h2: one Section deep */}
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 4 }}>
           <Card style={{ height: '100%' }}>
             <IconBadge color="primary"><HomeIcon /></IconBadge>
-            <Subtitle>Card title</Subtitle>
+            <AutoHeading size="h5">Card title</AutoHeading>   {/* h2 tag, h5 look */}
             <BodySmall color="quiet">One sentence.</BodySmall>
           </Card>
         </Grid>
@@ -200,6 +200,7 @@ import HomeIcon from '@omni-design/icons/Home';
 | Menu | `Dropdown` › `MenuButton` + `Menu` › `MenuItem`, `MenuDivider` | `Menu` without its `Dropdown` renders nothing. It does not portal: inside a scroll area or clipped card use `Popover` |
 | Anything floating (account panel, hover card) | `Popover` | `open`, `onClose`, `anchorRef`, `placement`; `role="tooltip"` + `autoFocus={false}` for a hover card |
 | Code, a shell command, a copyable URL | `CodeBlock` | `code`, `language`, `wrap`, `maxHeight` — brings its own copy button |
+| Section, panel or card title | `AutoHeading` | `size` (`h1`–`h6`, `display-*`) picks the look; the tag (h2, h3…) comes from nesting in `Section` / `HeadingLevel` |
 | Text | `DisplayLarge`, `DisplaySmall`, `H1`–`H6`, `Body`, `BodyLarge`, `BodySmall`, `Caption`, `Eyebrow` (the small caps line above a heading; `Overline` is its old name) | `color` (`quiet`, `primary`, `secondary`, `tertiary`, …), `component` (e.g. `component="p"` for a big price) |
 | Bold body text | `Subtitle` | Body has no bold — Subtitle is Body at 700 |
 | Icon on a tile | `IconBadge` | `color` (any Button color), `variant` (`solid` / `light` / `dark`), `size` (`small` / `medium` / `large`), `shape` |
@@ -245,18 +246,27 @@ brand color.
 - **One `h1` on every page** — the page's title, not just the home page,
   and including the not-found (404) page and empty states. Use
   `<H1>`, or `component="h1"` on a display style
-  (`<DisplayLarge component="h1">`). Section titles below it are `H2`, then
-  `H3`. A category, product, cart or checkout page whose title is an `H2` has
-  no `h1` at all.
+  (`<DisplayLarge component="h1">`). A category, product, cart or checkout
+  page whose title is an `H2` has no `h1` at all.
+- **Every other title is `<AutoHeading>`** — section, panel, sidebar, card,
+  dialog. Its level comes from nesting, so headings cannot skip a level:
+  h1 outside any `Section`, h2 inside one, h3 in a `Section` nested in that,
+  never past h6. Pick the look with `size` (`<AutoHeading size="h5">`), never
+  by choosing a smaller `H*` — an `H3` picked for its look, directly under the
+  page's `h1`, is the axe heading-order failure this replaces. For a
+  subsection that is not a `Section` (a card's own sub-titles) wrap it in
+  `<HeadingLevel>`. A block that only needs a color, not a new level, is a
+  `Box`, not a nested `Section`. `H1`–`H6` still render exactly their tag.
 - **A link that shows text gets no `aria-label`.** That covers every link:
   `Link`, and a `Card` or `Button` with `href`. Its visible content (an image
   link's badge and product name included) already names it, and a label that
   differs — even reordered, like `"Linen Throw, Sale"` on a link that reads
   "Sale Linen Throw" — fails voice control (axe label-content-name-mismatch).
   Use `aria-label` only on a link with no visible text (an icon), and give the
-  image inside a link `alt=""` so the visible text is the whole name.
-- **Headings go down one level at a time** — after the page's `h1`, a panel
-  title is `H2`, not `H3`.
+  image inside a link `alt=""` so the visible text is the whole name. The same
+  goes for `aria-labelledby` on anything showing text. `Link`, `Button`, a
+  clickable `Card`, `Chip` and `BreadcrumbItem` warn in development when a
+  label does not contain their visible text, and drop it in production builds.
 - **Cards take their section's color.** Leave `color` / `theme` off cards so
   they inherit the band they sit on. Never rotate colors across a row of cards
   (`color={COLORS[i % n]}`) or give one card a different theme from its

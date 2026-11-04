@@ -5,6 +5,7 @@ import { lazySxBox } from '../_lazyFallback';
 import CloseIcon from '@omni-design/icons/Close';
 import { Button } from '../Button/Button';
 import { SHADOW_LEVEL_1 } from '../_shadows';
+import { labelInName } from '../_labelInName';
 
 /**
  * Chip Component
@@ -368,6 +369,12 @@ export function Chip({
     </span>
   );
 
+  /* A pressable chip is named by its label (WCAG 2.5.3): a mismatching
+     aria-label is dropped in production, warned about in development. Read
+     from the label only — a chip takes no ref. */
+  const guard = pressable ? labelInName('Chip', props, displayLabel, { dom: false }) : null;
+  const ownProps = guard ? guard.props : props;
+
   const rootProps = {
     role: pressable ? 'button' : undefined,
     tabIndex: pressable ? 0 : undefined,
@@ -378,7 +385,7 @@ export function Chip({
       + (disabled ? ' Mui-disabled omni-chip-off' : '')
       + ' chip-' + chipColor + (selected ? ' chip-selected' : '') + ' ' + className,
     ...selectionProps,
-    ...props,
+    ...ownProps,
   };
   const body = <span className="MuiChip-label omni-chip-label">{labelContent}</span>;
   if (hasSx(sx)) return <SxBox sx={sx} {...rootProps}>{body}</SxBox>;
