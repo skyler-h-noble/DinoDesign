@@ -145,13 +145,14 @@ export interface SwitchProps extends ControlInputProps {
 export interface SliderMark { value: number; label?: React.ReactNode; }
 
 /**
- * Pick a number (or a range: pass an array `value`). SliderInput and RangeSlider are the same component — a range is just a two-number value.
+ * Pick a number (or a range: pass an array `value`). SliderInput and RangeSlider are the same component — a range is just a two-number value. Figma's Type maps to `value` + `fill`: single = a number, double = `[low, high]`, `-inverted` = `fill="inverted"`; Orientation = `orientation`. A range's thumbs are named "… minimum" / "… maximum" unless `getAriaLabel` names them.
  * @category Selection
  * @exports SliderInput Slider RangeSlider
  * @source Slider/Slider#Slider
  * @example
  * <><Slider label="Volume" value={value} onChange={(e, next) => setValue(next)} />
- * <RangeSlider label="Price" defaultValue={[20, 80]} min={0} max={100} /></>
+ * <RangeSlider label="Price" defaultValue={[20, 80]} min={0} max={100} />
+ * <Slider label="Treble" defaultValue={36} orientation="vertical" fill="inverted" style={{ height: 140 }} /></>
  */
 export interface SliderProps extends Native<HTMLSpanElement, 'onChange' | 'defaultValue'> {
   /** Sets data-theme on the control. */
@@ -174,14 +175,15 @@ export interface SliderProps extends Native<HTMLSpanElement, 'onChange' | 'defau
   step?: number | null;
   /** true = a tick per step; or `[{ value, label? }]` for the values worth labelling. */
   marks?: boolean | SliderMark[];
-  /** auto = while hovered / dragged / focused. */
+  /** auto = while hovered / dragged / focused; on = always, as Figma draws it. */
   valueLabelDisplay?: 'auto' | 'on' | 'off';
   /** top / bottom (horizontal), left / right (vertical). */
   valueLabelPosition?: 'top' | 'bottom' | 'left' | 'right';
-  /** Text of the value label, or a formatter. */
+  /** Text of the value label, or a formatter. A formatter's text is also the aria-valuetext. */
   valueLabelFormat?: string | ((value: number, index: number) => React.ReactNode);
+  /** Figma's Orientation. Vertical runs bottom (min) to top (max); give it a height. */
   orientation?: 'horizontal' | 'vertical';
-  /** Fill from the start (standard) or from the thumb to the end (inverted). */
+  /** Fill from the start to the thumb, or between a range's thumbs (standard); the other side(s) (inverted). */
   fill?: 'standard' | 'inverted' | 'normal';
   /** MUI's name for `fill`. false is retired and renders standard. */
   track?: 'standard' | 'inverted' | 'normal' | false;

@@ -1111,7 +1111,7 @@ A setting that takes effect immediately (role="switch"). Switch and SwitchInput 
 ```
 
 ### SliderInput · Slider · RangeSlider
-Pick a number (or a range: pass an array `value`). SliderInput and RangeSlider are the same component — a range is just a two-number value.
+Pick a number (or a range: pass an array `value`). SliderInput and RangeSlider are the same component — a range is just a two-number value. Figma's Type maps to `value` + `fill`: single = a number, double = `[low, high]`, `-inverted` = `fill="inverted"`; Orientation = `orientation`. A range's thumbs are named "… minimum" / "… maximum" unless `getAriaLabel` names them.
 
 - `theme?: Theme` — Sets data-theme on the control.
 - `surface?: Surface` — Sets data-surface on the control.
@@ -1125,11 +1125,11 @@ Pick a number (or a range: pass an array `value`). SliderInput and RangeSlider a
 - `max?: number` = `100`
 - `step?: number | null` = `1` — null = snap only to the `marks` values.
 - `marks?: boolean | SliderMark[]` = `false` — true = a tick per step; or `[{ value, label? }]` for the values worth labelling.
-- `valueLabelDisplay?: 'auto' | 'on' | 'off'` = `'auto'` — auto = while hovered / dragged / focused.
+- `valueLabelDisplay?: 'auto' | 'on' | 'off'` = `'auto'` — auto = while hovered / dragged / focused; on = always, as Figma draws it.
 - `valueLabelPosition?: 'top' | 'bottom' | 'left' | 'right'` — top / bottom (horizontal), left / right (vertical).
-- `valueLabelFormat?: string | ((value: number, index: number) => ReactNode)` = `Identity` — Text of the value label, or a formatter.
-- `orientation?: 'horizontal' | 'vertical'` = `'horizontal'`
-- `fill?: 'standard' | 'inverted' | 'normal'` — Fill from the start (standard) or from the thumb to the end (inverted).
+- `valueLabelFormat?: string | ((value: number, index: number) => ReactNode)` = `Identity` — Text of the value label, or a formatter. A formatter's text is also the aria-valuetext.
+- `orientation?: 'horizontal' | 'vertical'` = `'horizontal'` — Figma's Orientation. Vertical runs bottom (min) to top (max); give it a height.
+- `fill?: 'standard' | 'inverted' | 'normal'` — Fill from the start to the thumb, or between a range's thumbs (standard); the other side(s) (inverted).
 - `track?: 'standard' | 'inverted' | 'normal' | false` = `'standard'` — MUI's name for `fill`. false is retired and renders standard.
 - `disabled?: boolean` = `false`
 - `label?: ReactNode` — Visible label; also the accessible name.
@@ -1149,7 +1149,8 @@ Pick a number (or a range: pass an array `value`). SliderInput and RangeSlider a
 
 ```jsx
 <><Slider label="Volume" value={value} onChange={(e, next) => setValue(next)} />
-<RangeSlider label="Price" defaultValue={[20, 80]} min={0} max={100} /></>
+<RangeSlider label="Price" defaultValue={[20, 80]} min={0} max={100} />
+<Slider label="Treble" defaultValue={36} orientation="vertical" fill="inverted" style={{ height: 140 }} /></>
 ```
 
 ### RatingInput · Rating

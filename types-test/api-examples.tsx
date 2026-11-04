@@ -1112,7 +1112,8 @@ export const Example_SwitchProps = () => (
 export const Example_SliderProps = () => (
 <>
 <><Slider label="Volume" value={value} onChange={(e, next) => setValue(next)} />
-<RangeSlider label="Price" defaultValue={[20, 80]} min={0} max={100} /></>
+<RangeSlider label="Price" defaultValue={[20, 80]} min={0} max={100} />
+<Slider label="Treble" defaultValue={36} orientation="vertical" fill="inverted" style={{ height: 140 }} /></>
 </>
 );
 

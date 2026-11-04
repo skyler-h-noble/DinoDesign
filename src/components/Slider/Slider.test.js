@@ -363,7 +363,10 @@ describe('Slider — Accessibility (jest-axe)', () => {
 describe('Slider label (Figma SliderField)', () => {
   test('the label names every thumb of a range', () => {
     render(<Slider label="Price" defaultValue={[20, 60]} />);
-    expect(screen.getAllByRole('slider', { name: 'Price' })).toHaveLength(2);
+    /* Each thumb carries the field's name AND which end it is, so they are
+       not announced as two identical "Price" sliders. */
+    expect(screen.getByRole('slider', { name: 'Price minimum' })).toBeInTheDocument();
+    expect(screen.getByRole('slider', { name: 'Price maximum' })).toBeInTheDocument();
   });
   test('labelPosition="bottom" puts the label after the slider', () => {
     const { container } = render(<Slider label="Price" labelPosition="bottom" defaultValue={20} />);

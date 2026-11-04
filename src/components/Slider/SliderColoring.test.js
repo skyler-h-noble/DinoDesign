@@ -68,8 +68,13 @@ describe('surface tokens, not the button palette', () => {
   });
 
   test('the label uses a real text style, not hardcoded pixels', () => {
+    /* Figma's Label is the Mobile Nav Label Semibold style, so the size,
+       leading and tracking are the Mobile-Nav-Label tokens it binds. */
     render(<Slider defaultValue={40} valueLabelDisplay="on" />);
-    expect(css()).toContain('--Label-ExtraSmall-Font-Size');
+    const c = css().replace(/\s+/g, '');
+    expect(c).toContain('font-size:var(--Mobile-Nav-Label-Font-Size)');
+    expect(c).toContain('line-height:var(--Mobile-Nav-Label-Line-Height)');
+    expect(c).toContain('letter-spacing:var(--Mobile-Nav-Label-Letter-Spacing)');
   });
 
   test('...including its weight', () => {
@@ -79,7 +84,7 @@ describe('surface tokens, not the button palette', () => {
        fourth, which is invisible whenever the scale happens to say 600. */
     render(<Slider defaultValue={40} valueLabelDisplay="on" />);
     const c = css().replace(/\s+/g, '');
-    expect(c).toContain('font-weight:var(--Label-ExtraSmall-Font-Weight)');
+    expect(c).toContain('font-weight:var(--Body-Semibold-Font-Weight,var(--Mobile-Nav-Label-Font-Weight))');
     expect(c).not.toContain('font-weight:600');
   });
 });

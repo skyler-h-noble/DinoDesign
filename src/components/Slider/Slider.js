@@ -1,7 +1,7 @@
 // src/components/Slider/Slider.js
 import React, { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { FormLabel } from '../FormLabel/FormLabel';
-import { SHADOW_LEVEL_1 } from '../_shadows';
+import { SHADOW_LEVEL_2 } from '../_shadows';
 import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
 import { lazySxBox } from '../_lazyFallback';
 
@@ -189,6 +189,10 @@ const BODY2 = `font-family:${MUI_FONT};font-weight:400;font-size:0.875rem;line-h
 const EASE = 'cubic-bezier(0.4, 0, 0.2, 1)';
 // MUI's Level-2 elevation, which its thumb's ::before carried (theme.shadows[2]).
 const MUI_SHADOW_2 = '0px 3px 1px -2px rgba(0,0,0,0.2),0px 2px 2px 0px rgba(0,0,0,0.14),0px 1px 5px 0px rgba(0,0,0,0.12)';
+/* Figma's Handle carries Elevations/Level-2 (it was Level-1 here). Level 2 is
+   the surface-tinted set, not the black floating one: the thumb sits ON the
+   track, it does not float over the page. */
+const THUMB_SHADOW = SHADOW_LEVEL_2;
 // Figma's hover / pressed halo: the fill color at 20%.
 const HALO = 'color-mix(in srgb, var(--_sl-fill) 20%, transparent)';
 
@@ -205,10 +209,11 @@ registerStaticStyles('omni-slider', wk([
   '@media print{.omni-sl{color-adjust:exact}}',
   '.omni-sl.Mui-disabled{pointer-events:none;cursor:default;color:#bdbdbd}',
   '.omni-sl.MuiSlider-dragging .MuiSlider-thumb,.omni-sl.MuiSlider-dragging .MuiSlider-track{transition:none}',
-  `.omni-sl${H}{height:4px;width:100%;padding:13px 0}`,
+  /* Figma's Slider/Slider-Margin: 16px either side of the bar (MUI's was 13). */
+  `.omni-sl${H}{height:4px;width:100%;padding:16px 0}`,
   `@media (pointer: coarse){.omni-sl${H}{padding:20px 0}}`,
   `.omni-sl${H}.MuiSlider-marked{margin-bottom:20px}`,
-  `.omni-sl${V}{height:100%;width:4px;padding:0 13px}`,
+  `.omni-sl${V}{height:100%;width:4px;padding:0 16px}`,
   `@media (pointer: coarse){.omni-sl${V}{padding:0 20px}}`,
   `.omni-sl${V}.MuiSlider-marked{margin-right:44px}`,
   /* Rail, track. */
@@ -255,7 +260,7 @@ registerStaticStyles('omni-slider', wk([
 
   /* ── The design's layer (the sx). ── */
   ...Object.entries(SIZE_MAP).map(([size, c]) => `.omni-sl-${size}{--_sl-t:${c.track + 2}px;--_sl-r:${(c.track + 2) * 2}px;`
-    + `--_sl-thumb:${Math.max(TOUCH_MIN, c.visual)}px;--_sl-vis:${c.visual}px;--_sl-ml:${c.labelSize}px}`),
+    + `--_sl-thumb:${Math.max(TOUCH_MIN, c.visual)}px;--_sl-vis:${c.visual}px;--_sl-in:${(Math.max(TOUCH_MIN, c.visual) - c.visual) / 2}px;--_sl-ml:${c.labelSize}px}`),
   ...COLORS.map((color) => {
     const st = colorStyles(color);
     return `.omni-sl-${cap(color)}{--_sl-fill:${st.track};--_sl-edge:${st.thumb};--_sl-rail:${st.rail};--_sl-vl:${st.valueLabel};--_sl-vlt:${st.valueLabelText}}`;
@@ -283,34 +288,49 @@ registerStaticStyles('omni-slider', wk([
      ours, on ::before in the fill color. */
   `${ok('thumb')} .MuiSlider-thumb:hover,${ok('thumb')} .MuiSlider-thumb.Mui-focusVisible,${ok('thumb')} .MuiSlider-thumb.Mui-active{box-shadow:none}`,
   `${ok('thumb')} .MuiSlider-thumb::before{content:"";position:absolute;width:var(--_sl-vis);height:var(--_sl-vis);box-sizing:border-box;border-radius:50%;`
-    + `background-color:var(--_sl-edge);border:1px solid var(--Background);box-shadow:${SHADOW_LEVEL_1};transition:box-shadow 0.15s ease-in-out;`
+    + `background-color:var(--_sl-edge);border:1px solid var(--Background);box-shadow:${THUMB_SHADOW};transition:box-shadow 0.15s ease-in-out;`
     + 'top:50%;left:50%;transform:translate(-50%, -50%)}',
   /* Figma's Hover / Pressed: a halo of the fill color at 20% — 4px out on
      hover, 8px pressed — around the resting thumb. */
-  `${ok('thumb')} .MuiSlider-thumb:hover::before{box-shadow:${SHADOW_LEVEL_1}, 0 0 0 4px ${HALO}}`,
+  `${ok('thumb')} .MuiSlider-thumb:hover::before{box-shadow:${THUMB_SHADOW}, 0 0 0 4px ${HALO}}`,
   /* Focus: a 1px --Focus-Visible ring with a 1px --Background ring outside
      it, flush on the thumb's own --Background edge — so the ring's 3:1 is
      measured against a known color, not whatever sits behind the thumb. */
   `${ok('thumb')} .MuiSlider-thumb.Mui-focusVisible::before,${ok('thumb')} .MuiSlider-thumb:focus-visible::before`
-    + `{box-shadow:${SHADOW_LEVEL_1}, 0 0 0 1px var(--Focus-Visible), 0 0 0 2px var(--Background)}`,
-  `${ok('thumb')} .MuiSlider-thumb.Mui-active::before,${ok('thumb')} .MuiSlider-thumb:active::before{box-shadow:${SHADOW_LEVEL_1}, 0 0 0 8px ${HALO}}`,
+    + `{box-shadow:${THUMB_SHADOW}, 0 0 0 1px var(--Focus-Visible), 0 0 0 2px var(--Background)}`,
+  `${ok('thumb')} .MuiSlider-thumb.Mui-active::before,${ok('thumb')} .MuiSlider-thumb:active::before{box-shadow:${THUMB_SHADOW}, 0 0 0 8px ${HALO}}`,
   `${ok('thumb')} .MuiSlider-thumb.Mui-focusVisible{outline:none;border-radius:50%}`,
-  /* Value label — the surface's own pair, inverted, in Labels-Extra-Small. */
-  `${ok('vl')} .MuiSlider-valueLabel{background-color:var(--_sl-vl);color:var(--_sl-vlt);font-family:var(--Font-Families-Body, var(--Body-Font-Family));`
-    + 'font-size:var(--Label-ExtraSmall-Font-Size);font-weight:var(--Label-ExtraSmall-Font-Weight);letter-spacing:var(--Label-ExtraSmall-Letter-Spacing);'
-    + 'line-height:var(--Label-ExtraSmall-Line-Height);border-radius:var(--Sizing-1, 8px);padding:var(--Sizing-Half, 4px) var(--Sizing-1, 8px)}',
-  `${ok('vl')} .MuiSlider-valueLabel::before{background-color:var(--_sl-vl)}`,
-  /* Vertical: Figma's thumb shows its label to the RIGHT, 8px clear, the
-     arrow pointing back at the thumb (MUI puts it on the left) … */
-  `${ok('vl-v')}.omni-sl-vr.MuiSlider-vertical .MuiSlider-valueLabel{right:auto;left:calc(100% + 8px);transform-origin:left center}`,
-  `${ok('vl-v')}.omni-sl-vr.MuiSlider-vertical .MuiSlider-valueLabel::before{right:auto;left:0;transform:translate(-50%, -50%) rotate(45deg)}`,
-  /* … or Label-Left: 8px clear on the thumb's left, the arrow pointing right. */
-  `${ok('vl-v')}.omni-sl-vl.MuiSlider-vertical .MuiSlider-valueLabel{left:auto;right:calc(100% + 8px);transform-origin:right center}`,
-  `${ok('vl-v')}.omni-sl-vl.MuiSlider-vertical .MuiSlider-valueLabel::before{left:auto;right:0;transform:translate(50%, -50%) rotate(45deg)}`,
-  /* Label-Bottom: under the thumb, the arrow pointing up at it. */
-  `${ok('vl-b')}.omni-sl-vb .MuiSlider-thumb .MuiSlider-valueLabel{top:calc(100% + 10px);transform-origin:top center;transform:translateY(0) scale(0)}`,
+  /* Value label — the surface's own pair, inverted. Figma's Label is the
+     Mobile Nav Label Semibold text style: the Mobile-Nav-Label size, line
+     height and tracking, in the Body family at Body's semibold weight. It was
+     Label-ExtraSmall here, which shares the desktop numbers (11 / 16.5) but
+     not the device ramp Figma binds. */
+  `${ok('vl')} .MuiSlider-valueLabel{background-color:var(--_sl-vl);color:var(--_sl-vlt);font-family:var(--Font-Family-Body);`
+    + 'font-size:var(--Mobile-Nav-Label-Font-Size);font-weight:var(--Body-Semibold-Font-Weight, var(--Mobile-Nav-Label-Font-Weight));'
+    + 'letter-spacing:var(--Mobile-Nav-Label-Letter-Spacing);line-height:var(--Mobile-Nav-Label-Line-Height);'
+    + 'border-radius:var(--Sizing-1, 8px);padding:var(--Sizing-Half, 4px) var(--Sizing-1, 8px)}',
+  /* The pointer is Figma's triangle, not MUI's rotated square: 11 x 5 under
+     the label (Label-Top), its tip 4.5px off the thumb's visible edge.
+     --_sl-in is the gap between the 24px touch box and the visible circle,
+     so the label sits off the circle at every size, not off the box. */
+  `${ok('vl')} .MuiSlider-valueLabel::before{background-color:var(--_sl-vl);border-radius:0}`,
+  `${ok('vl')}${H} .MuiSlider-valueLabel{top:calc(var(--_sl-in) - 9.5px)}`,
+  `${ok('vl')}${H} .MuiSlider-valueLabel::before{width:11px;height:5px;top:auto;bottom:0;left:50%;right:auto;`
+    + 'transform:translate(-50%, 100%);clip-path:polygon(0 0, 100% 0, 50% 100%)}',
+  /* Vertical: Figma's Label-Right — 8px clear of the circle, a 6 x 10.4
+     triangle whose tip is 4px off the circle and whose base tucks 2px under
+     the label (MUI puts the label on the left) … */
+  `${ok('vl-v')}.omni-sl-vr.MuiSlider-vertical .MuiSlider-valueLabel{right:auto;left:calc(100% - var(--_sl-in) + 8px);transform-origin:left center}`,
+  `${ok('vl-v')}.omni-sl-vr.MuiSlider-vertical .MuiSlider-valueLabel::before{width:6px;height:10.4px;right:auto;left:0;top:50%;bottom:auto;`
+    + 'transform:translate(-4px, -50%);clip-path:polygon(0 50%, 100% 0, 100% 100%)}',
+  /* … or Label-Left, mirrored. */
+  `${ok('vl-v')}.omni-sl-vl.MuiSlider-vertical .MuiSlider-valueLabel{left:auto;right:calc(100% - var(--_sl-in) + 8px);transform-origin:right center}`,
+  `${ok('vl-v')}.omni-sl-vl.MuiSlider-vertical .MuiSlider-valueLabel::before{width:6px;height:10.4px;left:auto;right:0;top:50%;bottom:auto;`
+    + 'transform:translate(4px, -50%);clip-path:polygon(0 0, 100% 50%, 0 100%)}',
+  /* Label-Bottom: under the thumb, the pointer turned up at it. */
+  `${ok('vl-b')}.omni-sl-vb .MuiSlider-thumb .MuiSlider-valueLabel{top:calc(100% - var(--_sl-in) + 9.5px);transform-origin:top center;transform:translateY(0) scale(0)}`,
   `${ok('vl-b')}.omni-sl-vb .MuiSlider-thumb .MuiSlider-valueLabel.MuiSlider-valueLabelOpen{transform:translateY(0) scale(1)}`,
-  `${ok('vl-b')}.omni-sl-vb .MuiSlider-thumb .MuiSlider-valueLabel::before{bottom:auto;top:0;transform:translate(-50%, -50%) rotate(45deg)}`,
+  `${ok('vl-b')}.omni-sl-vb .MuiSlider-thumb .MuiSlider-valueLabel::before{bottom:auto;top:0;transform:translate(-50%, -100%);clip-path:polygon(50% 0, 100% 100%, 0 100%)}`,
   /* Marks are DOTS: --Quiet on the rail, --Background where the fill has
      passed — each token chosen against what it sits on. */
   `${ok('mark')} .MuiSlider-mark{background-color:var(--Quiet);width:2px;height:2px;border-radius:50%}`,
@@ -444,9 +464,10 @@ export function Slider({
   max = 100,
   step = 1,
   marks = false,
-  /* Figma's thumb carries its value label. 'auto' shows it while the thumb
-     is hovered, dragged or focused — the label is there when the value is
-     changing, without a row of bubbles over every resting slider. */
+  /* Figma's thumb carries its value label, and every variant in the set draws
+     it. 'auto' shows it while the thumb is hovered, dragged or focused — the
+     label is there when the value is changing, without a row of bubbles over
+     every resting slider; 'on' is the always-visible look the variants show. */
   valueLabelDisplay = 'auto',
   /* Which side of the thumb its value label sits — Figma's thumb booleans:
      horizontal 'top' (default, Label-Top) | 'bottom' (Label-Bottom);
@@ -837,6 +858,29 @@ export function Slider({
       })}
       {values.map((value, index) => {
         const percent = valueToPercent(value, min, max);
+        /* A range's thumbs need names that tell them apart: with one shared
+           name a screen reader announces "Price, slider" twice. Unless
+           getAriaLabel names them, the first is "minimum" and the last
+           "maximum", joined to the slider's own name — through
+           aria-labelledby listing the label and then the input itself, so the
+           visible label stays the source of the name. */
+        const thumbName = range && !getAriaLabel
+          ? (index === 0 ? 'minimum' : index === values.length - 1 ? 'maximum' : `value ${index + 1}`)
+          : null;
+        const inputId = inputSlot.id || `${labelId}-thumb-${index}`;
+        let thumbLabel = getAriaLabel ? getAriaLabel(index) : ariaLabel;
+        let thumbLabelledBy = labelledBy;
+        if (thumbName) {
+          if (labelledBy) { thumbLabel = thumbName; thumbLabelledBy = `${labelledBy} ${inputId}`; }
+          else thumbLabel = ariaLabel ? `${ariaLabel} ${thumbName}` : thumbName.charAt(0).toUpperCase() + thumbName.slice(1);
+        }
+        /* aria-valuetext: what the bubble shows, when a formatter makes it
+           differ from the bare number ("$40", "40%") — the sighted user reads
+           the bubble, so the screen-reader user should hear the same text. */
+        const formatted = typeof valueLabelFormat === 'function' ? valueLabelFormat(scale(value), index) : undefined;
+        const valueText = getAriaValueText ? getAriaValueText(scale(value), index)
+          : ariaValuetext !== undefined ? ariaValuetext
+          : ((typeof formatted === 'string' || typeof formatted === 'number') && String(formatted) !== String(scale(value)) ? String(formatted) : undefined);
         const showLabel = valueLabelDisplay !== 'off';
         const labelOpen = open === index || active === index || valueLabelDisplay === 'on';
         return (
@@ -851,10 +895,11 @@ export function Slider({
           >
             <input
               data-index={index}
-              aria-label={getAriaLabel ? getAriaLabel(index) : ariaLabel}
+              id={inputId}
+              aria-label={thumbLabel}
               aria-valuenow={scale(value)}
-              aria-labelledby={labelledBy}
-              aria-valuetext={getAriaValueText ? getAriaValueText(scale(value), index) : ariaValuetext}
+              aria-labelledby={thumbLabelledBy}
+              aria-valuetext={valueText}
               value={values[index]}
               tabIndex={tabIndex}
               aria-orientation={orientation}
