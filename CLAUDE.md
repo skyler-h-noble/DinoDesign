@@ -242,13 +242,17 @@ brand color.
   `paddingTop` / `paddingBottom` for one edge, e.g. the first section under the
   header). They come from the spacing tokens and shrink on phones. Do not
   write pixel padding on sections — six sections, six hand-picked rhythms.
-- **One `h1` on every page** — the page's title, not just the home page. Use
+- **One `h1` on every page** — the page's title, not just the home page,
+  and including the not-found (404) page and empty states. Use
   `<H1>`, or `component="h1"` on a display style
   (`<DisplayLarge component="h1">`). Section titles below it are `H2`, then
   `H3`. A category, product, cart or checkout page whose title is an `H2` has
   no `h1` at all.
-- **A link's `aria-label` must contain its visible text.** Voice-control users
-  say what they see. Leave `aria-label` off a link that already has text. On
+- **A link's `aria-label` must contain its visible text.** This covers every
+  link: `Link`, and a `Card` or `Button` with `href`. Voice-control users say
+  what they see. Leave `aria-label` off anything that already has text — a
+  clickable `Card` is named by its whole content, so an `aria-label` of just
+  its title fails when it also shows a description. On
   an image link, put the product name first and include any visible text on
   the image (a "Sale" badge): `aria-label="Linen Throw, Sale"`, or keep the
   badge outside the link.

@@ -217,7 +217,7 @@ export interface StackProps extends Native {
 // ─── Surfaces ────────────────────────────────────────────────────────────────
 
 /**
- * A card on a Container level; pads itself. Use `href` to make the whole card a link.
+ * A card on a Container level; pads itself. Use `href` to make the whole card a link. A linked card is named by its content — no `aria-label` unless it contains all the visible text.
  * @category Surfaces
  * @exports Card
  * @example
