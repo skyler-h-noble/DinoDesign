@@ -348,7 +348,7 @@ export interface ToggleButtonGroupProps extends Native<HTMLElement, 'onChange' |
 }
 
 /**
- * Inline text link. Without `href` it renders a button that runs `onClick`. No hover color change by design.
+ * Inline text link. Without `href` it renders a button that runs `onClick`. No hover color change by design. An `aria-label` must contain the visible text (voice control); omit it when the link has text.
  * @category Navigation
  * @exports Link
  * @example
@@ -414,7 +414,7 @@ export interface TypographyProps extends TypographyBase {
 }
 
 /**
- * Display and heading styles, in --Header colors. H1–H6 render h1–h6; Display* render a div — pass `component="h1"` for the page title. Heading = H4.
+ * Display and heading styles, in --Header colors. H1–H6 render h1–h6; Display* render a div — pass `component="h1"` for the page title. Every page has exactly one h1 (category, product and cart pages too); sections below it are H2, then H3. Heading = H4.
  * @category Text
  * @exports DisplayLarge DisplayMedium DisplaySmall H1 H2 H3 H4 H5 H6 Heading
  * @example

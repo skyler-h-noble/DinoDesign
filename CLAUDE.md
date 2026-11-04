@@ -231,6 +231,16 @@ brand color.
 - **Icon-only buttons:** the button carries the name, the icon none —
   `<Button iconOnly aria-label="Delete item"><DeleteIcon /></Button>`. Name the
   action, not the picture.
+- **One `h1` on every page** — the page's title, not just the home page. Use
+  `<H1>`, or `component="h1"` on a display style
+  (`<DisplayLarge component="h1">`). Section titles below it are `H2`, then
+  `H3`. A category, product, cart or checkout page whose title is an `H2` has
+  no `h1` at all.
+- **A link's `aria-label` must contain its visible text.** Voice-control users
+  say what they see. Leave `aria-label` off a link that already has text. On
+  an image link, put the product name first and include any visible text on
+  the image (a "Sale" badge): `aria-label="Linen Throw, Sale"`, or keep the
+  badge outside the link.
 - **Color roles — use all three.** Primary, Secondary and Tertiary are roles,
   each with contrast-checked text, buttons, icons and a whole theme on every
   surface. Do not build a page from one accent and grays. Mostly `Default` and

@@ -190,10 +190,16 @@ export function Rating({
           + (disabled ? ' omni-rt-star-off' : (isInteractive ? ' omni-rt-star-int' : ''))
           + starClass(isFilled, isHalfFilled)}
         type={isInteractive ? 'button' : undefined}
+        /* Read-only and disabled: the group is role="img" and its label already
+           says "3 of 5 stars", so each star is decoration. A span carrying
+           aria-checked / aria-label with no role is invalid ARIA (axe
+           aria-allowed-attr + aria-prohibited-attr, critical) — it put 840
+           violations on one product grid. */
         role={isInteractive ? 'radio' : undefined}
-        aria-checked={isFilled || isHalfFilled}
-        aria-label={(starValue) + ' star' + (starValue !== 1 ? 's' : '')}
-        tabIndex={isInteractive ? 0 : -1}
+        aria-checked={isInteractive ? (isFilled || isHalfFilled) : undefined}
+        aria-label={isInteractive ? (starValue) + ' star' + (starValue !== 1 ? 's' : '') : undefined}
+        aria-hidden={isInteractive ? undefined : 'true'}
+        tabIndex={isInteractive ? 0 : undefined}
         onClick={halves ? undefined : () => handleClick(starValue)}
         onMouseEnter={() => isInteractive && !halves && setHoverValue(starValue)}
         onMouseLeave={() => isInteractive && setHoverValue(null)}

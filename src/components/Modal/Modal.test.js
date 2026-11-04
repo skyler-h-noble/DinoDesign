@@ -216,3 +216,56 @@ describe('Figma structure', () => {
     expect(document.querySelector('.modal-footer')).toBeNull();
   });
 });
+
+/* --- Focus trap: Tab stays in the dialog (aria-modal promises it) --- */
+describe('Focus trap', () => {
+  const setup = () => {
+    render(
+      <>
+        <button>Behind</button>
+        <Modal open onClose={() => {}} title="Quick view">
+          <button>Add to cart</button>
+          <button disabled>Sold out</button>
+          <a href="/p/1">Details</a>
+        </Modal>
+      </>
+    );
+    const close = screen.getByRole('button', { name: 'Close modal' });
+    const add = screen.getByRole('button', { name: 'Add to cart' });
+    const details = screen.getByRole('link', { name: 'Details' });
+    return { close, add, details, dialog: screen.getByRole('dialog') };
+  };
+  const tab = (shiftKey = false) => fireEvent.keyDown(document.activeElement || document.body, { key: 'Tab', shiftKey });
+
+  test('Tab from the last control wraps to the first', () => {
+    const { close, details } = setup();
+    details.focus();
+    tab();
+    expect(document.activeElement).toBe(close);
+  });
+  test('Shift+Tab from the first control wraps to the last', () => {
+    const { close, details } = setup();
+    close.focus();
+    tab(true);
+    expect(document.activeElement).toBe(details);
+  });
+  test('Shift+Tab from the dialog frame (initial focus) stays inside', () => {
+    const { dialog, details } = setup();
+    dialog.focus();
+    tab(true);
+    expect(document.activeElement).toBe(details);
+  });
+  test('focus that left the dialog is pulled back in on Tab', () => {
+    const { close } = setup();
+    screen.getByRole('button', { name: 'Behind' }).focus();
+    tab();
+    expect(document.activeElement).toBe(close);
+  });
+  test('Tab in the middle is left to the browser', () => {
+    const { add } = setup();
+    add.focus();
+    const ev = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+    add.dispatchEvent(ev);
+    expect(ev.defaultPrevented).toBe(false);
+  });
+});

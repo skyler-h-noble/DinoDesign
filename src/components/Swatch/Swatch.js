@@ -239,7 +239,11 @@ export function Swatch({
     type: clickable ? 'button' : undefined,
     onClick: clickable ? onClick : undefined,
     disabled: clickable && disabled ? true : undefined,
-    'aria-pressed': clickable ? selected : undefined,
+    /* With the radio drawn, the swatch IS a radio (callers put the set in a
+       role="radiogroup"); otherwise it is a toggle button. */
+    role: clickable && radio ? 'radio' : undefined,
+    'aria-checked': clickable && radio ? Boolean(selected) : undefined,
+    'aria-pressed': clickable && !radio ? selected : undefined,
     'aria-label': accessibleName,
     className: `swatch ${selected ? 'swatch-selected' : ''} ${className}`.trim()
       + ' MuiBox-root omni-swatch'
@@ -260,8 +264,9 @@ export function Swatch({
             + (selected ? ' Mui-checked' : '') + (disabled ? ' Mui-disabled' : '') + ' omni-swatch-radio'}
           aria-hidden="true"
         >
-          <input className="PrivateSwitchBase-input" type="radio" tabIndex={-1} checked={selected}
-                 disabled={disabled} onChange={() => {}} />
+          {/* No <input>: a form control inside the button is a nested
+              interactive element (axe nested-interactive, serious) even when
+              hidden. The ring and dot below are the whole picture. */}
           <div className="radio-circle-icon MuiBox-root omni-swatch-ring">
             {selected && <div className="MuiBox-root omni-swatch-dot" />}
           </div>

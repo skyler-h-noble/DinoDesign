@@ -85,6 +85,21 @@ describe('Read only', () => {
     renderRating({ value: 3, readOnly: true });
     expect(screen.queryAllByRole('radio')).toHaveLength(0);
   });
+  // A roleless span may not carry aria-checked / aria-label (axe
+  // aria-allowed-attr, aria-prohibited-attr). The group's label carries the value.
+  test.each([['readOnly', { readOnly: true }], ['disabled', { disabled: true }]])(
+    '%s stars carry no ARIA state and are hidden from the tree', (_, p) => {
+      const { container } = renderRating({ value: 3, ...p });
+      const stars = container.querySelectorAll('.rating-star');
+      expect(stars).toHaveLength(5);
+      stars.forEach((s) => {
+        expect(s).not.toHaveAttribute('aria-checked');
+        expect(s).not.toHaveAttribute('aria-label');
+        expect(s).not.toHaveAttribute('tabindex');
+        expect(s).toHaveAttribute('aria-hidden', 'true');
+      });
+      expect(screen.getByRole('img')).toHaveAccessibleName(/3 of 5 stars/);
+    });
 });
 
 /* --- No rating --- */

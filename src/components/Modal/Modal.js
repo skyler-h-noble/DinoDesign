@@ -46,6 +46,12 @@ import { Body, Eyebrow, H3 } from '../Typography/Typography';
  * BACKDROP: semi-transparent overlay, click to close (optional)
  */
 
+/* What Tab can land on inside the dialog. Disabled controls and tabindex=-1
+   are not stops; the dialog frame itself (tabindex -1) is handled apart. */
+const FOCUSABLE = 'a[href], area[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), '
+  + 'select:not([disabled]), textarea:not([disabled]), iframe, [contenteditable="true"], '
+  + '[tabindex]:not([tabindex="-1"])';
+
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 /* One map, not two. The palette is the same for solid and soft — what
@@ -202,11 +208,29 @@ export function Modal({
     return () => { document.body.style.overflow = ''; };
   }, [open]);
 
-  // Escape key
+  // Escape closes; Tab and Shift+Tab cycle inside the dialog. Opening only
+  // FOCUSED the dialog — nothing kept Tab in it, so focus walked out to the
+  // page behind (aria-modal promises it cannot), 47 of 50 presses in the
+  // clean-room store's Quick view. Listening on the document, not the frame,
+  // also catches focus that has already left (e.g. a click on the backdrop).
   useEffect(() => {
     if (!open) return;
     const handler = (e) => {
-      if (e.key === 'Escape') onClose?.();
+      if (e.key === 'Escape') { onClose?.(); return; }
+      if (e.key !== 'Tab' || !modalRef.current) return;
+      const frame = modalRef.current;
+      const items = Array.from(frame.querySelectorAll(FOCUSABLE))
+        .filter((el) => !el.closest('[hidden], [inert], [aria-hidden="true"]'));
+      const active = document.activeElement;
+      if (!items.length) { e.preventDefault(); frame.focus(); return; }
+      const first = items[0];
+      const last = items[items.length - 1];
+      const inside = frame.contains(active);
+      if (e.shiftKey) {
+        if (!inside || active === first || active === frame) { e.preventDefault(); last.focus(); }
+      } else if (!inside || active === last) {
+        e.preventDefault(); first.focus();
+      }
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);

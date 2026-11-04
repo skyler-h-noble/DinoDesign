@@ -280,7 +280,7 @@ Any text style by name. Prefer the named components below.
 ```
 
 ### DisplayLarge · DisplayMedium · DisplaySmall · H1 · H2 · H3 · H4 · H5 · H6 · Heading
-Display and heading styles, in --Header colors. H1–H6 render h1–h6; Display* render a div — pass `component="h1"` for the page title. Heading = H4.
+Display and heading styles, in --Header colors. H1–H6 render h1–h6; Display* render a div — pass `component="h1"` for the page title. Every page has exactly one h1 (category, product and cart pages too); sections below it are H2, then H3. Heading = H4.
 
 - `color?: HeadingColor` — Header color role (3:1).
 - `component?: ElementType` — Element to render (keep one h1 per page: `<DisplayLarge component="h1">`).
@@ -1276,7 +1276,7 @@ A plain surface on a Container level (MUI Paper markup). For content cards prefe
 ## Navigation
 
 ### Link
-Inline text link. Without `href` it renders a button that runs `onClick`. No hover color change by design.
+Inline text link. Without `href` it renders a button that runs `onClick`. No hover color change by design. An `aria-label` must contain the visible text (voice control); omit it when the link has text.
 
 - `href?: string`
 - `target?: string`
