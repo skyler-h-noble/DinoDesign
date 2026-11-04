@@ -7,8 +7,12 @@
   "main": "dist/index.js",
   "module": "dist/esm/components/index.js",
   "types": "./dist/types/components/index.d.ts",
+  "bin": {
+    "omni-check": "bin/omni-check.js"
+  },
   "files": [
     "dist",
+    "bin",
     "public/styles",
     "docs/REFERENCE.md",
     "docs/API.md",
@@ -110,7 +114,8 @@
   },
   "dependencies": {
     "@fortawesome/free-brands-svg-icons": "^7.3.1",
-    "@omni-design/icons": "^0.1.0"
+    "@omni-design/icons": "^0.1.0",
+    "axe-core": "^4.11.1"
   },
   "homepage": "/",
   "browserslist": {

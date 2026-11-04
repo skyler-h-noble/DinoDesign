@@ -62,6 +62,29 @@ would rather not hand over a component, `navigate={(href, event) => …}` is
 called on plain left clicks instead. Details: [`CLAUDE.md`](./CLAUDE.md),
 section 10.
 
+## Accessibility check: `omni-check`
+
+The design system owns contrast, focus and states. What it cannot own is how a
+page is put together, so the package ships a checker for that:
+
+```bash
+npm run build && npx omni-check
+```
+
+It serves your build folder (`dist/`, `build/` or `out/`, or pass a folder or
+a URL), follows the links from the start page (or `--routes /,/cart`), and runs
+axe-core on every page in light and dark mode at 1280px and 390px, in a Chrome,
+Chromium or Edge already on your machine (`CHROME_PATH` to pick one; it never
+downloads a browser). Each failure is printed with its element and the fix; the
+last line is `omni-check: 0 issues` when clean, and the exit code is 1 when not,
+for CI. `--json` for a machine-readable report. Needs Node 22+.
+
+Two common failures are designed out in the components themselves:
+`<AutoHeading>` takes its level from nesting in `Section` / `HeadingLevel`, so
+section titles cannot skip a level; and `Link`, `Button`, clickable `Card`,
+`Chip` and `BreadcrumbItem` drop an `aria-label` that does not contain their
+visible text in production builds (and warn in development).
+
 ## Docs
 
 - [`CLAUDE.md`](./CLAUDE.md) — the short guide: setup, the components you

@@ -282,6 +282,12 @@ brand color.
   section (Primary → Secondary, Secondary → Tertiary, …) — do not recolor it.
   To separate neighboring sections, alternate the `theme`; neighboring
   `surface` levels can look nearly the same.
+- **Before you report done, run `npm run build && npx omni-check` and fix
+  anything it reports.** It serves the build, checks every page (light and
+  dark, 1280px and 390px) with axe in a local Chrome, prints each failure with
+  its element and the fix, and ends `omni-check: 0 issues` when clean (exit
+  code 1 otherwise). `--routes /,/cart,/checkout` to name pages; by default it
+  follows the links from the start page.
 - **Build warning you can ignore:** Vite may warn about a large `BrandIcon`
   chunk. It is loaded only when a Footer social link names a brand.
 - **Do not import components from `@mui/material`** — the package re-exports
