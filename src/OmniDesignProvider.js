@@ -316,7 +316,31 @@ async function fetchThemeManifest(themeURL) {
     // Human-readable design system name — surfaced on the context so consumers
     // (AppBar brand, page headers, etc.) can display it.
     name:           manifest.name           ?? null,
+    // Google Fonts stylesheets the system uses (studio 2026-11+). Requested as
+    // <link>s as soon as the manifest is read, in parallel with the sheets,
+    // instead of waiting for an @import inside foundation.css to be parsed.
+    fonts: Array.isArray(manifest.fonts)
+      ? manifest.fonts.filter((u) => typeof u === 'string' && /^https:\/\/fonts\.googleapis\.com\//.test(u))
+      : [],
   };
+}
+
+/* One <link rel="stylesheet"> per font URL, plus the two preconnects, each
+   added once per document. A system published before `fonts` existed has none
+   and loads its fonts through foundation.css's @import as before. */
+function linkFonts(urls) {
+  if (typeof document === 'undefined' || !urls || !urls.length) return;
+  const add = (attrs) => {
+    const sel = 'link[rel="' + attrs.rel + '"][href="' + attrs.href + '"]';
+    if (document.head.querySelector(sel)) return;
+    const el = document.createElement('link');
+    Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+    el.setAttribute('data-omni', 'font');
+    document.head.appendChild(el);
+  };
+  add({ rel: 'preconnect', href: 'https://fonts.googleapis.com' });
+  add({ rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' });
+  urls.forEach((href) => add({ rel: 'stylesheet', href }));
 }
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
@@ -504,6 +528,8 @@ export function OmniDesignProvider({
     fetchThemeManifest(themeURL)
       .then(manifest => {
         if (!mountedRef.current) return;
+
+        linkFonts(manifest.fonts);
 
         // Individual CSS props always take precedence over manifest
         setResolvedSources({
