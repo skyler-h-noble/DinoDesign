@@ -34,7 +34,12 @@ registerStaticStyles('omni-text-field', [
   `.omni-tf-err${OR}.Mui-focused fieldset{border-color:var(--Buttons-Error-Border)}`,
   `.omni-tf${OR}.Mui-disabled{background-color:var(--Background);opacity:var(--Disabled, 0.38)}`,
   // Label
-  '.omni-tf .MuiInputLabel-root{color:var(--Text-Quiet);transition:all 0.2s ease-in-out;font-size:14px;font-weight:500}',
+  /* --Quiet of the FIELD's surface (the root declares Container below), not
+     the section's: the resting label sits on the Container fill, and the
+     section's quiet tone is tuned for the lighter page — 4.46:1 on #f3f3f3.
+     --Quiet, not --Text-Quiet: --Text-Quiet is only declared where theme and
+     surface share an element, so a nested field never re-resolved it. */
+  '.omni-tf .MuiInputLabel-root{color:var(--Quiet, var(--Text-Quiet));transition:all 0.2s ease-in-out;font-size:14px;font-weight:500}',
   '.omni-tf-foc .MuiInputLabel-root,.omni-tf-err .MuiInputLabel-root{color:var(--Text)}',
   '.omni-tf .MuiInputLabel-root.Mui-focused{color:var(--Text);font-weight:600}',
   '.omni-tf .MuiInputLabel-root.Mui-error{color:var(--Text)}',
@@ -123,6 +128,10 @@ function TextFieldStatic({
     onBlur: (e) => { setIsFocused(false); onBlurProp?.(e); },
     error,
     fullWidth,
+    /* The label and helper are siblings of the input box, not inside it, so
+       they need the box's surface too or they read the section's colors
+       while drawn over the Container fill. data-surface paints nothing. */
+    'data-surface': disabled ? 'Container-Low' : 'Container',
     inputProps: {
       ...(ariaLabel ? { 'aria-label': ariaLabel } : {}),
       ...(ariaLabelledby ? { 'aria-labelledby': ariaLabelledby } : {}),

@@ -78,7 +78,7 @@ export function TextField({
     ? 'var(--Text)'
     : isFocused
     ? 'var(--Text)'
-    : 'var(--Text-Quiet)';
+    : 'var(--Quiet, var(--Text-Quiet))';   // the field's (Container) quiet — see TextField.js
 
   const textColor = error ? 'var(--Text)' : 'var(--Text)';
 
@@ -102,6 +102,8 @@ export function TextField({
         onBlur={(e) => { setIsFocused(false); onBlurProp?.(e); }}
         error={error}
         fullWidth={fullWidth}
+        /* Label and helper sit beside the input box, so they take its surface. */
+        data-surface={disabled ? 'Container-Low' : 'Container'}
         slotProps={{
           htmlInput: {
             ...(ariaLabel ? { 'aria-label': ariaLabel } : {}),
