@@ -248,14 +248,15 @@ brand color.
   (`<DisplayLarge component="h1">`). Section titles below it are `H2`, then
   `H3`. A category, product, cart or checkout page whose title is an `H2` has
   no `h1` at all.
-- **A link's `aria-label` must contain its visible text.** This covers every
-  link: `Link`, and a `Card` or `Button` with `href`. Voice-control users say
-  what they see. Leave `aria-label` off anything that already has text — a
-  clickable `Card` is named by its whole content, so an `aria-label` of just
-  its title fails when it also shows a description. On
-  an image link, put the product name first and include any visible text on
-  the image (a "Sale" badge): `aria-label="Linen Throw, Sale"`, or keep the
-  badge outside the link.
+- **A link that shows text gets no `aria-label`.** That covers every link:
+  `Link`, and a `Card` or `Button` with `href`. Its visible content (an image
+  link's badge and product name included) already names it, and a label that
+  differs — even reordered, like `"Linen Throw, Sale"` on a link that reads
+  "Sale Linen Throw" — fails voice control (axe label-content-name-mismatch).
+  Use `aria-label` only on a link with no visible text (an icon), and give the
+  image inside a link `alt=""` so the visible text is the whole name.
+- **Headings go down one level at a time** — after the page's `h1`, a panel
+  title is `H2`, not `H3`.
 - **Color roles — use all three.** Primary, Secondary and Tertiary are roles,
   each with contrast-checked text, buttons, icons and a whole theme on every
   surface. Do not build a page from one accent and grays. Mostly `Default` and

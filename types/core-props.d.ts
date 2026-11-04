@@ -217,7 +217,7 @@ export interface StackProps extends Native {
 // ─── Surfaces ────────────────────────────────────────────────────────────────
 
 /**
- * A card on a Container level; pads itself. Use `href` to make the whole card a link. A linked card is named by its content — no `aria-label` unless it contains all the visible text.
+ * A card on a Container level; pads itself. Use `href` to make the whole card a link. A linked card is named by its content — never add `aria-label` to it.
  * @category Surfaces
  * @exports Card
  * @example
@@ -355,7 +355,7 @@ export interface ToggleButtonGroupProps extends Native<HTMLElement, 'onChange' |
 }
 
 /**
- * Inline text link. Without `href` it renders a button that runs `onClick`. No hover color change by design. An `aria-label` must contain the visible text (voice control); omit it when the link has text.
+ * Inline text link. Without `href` it renders a button that runs `onClick`. No hover color change by design. Never add `aria-label` to a link that shows text — its content names it; any different label (even reordered) fails voice control.
  * @category Navigation
  * @exports Link
  * @example

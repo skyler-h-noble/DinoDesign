@@ -1218,7 +1218,7 @@ One day of a calendar — the building block DatePicker draws; use it to build a
 ## Surfaces
 
 ### Card
-A card on a Container level; pads itself. Use `href` to make the whole card a link. A linked card is named by its content — no `aria-label` unless it contains all the visible text.
+A card on a Container level; pads itself. Use `href` to make the whole card a link. A linked card is named by its content — never add `aria-label` to it.
 
 - `variant?: 'solid' | 'light' | 'dark'` = `'solid'` — solid = on a Container level; light / dark = a tinted or deep card in `color`.
 - `color?: Color` = `'default'` — Palette for light / dark variants.
@@ -1280,7 +1280,7 @@ A plain surface on a Container level (MUI Paper markup). For content cards prefe
 ## Navigation
 
 ### Link
-Inline text link. Without `href` it renders a button that runs `onClick`. No hover color change by design. An `aria-label` must contain the visible text (voice control); omit it when the link has text.
+Inline text link. Without `href` it renders a button that runs `onClick`. No hover color change by design. Never add `aria-label` to a link that shows text — its content names it; any different label (even reordered) fails voice control.
 
 - `href?: string`
 - `target?: string`
