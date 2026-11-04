@@ -1219,7 +1219,7 @@ One day of a calendar — the building block DatePicker draws; use it to build a
 ## Surfaces
 
 ### Card
-A card on a Container level; pads itself. Use `href` to make the whole card a link. A linked card is named by its content — never add `aria-label` to it.
+A card on a Container level; pads itself. Use `href` to make the whole card a link. A linked card is named by its content — never add `aria-label` to it. Leave `color` unset so cards take their section's theme; never vary it across a row of cards.
 
 - `variant?: 'solid' | 'light' | 'dark'` = `'solid'` — solid = on a Container level; light / dark = a tinted or deep card in `color`.
 - `color?: Color` = `'default'` — Palette for light / dark variants.

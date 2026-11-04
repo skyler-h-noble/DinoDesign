@@ -257,6 +257,11 @@ brand color.
   image inside a link `alt=""` so the visible text is the whole name.
 - **Headings go down one level at a time** — after the page's `h1`, a panel
   title is `H2`, not `H3`.
+- **Cards take their section's color.** Leave `color` / `theme` off cards so
+  they inherit the band they sit on. Never rotate colors across a row of cards
+  (`color={COLORS[i % n]}`) or give one card a different theme from its
+  neighbours — a set of cards is one surface, not a palette sampler. To make
+  one card stand out, raise its level (`Container-High`), not its color.
 - **Color roles — use all three.** Primary, Secondary and Tertiary are roles,
   each with contrast-checked text, buttons, icons and a whole theme on every
   surface. Do not build a page from one accent and grays. Mostly `Default` and
