@@ -267,14 +267,15 @@ describe('Tooltip — elevation is a token', () => {
   // eslint-disable-next-line global-require
   const source = require('fs').readFileSync(require.resolve('./Tooltip.js'), 'utf8');
 
-  /* Was `var(--Effect-Level-2)`, the tinted set. A tooltip floats over the
-     page, so it now reads the BLACK set at the same level: a tinted shadow
-     showed as a colored halo over the colors that were not its own. */
-  it('reads --Effect-Level-2-Neutral (the black set) for its shadow', () => {
+  /* Level 2 from the surface-tinted set. It spent a while on the black set
+     (--Effect-Level-2-Neutral); since 2026-11-04 only Modal, Dialog, Toast and
+     Popover are black. */
+  it('reads --Effect-Level-2 (the tinted set) for its shadow', () => {
     const { bubble } = openParts();
     const shadow = declared(bubble, 'box-shadow');
-    expect(shadow.startsWith('var(--Effect-Level-2-Neutral, ')).toBe(true);
-    expect(shadow).not.toContain('--Dropshadow-Color');
+    expect(shadow.startsWith('var(--Effect-Level-2, ')).toBe(true);
+    expect(shadow).toContain('--Dropshadow-Color');
+    expect(shadow).not.toContain('-Neutral');
   });
 
   it('hardcodes no rgba/rgb shadow', () => {

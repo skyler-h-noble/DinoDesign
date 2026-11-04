@@ -5,7 +5,7 @@ import { lazySxBox } from '../_lazyFallback';
 import { Button } from '../Button/Button';
 import { Icon } from '../Icon/Icon';
 import { Fab } from '../Fab/Fab';
-import { SHADOW_NEUTRAL_LEVEL_2 } from '../_shadows';
+import { SHADOW_LEVEL_2 } from '../_shadows';
 
 /**
  * Toolbar Component
@@ -102,11 +102,10 @@ registerStaticStyles('omni-toolbar', webkitBox([
   '.omni-tb{display:inline-flex;flex-direction:row;align-items:center;gap:4px;width:fit-content;background-color:var(--Background);'
     + 'border:1px solid var(--Border-Variant);border-radius:var(--Style-Border-Radius);padding:8px;font-family:inherit;flex-shrink:0}',
   '.omni-tb-v{flex-direction:column}',
-  /* Only the floating pill casts a shadow, and it is the BLACK set: that bar
-     is placed over the page content (the contextual bar has no shadow at
-     all), so a surface-tinted shadow would show as a colored halo over the
-     colors that are not its own. */
-  `.omni-tb-float{border-radius:56px;padding:8px 16px;box-shadow:${SHADOW_NEUTRAL_LEVEL_2}}`,
+  /* Only the floating pill casts a shadow (the contextual bar has none):
+     Level 2, Figma's "AppBar, Toolbars, Menus" group, from the surface-tinted
+     set. Only Modal, Dialog, Toast and Popover use the black set. */
+  `.omni-tb-float{border-radius:56px;padding:8px 16px;box-shadow:${SHADOW_LEVEL_2}}`,
   '.omni-tb-float.omni-tb-v{padding:16px 8px}',
   '.omni-icon.omni-tb-ic{color:inherit}',
   '.omni-tb-fabrow{display:inline-flex;flex-direction:row;align-items:center;gap:8px}',
