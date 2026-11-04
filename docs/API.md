@@ -47,6 +47,7 @@ Format: `` `name?: type` = default — meaning``. No `?` means required. "+ `chi
 - `RailItemData` = `{ icon?: ReactNode; avatar?: ReactNode; label?: string; badge?: boolean | ReactNode; disabled?: boolean }`
 - `RailSection` = `{ title?: ReactNode; items: RailItemData[] }`
 - `RatioName` = `| '1:1' | '3:4' | '4:3' | '16:9' | '9:16' | '2:3' | '3:2' | '1:2' | '2:1' | '9:21' | '21:9' | '5:7' | '7:5' | '4:5' | '5:4' | '5:3' | '3:5' | '16:10' | '10:16' | 'Golden-Horizontal' | 'Golden-Vertical'`
+- `SectionPadding` = `'none' | 'small' | 'medium' | 'large'`
 - `SelectOption` = `string | { value: string | number; label: ReactNode; /** Small picture before the label (also shown in the closed field). */ icon?: ReactNode; /** CSS color for mode="color" swatches. */ color?: string; disabled?: boolean; }`
 - `SelectOptionGroup` = `{ label: ReactNode; options: SelectOption[] }`
 - `ShapeName` = `| 'rounded' | 'squircle' | 'circle' | 'oval' | 'pill' | 'arch' | 'semicircle' | 'heart' | 'ghost' | 'bun' | 'square' | 'slanted' | 'triangle' | 'arrow' | 'fan' | 'diamond' | 'clamshell' | 'pentagon' | 'gem' | 'heptagon' | 'cookie-4' | 'cookie-6' | 'cookie-7' | 'cookie-9' | 'cookie-12' | 'sunny' | 'very-sunny' | 'clover-4' | 'clover-8' | 'flower' | 'puffy' | 'puffy-diamond' | 'burst' | 'soft-burst' | 'boom' | 'soft-boom' | 'pixel-circle' | 'pixel-triangle' | 'cut-corners' | 'cut-two' | 'octagon' | 'one-corner' | 'notch' | 'scallop'`
@@ -78,7 +79,8 @@ Loads a design system's CSS and puts theme / style / surface / dark mode on the 
 - `defaultStyle?: 'Professional' | 'Modern' | 'Bold' | 'Playful'` = `'Modern'` — Root data-style (shape language); overrides theme.json.
 - `defaultSurface?: Surface` = `'Surface'` — Root data-surface; overrides theme.json.
 - `surfaceStyle?: 'light-tonal' | 'grey-professional' | 'dark-professional'` — Preset root theme + surface; wins over defaultTheme / defaultSurface.
-- `defaultDarkMode?: boolean` = `false` — Initial dark mode (uncontrolled).
+- `defaultDarkMode?: boolean | 'system'` = `false` — Initial dark mode (uncontrolled). `'system'` follows the device's light/dark setting, live, until the user toggles.
+- `persistDarkMode?: boolean | string` = `false` — Remember the user's toggle in localStorage and restore it next visit. `true` uses the key `omni-dark-mode`; a string is the key.
 - `darkTheme?: Theme | null` = `null` — Root data-theme in dark mode; unset keeps the light theme.
 - `darkMode?: boolean` — Controlled dark mode; pair with onDarkModeChange.
 - `onDarkModeChange?: (dark: boolean) => void` — Called with the requested dark-mode value when toggled while controlled.
@@ -128,7 +130,9 @@ A page region that paints its theme + surface; everything inside picks contrast-
 - `theme?: Theme` — Palette. Omit to inherit the parent's.
 - `surface?: Surface` = `'Surface'` — How light the region sits.
 - `as?: ElementType` = `'section'` — Element to render: 'header', 'footer', 'article', …
-- `padding?: string | number` — CSS padding, e.g. "80px 24px".
+- `padding?: SectionPadding | (string & {}) | number` — Named rhythm — `small` (40 / 32 on phones), `medium` (64 / 40), `large` (96 / 56), sides 24 / 16 — from the Sizing tokens; use these so sections share one rhythm. Or any CSS padding for a one-off.
+- `paddingTop?: SectionPadding` — Named size for the top edge only, e.g. the first section under the header.
+- `paddingBottom?: SectionPadding` — Named size for the bottom edge only.
 - `edgeTop?: string` — Shaped top edge — a name from EDGE_NAMES (e.g. 'wave').
 - `edgeBottom?: string` — Shaped bottom edge — a name from EDGE_NAMES.
 - `edgeHeight?: number` — Edge height in px (overrides edgeSize).
@@ -138,7 +142,7 @@ A page region that paints its theme + surface; everything inside picks contrast-
 + `children`, `<div>`
 
 ```jsx
-<Section theme="Primary" surface="Surface" padding="80px 24px">
+<Section theme="Primary" surface="Surface" padding="large">
   <H2>Title</H2>
 </Section>
 ```

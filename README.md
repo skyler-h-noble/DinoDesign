@@ -25,7 +25,7 @@ import { OmniDesignProvider, OMNI_DEFAULT_THEME_URL, Section, H2, Body, Button }
 export default function App() {
   return (
     <OmniDesignProvider themeURL={OMNI_DEFAULT_THEME_URL}>
-      <Section theme="Primary" surface="Surface" padding="64px 24px">
+      <Section theme="Primary" surface="Surface" padding="medium">
         <H2>Hello</H2>
         <Body>Every color here comes from the design system.</Body>
         <Button variant="default">Get started</Button>

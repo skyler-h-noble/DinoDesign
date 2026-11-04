@@ -36,8 +36,10 @@ export interface OmniDesignProviderProps {
   defaultSurface?: Surface;
   /** Preset root theme + surface; wins over defaultTheme / defaultSurface. */
   surfaceStyle?: 'light-tonal' | 'grey-professional' | 'dark-professional';
-  /** Initial dark mode (uncontrolled). */
-  defaultDarkMode?: boolean;
+  /** Initial dark mode (uncontrolled). `'system'` follows the device's light/dark setting, live, until the user toggles. */
+  defaultDarkMode?: boolean | 'system';
+  /** Remember the user's toggle in localStorage and restore it next visit. `true` uses the key `omni-dark-mode`; a string is the key. */
+  persistDarkMode?: boolean | string;
   /** Root data-theme in dark mode; unset keeps the light theme. */
   darkTheme?: Theme | null;
   /** Controlled dark mode; pair with onDarkModeChange. */

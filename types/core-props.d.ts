@@ -84,12 +84,15 @@ export type Native<E = HTMLElement, Own extends PropertyKey = never> =
 
 // ─── Layout ──────────────────────────────────────────────────────────────────
 
+/** Named Section padding sizes. */
+export type SectionPadding = 'none' | 'small' | 'medium' | 'large';
+
 /**
  * A page region that paints its theme + surface; everything inside picks contrast-checked colors.
  * @category Layout
  * @exports Section
  * @example
- * <Section theme="Primary" surface="Surface" padding="80px 24px">
+ * <Section theme="Primary" surface="Surface" padding="large">
  *   <H2>Title</H2>
  * </Section>
  */
@@ -100,8 +103,12 @@ export interface SectionProps extends Native {
   surface?: Surface;
   /** Element to render: 'header', 'footer', 'article', … */
   as?: React.ElementType;
-  /** CSS padding, e.g. "80px 24px". */
-  padding?: string | number;
+  /** Named rhythm — `small` (40 / 32 on phones), `medium` (64 / 40), `large` (96 / 56), sides 24 / 16 — from the Sizing tokens; use these so sections share one rhythm. Or any CSS padding for a one-off. */
+  padding?: SectionPadding | (string & {}) | number;
+  /** Named size for the top edge only, e.g. the first section under the header. */
+  paddingTop?: SectionPadding;
+  /** Named size for the bottom edge only. */
+  paddingBottom?: SectionPadding;
   /** Shaped top edge — a name from EDGE_NAMES (e.g. 'wave'). */
   edgeTop?: string;
   /** Shaped bottom edge — a name from EDGE_NAMES. */

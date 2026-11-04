@@ -744,12 +744,12 @@ import {
 ```jsx
 // Section bundles data-theme + data-surface + background paint into one
 // component. Use it for page sections, footers, hero, sticky-nav wrappers.
-<Section theme="Primary" surface="Surface" padding="80px 24px">
+<Section theme="Primary" surface="Surface" padding="large">
   <H2>…</H2>
 </Section>
 
 // Inherit surface from parent (no theme switch):
-<Section padding="48px 24px">…</Section>
+<Section padding="small">…</Section>
 
 // Render as a different element:
 <Section as="footer" theme="Neutral" surface="Surface-Dimmest">…</Section>
@@ -764,7 +764,7 @@ import {
 // MUI 5's `item xs={12} md={4}` is still accepted and mapped to `size`.
 
 // Container is LAYOUT ONLY: centers content at a max width, paints nothing.
-<Section theme="Secondary" surface="Surface" padding="80px 24px">
+<Section theme="Secondary" surface="Surface" padding="large">
   <Container maxWidth="lg">…</Container>
 </Section>
 ```

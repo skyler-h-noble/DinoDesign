@@ -18,7 +18,7 @@ export function QuickstartPage() {
             <Button variant="default" size="small">Get started</Button>
           </>} />
 
-  <Section theme="Default" surface="Surface" padding="80px 24px">
+  <Section theme="Default" surface="Surface" padding="large">
     <Container maxWidth="md">
       <VStack spacing={2} alignItems="center">
         <Eyebrow>Eyebrow</Eyebrow>
@@ -29,7 +29,7 @@ export function QuickstartPage() {
     </Container>
   </Section>
 
-  <Section theme="Secondary" surface="Surface" padding="80px 24px" id="features">
+  <Section theme="Secondary" surface="Surface" padding="large" id="features">
     <Container maxWidth="lg">
       <H2>Features</H2>
       <Grid container spacing={3}>

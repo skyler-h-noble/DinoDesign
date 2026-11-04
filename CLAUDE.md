@@ -27,7 +27,11 @@ Pin MUI to 7: the parts still built on MUI (and any `sx` you pass) are built aga
 // main.jsx
 import { OmniDesignProvider, OMNI_DEFAULT_THEME_URL } from '@omni-design/components';
 
-<OmniDesignProvider themeURL={OMNI_DEFAULT_THEME_URL}>   {/* or your design system's theme.json URL */}
+<OmniDesignProvider
+  themeURL={OMNI_DEFAULT_THEME_URL}   // or your design system's theme.json URL
+  defaultDarkMode="system"            // start in the device's light/dark mode
+  persistDarkMode                     // remember the visitor's toggle across visits
+>
   <App />
 </OmniDesignProvider>
 ```
@@ -96,7 +100,10 @@ bars, buttons and cards. Follow it.
   `data-device`; it only pins a device on purpose. `AppBar` folds its links, and every `endSlot` action
   but the last, into a menu button below 900px. Pass `endSlot` as a fragment
   of buttons, primary action last. Nothing to set up.
-- **Light / dark:** a toggle is three lines; every component and color
+- **Light / dark:** with `defaultDarkMode="system"` and `persistDarkMode` on
+  the provider (section 2), the page starts in the device's mode and keeps the
+  visitor's choice across reloads — do not write your own storage or
+  `matchMedia` code. A toggle is three lines; every component and color
   follows, with contrast already checked in both modes:
 
 ```jsx
@@ -144,7 +151,7 @@ import HomeIcon from '@omni-design/icons/Home';
             <Button variant="default" size="small">Get started</Button>
           </>} />
 
-  <Section theme="Default" surface="Surface" padding="80px 24px">
+  <Section theme="Default" surface="Surface" padding="large">
     <Container maxWidth="md">
       <VStack spacing={2} alignItems="center">
         <Eyebrow>Eyebrow</Eyebrow>
@@ -155,7 +162,7 @@ import HomeIcon from '@omni-design/icons/Home';
     </Container>
   </Section>
 
-  <Section theme="Secondary" surface="Surface" padding="80px 24px" id="features">
+  <Section theme="Secondary" surface="Surface" padding="large" id="features">
     <Container maxWidth="lg">
       <H2>Features</H2>
       <Grid container spacing={3}>
@@ -179,7 +186,7 @@ import HomeIcon from '@omni-design/icons/Home';
 
 | Need | Use | Key props |
 | --- | --- | --- |
-| Region with a background | `Section` | `theme`, `surface`, `padding`, `as`, `id` |
+| Region with a background | `Section` | `theme`, `surface`, `padding` (`small` / `medium` / `large`), `paddingTop`, `as`, `id` |
 | Center + max width | `Container` | `maxWidth` (`sm`/`md`/`lg`/`xl`) — layout only, paints nothing |
 | Columns | `Grid` | container: `container spacing`; child: `size={{ xs: 12, md: 4 }}` |
 | Stacks | `VStack`, `HStack` | `spacing`, `alignItems`, `justifyContent`, `component` — a list is `<VStack component="ul">` with `<HStack component="li">` |
@@ -231,6 +238,10 @@ brand color.
 - **Icon-only buttons:** the button carries the name, the icon none —
   `<Button iconOnly aria-label="Delete item"><DeleteIcon /></Button>`. Name the
   action, not the picture.
+- **Section spacing is named.** `padding="small" | "medium" | "large"` (and
+  `paddingTop` / `paddingBottom` for one edge, e.g. the first section under the
+  header). They come from the spacing tokens and shrink on phones. Do not
+  write pixel padding on sections — six sections, six hand-picked rhythms.
 - **One `h1` on every page** — the page's title, not just the home page. Use
   `<H1>`, or `component="h1"` on a display style
   (`<DisplayLarge component="h1">`). Section titles below it are `H2`, then

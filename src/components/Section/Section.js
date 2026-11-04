@@ -32,7 +32,17 @@ import { EDGE_NAMES, edgeMaskURL, edgeTile, edgeDefaultHeight, EDGE_SIZES, SIZED
  *              used to be. Passed through unvalidated — an unknown value
  *              simply matches no rule and inherits the parent's paint.
  *   as       — element tag, defaults to "section"
- *   padding  — CSS padding value (string or number). Optional.
+ *   padding  — a named size: "none" | "small" | "medium" | "large", or any CSS
+ *              padding value (string or number). The names set the section's
+ *              rhythm from the spacing tokens and shrink on tablets and phones:
+ *                         desktop   tablet   phone      (top & bottom)
+ *                small      40        40       32
+ *                medium     64        56       40
+ *                large      96        80       56
+ *              sides 24 (16 on phones). Use the names so every section on a
+ *              site shares one rhythm; a raw value is for a genuine one-off.
+ *   paddingTop / paddingBottom — a named size for one edge (e.g. the first
+ *              section under the header: padding="medium" paddingTop="small").
  *   edgeTop / edgeBottom — the shape where this section meets the one above
  *              / below: wave | random-wave | scallop | zigzag | steps | curve | slant.
  *              The section reaches INTO its neighbour by `edgeHeight`, in its
@@ -77,6 +87,27 @@ registerStaticStyles('omni-section-edge', [
     + '.omni-section-edge-swell.omni-section-edge-bottom{animation-name:omni-edge-swell-flip}}',
 ].join('\n'));
 
+/* Named section padding. Desktop / tablet (600-899) / phone (<600), from the
+   Sizing scale (N x 8px). Raw `padding` values still work and win. */
+const PAD_SIZES = ['none', 'small', 'medium', 'large'];
+const PAD_Y = {
+  none:   ['0', '0', '0'],
+  small:  ['var(--Sizing-5, 40px)', 'var(--Sizing-5, 40px)', 'var(--Sizing-4, 32px)'],
+  medium: ['var(--Sizing-8, 64px)', 'var(--Sizing-7, 56px)', 'var(--Sizing-5, 40px)'],
+  large:  ['var(--Sizing-12, 96px)', 'var(--Sizing-10, 80px)', 'var(--Sizing-7, 56px)'],
+};
+/* All py rules before any pt / pb rule, in every block, so a one-edge size
+   overrides the section's size whichever names are combined. */
+const padRules = (i) => PAD_SIZES.map((k) => `.omni-section-py-${k}{padding-top:${PAD_Y[k][i]};padding-bottom:${PAD_Y[k][i]}}`).join('')
+  + PAD_SIZES.map((k) => `.omni-section-pt-${k}{padding-top:${PAD_Y[k][i]}}.omni-section-pb-${k}{padding-bottom:${PAD_Y[k][i]}}`).join('');
+registerStaticStyles('omni-section-pad', [
+  '.omni-section-px{padding-left:var(--Sizing-3, 24px);padding-right:var(--Sizing-3, 24px)}',
+  '.omni-section-px-none{padding-left:0;padding-right:0}',
+  padRules(0),
+  '@media (min-width:600px) and (max-width:899.98px){' + padRules(1) + '}',
+  '@media (max-width:599.98px){.omni-section-px{padding-left:var(--Sizing-2, 16px);padding-right:var(--Sizing-2, 16px)}' + padRules(2) + '}',
+].join('\n'));
+
 const warned = new Set();
 
 /** The section's own color, shaped, reaching into its neighbour. */
@@ -114,6 +145,8 @@ export function Section({
   surface = 'Surface',
   as: Tag = 'section',
   padding,
+  paddingTop,
+  paddingBottom,
   edgeTop,
   edgeBottom,
   edgeHeight,
@@ -125,19 +158,27 @@ export function Section({
   children,
   ...rest
 }) {
+  useStaticStyles('omni-section-pad');
   const hasEdge = Boolean(edgeTop || edgeBottom);
+  const named = PAD_SIZES.includes(padding);
+  const edgeNamed = (v) => (PAD_SIZES.includes(v) ? v : null);
+  const padClass = [
+    named ? 'omni-section-py-' + padding + ' ' + (padding === 'none' ? 'omni-section-px-none' : 'omni-section-px') : '',
+    edgeNamed(paddingTop) ? 'omni-section-pt-' + paddingTop : '',
+    edgeNamed(paddingBottom) ? 'omni-section-pb-' + paddingBottom : '',
+  ].filter(Boolean).join(' ');
   const heightFor = (name) => edgeHeight
     ?? (SIZED_EDGES.includes(name) ? (EDGE_SIZES[edgeSize] || EDGE_SIZES.large) : edgeDefaultHeight(name));
   return (
     <Tag
       {...(theme ? { 'data-theme': theme } : {})}
       data-surface={surface}
-      className={className}
+      className={[padClass, className].filter(Boolean).join(' ') || undefined}
       style={{
         background: 'var(--Background)',
         color: 'var(--Text)',
         ...(hasEdge ? { position: 'relative' } : {}),
-        ...(padding !== undefined ? { padding } : {}),
+        ...(padding !== undefined && !named ? { padding } : {}),
         ...style,
       }}
       {...rest}

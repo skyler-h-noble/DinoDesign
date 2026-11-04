@@ -35,7 +35,7 @@ declare const anchorRef: React.RefObject<HTMLButtonElement>;
 // SectionProps (Section)
 export const Example_SectionProps = () => (
 <>
-<Section theme="Primary" surface="Surface" padding="80px 24px">
+<Section theme="Primary" surface="Surface" padding="large">
   <H2>Title</H2>
 </Section>
 </>

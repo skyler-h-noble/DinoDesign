@@ -345,7 +345,12 @@ async function fetchThemeManifest(themeURL) {
  * @param {string}   props.surfaceStyle      'light-tonal' | 'grey-professional' | 'dark-professional'
  *
  * Dark mode — uncontrolled:
- * @param {boolean}  props.defaultDarkMode   Initial dark mode (default: false)
+ * @param {boolean|'system'} props.defaultDarkMode  Initial dark mode (default: false).
+ *                                           'system' follows the device's light/dark
+ *                                           setting, live, until the user toggles.
+ * @param {boolean|string} props.persistDarkMode  Remember the user's toggle in
+ *                                           localStorage (true = key 'omni-dark-mode',
+ *                                           or pass a key). Restored on the next visit.
  * @param {string}   props.darkTheme         data-theme in dark mode (default: none — the
  *                                           root keeps its theme; Default carries the
  *                                           page background into dark mode itself)
@@ -368,6 +373,22 @@ async function fetchThemeManifest(themeURL) {
  * @param {boolean}  props.fullHeight        Adds minHeight: 100vh (default: true)
  * @param {React.ReactNode} props.children
  */
+/* Storage can throw (private mode, blocked site data): treat that as "no
+   saved choice" rather than failing the render. */
+function readDarkPref(key) {
+  try {
+    const v = typeof window !== 'undefined' ? window.localStorage.getItem(key) : null;
+    return v === 'dark' ? true : v === 'light' ? false : null;
+  } catch { return null; }
+}
+function writeDarkPref(key, dark) {
+  try { window.localStorage.setItem(key, dark ? 'dark' : 'light'); } catch { /* not saved */ }
+}
+function systemPrefersDark() {
+  try { return typeof window !== 'undefined' && !!window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; }
+  catch { return false; }
+}
+
 export function OmniDesignProvider({
   // Theme URL
   themeURL,
@@ -402,6 +423,8 @@ export function OmniDesignProvider({
      a different palette in dark; it simply no longer fires by default. */
   darkTheme:      darkThemeProp = null,
 
+  persistDarkMode = false,
+
   // Controlled dark mode
   darkMode: controlledDarkMode,
   onDarkModeChange,
@@ -420,9 +443,36 @@ export function OmniDesignProvider({
 }) {
 
   // ── Dark mode ──────────────────────────────────────────────────────────────
-  const [internalDark, setInternalDark] = useState(defaultDarkMode);
+  /* Uncontrolled dark mode can follow the device and remember the user's
+     choice. Both are opt-in: a provider nested inside an app (a preview, a
+     themed sub-tree) must not pick up the OS setting or share a stored choice
+     it never offered. A saved choice wins over the device; until the user
+     toggles, 'system' tracks the device live. Read synchronously so the first
+     paint is already in the right mode. */
   const isControlled = controlledDarkMode !== undefined;
+  const storageKey = persistDarkMode === true ? 'omni-dark-mode'
+    : (typeof persistDarkMode === 'string' && persistDarkMode ? persistDarkMode : null);
+  const followSystem = defaultDarkMode === 'system';
+  const [internalDark, setInternalDark] = useState(() => {
+    const saved = storageKey ? readDarkPref(storageKey) : null;
+    if (saved !== null) return saved;
+    if (followSystem) return systemPrefersDark();
+    return defaultDarkMode === true;
+  });
+  const userChoseRef = useRef(storageKey ? readDarkPref(storageKey) !== null : false);
   const isDark = isControlled ? controlledDarkMode : internalDark;
+
+  useEffect(() => {
+    if (isControlled || !followSystem || typeof window === 'undefined' || !window.matchMedia) return undefined;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = (e) => { if (!userChoseRef.current) setInternalDark(e.matches); };
+    if (mq.addEventListener) mq.addEventListener('change', onChange);
+    else if (mq.addListener) mq.addListener(onChange);
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener('change', onChange);
+      else if (mq.removeListener) mq.removeListener(onChange);
+    };
+  }, [isControlled, followSystem]);
 
   // ── Resolved CSS sources ───────────────────────────────────────────────────
   // When themeURL is provided, manifest values fill in anything not passed as props.
@@ -697,10 +747,14 @@ export function OmniDesignProvider({
      the switch. */
   const activeTheme = (isDark && resolvedDarkTheme) ? resolvedDarkTheme : theme;
 
-  const toggleDarkMode = useCallback(() => {
-    if (isControlled) onDarkModeChange?.(!isDark);
-    else setInternalDark(d => !d);
-  }, [isControlled, isDark, onDarkModeChange]);
+  const setDarkMode = useCallback((next) => {
+    if (isControlled) { onDarkModeChange?.(next); return; }
+    userChoseRef.current = true;
+    setInternalDark(next);
+    if (storageKey) writeDarkPref(storageKey, next);
+  }, [isControlled, onDarkModeChange, storageKey]);
+
+  const toggleDarkMode = useCallback(() => setDarkMode(!isDark), [setDarkMode, isDark]);
 
   const setTheme = useCallback((next) => {
     if (!OMNI_THEMES.includes(next)) console.warn(`OmniDesignProvider: unknown theme "${next}"`);
@@ -721,13 +775,13 @@ export function OmniDesignProvider({
   const contextValue = useMemo(() => ({
     theme: activeTheme, style: styleVariant, surface: rootSurface,
     isDark, cssStatus, cssError,
-    setTheme, setStyle, setSurface, toggleDarkMode,
+    setTheme, setStyle, setSurface, toggleDarkMode, setDarkMode,
     themes: OMNI_THEMES, styles: OMNI_STYLES, surfaces: OMNI_SURFACES,
     name: manifestThemeConfig.name ?? null,
   }), [
     activeTheme, styleVariant, rootSurface, isDark,
     cssStatus, cssError,
-    setTheme, setStyle, setSurface, toggleDarkMode,
+    setTheme, setStyle, setSurface, toggleDarkMode, setDarkMode,
     manifestThemeConfig.name,
   ]);
 
