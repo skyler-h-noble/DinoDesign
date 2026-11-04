@@ -82,10 +82,13 @@ registerStaticStyles('omni-breadcrumbs', webkitBox([
   ...Object.entries(SIZE_MAP).map(([k, v]) => `.omni-bc-lh-${k}{line-height:${v.line}}`),
   `.omni-bc-list{display:flex;flex-wrap:wrap;align-items:center;gap:${GAP};list-style:none;margin:0;padding:0}`,
   '@media (max-width: 600px){.omni-bc-list-bom{display:none}}',
-  /* Border-Variant, as Figma binds it: the separator is decoration
-     (aria-hidden), so it carries no contrast requirement — the crumbs do. A
-     full Body line tall, as the text-shaped separators are. */
-  '.omni-bc-sep{display:inline-flex;align-items:center;color:var(--Border-Variant);user-select:none;font-size:inherit;flex-shrink:0}',
+  /* --Quiet. The separator is decoration (aria-hidden) and WCAG exempts it,
+     but it is visible text: on Border-Variant it measured 1.86:1 on a dark
+     page, the only failing text on a clean-room store. Quiet passes 4.5:1 on
+     every surface. (Figma bound Border-Variant; its Breadcrumb separator moves
+     to Quiet to match.) A full Body line tall, as the text-shaped separators
+     are. */
+  '.omni-bc-sep{display:inline-flex;align-items:center;color:var(--Quiet, var(--Text-Quiet));user-select:none;font-size:inherit;flex-shrink:0}',
   '.omni-bc-dot{width:4px;height:4px;border-radius:50%;background-color:currentColor}',
   /* Truncate long crumbs. The current crumb is --Text in the semibold token;
      every other one takes the link role (see the note in the component). */
@@ -181,9 +184,8 @@ export function Breadcrumbs({
 
   // ── Separator renderer ──
   const renderSeparator = (key) => (
-    /* Border-Variant, as Figma binds it: the separator is decoration
-       (aria-hidden), so it carries no contrast requirement — the crumbs
-       do. A full Body line tall, as the text-shaped separators are. */
+    /* Decoration (aria-hidden), colored --Quiet so it still passes contrast
+       — see .omni-bc-sep. A full Body line tall. */
     <li
       key={'sep-' + key}
       role="presentation"
