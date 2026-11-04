@@ -2,7 +2,7 @@
 
 Every exported component: purpose, props, required parent, one example. GENERATED from `types/` by `scripts/build-api-doc.mjs` — the same files the published .d.ts come from, so this cannot drift from the types. Do not edit by hand. Do not open `dist/` to learn a prop: if it is not here, the component does not take it. Rules (color, surfaces, layout) are in `CLAUDE.md`.
 
-Read a section, not the file: search for `### Name`. 234 components.
+Read a section, not the file: search for `### Name`. 236 components.
 
 Format: `` `name?: type` = default — meaning``. No `?` means required. "+ `children`" means it takes children; "+ `<div>`" means the native attributes of that element pass through (id, className, style, aria-*, data-*, on*). Defaults come from the component source.
 
@@ -26,6 +26,7 @@ Format: `` `name?: type` = default — meaning``. No `?` means required. "+ `chi
 - `AlertColor` = `'info' | 'success' | 'warning' | 'error'`
 - `AppBarLink` = `{ label: ReactNode; href?: string; onClick?: MouseEventHandler<HTMLElement>; current?: boolean }`
 - `AutocompleteOption` = `string | { label: string; [key: string]: unknown }`
+- `AutoHeadingSize` = `'display-large' | 'display-medium' | 'display-small' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'`
 - `AvatarGroupPerson` = `{ key?: Key; name?: string; detail?: ReactNode; src?: string; initials?: string; href?: string; onClick?: MouseEventHandler<HTMLElement>; disabled?: boolean }`
 - `BevelCustom` = `{ angle?: number; depth?: number; softness?: number; bevel?: boolean; shadow?: boolean; shadowDistance?: number; shadowBlur?: number; shadowOpacity?: number }`
 - `BevelPreset` = `'Classic' | 'Carved' | 'Embossed' | 'Stamp' | 'Night Cut' | 'Shadow Only' | 'custom'`
@@ -284,7 +285,7 @@ Any text style by name. Prefer the named components below.
 ```
 
 ### DisplayLarge · DisplayMedium · DisplaySmall · H1 · H2 · H3 · H4 · H5 · H6 · Heading
-Display and heading styles, in --Header colors. H1–H6 render h1–h6; Display* render a div — pass `component="h1"` for the page title. Every page has exactly one h1 (category, product and cart pages too); sections below it are H2, then H3. Heading = H4.
+Display and heading styles, in --Header colors. H1–H6 render h1–h6; Display* render a div — pass `component="h1"` for the page title. Every page has exactly one h1 (category, product and cart pages too); for titles below it use AutoHeading, whose level comes from nesting. Heading = H4.
 
 - `color?: HeadingColor` — Header color role (3:1).
 - `component?: ElementType` — Element to render (keep one h1 per page: `<DisplayLarge component="h1">`).
@@ -297,6 +298,36 @@ Display and heading styles, in --Header colors. H1–H6 render h1–h6; Display*
 
 ```jsx
 <><DisplayLarge component="h1">Headline</DisplayLarge><H2 color="primary">Section</H2></>
+```
+
+### AutoHeading
+A title whose level comes from nesting, not from its look: h1 outside any Section, one level deeper inside each `Section` / `HeadingLevel` (h2 in a page band, h3 in a Section nested in one), capped at h6 — so titles cannot skip a level. Use it for every section, panel and card title; keep the page title an explicit `H1` (or `component="h1"`). Pick the look with `size`.
+
+- `size?: AutoHeadingSize` — The look. Defaults to the style of the level it renders (h2 → 'h2'); the tag stays the level.
+- `color?: HeadingColor` — Header color role (3:1).
+- `width?: 'fill' | 'hug' | (string & {}) | number` — 'fill' = block, full width; 'hug' = inline.
+- `noWrap?: boolean` — One line with an ellipsis.
+- `gutterBottom?: boolean` — Margin below.
++ `children`, `<h1–h6>`
+
+```jsx
+<Section padding="large">
+  <AutoHeading>Featured</AutoHeading>
+  <Card><AutoHeading size="h5">Order summary</AutoHeading></Card>
+</Section>
+```
+
+### HeadingLevel
+Makes the AutoHeadings inside it one level deeper without painting anything — for a subsection that is not a Section (a card's sub-titles, a sidebar). `level` sets the level outright.
+
+- `level?: 1 | 2 | 3 | 4 | 5 | 6` — Set the level (1–6) for the titles inside, instead of one deeper than outside.
++ `children`
+
+```jsx
+<Card>
+  <AutoHeading>Checkout</AutoHeading>
+  <HeadingLevel><AutoHeading>Shipping</AutoHeading></HeadingLevel>
+</Card>
 ```
 
 ### AltDisplayLarge · AltDisplayMedium · AltDisplaySmall

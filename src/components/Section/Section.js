@@ -1,5 +1,6 @@
 // src/components/Section/Section.js
-import React from 'react';
+import React, { useContext } from 'react';
+import { HeadingLevelContext } from '../_headingLevel';
 import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
 import { EDGE_NAMES, edgeMaskURL, edgeTile, edgeDefaultHeight, EDGE_SIZES, SIZED_EDGES } from './edges';
 
@@ -60,6 +61,12 @@ import { EDGE_NAMES, edgeMaskURL, edgeTile, edgeDefaultHeight, EDGE_SIZES, SIZED
  *   edgeSeed — a number that varies random-wave, so stacked sections do not
  *              match. Default 0, which is the one Figma draws.
  *   className, style, children, ...rest — forwarded.
+ *
+ * HEADING LEVEL: a Section is a section of the page's outline too. Titles
+ * inside it written as <AutoHeading> render one level below the Section it
+ * sits in — h2 in a top-level band, h3 in a Section nested in one. Explicit
+ * H1–H6 are unaffected. A block that only needs a color, not a new outline
+ * level, is a Box, not a nested Section.
  *
  * For wrapping without painting (e.g. AppBar's themed zone), use ThemedZone
  * instead.
@@ -159,6 +166,7 @@ export function Section({
   ...rest
 }) {
   useStaticStyles('omni-section-pad');
+  const headingLevel = useContext(HeadingLevelContext);
   const hasEdge = Boolean(edgeTop || edgeBottom);
   const named = PAD_SIZES.includes(padding);
   const edgeNamed = (v) => (PAD_SIZES.includes(v) ? v : null);
@@ -184,7 +192,7 @@ export function Section({
       {...rest}
     >
       {edgeTop && <SectionEdge name={edgeTop} side="top" height={heightFor(edgeTop)} animate={edgeAnimate} seed={edgeSeed} />}
-      {children}
+      <HeadingLevelContext.Provider value={Math.min(headingLevel + 1, 6)}>{children}</HeadingLevelContext.Provider>
       {edgeBottom && <SectionEdge name={edgeBottom} side="bottom" height={heightFor(edgeBottom)} animate={edgeAnimate} seed={edgeSeed} />}
     </Tag>
   );

@@ -421,13 +421,59 @@ export interface TypographyProps extends TypographyBase {
 }
 
 /**
- * Display and heading styles, in --Header colors. H1–H6 render h1–h6; Display* render a div — pass `component="h1"` for the page title. Every page has exactly one h1 (category, product and cart pages too); sections below it are H2, then H3. Heading = H4.
+ * Display and heading styles, in --Header colors. H1–H6 render h1–h6; Display* render a div — pass `component="h1"` for the page title. Every page has exactly one h1 (category, product and cart pages too); for titles below it use AutoHeading, whose level comes from nesting. Heading = H4.
  * @category Text
  * @exports DisplayLarge DisplayMedium DisplaySmall H1 H2 H3 H4 H5 H6 Heading
  * @example
  * <><DisplayLarge component="h1">Headline</DisplayLarge><H2 color="primary">Section</H2></>
  */
 export interface HeadingTextProps extends HeadingProps {}
+
+/** The looks AutoHeading can wear — any heading or display style. */
+export type AutoHeadingSize = 'display-large' | 'display-medium' | 'display-small' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+
+/**
+ * A title whose level comes from nesting, not from its look: h1 outside any Section, one level deeper inside each `Section` / `HeadingLevel` (h2 in a page band, h3 in a Section nested in one), capped at h6 — so titles cannot skip a level. Use it for every section, panel and card title; keep the page title an explicit `H1` (or `component="h1"`). Pick the look with `size`.
+ * @category Text
+ * @exports AutoHeading
+ * @source Typography/Typography#AutoHeading
+ * @example
+ * <Section padding="large">
+ *   <AutoHeading>Featured</AutoHeading>
+ *   <Card><AutoHeading size="h5">Order summary</AutoHeading></Card>
+ * </Section>
+ */
+export interface AutoHeadingProps extends Native<HTMLHeadingElement> {
+  /** The look. Defaults to the style of the level it renders (h2 → 'h2'); the tag stays the level. */
+  size?: AutoHeadingSize;
+  /** Header color role (3:1). */
+  color?: HeadingColor;
+  /** 'fill' = block, full width; 'hug' = inline. */
+  width?: 'fill' | 'hug' | (string & {}) | number;
+  /** One line with an ellipsis. */
+  noWrap?: boolean;
+  /** Margin below. */
+  gutterBottom?: boolean;
+  sx?: Sx;
+  children?: React.ReactNode;
+}
+
+/**
+ * Makes the AutoHeadings inside it one level deeper without painting anything — for a subsection that is not a Section (a card's sub-titles, a sidebar). `level` sets the level outright.
+ * @category Text
+ * @exports HeadingLevel
+ * @source _headingLevel#HeadingLevel
+ * @example
+ * <Card>
+ *   <AutoHeading>Checkout</AutoHeading>
+ *   <HeadingLevel><AutoHeading>Shipping</AutoHeading></HeadingLevel>
+ * </Card>
+ */
+export interface HeadingLevelProps {
+  /** Set the level (1–6) for the titles inside, instead of one deeper than outside. */
+  level?: 1 | 2 | 3 | 4 | 5 | 6;
+  children?: React.ReactNode;
+}
 
 /**
  * Display sizes painted with the brand's Alt-Display color or gradient (`altMode`, or an ancestor's data-alt-display).

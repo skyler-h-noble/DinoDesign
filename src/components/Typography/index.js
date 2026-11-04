@@ -9,6 +9,8 @@ export {
   CAP_HEIGHT_TRIM,
   // Headings
   H1, H2, H3, H4, H5, H6, Heading,
+  // Level from nesting (Section / HeadingLevel), look from `size`
+  AutoHeading, AUTO_HEADING_SIZES,
   // Display
   DisplayLarge, DisplayMedium, DisplaySmall,
   AltDisplayLarge, AltDisplayMedium, AltDisplaySmall,
@@ -33,5 +35,6 @@ export {
   NumberLarge, NumberMedium, NumberSmall,
 } from './Typography';
 
+export { HeadingLevel, useHeadingLevel } from '../_headingLevel';
 export { TypographyShowcase } from './TypographyShowcase';
 export { default } from './Typography';

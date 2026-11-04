@@ -4,6 +4,7 @@ import { Button as ButtonTypography, ButtonSmall as ButtonSmallTypography, Butto
 import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
 import { useRouterLink } from '../_routerLink';
 import { lazySxBox } from '../_lazyFallback';
+import { labelInName, mergeRefs } from '../_labelInName';
 import { Avatar as DDAvatar } from '../Avatar/Avatar';
 import { Icon as DDIcon, ICON_SIZE_MAP } from '../Icon/Icon';
 import { Badge as DDBadge } from '../Badge/Badge';
@@ -908,6 +909,13 @@ export const Button = React.forwardRef(function Button({
       });
     }
   }
+  /* A button that shows text is named by it (WCAG 2.5.3): an aria-label that
+     does not contain the text is dropped in production, warned about in
+     development. Types with no visible text keep their label — they need it. */
+  const guard = isLabelless ? null : labelInName('Button', props, children);
+  const ownProps = guard ? guard.props : props;
+  const ownRef = guard && guard.ref ? mergeRefs(ref, guard.ref) : ref;
+
   const isTextContent  = !isIconOnly;
   const effectiveFullWidth = fullWidth && !isIconOnly && !letterNumber;
 
@@ -982,7 +990,7 @@ export const Button = React.forwardRef(function Button({
   };
 
   const rootProps = {
-    ref,
+    ref: ownRef,
     ...(isNativeButton ? { type: type === undefined ? 'button' : type, disabled } : { type }),
     tabIndex: disabled ? -1 : (tabIndex ?? 0),
     ...(!isNativeButton && disabled ? { 'aria-disabled': true } : {}),
@@ -1005,7 +1013,7 @@ export const Button = React.forwardRef(function Button({
       + ' btn-' + effectiveVariant + ' ' + className,
     // A swatch's own background is fixed transparent, as it always was.
     style: { ...vars, ...(swatch ? { backgroundColor: 'transparent' } : style) },
-    ...props,
+    ...ownProps,
   };
 
   const content = (

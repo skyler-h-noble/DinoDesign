@@ -1,6 +1,7 @@
 // src/components/Typography/Typography.js
 import React from 'react';
 import { useGhost } from '../_ghost';
+import { useHeadingLevel } from '../_headingLevel';
 import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
 import { lazySxBox } from '../_lazyFallback';
 
@@ -945,6 +946,18 @@ export const H4 = (p) => <Typography textStyle="h4" {...p} />;
 export const H5 = (p) => <Typography textStyle="h5" {...p} />;
 export const H6 = (p) => <Typography textStyle="h6" {...p} />;
 export const Heading = H4;
+
+/* AutoHeading — a title whose LEVEL comes from where it sits and whose LOOK
+   comes from `size`. The level is 1 outside any Section and one deeper inside
+   each Section / HeadingLevel (see _headingLevel.js), so titles cannot skip a
+   level however they are styled. `size` is any heading or display style and
+   defaults to the style of the level it renders. */
+export const AUTO_HEADING_SIZES = ['display-large', 'display-medium', 'display-small', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+export function AutoHeading({ size, ...p }) {
+  const level = useHeadingLevel();
+  const look = AUTO_HEADING_SIZES.includes(size) ? size : 'h' + level;
+  return <Typography {...p} textStyle={look} component={'h' + level} />;
+}
 
 // Subtitles
 export const SubtitleLarge = (p) => <Typography textStyle="subtitle-large" {...p} />;

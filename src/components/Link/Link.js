@@ -3,6 +3,7 @@ import React from 'react';
 import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
 import { useRouterLink } from '../_routerLink';
 import { lazySxBox } from '../_lazyFallback';
+import { labelInName } from '../_labelInName';
 
 const SxBox = lazySxBox('Link');
 
@@ -195,6 +196,12 @@ export function Link({
   const effColor = color === 'quiet' ? 'standard' : color;
   const colorKey = COLOR_MAP[effColor] ? effColor : 'primary';
 
+  /* A link that shows text is named by it: an aria-label that does not
+     contain that text is dropped in production and warned about in
+     development (WCAG 2.5.3). Nothing runs without an aria-label. */
+  const guard = labelInName('Link', props, children);
+  const ownProps = guard ? guard.props : props;
+
   const resolvedRel = target === '_blank'
     ? (rel || 'noopener noreferrer')
     : rel;
@@ -214,7 +221,8 @@ export function Link({
       ' omni-link-c-' + colorKey + (visited ? '-v' : '') +
       (disabled ? ' omni-link-off' : '') +
       ' ' + className,
-    ...props,
+    ...ownProps,
+    ...(guard && guard.ref ? { ref: guard.ref } : {}),
   };
 
   /* An internal href goes through the app's router when one is configured;

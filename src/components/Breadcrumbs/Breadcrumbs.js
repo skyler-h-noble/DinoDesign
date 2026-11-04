@@ -8,6 +8,7 @@ import MoreHorizIcon from '@omni-design/icons/MoreHoriz';
 import ArrowBackIcon from '@omni-design/icons/ArrowBack';
 import { Icon } from '../Icon/Icon';
 import { BodySmall, Caption } from '../Typography';
+import { labelInName } from '../_labelInName';
 
 /**
  * Breadcrumbs Component
@@ -282,12 +283,15 @@ export function Breadcrumbs({
 export function BreadcrumbItem({ children, href, reloadDocument = false, className = '', sx = {}, ...props }) {
   useStaticStyles('omni-breadcrumbs');
   const isLink = !!href;
+  /* A breadcrumb link is named by its text (WCAG 2.5.3). */
+  const guard = isLink ? labelInName('BreadcrumbItem', props, children, { dom: false }) : null;
+  const ownProps = guard ? guard.props : props;
   /* An internal href goes through the app's router when one is configured
      (OmniDesignProvider linkComponent / navigate); reloadDocument opts out. */
   const link = useRouterLink(isLink ? 'a' : 'span', {
     href: href || undefined,
     className: 'breadcrumb-link ' + className + ' MuiBox-root omni-bc-link' + (isLink ? ' omni-bc-link-a' : ''),
-    ...props,
+    ...ownProps,
   }, { reloadDocument });
   return (
     <Part component={link.Tag} sx={sx} {...link.props}>
