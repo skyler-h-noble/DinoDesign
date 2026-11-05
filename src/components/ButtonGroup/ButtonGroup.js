@@ -123,6 +123,9 @@ const LIGHT_SURFACE = 'Surface-Brightest';
    would be worse than one that renders and complains. */
 const warnedSegments = new Set();
 
+/* The shapes a segment is allowed to name: an outline, ghost or text. */
+const isSegmentShape = (v) => /-outline$/.test(String(v)) || v === 'outline' || v === 'ghost' || v === 'text';
+
 function warnSegmentShape(props = {}, separated = false) {
   if (process.env.NODE_ENV === 'production') return;
   const bad = [];
@@ -494,6 +497,14 @@ export function ButtonGroup({
 
     warnSegmentShape(child.props, separated);
 
+    const groupVariant = !hasSelection
+      ? (isGhost ? 'ghost' : color)
+      : isGhost
+        ? (isSelected ? color + '-outline' : 'ghost')
+        : isSelected
+          ? color
+          : color + '-outline';
+
     const clonedButton = React.cloneElement(child, {
       /* One step of escalation from the group's own style:
            outlined / light   unselected `-outline`  ->  selected SOLID
@@ -504,16 +515,19 @@ export function ButtonGroup({
          TO. A plain ButtonGroup has no selection, so every segment sits on the
          unselected rung forever — a row of outlines waiting for a solid that
          never arrives. Its segments are peers instead, and peers look alike:
-         the group's own style, same for all of them. */
-      variant: child.props.variant ?? (
-        !hasSelection
-          ? (isGhost ? 'ghost' : color)
-          : isGhost
-            ? (isSelected ? color + '-outline' : 'ghost')
-            : isSelected
-              ? color
-              : color + '-outline'
-      ),
+         the group's own style, same for all of them.
+
+         A SELECTED segment whose child names a segment SHAPE (`-outline`,
+         `ghost`, `text` — what warnSegmentShape asks segments to be) takes
+         the group's escalation anyway. The group already paints that segment
+         with the selected fill, edge and label (.omni-seg-sel); left on the
+         child's outline variant it kept the outline's flat shadow, so it came
+         out the right color with no bevel — not the Button it is meant to
+         look like. Escalating makes it that Button: same variant, same bevel,
+         same classes. A child that names a SOLID variant still wins. */
+      variant: (child.props.variant != null && !(hasSelection && isSelected && isSegmentShape(child.props.variant)))
+        ? child.props.variant
+        : groupVariant,
       /* SEPARATED segments are whole buttons, and Figma's selected one is
          Button's own selected look — the edge thickened to
          --Button-Selected-Border-Width (2px) with its selected bevel — so the

@@ -274,6 +274,107 @@ describe('Select color mode', () => {
   });
 });
 
+describe('Select panel takes the PAGE surface, as Popover', () => {
+  /* It used to copy the trigger's closest data-theme onto the portaled
+     list, so a Select inside a dark Primary · Surface-Dimmest tile opened a
+     deep-purple panel over a light page. */
+  test('the portaled list carries no data-theme or data-surface of its own', () => {
+    render(
+      <div data-theme="Primary" data-surface="Surface-Dimmest">
+        <Select options={OPTIONS} defaultValue="a" aria-label="Pick" />
+      </div>
+    );
+    fireEvent.click(screen.getByRole('combobox'));
+    const list = screen.getByRole('listbox');
+    expect(list.parentElement).toBe(document.body);
+    expect(list.hasAttribute('data-theme')).toBe(false);
+    expect(list.hasAttribute('data-surface')).toBe(false);
+    expect(list.closest('[data-theme]')).toBeNull();
+  });
+  test('keeps its border, radius, fill and no shadow', () => {
+    render(<Select options={OPTIONS} aria-label="Pick" />);
+    fireEvent.click(screen.getByRole('combobox'));
+    const list = screen.getByRole('listbox');
+    expect(declared(list, 'background-color')).toBe('var(--Hover)');
+    expect(declared(list, 'border-color')).toBe('var(--Border)');
+    expect(declared(list, 'border-radius')).toMatch(/^var\(--Dropdown-Frame-Radius/);
+    expect(declared(list, 'box-shadow')).toBe('none');
+  });
+});
+
+describe('Select panel width', () => {
+  test('at least the trigger, as wide as its longest option, capped at 360px / the viewport', () => {
+    render(<Select options={OPTIONS} aria-label="Pick" />);
+    fireEvent.click(screen.getByRole('combobox'));
+    const list = screen.getByRole('listbox');
+    expect(declared(list, 'width')).toBe('max-content');
+    expect(declared(list, 'min-width')).toBe('var(--_sel-trg-w)');
+    expect(declared(list, 'max-width')).toBe('min(360px, calc(100vw - 16px))');
+    expect(list.style.getPropertyValue('--_sel-trg-w')).toMatch(/px$/);
+  });
+  test('an option label stays on one line, with an ellipsis only past the max width', () => {
+    render(<Select options={OPTIONS} aria-label="Pick" />);
+    fireEvent.click(screen.getByRole('combobox'));
+    const label = screen.getByText('Alpha');
+    expect(declared(label, 'white-space')).toBe('nowrap');
+    expect(declared(label, 'text-overflow')).toBe('ellipsis');
+    expect(declared(label, 'min-width')).toBe('0');
+  });
+  test('a panel that would run off the right edge moves back on screen', () => {
+    const orig = Element.prototype.getBoundingClientRect;
+    const w = window.innerWidth;
+    Element.prototype.getBoundingClientRect = function () {
+      if (this.getAttribute && this.getAttribute('role') === 'listbox') return { left: 0, top: 0, right: 300, bottom: 100, width: 300, height: 100 };
+      if (this.getAttribute && this.getAttribute('role') === 'combobox') return { left: w - 120, right: w - 20, top: 10, bottom: 50, width: 100, height: 40 };
+      return orig.call(this);
+    };
+    try {
+      render(<Select options={OPTIONS} aria-label="Pick" />);
+      fireEvent.click(screen.getByRole('combobox'));
+      const left = parseFloat(screen.getByRole('listbox').style.left);
+      // Flipped to the trigger's right edge: right = w - 20, so left = w - 320.
+      expect(left).toBe(w - 320);
+      expect(left + 300).toBeLessThanOrEqual(w - 8);
+    } finally {
+      Element.prototype.getBoundingClientRect = orig;
+    }
+  });
+});
+
+describe('Select color swatches size from the FIELD, not the buttons', () => {
+  const opts = [{ value: 'a', label: 'Sea', color: '#2f6f5e' }, { value: 'b', label: 'Clay', color: '#b0603a' }];
+  test('trigger and rows wear the same scoped swatch class', () => {
+    const { container } = render(<Select mode="color" options={opts} value="a" onChange={() => {}} aria-label="Color" />);
+    const trg = container.querySelector('.swatch-chip');
+    fireEvent.click(screen.getByRole('combobox'));
+    const rows = document.querySelectorAll('[role="option"] .swatch-chip');
+    [trg, ...rows].forEach((chip) => {
+      expect(chip.parentElement.classList.contains('omni-sel-sw')).toBe(true);
+      // Field height − 8px, from the mode's variable — not --Small-Button-Height.
+      expect(declared(chip, '--_sw-d')).toBe('var(--_sel-sw)');
+      expect(declared(chip, 'border-radius')).toBe('min(var(--Input-Radius, 4px), 6px)');
+    });
+  });
+  test.each([
+    ['small', 'calc(var(--Small-Button-Height) - 8px)'],
+    ['medium', 'calc(var(--Button-Height) - 8px)'],
+    ['large', 'calc(var(--Large-Button-Height) - 8px)'],
+  ])('%s: the chip is the field height − 8px, the same in the trigger and the rows', (size, want) => {
+    render(<Select mode="color" size={size} options={opts} value="a" onChange={() => {}} aria-label="Color" />);
+    const trigger = screen.getByRole('combobox');
+    expect(declared(trigger, '--_sel-sw')).toBe(want);
+    fireEvent.click(trigger);
+    expect(declared(screen.getAllByRole('option')[0], '--_sel-sw')).toBe(want);
+  });
+  test('no button token sizes or rounds the chip', () => {
+    const { container } = render(<Select mode="color" options={opts} value="a" onChange={() => {}} aria-label="Color" />);
+    const chip = container.querySelector('.swatch-chip');
+    expect(declared(chip, '--_sw-d')).not.toMatch(/Button/);
+    expect(declared(chip, 'border-radius')).not.toMatch(/Button/);
+    expect(declared(chip.parentElement, 'width')).toBe('auto');
+  });
+});
+
 describe('Select option icons', () => {
   test('an option icon shows in the list and, once chosen, in the field', () => {
     const opts = [{ value: 'a', label: 'Alpha', icon: <span data-testid="icon-a" /> }, { value: 'b', label: 'Beta' }];

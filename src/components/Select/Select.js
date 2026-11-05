@@ -1,5 +1,5 @@
 // src/components/Select/Select.js
-import React, { useState, useRef, useEffect, useCallback, useId } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect, useCallback, useId } from 'react';
 import ReactDOM from 'react-dom';
 import { Swatch } from '../Swatch/Swatch';
 import { Icon } from '../Icon/Icon';
@@ -102,6 +102,19 @@ registerStaticStyles('omni-select', [
   '.omni-sel-trg{display:flex;-webkit-box-align:center;align-items:center;gap:var(--Sizing-1-and-Half, 12px);width:100%;min-width:var(--_sel-minw);'
     + 'background-color:transparent;border:none;border-radius:0;color:var(--Quiet);font-family:var(--Body-Font-Family, inherit);'
     + 'cursor:pointer;outline:none;text-align:left;position:relative;transition:color 0.15s ease}',
+  /* The color chip, sized from the FIELD, not from the buttons: field height
+     − 8px, so a 32px field holds a 24px chip and a 40px field a 32px one, and
+     moving the brand's button height or radius no longer moves it. A
+     floating field's height includes its raised label, so its chip is the
+     value line's (height − 32px: 16 / 24 / 32). One variable per mode, set on
+     the trigger AND on the rows, so the two chips are always the same. */
+  ...MODES.map(([k, sc, flt]) => `.omni-sel-trg-${k},.omni-sel-opt-${k}{--_sel-sw:calc(${px(sc.height)} - ${flt ? 32 : 8}px)}`),
+  /* Over Swatch's own chip rules (one class each) — two classes. A rounded
+     square with a modest corner: the input's radius, capped at 6px, so a
+     pill-shaped brand does not turn the chip into a circle. The Swatch root's
+     56px width is for a LABELLED swatch; here the chip is the whole thing. */
+  '.omni-sel-sw.omni-swatch{width:auto}',
+  '.omni-sel-sw .omni-swatch-chip{--_sw-d:var(--_sel-sw);border-radius:min(var(--Input-Radius, 4px), 6px)}',
   ...MODES.map(([k, sc, flt]) => `.omni-sel-trg-${k}{height:${px(sc.height)};`
     + (flt ? longPad(sc.padding) : `padding-top:0;padding-right:0;padding-bottom:0;padding-left:${sc.pad}`)
     + `;font-size:${sc.fontSize}` + (sc.lineHeight ? `;line-height:${sc.lineHeight}` : '') + (flt ? ';gap:8px' : '') + '}'),
@@ -134,7 +147,10 @@ registerStaticStyles('omni-select', [
   `.omni-sel-glyph{${SVG_ICON_DECLS};font-size:1.5rem}`,
 
   /* The dropdown panel. */
-  '.omni-sel-list{position:fixed;background-color:var(--Hover);border-width:1px;border-style:solid;border-color:var(--Border);'
+  /* At least the trigger's width (--_sel-trg-w), as wide as its longest
+     option on one line, never past 360px or the viewport. */
+  '.omni-sel-list{position:fixed;box-sizing:border-box;width:max-content;min-width:var(--_sel-trg-w);max-width:min(360px, calc(100vw - 16px));'
+    + 'background-color:var(--Hover);border-width:1px;border-style:solid;border-color:var(--Border);'
     + 'border-radius:var(--Dropdown-Frame-Radius, var(--Input-Radius, var(--Style-Border-Radius, 4px)));box-shadow:none;z-index:99999;'
     + `max-height:${DROPDOWN_MAX_HEIGHT}px;overflow-y:auto;padding-top:4px;padding-bottom:4px}`,
   '.omni-sel-opt{display:flex;-webkit-box-align:center;align-items:center;gap:8px;padding-left:12px;padding-right:12px;padding-top:0;padding-bottom:0;'
@@ -146,6 +162,8 @@ registerStaticStyles('omni-select', [
   '.omni-sel-opt-off:hover{background-color:var(--_sel-hover);color:var(--_sel-btn-text)}',
   '.omni-sel-opt-off:active{background-color:var(--_sel-pressed);color:var(--_sel-btn-text)}',
   '.omni-sel-opt:focus-visible{outline-width:2px;outline-style:solid;outline-color:var(--Focus-Visible);outline-offset:2px}',
+  /* One line per option; ellipsis only once the panel is at its max width. */
+  '.omni-sel-opt-label{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
   '.omni-sel-opt-icon{display:inline-flex;-webkit-box-align:center;align-items:center;flex-shrink:0}',
   '.omni-sel-div{height:1px;background-color:var(--Border);margin-left:8px;margin-right:8px;margin-top:2px;margin-bottom:2px}',
   '.omni-sel-group{padding-left:12px;padding-right:12px;padding-top:10px;padding-bottom:4px;font-size:11px;font-family:inherit;font-weight:700;'
@@ -236,8 +254,6 @@ export function Select({
 
   const wrapperRef = useRef(null);
   const triggerRef = useRef(null);
-  const [parentTheme, setParentTheme] = useState(null);
-  const [parentSurface, setParentSurface] = useState(null);
 
   const isControlled = controlledValue !== undefined;
   const currentValue = isControlled ? controlledValue : internalValue;
@@ -256,9 +272,8 @@ export function Select({
   const isLeft = labelPosition === 'left';
   const isTop = labelPosition === 'top' || isLeft;
   const isColor = mode === 'color';
-  /* The Swatch one step under the field: a 32px field holds the 24px chip,
-     a 56px field the 32px one, as the old height − 8 square did. */
-  const swatchSize = size === 'large' ? 'medium' : 'small';
+  /* The chip's size comes from the field (--_sel-sw, field height − 8px, in
+     the sheet); `small` here only picks Swatch's base class. */
   const sizeConfig = isFloating
     ? (FLOATING_SIZE_MAP[size] || FLOATING_SIZE_MAP.medium)
     : (SIZE_MAP[size] || SIZE_MAP.medium);
@@ -311,17 +326,15 @@ export function Select({
     return () => document.removeEventListener('mousedown', handler);
   }, [open]);
 
-  // Capture parent theme/surface and reposition on scroll/resize
+  /* Reposition on scroll/resize. The panel does NOT copy the trigger's
+     data-theme / data-surface: like Popover, a floating panel belongs to the
+     page, not to the tile it was opened from. It used to capture the closest
+     data-theme, so a Select in a small dark preview cell (Primary ·
+     Surface-Dimmest) opened a deep-purple panel over a light page. Portaled
+     to <body>, it now resolves every token against the document's own
+     theme and surface. */
   useEffect(() => {
     if (!open || !triggerRef.current) return;
-
-    // Capture closest data-theme and data-surface from the trigger's ancestors
-    const themeEl = triggerRef.current.closest('[data-theme]');
-    const surfaceEl = triggerRef.current.closest('[data-surface]');
-    setParentTheme(themeEl?.getAttribute('data-theme') || null);
-    setParentSurface(surfaceEl?.getAttribute('data-surface') || null);
-
-    // Force re-render on scroll/resize to update position
     const forceUpdate = () => setDropdownPos(getDropdownPos());
     window.addEventListener('scroll', forceUpdate, true);
     window.addEventListener('resize', forceUpdate);
@@ -332,6 +345,23 @@ export function Select({
   }, [open, getDropdownPos]);
 
   const dropdownRef = useRef(null);
+
+  /* Keep the panel on screen. It can be wider than the trigger now, so a
+     Select near the right edge would run off it: flip to the trigger's right
+     edge, and if that still does not fit, shift it in to an 8px margin. */
+  useLayoutEffect(() => {
+    const el = dropdownRef.current;
+    if (!open || !el || !triggerRef.current) return;
+    const vw = window.innerWidth || document.documentElement.clientWidth;
+    const w = el.getBoundingClientRect().width;
+    const trg = triggerRef.current.getBoundingClientRect();
+    let left = dropdownPos.left;
+    if (left + w > vw - 8) {
+      left = trg.right - w;
+      if (left < 8) left = Math.max(8, vw - 8 - w);
+    }
+    el.style.left = left + 'px';
+  }, [open, dropdownPos]);
 
   const focusOption = useCallback((dir) => {
     const container = dropdownRef.current;
@@ -373,22 +403,20 @@ export function Select({
     });
   }, [open]);
 
-  // The dropdown rendered into document.body via portal. No data-surface —
-  // the dropdown uses --Hover (a subtle tint of whatever scope the body
-  // resolves to) for its background so it stays consistent with the
-  // trigger field and doesn't fight saturated brand surfaces. We still
-  // carry data-theme so per-palette tokens (Buttons, Border, etc.)
-  // resolve correctly against the brand the user picked.
+  // The dropdown rendered into document.body via portal, with NO data-theme
+  // and NO data-surface of its own: it takes the PAGE's theme and surface, as
+  // Popover's panel does, whatever tile the trigger sits in. Its fill is that
+  // scope's --Hover (the same resting tint as the field), its edge --Border,
+  // and no shadow.
   //
-  // The row palette arrives as custom properties declared on the listbox,
-  // which carries the same data-theme the rows resolve against.
+  // The row palette arrives as custom properties declared on the listbox and
+  // resolves against that same page scope.
   const sk = SZ[size] ? size : 'medium';
   const modeKey = (isFloating ? 'f' : 's') + SZ[sk];
   const dropdown = open ? ReactDOM.createPortal(
     <div
       ref={dropdownRef}
       data-select-dropdown
-      data-theme={parentTheme || undefined}
       role="listbox"
       aria-label={label || 'Options'}
       className="MuiBox-root omni-sel-list"
@@ -396,7 +424,9 @@ export function Select({
         top: dropdownPos.top ?? 'unset',
         bottom: dropdownPos.bottom ?? 'unset',
         left: dropdownPos.left,
-        width: dropdownPos.width + 'px',
+        /* At least the trigger, wide enough for the longest option on one
+           line, never wider than 360px or the viewport (see .omni-sel-list). */
+        '--_sel-trg-w': dropdownPos.width + 'px',
         '--_sel-btn': 'var(--Buttons-' + C + '-Button)',
         '--_sel-btn-text': 'var(--Buttons-' + C + '-Text)',
         '--_sel-btn-border': 'var(--Buttons-' + C + '-Border)',
@@ -428,13 +458,13 @@ export function Select({
                   /* The library's Swatch — the chip Figma's color dropdown
                      puts in each row. The row marks selection with its check,
                      so the chip stays plain. */
-                  <Swatch color={optColor} size={swatchSize} aria-hidden="true" />
+                  <Swatch color={optColor} size="small" className="omni-sel-sw" aria-hidden="true" />
                 )}
                 {optIcon && (
                   <div aria-hidden="true" className="MuiBox-root omni-sel-opt-icon">{optIcon}</div>
                 )}
                 {(!isColor || showColorLabels) && (
-                  <BodySmall style={{ flex: 1, color: 'inherit', fontWeight: 'inherit' }}>{optLabel}</BodySmall>
+                  <BodySmall className="omni-sel-opt-label" style={{ color: 'inherit', fontWeight: 'inherit' }}>{optLabel}</BodySmall>
                 )}
                 {isSelected && <Icon size="small" sx={{ opacity: 0.6, flexShrink: 0 }}><Glyph name="Check" className="omni-sel-glyph" /></Icon>}
               </div>
@@ -542,7 +572,7 @@ export function Select({
               {/* selectedOption holds the option object; the trigger shows
                   its color as the same library Swatch the rows use. */}
               <Swatch color={(selectedOption && typeof selectedOption !== 'string' && selectedOption.color) || 'transparent'}
-                size={swatchSize} aria-hidden="true" />
+                size="small" className="omni-sel-sw" aria-hidden="true" />
               {showColorLabels && <BodySmall style={{ color: 'inherit', padding: 0 }}>{selectedLabel}</BodySmall>}
             </div>
           ) : (
