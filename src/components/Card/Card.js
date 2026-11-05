@@ -105,6 +105,8 @@ registerStaticStyles('omni-card', [
   '.omni-card-click:active{transform:translateY(0);box-shadow:var(--_cd-rest)}',
   /* Figma's State=Drag: lifted 1px like Hover, two shadow levels above rest. */
   '.omni-card-drag:active{cursor:grabbing;z-index:10;box-shadow:var(--_cd-drag);transform:translateY(-1px)}',
+  /* Drag-image snapshot frame: no shadow, no lift (see onDragStart). */
+  '.omni-card.omni-card-snap{box-shadow:none !important;transform:none !important}',
   /* No border-radius on the ring: the browser draws the outline around the
      box's own corners, offset included. */
   '.omni-card-click:focus-visible,.omni-card-drag:focus-visible{outline:2px solid var(--Focus-Visible);outline-offset:1px}',
@@ -236,6 +238,19 @@ export function Card({
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick?.(e); }
     } : undefined,
     ...ownProps,
+    /* The browser snapshots a dragged element's RECTANGLE at dragstart. Caught
+       mid-lift with its drag shadow, the rounded card came out framed by a
+       square-cut shadow. Drop the shadow and lift for that one frame (the
+       snapshot is taken synchronously), then restore. The consumer's own
+       onDragStart still runs. */
+    ...(isDraggable ? {
+      onDragStart: (e) => {
+        const el = e.currentTarget;
+        el.classList.add('omni-card-snap');
+        requestAnimationFrame(() => el.classList.remove('omni-card-snap'));
+        ownProps.onDragStart?.(e);
+      },
+    } : {}),
   }, { reloadDocument });
 
   return (
