@@ -338,11 +338,14 @@ registerStaticStyles('omni-slider', wk([
   `${ok('mark-label')} .MuiSlider-markLabel{color:var(--Text-Quiet);font-size:var(--_sl-ml)}`,
   /* Disabled: the resting slider at 38%. */
   `${ok('disabled')}.Mui-disabled{opacity:var(--Disabled, 0.38);cursor:not-allowed;pointer-events:none}`,
-  /* SliderField: the Form-Label above or below, Sizing-Half apart; the slider
-     keeps 48px either side of its bar for its value label. */
+  /* SliderField: the Form-Label above or below, Sizing-Half apart. The slider
+     keeps Figma's Slider-Margin (16px) above and below its bar, like a bare
+     Slider — the value bubble floats over that space while it shows, as it
+     does in Figma. (It used to reserve 48px either side, which left a tall
+     empty band around every labelled slider.) */
   '.omni-slf{width:100%;height:auto;display:flex;flex-direction:column;gap:var(--Sizing-Half, 4px)}',
   '.omni-slf-v{width:auto;height:100%}',
-  '.omni-slf:where(:not(.omni-slf-v)) .MuiSlider-root{padding-top:48px;padding-bottom:48px}',
+  '.omni-slf .MuiSlider-valueLabel{z-index:2}',
 ].join('\n')));
 
 // --- Behaviour (what MUI's useSlider did) ------------------------------------
