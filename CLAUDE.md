@@ -372,9 +372,12 @@ brand color.
   If it stops with pages NOT checked, report that and move on. Pages that
   need app state (a filled cart, a signed-in user) are checked in their
   empty state.
-- **Never kill Chrome — or any process — by name or pattern** (`pkill chrome`,
-  `killall`, `ps … | grep … | xargs kill`): that closes the user's own browser
-  and every other tool's. omni-check closes the one browser it started on its
+- **Never kill Chrome — or any process — by name, pattern or port** (`pkill chrome`,
+  `killall`, `ps … | grep … | xargs kill`, `lsof -ti:5190 | xargs kill`): that
+  closes the user's own browser, dev servers and every other tool's. Start a
+  preview on a port nothing else uses (`vite preview --port 0` picks a free
+  one; `--strictPort` fails instead of taking someone else's), and stop only
+  the server you started, by its own PID. omni-check closes the one browser it started on its
   own, including on a timeout. If it ever seems stuck, stop only omni-check
   itself (Ctrl-C, or `kill` its own PID) and report what it printed.
 - **Build warning you can ignore:** Vite may warn about a large `BrandIcon`
