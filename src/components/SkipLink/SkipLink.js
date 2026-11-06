@@ -1,6 +1,7 @@
 // src/components/SkipLink/SkipLink.js
 import React from 'react';
 import { registerStaticStyles, useStaticStyles } from '../_staticStyles';
+import { SHADOW_LEVEL_3 } from '../_shadows';
 
 /**
  * SkipLink — "Skip to main content", the first thing a keyboard user tabs to.
@@ -40,7 +41,9 @@ registerStaticStyles('omni-skip-link', [
     + 'font-family:var(--Font-Family-Body, var(--Body-Font-Family, inherit));font-size:var(--Body-Medium-Font-Size, 16px);'
     + 'line-height:var(--Body-Medium-Line-Height, 24px);font-weight:600;'
     + 'border:1px solid var(--Border);border-radius:var(--Button-Radius, var(--Style-Border-Radius, 4px));'
-    + 'box-shadow:var(--Effect-Level-3-Neutral, 0 4px 12px rgba(0, 0, 0, 0.3));'
+    /* Tinted, not the black set: neutral shadows are Modal, Dialog, Toast and
+       Popover only (floatingShadows.test.js pins the list). */
+    + 'box-shadow:' + SHADOW_LEVEL_3 + ';'
     + 'outline:2px solid var(--Focus-Visible);outline-offset:-5px}',
 ].join('\n'));
 
