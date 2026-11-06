@@ -22,6 +22,10 @@ light and dark mode, at 1280px and 390px. Exit code 1 when anything fails.
   --max-time S       seconds for the whole run (default 600); pages not
                      reached by then are listed as not checked
   --json             machine-readable report
+  --install-commands copy the library's Claude Code slash commands
+                     (/OmniCheck, /ScanComponents, /ShareComponent) into this
+                     project's .claude/commands/ and exit. Existing files are
+                     kept; add --force to replace them.
   -h, --help         this text
 
 Dark mode: omni-check stores 'dark' under localStorage 'omni-dark-mode' (what
@@ -49,7 +53,7 @@ function positive(flag, v) {
 }
 
 function parseArgs(argv) {
-  const o = { target: null, routes: null, port: 0, json: false, help: false, cap: 30, darkKeys: ['omni-dark-mode'], pageTimeout: 60, maxTime: 600 };
+  const o = { target: null, routes: null, port: 0, json: false, help: false, installCommands: false, force: false, cap: 30, darkKeys: ['omni-dark-mode'], pageTimeout: 60, maxTime: 600 };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     const val = () => {
@@ -60,6 +64,8 @@ function parseArgs(argv) {
     };
     if (a === '-h' || a === '--help') o.help = true;
     else if (a === '--json') o.json = true;
+    else if (a === '--install-commands') o.installCommands = true;
+    else if (a === '--force') o.force = true;
     else if (a.startsWith('--routes')) o.routes = parseRoutesArg(val());
     else if (a.startsWith('--port')) o.port = Number(val()) || 0;
     else if (a.startsWith('--max-routes')) o.cap = Math.max(1, Number(val()) || 30);
@@ -71,6 +77,27 @@ function parseArgs(argv) {
     else throw new Error('omni-check: one url-or-dir only (got "' + o.target + '" and "' + a + '")');
   }
   return o;
+}
+
+/** The slash commands that ship in the package (.claude/commands/*.md). */
+const COMMANDS_DIR = path.join(__dirname, '..', '..', '.claude', 'commands');
+
+/* Claude Code reads commands from the PROJECT's .claude/commands, never from
+   node_modules — so a command shipped in the package does nothing until it is
+   copied in. This is that copy. Existing files are left alone (the user may
+   have edited one) unless --force. → { installed: [], kept: [], dir } */
+function installCommands({ cwd = process.cwd(), force = false, from = COMMANDS_DIR } = {}) {
+  if (!fs.existsSync(from)) throw new Error('omni-check: this package has no .claude/commands to install (' + from + ').');
+  const dir = path.join(cwd, '.claude', 'commands');
+  fs.mkdirSync(dir, { recursive: true });
+  const installed = []; const kept = [];
+  for (const f of fs.readdirSync(from).filter((n) => n.endsWith('.md')).sort()) {
+    const dest = path.join(dir, f);
+    if (fs.existsSync(dest) && !force) { kept.push(f); continue; }
+    fs.copyFileSync(path.join(from, f), dest);
+    installed.push(f);
+  }
+  return { installed, kept, dir };
 }
 
 /** { kind: 'url', url } | { kind: 'dir', dir } — or throws with what to do. */
@@ -93,6 +120,16 @@ async function main(argv, { stdout = process.stdout, stderr = process.stderr, cw
   let opts;
   try { opts = parseArgs(argv); } catch (e) { stderr.write(e.message + '\n'); return 2; }
   if (opts.help) { stdout.write(USAGE + '\n'); return 0; }
+  if (opts.installCommands) {
+    try {
+      const r = installCommands({ cwd, force: opts.force });
+      const name = (f) => '/' + f.replace(/\.md$/, '');
+      if (r.installed.length) stdout.write('omni-check: installed ' + r.installed.map(name).join(', ') + ' into ' + path.relative(cwd, r.dir) + '/\n');
+      if (r.kept.length) stdout.write('omni-check: kept your existing ' + r.kept.map(name).join(', ') + ' (--force to replace)\n');
+      if (!r.installed.length && !r.kept.length) stdout.write('omni-check: no commands to install\n');
+      return 0;
+    } catch (e) { stderr.write(e.message + '\n'); return 2; }
+  }
 
   let target;
   try { target = resolveTarget(opts.target, cwd); } catch (e) { stderr.write(e.message + '\n'); return 2; }
@@ -139,4 +176,4 @@ async function main(argv, { stdout = process.stdout, stderr = process.stderr, cw
   }
 }
 
-module.exports = { main, parseArgs, resolveTarget, USAGE };
+module.exports = { main, parseArgs, resolveTarget, installCommands, USAGE };
