@@ -144,8 +144,8 @@ bars, buttons and cards. Follow it.
 - **Phones:** type follows the screen through the theme's CSS — the phone
   ramp below 600px, tablet below 900px (smaller headings; body text is
   semibold on phones by design — do not override it). Do not set
-  `data-device`; it only pins a device on purpose. `AppBar` folds its links, and every `endSlot` action
-  but the last, into a menu button below 900px. Pass `endSlot` as a fragment
+  `data-device`; it only pins a device on purpose. `AppBar` folds its links, its `centerSlot`, and every
+  `endSlot` action but the last, into a menu button below 900px. Pass `endSlot` as a fragment
   of buttons, primary action last. Nothing to set up.
 - **Light / dark:** with `defaultDarkMode="system"` and `persistDarkMode` on
   the provider (section 2), the page starts in the device's mode and keeps the
@@ -244,7 +244,7 @@ import HomeIcon from '@omni-design/icons/Home';
 | Columns | `Grid` | container: `container spacing`; child: `size={{ xs: 12, md: 4 }}` |
 | Stacks | `VStack`, `HStack` | `spacing`, `alignItems`, `justifyContent`, `component` — a list is `<VStack component="ul">` with `<HStack component="li">` |
 | Skip link | `SkipLink` | first child of the app, before the `AppBar`; `href` (default `#main`) — give the main region that id |
-| Site nav | `AppBar` | `brand`, `navLinks` (`{ label, href, current? }` — the system's Tabs as links: the current one is marked and announced, and for `#section` links it follows the section on screen; a menu button below 900px — change with `collapseAt`), `endSlot`, `barColor`. `mode="mobile"` is an app-screen bar (search / title), not a site nav |
+| Site nav | `AppBar` | `brand`, `navLinks` (`{ label, href, current? }` — the system's Tabs as links: the current one is marked and announced, and for `#section` links it follows the section on screen; a menu button below 900px — change with `collapseAt`), `centerSlot` (e.g. a `SearchField`: shows after the links — both show — and moves into that menu below `collapseAt`), `endSlot`, `barColor`. `mode="mobile"` is an app-screen bar (search / title), not a site nav |
 | Card | `Card` | pads itself on a `Container` level; `variant` (`solid`/`light`/`dark`), `color`, `elevated`, `clickable`; `href` makes it a real link |
 | Button | `Button` | `variant`, `size` (`small`/`medium`/`large`), `startIcon`, `endIcon`, `fullWidth` |
 | Tabs that go to places (a nav, not panels) | `Tabs navigation` | each `Tab` takes `href`; the current one gets `aria-current` and the selected marker — links, not tab roles |

@@ -735,7 +735,9 @@ import {
   endSlot={<Button variant="default" size="small">Get started</Button>}
 />
 // menuType: 'auto' (default) | 'hamburger' (always) | 'expanded' (tabs) | 'none'
-// centerSlot replaces the middle with your own content (it does not collapse).
+// centerSlot (e.g. a SearchField) sits after the navLinks — both show; it
+// replaces only the built-in search. Below collapseAt it moves into the menu
+// drawer after the links, so it never makes a phone page scroll sideways.
 // mode="mobile" is an APP-screen bar — mobileVariant 'search' | 'small' |
 // 'medium' | 'large' — not a site nav.
 ```

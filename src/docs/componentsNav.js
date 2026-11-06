@@ -66,7 +66,7 @@ export const APPBAR_DOC = {
     name: 'centerSlot / endSlot',
     type: 'ReactNode',
     default: 'undefined',
-    note: 'For anything the props do not cover — search, a status chip, a second action.'
+    note: 'For anything the props do not cover — search, a status chip, a second action. centerSlot shows after navLinks (both show) and moves into the menu drawer below collapseAt.'
   }],
   states: [{
     state: 'Scrolled',

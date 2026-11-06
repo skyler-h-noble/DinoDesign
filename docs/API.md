@@ -2728,7 +2728,7 @@ Site footer: brand, up to three link columns, social links, copyright.
 ```
 
 ### AppBar · DesktopAppBar · MobileAppBar
-Site / app top bar on the App-Bar theme. Links fold into a menu button below `collapseAt`. DesktopAppBar / MobileAppBar are its two modes as components.
+Site / app top bar on the App-Bar theme. Links and centerSlot fold into a menu button below `collapseAt`. DesktopAppBar / MobileAppBar are its two modes as components.
 
 - `mode?: 'desktop' | 'mobile'` = `'desktop'` — desktop = site nav; mobile = an app-screen bar (search or title).
 - `size?: Size` = `'medium'`
@@ -2738,11 +2738,11 @@ Site / app top bar on the App-Bar theme. Links fold into a menu button below `co
 - `brand?: ReactNode`
 - `onBrandClick?: MouseEventHandler<HTMLElement>`
 - `navLinks?: Array<AppBarLink | string>` = `[]` — Site links `{ label, href, current? }` (strings work too).
-- `collapseAt?: number` = `900` — Width in px below which links fold into a menu.
+- `collapseAt?: number` = `900` — Width in px below which links (and centerSlot) fold into a menu.
 - `menuType?: 'auto' | 'hamburger' | 'expanded' | 'none'` = `'auto'` — auto | hamburger (always) | expanded (tabs) | none.
 - `showMenu?: boolean` = `true`
 - `onMenuClick?: MouseEventHandler<HTMLElement>`
-- `centerSlot?: ReactNode` — Replaces the middle (links / search).
+- `centerSlot?: ReactNode` — Middle content, e.g. a SearchField. Shows after navLinks (both show; it replaces only the built-in search). Below `collapseAt` it moves into the menu drawer after the links, so it never widens a phone page.
 - `endSlot?: ReactNode` — Right side actions — a fragment of buttons, primary last.
 - `searchPosition?: 'left' | 'right' | 'none'`
 - `searchValue?: string`

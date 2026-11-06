@@ -137,6 +137,64 @@ describe('DesktopAppBar', () => {
     fireEvent.click(screen.getByLabelText('Open navigation menu'));
     expect(document.querySelector('.appbar-drawer-actions').textContent).toContain('Login');
   });
+  /* centerSlot used to REPLACE the middle, links included: a bar given a
+     search field and navLinks showed no nav at all on desktop. They coexist,
+     links first. */
+  test('centerSlot and navLinks both render, links before the centerSlot', () => {
+    render(<DesktopAppBar brand="Acme" navLinks={[{ label: 'Features', href: '#features' }, { label: 'Pricing', href: '#pricing' }]}
+      centerSlot={<input aria-label="Search products" />} />);
+    const nav = screen.getByRole('navigation', { name: 'Main navigation' });
+    expect(nav.querySelector('a[href="#features"]')).not.toBeNull();
+    const search = screen.getByLabelText('Search products');
+    // Focus order follows the DOM: the links, then the search.
+    expect(nav.compareDocumentPosition(search) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    // The links keep their own box, so the collapse rule still reaches them.
+    expect(nav.closest('.appbar-links')).not.toBeNull();
+    expect(search.closest('.appbar-links')).toBeNull();
+  });
+  test('centerSlot replaces only the built-in search', () => {
+    const { container } = render(<DesktopAppBar searchPosition="right" centerSlot={<span>Status</span>} />);
+    expect(screen.getByText('Status')).toBeInTheDocument();
+    expect(container.querySelector('.omni-sf, input')).toBeNull();
+  });
+  test('expanded links show beside a centerSlot too', () => {
+    render(<DesktopAppBar menuType="expanded" navLinks={['Home', 'About']} centerSlot={<span>Status</span>} />);
+    expect(screen.getByLabelText('Main navigation')).toBeInTheDocument();
+    expect(screen.getByText('Status')).toBeInTheDocument();
+  });
+  /* Below collapseAt the centerSlot folds into the drawer after the links, as
+     endSlot's extra actions do — at 360px a search field beside the brand
+     pushed the page 191px wider than the screen. */
+  test('collapsed: the centerSlot is hidden in the bar and shown in the drawer after the links', async () => {
+    render(<DesktopAppBar brand="Acme" navLinks={['Features']}
+      centerSlot={<input aria-label="Search products" />}
+      endSlot={<><button type="button">Login</button><button type="button">Get started</button></>} />);
+    const css = Array.from(document.styleSheets).flatMap((sh) => Array.from(sh.cssRules).map((r) => r.cssText)).join('\n');
+    const below = css.match(/@media[^{]*max-width:\s*899\.98px[^{]*\{([\s\S]*?)\}\s*\}/);
+    expect(below && below[1]).toMatch(/\.omni-ab-below-900 \.appbar-center-folds/);
+    expect(screen.getByLabelText('Search products').closest('.appbar-center-folds')).not.toBeNull();
+    fireEvent.click(screen.getByLabelText('Open navigation menu'));
+    await waitFor(() => expect(document.querySelector('.appbar-drawer-center')).not.toBeNull());
+    const drawerNav = document.querySelector('.appbar-drawer-center').closest('nav');
+    const order = Array.from(drawerNav.querySelectorAll('a, button, input'))
+      .map((el) => el.getAttribute('aria-label') || el.textContent);
+    expect(order).toEqual(['Features', 'Search products', 'Login']);
+  });
+  test('a centerSlot alone still gets a menu button to fold into', () => {
+    render(<DesktopAppBar brand="Acme" centerSlot={<input aria-label="Search products" />} />);
+    expect(screen.getByLabelText('Open navigation menu').closest('.omni-ab-menu-auto')).not.toBeNull();
+  });
+  test('with nothing to show it, the centerSlot stays in the bar and may shrink', () => {
+    render(<DesktopAppBar brand="Acme" navLinks={['A']} showMenu={false} centerSlot={<input aria-label="Search products" />} />);
+    const box = screen.getByLabelText('Search products').closest('.appbar-center-slot');
+    expect(box).not.toHaveClass('appbar-center-folds');
+    const css = Array.from(document.styleSheets).flatMap((sh) => Array.from(sh.cssRules).map((r) => r.cssText)).join('\n');
+    expect(css).toMatch(/\.omni-ab-center\s*\{[^}]*min-width:\s*0/);
+  });
+  test('a bar without centerSlot renders no center box', () => {
+    const { container } = render(<DesktopAppBar brand="Acme" navLinks={['A']} endSlot={<span>end</span>} />);
+    expect(container.querySelector('.appbar-center-slot')).toBeNull();
+  });
   test('a single endSlot action stays put and adds no menu button', () => {
     render(<DesktopAppBar brand="Acme" endSlot={<button type="button">Get started</button>} />);
     expect(screen.queryByLabelText('Open navigation menu')).not.toBeInTheDocument();

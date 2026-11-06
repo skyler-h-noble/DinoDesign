@@ -115,16 +115,20 @@ registerStaticStyles('omni-appbar', [
   /* Display lives here, not inline, so the collapse rule can hide them. */
   '.omni-ab-links{display:flex;align-items:center;align-self:center;flex-shrink:0}',
   '.omni-ab-endsec{display:contents}',
+  /* centerSlot's box. It may shrink (min-width 0 — a SearchField narrows) and
+     its display is here, not inline, so the collapse rule can hide it. */
+  '.omni-ab-center{display:flex;align-items:center;flex:0 1 auto;min-width:0}',
 ].join('\n'));
 
 /* Below collapseAt the links fold into the menu button, and every end action
-   but the last moves into the drawer. */
+   but the last — and the centerSlot — moves into the drawer. */
 function useCollapseSheet(collapseAt) {
   const id = 'omni-appbar-below-' + String(collapseAt).replace(/[^\w-]/g, '_');
   const c = String(collapseAt).replace(/[^\w-]/g, '_');
   registerStaticStyles(id, `@media (max-width: ${collapseAt - 0.02}px){`
     + `.omni-ab-below-${c} .omni-ab-menu-auto{display:contents}`
-    + `.omni-ab-below-${c} .appbar-links,.omni-ab-below-${c} .appbar-end-secondary{display:none}}`);
+    + `.omni-ab-below-${c} .appbar-links,.omni-ab-below-${c} .appbar-end-secondary,`
+    + `.omni-ab-below-${c} .appbar-center-folds{display:none}}`);
   useStaticStyles(id);
   return 'omni-ab-below-' + c;
 }
@@ -150,7 +154,12 @@ function AppBarIconButton({ children, onClick, ariaLabel, onIntent }) {
  * Slot props (override hardcoded defaults when provided):
  *   brand        — string or ReactNode shown in the brand spot (overrides companyName)
  *   onBrandClick — click handler for the brand (makes it a button)
- *   centerSlot   — ReactNode replacing the default search/tabs in the middle
+ *   centerSlot   — ReactNode in the middle (a SearchField, a status chip). It
+ *                  replaces the built-in search, NOT the navLinks: with both,
+ *                  the links come first and the centerSlot follows them (the
+ *                  Figma desktop bar's order: menu, branding, search, right
+ *                  buttons). Below collapseAt it folds into the drawer with
+ *                  the links — see `foldsCenter`.
  *   endSlot      — ReactNode replacing the default right buttons + login on the right
  *
  * When a slot is NOT provided, the previous hardcoded UI renders unchanged
@@ -250,7 +259,18 @@ function DesktopAppBar({
     React.isValidElement(c) && c.type === React.Fragment ? flatten(c.props.children) : [c]));
   const endItems = endSlot !== undefined ? flatten(endSlot) : [];
   const movesActions = menuType === 'auto' && endItems.length > 1;
-  const canOpen = links.length > 0 || Boolean(onMenuClick) || movesActions;
+  /* centerSlot on a collapsed bar moves into the drawer, after the links —
+     the same fold endSlot's extra actions take, for the same reason: a brand,
+     a menu button, a search field and an action overflowed a 360px phone by
+     191px. Shrinking instead would only work for content that can shrink (a
+     search field can, tabs or a chip cannot), and below ~600px even a search
+     field has no room left beside the brand. So it folds whatever it holds.
+     Only when the menu button will open OUR drawer: with showMenu={false} or
+     a caller's own onMenuClick nothing would show it, so there it stays in
+     the bar and may shrink (min-width 0). */
+  const hasCenter = centerSlot !== undefined && centerSlot !== null && centerSlot !== false;
+  const foldsCenter = menuType === 'auto' && hasCenter && showMenu && !onMenuClick;
+  const canOpen = links.length > 0 || Boolean(onMenuClick) || movesActions || foldsCenter;
   const menuButton = showMenu && canOpen && (effectiveMenu === 'hamburger' || effectiveMenu === 'auto');
 
   // The navigation drawer the menu button opens — shared by both bars.
@@ -272,6 +292,13 @@ function DesktopAppBar({
               {link.label}
             </Button>
           ))}
+          {/* The bar's order, top to bottom: links, centerSlot, actions. The
+              Figma `layout` bars keep their centerSlot in the bar. */}
+          {foldsCenter && !layout && (
+            <div className="appbar-drawer-center" style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', marginTop: links.length ? 'var(--Sizing-2, 16px)' : 0 }}>
+              {centerSlot}
+            </div>
+          )}
           {movesActions && (
             <div className="appbar-drawer-actions" style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 'var(--Sizing-1, 8px)', marginTop: 'var(--Sizing-2, 16px)' }}>
               {endItems.slice(0, -1)}
@@ -428,41 +455,39 @@ function DesktopAppBar({
             <H3 component="span" width="hug" style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>{companyName}</H3>
           )}
 
-          {/* Center: slot overrides default search/tabs.
-              Uses equal-flex spacers on both sides so the slot stays visually
-              centered in the AppBar regardless of brand or end-slot widths. */}
-          {centerSlot !== undefined ? (
-            <>
-              {spacer}
-              <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-                {centerSlot}
-              </div>
-              <div style={{ flex: 1 }} />
-            </>
-          ) : (
-            <>
-              {searchPosition === 'left' && searchField}
+          {/* Center. The links and the centerSlot share the middle, links
+              first — a centerSlot replaces the built-in search, never the
+              links (it used to replace both, so a bar given a search field
+              and navLinks lost its whole nav on desktop). Equal-flex spacers
+              either side keep the group centred whatever the brand's and the
+              end slot's widths.
+              The fragments are kept as they were before the centerSlot moved
+              in, so a bar without one renders the same tree — the same
+              generated tab ids included. */}
+          <>
+            {centerSlot === undefined && searchPosition === 'left' && searchField}
 
-              {effectiveMenu === 'expanded' && (
-                <Tabs defaultValue={0} variant="standard" color="default" size={barSize} style={{ marginLeft: 16, minHeight: 0 }}>
-                  <TabList aria-label="Main navigation">
-                    {links.map((link, i) => (
-                      <Tab key={i}>{link.label}</Tab>
-                    ))}
-                  </TabList>
-                </Tabs>
-              )}
+            {effectiveMenu === 'expanded' && (
+              <Tabs defaultValue={0} variant="standard" color="default" size={barSize} style={{ marginLeft: 16, minHeight: 0 }}>
+                <TabList aria-label="Main navigation">
+                  {links.map((link, i) => (
+                    <Tab key={i}>{link.label}</Tab>
+                  ))}
+                </TabList>
+              </Tabs>
+            )}
 
-              {/* auto: the links inline and centred on a wide bar; hidden below
-                  collapseAt, where the menu button opens the same list. */}
-              {effectiveMenu === 'auto' && links.length > 0 ? (
-                <>
-                  {spacer}
-                  {/* The system's Tabs, as links: same look and selected marker
-                      as every other tab bar, with aria-current on the section
-                      you are at (a site nav goes to a place; it does not
-                      switch a panel, so no tab roles). */}
-                  {/* Centred on the bar's height, like the brand and the actions beside it. */}
+            {/* auto: the links inline and centred on a wide bar; hidden below
+                collapseAt, where the menu button opens the same list. */}
+            {(effectiveMenu === 'auto' && links.length > 0) || centerSlot !== undefined ? (
+              <>
+                {spacer}
+                {/* The system's Tabs, as links: same look and selected marker
+                    as every other tab bar, with aria-current on the section
+                    you are at (a site nav goes to a place; it does not
+                    switch a panel, so no tab roles). */}
+                {/* Centred on the bar's height, like the brand and the actions beside it. */}
+                {effectiveMenu === 'auto' && links.length > 0 ? (
                   <div className="appbar-links omni-ab-links">
                     <Tabs navigation value={currentIndex} onChange={setCurrentIndex} baseline={false} size={barSize}
                           style={{ display: 'flex', alignItems: 'center' }}>
@@ -473,14 +498,19 @@ function DesktopAppBar({
                       </TabList>
                     </Tabs>
                   </div>
-                </>
-              ) : null}
+                ) : null}
+                {centerSlot !== undefined && (
+                  <div className={'appbar-center-slot omni-ab-center' + (foldsCenter ? ' appbar-center-folds' : '')}>
+                    {centerSlot}
+                  </div>
+                )}
+              </>
+            ) : null}
 
-              <div style={{ flex: 1 }} />
+            <div style={{ flex: 1 }} />
 
-              {searchPosition === 'right' && searchField}
-            </>
-          )}
+            {centerSlot === undefined && searchPosition === 'right' && searchField}
+          </>
 
           {/* End: slot overrides default right buttons + login.
               Wrap consumer children in a flex container with an 8px gap so

@@ -753,7 +753,7 @@ export interface AppBarLink {
   current?: boolean;
 }
 /**
- * Site / app top bar on the App-Bar theme. Links fold into a menu button below `collapseAt`. DesktopAppBar / MobileAppBar are its two modes as components.
+ * Site / app top bar on the App-Bar theme. Links and centerSlot fold into a menu button below `collapseAt`. DesktopAppBar / MobileAppBar are its two modes as components.
  * @category App structure
  * @exports AppBar DesktopAppBar MobileAppBar
  * @source AppBar/AppBar#AppBar
@@ -777,13 +777,13 @@ export interface AppBarProps {
   onBrandClick?: React.MouseEventHandler<HTMLElement>;
   /** Site links `{ label, href, current? }` (strings work too). */
   navLinks?: Array<AppBarLink | string>;
-  /** Width in px below which links fold into a menu. */
+  /** Width in px below which links (and centerSlot) fold into a menu. */
   collapseAt?: number;
   /** auto | hamburger (always) | expanded (tabs) | none. */
   menuType?: 'auto' | 'hamburger' | 'expanded' | 'none';
   showMenu?: boolean;
   onMenuClick?: React.MouseEventHandler<HTMLElement>;
-  /** Replaces the middle (links / search). */
+  /** Middle content, e.g. a SearchField. Shows after navLinks (both show; it replaces only the built-in search). Below `collapseAt` it moves into the menu drawer after the links, so it never widens a phone page. */
   centerSlot?: React.ReactNode;
   /** Right side actions — a fragment of buttons, primary last. */
   endSlot?: React.ReactNode;
