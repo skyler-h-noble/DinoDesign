@@ -8,7 +8,8 @@
   "module": "dist/esm/components/index.js",
   "types": "./dist/types/components/index.d.ts",
   "bin": {
-    "omni-check": "bin/omni-check.js"
+    "omni-check": "bin/omni-check.js",
+    "omni-theme-links": "bin/omni-theme-links.js"
   },
   "files": [
     "dist",
@@ -31,6 +32,11 @@
       "types": "./dist/types/OmniDesignProvider.d.ts",
       "import": "./dist/esm/OmniDesignProvider.js",
       "require": "./dist/OmniDesignProvider.js"
+    },
+    "./vite": {
+      "types": "./dist/types/vite.d.ts",
+      "import": "./dist/vite.mjs",
+      "require": "./dist/vite.cjs"
     },
     "./public/styles/foundation.css": "./public/styles/foundation.css",
     "./public/styles/core.css": "./public/styles/core.css",
@@ -56,7 +62,7 @@
     "prepublishOnly": "npm run build:lib && npm run test:types",
     "predeploy": "npm run build:app",
     "deploy": "gh-pages -d build",
-    "build:types": "npx -y -p typescript@5.9 tsc -p tsconfig.dts.json && node scripts/fix-dts.mjs",
+    "build:types": "npx -y -p typescript@5.9 tsc -p tsconfig.dts.json && node scripts/fix-dts.mjs && cp src/vite/index.d.ts dist/types/vite.d.ts",
     "clean:lib": "rm -rf dist",
     "test:types": "node scripts/check-quickstart.mjs && node scripts/check-api-examples.mjs && npx -y -p typescript@5.9 tsc -p types-test/tsconfig.json && npx -y -p typescript@5.9 tsc -p types-test/tsconfig.examples.json && node scripts/audit-types.mjs && node scripts/build-api-doc.mjs --check"
   },

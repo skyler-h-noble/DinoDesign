@@ -60,7 +60,23 @@ const plugins = [
   terser(),                                   // ← 4th: minify
 ];
 
+/* The build helpers (@omni-design/components/vite, bin/omni-theme-links.js)
+   run in Node, at build time. Plain modern JS — no Babel, no JSX — with the
+   shared src/themeHead.js bundled in, so the provider and the helpers read and
+   write the head block the same way. */
+const nodeHelpers = {
+  input: 'src/vite/index.js',
+  output: [
+    { file: 'dist/vite.mjs', format: 'esm' },
+    { file: 'dist/vite.cjs', format: 'cjs', exports: 'named' },
+  ],
+  plugins: [omniVersion, resolve({ extensions: ['.js'] })],
+  external: (id) => /^(node:)?(crypto|fs|path|url)$/.test(id),
+};
+
 export default [
+  nodeHelpers,
+
   // ── Main component library ──────────────────────────────────────────────
   {
     input: 'src/components/index.js',
