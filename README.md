@@ -67,8 +67,9 @@ section 10.
 The design system owns contrast, focus and states. What it cannot own is how a
 page is put together, so the package ships a checker for that:
 
-> **Preview.** On some real sites a page can still stall past `--page-timeout`.
-> Name a few pages with `--routes` and stop it with Ctrl-C if it hangs.
+> It visits pages as a new visitor, so a page that needs app state (a filled
+> cart, a signed-in user) is checked in its empty state. If the computer sleeps
+> during a run, pages time out and are listed as not checked; run it again.
 
 ```bash
 npm run build && npx omni-check
