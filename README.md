@@ -57,6 +57,36 @@ your design system's `theme.json` URL from the studio instead. The studio also
 gives you a CLAUDE.md for that system — its page background, bars, buttons and
 cards — to put next to this package's in your project.
 
+## Fast first paint: the theme in `index.html`
+
+With `themeURL` alone the browser downloads your JavaScript, then theme.json,
+then the theme's CSS, and only then paints — the provider keeps the page
+hidden until the theme has applied, so nothing flashes unstyled. The Vite
+plugin moves the CSS into the HTML so it downloads alongside the JavaScript:
+
+```js
+// vite.config.js
+import { omniTheme, OMNI_DEFAULT_THEME_URL } from '@omni-design/components/vite';
+
+export default defineConfig({
+  plugins: [react(), omniTheme({ themeURL: OMNI_DEFAULT_THEME_URL })], // same URL as the provider
+});
+```
+
+Keep `themeURL` on `<OmniDesignProvider>`: it finds the theme in the page,
+skips theme.json and never downloads a sheet twice. At `vite build` the
+plugin copies the CSS into your build (hashed file names, served by your host
+with its compression and caching) and requests every Google Font family in one
+URL; in dev it links the published files. A small inline script picks light or
+dark before the first paint (saved toggle, else the device — `dark: 'system'`,
+the default; use `'light'` or `'dark'` to match a provider without
+`defaultDarkMode="system"`).
+
+Measured on a store app (150 ms latency, 1.6 Mbps, 4× CPU, median of 3): first
+styled paint 1.9–2.6 s with `themeURL` alone, 1.3 s with the plugin, on every
+page (Lighthouse mobile home 82 → 87). Without Vite, `npx omni-theme-links <theme.json URL>` prints the same
+block to paste into `<head>` (add `--copy public/omni` to self-host the files).
+
 ## Client-side routing
 
 Pass your router's link component to the provider and every component with an

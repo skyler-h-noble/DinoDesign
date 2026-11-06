@@ -29,7 +29,10 @@ read `node_modules`:
 npx omni-check --install-commands   # writes them to .claude/commands/
 ```
 
-## 2. Provider
+## 2. Provider + theme in the page
+
+Two parts, both with the same theme URL: the provider, and the Vite plugin
+that writes the theme into `index.html` at build time.
 
 ```jsx
 // main.jsx
@@ -44,20 +47,52 @@ import { OmniDesignProvider, OMNI_DEFAULT_THEME_URL } from '@omni-design/compone
 </OmniDesignProvider>
 ```
 
-The components carry no colors or fonts of their own; `themeURL` loads them.
-Pass nothing and the page renders as bare HTML (the provider warns in dev).
+```js
+// vite.config.js
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { omniTheme, OMNI_DEFAULT_THEME_URL } from '@omni-design/components/vite';
 
-For a faster first paint, let the browser open its connections while your
-JavaScript downloads — in `index.html`'s `<head>`:
-
-```html
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+export default defineConfig({
+  plugins: [react(), omniTheme({ themeURL: OMNI_DEFAULT_THEME_URL })], // the SAME URL as the provider
+});
 ```
 
-(Or self-host the theme: copy `node_modules/@omni-design/components/public/styles/`
-to `public/omni/` and pass `themeURL="/omni/theme.json"` — no CDN round trip.)
+The components carry no colors or fonts of their own; the theme brings them.
+Pass nothing and the page renders as bare HTML (the provider warns in dev).
+
+**Why the plugin:** with `themeURL` alone the browser must download your
+JavaScript, then theme.json, then the theme's CSS before it can paint — the
+page stays hidden until then. The plugin puts the CSS links in the HTML, so
+the CSS downloads while the JavaScript does. On a slow phone connection
+(150 ms, 1.6 Mbps, 4× CPU) the first styled paint went from 1.9–2.6 s to
+1.3 s on every page; Lighthouse mobile from 82 to 87 on the home page (and
++5 or more on every page measured).
+`themeURL` alone still works — just slower.
+
+What the plugin does:
+- `vite build`: downloads theme.json and the CSS once and serves the CSS from
+  your own host (hashed files, so they cache well); all Google Fonts in one
+  request. It is a snapshot — rebuild after the design system is republished.
+- `vite` (dev): links the published files.
+- Adds a tiny script that picks light or dark before the first paint (saved
+  toggle, else the device), so dark-mode visitors never see a light flash.
+  `dark` must match the provider: `omniTheme({ themeURL, dark: 'system' })`
+  (the default) for `defaultDarkMode="system"`, `'light'` for the provider's
+  default, `'dark'` for `defaultDarkMode`. If you pass `persistDarkMode="key"`,
+  pass the same `storageKey` to the plugin.
+- Keep `themeURL` on the provider. It finds the theme in the page (same URL),
+  skips theme.json and never downloads a sheet twice.
+
+Not using Vite? Print the same block and paste it into `index.html` right
+after the `<meta>` tags, before any other `<link>`, `<script>` or `<style>`:
+
+```bash
+npx omni-theme-links <theme.json URL>                       # links the published files
+npx omni-theme-links <theme.json URL> --copy public/omni    # or copies them into your app
+```
+
+The theme's CSS comes before your own CSS in the page, so your CSS wins a tie.
 
 The CSS styles no bare elements, so set the body once:
 
