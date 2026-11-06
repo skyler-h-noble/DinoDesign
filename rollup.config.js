@@ -37,6 +37,20 @@ const omniVersion = {
   },
 };
 
+/* CJS build only: a per-icon path is an ES module (@omni-design/icons 0.2.0), so
+   require() of it needs Node's require(esm) and fails under Jest. The root ships CommonJS. */
+const iconsToRoot = {
+  name: 'icons-to-root',
+  transform(code) {
+    if (!code.includes('@omni-design/icons/')) return null;
+    return { code: code
+      .replace(/import (\w+) from '@omni-design\/icons\/([A-Z_][A-Za-z0-9_]*)';/g,
+        (m, local, name) => `import { ${name} as ${local} } from '@omni-design/icons';`)
+      .replace(/ from '@omni-design\/icons\/(outlined|rounded|sharp|twotone)';/g, " from '@omni-design/icons';"),
+      map: null };
+  },
+};
+
 const plugins = [
   peerDepsExternal(),
   omniVersion,
@@ -67,7 +81,7 @@ export default [
         interop: 'auto',
       },
     ],
-    plugins,
+    plugins: [iconsToRoot, ...plugins],
     external,
   },
 
@@ -111,7 +125,7 @@ export default [
         interop: 'auto',
       },
     ],
-    plugins,
+    plugins: [iconsToRoot, ...plugins],
     external,
   },
 ];
