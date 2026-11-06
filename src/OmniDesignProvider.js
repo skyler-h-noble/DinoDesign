@@ -151,6 +151,10 @@ export const SURFACE_STYLE_THEME_MAP = {
 //   #omni-base        (5th)
 //   #omni-styles      (6th) ← always last
 
+/* How long the page stays hidden waiting for the theme CSS before it is shown
+   anyway (a stalled request neither loads nor fails). */
+export const THEME_LOAD_TIMEOUT_MS = 10000;
+
 const TAG = {
   foundation: 'omni-foundation',
   core:       'omni-core',
@@ -521,9 +525,10 @@ export function OmniDesignProvider({
 
   // ── EFFECT: Fetch manifest if themeURL provided ────────────────────────────
   useEffect(() => {
-    if (!themeURL) return;
+    if (!themeURL) { setManifestPending(false); return; }
 
     setCssStatus('loading');
+    setManifestPending(true);
 
     fetchThemeManifest(themeURL)
       .then(manifest => {
@@ -550,12 +555,16 @@ export function OmniDesignProvider({
           darkTheme:      manifest.darkTheme,
           name:           manifest.name,
         });
+        // Same batch as the sources: the sheet effects see the manifest's
+        // URLs in the very render that stops waiting for it.
+        setManifestPending(false);
       })
       .catch(err => {
         if (!mountedRef.current) return;
         console.error('OmniDesignProvider: manifest error:', err);
         setCssError(err.message);
         setCssStatus('error');
+        setManifestPending(false);
       });
 
   }, [themeURL]);
@@ -592,8 +601,39 @@ export function OmniDesignProvider({
     themeURL || foundationCSS || coreCSS || typographyCSS || baseCSS || stylesCSS
       || (isDark ? darkModeCSS : lightModeCSS)
   );
-  const [cssStatus, setCssStatus] = useState(hasAnyCSSSource ? 'loading' : 'ready');
+  /* sheetStatus is what the sheet effects report; cssStatus — what the page
+     shows and the context exposes — is 'ready' only when ALL of these hold:
+       1. the theme.json manifest has arrived (with themeURL). Before it, the
+          static slots are empty, and the static effect's "nothing to load"
+          branch reported ready — so the hide rule never applied and a
+          throttled page painted unstyled (black on white, system fonts, blue
+          links) for 1–2 s, then restyled (CLS 0.396 unthrottled).
+       2. the static sheets have loaded (sheetStatus).
+       3. the active mode sheet (Light- / Dark-Mode.css, where the colors are)
+          has loaded the first time. Later mode toggles never hide the page.
+     A sheet that neither loads nor fails (a stalled network) must not leave
+     the page hidden for good: after THEME_LOAD_TIMEOUT_MS the page shows
+     anyway, with a console warning. A failed load is 'error', which shows. */
+  const [sheetStatus, setCssStatus] = useState(hasAnyCSSSource ? 'loading' : 'ready');
   const [cssError,  setCssError]  = useState(null);
+  const [manifestPending, setManifestPending] = useState(!!themeURL);
+  const [modeSettled, setModeSettled] = useState(() => !themeURL && !(isDark ? darkModeCSS : lightModeCSS));
+  const [loadTimedOut, setLoadTimedOut] = useState(false);
+  const cssStatus = sheetStatus === 'error' ? 'error'
+    : ((sheetStatus === 'ready' && !manifestPending && modeSettled) || loadTimedOut) ? 'ready'
+      : 'loading';
+
+  useEffect(() => {
+    if (cssStatus !== 'loading' || loadTimedOut) return undefined;
+    const t = setTimeout(() => {
+      if (!mountedRef.current) return;
+      // eslint-disable-next-line no-console
+      console.warn('[OmniDesignProvider] The theme CSS has not finished loading after '
+        + (THEME_LOAD_TIMEOUT_MS / 1000) + 's — showing the page anyway.');
+      setLoadTimedOut(true);
+    }, THEME_LOAD_TIMEOUT_MS);
+    return () => clearTimeout(t);
+  }, [cssStatus, loadTimedOut]);
 
   /* Phone and tablet type ramps come from the theme's CSS by screen width
      (@media … :root:not([data-device])) — the browser applies them as the
@@ -703,10 +743,20 @@ export function OmniDesignProvider({
        light left the dark sheet on top of the bundled light one. */
     if (!activeSource) { removeStyleTag(TAG.mode); return; }
 
+    // Settled on load OR failure: a failed mode sheet is logged, and the
+    // page still shows rather than staying hidden.
     loadCSSSource(TAG.mode, activeSource, TAG.base)
-      .catch(err => console.error('OmniDesignProvider mode CSS error:', err));
+      .catch(err => console.error('OmniDesignProvider mode CSS error:', err))
+      .then(() => { if (mountedRef.current) setModeSettled(true); });
 
   }, [isDark, resolvedSources.lightMode, resolvedSources.darkMode]);
+
+  /* No mode sheet to wait for (the app bundles that mode itself) — settled as
+     soon as the manifest, if any, has said so. */
+  const activeModeSource = isDark ? resolvedSources.darkMode : resolvedSources.lightMode;
+  useEffect(() => {
+    if (!manifestPending && !activeModeSource) setModeSettled(true);
+  }, [manifestPending, activeModeSource]);
 
   // ── EFFECT: Prefetch the OTHER mode sheet once everything else is done ───
   // The first toggle used to wait on the network: Dark-Mode.css was only

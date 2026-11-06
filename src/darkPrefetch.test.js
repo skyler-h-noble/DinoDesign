@@ -16,6 +16,10 @@ describe('dark-mode prefetch waits for load and idle', () => {
   test('no prefetch until idle, then one link to the dark sheet', async () => {
     render(<OmniDesignProvider lightModeCSS="/styles/Light-Mode.css" darkModeCSS="/styles/Dark-Mode.css"><div>page</div></OmniDesignProvider>);
     const prefetch = () => document.querySelectorAll('link[rel="prefetch"][href="/styles/Dark-Mode.css"]');
+    // The page is ready (and the prefetch scheduled) once the light sheet has
+    // loaded — jsdom never loads one, so fire the load event the browser would.
+    await waitFor(() => expect(document.getElementById('omni-mode')).not.toBeNull());
+    act(() => { document.getElementById('omni-mode').onload(); });
     // jsdom has finished loading, so the provider waits only for idle.
     await waitFor(() => expect(idleCallbacks.length).toBeGreaterThan(0));
     expect(prefetch()).toHaveLength(0);
