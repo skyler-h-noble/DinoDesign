@@ -9,8 +9,9 @@ export interface OmniThemeOptions {
    * `vite build`: download the sheets once and serve them from the app's own
    * host as hashed assets, with foundation.css's Google Fonts @imports
    * replaced by one font request (when theme.json lists its fonts).
-   * A snapshot: rebuild to pick up a republished system. Default true.
-   * false links the published files where they are (always the case in dev).
+   * A snapshot: rebuild to pick up a republished system. Opt-in.
+   * Default false: link the live published files (always the case in dev),
+   * so a system re-published from the studio reaches the site on the next visit.
    */
   copy?: boolean;
   /**

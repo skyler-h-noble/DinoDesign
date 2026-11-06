@@ -71,10 +71,14 @@ the CSS downloads while the JavaScript does. On a slow phone connection
 `themeURL` alone still works — just slower.
 
 What the plugin does:
-- `vite build`: downloads theme.json and the CSS once and serves the CSS from
-  your own host (hashed files, so they cache well); all Google Fonts in one
-  request. It is a snapshot — rebuild after the design system is republished.
-- `vite` (dev): links the published files.
+- Links the design system's published CSS straight from the page's `<head>`,
+  so it downloads alongside your JavaScript instead of after it. It stays
+  LIVE: when the system is regenerated in the studio, the site picks it up on
+  the next visit — no rebuild.
+- `omniTheme({ themeURL, copy: true })` (opt-in) instead copies a snapshot of
+  the CSS into your build, served from your own host with all Google Fonts in
+  one request — a little faster, but you must rebuild to pick up a
+  regenerated system.
 - Adds a tiny script that picks light or dark before the first paint (saved
   toggle, else the device), so dark-mode visitors never see a light flash.
   `dark` must match the provider: `omniTheme({ themeURL, dark: 'system' })`

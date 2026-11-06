@@ -74,16 +74,19 @@ export default defineConfig({
 ```
 
 Keep `themeURL` on `<OmniDesignProvider>`: it finds the theme in the page,
-skips theme.json and never downloads a sheet twice. At `vite build` the
-plugin copies the CSS into your build (hashed file names, served by your host
-with its compression and caching) and requests every Google Font family in one
-URL; in dev it links the published files. A small inline script picks light or
+skips theme.json and never downloads a sheet twice. By default the plugin
+links the published CSS from the page's head, so it downloads alongside your
+JavaScript and stays live — a design system regenerated in the studio reaches
+the site on the next visit, no rebuild. `omniTheme({ themeURL, copy: true })`
+instead copies a snapshot into your build (hashed files served by your host,
+every Google Font family in one URL): a little faster, but rebuild to pick up
+a regenerated system. A small inline script picks light or
 dark before the first paint (saved toggle, else the device — `dark: 'system'`,
 the default; use `'light'` or `'dark'` to match a provider without
 `defaultDarkMode="system"`).
 
 Measured on a store app (150 ms latency, 1.6 Mbps, 4× CPU, median of 3): first
-styled paint 1.9–2.6 s with `themeURL` alone, 1.3 s with the plugin, on every
+styled paint 1.9–2.6 s with `themeURL` alone, 1.3 s with the plugin (`copy: true`), on every
 page (Lighthouse mobile home 82 → 87). Without Vite, `npx omni-theme-links <theme.json URL>` prints the same
 block to paste into `<head>` (add `--copy public/omni` to self-host the files).
 

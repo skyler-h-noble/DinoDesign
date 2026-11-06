@@ -106,9 +106,9 @@ async function runPlugin(plugin, command) {
   return { html, emitted, ctx };
 }
 
-test('vite build: the sheets become hashed assets, linked from the head; fonts in one request', async () => {
+test('vite build with copy: true: the sheets become hashed assets, linked from the head; fonts in one request', async () => {
   const fetch = fakeFetch();
-  const { html, emitted } = await runPlugin(omniTheme({ themeURL: BASE + 'theme.json', fetch }), 'build');
+  const { html, emitted } = await runPlugin(omniTheme({ themeURL: BASE + 'theme.json', copy: true, fetch }), 'build');
   expect(emitted.map((e) => e.fileName)).toEqual(expect.arrayContaining([expect.stringMatching(/^assets\/omni-Light-Mode-[0-9a-f]{8}\.css$/)]));
   expect(emitted).toHaveLength(7);
   expect(emitted.find((e) => /omni-foundation-/.test(e.fileName)).source).not.toMatch(/@import/);
@@ -120,6 +120,12 @@ test('vite build: the sheets become hashed assets, linked from the head; fonts i
   expect(html).not.toContain('preconnect" href="https://storage.test"'); // self-hosted: no theme origin
   expect(html.indexOf('id="omni-theme"')).toBeLessThan(html.indexOf('/assets/index-abc.css'));
   expect(fetch.mock.calls.filter(([u]) => u.endsWith('theme.json'))).toHaveLength(1); // fetched once
+});
+
+test('the default build is LIVE: links the published files, emits nothing (a re-published system arrives without a rebuild)', async () => {
+  const { html, emitted } = await runPlugin(omniTheme({ themeURL: BASE + 'theme.json', fetch: fakeFetch() }), 'build');
+  expect(emitted).toHaveLength(0);
+  expect(jsonOf(html).sheets.lightMode).toBe(MANIFEST.lightMode);
 });
 
 test('vite dev (and copy: false): links the published files, emits nothing', async () => {
@@ -134,7 +140,10 @@ test('vite dev (and copy: false): links the published files, emits nothing', asy
 test('vite: an unreachable theme leaves index.html alone (the provider loads it at runtime)', async () => {
   const spy = jest.spyOn(console, 'warn').mockImplementation(() => {});
   const fetch = jest.fn(() => Promise.resolve({ ok: false, status: 503, text: () => Promise.resolve('') }));
-  const { html, ctx } = await runPlugin(omniTheme({ themeURL: BASE + 'theme.json', fetch }), 'build');
+  const live = await runPlugin(omniTheme({ themeURL: BASE + 'theme.json', fetch }), 'build');
+  expect(live.html).toBe(INDEX);
+  expect(console.warn).toHaveBeenCalled();
+  const { html, ctx } = await runPlugin(omniTheme({ themeURL: BASE + 'theme.json', copy: true, fetch }), 'build');
   expect(html).toBe(INDEX);
   expect(ctx.warn).toHaveBeenCalled();
   spy.mockRestore();

@@ -13,14 +13,19 @@
  * head's theme (same themeURL) and neither fetches theme.json nor refetches a
  * sheet. Remove the plugin and the app still works, the slower way.
  *
- * `vite build` (copy: true, the default): downloads theme.json and the seven
+ * Default (copy: false) — LIVE: the head links the PUBLISHED sheets, so the CSS
+ * downloads in parallel with the JS (no theme.json round trip first) and a
+ * system re-published from the studio reaches the site on the next visit,
+ * with no rebuild. This is the default because that promise is the product's.
+ *
+ * `copy: true` — SNAPSHOT, opt-in: `vite build` downloads theme.json and the seven
  * sheets ONCE, writes them into the build as hashed assets
  * (assets/omni-<file>-<hash>.css), takes the Google Fonts @imports out of
  * foundation.css when theme.json lists its fonts, and links every font family
  * in one request. The theme is then served by the app's own host, with its
  * compression and caching. It is a snapshot: re-run the build to pick up a
- * republished system.
- * copy: false, and `vite` dev: links the published files where they are.
+ * republished system. Choose it when speed matters more than live updates.
+ * `vite` dev always links the published files.
  *
  * Node only. No dependencies; Vite is not imported.
  */
@@ -129,12 +134,12 @@ export function injectIntoHead(html, block) {
  * The Vite plugin.
  * @param {object} options
  * @param {string} options.themeURL   the design system's theme.json URL (same as the provider's)
- * @param {boolean} [options.copy=true]  build: self-host the sheets as hashed assets
+ * @param {boolean} [options.copy=false]  build: self-host a SNAPSHOT of the sheets as hashed assets (re-build to pick up a re-published system). Default: link the live published files
  * @param {'system'|'light'|'dark'} [options.dark='system']  first mode when the visitor has no saved choice
  * @param {string} [options.storageKey='omni-dark-mode']  the provider's persistDarkMode key
  */
 export function omniTheme(options = {}) {
-  const { themeURL, copy = true, dark = 'system', storageKey = OMNI_DARK_MODE_KEY, fetch: fetchImpl } = options;
+  const { themeURL, copy = false, dark = 'system', storageKey = OMNI_DARK_MODE_KEY, fetch: fetchImpl } = options;
   if (!themeURL || typeof themeURL !== 'string') throw new Error('omniTheme: pass { themeURL } — the theme.json URL your OmniDesignProvider uses');
   let isBuild = false;
   let base = '/';
