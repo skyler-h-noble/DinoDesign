@@ -16,11 +16,23 @@ import { lazySxBox } from '../_lazyFallback';
  *            48px sliver at small and taller than wide at large
  *   corner   --Input-Radius, the field it belongs to
  *   icon     the in-button size, --Button-Icon (16 / 20 / 32), in --Icons-Default (Figma's Icons/Icon, Default mode)
- *   ghost    no edge; rests on the surface's --Hover, --Pressed when pressed
+ *   ghost    no edge and no resting fill: the surface shows through. --Hover
+ *            under the pointer (with the Level-1 lift), --Pressed when pressed.
+ *
+ *   Why no resting fill (decided 2026-11-05): a ghost FieldButton lives inside
+ *   a field's own 3:1 outline (NumberField's stepper column), so it is one of
+ *   the field's parts, not a control that needs its own boundary. The fill it
+ *   used to rest on (--Hover) was decorative, but it still drew an edge — and
+ *   that edge measured 1.13:1 light / 1.34:1 dark against the field, a
+ *   sub-3:1 boundary claim nothing needed. With no fill there is no claim.
+ *   What does carry the control is its glyph: --Icons-Default, which meets
+ *   3:1 against the surface at rest, --Hover, --Pressed and under the focus
+ *   ring (disabled excepted). Hover and press change the fill and add / drop
+ *   the lift, so both states are perceivable.
  *   outline  1px --Buttons-<C>-Border, inside, on --Buttons-<C>-Button;
  *            --Buttons-<C>-Hover / -Pressed for those states
  *   Hover    the Buttons-Hover lift (Level 1)
- *   Focus    the rest fill under a 3px ring INSIDE the button (1px in from a
+ *   Focus    the rest fill (none, for ghost) under a 3px ring INSIDE the button (1px in from a
  *            ghost's edge, 2px in from an outline's) — the button sits in a
  *            clipped field, where a ring drawn outside would be cut off
  *   Disabled the rest fill at 38%
@@ -63,7 +75,7 @@ const after = (rule, root, prefix, earlier) => {
 };
 registerStaticStyles('omni-field-button', wk([
   '.omni-fb{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;box-sizing:border-box;margin:0;padding:0;border:none;'
-    + 'box-shadow:none;background-color:var(--Hover);color:var(--Icons-Default, var(--Text));cursor:pointer;opacity:1;outline:none;'
+    + 'box-shadow:none;background-color:transparent;color:var(--Icons-Default, var(--Text));cursor:pointer;opacity:1;outline:none;'
     + 'transition:background-color 0.15s ease, box-shadow 0.15s ease}',
   ...Object.keys(PREFIX).map((size) => {
     const p = PREFIX[size];
@@ -77,7 +89,7 @@ registerStaticStyles('omni-field-button', wk([
   `${live('hover', '.omni-fb-outline')}:hover{background-color:var(--_fb-hv);box-shadow:${RING}, ${SHADOW_LEVEL_1}}`,
   after(`${live('active')}:active{background-color:var(--Pressed);box-shadow:none}`, '.omni-fb', 'omni-fb-no-', ['hover']),
   after(`${live('active', '.omni-fb-outline')}:active{background-color:var(--_fb-pr);box-shadow:${RING}}`, '.omni-fb', 'omni-fb-no-', ['hover']),
-  after(`${live('focus')}:focus-visible,${live('focus')}.Mui-focusVisible{background-color:var(--Hover);outline:3px solid var(--Focus-Visible);outline-offset:-4px}`, '.omni-fb', 'omni-fb-no-', ['hover', 'active']),
+  after(`${live('focus')}:focus-visible,${live('focus')}.Mui-focusVisible{background-color:transparent;outline:3px solid var(--Focus-Visible);outline-offset:-4px}`, '.omni-fb', 'omni-fb-no-', ['hover', 'active']),
   after(`${live('focus', '.omni-fb-outline')}:focus-visible,${live('focus', '.omni-fb-outline')}.Mui-focusVisible{background-color:var(--_fb-bt);outline-offset:-5px}`, '.omni-fb', 'omni-fb-no-', ['hover', 'active']),
 ].join('\n')));
 

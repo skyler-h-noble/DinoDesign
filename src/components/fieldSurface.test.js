@@ -66,9 +66,8 @@ describe.each(CASES)('%s', (name, ui, textSel) => {
 
   test('nothing paints the page --Hover as the resting fill', () => {
     const { container } = render(ui());
-    // NumberField's step buttons are their own controls (FieldButton).
     const hoverFilled = Array.from(container.querySelectorAll('*'))
-      .filter((el) => !el.closest('.omni-fb') && declared(el, 'background-color') === 'var(--Hover)');
+      .filter((el) => declared(el, 'background-color') === 'var(--Hover)');
     expect(hoverFilled).toEqual([]);
   });
 

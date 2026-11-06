@@ -68,6 +68,11 @@ registerStaticStyles('omni-numberfield', wk([
   '.omni-nf-row-outlined:focus-within{outline:2px solid var(--Focus-Visible);outline-offset:1px}',
   '.omni-nf-row-spinner{display:flex;align-items:center;gap:var(--Sizing-1, 8px);width:100%}',
   '.omni-nf-steppers{position:relative;display:flex;flex-direction:column;margin-left:-1px;padding:1px;box-sizing:border-box;flex-shrink:0;overflow:hidden}',
+  /* Inside the column's edge, the steppers sit on the SAME surface as the
+     field (data-surface="Container", painting its --Background), so the
+     control reads as one fill and the ghost buttons' glyph color is the one
+     tuned for it. The edge itself stays on the page's --Border. */
+  '.omni-nf-steppers-surf{display:flex;flex-direction:column;flex:1;min-height:0;background-color:var(--Background)}',
   ...SIZES.map((size) => `.omni-nf-steppers-${size}{border-radius:0 ${RADIUS(PREFIX[size])} ${RADIUS(PREFIX[size])} 0}`),
   '.omni-nf-steppers::after{content:"";position:absolute;inset:0;pointer-events:none;border:1px solid var(--Border);border-radius:inherit}',
   '.omni-nf-steppers-off{opacity:var(--Disabled, 0.38)}',
@@ -216,9 +221,11 @@ export function NumberField({
       {field}
       {/* Overlaps the field's right edge by its 1px, as Figma's gap -1 does. */}
       <div className={'MuiBox-root numberfield-steppers omni-nf-steppers omni-nf-steppers-' + sizeKey + (disabled ? ' omni-nf-steppers-off' : '')}>
-        {increase}
-        <div aria-hidden="true" className={'MuiBox-root omni-nf-divider omni-nf-divider-' + sizeKey} />
-        {decrease}
+        <div className="MuiBox-root omni-nf-steppers-surf" data-surface="Container">
+          {increase}
+          <div aria-hidden="true" className={'MuiBox-root omni-nf-divider omni-nf-divider-' + sizeKey} />
+          {decrease}
+        </div>
       </div>
     </div>
   ) : (

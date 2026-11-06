@@ -218,3 +218,15 @@ describe('validation and label type', () => {
     expect(screen.getByRole('spinbutton')).toHaveAttribute('aria-required', 'true');
   });
 });
+
+// The stepper column sits on the field's own surface, inside the column's
+// page-scoped edge, so field and steppers are one fill and the ghost
+// buttons' glyph is the color tuned for it.
+test('outlined: the steppers sit on the field surface, inside the column edge', () => {
+  const { container } = render(<NumberField label="Qty" defaultValue={1} />);
+  const column = container.querySelector('.omni-nf-steppers');
+  const surf = column.querySelector('.omni-nf-steppers-surf');
+  expect(surf).toHaveAttribute('data-surface', 'Container');
+  expect(column.hasAttribute('data-surface')).toBe(false);
+  expect(surf.querySelectorAll('button')).toHaveLength(2);
+});

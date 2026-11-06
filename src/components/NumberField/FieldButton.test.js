@@ -28,6 +28,20 @@ describe('FieldButton', () => {
     expect(stateRules(screen.getByRole('button', { name: 'Down' })).base).toContain('box-shadow: none;');
   });
 
+  // Ghost has no resting fill (a sub-3:1 edge inside the field's own outline
+  // was a boundary claim nothing needed); hover and press fill it, focus keeps
+  // the rest (none) under the ring; the glyph is --Icons-Default throughout.
+  test('ghost: no resting fill; --Hover / --Pressed for hover / press; transparent under the focus ring', () => {
+    render(<FieldButton variant="ghost" aria-label="Up"><AddIcon /></FieldButton>);
+    const r = stateRules(screen.getByRole('button', { name: 'Up' }));
+    expect(r.base).toContain('background-color: transparent;');
+    expect(r.base).toContain('color: var(--Icons-Default, var(--Text));');
+    expect(r.states.hover).toContain('background-color: var(--Hover);');
+    expect(r.states.active).toContain('background-color: var(--Pressed);');
+    expect(r.states.focusVisible).toContain('background-color: transparent;');
+    expect(r.states.focusVisible).toContain('outline: 3px solid var(--Focus-Visible);');
+  });
+
   test('disabled is a disabled button', () => {
     render(<FieldButton disabled aria-label="Up"><AddIcon /></FieldButton>);
     expect(screen.getByRole('button', { name: 'Up' })).toBeDisabled();
