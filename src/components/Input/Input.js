@@ -547,7 +547,10 @@ function InputStatic({
         htmlFor={inputId}
         type={labelType}
         disabled={disabled}
-        sx={{
+        /* style, not sx: an sx on FormLabel makes it render through SxBox,
+           which pulls MUI + emotion (27 KB gzip, 4 requests) onto every page
+           with a labeled field — the Footer's newsletter input was enough. */
+        style={{
           ...(isLeft ? { flexShrink: 0 } : { marginBottom: 'var(--Sizing-Half, 4px)' }),
           ...(disabled && { opacity: 'var(--Disabled, 0.38)' }),
         }}

@@ -480,7 +480,7 @@ export function Select({
                 {(!isColor || showColorLabels) && (
                   <BodySmall className="omni-sel-opt-label" style={{ color: 'inherit', fontWeight: 'inherit' }}>{optLabel}</BodySmall>
                 )}
-                {isSelected && <Icon size="small" sx={{ opacity: 0.6, flexShrink: 0 }}><Glyph name="Check" className="omni-sel-glyph" /></Icon>}
+                {isSelected && <Icon size="small" style={{ opacity: 0.6, flexShrink: 0 }}><Glyph name="Check" className="omni-sel-glyph" /></Icon>}
               </div>
               {showDividers && !isLast && (
                 <div aria-hidden="true" className="MuiBox-root omni-sel-div" />
@@ -530,7 +530,8 @@ export function Select({
           <button>, which IS labelable, so <label for> names it. */}
       {isTop && label && (
         <FormLabel htmlFor={triggerId} disabled={disabled}
-          sx={{ ...(isLeft ? { flexShrink: 0 } : { marginBottom: 'var(--Sizing-Half, 4px)' }), ...(disabled && { opacity: 'var(--Disabled, 0.38)' }) }}>
+          /* style, not sx: sx renders FormLabel through SxBox and pulls MUI. */
+          style={{ ...(isLeft ? { flexShrink: 0 } : { marginBottom: 'var(--Sizing-Half, 4px)' }), ...(disabled && { opacity: 'var(--Disabled, 0.38)' }) }}>
           {label}
         </FormLabel>
       )}

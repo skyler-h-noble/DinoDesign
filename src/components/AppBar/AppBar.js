@@ -610,7 +610,7 @@ function MobileAppBar({
           <SearchField
             placeholder={'Search ' + companyName}
             size="small"
-            sx={{ flex: 1, minWidth: 0 }}
+            style={{ flex: 1, minWidth: 0 }}
           />
         </Suspense>
         <Button iconOnly variant="ghost" size="medium" aria-label="Account">
