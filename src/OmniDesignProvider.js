@@ -16,6 +16,12 @@
  *   The Provider fetches {themeURL}/theme.json to discover the CSS files,
  *   then loads them in the correct order automatically.
  *
+ *   Faster: the same themeURL in `@omni-design/components/vite`'s
+ *   omniTheme() (or `npx omni-theme-links`) writes the sheets into the HTML.
+ *   The provider then finds them (#omni-theme JSON + <link id="omni-…">),
+ *   fetches nothing and is ready as soon as they have loaded — see
+ *   detectHeadTheme and src/themeHead.js.
+ *
  * 2. MANUAL — individual CSS props (local dev / custom setups):
  *
  *   <OmniDesignProvider
@@ -82,6 +88,9 @@ import React, {
 } from 'react';
 import { chartColorVisionCSS } from './components/Charts/colorVision';
 import { OmniLinkContext } from './components/_routerLink';
+import {
+  OMNI_TAG_IDS, manifestURLFor, resolveThemeManifest, readHeadTheme, readHeadMode, sameURL,
+} from './themeHead';
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 
@@ -117,10 +126,7 @@ export const OMNI_STYLES = ['Professional', 'Modern', 'Bold', 'Playful'];
    A real design system passes its own themeURL (or the individual CSS props)
    instead. The version is written in at build time; source builds (the
    gallery, tests) fall back to @latest. */
-/* global __OMNI_VERSION__ */
-const OMNI_VERSION = typeof __OMNI_VERSION__ !== 'undefined' ? __OMNI_VERSION__ : 'latest';
-export const OMNI_DEFAULT_THEME_URL =
-  'https://cdn.jsdelivr.net/npm/@omni-design/components@' + OMNI_VERSION + '/public/styles/theme.json';
+export { OMNI_DEFAULT_THEME_URL } from './themeHead';
 
 export const OMNI_SURFACES = [
   // Five surface levels, darkest to lightest. Surface-Dimmest and
@@ -155,14 +161,7 @@ export const SURFACE_STYLE_THEME_MAP = {
    anyway (a stalled request neither loads nor fails). */
 export const THEME_LOAD_TIMEOUT_MS = 10000;
 
-const TAG = {
-  foundation: 'omni-foundation',
-  core:       'omni-core',
-  typography: 'omni-typography',
-  mode:       'omni-mode',
-  base:       'omni-base',
-  styles:     'omni-styles',
-};
+const TAG = OMNI_TAG_IDS;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -195,8 +194,7 @@ function injectLinkTag(id, href, beforeId) {
        "/styles/core.css" where the manifest resolves to the full URL. Read as
        text they differ, the href was swapped, and the browser fetched the
        same sheet twice. */
-    const same = (a, b) => { try { return new URL(a, document.baseURI).href === new URL(b, document.baseURI).href; } catch (e) { return a === b; } };
-    if (existing.tagName === 'LINK' && !same(existing.getAttribute('href'), href)) {
+    if (existing.tagName === 'LINK' && !sameURL(existing.getAttribute('href'), href)) {
       // Swap href in place — browser refetches. Use the existing onload so
       // callers can still await readiness on a mode swap.
       return new Promise((resolve, reject) => {
@@ -205,7 +203,9 @@ function injectLinkTag(id, href, beforeId) {
         existing.setAttribute('href', href);
       });
     }
-    return Promise.resolve(existing);
+    /* Already in the page — a <link> in the HTML or one the head script
+       added. Never refetch it: wait for it to finish, if it has not. */
+    return existing.tagName === 'LINK' ? whenSheetSettled(existing) : Promise.resolve(existing);
   }
   return new Promise((resolve, reject) => {
     const tag = document.createElement('link');
@@ -222,6 +222,89 @@ function injectLinkTag(id, href, beforeId) {
       document.head.appendChild(tag);
     }
   });
+}
+
+/**
+ * Has this <link rel="stylesheet"> finished? `sheet` is set once it has
+ * loaded. A link that was in the page before the window's load event has
+ * settled once that event has fired (load waits for every stylesheet in the
+ * head) — which is also how jsdom, which never fetches a sheet, reads it. A
+ * link this provider inserted itself is judged by its own load event only.
+ */
+function sheetLoaded(el) {
+  if (!el || el.tagName !== 'LINK') return false;
+  if (el.sheet) return true;
+  return document.readyState === 'complete' && el.getAttribute('data-omni') !== 'true';
+}
+
+/** Resolves when a <link> already in the page has loaded; rejects if it fails. */
+function whenSheetSettled(el) {
+  if (sheetLoaded(el)) return Promise.resolve(el);
+  return new Promise((resolve, reject) => {
+    const cleanup = () => {
+      el.removeEventListener('load', onLoad);
+      el.removeEventListener('error', onError);
+      window.removeEventListener('load', onWindowLoad);
+    };
+    const onLoad = () => { cleanup(); resolve(el); };
+    const onError = () => { cleanup(); reject(new Error(`OmniDesignProvider: failed to load ${el.getAttribute('href')}`)); };
+    // A sheet that settled before this listener was attached is still caught:
+    // the window's load event waits for it.
+    const onWindowLoad = () => { cleanup(); resolve(el); };
+    el.addEventListener('load', onLoad);
+    el.addEventListener('error', onError);
+    if (el.getAttribute('data-omni') !== 'true') window.addEventListener('load', onWindowLoad);
+  });
+}
+
+/** True when a slot needs nothing: no source, or its <link> is in the page
+ *  with that address and has already loaded. */
+function settledNow(id, source) {
+  if (!source) return true;
+  if (typeof document === 'undefined' || !isURL(source)) return false;
+  const el = document.getElementById(id);
+  return !!el && el.tagName === 'LINK' && sameURL(el.getAttribute('href'), source) && sheetLoaded(el);
+}
+
+/**
+ * The theme the page's <head> already carries, or null.
+ *
+ * 1. #omni-theme JSON (written by `@omni-design/components/vite` or
+ *    `npx omni-theme-links`): every sheet's URL is known, the head script has
+ *    already added the links, and theme.json is never fetched. Used when its
+ *    themeURL is this provider's themeURL — or, with no themeURL and no CSS
+ *    props, by the top-level provider.
+ * 2. <link id="omni-…"> written by hand, no JSON: used with a themeURL. The
+ *    links' own addresses are used as they are; theme.json is still fetched,
+ *    in the background, for the other mode's sheet and the name.
+ */
+function detectHeadTheme(themeURL, hasCSSProps, topLevel) {
+  if (typeof document === 'undefined') return null;
+  const scriptMode = readHeadMode();
+  const config = readHeadTheme();
+  if (config) {
+    const matches = themeURL ? !!config.themeURL && sameURL(config.themeURL, themeURL) : (topLevel && !hasCSSProps);
+    if (!matches) return null;
+    return { config, sources: { ...config.sheets }, scriptMode, fetchManifest: false };
+  }
+  if (!themeURL) return null;
+  const href = (id) => {
+    const el = document.getElementById(id);
+    return el && el.tagName === 'LINK' && el.getAttribute('href') ? el.getAttribute('href') : null;
+  };
+  const modeHref = href(TAG.mode);
+  if (!modeHref) return null;
+  const mode = scriptMode || (/dark-mode/i.test(modeHref) ? 'dark' : 'light');
+  return {
+    config: null,
+    sources: {
+      foundation: href(TAG.foundation), core: href(TAG.core), typography: href(TAG.typography),
+      lightMode: mode === 'light' ? modeHref : null, darkMode: mode === 'dark' ? modeHref : null,
+      base: href(TAG.base), styles: href(TAG.styles),
+    },
+    scriptMode,
+    fetchManifest: true,
+  };
 }
 
 /**
@@ -249,8 +332,13 @@ function injectStyleTag(id, css, beforeId) {
   return Promise.resolve(tag);
 }
 
+/* Only what this provider inserted (data-omni="true"). A sheet the page's
+   HTML carries — the head links — is not the provider's to take out: under
+   React StrictMode the effects run twice, and removing it would refetch the
+   whole theme. */
 function removeStyleTag(id) {
-  document.getElementById(id)?.remove();
+  const el = document.getElementById(id);
+  if (el && el.getAttribute('data-omni') === 'true') el.remove();
 }
 
 /**
@@ -274,40 +362,30 @@ function loadCSSSource(id, source, beforeId) {
  *                                defaultSurface, darkTheme }
  */
 async function fetchThemeManifest(themeURL) {
-  // If themeURL already points to a .json file (e.g. a Firebase Storage URL), use it directly.
-  // Otherwise treat it as a folder and append /theme.json (legacy path-based hosting).
-  const isManifestUrl = /\.json(\?|$)/.test(themeURL);
-  const manifestURL = isManifestUrl ? themeURL : `${themeURL.replace(/\/$/, '')}/theme.json`;
-  // Folder base (used only for path-based fallback when manifest values are relative filenames)
-  const base = themeURL.replace(/\/$/, '').replace(/\/theme\.json(\?.*)?$/, '');
+  // A .json URL (e.g. a Firebase Storage URL) is the manifest itself;
+  // anything else is a folder holding theme.json (legacy path-based hosting).
+  const manifestURL = manifestURLFor(themeURL);
 
   const res = await fetch(manifestURL);
   if (!res.ok) {
     throw new Error(`OmniDesignProvider: could not load theme manifest from ${manifestURL} (${res.status})`);
   }
 
-  const manifest = await res.json();
-
-  // Resolve each manifest entry. If it's already a full URL, pass it through unchanged.
-  // Otherwise, treat it as a relative filename and join it with the folder base.
-  const resolve = (value) => {
-    if (!value) return null;
-    if (/^https?:\/\//i.test(value)) return value;
-    return `${base}/${value}`;
-  };
+  // Full URLs pass through; bare file names join the manifest's folder.
+  const m = resolveThemeManifest(await res.json(), themeURL);
 
   return {
-    foundationURL:  resolve(manifest.foundation),
-    coreURL:        resolve(manifest.core),
-    typographyURL:  resolve(manifest.typography),
-    lightModeURL:   resolve(manifest.lightMode),
-    darkModeURL:    resolve(manifest.darkMode),
-    baseURL:        resolve(manifest.base),
-    stylesURL:      resolve(manifest.styles),
+    foundationURL:  m.sheets.foundation,
+    coreURL:        m.sheets.core,
+    typographyURL:  m.sheets.typography,
+    lightModeURL:   m.sheets.lightMode,
+    darkModeURL:    m.sheets.darkMode,
+    baseURL:        m.sheets.base,
+    stylesURL:      m.sheets.styles,
     // Theme config from manifest (props override these)
-    defaultTheme:   manifest.defaultTheme   ?? null,
-    defaultStyle:   manifest.defaultStyle   ?? null,
-    defaultSurface: manifest.defaultSurface ?? null,
+    defaultTheme:   m.defaultTheme,
+    defaultStyle:   m.defaultStyle,
+    defaultSurface: m.defaultSurface,
     /* darkTheme is NOT read from theme.json. The studio wrote
        "darkTheme": "Neutral" into every published system — a hard-coded
        value, not the designer's choice — and obeying it switched the root
@@ -319,13 +397,15 @@ async function fetchThemeManifest(themeURL) {
     darkTheme:      null,
     // Human-readable design system name — surfaced on the context so consumers
     // (AppBar brand, page headers, etc.) can display it.
-    name:           manifest.name           ?? null,
+    name:           m.name,
     // Google Fonts stylesheets the system uses (studio 2026-11+). Requested as
     // <link>s as soon as the manifest is read, in parallel with the sheets,
     // instead of waiting for an @import inside foundation.css to be parsed.
-    fonts: Array.isArray(manifest.fonts)
-      ? manifest.fonts.filter((u) => typeof u === 'string' && /^https:\/\/fonts\.googleapis\.com\//.test(u))
-      : [],
+    // Kept as separate URLs on purpose: foundation.css @imports these exact
+    // addresses, so the browser reuses one request for both. One combined
+    // URL would be a second, different request for every family. (The build
+    // helpers combine them, because they take the @imports out.)
+    fonts:          m.fonts,
   };
 }
 
@@ -470,6 +550,18 @@ export function OmniDesignProvider({
   children,
 }) {
 
+  // ── The theme already in the page's <head> ─────────────────────────────────
+  /* Read once, on mount. With it the sheets are already loading (or loaded)
+     when React starts, and — with the #omni-theme JSON — theme.json is never
+     fetched, which takes a whole network stage off the first styled paint.
+     See detectHeadTheme and src/themeHead.js. */
+  const parentContext = useContext(OmniDesignContext);
+  const [head] = useState(() => detectHeadTheme(
+    themeURL,
+    !!(foundationCSS || coreCSS || typographyCSS || lightModeCSS || darkModeCSS || baseCSS || stylesCSS),
+    parentContext === null,
+  ));
+
   // ── Dark mode ──────────────────────────────────────────────────────────────
   /* Uncontrolled dark mode can follow the device and remember the user's
      choice. Both are opt-in: a provider nested inside an app (a preview, a
@@ -482,6 +574,12 @@ export function OmniDesignProvider({
     : (typeof persistDarkMode === 'string' && persistDarkMode ? persistDarkMode : null);
   const followSystem = defaultDarkMode === 'system';
   const [internalDark, setInternalDark] = useState(() => {
+    /* The head script already chose a mode and requested its sheet. Starting
+       anywhere else would swap that sheet (a second download) and paint the
+       wrong mode first. It applies the same rule — saved choice, else the
+       device when set to 'system' — so with matching settings they agree
+       anyway; this makes them agree when the settings drift apart too. */
+    if (head && head.scriptMode) return head.scriptMode === 'dark';
     const saved = storageKey ? readDarkPref(storageKey) : null;
     if (saved !== null) return saved;
     if (followSystem) return systemPrefersDark();
@@ -504,18 +602,26 @@ export function OmniDesignProvider({
 
   // ── Resolved CSS sources ───────────────────────────────────────────────────
   // When themeURL is provided, manifest values fill in anything not passed as props.
+  const headSources = head ? head.sources : {};
   const [resolvedSources, setResolvedSources] = useState({
-    foundation: foundationCSS ?? null,
-    core:       coreCSS       ?? null,
-    typography: typographyCSS ?? null,
-    lightMode:  lightModeCSS  ?? null,
-    darkMode:   darkModeCSS   ?? null,
-    base:       baseCSS       ?? null,
-    styles:     stylesCSS     ?? null,
+    foundation: foundationCSS ?? headSources.foundation ?? null,
+    core:       coreCSS       ?? headSources.core       ?? null,
+    typography: typographyCSS ?? headSources.typography ?? null,
+    lightMode:  lightModeCSS  ?? headSources.lightMode  ?? null,
+    darkMode:   darkModeCSS   ?? headSources.darkMode   ?? null,
+    base:       baseCSS       ?? headSources.base       ?? null,
+    styles:     stylesCSS     ?? headSources.styles     ?? null,
   });
 
-  // Theme config — may be overridden by manifest values
-  const [manifestThemeConfig, setManifestThemeConfig] = useState({});
+  // Theme config — may be overridden by manifest values.
+  /* From the head JSON only the name is taken up front. defaultTheme /
+     defaultStyle / defaultSurface seed useState below, and with themeURL they
+     arrive after the first render, so the root never took them; reading them
+     here would make the same app look different with and without the head
+     links. Same result either way — a separate fix, if it is wanted. */
+  const [manifestThemeConfig, setManifestThemeConfig] = useState(
+    () => (head && head.config ? { name: head.config.name ?? null } : {}),
+  );
 
   const mountedRef = useRef(true);
   useEffect(() => {
@@ -526,9 +632,19 @@ export function OmniDesignProvider({
   // ── EFFECT: Fetch manifest if themeURL provided ────────────────────────────
   useEffect(() => {
     if (!themeURL) { setManifestPending(false); return; }
+    // The head JSON is the manifest: nothing to fetch.
+    if (head && !head.fetchManifest && themeURL === themeURLAtMount.current) { setManifestPending(false); return; }
+    /* Hand-written head links: the page can show as soon as they load, so
+       the manifest is fetched in the background — for the other mode's
+       sheet and the name — and does not hide the page while it is in flight
+       (unless the head's mode is not the one this provider starts in). */
+    const background = !!head && head.fetchManifest && !manifestPending
+      && themeURL === themeURLAtMount.current;
 
-    setCssStatus('loading');
-    setManifestPending(true);
+    if (!background) {
+      setCssStatus('loading');
+      setManifestPending(true);
+    }
 
     fetchThemeManifest(themeURL)
       .then(manifest => {
@@ -536,15 +652,19 @@ export function OmniDesignProvider({
 
         linkFonts(manifest.fonts);
 
-        // Individual CSS props always take precedence over manifest
+        /* Individual CSS props always take precedence over the manifest; a
+           sheet the page's HTML already links comes next (its address is
+           the page author's choice — self-hosted copies, say — and swapping
+           it would download the theme twice); the manifest fills the rest. */
+        const headFirst = background ? headSources : {};
         setResolvedSources({
-          foundation: foundationCSS ?? manifest.foundationURL,
-          core:       coreCSS       ?? manifest.coreURL,
-          typography: typographyCSS ?? manifest.typographyURL,
-          lightMode:  lightModeCSS  ?? manifest.lightModeURL,
-          darkMode:   darkModeCSS   ?? manifest.darkModeURL,
-          base:       baseCSS       ?? manifest.baseURL,
-          styles:     stylesCSS     ?? manifest.stylesURL,
+          foundation: foundationCSS ?? headFirst.foundation ?? manifest.foundationURL,
+          core:       coreCSS       ?? headFirst.core       ?? manifest.coreURL,
+          typography: typographyCSS ?? headFirst.typography ?? manifest.typographyURL,
+          lightMode:  lightModeCSS  ?? headFirst.lightMode  ?? manifest.lightModeURL,
+          darkMode:   darkModeCSS   ?? headFirst.darkMode   ?? manifest.darkModeURL,
+          base:       baseCSS       ?? headFirst.base       ?? manifest.baseURL,
+          styles:     stylesCSS     ?? headFirst.styles     ?? manifest.stylesURL,
         });
 
         // Store manifest theme config — props will override in render
@@ -562,6 +682,8 @@ export function OmniDesignProvider({
       .catch(err => {
         if (!mountedRef.current) return;
         console.error('OmniDesignProvider: manifest error:', err);
+        // The head's sheets are already showing a styled page: keep it.
+        if (background) return;
         setCssError(err.message);
         setCssStatus('error');
         setManifestPending(false);
@@ -598,7 +720,7 @@ export function OmniDesignProvider({
      page that is already styled. A prerendered page depends on this: hidden
      until JavaScript runs, it would paint no earlier than an unrendered one. */
   const hasAnyCSSSource = !!(
-    themeURL || foundationCSS || coreCSS || typographyCSS || baseCSS || stylesCSS
+    themeURL || head || foundationCSS || coreCSS || typographyCSS || baseCSS || stylesCSS
       || (isDark ? darkModeCSS : lightModeCSS)
   );
   /* sheetStatus is what the sheet effects report; cssStatus — what the page
@@ -614,10 +736,23 @@ export function OmniDesignProvider({
      A sheet that neither loads nor fails (a stalled network) must not leave
      the page hidden for good: after THEME_LOAD_TIMEOUT_MS the page shows
      anyway, with a console warning. A failed load is 'error', which shows. */
-  const [sheetStatus, setCssStatus] = useState(hasAnyCSSSource ? 'loading' : 'ready');
+  /* With the theme in the head, the page is ready on the FIRST render when
+     its sheets have already loaded (the usual case: they download in
+     parallel with the JavaScript) — no hidden frame, no effect round trip. */
+  const initialActiveMode = isDark ? resolvedSources.darkMode : resolvedSources.lightMode;
+  const headStaticSettled = !!head && ['foundation', 'core', 'typography', 'base', 'styles']
+    .every((k) => settledNow(TAG[k], resolvedSources[k]));
+  const headModeKnown = !!head && !!initialActiveMode;
+  const [sheetStatus, setCssStatus] = useState(
+    !hasAnyCSSSource || (headModeKnown && headStaticSettled) ? 'ready' : 'loading',
+  );
   const [cssError,  setCssError]  = useState(null);
-  const [manifestPending, setManifestPending] = useState(!!themeURL);
-  const [modeSettled, setModeSettled] = useState(() => !themeURL && !(isDark ? darkModeCSS : lightModeCSS));
+  // With head links the manifest only gates when the head lacks this mode's sheet.
+  const [manifestPending, setManifestPending] = useState(!!themeURL && !headModeKnown);
+  const themeURLAtMount = useRef(themeURL);
+  const [modeSettled, setModeSettled] = useState(() => (headModeKnown
+    ? settledNow(TAG.mode, initialActiveMode)
+    : !themeURL && !(isDark ? darkModeCSS : lightModeCSS)));
   const [loadTimedOut, setLoadTimedOut] = useState(false);
   const cssStatus = sheetStatus === 'error' ? 'error'
     : ((sheetStatus === 'ready' && !manifestPending && modeSettled) || loadTimedOut) ? 'ready'
@@ -681,6 +816,15 @@ export function OmniDesignProvider({
       // permanently invisible.
       setCssStatus('ready');
       return;
+    }
+
+    /* Every sheet already in the page and loaded (the head links): nothing
+       to wait for, so never pass through 'loading' — that would hide a page
+       that is already styled for a frame. */
+    const slots = [[TAG.foundation, foundation], [TAG.core, core], [TAG.typography, typography], [TAG.base, base], [TAG.styles, styles]];
+    if (slots.every(([id, src]) => settledNow(id, src))) {
+      setCssStatus('ready');
+      return () => slots.forEach(([id]) => removeStyleTag(id));
     }
 
     setCssStatus('loading');
@@ -808,6 +952,14 @@ export function OmniDesignProvider({
 
   // Cleanup mode tag on unmount
   useEffect(() => { return () => removeStyleTag(TAG.mode); }, []);
+
+  /* Keep <html data-omni-mode> in step with a toggle, so a reload's head
+     script and anything styling off it see the current mode. Only when the
+     head script set it — this provider owns the page's theme then. */
+  useEffect(() => {
+    if (!head || !head.scriptMode || typeof document === 'undefined') return;
+    document.documentElement.setAttribute('data-omni-mode', isDark ? 'dark' : 'light');
+  }, [isDark]);
 
   /* Chart colors per color-vision preference (data-color-vision). Injected by
      the provider, not shipped in a design system's CSS, because they are the
