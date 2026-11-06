@@ -1,7 +1,7 @@
 // GENERATED from the @example tags in types/ by scripts/check-api-examples.mjs.
 // Every example in docs/API.md must compile against the published types.
 import * as React from 'react';
-import { Accordion, AccordionDetails, AccordionGroup, AccordionSummary, Alert, AlertDialog, AltDisplayLarge, AppBar, AutoHeading, Autocomplete, Avatar, AvatarGroup, Badge, BarChart, BevelText, Body, BodySmall, BottomNavigation, Box, BrandIcon, BreadcrumbItem, Breadcrumbs, Button, ButtonGroup, ButtonText, Caption, Card, CardActions, CardContent, CarouselDot, CarouselDots, Checkbox, Chip, CircularProgress, CodeBlock, Colors, Container, CopyButton, Copyright, CurvedText, DatePicker, DayCell, Dialog, DisplayLarge, Divider, DotsLoader, Drawer, DrawerClose, DrawerContent, DrawerHeader, DropZone, Dropdown, EmailTextField, ErrorTag, Eyebrow, Fab, FieldButton, FieldGroup, Footer, FormDialog, FormHelper, FormLabel, Ghost, Grid, H1, H2, H3, H6, HStack, HeadingLevel, Icon, IconBadge, ImagePlaceholder, InputDecorator, InputMessage, Label, LightTreeView, LineChart, LinearLoader, LinearProgress, Link, LinkGroup, List, ListItem, ListItemDecorator, Loader, MainLayout, Menu, MenuButton, MenuDivider, MenuItem, MiniSwatch, Modal, NumberField, NumberLarge, OmniDesignProvider, OmniTreeView, OverlayLoader, PageLoader, Pagination, Paper, PasswordTextField, PieChart, Player, Popover, PrimaryToggleButtonGroup, Quote, Radio, RadioGroup, Rail, RailItem, RailSectionTitle, RangeSlider, Rating, Ratio, ResponsiveStack, SearchField, Section, Select, SelectableCard, SettingsPanel, Shape, ShapeButton, Sheet, Sidebar, SkeletonCard, SkeletonLoader, SkipLink, Slider, Snackbar, SpaceBetweenStack, Spacing, SpeedDial, StackDivider, StateMessage, Step, Stepper, Subtitle, Surfaced, Swatch, SwatchField, Switch, Tab, TabList, TabPanel, Table, Tabs, Tag, TextArea, TextAreaField, TextField, TextFieldGroup, TextInput, ThemedZone, ToggleButton, ToggleButtonGroup, Toolbar, Tooltip, TreeBranch, Typography, VStack } from '@omni-design/components';
+import { Accordion, AccordionDetails, AccordionGroup, AccordionSummary, Alert, AlertDialog, AltDisplayLarge, AppBar, AutoHeading, Autocomplete, Avatar, AvatarGroup, Badge, BarChart, BevelText, Body, BodySmall, BottomNavigation, Box, BrandIcon, BreadcrumbItem, Breadcrumbs, Button, ButtonGroup, ButtonText, Caption, Card, CardActions, CardContent, CarouselDot, CarouselDots, Checkbox, Chip, CircularProgress, CodeBlock, Colors, Container, CopyButton, Copyright, CurvedText, DatePicker, DayCell, Dialog, DisplayLarge, Divider, DotsLoader, Drawer, DrawerClose, DrawerContent, DrawerHeader, DropZone, Dropdown, EmailTextField, ErrorTag, Eyebrow, Fab, FieldButton, FieldGroup, Footer, FormDialog, FormHelper, FormLabel, Ghost, Grid, H1, H2, H3, H6, HStack, HeadingLevel, Icon, IconBadge, ImagePlaceholder, InputDecorator, InputMessage, Label, LightTreeView, LineChart, LinearLoader, LinearProgress, Link, LinkGroup, List, ListItem, ListItemDecorator, Loader, MainLayout, Menu, MenuButton, MenuDivider, MenuItem, MiniSwatch, Modal, NumberField, NumberLarge, OmniDesignProvider, OmniTreeView, OverlayLoader, PageLoader, Pagination, Paper, PasswordTextField, PieChart, Player, Popover, PrimaryToggleButtonGroup, Quote, Radio, RadioGroup, Rail, RailItem, RailSectionTitle, RangeSlider, Rating, Ratio, ResponsiveStack, SearchField, Section, Select, SelectableCard, SettingsPanel, Shape, ShapeButton, Sheet, Sidebar, SkeletonCard, SkeletonLoader, SkipLink, Slider, Snackbar, SpaceBetweenStack, Spacing, SpeedDial, StackDivider, StateMessage, Step, Stepper, Subtitle, Surfaced, Swatch, SwatchField, Switch, Tab, TabList, TabPanel, Table, Tabs, Tag, TextArea, TextAreaField, TextField, TextFieldGroup, TextInput, ThemedZone, ThumbnailSelector, ToggleButton, ToggleButtonGroup, Toolbar, Tooltip, TreeBranch, Typography, VStack } from '@omni-design/components';
 import AddIcon from '@omni-design/icons/Add';
 import CheckCircleIcon from '@omni-design/icons/CheckCircle';
 import DeleteIcon from '@omni-design/icons/Delete';
@@ -1125,6 +1125,14 @@ export const Example_RadioGroupProps = () => (
 <>
 <RadioGroup label="Shipping" value={value} onChange={(e, next) => setValue(next)}
   options={[{ value: 'standard', label: 'Standard' }, { value: 'express', label: 'Express' }]} />
+</>
+);
+
+// ThumbnailSelectorProps (ThumbnailSelector)
+export const Example_ThumbnailSelectorProps = () => (
+<>
+<ThumbnailSelector aria-label="Product images" value={page} onChange={setPage}
+  items={[{ src: '/img/front.jpg', alt: 'Front view' }, { src: '/img/back.jpg', alt: 'Back view' }]} />
 </>
 );
 

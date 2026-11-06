@@ -2,7 +2,7 @@
 
 Every exported component: purpose, props, required parent, one example. GENERATED from `types/` by `scripts/build-api-doc.mjs` — the same files the published .d.ts come from, so this cannot drift from the types. Do not edit by hand. Do not open `dist/` to learn a prop: if it is not here, the component does not take it. Rules (color, surfaces, layout) are in `CLAUDE.md`.
 
-Read a section, not the file: search for `### Name`. 237 components.
+Read a section, not the file: search for `### Name`. 238 components.
 
 Format: `` `name?: type` = default — meaning``. No `?` means required. "+ `children`" means it takes children; "+ `<div>`" means the native attributes of that element pass through (id, className, style, aria-*, data-*, on*). Defaults come from the component source.
 
@@ -58,6 +58,7 @@ Format: `` `name?: type` = default — meaning``. No `?` means required. "+ `chi
 - `TableColumn` = `{ label?: ReactNode; header?: ReactNode; field?: string; key?: string; width?: number | string }`
 - `TabValue` = `string | number`
 - `TextFieldGroupField` = `{ id: string | number }`
+- `ThumbnailItem` = `{ src: string; alt: string; label?: string; disabled?: boolean; id?: string | number }`
 - `ToolbarItem` = `{ icon: ReactNode; label: string; key?: Key }`
 - `TreeItem` = `{ id: string; label: ReactNode; icon?: ReactNode; swatch?: string; badge?: ReactNode; toggle?: boolean; divider?: boolean; disabled?: boolean; className?: string; sx?: Sx; children?: TreeItem[] }`
 
@@ -1105,6 +1106,25 @@ A labelled set of radios (a fieldset with a legend) built from `options`. Contro
 ```jsx
 <RadioGroup label="Shipping" value={value} onChange={(e, next) => setValue(next)}
   options={[{ value: 'standard', label: 'Standard' }, { value: 'express', label: 'Express' }]} />
+```
+
+### ThumbnailSelector
+Pick one image from a row of thumbnails — a product gallery's views. A radio group: one tab stop, arrow keys move and select, Home / End jump. Each thumbnail is named by its `alt` (the image inside is decorative, so it is announced once). Rest edge, selected ring and focus ring are surface tokens, 3:1 on every theme and surface, light and dark. For a gallery's thumbnails use this — never hand-build image buttons. Ref: `HTMLDivElement`.
+
+- `items?: ThumbnailItem[]` = `[]` — `[{ src, alt, label?, disabled?, id? }]`, in display order.
+- `value?: number` — Controlled: the selected index.
+- `defaultValue?: number` = `0` — Uncontrolled: the initially selected index.
+- `onChange?: (index: number, item: ThumbnailItem) => void` — Called with the chosen index and its item.
+- `size?: Size` = `'medium'` — Side of each thumbnail: 56 / 72 / 96px (Sizing-7 / 9 / 12). Corners follow the brand's card radius.
+- `orientation?: 'horizontal' | 'vertical'` = `'horizontal'` — A row (wraps) or a column.
+- `disabled?: boolean` = `false` — Disables every thumbnail.
+- `aria-label?: string` — Names the group, e.g. "Product images". Give this or `aria-labelledby`.
+- `aria-labelledby?: string`
++ `<div>`
+
+```jsx
+<ThumbnailSelector aria-label="Product images" value={page} onChange={setPage}
+  items={[{ src: '/img/front.jpg', alt: 'Front view' }, { src: '/img/back.jpg', alt: 'Back view' }]} />
 ```
 
 ### SwitchInput · Switch

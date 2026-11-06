@@ -206,6 +206,7 @@ import HomeIcon from '@omni-design/icons/Home';
 | Bold body text | `Subtitle` | Body has no bold — Subtitle is Body at 700 |
 | Icon on a tile | `IconBadge` | `color` (any Button color), `variant` (`solid` / `light` / `dark`), `size` (`small` / `medium` / `large`), `shape` |
 | Tag | `Chip` | `label`, `startDecorator` (or `icon`), `selected` |
+| Product gallery thumbnails | `ThumbnailSelector` | `items` (`[{ src, alt }]` — `alt` names each thumbnail), `value` / `onChange(index)` or `defaultValue`, `size` (`small` / `medium` / `large`), `orientation`, `aria-label` ("Product images") |
 | Person / step number | `Avatar` | `initials`, `color` |
 | Form field | `TextField` | `label`, `value`, `onChange`, `type`, `helperText` |
 | Footer | `Footer` | `brand`, `columns` (`[{ title, links: [{ label, href }] }]`, up to 3), `copyrightName`, `color` (`default` dark band / `primary` / `white` / `black`) |
@@ -244,6 +245,10 @@ brand color.
   `paddingTop` / `paddingBottom` for one edge, e.g. the first section under the
   header). They come from the spacing tokens and shrink on phones. Do not
   write pixel padding on sections — six sections, six hand-picked rhythms.
+- **For a product gallery's thumbnails use `ThumbnailSelector`** — never
+  hand-build image buttons. It is a radio group (arrow keys, one tab stop),
+  names each thumbnail by its `alt`, and draws the edge, selected ring and
+  focus ring from surface tokens, so they pass on dark bands too.
 - **Start the app with `<SkipLink />`** — its first child, before the
   `AppBar` — and give the main region `id="main"` (`<Section as="main"
   id="main">` or `<main id="main">`). It stays hidden until a keyboard user

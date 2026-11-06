@@ -69,6 +69,7 @@ export { Select } from './Select';
 export { Autocomplete } from './Autocomplete';
 export { Checkbox } from './Checkbox';
 export { Radio, RadioGroup, RadioInput } from './Radio';
+export { ThumbnailSelector } from './ThumbnailSelector';
 export { Player, formatTime } from './Player';
 export { SwitchInput } from './Switch';
 export { SliderInput, RangeSlider } from './Slider';

@@ -148,6 +148,7 @@ const REGISTRY = [
   { control: 'NumberField spinner', file: 'NumberField/NumberField.js', delegatesTo: 'NumberField/FieldButton.js', renders: /<FieldButton\b/ },
   { control: 'Field button',        file: 'NumberField/FieldButton.js' },
   { control: 'Carousel dot',        file: 'CarouselDots/CarouselDots.js' },
+  { control: 'Thumbnail',           file: 'ThumbnailSelector/ThumbnailSelector.js' },
   // The field label is a FormLabel; the control is the Swatch it renders.
   { control: 'SwatchField swatch',  file: 'SwatchField/SwatchField.js', delegatesTo: 'Swatch/Swatch.js', renders: /<Swatch\b/ },
   {

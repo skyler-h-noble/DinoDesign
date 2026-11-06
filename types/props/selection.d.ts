@@ -119,6 +119,48 @@ export interface RadioGroupProps extends Omit<React.HTMLAttributes<HTMLDivElemen
   sx?: Sx;
 }
 
+export interface ThumbnailItem {
+  /** Image URL. */
+  src: string;
+  /** What the picture shows — the thumbnail's accessible name ("Back view"). Required: without it the radio is announced "Image 2 of 5". */
+  alt: string;
+  /** Overrides `alt` as the name, when the choice reads better than the description ("Navy"). Not shown. */
+  label?: string;
+  /** Skipped by the arrow keys; cannot be chosen. */
+  disabled?: boolean;
+  /** React key; the index when omitted. */
+  id?: string | number;
+}
+
+/**
+ * Pick one image from a row of thumbnails — a product gallery's views. A radio group: one tab stop, arrow keys move and select, Home / End jump. Each thumbnail is named by its `alt` (the image inside is decorative, so it is announced once). Rest edge, selected ring and focus ring are surface tokens, 3:1 on every theme and surface, light and dark. For a gallery's thumbnails use this — never hand-build image buttons.
+ * @category Selection
+ * @exports ThumbnailSelector
+ * @ref HTMLDivElement
+ * @example
+ * <ThumbnailSelector aria-label="Product images" value={page} onChange={setPage}
+ *   items={[{ src: '/img/front.jpg', alt: 'Front view' }, { src: '/img/back.jpg', alt: 'Back view' }]} />
+ */
+export interface ThumbnailSelectorProps extends Native<HTMLDivElement, 'onChange' | 'defaultValue'> {
+  /** `[{ src, alt, label?, disabled?, id? }]`, in display order. */
+  items?: ThumbnailItem[];
+  /** Controlled: the selected index. */
+  value?: number;
+  /** Uncontrolled: the initially selected index. */
+  defaultValue?: number;
+  /** Called with the chosen index and its item. */
+  onChange?: (index: number, item: ThumbnailItem) => void;
+  /** Side of each thumbnail: 56 / 72 / 96px (Sizing-7 / 9 / 12). Corners follow the brand's card radius. */
+  size?: Size;
+  /** A row (wraps) or a column. */
+  orientation?: 'horizontal' | 'vertical';
+  /** Disables every thumbnail. */
+  disabled?: boolean;
+  /** Names the group, e.g. "Product images". Give this or `aria-labelledby`. */
+  'aria-label'?: string;
+  'aria-labelledby'?: string;
+}
+
 /**
  * A setting that takes effect immediately (role="switch"). Switch and SwitchInput are the same component.
  * @category Selection
