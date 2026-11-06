@@ -49,6 +49,18 @@ describe('Footer Component', () => {
     expect(screen.queryByText('D-should-not-render')).not.toBeInTheDocument();
   });
 
+  test('black is the Neutral Surface-Dimmest surface, so the tokens inside (focus ring, links) are that surface\'s', () => {
+    const { container } = render(<Footer color="black" columns={[{ title: 'Shop', links: [{ label: 'Home', href: '/c/home' }] }]} />);
+    const footer = container.querySelector('footer');
+    expect(footer).toHaveAttribute('data-theme', 'Neutral');
+    expect(footer).toHaveAttribute('data-surface', 'Surface-Dimmest');
+    // No literal palette tone painted on the box: the surface paints it.
+    expect(footer.getAttribute('style') || '').not.toMatch(/Neutral-Color/);
+    // The links sit inside that scope — nothing between them re-declares one.
+    const link = screen.getByRole('link', { name: 'Home' });
+    expect(link.closest('[data-theme]')).toBe(footer);
+  });
+
   test('renders the copyright strip', () => {
     render(<Footer address={sampleAddress} copyrightName="TestCo" copyrightYear={2026} />);
     expect(screen.getByText(/© 2026 TestCo/)).toBeInTheDocument();

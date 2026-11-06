@@ -32,8 +32,9 @@ import { VStack, HStack } from '../Stack/Stack';
  *                   user's Primary surface tone.
  *   primary-dark  — `data-theme="Primary" data-surface="Surface-Dimmest"` —
  *                   the deepest Primary surface.
- *   white         — Neutral Color-12 (pure white).
- *   black         — Neutral Color-1 (near-black).
+ *   white         — Neutral Color-12 (pure white), painted as a literal.
+ *   black         — `data-theme="Neutral" data-surface="Surface-Dimmest"` —
+ *                   black in light and dark mode.
  *
  * Props:
  *   color         — "default" (default) | "primary" | "primary-dark" |
@@ -66,15 +67,25 @@ import { VStack, HStack } from '../Stack/Stack';
  * from a different one, which is the exact failure data-surface exists to
  * prevent.
  *
- * `white` and `black` keep their literals: they are escape hatches for a
- * footer that must sit on a fixed color regardless of brand, which is a real
- * requirement and not expressible as a surface. */
+ * `black` is Neutral at Surface-Dimmest — tone 1 in light AND dark, so it
+ * stays black in both modes — declared as a surface like the rest. It used to
+ * paint literals (Neutral-Color-1 behind Neutral-Color-12) with no
+ * data-theme / data-surface, so its focus ring, links, quiet text, borders and
+ * the subscribe field all resolved against the PARENT's light surface: the
+ * light page's focus ring (#0056af) sat on #040404 at 2.88:1. Now they are
+ * Neutral Dimmest's own (focus ring 6.19:1 light, 5.83:1 dark). Toolbar and
+ * AppBar already map black the same way.
+ *
+ * `white` still paints literals, for a footer that must stay white in dark
+ * mode — which no surface does (Neutral Surface-Brightest darkens in dark
+ * mode). Its tokens inside therefore still resolve against the parent; see
+ * the release notes before relying on it in dark mode. */
 const COLOR_PRESETS = {
   default:        { theme: 'Primary', surface: 'Surface-Dimmest' },
   primary:        { theme: 'Primary', surface: 'Surface' },
   'primary-dark': { theme: 'Primary', surface: 'Surface-Dimmest' },
   white:          { bg: 'var(--Neutral-Color-12)', fg: 'var(--Neutral-Color-2)' },
-  black:          { bg: 'var(--Neutral-Color-1)',  fg: 'var(--Neutral-Color-12)' },
+  black:          { theme: 'Neutral', surface: 'Surface-Dimmest' },
 };
 
 export function Footer({
