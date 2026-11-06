@@ -1,8 +1,10 @@
 // src/components/StateMessage/StateMessage.js
 import React, { useId } from 'react';
-import InboxOutlinedIcon from '@omni-design/icons/InboxOutlined';
-import SearchOffOutlinedIcon from '@omni-design/icons/SearchOffOutlined';
-import ErrorOutlineOutlinedIcon from '@omni-design/icons/ErrorOutlineOutlined';
+import {
+  InboxOutlined as InboxOutlinedIcon,
+  SearchOffOutlined as SearchOffOutlinedIcon,
+  ErrorOutlineOutlined as ErrorOutlineOutlinedIcon,
+} from '@omni-design/icons/outlined';
 import { Icon } from '../Icon/Icon';
 import { Subtitle, Body, BodySmall } from '../Typography';
 import { useStaticStyles } from '../_staticStyles';

@@ -6,7 +6,7 @@ import { DocSummary, DocChanges } from '../../docs/DocPanels';
 import { Box, Stack, Grid } from '@mui/material';
 import ContentCopyIcon from '@omni-design/icons/ContentCopy';
 import CheckIcon from '@omni-design/icons/Check';
-import InfoOutlinedIcon from '@omni-design/icons/InfoOutlined';
+import { InfoOutlined as InfoOutlinedIcon } from '@omni-design/icons/outlined';
 import CheckCircleOutlineIcon from '@omni-design/icons/CheckCircleOutline';
 import WarningAmberIcon from '@omni-design/icons/WarningAmber';
 import ErrorOutlineIcon from '@omni-design/icons/ErrorOutline';

@@ -1,32 +1,112 @@
 {
   "name": "@omni-design/icons",
-  "version": "0.1.0",
-  "description": "Material Icons as plain SVG React components \u2014 same names and glyphs as @mui/icons-material, without MUI.",
+  "version": "0.2.0",
+  "description": "Material Icons as plain SVG React components — same names and glyphs as @mui/icons-material, without MUI.",
   "license": "MIT",
+  "type": "module",
   "sideEffects": false,
-  "main": "./index.js",
-  "module": "./esm/index.js",
+  "main": "./index.cjs",
+  "module": "./index.js",
   "types": "./index.d.ts",
   "exports": {
     ".": {
-      "types": "./index.d.ts",
-      "import": "./esm/index.js",
-      "require": "./index.js"
+      "import": {
+        "types": "./index.d.ts",
+        "default": "./index.js"
+      },
+      "require": {
+        "types": "./index.d.cts",
+        "default": "./index.cjs"
+      }
     },
+    "./outlined": {
+      "import": {
+        "types": "./outlined.d.ts",
+        "default": "./outlined.js"
+      },
+      "require": {
+        "types": "./outlined.d.cts",
+        "default": "./outlined.cjs"
+      }
+    },
+    "./rounded": {
+      "import": {
+        "types": "./rounded.d.ts",
+        "default": "./rounded.js"
+      },
+      "require": {
+        "types": "./rounded.d.cts",
+        "default": "./rounded.cjs"
+      }
+    },
+    "./sharp": {
+      "import": {
+        "types": "./sharp.d.ts",
+        "default": "./sharp.js"
+      },
+      "require": {
+        "types": "./sharp.d.cts",
+        "default": "./sharp.cjs"
+      }
+    },
+    "./twotone": {
+      "import": {
+        "types": "./twotone.d.ts",
+        "default": "./twotone.js"
+      },
+      "require": {
+        "types": "./twotone.d.cts",
+        "default": "./twotone.cjs"
+      }
+    },
+    "./createIcon": {
+      "import": {
+        "types": "./createIcon.d.ts",
+        "default": "./createIcon.js"
+      },
+      "require": {
+        "types": "./createIcon.d.cts",
+        "default": "./createIcon.cjs"
+      }
+    },
+    "./package.json": "./package.json",
     "./*": {
-      "types": "./*.d.ts",
-      "import": "./esm/*.js",
-      "require": "./*.js"
-    },
-    "./package.json": "./package.json"
+      "types": "./icon.d.ts",
+      "default": "./*.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "index.d.ts": [
+        "index.d.ts"
+      ],
+      "outlined": [
+        "outlined.d.ts"
+      ],
+      "rounded": [
+        "rounded.d.ts"
+      ],
+      "sharp": [
+        "sharp.d.ts"
+      ],
+      "twotone": [
+        "twotone.d.ts"
+      ],
+      "createIcon": [
+        "createIcon.d.ts"
+      ],
+      "*": [
+        "icon.d.ts"
+      ]
+    }
   },
   "files": [
-    "*.js",
-    "*.d.ts",
-    "esm",
+    "/*.js",
+    "/*.cjs",
+    "/*.d.ts",
+    "/*.d.cts",
     "LICENSE",
-    "README.md",
-    "!scripts"
+    "README.md"
   ],
   "scripts": {
     "build": "node scripts/build.mjs",

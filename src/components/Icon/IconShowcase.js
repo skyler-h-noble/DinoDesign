@@ -21,56 +21,64 @@ import ShoppingCartIcon from '@omni-design/icons/ShoppingCart';
 import LockIcon from '@omni-design/icons/Lock';
 import InfoIcon from '@omni-design/icons/Info';
 // Outlined
-import HomeOutlinedIcon from '@omni-design/icons/HomeOutlined';
-import FavoriteOutlinedIcon from '@omni-design/icons/FavoriteBorderOutlined';
-import DeleteOutlinedIcon from '@omni-design/icons/DeleteOutlined';
-import SettingsOutlinedIcon from '@omni-design/icons/SettingsOutlined';
+import {
+  HomeOutlined as HomeOutlinedIcon,
+  FavoriteBorderOutlined as FavoriteOutlinedIcon,
+  DeleteOutlined as DeleteOutlinedIcon,
+  SettingsOutlined as SettingsOutlinedIcon,
+  PersonOutlined as PersonOutlinedIcon,
+  NotificationsOutlined as NotificationsOutlinedIcon,
+  VisibilityOutlined as VisibilityOutlinedIcon,
+  ShoppingCartOutlined as ShoppingCartOutlinedIcon,
+  LockOutlined as LockOutlinedIcon,
+  InfoOutlined as InfoOutlinedIcon,
+} from '@omni-design/icons/outlined';
 import StarOutlinedIcon from '@omni-design/icons/StarOutline';
-import PersonOutlinedIcon from '@omni-design/icons/PersonOutlined';
-import NotificationsOutlinedIcon from '@omni-design/icons/NotificationsOutlined';
-import VisibilityOutlinedIcon from '@omni-design/icons/VisibilityOutlined';
-import ShoppingCartOutlinedIcon from '@omni-design/icons/ShoppingCartOutlined';
-import LockOutlinedIcon from '@omni-design/icons/LockOutlined';
-import InfoOutlinedIcon from '@omni-design/icons/InfoOutlined';
 // Rounded
-import HomeRoundedIcon from '@omni-design/icons/HomeRounded';
-import FavoriteRoundedIcon from '@omni-design/icons/FavoriteRounded';
-import DeleteRoundedIcon from '@omni-design/icons/DeleteRounded';
-import SettingsRoundedIcon from '@omni-design/icons/SettingsRounded';
-import SearchRoundedIcon from '@omni-design/icons/SearchRounded';
-import StarRoundedIcon from '@omni-design/icons/StarRounded';
-import PersonRoundedIcon from '@omni-design/icons/PersonRounded';
-import NotificationsRoundedIcon from '@omni-design/icons/NotificationsRounded';
-import VisibilityRoundedIcon from '@omni-design/icons/VisibilityRounded';
-import ShoppingCartRoundedIcon from '@omni-design/icons/ShoppingCartRounded';
-import LockRoundedIcon from '@omni-design/icons/LockRounded';
-import InfoRoundedIcon from '@omni-design/icons/InfoRounded';
+import {
+  HomeRounded as HomeRoundedIcon,
+  FavoriteRounded as FavoriteRoundedIcon,
+  DeleteRounded as DeleteRoundedIcon,
+  SettingsRounded as SettingsRoundedIcon,
+  SearchRounded as SearchRoundedIcon,
+  StarRounded as StarRoundedIcon,
+  PersonRounded as PersonRoundedIcon,
+  NotificationsRounded as NotificationsRoundedIcon,
+  VisibilityRounded as VisibilityRoundedIcon,
+  ShoppingCartRounded as ShoppingCartRoundedIcon,
+  LockRounded as LockRoundedIcon,
+  InfoRounded as InfoRoundedIcon,
+} from '@omni-design/icons/rounded';
 // TwoTone
-import HomeTwoToneIcon from '@omni-design/icons/HomeTwoTone';
-import FavoriteTwoToneIcon from '@omni-design/icons/FavoriteTwoTone';
-import DeleteTwoToneIcon from '@omni-design/icons/DeleteTwoTone';
-import SettingsTwoToneIcon from '@omni-design/icons/SettingsTwoTone';
-import SearchTwoToneIcon from '@omni-design/icons/SearchTwoTone';
-import StarTwoToneIcon from '@omni-design/icons/StarTwoTone';
-import PersonTwoToneIcon from '@omni-design/icons/PersonTwoTone';
-import NotificationsTwoToneIcon from '@omni-design/icons/NotificationsTwoTone';
-import VisibilityTwoToneIcon from '@omni-design/icons/VisibilityTwoTone';
-import ShoppingCartTwoToneIcon from '@omni-design/icons/ShoppingCartTwoTone';
-import LockTwoToneIcon from '@omni-design/icons/LockTwoTone';
-import InfoTwoToneIcon from '@omni-design/icons/InfoTwoTone';
+import {
+  HomeTwoTone as HomeTwoToneIcon,
+  FavoriteTwoTone as FavoriteTwoToneIcon,
+  DeleteTwoTone as DeleteTwoToneIcon,
+  SettingsTwoTone as SettingsTwoToneIcon,
+  SearchTwoTone as SearchTwoToneIcon,
+  StarTwoTone as StarTwoToneIcon,
+  PersonTwoTone as PersonTwoToneIcon,
+  NotificationsTwoTone as NotificationsTwoToneIcon,
+  VisibilityTwoTone as VisibilityTwoToneIcon,
+  ShoppingCartTwoTone as ShoppingCartTwoToneIcon,
+  LockTwoTone as LockTwoToneIcon,
+  InfoTwoTone as InfoTwoToneIcon,
+} from '@omni-design/icons/twotone';
 // Sharp
-import HomeSharpIcon from '@omni-design/icons/HomeSharp';
-import FavoriteSharpIcon from '@omni-design/icons/FavoriteSharp';
-import DeleteSharpIcon from '@omni-design/icons/DeleteSharp';
-import SettingsSharpIcon from '@omni-design/icons/SettingsSharp';
-import SearchSharpIcon from '@omni-design/icons/SearchSharp';
-import StarSharpIcon from '@omni-design/icons/StarSharp';
-import PersonSharpIcon from '@omni-design/icons/PersonSharp';
-import NotificationsSharpIcon from '@omni-design/icons/NotificationsSharp';
-import VisibilitySharpIcon from '@omni-design/icons/VisibilitySharp';
-import ShoppingCartSharpIcon from '@omni-design/icons/ShoppingCartSharp';
-import LockSharpIcon from '@omni-design/icons/LockSharp';
-import InfoSharpIcon from '@omni-design/icons/InfoSharp';
+import {
+  HomeSharp as HomeSharpIcon,
+  FavoriteSharp as FavoriteSharpIcon,
+  DeleteSharp as DeleteSharpIcon,
+  SettingsSharp as SettingsSharpIcon,
+  SearchSharp as SearchSharpIcon,
+  StarSharp as StarSharpIcon,
+  PersonSharp as PersonSharpIcon,
+  NotificationsSharp as NotificationsSharpIcon,
+  VisibilitySharp as VisibilitySharpIcon,
+  ShoppingCartSharp as ShoppingCartSharpIcon,
+  LockSharp as LockSharpIcon,
+  InfoSharp as InfoSharpIcon,
+} from '@omni-design/icons/sharp';
 
 import { Icon } from './Icon';
 import { Button } from '../Button/Button';
@@ -188,7 +196,12 @@ export function IconShowcase() {
     if (disabled)             parts.push('disabled');
     if (isMeaningful)         parts.push('aria-label="' + ariaLabel.trim() + '"');
     const p = parts.length ? ' ' + parts.join(' ') : '';
-    return "import " + importName + " from '@omni-design/icons/" + selectedIcon + (suffix||"") + "';\n\n<Icon" + p + ">\n  <" + importName + " />\n</Icon>";
+    /* Filled icons are one module each; the other styles are one module per
+       style (@omni-design/icons 0.2.0), imported by name. */
+    const importLine = suffix
+      ? "import { " + selectedIcon + suffix + " as " + importName + " } from '@omni-design/icons/" + style + "';"
+      : "import " + importName + " from '@omni-design/icons/" + selectedIcon + "';";
+    return importLine + "\n\n<Icon" + p + ">\n  <" + importName + " />\n</Icon>";
   };
 
   // Decorative code example using the current icon

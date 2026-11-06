@@ -2,8 +2,30 @@
 //
 // Each MUI icon module is `createSvgIcon(<path d="…"/>, 'Name')`. Loading the
 // CommonJS build with createSvgIcon swapped for a recorder gives back the
-// exact element tree — no path is retyped, so no glyph can drift. The output is
-// one tiny module per icon (ESM + CommonJS + types) over src/createIcon.js.
+// exact element tree — no path is retyped, so no glyph can drift.
+//
+// LAYOUT (0.2.0). Installing is dominated by FILE COUNT, not bytes: 0.1.0 was
+// 43,103 files (every icon in five styles, as ESM + CommonJS + two .d.ts), and
+// `npm install` spent most of its time writing them. Now:
+//
+//   Add.js …        one tiny ES module per FILLED icon, at the package root,
+//                   so `import AddIcon from '@omni-design/icons/Add'` works and
+//                   a bundler keeps only what is imported.
+//   outlined.js …   ONE module per other style (outlined, rounded, sharp,
+//                   twotone), every icon a pure named export, tree-shaken the
+//                   same way: `import { HomeOutlined } from
+//                   '@omni-design/icons/outlined'`.
+//   index.js        all of the above, named:
+//                   `import { Add, HomeOutlined } from '@omni-design/icons'`.
+//   *.cjs           require() for the ROOT and the style entries only
+//                   (index.cjs, outlined.cjs …). Per-icon subpaths are ESM;
+//                   require() of one needs Node's require(esm) (20.19+/22.12+).
+//   icon.d.ts       the one type every per-icon subpath resolves to (the ~2,200
+//                   per-icon .d.ts files of 0.1.0 were byte-identical).
+//
+// The files sit at the ROOT, not in esm/, so a resolver that ignores the
+// exports map (Jest before 28, which Create React App ships) still finds
+// @omni-design/icons/Home as a real Home.js.
 import { createRequire } from 'module';
 import Module from 'module';
 import fs from 'fs';
@@ -39,58 +61,100 @@ const serializeList = (els) => (Array.isArray(els) ? els : [els]).flatMap((el) =
   return [kids && kids.length ? [el.type, attrs, kids] : [el.type, attrs]];
 });
 
+/* Style by MUI's naming rule: the suffix decides. 18 styled icons have no
+   filled sibling (FaceUnlockOutlined, WifiCalling1TwoTone …); they still go
+   with their style, since that is the glyph they are. */
+const STYLES = [
+  ['outlined', 'Outlined'],
+  ['rounded', 'Rounded'],
+  ['sharp', 'Sharp'],
+  ['twotone', 'TwoTone'],
+];
+const styleOf = (name) => {
+  const hit = STYLES.find(([, suffix]) => name.endsWith(suffix) && name.length > suffix.length);
+  return hit ? hit[0] : 'filled';
+};
+
 const names = fs.readdirSync(path.join(muiDir, 'esm'))
   .filter((f) => f.endsWith('.js') && f !== 'index.js')
   .map((f) => f.slice(0, -3))
   .sort();
 
-/* MUI's layout, for the same reason MUI uses it: CommonJS files and their
-   types at the package ROOT, ESM in esm/. A resolver that ignores the exports
-   map (Jest before 28, which Create React App ships) finds
-   @omni-design/icons/Home as a real Home.js. */
-const OUT = { cjs: root, esm: path.join(root, 'esm'), types: root, esmTypes: path.join(root, 'esm') };
-for (const f of fs.readdirSync(root)) if (/\.(js|d\.ts)$/.test(f)) fs.rmSync(path.join(root, f));
+// Clear every generated file (and 0.1.0's esm/ tree).
+for (const f of fs.readdirSync(root)) if (/\.(js|cjs|d\.c?ts)$/.test(f)) fs.rmSync(path.join(root, f));
 fs.rmSync(path.join(root, 'esm'), { recursive: true, force: true });
 fs.rmSync(path.join(root, 'dist'), { recursive: true, force: true });
-fs.mkdirSync(OUT.esm, { recursive: true });
-const write = (kind, file, text) => fs.writeFileSync(path.join(OUT[kind], file), text);
+const write = (file, text) => fs.writeFileSync(path.join(root, file), text);
+/* Types twice: .d.ts for import, .d.cts for require. Under TypeScript's
+   node16/nodenext resolution a "type": "module" package's .d.ts is ESM, so a
+   CommonJS caller needs its own copy pointing at the .cjs files. */
+const writeTypes = (base, make) => {
+  write(base + '.d.ts', make('js'));
+  write(base + '.d.cts', make('cjs'));
+};
 
 // createIcon: the source is ESM; the CommonJS copy is a direct translation.
 const src = fs.readFileSync(path.join(root, 'src', 'createIcon.js'), 'utf8');
-write('esm', 'createIcon.js', src);
-const cjs = src
+write('createIcon.js', src);
+write('createIcon.cjs', src
   .replace("import * as React from 'react';", "'use strict';\nObject.defineProperty(exports, '__esModule', { value: true });\nconst React = require('react');")
   .replace('export function getIconStyles', 'function getIconStyles')
   .replace('export default function createIcon', 'function createIcon')
-  + '\nexports.default = createIcon;\nexports.getIconStyles = getIconStyles;\n';
-write('cjs', 'createIcon.js', cjs);
+  + '\nexports.default = createIcon;\nexports.getIconStyles = getIconStyles;\n');
 
-let esmIndex = "export { default as createIcon, getIconStyles } from './createIcon.js';\n";
-let cjsIndex = "'use strict';\nObject.defineProperty(exports, '__esModule', { value: true });\n"
-  + "const c = require('./createIcon.js');\nexports.createIcon = c.default;\nexports.getIconStyles = c.getIconStyles;\n";
-let dtsIndex = "export { default as createIcon, getIconStyles, OmniIcon, OmniIconProps } from './createIcon';\n";
-let count = 0;
+const PURE = '/*#__PURE__*/';
+const groups = { filled: [] };
+for (const [style] of STYLES) groups[style] = [];
 for (const name of names) {
   const mod = require(path.join(muiDir, name + '.js'));
   const rec = mod && mod.default;
   if (!rec || !rec.node) throw new Error('Not a createSvgIcon module: ' + name);
-  const nodes = JSON.stringify(serializeList(rec.node));
-  const display = JSON.stringify(rec.name);
-  const dts = "import { OmniIcon } from './createIcon';\ndeclare const Icon: OmniIcon;\nexport default Icon;\n";
-  write('esm', name + '.js', `import createIcon from './createIcon.js';\nexport default createIcon(${nodes}, ${display});\n`);
-  write('cjs', name + '.js', `'use strict';\nObject.defineProperty(exports, '__esModule', { value: true });\nexports.default = require('./createIcon.js').default(${nodes}, ${display});\n`);
-  write('types', name + '.d.ts', dts);
-  write('esmTypes', name + '.d.ts', dts);
-  esmIndex += `export { default as ${name} } from './${name}.js';\n`;
-  cjsIndex += `Object.defineProperty(exports, ${JSON.stringify(name)}, { enumerable: true, get: () => require('./${name}.js').default });\n`;
-  dtsIndex += `export { default as ${name} } from './${name}';\n`;
-  count++;
+  groups[styleOf(name)].push({ name, args: `${JSON.stringify(serializeList(rec.node))}, ${JSON.stringify(rec.name)}` });
 }
-write('esm', 'index.js', esmIndex);
-write('cjs', 'index.js', cjsIndex);
-write('types', 'index.d.ts', dtsIndex);
-write('esmTypes', 'index.d.ts', dtsIndex);
-const createIconDts = `import * as React from 'react';
+
+const CJS_HEAD = "'use strict';\nObject.defineProperty(exports, '__esModule', { value: true });\n";
+
+// Filled: one ES module per icon.
+for (const { name, args } of groups.filled) {
+  write(name + '.js', `import createIcon from './createIcon.js';\nexport default ${PURE}createIcon(${args});\n`);
+}
+
+// Other styles: one module per style, in both formats, plus its types.
+for (const [style] of STYLES) {
+  const list = groups[style];
+  write(style + '.js', "import createIcon from './createIcon.js';\n"
+    + list.map(({ name, args }) => `export const ${name} = ${PURE}createIcon(${args});\n`).join(''));
+  write(style + '.cjs', CJS_HEAD + "const c = require('./createIcon.cjs').default;\n"
+    + list.map(({ name, args }) => `exports.${name} = c(${args});\n`).join(''));
+  writeTypes(style, (ext) => `import { OmniIcon } from './createIcon.${ext}';\n`
+    + list.map(({ name }) => `export declare const ${name}: OmniIcon;\n`).join(''));
+}
+
+// Root, ESM: filled re-exported from their own files (one component per icon
+// however it is imported), styles re-exported whole.
+write('index.js', "export { default as createIcon, getIconStyles } from './createIcon.js';\n"
+  + groups.filled.map(({ name }) => `export { default as ${name} } from './${name}.js';\n`).join('')
+  + STYLES.map(([style]) => `export * from './${style}.js';\n`).join(''));
+
+/* Root, CommonJS: filled icons defined here, in one file (a require() cannot
+   tree-shake anyway); each style is read on first use of one of its icons, so
+   a test that only needs Add does not parse four other styles. */
+write('index.cjs', CJS_HEAD
+  + "const cm = require('./createIcon.cjs');\nconst c = cm.default;\n"
+  + 'exports.createIcon = c;\nexports.getIconStyles = cm.getIconStyles;\n'
+  + groups.filled.map(({ name, args }) => `exports.${name} = c(${args});\n`).join('')
+  + 'const lazy = (file, names) => { let m; for (const n of names) Object.defineProperty(exports, n, { enumerable: true, get: () => (m || (m = require(file)))[n] }); };\n'
+  + STYLES.map(([style]) => `lazy('./${style}.cjs', ${JSON.stringify(groups[style].map((g) => g.name))});\n`).join(''));
+
+writeTypes('index', (ext) => `export { default as createIcon, getIconStyles, OmniIcon, OmniIconProps } from './createIcon.${ext}';\n`
+  + `import { OmniIcon } from './createIcon.${ext}';\n`
+  + groups.filled.map(({ name }) => `export declare const ${name}: OmniIcon;\n`).join('')
+  + STYLES.map(([style]) => `export * from './${style}.${ext}';\n`).join(''));
+
+// The one type every per-icon subpath (`@omni-design/icons/Add`) resolves to.
+write('icon.d.ts', "import { OmniIcon } from './createIcon.js';\ndeclare const Icon: OmniIcon;\nexport default Icon;\n");
+
+writeTypes('createIcon', () => `import * as React from 'react';
 
 export interface OmniIconProps extends Omit<React.SVGProps<SVGSVGElement>, 'color' | 'fontSize' | 'ref'> {
   /** small 1.25rem | medium 1.5rem (default) | large 2.1875rem | inherit */
@@ -108,7 +172,7 @@ export interface OmniIconProps extends Omit<React.SVGProps<SVGSVGElement>, 'colo
 export type OmniIcon = React.MemoExoticComponent<React.ForwardRefExoticComponent<OmniIconProps & React.RefAttributes<SVGSVGElement>>> & { muiName: string };
 export default function createIcon(nodes: unknown[], displayName: string): OmniIcon;
 export function getIconStyles(): string;
-`;
-write('types', 'createIcon.d.ts', createIconDts);
-write('esmTypes', 'createIcon.d.ts', createIconDts);
-console.log(`@omni-design/icons: ${count} icons from @mui/icons-material ${muiVersion}`);
+`);
+
+const counts = Object.fromEntries(Object.entries(groups).map(([k, v]) => [k, v.length]));
+console.log(`@omni-design/icons: ${names.length} icons from @mui/icons-material ${muiVersion}`, counts);

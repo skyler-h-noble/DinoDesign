@@ -3,12 +3,11 @@ import React from 'react';
 import { Icon } from './Icon';
 import { Box, Stack } from '@mui/material';
 import HomeIcon from '@omni-design/icons/Home';
-import HomeOutlinedIcon from '@omni-design/icons/HomeOutlined';
-import HomeRoundedIcon from '@omni-design/icons/HomeRounded';
-import HomeTwoToneIcon from '@omni-design/icons/HomeTwoTone';
-import HomeSharpIcon from '@omni-design/icons/HomeSharp';
+import { HomeOutlined as HomeOutlinedIcon } from '@omni-design/icons/outlined';
+import { HomeRounded as HomeRoundedIcon } from '@omni-design/icons/rounded';
+import { HomeTwoTone as HomeTwoToneIcon, FavoriteTwoTone as FavoriteTwoToneIcon } from '@omni-design/icons/twotone';
+import { HomeSharp as HomeSharpIcon } from '@omni-design/icons/sharp';
 import FavoriteIcon from '@omni-design/icons/Favorite';
-import FavoriteTwoToneIcon from '@omni-design/icons/FavoriteTwoTone';
 
 export default { title: 'Data Display/Icon', component: Icon };
 

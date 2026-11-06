@@ -4,7 +4,7 @@ import { Snackbar } from './Snackbar';
 import { Box, Stack } from '@mui/material';
 import CheckCircleOutlineIcon from '@omni-design/icons/CheckCircleOutline';
 import ErrorOutlineIcon from '@omni-design/icons/ErrorOutline';
-import InfoOutlinedIcon from '@omni-design/icons/InfoOutlined';
+import { InfoOutlined as InfoOutlinedIcon } from '@omni-design/icons/outlined';
 
 export default { title: 'Feedback/Snackbar', component: Snackbar };
 

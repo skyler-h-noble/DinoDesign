@@ -38,7 +38,7 @@ import React from 'react';
 import { Label } from '../Typography/Typography';
 import { Link } from '../Link/Link';
 import { Icon } from '../Icon/Icon';
-import InfoOutlinedIcon from '@omni-design/icons/InfoOutlined';
+import { InfoOutlined as InfoOutlinedIcon } from '@omni-design/icons/outlined';
 import { useStaticStyles } from '../_staticStyles';
 import { registerBoxStyles } from '../_webkitBox';
 import { lazySxBox } from '../_lazyFallback';

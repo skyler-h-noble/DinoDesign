@@ -26,7 +26,7 @@ import MoreVertIcon from '@omni-design/icons/MoreVert';
 import InfoIcon from '@omni-design/icons/Info';
 import BookmarkIcon from '@omni-design/icons/Bookmark';
 import SearchIcon from '@omni-design/icons/Search';
-import ImageOutlinedIcon from '@omni-design/icons/ImageOutlined';
+import { ImageOutlined as ImageOutlinedIcon } from '@omni-design/icons/outlined';
 import { List, ListItem } from './List';
 import { Button } from '../Button';
 import { ButtonGroup } from '../ButtonGroup';
