@@ -31,9 +31,13 @@ describe('Autocomplete', () => {
      and the test claimed "Container-Lowest"; the code set neither. For a
      lighter Autocomplete the documented route is data-surface="Surface-
      Brightest" on the container, not a deeper inset level here. */
-  test('pins no surface of its own', () => {
+  test('the field row is its own Container surface; nothing else pins one', () => {
     const { container } = renderAC();
-    expect(container.querySelector('[data-surface]')).toBeNull();
+    const surfaces = container.querySelectorAll('[data-surface]');
+    expect(surfaces).toHaveLength(1);
+    expect(surfaces[0]).toHaveAttribute('data-surface', 'Container');
+    expect(surfaces[0]).toHaveClass('omni-ac-row');
+    expect(surfaces[0].querySelector('input')).not.toBeNull();
   });
 });
 

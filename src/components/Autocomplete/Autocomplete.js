@@ -51,8 +51,8 @@ const FLOATING_SIZE_MAP = {
 
 /* Static sheet — the MUI Box sx blocks this was built from, as plain rules.
    The size tables generate one class per size (standard and floating); the
-   palette's active text arrives as a custom property declared on the root
-   (--_ac-act). State rules weigh one class + one pseudo-class, as emotion's
+   palette's active text arrives as a custom property declared on the field
+   row, inside the field's own surface (--_ac-act). State rules weigh one class + one pseudo-class, as emotion's
    did. The loading spinner was MUI's CircularProgress (indeterminate, 16px):
    its markup, classes and animation are reproduced here, so a loading field
    no longer pulls in MUI. */
@@ -86,8 +86,13 @@ registerStaticStyles('omni-autocomplete', wk([
   ...Object.entries(RADIUS).map(([size, r]) => `.omni-ac-shell-${size}{border-radius:${r}}`),
   '.omni-ac-shell-off{opacity:var(--Disabled, 0.38)}',
   '.omni-ac-shell:focus-within{outline:2px solid var(--Focus-Visible);outline-offset:2px}',
-  /* Input container — uses --Hover for affordance against parent surface. */
-  '.omni-ac-row{position:relative;display:flex;align-items:center;background-color:var(--Hover)}',
+  /* The field is its own surface: the row declares data-surface="Container"
+     and paints that surface's --Background, so the placeholder's --Quiet and
+     the value's colors are the ones tuned for this fill. It rested on the
+     page's --Hover with the page's --Quiet — a pair nothing checks (4.08:1
+     light, 3.53:1 dark in a Default card). The shell's edge and focus ring
+     stay on the page's tokens: they are drawn against the page. */
+  '.omni-ac-row{position:relative;display:flex;align-items:center;background-color:var(--Background)}',
   sizeRules('s', SIZE_MAP),
   sizeRules('f', FLOATING_SIZE_MAP),
   '.omni-ac-fl{position:absolute;top:50%;transform:translateY(-50%);transform-origin:top left;color:var(--Quiet);font-weight:400;'
@@ -265,7 +270,7 @@ export function Autocomplete({
       (disabled ? ' autocomplete-disabled' : '') +
       (className ? ' ' + className : '') +
       ' omni-ac' + (fullWidth ? ' omni-ac-full' : ''),
-    style: { '--_ac-act': activeTextColor, ...style },
+    style,
     ...props,
   };
   const radiusKey = size === 'small' || size === 'large' ? size : 'medium';
@@ -295,11 +300,12 @@ export function Autocomplete({
 
       <div className={'MuiBox-root omni-ac-shell omni-ac-shell-' + radiusKey + (disabled ? ' omni-ac-shell-off' : '')}>
 
-      {/* Inner wrapper — no data-surface so the field inherits parent
-          scope and doesn't drag the brand --Background through. */}
+      {/* Inner wrapper (the row inside declares the field's surface). */}
       <div className="MuiBox-root">
 
-      <div className={'MuiBox-root omni-ac-row omni-ac-row-' + sz}>
+      {/* --_ac-act is declared HERE, inside the field's surface, so the
+          active text color resolves against the fill it is drawn on. */}
+      <div className={'MuiBox-root omni-ac-row omni-ac-row-' + sz} data-surface="Container" style={{ '--_ac-act': activeTextColor }}>
         {/* Floating label */}
         {isFloating && label && (
           <div className={'MuiBox-root omni-ac-fl omni-ac-fl-' + sizeKey + (raised ? ' omni-ac-fl-up' : '') + (focused ? ' omni-ac-fl-focus' : '')}>

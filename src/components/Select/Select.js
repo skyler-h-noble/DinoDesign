@@ -85,13 +85,27 @@ registerStaticStyles('omni-select', [
   '.omni-sel-left{display:inline-grid;grid-template-columns:auto minmax(0, 1fr);column-gap:var(--Sizing-1, 8px);-webkit-box-align:center;align-items:center}',
   '.omni-sel-left-full{display:grid}',
 
-  /* The shell, as Input's. */
-  '.omni-sel-shell{position:relative;border:none;overflow:hidden;background-color:var(--Hover);transition:background-color 0.15s ease;box-shadow:none}',
+  /* The shell, as Input's: the edge and the focus ring, both drawn against
+     the PAGE the field sits on, so both read the page's tokens. */
+  '.omni-sel-shell{position:relative;border:none;overflow:hidden;box-shadow:none}',
+  /* The fill is the field's own surface. The inner wrapper declares
+     data-surface="Container" and paints that surface's --Background, so the
+     placeholder's --Quiet, the value's --Text and the chevron's icon color are
+     the ones the design system tuned for THIS fill. The fill used to be the
+     page's --Hover with the page's --Quiet on it: a pair nothing checks, which
+     measured 4.08:1 (light) and 3.53:1 (dark) inside a Default card. Every
+     Container level meets 4.5:1 for --Quiet by construction. */
+  '.omni-sel-surf{background-color:var(--Background);transition:background-color 0.15s ease}',
   '.omni-sel-shell::after{content:"";position:absolute;inset:0;pointer-events:none;border-width:1px;border-style:solid;border-color:var(--Border);border-radius:inherit}',
   ...Object.keys(SZ).map((s) => `.omni-sel-shell-${SZ[s]}{border-radius:${SIZE_MAP[s].radius}}`),
   '.omni-sel-shell-f{border-radius:var(--Input-Radius, var(--Style-Border-Radius))}',
-  '.omni-sel-on:hover{background-color:var(--Pressed)}',
-  '.omni-sel-on:active{background-color:var(--Hover)}',
+  /* Hover and press deepen the fill (the field's own --Hover / --Pressed);
+     the text turns --Text for both (below), which the system pairs with them. */
+  /* Painted on the trigger, which fills the surface: the design system's own
+     paint rule for a Container weighs as much as a class + :hover + class
+     and comes later, so a state fill on the surface element itself loses. */
+  '.omni-sel-on:hover .omni-sel-trg{background-color:var(--Hover)}',
+  '.omni-sel-on:active .omni-sel-trg{background-color:var(--Pressed)}',
   // Pressed, the edge is 2px — Figma's Select (as Input) draws its stroke at 2 there.
   '.omni-sel-on:active::after{border-width:2px}',
   '.omni-sel-on:hover .select-trigger,.omni-sel-on:active .select-trigger,.omni-sel-on:focus-within .select-trigger{color:var(--Text)}',
@@ -101,7 +115,7 @@ registerStaticStyles('omni-select', [
   /* The trigger. The field's text is --Text; only the placeholder is Quiet. */
   '.omni-sel-trg{display:flex;-webkit-box-align:center;align-items:center;gap:var(--Sizing-1-and-Half, 12px);width:100%;min-width:var(--_sel-minw);'
     + 'background-color:transparent;border:none;border-radius:0;color:var(--Quiet);font-family:var(--Body-Font-Family, inherit);'
-    + 'cursor:pointer;outline:none;text-align:left;position:relative;transition:color 0.15s ease}',
+    + 'cursor:pointer;outline:none;text-align:left;position:relative;transition:color 0.15s ease, background-color 0.15s ease}',
   /* The color chip, sized from the FIELD, not from the buttons: field height
      − 8px, so a 32px field holds a 24px chip and a 40px field a 32px one, and
      moving the brand's button height or radius no longer moves it. A
@@ -521,16 +535,17 @@ export function Select({
         </FormLabel>
       )}
 
-      {/* Outer shell — Input's: the edge an inside-stroke overlay, the fill
-          resting on --Hover, deepening to --Pressed under the pointer and back
-          to --Hover while pressed; the 2px ring 1px out; 38% when disabled. */}
+      {/* Outer shell — Input's: the edge an inside-stroke overlay; the fill
+          the field's own Container surface, deepening to its --Hover under the
+          pointer and --Pressed while pressed; the 2px ring 1px out; 38% when
+          disabled. */}
       {/* The wrapper is the shell's parent — read from here so it is found
           whether the wrapper is a plain div or the sx box. */}
       <div ref={(n) => { wrapperRef.current = n ? n.parentElement : null; }}
         className={'select-shell MuiBox-root omni-sel-shell omni-sel-shell-' + (isFloating ? 'f' : SZ[sk])
         + (disabled ? ' omni-sel-shell-off' : ' omni-sel-on')}>
-      {/* Inner wrapper — no data-surface so trigger inherits parent scope */}
-      <div className="MuiBox-root">
+      {/* Inner wrapper — the field's own surface (see .omni-sel-surf). */}
+      <div className="MuiBox-root omni-sel-surf" data-surface="Container">
 
       {/* Trigger */}
       <button

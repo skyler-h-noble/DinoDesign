@@ -42,10 +42,9 @@ const RADIUS = {
 };
 
 /* Static sheet — the five MUI Box sx blocks this was built from, as plain
-   rules. The palette arrives as custom properties declared on the root
-   (--_sf-bd / -hv / -pr border, --_sf-act the active text); nothing between
-   the root and the parts sets a data-theme, so they resolve against the same
-   scope the parts named them in. State rules weigh one class + one
+   rules. The palette arrives as custom properties: the border's (--_sf-bd /
+   -hv / -pr) on the root, in the page's scope the edge is drawn against; the
+   active text (--_sf-act) on the field, in the field's own surface. State rules weigh one class + one
    pseudo-class, as emotion's did; hover / pressed stay off a disabled field
    (.omni-sf-off), which the sx left them out of. */
 const SxBox = lazySxBox('SearchField');
@@ -66,7 +65,11 @@ registerStaticStyles('omni-searchfield', wk([
   '.omni-sf-shell:where(:not(.omni-sf-shell-off)):hover{border-color:var(--_sf-hv)}',
   '.omni-sf-shell:where(:not(.omni-sf-shell-off)):active{border-color:var(--_sf-pr)}',
   '.omni-sf-shell:focus-within{outline:2px solid var(--Focus-Visible);outline-offset:2px}',
-  '.omni-sf-field{display:flex;align-items:center;gap:8px;width:100%;box-sizing:border-box;background-color:var(--Hover)}',
+  /* The field is its own surface (data-surface="Container", painting its
+     --Background), so the placeholder's --Quiet is the one tuned for this
+     fill — the page's --Quiet on the page's --Hover was a pair nothing
+     checks (4.08:1 light, 3.53:1 dark in a Default card). */
+  '.omni-sf-field{display:flex;align-items:center;gap:8px;width:100%;box-sizing:border-box;background-color:var(--Background)}',
   ...Object.entries(SZ).map(([size, k]) => `.omni-sf-field-${k}{min-height:${SIZE_MAP[size].height};padding-left:${SIZE_MAP[size].px}px;padding-right:${SIZE_MAP[size].px}px}`),
   /* Two classes: the Icon's own colour rule is one. */
   '.omni-sf .omni-sf-icon{color:var(--Quiet);flex-shrink:0;transition:color 0.15s ease}',
@@ -160,7 +163,6 @@ export function SearchField({
       '--_sf-bd': borderToken,
       '--_sf-hv': 'var(--Buttons-' + C + '-Hover)',
       '--_sf-pr': 'var(--Buttons-' + C + '-Pressed)',
-      '--_sf-act': activeTextColor,
       ...style,
     },
     ...props,
@@ -169,18 +171,15 @@ export function SearchField({
     <>
       {/* Outer border shell — size-aware Input-Radius so each size rounds
           by its own height, not the medium button's. Hover and pressed move
-          the BORDER, matching Input: this field's resting background is
-          already --Hover, so a background scrim would paint --Hover over
-          --Hover and show nothing. Off while disabled: :hover still MATCHES a
+          the BORDER. Off while disabled: :hover still MATCHES a
           disabled field, so an unguarded rule lights up a control that cannot
           be used. */}
       <div className={'MuiBox-root omni-sf-shell omni-sf-shell-' + k + (disabled ? ' omni-sf-shell-off' : '')}>
 
-      {/* Inner field. No data-surface — inherits parent's surface so the
-          field's background blends with the surrounding container. Uses
-          --Hover (a subtle tint of the parent surface) for affordance
-          without dragging the brand --Background through. */}
-      <div className={'MuiBox-root omni-sf-field omni-sf-field-' + k}>
+      {/* Inner field: its own Container surface (see .omni-sf-field).
+          --_sf-act is declared HERE, inside that surface, so the active text
+          color resolves against the fill it is drawn on. */}
+      <div className={'MuiBox-root omni-sf-field omni-sf-field-' + k} data-surface="Container" style={{ '--_sf-act': activeTextColor }}>
         <Icon size="small" className={'MuiBox-root omni-sf-icon' + (isActive ? ' omni-sf-icon-on' : '')}>
           <SearchIcon />
         </Icon>

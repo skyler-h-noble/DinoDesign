@@ -33,7 +33,11 @@ const EASE_OUT = 'cubic-bezier(0, 0, 0.2, 1)';
 const EASE_IN_OUT = 'cubic-bezier(0.4, 0, 0.2, 1)';
 const UNDERLINE_AFTER = `left:0;bottom:0;content:"";position:absolute;right:0;transform:scaleX(0);transition:transform 200ms ${EASE_OUT} 0ms;pointer-events:none`;
 const UNDERLINE_BEFORE_POS = `left:0;bottom:0;content:"";position:absolute;right:0;transition:border-bottom-color 200ms ${EASE_IN_OUT} 0ms;pointer-events:none`;
-const PLACEHOLDER = `color:currentColor;opacity:0.42;transition:opacity 200ms ${EASE_IN_OUT} 0ms`;
+/* The placeholder is the field's --Quiet at full strength — the tone the
+   design system checks at 4.5:1 against the field's own surface (TextField
+   and Input both declare one). MUI's 42% of the text color was never checked
+   against anything and measured ~3:1. */
+const PLACEHOLDER = `color:var(--Quiet, currentColor);opacity:1;transition:opacity 200ms ${EASE_IN_OUT} 0ms`;
 /* One rule per vendor form: a selector list with a pseudo-element the browser
    does not know drops the whole rule. */
 const placeholderRules = (sel, decls) => ['::-webkit-input-placeholder', '::-moz-placeholder', '::placeholder']
@@ -119,7 +123,7 @@ registerStaticStyles('omni-textfield', [
   '.omni-ii:invalid{box-shadow:none}',
   '.omni-ii::-webkit-search-decoration{-webkit-appearance:none}',
   ...placeholderRules('label[data-shrink=false] + .MuiInputBase-formControl .omni-ii%', 'opacity:0 !important'),
-  ...placeholderRules('label[data-shrink=false] + .MuiInputBase-formControl .omni-ii:focus%', 'opacity:0.42'),
+  ...placeholderRules('label[data-shrink=false] + .MuiInputBase-formControl .omni-ii:focus%', 'opacity:1'),
   '.omni-ii.Mui-disabled{opacity:1;-webkit-text-fill-color:rgba(0, 0, 0, 0.38)}',
   '.omni-ii:-webkit-autofill{animation-duration:5000s;animation-name:mui-auto-fill}',
   '.omni-ii:where(.MuiInputBase-inputSizeSmall){padding-top:1px}',

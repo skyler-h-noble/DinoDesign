@@ -43,9 +43,13 @@ describe('SearchField', () => {
    Container-Lowest, which pinned the field to one level regardless of where
    it was placed. */
 describe('Structure', () => {
-  test('the inner field inherits rather than pinning a surface', () => {
+  test('the inner field is its own Container surface; nothing else pins one', () => {
     const { container } = renderField();
-    expect(container.querySelector('[data-surface]')).toBeNull();
+    const surfaces = container.querySelectorAll('[data-surface]');
+    expect(surfaces).toHaveLength(1);
+    expect(surfaces[0]).toHaveAttribute('data-surface', 'Container');
+    expect(surfaces[0]).toHaveClass('omni-sf-field');
+    expect(surfaces[0].querySelector('input')).not.toBeNull();
   });
 
   test('the border shell is the outer element', () => {
