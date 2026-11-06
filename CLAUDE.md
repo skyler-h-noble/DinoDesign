@@ -288,15 +288,13 @@ brand color.
   section (Primary → Secondary, Secondary → Tertiary, …) — do not recolor it.
   To separate neighboring sections, alternate the `theme`; neighboring
   `surface` levels can look nearly the same.
-- **Before you report done, run `npm run build && npx omni-check` and fix
-  anything it reports.** It serves the build, checks every page (light and
-  dark, 1280px and 390px) with axe in a local Chrome, prints each failure with
-  its element and the fix, and ends `omni-check: 0 issues` when clean (exit
-  code 1 otherwise). `--routes /,/cart,/checkout` to name pages; by default it
-  follows the links from the start page (up to 30 pages, a few seconds each —
-  about 2½ minutes for 30). It prints a line per page as it goes, gives up on a
-  page after 60s (`--page-timeout`) and on the run after 10 minutes
-  (`--max-time`), listing what it could not check (exit code 2).
+- **`npx omni-check` is optional, and only on request.** It checks the
+  built pages with axe in a local Chrome, but it can still stall on some
+  pages, so do not run it as a routine step and never loop on it. If the user
+  asks for it: `npm run build && npx omni-check --routes /,/cart` (name a few
+  pages), run it once, report what it printed, and fix only issues in your own
+  code. If it stalls, stop it (see below) and say so — do not retry, and do
+  not try to work out why.
 - **Never kill Chrome — or any process — by name or pattern** (`pkill chrome`,
   `killall`, `ps … | grep … | xargs kill`): that closes the user's own browser
   and every other tool's. omni-check closes the one browser it started on its

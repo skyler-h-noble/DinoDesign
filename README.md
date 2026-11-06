@@ -67,6 +67,9 @@ section 10.
 The design system owns contrast, focus and states. What it cannot own is how a
 page is put together, so the package ships a checker for that:
 
+> **Preview.** On some real sites a page can still stall past `--page-timeout`.
+> Name a few pages with `--routes` and stop it with Ctrl-C if it hangs.
+
 ```bash
 npm run build && npx omni-check
 ```
