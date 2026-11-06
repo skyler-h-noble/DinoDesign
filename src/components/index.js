@@ -167,6 +167,7 @@ export { OmniTreeView, SolidTreeView, LightTreeView, DEFAULT_ITEMS, TreeBranch }
 
 // ========== UTILITIES & LINKS ==========
 export { Link } from './Link';
+export { SkipLink } from './SkipLink';
 export { SettingsPanel } from './SettingsPanel';
 
 // ========== CONVENIENCE ALIASES ==========

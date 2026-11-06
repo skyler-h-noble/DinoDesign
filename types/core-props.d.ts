@@ -380,6 +380,20 @@ export interface LinkProps extends Omit<React.AnchorHTMLAttributes<HTMLAnchorEle
   children?: React.ReactNode;
 }
 
+/**
+ * "Skip to main content": hidden until a keyboard user tabs to it, then shown top-left above everything with the lib's focus ring. Put `<SkipLink />` FIRST in the app (before the AppBar) and give the main region the id it points at: `<Section as="main" id="main">` or `<main id="main">`. Activating it moves focus to that region. Never hand-build one.
+ * @category Navigation
+ * @exports SkipLink
+ * @example
+ * <><SkipLink /><AppBar brand="Acme" /><Section as="main" id="main"><H1>Shop</H1></Section></>
+ */
+export interface SkipLinkProps extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'color'> {
+  /** The in-page target, `#` + the main region's id. */
+  href?: string;
+  /** The link text. */
+  children?: React.ReactNode;
+}
+
 // ─── Text ────────────────────────────────────────────────────────────────────
 
 interface TypographyBase extends Native {

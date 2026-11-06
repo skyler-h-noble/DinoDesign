@@ -190,6 +190,7 @@ import HomeIcon from '@omni-design/icons/Home';
 | Center + max width | `Container` | `maxWidth` (`sm`/`md`/`lg`/`xl`) — layout only, paints nothing |
 | Columns | `Grid` | container: `container spacing`; child: `size={{ xs: 12, md: 4 }}` |
 | Stacks | `VStack`, `HStack` | `spacing`, `alignItems`, `justifyContent`, `component` — a list is `<VStack component="ul">` with `<HStack component="li">` |
+| Skip link | `SkipLink` | first child of the app, before the `AppBar`; `href` (default `#main`) — give the main region that id |
 | Site nav | `AppBar` | `brand`, `navLinks` (`{ label, href, current? }` — the system's Tabs as links: the current one is marked and announced, and for `#section` links it follows the section on screen; a menu button below 900px — change with `collapseAt`), `endSlot`, `barColor`. `mode="mobile"` is an app-screen bar (search / title), not a site nav |
 | Card | `Card` | pads itself on a `Container` level; `variant` (`solid`/`light`/`dark`), `color`, `elevated`, `clickable`; `href` makes it a real link |
 | Button | `Button` | `variant`, `size` (`small`/`medium`/`large`), `startIcon`, `endIcon`, `fullWidth` |
@@ -243,6 +244,11 @@ brand color.
   `paddingTop` / `paddingBottom` for one edge, e.g. the first section under the
   header). They come from the spacing tokens and shrink on phones. Do not
   write pixel padding on sections — six sections, six hand-picked rhythms.
+- **Start the app with `<SkipLink />`** — its first child, before the
+  `AppBar` — and give the main region `id="main"` (`<Section as="main"
+  id="main">` or `<main id="main">`). It stays hidden until a keyboard user
+  tabs to it, then shows top-left with the focus ring and moves focus to the
+  main region. Never hand-build a skip link.
 - **One `h1` on every page** — the page's title, not just the home page,
   and including the not-found (404) page and empty states. Use
   `<H1>`, or `component="h1"` on a display style

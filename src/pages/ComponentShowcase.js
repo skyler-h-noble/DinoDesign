@@ -37,6 +37,7 @@ import { TypographyShowcase } from '../components/Typography/TypographyShowcase'
 import { AccordionShowcase } from '../components/Accordion/AccordionShowcase';
 import { SheetShowcase } from '../components/Sheet/SheetShowcase';
 import { LinkShowcase } from '../components/Link/LinkShowcase';
+import { SkipLinkShowcase } from '../components/SkipLink/SkipLinkShowcase';
 import { BreadcrumbsShowcase } from '../components/Breadcrumbs/BreadcrumbsShowcase';
 import { MenuShowcase } from '../components/Menu/MenuShowcase';
 import { StepperShowcase } from '../components/Stepper/StepperShowcase';
@@ -278,6 +279,7 @@ const NAV_ITEMS = [
     label: 'Navigation',
     children: [
       { id: 'link', label: 'Link' },
+      { id: 'skiplink', label: 'Skip Link' },
       { id: 'appbar', label: 'App Bar' },
       { id: 'footer', label: 'Footer' },
       { id: 'copyright', label: 'Copyright' },
@@ -552,6 +554,7 @@ function ShowcaseInner() {
 
             {/* ============ NAVIGATION ============ */}
             {activeSection === 'link' && <LinkShowcase />}
+            {activeSection === 'skiplink' && <SkipLinkShowcase />}
             {activeSection === 'appbar' && <AppBarShowcase />}
             {activeSection === 'footer' && <FooterShowcase />}
             {activeSection === 'copyright' && <CopyrightShowcase />}

@@ -2,7 +2,7 @@
 
 Every exported component: purpose, props, required parent, one example. GENERATED from `types/` by `scripts/build-api-doc.mjs` — the same files the published .d.ts come from, so this cannot drift from the types. Do not edit by hand. Do not open `dist/` to learn a prop: if it is not here, the component does not take it. Rules (color, surfaces, layout) are in `CLAUDE.md`.
 
-Read a section, not the file: search for `### Name`. 236 components.
+Read a section, not the file: search for `### Name`. 237 components.
 
 Format: `` `name?: type` = default — meaning``. No `?` means required. "+ `children`" means it takes children; "+ `<div>`" means the native attributes of that element pass through (id, className, style, aria-*, data-*, on*). Defaults come from the component source.
 
@@ -1327,6 +1327,17 @@ Inline text link. Without `href` it renders a button that runs `onClick`. No hov
 
 ```jsx
 <Body>Read the <Link href="/docs">docs</Link>.</Body>
+```
+
+### SkipLink
+"Skip to main content": hidden until a keyboard user tabs to it, then shown top-left above everything with the lib's focus ring. Put `<SkipLink />` FIRST in the app (before the AppBar) and give the main region the id it points at: `<Section as="main" id="main">` or `<main id="main">`. Activating it moves focus to that region. Never hand-build one.
+
+- `href?: string` = `'#main'` — The in-page target, `#` + the main region's id.
+- `children?: ReactNode` = `'Skip to main content'` — The link text.
++ `<a>`
+
+```jsx
+<><SkipLink /><AppBar brand="Acme" /><Section as="main" id="main"><H1>Shop</H1></Section></>
 ```
 
 ### Tabs
