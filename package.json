@@ -47,6 +47,7 @@
     "build:lib": "npm run clean:lib && rollup -c rollup.config.js && npm run build:types",
     "build": "npm run build:lib",
     "test": "react-scripts test",
+    "test:omni-check": "OMNI_CHECK_E2E=1 CI=true react-scripts test --watchAll=false omniCheck.integration",
     "test:coverage": "react-scripts test --coverage --watchAll=false",
     "test:a11y": "react-scripts test --testPathPattern=test --watchAll=false",
     "storybook": "storybook dev -p 6006",

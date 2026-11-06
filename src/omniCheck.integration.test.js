@@ -2,7 +2,8 @@
 // tiny built pages — a clean one (0 issues) and one with a known
 // label-content-name-mismatch (1 issue). Run as a child process, exactly as
 // `npx omni-check` runs. Skipped when no local Chrome / Chromium / Edge is
-// installed (most CI images), since omni-check never downloads one.
+// installed (most CI images), since omni-check never downloads one, and
+// unless OMNI_CHECK_E2E is set (see below).
 import path from 'path';
 import { execFile, spawn, execFileSync } from 'child_process';
 
@@ -11,7 +12,11 @@ const { findChrome } = require('../bin/omni-check/browser');
 const BIN = path.join(__dirname, '../bin/omni-check.js');
 const FIXTURES = path.join(__dirname, '__fixtures__/omni-check');
 const nodeMajor = Number(process.versions.node.split('.')[0]);
-const maybe = findChrome() && nodeMajor >= 22 ? test : test.skip;
+/* Opt-in: OMNI_CHECK_E2E=1. Alone it takes ~30 s; inside the full parallel
+   suite, real Chrome competes with every other worker and the run took 47 min,
+   which stalled anything waiting on `npm test`. Run it on its own:
+     OMNI_CHECK_E2E=1 CI=true npx react-scripts test --watchAll=false omniCheck.integration */
+const maybe = process.env.OMNI_CHECK_E2E && findChrome() && nodeMajor >= 22 ? test : test.skip;
 
 const run = (args) => new Promise((resolve) => {
   execFile(process.execPath, [BIN, ...args], { cwd: FIXTURES, timeout: 110000 }, (err, stdout, stderr) => {
