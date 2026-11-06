@@ -21,6 +21,14 @@ npm install @omni-design/components @omni-design/icons @mui/material@^7 @emotion
 
 Pin MUI to 7: the parts still built on MUI (and any `sx` you pass) are built against it. Icons come from `@omni-design/icons`, not MUI.
 
+Then copy the package's Claude Code slash commands (`/OmniCheck`,
+`/ScanComponents`, `/ShareComponent`) into the project — Claude Code does not
+read `node_modules`:
+
+```bash
+npx omni-check --install-commands   # writes them to .claude/commands/
+```
+
 ## 2. Provider
 
 ```jsx
@@ -121,6 +129,12 @@ function ModeToggle() {
 }
 ```
 
+- **Photos dim in dark mode; logos do not.** The theme's dark sheet dims
+  photos 30% so they do not glare. SVGs, images inside a `header`, `footer`
+  or `nav`, and images marked `data-logo` or `data-no-dim` stay at full
+  brightness. Mark a logo or brand image that lives elsewhere with
+  `data-logo` (`<img src="/logo.png" data-logo alt="Acme">`); put
+  `data-no-dim` on a region to keep everything in it bright.
 - **Contrast and focus are built in.** Every text, border and focus-ring
   color is chosen by the design system to meet WCAG AA on every theme and
   surface, in light and dark. It can only fail if your code overrides a
@@ -218,9 +232,11 @@ are exported too: `Theme`, `Surface`, `Color`, `ButtonVariant`, `…Props`.
 Any component not in this table: `docs/API.md`.
 
 Icons: `@omni-design/icons` — the Material Icons as plain SVG, same names as
-`@mui/icons-material` v7 (`import HomeIcon from '@omni-design/icons/Home'`,
-plus `…Outlined` / `…Rounded` / `…Sharp` / `…TwoTone`) without MUI's styling
-engine. Use names that exist in v7 (e.g. `Eco` is gone; `EnergySavingsLeaf`
+`@mui/icons-material` v7, without MUI's styling engine. Filled icons:
+`import HomeIcon from '@omni-design/icons/Home'`. Other styles are one module
+each: `import { HomeOutlined } from '@omni-design/icons/outlined'` (`/rounded`,
+`/sharp`, `/twotone`). The per-icon `@omni-design/icons/HomeOutlined` paths
+were removed in 0.2.0. Use names that exist in v7 (e.g. `Eco` is gone; `EnergySavingsLeaf`
 replaces it), or the build fails. Use `<Icon color="primary">` to give one a
 brand color.
 

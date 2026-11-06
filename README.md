@@ -15,7 +15,24 @@ npm install @omni-design/components @omni-design/icons @mui/material@^7 @emotion
 ```
 
 MUI 7 is required. Icons come from `@omni-design/icons` (the Material Icons
-as plain SVG, same names), not `@mui/icons-material`.
+as plain SVG, same names), not `@mui/icons-material`. Filled icons:
+`import HomeIcon from '@omni-design/icons/Home'`. Other styles are one module
+each: `import { HomeOutlined } from '@omni-design/icons/outlined'` (`/rounded`,
+`/sharp`, `/twotone`). The per-icon `@omni-design/icons/HomeOutlined` paths
+were removed in 0.2.0.
+
+Using Claude Code? Copy the package's slash commands (`/OmniCheck`,
+`/ScanComponents`, `/ShareComponent`) into the project — Claude Code does not
+read `node_modules`:
+
+```bash
+npx omni-check --install-commands   # writes them to .claude/commands/
+```
+
+**Dark mode and images:** photos are dimmed 30% in dark mode so they do not
+glare; logos never are. SVGs, images inside a `header`, `footer` or `nav`, and
+images marked `data-logo` or `data-no-dim` (or inside a `data-no-dim` region)
+stay at full brightness.
 
 ## Use
 
