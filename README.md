@@ -86,7 +86,7 @@ the default; use `'light'` or `'dark'` to match a provider without
 `defaultDarkMode="system"`).
 
 Measured on a store app (150 ms latency, 1.6 Mbps, 4× CPU, median of 3): first
-styled paint 1.9–2.6 s with `themeURL` alone, 1.3 s with the plugin (`copy: true`), on every
+styled paint 1.9–2.6 s with `themeURL` alone, 1.3 s with the plugin — live (1.34 s) or `copy: true` (1.31 s) — on every
 page (Lighthouse mobile home 82 → 87). Without Vite, `npx omni-theme-links <theme.json URL>` prints the same
 block to paste into `<head>` (add `--copy public/omni` to self-host the files).
 
