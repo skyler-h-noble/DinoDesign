@@ -348,6 +348,15 @@ brand color.
   section (Primary → Secondary, Secondary → Tertiary, …) — do not recolor it.
   To separate neighboring sections, alternate the `theme`; neighboring
   `surface` levels can look nearly the same.
+- **Don't test what the system already guarantees.** Omni's components and
+  tokens own contrast (text, borders, focus rings, hover/pressed) in light and
+  dark, keyboard behavior for dialogs, drawers, menus and tabs, and focus
+  return. Do NOT install browser-testing tools (Playwright, Puppeteer,
+  Cypress) or write your own scripts to screenshot, measure contrast or tab
+  through pages. When you're done: `npm run build`, confirm it succeeds, and
+  report. If the user wants assurance, they run `/OmniCheck` (about two
+  minutes). Check by reading your code only what is yours: layout that could
+  overflow at 360px, and that every page has one `<h1>`.
 - **omni-check is optional — run it only when the user asks for it.** It is
   not a step before you report done: the components already own contrast,
   focus and states. If asked, run it ONCE, against a few key pages, and let
