@@ -62,18 +62,22 @@ would rather not hand over a component, `navigate={(href, event) => …}` is
 called on plain left clicks instead. Details: [`CLAUDE.md`](./CLAUDE.md),
 section 10.
 
-## Accessibility check: `omni-check`
+## Accessibility check: `omni-check` (optional)
 
 The design system owns contrast, focus and states. What it cannot own is how a
-page is put together, so the package ships a checker for that:
+page is put together, so the package ships a checker for that. It is a tool to
+run when you want an audit, not a required build step.
 
 > It visits pages as a new visitor, so a page that needs app state (a filled
 > cart, a signed-in user) is checked in its empty state. If the computer sleeps
 > during a run, pages time out and are listed as not checked; run it again.
 
 ```bash
-npm run build && npx omni-check
+npm run build && npx omni-check --routes /,/cart,/checkout
 ```
+
+Run it once and let the output stream (it prints a line per page; 30 pages
+take 2-3 minutes) — piping it through `tail` hides that progress until the end.
 
 It serves your build folder (`dist/`, `build/` or `out/`, or pass a folder or
 a URL), follows the links from the start page (or `--routes /,/cart`), and runs

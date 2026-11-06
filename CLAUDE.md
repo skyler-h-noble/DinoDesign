@@ -293,14 +293,21 @@ brand color.
   section (Primary → Secondary, Secondary → Tertiary, …) — do not recolor it.
   To separate neighboring sections, alternate the `theme`; neighboring
   `surface` levels can look nearly the same.
-- **Before you report done, run `npm run build && npx omni-check` once.**
-  It checks every page it can reach (light and dark, 1280px and 390px) with
-  axe in a local Chrome — about 5 seconds a page, 2-3 minutes for 30 — and
-  ends `omni-check: 0 issues` when clean. Fix what it reports in YOUR code,
-  then run it at most once more. Do not loop on it, and do not investigate
-  the tool: if it stops with pages NOT checked, report that and move on.
-  Pages that need app state (a filled cart, a signed-in user) are checked in
-  their empty state, so look at those screens yourself.
+- **omni-check is optional — run it only when the user asks for it.** It is
+  not a step before you report done: the components already own contrast,
+  focus and states. If asked, run it ONCE, against a few key pages, and let
+  its output stream — do not pipe it through `tail` / `head` (it prints a
+  line per page as it goes; 30 pages take 2-3 minutes, and a pipe hides all
+  of it until the end):
+
+  ```bash
+  npm run build && npx omni-check --routes /,/cart,/checkout
+  ```
+
+  Do not sleep, poll or re-run it. Fix only what it reports in YOUR code.
+  If it stops with pages NOT checked, report that and move on. Pages that
+  need app state (a filled cart, a signed-in user) are checked in their
+  empty state.
 - **Never kill Chrome — or any process — by name or pattern** (`pkill chrome`,
   `killall`, `ps … | grep … | xargs kill`): that closes the user's own browser
   and every other tool's. omni-check closes the one browser it started on its
