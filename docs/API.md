@@ -77,9 +77,9 @@ Loads a design system's CSS and puts theme / style / surface / dark mode on the 
 - `darkModeCSS?: string`
 - `baseCSS?: string`
 - `stylesCSS?: string` — styles.css, loaded last.
-- `defaultTheme?: Theme` = `'Default'` — Root data-theme; overrides theme.json.
-- `defaultStyle?: 'Professional' | 'Modern' | 'Bold' | 'Playful'` = `'Modern'` — Root data-style (shape language); overrides theme.json.
-- `defaultSurface?: Surface` = `'Surface'` — Root data-surface; overrides theme.json.
+- `defaultTheme?: Theme` — Root data-theme. Wins over theme.json's defaultTheme; unset, the root takes theme.json's, else 'Default'.
+- `defaultStyle?: 'Professional' | 'Modern' | 'Bold' | 'Playful'` — Root data-style (shape language). Wins over theme.json's defaultStyle; unset, the root takes theme.json's, else 'Modern'.
+- `defaultSurface?: Surface` — Root data-surface. Wins over theme.json's defaultSurface; unset, the root takes theme.json's, else 'Surface'.
 - `surfaceStyle?: 'light-tonal' | 'grey-professional' | 'dark-professional'` — Preset root theme + surface; wins over defaultTheme / defaultSurface.
 - `defaultDarkMode?: boolean | 'system'` = `false` — Initial dark mode (uncontrolled). `'system'` follows the device's light/dark setting, live, until the user toggles.
 - `persistDarkMode?: boolean | string` = `false` — Remember the user's toggle in localStorage and restore it next visit. `true` uses the key `omni-dark-mode`; a string is the key.

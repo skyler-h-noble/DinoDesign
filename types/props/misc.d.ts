@@ -28,11 +28,11 @@ export interface OmniDesignProviderProps {
   baseCSS?: string;
   /** styles.css, loaded last. */
   stylesCSS?: string;
-  /** Root data-theme; overrides theme.json. */
+  /** Root data-theme. Wins over theme.json's defaultTheme; unset, the root takes theme.json's, else 'Default'. */
   defaultTheme?: Theme;
-  /** Root data-style (shape language); overrides theme.json. */
+  /** Root data-style (shape language). Wins over theme.json's defaultStyle; unset, the root takes theme.json's, else 'Modern'. */
   defaultStyle?: 'Professional' | 'Modern' | 'Bold' | 'Playful';
-  /** Root data-surface; overrides theme.json. */
+  /** Root data-surface. Wins over theme.json's defaultSurface; unset, the root takes theme.json's, else 'Surface'. */
   defaultSurface?: Surface;
   /** Preset root theme + surface; wins over defaultTheme / defaultSurface. */
   surfaceStyle?: 'light-tonal' | 'grey-professional' | 'dark-professional';

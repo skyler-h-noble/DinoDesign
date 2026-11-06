@@ -427,6 +427,29 @@ function linkFonts(urls) {
   urls.forEach((href) => add({ rel: 'stylesheet', href }));
 }
 
+/**
+ * The system's own defaults from a manifest (theme.json or the head JSON),
+ * keeping only values this package knows. A theme.json without them — or
+ * with a name no generated system defines (an old `Primary-Light`) — leaves
+ * that one unset, and the provider falls back as it always did.
+ */
+function manifestDefaults(m) {
+  const pick = (value, list, field) => {
+    if (value == null || value === '') return null;
+    if (list.includes(value)) return value;
+    if (process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.warn(`OmniDesignProvider: theme.json ${field} "${value}" is not one this package supports — ignored.`);
+    }
+    return null;
+  };
+  return {
+    defaultTheme:   pick(m && m.defaultTheme,   OMNI_THEMES,   'defaultTheme'),
+    defaultStyle:   pick(m && m.defaultStyle,   OMNI_STYLES,   'defaultStyle'),
+    defaultSurface: pick(m && m.defaultSurface, OMNI_SURFACES, 'defaultSurface'),
+  };
+}
+
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 /**
@@ -447,9 +470,9 @@ function linkFonts(urls) {
  * @param {string}   props.stylesCSS         styles.css (loaded last)
  *
  * Theme config (props override theme.json values):
- * @param {string}   props.defaultTheme      Starting data-theme   (default: 'Default')
- * @param {string}   props.defaultStyle      Starting data-style   (default: 'Modern')
- * @param {string}   props.defaultSurface    Root data-surface     (default: 'Surface')
+ * @param {string}   props.defaultTheme      Starting data-theme   (unset: theme.json's, else 'Default')
+ * @param {string}   props.defaultStyle      Starting data-style   (unset: theme.json's, else 'Modern')
+ * @param {string}   props.defaultSurface    Root data-surface     (unset: theme.json's, else 'Surface')
  * @param {string}   props.surfaceStyle      'light-tonal' | 'grey-professional' | 'dark-professional'
  *
  * Dark mode — uncontrolled:
@@ -510,10 +533,13 @@ export function OmniDesignProvider({
   baseCSS,
   stylesCSS,
 
-  // Theme config
-  defaultTheme:   defaultThemeProp   = 'Default',
-  defaultStyle:   defaultStyleProp   = 'Modern',
-  defaultSurface: defaultSurfaceProp = 'Surface',
+  // Theme config. No defaults here: an unset prop must be told apart from
+  // one the app passed, because a passed prop wins over the system's own
+  // defaults (theme.json) and an unset one does not. The fallbacks
+  // ('Default' / 'Modern' / 'Surface') apply under "Theme / style / surface".
+  defaultTheme:   defaultThemeProp,
+  defaultStyle:   defaultStyleProp,
+  defaultSurface: defaultSurfaceProp,
   surfaceStyle,
 
   // Dark mode
@@ -613,14 +639,20 @@ export function OmniDesignProvider({
     styles:     stylesCSS     ?? headSources.styles     ?? null,
   });
 
-  // Theme config — may be overridden by manifest values.
-  /* From the head JSON only the name is taken up front. defaultTheme /
-     defaultStyle / defaultSurface seed useState below, and with themeURL they
-     arrive after the first render, so the root never took them; reading them
-     here would make the same app look different with and without the head
-     links. Same result either way — a separate fix, if it is wanted. */
+  // Theme config from the system's manifest (theme.json, or the head JSON).
+  /* The system's defaults — theme, surface and component style — are taken
+     from the head JSON synchronously, so the very first render of the root
+     already wears them. With themeURL alone they arrive with theme.json, in
+     the same render that stops waiting for it, while the page is still hidden
+     (cssStatus). Either way the root never shows the built-in fallbacks for
+     a system that names its own.
+
+     These used to seed useState and never reach the root: with themeURL the
+     manifest arrived after the first render, the state had already been
+     initialized to 'Default' / 'Modern' / 'Surface', and a system published
+     as Professional rendered as Modern. */
   const [manifestThemeConfig, setManifestThemeConfig] = useState(
-    () => (head && head.config ? { name: head.config.name ?? null } : {}),
+    () => (head && head.config ? { ...manifestDefaults(head.config), name: head.config.name ?? null } : {}),
   );
 
   const mountedRef = useRef(true);
@@ -669,9 +701,7 @@ export function OmniDesignProvider({
 
         // Store manifest theme config — props will override in render
         setManifestThemeConfig({
-          defaultTheme:   manifest.defaultTheme,
-          defaultStyle:   manifest.defaultStyle,
-          defaultSurface: manifest.defaultSurface,
+          ...manifestDefaults(manifest),
           darkTheme:      manifest.darkTheme,
           name:           manifest.name,
         });
@@ -692,21 +722,31 @@ export function OmniDesignProvider({
   }, [themeURL]);
 
   // ── Theme / style / surface ────────────────────────────────────────────────
-  // Priority: prop → manifest → default
-  const resolvedDefaultTheme = surfaceStyle
-    ? (SURFACE_STYLE_THEME_MAP[surfaceStyle]?.theme ?? defaultThemeProp)
-    : (defaultThemeProp !== 'Default' ? defaultThemeProp : (manifestThemeConfig.defaultTheme ?? defaultThemeProp));
+  /* Priority: surfaceStyle → a prop the app passed → the system's manifest →
+     the built-in fallback. A prop wins because it is the developer's explicit
+     choice; the manifest is the designer's default for the system, and the
+     same values Figma's import uses (Theme and Surface collections default to
+     the first mode, Default and the picked level; the component style is the
+     one whose radii and heights are baked into the file).
 
-  const resolvedDefaultSurface = surfaceStyle
-    ? (SURFACE_STYLE_THEME_MAP[surfaceStyle]?.rootSurface ?? defaultSurfaceProp)
-    : (manifestThemeConfig.defaultSurface ?? defaultSurfaceProp);
+     Not state: derived on every render, so a manifest that arrives after the
+     first render still reaches the root. State holds only what setTheme /
+     setStyle / setSurface chose, which wins over every default. */
+  const resolvedDefaultTheme = (surfaceStyle && SURFACE_STYLE_THEME_MAP[surfaceStyle]?.theme)
+    || defaultThemeProp || manifestThemeConfig.defaultTheme || 'Default';
 
-  const resolvedDefaultStyle = manifestThemeConfig.defaultStyle ?? defaultStyleProp;
+  const resolvedDefaultSurface = (surfaceStyle && SURFACE_STYLE_THEME_MAP[surfaceStyle]?.rootSurface)
+    || defaultSurfaceProp || manifestThemeConfig.defaultSurface || 'Surface';
+
+  const resolvedDefaultStyle = defaultStyleProp || manifestThemeConfig.defaultStyle || 'Modern';
   const resolvedDarkTheme    = darkThemeProp ?? manifestThemeConfig.darkTheme ?? null;
 
-  const [theme,        setThemeState]   = useState(resolvedDefaultTheme);
-  const [styleVariant, setStyleVariant] = useState(resolvedDefaultStyle);
-  const [rootSurface,  setRootSurface]  = useState(resolvedDefaultSurface);
+  const [chosenTheme,   setThemeState]   = useState(null);
+  const [chosenStyle,   setStyleVariant] = useState(null);
+  const [chosenSurface, setRootSurface]  = useState(null);
+  const theme        = chosenTheme   ?? resolvedDefaultTheme;
+  const styleVariant = chosenStyle   ?? resolvedDefaultStyle;
+  const rootSurface  = chosenSurface ?? resolvedDefaultSurface;
 
   // ── CSS status ─────────────────────────────────────────────────────────────
   // 'loading' while sheets are in flight, 'ready' after they apply, 'error' on
