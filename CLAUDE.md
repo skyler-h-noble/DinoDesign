@@ -287,7 +287,15 @@ brand color.
   dark, 1280px and 390px) with axe in a local Chrome, prints each failure with
   its element and the fix, and ends `omni-check: 0 issues` when clean (exit
   code 1 otherwise). `--routes /,/cart,/checkout` to name pages; by default it
-  follows the links from the start page.
+  follows the links from the start page (up to 30 pages, a few seconds each —
+  about 2½ minutes for 30). It prints a line per page as it goes, gives up on a
+  page after 60s (`--page-timeout`) and on the run after 10 minutes
+  (`--max-time`), listing what it could not check (exit code 2).
+- **Never kill Chrome — or any process — by name or pattern** (`pkill chrome`,
+  `killall`, `ps … | grep … | xargs kill`): that closes the user's own browser
+  and every other tool's. omni-check closes the one browser it started on its
+  own, including on a timeout. If it ever seems stuck, stop only omni-check
+  itself (Ctrl-C, or `kill` its own PID) and report what it printed.
 - **Build warning you can ignore:** Vite may warn about a large `BrandIcon`
   chunk. It is loaded only when a Footer social link names a brand.
 - **Do not import components from `@mui/material`** — the package re-exports

@@ -71,9 +71,21 @@ function contextLabel(contexts, modes, widths) {
   return contexts.map((c) => c.replace(/ (\d+)$/, ' $1px')).join('; ');
 }
 
-function finalLine(issues) {
+/** "omni-check: 3 issues", plus how many pages could not be checked. A run
+ *  that skipped pages is never reported as plainly clean. */
+function finalLine(issues, meta = {}) {
   const n = total(issues);
-  return 'omni-check: ' + n + (n === 1 ? ' issue' : ' issues');
+  const unchecked = uncheckedRoutes(meta).length;
+  return 'omni-check: ' + n + (n === 1 ? ' issue' : ' issues')
+    + (unchecked ? ' — ' + unchecked + (unchecked === 1 ? ' page' : ' pages') + ' NOT checked (see above)' : '');
+}
+
+/** Routes that failed or were never reached. */
+function uncheckedRoutes(meta = {}) {
+  const out = [];
+  for (const f of meta.failed || []) if (!out.includes(f.route)) out.push(f.route);
+  for (const r of meta.skipped || []) if (!out.includes(r)) out.push(r);
+  return out;
 }
 
 /** The human report. meta: { pages: [route], modes: ['light','dark'], widths: [1280, 390], notes: [] } */
@@ -85,8 +97,10 @@ function formatReport(issues, meta = {}) {
   const lines = [];
   lines.push('omni-check — ' + pages.length + (pages.length === 1 ? ' page' : ' pages')
     + ' × ' + modes.join('/') + ' × ' + widths.map((w) => w + 'px').join('/')
-    + (pages.length ? '  (' + pages.slice(0, 8).join(' ') + (pages.length > 8 ? ' …' : '') + ')' : ''));
+    + (pages.length ? '  (' + pages.slice(0, 8).join(' ') + (pages.length > 8 ? ' …' : '') + ')' : '')
+    + (typeof meta.elapsed === 'number' ? '  in ' + (meta.elapsed / 1000).toFixed(1) + 's' : ''));
   for (const note of meta.notes || []) lines.push('note: ' + note);
+  for (const f of meta.failed || []) lines.push('not checked: ' + f.route + ' — ' + f.error);
   for (const rule of issues) {
     lines.push('');
     lines.push(rule.id + ' (' + rule.impact + ') · ' + rule.count);
@@ -100,7 +114,7 @@ function formatReport(issues, meta = {}) {
     if (rule.helpUrl) lines.push('  ' + rule.helpUrl);
   }
   lines.push('');
-  lines.push(finalLine(issues));
+  lines.push(finalLine(issues, meta));
   return lines.join('\n');
 }
 
@@ -112,8 +126,12 @@ function formatJSON(issues, meta = {}) {
     modes: meta.modes || ['light', 'dark'],
     widths: meta.widths || [1280, 390],
     notes: meta.notes || [],
+    failed: meta.failed || [],
+    skipped: meta.skipped || [],
+    complete: uncheckedRoutes(meta).length === 0,
+    ...(typeof meta.elapsed === 'number' ? { seconds: Math.round(meta.elapsed / 100) / 10 } : {}),
     rules: issues,
   }, null, 2);
 }
 
-module.exports = { HINTS, collectIssues, formatReport, formatJSON, finalLine, total };
+module.exports = { HINTS, collectIssues, formatReport, formatJSON, finalLine, uncheckedRoutes, total };

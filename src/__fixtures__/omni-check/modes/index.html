@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modes</title>
+<style>
+  body { margin: 0; font: 16px/1.5 system-ui, sans-serif; background: #fff; color: #1a1a1a; }
+  @media (prefers-color-scheme: dark) { body { background: #121212; color: #ededed; } }
+</style>
+<script>
+  /* Two checks in one page.
+     1. Isolation: each mode writes what it is to localStorage. If this page
+        can read a write from the OTHER mode, light and dark shared a profile —
+        and the page shows an image with no alt (image-alt), so the run fails.
+     2. Throttling: the content is rendered from requestAnimationFrame. A page
+        left in a throttled background tab never paints it, and then has no
+        <main> and no <h1>, so the run fails. */
+  var mode = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  var other = mode === 'dark' ? 'light' : 'dark';
+  var seen = localStorage.getItem('fixture-modes-seen') || '';
+  if (seen.indexOf(mode) < 0) localStorage.setItem('fixture-modes-seen', seen + mode + ',');
+  requestAnimationFrame(function () {
+    document.getElementById('root').innerHTML = '<main><h1>Modes</h1>'
+      + (seen.indexOf(other) >= 0 ? '<img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" width="40" height="40">' : '<p>Only this mode has been here.</p>')
+      + '</main>';
+  });
+</script>
+</head>
+<body>
+<div id="root"></div>
+</body>
+</html>

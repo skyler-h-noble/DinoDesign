@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const { parseRoutesArg } = require('./routes');
-const { collectIssues, formatReport, formatJSON, total } = require('./report');
+const { collectIssues, formatReport, formatJSON, total, uncheckedRoutes } = require('./report');
 const { findChrome, NO_BROWSER } = require('./browser');
 
 const USAGE = `Usage: npx omni-check [url-or-dir] [options]
@@ -17,6 +17,10 @@ light and dark mode, at 1280px and 390px. Exit code 1 when anything fails.
   --max-routes N     crawl cap (default 30)
   --port N           port for serving a build folder (default: any free one)
   --dark-key KEY     localStorage key, when persistDarkMode names its own
+  --page-timeout S   seconds for one page in one mode at one width (default 60);
+                     a page that takes longer is reported as not checked
+  --max-time S       seconds for the whole run (default 600); pages not
+                     reached by then are listed as not checked
   --json             machine-readable report
   -h, --help         this text
 
@@ -24,13 +28,28 @@ Dark mode: omni-check stores 'dark' under localStorage 'omni-dark-mode' (what
 persistDarkMode reads) AND emulates prefers-color-scheme: dark (what
 defaultDarkMode="system" follows), so either setup is checked. If the first
 page looks the same in both, the app has no reachable dark mode and the dark
-runs are skipped (noted in the report).
+runs are skipped (noted in the report). Light and dark run in separate browser
+contexts (separate localStorage), one page at a time.
+
+Exit codes: 0 clean, 1 issues found, 2 could not run or some pages were not
+checked (timed out / failed to load; listed in the report).
+
+omni-check starts its own headless browser on a temp profile and closes
+exactly that browser when it ends, times out or is stopped with Ctrl-C. To
+stop a run, press Ctrl-C (or kill the omni-check process itself) — never kill
+Chrome by name.
 
 Browser: CHROME_PATH, else an installed Chrome / Chromium / Edge / Brave, else
 one the project's playwright or puppeteer already installed. Never downloads.`;
 
+function positive(flag, v) {
+  const n = Number(v);
+  if (!(n > 0)) throw new Error('omni-check: ' + flag.split('=')[0] + ' needs a number of seconds (got "' + v + '")');
+  return n;
+}
+
 function parseArgs(argv) {
-  const o = { target: null, routes: null, port: 0, json: false, help: false, cap: 30, darkKeys: ['omni-dark-mode'] };
+  const o = { target: null, routes: null, port: 0, json: false, help: false, cap: 30, darkKeys: ['omni-dark-mode'], pageTimeout: 60, maxTime: 600 };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     const val = () => {
@@ -44,6 +63,8 @@ function parseArgs(argv) {
     else if (a.startsWith('--routes')) o.routes = parseRoutesArg(val());
     else if (a.startsWith('--port')) o.port = Number(val()) || 0;
     else if (a.startsWith('--max-routes')) o.cap = Math.max(1, Number(val()) || 30);
+    else if (a.startsWith('--page-timeout')) o.pageTimeout = positive(a, val());
+    else if (a.startsWith('--max-time')) o.maxTime = positive(a, val());
     else if (a.startsWith('--dark-key')) { const k = val(); if (!o.darkKeys.includes(k)) o.darkKeys.push(k); }
     else if (a.startsWith('-')) throw new Error('omni-check: unknown option ' + a + '\n\n' + USAGE);
     else if (!o.target) o.target = a;
@@ -93,14 +114,23 @@ async function main(argv, { stdout = process.stdout, stderr = process.stderr, cw
     baseUrl = u.origin;
     startRoute = u.pathname + u.search;
   }
-  const log = (opts.json || !stderr.isTTY) ? () => {} : (m) => stderr.write('\r\x1b[2K' + m);
+  /* Progress goes to stderr: one updating line in a terminal, one line per
+     page otherwise — so a run in a script or an agent's shell visibly moves
+     instead of looking hung. */
+  const log = opts.json ? () => {}
+    : stderr.isTTY ? (m) => stderr.write('\r\x1b[2K' + m)
+      : (m) => { if (!m.startsWith('checking ')) stderr.write('omni-check: ' + m + '\n'); };
   try {
-    const run = await runCheck({ chromePath, baseUrl, startRoute, routes: opts.routes, cap: opts.cap, darkKeys: opts.darkKeys, axeSource, log });
+    const run = await runCheck({
+      chromePath, baseUrl, startRoute, routes: opts.routes, cap: opts.cap, darkKeys: opts.darkKeys, axeSource, log,
+      pageTimeout: opts.pageTimeout * 1000, maxTime: opts.maxTime * 1000,
+    });
     if (stderr.isTTY && !opts.json) stderr.write('\r\x1b[2K');
     const issues = collectIssues(run.results);
-    const meta = { pages: run.pages, modes: run.modes, widths: [1280, 390], notes: run.notes };
+    const meta = { pages: run.pages, modes: run.modes, widths: [1280, 390], notes: run.notes, failed: run.failed, skipped: run.skipped, elapsed: run.elapsed };
     stdout.write((opts.json ? formatJSON(issues, meta) : formatReport(issues, meta)) + '\n');
-    return total(issues) > 0 ? 1 : 0;
+    if (total(issues) > 0) return 1;
+    return uncheckedRoutes(meta).length ? 2 : 0;
   } catch (e) {
     stderr.write((e && e.message ? e.message : String(e)) + '\n');
     return 2;

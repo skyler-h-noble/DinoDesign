@@ -7,7 +7,8 @@ const { normalizeRoute, parseRoutesArg, createCrawler } = require('../bin/omni-c
 const { collectIssues, formatReport, formatJSON, finalLine, HINTS } = require('../bin/omni-check/report');
 const { parseArgs, resolveTarget } = require('../bin/omni-check/cli');
 const { resolveFile } = require('../bin/omni-check/serve');
-const { findChrome, candidatePaths } = require('../bin/omni-check/browser');
+const { findChrome, candidatePaths, NO_THROTTLE } = require('../bin/omni-check/browser');
+const { runCheck, withTimeout } = require('../bin/omni-check/run');
 
 const ORIGIN = 'http://127.0.0.1:4000';
 const FIXTURES = path.join(__dirname, '__fixtures__/omni-check');
@@ -107,6 +108,9 @@ describe('arguments and target', () => {
     expect(() => parseArgs(['--nope'])).toThrow(/unknown option/);
     expect(() => parseArgs(['a', 'b'])).toThrow(/one url-or-dir/);
     expect(() => parseArgs(['--routes'])).toThrow(/needs a value/);
+    expect(parseArgs([])).toEqual(expect.objectContaining({ pageTimeout: 60, maxTime: 600 }));
+    expect(parseArgs(['--page-timeout', '5', '--max-time=90'])).toEqual(expect.objectContaining({ pageTimeout: 5, maxTime: 90 }));
+    expect(() => parseArgs(['--max-time', 'soon'])).toThrow(/needs a number of seconds/);
   });
 
   test('a URL, a folder, or dist/ / build/ found in cwd', () => {
@@ -142,5 +146,129 @@ describe('browser discovery', () => {
     expect(candidatePaths('linux', { PATH: '/opt/bin' })).toContain('/opt/bin/chromium');
     expect(candidatePaths('win32', { PROGRAMFILES: 'C:\\Program Files' })).toContain('C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe');
     expect(findChrome({ env: {}, platform: 'linux', exists: () => false, tooling: false })).toBeNull();
+  });
+});
+
+/* A fake browser for the orchestration: every protocol call is recorded, and
+   a page's behavior is decided by its URL. `hangOn` makes the settle step of
+   that route never answer, like a page whose main thread is blocked. */
+function fakeBrowser({ hangOn = null, violationsFor = () => [] } = {}) {
+  const calls = [];
+  const sessions = {}; // sessionId -> { context, url }
+  const contexts = {}; // contextId -> { storage init script, mode, disposed }
+  let n = 0;
+  const cdp = {
+    timeout: 0,
+    closed: false,
+    send(method, params = {}, sessionId) {
+      calls.push({ method, params, sessionId });
+      switch (method) {
+        case 'Target.createBrowserContext': { const id = 'ctx' + (++n); contexts[id] = {}; return Promise.resolve({ browserContextId: id }); }
+        case 'Target.createTarget': return Promise.resolve({ targetId: 't' + (++n) + ':' + params.browserContextId });
+        case 'Target.attachToTarget': { const id = 's' + (++n); sessions[id] = { context: params.targetId.split(':')[1] }; return Promise.resolve({ sessionId: id }); }
+        case 'Target.disposeBrowserContext': contexts[params.browserContextId].disposed = true; return Promise.resolve({});
+        case 'Page.addScriptToEvaluateOnNewDocument': contexts[sessions[sessionId].context].init = params.source; return Promise.resolve({});
+        case 'Emulation.setEmulatedMedia': contexts[sessions[sessionId].context].mode = params.features[0].value; return Promise.resolve({});
+        case 'Page.navigate': sessions[sessionId].url = params.url; return Promise.resolve({ frameId: 'f' });
+        case 'Runtime.evaluate': {
+          const s = sessions[sessionId];
+          const mode = contexts[s.context].mode;
+          const e = params.expression;
+          if (e.startsWith('new Promise')) {
+            if (hangOn && s.url.endsWith(hangOn)) return new Promise(() => {});
+            return Promise.resolve({ result: { value: 'ready' } });
+          }
+          if (e === 'typeof axe') return Promise.resolve({ result: { value: 'object' } });
+          if (e.startsWith('axe.run')) return Promise.resolve({ result: { value: violationsFor(new URL(s.url).pathname, mode) } });
+          if (e.startsWith('Array.from')) return Promise.resolve({ result: { value: [] } });
+          if (e.startsWith('(() =>')) return Promise.resolve({ result: { value: 'colors-' + mode } });
+          return Promise.resolve({ result: {} });
+        }
+        default: return Promise.resolve({});
+      }
+    },
+    waitFor() { return Promise.resolve({}); },
+    close() { this.closed = true; },
+  };
+  const browser = { wsEndpoint: 'ws://fake', closed: false, close() { this.closed = true; return Promise.resolve(); } };
+  return { cdp, browser, calls, sessions, contexts, deps: { launch: () => Promise.resolve(browser), connect: () => Promise.resolve(cdp) } };
+}
+
+const RUN = { chromePath: '/x/chrome', baseUrl: 'http://127.0.0.1:4000', axeSource: '/* axe */' };
+
+describe('run orchestration', () => {
+  test('withTimeout: the value, or a TimeoutError naming the step', async () => {
+    await expect(withTimeout(Promise.resolve(3), 50, 'x')).resolves.toBe(3);
+    await expect(withTimeout(new Promise(() => {}), 20, 'loading /cart')).rejects.toThrow('loading /cart did not finish within 0s');
+  });
+
+  test('the browser never throttles a page that is not in front', () => {
+    expect(NO_THROTTLE).toEqual(expect.arrayContaining([
+      '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows',
+    ]));
+  });
+
+  test('light and dark each get their own browser context, with their own saved mode', async () => {
+    const f = fakeBrowser();
+    const run = await runCheck({ ...RUN, routes: ['/', '/cart'], deps: f.deps });
+    const ids = Object.keys(f.contexts);
+    expect(ids).toHaveLength(2);
+    const byMode = Object.fromEntries(ids.map((id) => [f.contexts[id].mode, f.contexts[id]]));
+    expect(byMode.light.init).toContain('localStorage.setItem("omni-dark-mode","light")');
+    expect(byMode.dark.init).toContain('localStorage.setItem("omni-dark-mode","dark")');
+    // Every audit brings its page to the front first, and focus is emulated.
+    const navs = f.calls.filter((c) => c.method === 'Page.navigate').length;
+    expect(f.calls.filter((c) => c.method === 'Page.bringToFront')).toHaveLength(navs);
+    expect(f.calls.filter((c) => c.method === 'Emulation.setFocusEmulationEnabled')).toHaveLength(2);
+    expect(run.results.map((r) => r.mode + ' ' + r.width + ' ' + r.route)).toEqual([
+      'light 1280 /', 'dark 1280 /', 'light 390 /', 'dark 390 /',
+      'light 1280 /cart', 'dark 1280 /cart', 'light 390 /cart', 'dark 390 /cart',
+    ]);
+    expect(run.pages).toEqual(['/', '/cart']);
+    expect(run.incomplete).toBe(false);
+    // Everything is closed at the end.
+    expect(ids.every((id) => f.contexts[id].disposed)).toBe(true);
+    expect(f.cdp.closed).toBe(true);
+    expect(f.browser.closed).toBe(true);
+  });
+
+  test('a page that never answers is reported, its context replaced, and the run goes on', async () => {
+    const f = fakeBrowser({ hangOn: '/stuck', violationsFor: (route, mode) => (route === '/after' && mode === 'dark'
+      ? [{ id: 'image-alt', impact: 'critical', nodes: [{ target: ['img'], html: '<img>' }] }] : []) });
+    const t0 = Date.now();
+    const run = await runCheck({ ...RUN, routes: ['/', '/stuck', '/after'], pageTimeout: 150, deps: f.deps });
+    expect(Date.now() - t0).toBeLessThan(3000);
+    expect(run.failed).toEqual([{ route: '/stuck', mode: 'light', width: 1280, error: expect.stringMatching(/^timed out after \d+s while waiting for the page to settle \(light, 1280px\)$/) }]);
+    expect(run.pages).toEqual(['/', '/after']);
+    expect(run.results.filter((r) => r.route === '/after')).toHaveLength(4);
+    expect(run.results.find((r) => r.route === '/after' && r.mode === 'dark').violations[0].id).toBe('image-alt');
+    // The stuck light context was disposed and a fresh one opened for /after.
+    expect(Object.values(f.contexts).filter((c) => c.mode === 'light')).toHaveLength(2);
+  });
+
+  test('the whole-run limit stops the run and lists the pages not reached', async () => {
+    const f = fakeBrowser();
+    let t = 0;
+    const now = () => t;
+    const orig = f.cdp.send.bind(f.cdp);
+    f.cdp.send = (m, p, s, o) => { if (m === 'Page.navigate') t += 1000; return orig(m, p, s, o); };
+    const run = await runCheck({ ...RUN, routes: ['/', '/a', '/b', '/c'], maxTime: 8500, deps: { ...f.deps, now } });
+    expect(run.incomplete).toBe(true);
+    expect(run.pages).toEqual(['/', '/a']);
+    expect(run.skipped).toEqual(['/b', '/c']);
+    expect(run.notes.pop()).toMatch(/stopped at the --max-time limit \(9s\); not checked: \/b \/c\./);
+  });
+});
+
+describe('report: pages not checked', () => {
+  test('a run with unchecked pages is never reported as plainly clean', () => {
+    const meta = { pages: ['/'], failed: [{ route: '/stuck', mode: 'light', width: 1280, error: 'timed out after 60s while waiting for the page to settle (light, 1280px)' }], skipped: ['/z'], elapsed: 61234 };
+    const text = formatReport([], meta);
+    expect(text).toMatch(/in 61\.2s/);
+    expect(text).toMatch(/not checked: \/stuck — timed out after 60s/);
+    expect(text.split('\n').pop()).toBe('omni-check: 0 issues — 2 pages NOT checked (see above)');
+    const json = JSON.parse(formatJSON([], meta));
+    expect(json).toEqual(expect.objectContaining({ complete: false, seconds: 61.2, skipped: ['/z'] }));
+    expect(finalLine([], { pages: ['/'] })).toBe('omni-check: 0 issues');
   });
 });

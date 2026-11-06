@@ -65,33 +65,102 @@ function findChrome({ env = process.env, platform = process.platform, exists = f
 const NO_BROWSER = 'omni-check: no Chrome, Chromium or Edge found. Install one, or point CHROME_PATH at it '
   + '(e.g. CHROME_PATH=/usr/bin/chromium npx omni-check). omni-check never downloads a browser.';
 
-function launchChrome(executable, { timeout = 20000 } = {}) {
+/* Flags that keep a page that is not the focused one running at full speed.
+   Without them Chrome throttles timers and requestAnimationFrame in a
+   background tab — the second color mode's tab sat unrendered for half an
+   hour in a real run, and axe was never injected. */
+const NO_THROTTLE = [
+  '--disable-background-timer-throttling', '--disable-renderer-backgrounding',
+  '--disable-backgrounding-occluded-windows', '--disable-ipc-flooding-protection',
+];
+
+/* Every browser this process launched and has not yet closed. Cleaned up on
+   exit, Ctrl-C (SIGINT), SIGTERM and SIGHUP, so an interrupted run never
+   leaves a Chrome or its temp profile behind. Only these PIDs are ever
+   signalled: omni-check never looks a process up by name. */
+const live = new Set();
+let handlersInstalled = false;
+
+function killBrowser(b) {
+  if (b.killed) return;
+  b.killed = true;
+  live.delete(b);
+  try {
+    // Detached on POSIX: the browser leads its own process group, so -pid is
+    // exactly the Chrome we started plus its renderer / GPU helpers.
+    if (b.group) process.kill(-b.pid, 'SIGKILL');
+    else b.proc.kill('SIGKILL');
+  } catch { /* already gone */ }
+}
+
+function removeProfile(dir) {
+  try { fs.rmSync(dir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 }); } catch { /* best effort */ }
+}
+
+function installHandlers() {
+  if (handlersInstalled) return;
+  handlersInstalled = true;
+  process.on('exit', () => { for (const b of [...live]) { killBrowser(b); removeProfile(b.userDataDir); } });
+  for (const [sig, code] of [['SIGINT', 130], ['SIGTERM', 143], ['SIGHUP', 129]]) {
+    process.on(sig, () => {
+      for (const b of [...live]) { killBrowser(b); removeProfile(b.userDataDir); }
+      process.stderr.write('\nomni-check: stopped (' + sig + '); closed the browser it started.\n');
+      process.exit(code);
+    });
+  }
+}
+
+/** Launches a headless browser on a fresh temp profile.
+ *  → { wsEndpoint, pid, userDataDir, close(): Promise } */
+function launchChrome(executable, { timeout = 20000, spawnFn = spawn } = {}) {
   const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'omni-check-'));
   const args = [
     '--headless=new', '--remote-debugging-port=0', '--user-data-dir=' + userDataDir,
     '--no-first-run', '--no-default-browser-check', '--disable-extensions', '--disable-sync',
     '--disable-background-networking', '--disable-gpu', '--hide-scrollbars', '--mute-audio',
-    '--force-color-profile=srgb',
+    '--force-color-profile=srgb', ...NO_THROTTLE,
   ];
   // Chrome refuses to sandbox as root (CI containers).
   if ((process.getuid && process.getuid() === 0) || process.env.OMNI_CHECK_NO_SANDBOX) args.push('--no-sandbox');
   args.push('about:blank');
-  const proc = spawn(executable, args, { stdio: ['ignore', 'ignore', 'pipe'] });
-  const cleanup = () => {
-    try { proc.kill('SIGKILL'); } catch { /* gone */ }
-    try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch { /* best effort */ }
+  const group = process.platform !== 'win32';
+  const proc = spawnFn(executable, args, { stdio: ['ignore', 'ignore', 'pipe'], detached: group });
+  const b = { proc, pid: proc.pid, group, userDataDir, killed: false };
+  installHandlers();
+  live.add(b);
+  const exited = new Promise((r) => {
+    if (proc.exitCode !== null && proc.exitCode !== undefined) r();
+    else proc.once('exit', () => r());
+  });
+  const close = async () => {
+    killBrowser(b);
+    await Promise.race([exited, new Promise((r) => setTimeout(r, 3000))]);
+    removeProfile(userDataDir);
   };
   return new Promise((resolve, reject) => {
     let buf = '';
-    const timer = setTimeout(() => { cleanup(); reject(new Error('omni-check: Chrome did not start within ' + timeout / 1000 + 's (' + executable + ')')); }, timeout);
+    let ready = false;
+    const fail = (msg) => { clearTimeout(timer); close().then(() => reject(new Error(msg))); };
+    const timer = setTimeout(() => fail('omni-check: Chrome did not start within ' + timeout / 1000 + 's (' + executable + ')'), timeout);
     proc.stderr.on('data', (d) => {
       buf += d;
       const m = buf.match(/DevTools listening on (ws:\/\/\S+)/);
-      if (m) { clearTimeout(timer); proc.stderr.removeAllListeners('data'); proc.stderr.resume(); resolve({ wsEndpoint: m[1], close: cleanup }); }
+      if (m && !ready) {
+        ready = true;
+        clearTimeout(timer);
+        proc.stderr.removeAllListeners('data');
+        proc.stderr.resume();
+        resolve({ wsEndpoint: m[1], pid: proc.pid, userDataDir, close });
+      }
     });
-    proc.once('error', (e) => { clearTimeout(timer); cleanup(); reject(new Error('omni-check: could not start ' + executable + ': ' + e.message)); });
-    proc.once('exit', (code) => { clearTimeout(timer); reject(new Error('omni-check: Chrome exited (' + code + ') before it was ready.\n' + buf.slice(-500))); });
+    proc.once('error', (e) => fail('omni-check: could not start ' + executable + ': ' + e.message));
+    proc.once('exit', (code) => { if (!ready) fail('omni-check: Chrome exited (' + code + ') before it was ready.\n' + buf.slice(-500)); });
   });
+}
+
+/** A step that took too long — distinguishable from a page error. */
+class TimeoutError extends Error {
+  constructor(message) { super(message); this.name = 'TimeoutError'; }
 }
 
 /** Minimal DevTools-protocol client over the built-in WebSocket. */
@@ -111,6 +180,13 @@ class CDP {
     this.id = 0;
     this.pending = new Map();
     this.listeners = new Set();
+    this.timeout = 30000;
+    this.closed = false;
+    ws.addEventListener('close', () => {
+      this.closed = true;
+      for (const { reject, method } of this.pending.values()) reject(new Error(method + ': the browser connection closed'));
+      this.pending.clear();
+    });
     ws.addEventListener('message', (ev) => {
       const msg = JSON.parse(typeof ev.data === 'string' ? ev.data : Buffer.from(ev.data).toString());
       if (msg.id && this.pending.has(msg.id)) {
@@ -123,21 +199,36 @@ class CDP {
       }
     });
   }
-  send(method, params = {}, sessionId) {
+  /** Rejects after `timeout` ms: no protocol call can stall a run forever. */
+  send(method, params = {}, sessionId, { timeout = this.timeout } = {}) {
+    if (this.closed) return Promise.reject(new Error(method + ': the browser connection is closed'));
     const id = ++this.id;
-    this.ws.send(JSON.stringify(sessionId ? { id, method, params, sessionId } : { id, method, params }));
-    return new Promise((resolve, reject) => this.pending.set(id, { resolve, reject, method }));
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        this.pending.delete(id);
+        reject(new TimeoutError(method + ' did not answer within ' + Math.round(timeout / 1000) + 's'));
+      }, timeout);
+      const settle = (fn) => (v) => { clearTimeout(timer); fn(v); };
+      this.pending.set(id, { resolve: settle(resolve), reject: settle(reject), method });
+      try {
+        this.ws.send(JSON.stringify(sessionId ? { id, method, params, sessionId } : { id, method, params }));
+      } catch (e) {
+        this.pending.delete(id);
+        clearTimeout(timer);
+        reject(new Error(method + ': ' + e.message));
+      }
+    });
   }
   /** Resolves with the next event `method` on `sessionId`, or rejects after `timeout`. */
   waitFor(method, sessionId, timeout = 30000) {
     return new Promise((resolve, reject) => {
       const done = (fn, v) => { clearTimeout(timer); this.listeners.delete(l); fn(v); };
       const l = (msg) => { if (msg.method === method && msg.sessionId === sessionId) done(resolve, msg.params); };
-      const timer = setTimeout(() => done(reject, new Error('timed out waiting for ' + method)), timeout);
+      const timer = setTimeout(() => done(reject, new TimeoutError('timed out waiting for ' + method)), timeout);
       this.listeners.add(l);
     });
   }
   close() { try { this.ws.close(); } catch { /* closed */ } }
 }
 
-module.exports = { candidatePaths, toolingBrowser, findChrome, launchChrome, CDP, NO_BROWSER };
+module.exports = { candidatePaths, toolingBrowser, findChrome, launchChrome, CDP, TimeoutError, NO_BROWSER, NO_THROTTLE, liveBrowsers: live };

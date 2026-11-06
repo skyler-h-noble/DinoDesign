@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Hangs</title></head>
+<body>
+<main><h1>This page blocks its main thread forever</h1></main>
+<!-- omni-check must report it as not checked and move on, not hang. -->
+<script>addEventListener('load', function () { setTimeout(function () { for (;;) {} }, 50); });</script>
+</body>
+</html>

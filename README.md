@@ -79,6 +79,14 @@ downloads a browser). Each failure is printed with its element and the fix; the
 last line is `omni-check: 0 issues` when clean, and the exit code is 1 when not,
 for CI. `--json` for a machine-readable report. Needs Node 22+.
 
+Light and dark run in separate browser contexts (separate localStorage), one
+page at a time, and every page is bounded: `--page-timeout` (default 60s) for
+one page, `--max-time` (default 600s) for the run. A page that times out or
+fails to load is listed as not checked and the exit code is 2. omni-check
+starts its own headless browser on a temp profile and closes exactly that
+browser when it finishes, times out or is stopped with Ctrl-C. To stop a run,
+stop omni-check itself — never kill Chrome by name.
+
 Two common failures are designed out in the components themselves:
 `<AutoHeading>` takes its level from nesting in `Section` / `HeadingLevel`, so
 section titles cannot skip a level; and `Link`, `Button`, clickable `Card`,
