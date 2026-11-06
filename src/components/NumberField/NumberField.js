@@ -83,7 +83,14 @@ registerStaticStyles('omni-numberfield', wk([
   /* The field fills the row's height and gives up its trailing corners: the
      stepper column carries them, sharing the field's right edge. The ring is
      the whole control's (field + steppers), drawn on the row. */
-  '.omni-nf .omni-nf-field{flex:1;min-width:0}',
+  /* Never narrower than a 24px typing area plus the input's own padding.
+     min-width:0 let a NumberField in a row (a cart line) shrink until the
+     steppers took everything: the <input> measured 16px wide with 8px of
+     padding a side — 0px for the number — under WCAG 2.5.8's 24px target.
+     Figma's field container hugs its digits plus padding and can't collapse,
+     so this is the code catching up with the design. max(24px, 3ch): three
+     digits when the type is large, never under 24px when it's small. */
+  '.omni-nf .omni-nf-field{flex:1;min-width:calc(max(24px, 3ch) + 2 * var(--Input-Padding, 8px))}',
   '.omni-nf .omni-nf-field-stacked{height:100%}',
   '.omni-nf .omni-nf-field-stacked .inp-shell{height:100%;border-top-right-radius:0;border-bottom-right-radius:0}',
   '.omni-nf .omni-nf-field-stacked .inp-shell:focus-within{outline:none}',
