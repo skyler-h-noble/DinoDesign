@@ -425,9 +425,26 @@ export function Select({
   //
   // The row palette arrives as custom properties declared on the listbox and
   // resolves against that same page scope.
+  //
+  // "The page" is <body> when the app themes it there. When the app themes a
+  // wrapper instead (<div data-theme data-surface> around the routes), <body>
+  // has no tokens, --Hover resolves to nothing and the panel is see-through.
+  // So the page scope is the OUTERMOST themed ancestor of the trigger, still
+  // never the tile it sits in, and the panel is portaled inside a
+  // display:contents carrier with that scope's attributes. The carrier paints
+  // nothing; it only lets the tokens resolve.
+  const pageScope = (() => {
+    if (!open || typeof document === 'undefined') return null;
+    if (document.body.hasAttribute('data-theme') || document.documentElement.hasAttribute('data-theme')) return null;
+    let outer = null;
+    for (let el = triggerRef.current; el && el !== document.body; el = el.parentElement) {
+      if (el.hasAttribute('data-theme')) outer = el;
+    }
+    return outer ? { theme: outer.getAttribute('data-theme'), surface: outer.getAttribute('data-surface') || 'Surface' } : null;
+  })();
   const sk = SZ[size] ? size : 'medium';
   const modeKey = (isFloating ? 'f' : 's') + SZ[sk];
-  const dropdown = open ? ReactDOM.createPortal(
+  const panel = open ? (
     <div
       ref={dropdownRef}
       data-select-dropdown
@@ -505,7 +522,12 @@ export function Select({
           return renderOption(opt, gIdx, options.length);
         });
       })()}
-    </div>,
+    </div>
+  ) : null;
+  const dropdown = panel ? ReactDOM.createPortal(
+    pageScope
+      ? <div data-theme={pageScope.theme} data-surface={pageScope.surface} style={{ display: 'contents' }}>{panel}</div>
+      : panel,
     document.body
   ) : null;
 

@@ -279,17 +279,41 @@ describe('Select panel takes the PAGE surface, as Popover', () => {
      list, so a Select inside a dark Primary · Surface-Dimmest tile opened a
      deep-purple panel over a light page. */
   test('the portaled list carries no data-theme or data-surface of its own', () => {
+    document.body.setAttribute('data-theme', 'Default');
+    try {
+      render(
+        <div data-theme="Primary" data-surface="Surface-Dimmest">
+          <Select options={OPTIONS} defaultValue="a" aria-label="Pick" />
+        </div>
+      );
+      fireEvent.click(screen.getByRole('combobox'));
+      const list = screen.getByRole('listbox');
+      expect(list.parentElement).toBe(document.body);
+      expect(list.hasAttribute('data-theme')).toBe(false);
+      expect(list.hasAttribute('data-surface')).toBe(false);
+    } finally {
+      document.body.removeAttribute('data-theme');
+    }
+  });
+  /* An app that themes a wrapper rather than <body> left the panel with no
+     tokens at all: --Hover undefined, a see-through list over the page. The
+     panel takes the OUTERMOST themed ancestor (the page), never the tile. */
+  test('with an unthemed body, it takes the page wrapper, not the tile', () => {
     render(
-      <div data-theme="Primary" data-surface="Surface-Dimmest">
-        <Select options={OPTIONS} defaultValue="a" aria-label="Pick" />
+      <div data-theme="Default" data-surface="Surface">
+        <div data-theme="Primary" data-surface="Surface-Dimmest">
+          <Select options={OPTIONS} defaultValue="a" aria-label="Pick" />
+        </div>
       </div>
     );
     fireEvent.click(screen.getByRole('combobox'));
     const list = screen.getByRole('listbox');
-    expect(list.parentElement).toBe(document.body);
+    const carrier = list.parentElement;
+    expect(carrier.parentElement).toBe(document.body);
+    expect(carrier.getAttribute('data-theme')).toBe('Default');
+    expect(carrier.getAttribute('data-surface')).toBe('Surface');
+    expect(carrier.style.display).toBe('contents');
     expect(list.hasAttribute('data-theme')).toBe(false);
-    expect(list.hasAttribute('data-surface')).toBe(false);
-    expect(list.closest('[data-theme]')).toBeNull();
   });
   test('keeps its border, radius, fill and no shadow', () => {
     render(<Select options={OPTIONS} aria-label="Pick" />);
