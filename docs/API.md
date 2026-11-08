@@ -2498,6 +2498,7 @@ A bare media slot that holds an aspect ratio (image, video, map). No states — 
 - `padding?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl'` = `'none'` — Inner padding step.
 - `fit?: 'width' | 'height'` = `'width'` — width = fill the parent's width; height = fill its (definite) height.
 - `placeholder?: boolean` = `false` — Show the image placeholder while empty.
+- `priority?: boolean` = `false` — The first image a visitor sees: an <img> inside loads at once with high priority. Off by default.
 - `maxWidth?: number | string` — CSS max width, e.g. 320 or "40%".
 - `maxHeight?: number | string`
 - `component?: ElementType` = `'div'` — Element to render.
