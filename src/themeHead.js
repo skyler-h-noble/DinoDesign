@@ -87,7 +87,6 @@ export function resolveThemeManifest(manifest, themeURL) {
       base:       resolve(m.base),
       styles:     resolve(m.styles),
     },
-    modeParts:      resolveModeParts(m.modeParts, resolve),
     name:           m.name           ?? null,
     defaultTheme:   m.defaultTheme   ?? null,
     defaultStyle:   m.defaultStyle   ?? null,
@@ -98,45 +97,6 @@ export function resolveThemeManifest(manifest, themeURL) {
       : [],
   };
 }
-
-/* ── Per-theme mode files ─────────────────────────────────────────────────── */
-
-/* A system published by the studio from Nov 2026 lists its mode sheets split
-   per theme (theme.json `modeParts`): for each mode, one file per theme and a
-   shared file. A page that links only the themes it uses downloads a fraction
-   of the mode sheet. LINK ORDER: the theme files in `order`, then shared —
-   the studio's splitter guarantees that reproduces the full sheet's cascade.
-   Systems without the field load the full sheet, as before. */
-function resolveModeParts(mp, resolve) {
-  if (!mp || typeof mp !== 'object' || !Array.isArray(mp.order)) return null;
-  const mode = (e) => {
-    if (!e || typeof e !== 'object' || !e.shared || !e.themes) return null;
-    const themes = {};
-    for (const t of mp.order) { const u = resolve(e.themes[t]); if (!u) return null; themes[t] = u; }
-    return { shared: resolve(e.shared), themes };
-  };
-  const lightMode = mode(mp.lightMode);
-  const darkMode = mode(mp.darkMode);
-  return lightMode && darkMode ? { order: mp.order.slice(), lightMode, darkMode } : null;
-}
-
-/**
- * The mode slot as an ordered list of URLs for the given themes: their files
- * in the system's order, then shared. `themes` names the ones to keep; an
- * unknown name is ignored. Null when the system has no modeParts.
- */
-export function selectModeParts(modeParts, themes) {
-  if (!modeParts) return null;
-  const want = new Set(themes || modeParts.order);
-  const keep = modeParts.order.filter((t) => want.has(t));
-  const list = (m) => keep.map((t) => m.themes[t]).concat(m.shared);
-  return { themes: keep, all: modeParts.order.slice(), lightMode: list(modeParts.lightMode), darkMode: list(modeParts.darkMode),
-    /* Every theme's file, so the provider can add one the build did not see. */
-    available: { lightMode: { ...modeParts.lightMode.themes }, darkMode: { ...modeParts.darkMode.themes } } };
-}
-
-/** The <link> id of part i of the mode slot: #omni-mode, #omni-mode-1, … */
-export const modePartId = (i) => (i === 0 ? OMNI_TAG_IDS.mode : OMNI_TAG_IDS.mode + '-' + i);
 
 /* ── Google Fonts ─────────────────────────────────────────────────────────── */
 
@@ -221,14 +181,12 @@ export const OMNI_HEAD_SCRIPT = "(function(){var d=document,r=d.documentElement,
   + "try{s=localStorage.getItem(c.storageKey||'" + OMNI_DARK_MODE_KEY + "')}catch(e){}"
   + "if(s==='dark')k=true;else if(s!=='light'){if(c.dark==='system'){try{k=matchMedia('(prefers-color-scheme: dark)').matches}catch(e){}}else k=c.dark==='dark'}"
   + "r.setAttribute('data-omni-mode',k?'dark':'light');"
-  + "var h=c.sheets||{},m=k?'darkMode':'lightMode',q=c.modeParts&&c.modeParts[m],p=[['foundation',h.foundation],['core',h.core],['typography',h.typography]];"
-  + "if(q&&q.length){for(var j=0;j<q.length;j++)p.push([j?'mode-'+j:'mode',q[j]])}else p.push(['mode',h[m]]);"
-  + "p.push(['base',h.base],['styles',h.styles]);"
-  + "for(var i=0;i<p.length;i++){var u=p[i][1],id='omni-'+p[i][0];if(!u||d.getElementById(id))continue;"
+  + "var h=c.sheets||{},p=[['foundation','foundation'],['core','core'],['typography','typography'],['mode',k?'darkMode':'lightMode'],['base','base'],['styles','styles']];"
+  + "for(var i=0;i<p.length;i++){var u=h[p[i][1]],id='omni-'+p[i][0];if(!u||d.getElementById(id))continue;"
   + "var l=d.createElement('link');l.id=id;l.rel='stylesheet';l.setAttribute('blocking','render');l.setAttribute('data-omni','head');l.href=u;d.head.appendChild(l)}})();";
 
 /** The JSON the head carries (and the provider reads). */
-export function headThemeConfig(resolved, { themeURL, dark = 'system', storageKey = OMNI_DARK_MODE_KEY, sheets, modeParts } = {}) {
+export function headThemeConfig(resolved, { themeURL, dark = 'system', storageKey = OMNI_DARK_MODE_KEY, sheets } = {}) {
   return {
     v: 1,
     themeURL: themeURL || null,
@@ -239,9 +197,6 @@ export function headThemeConfig(resolved, { themeURL, dark = 'system', storageKe
     dark,
     storageKey,
     sheets: sheets || resolved.sheets,
-    /* selectModeParts(): the mode slot as a list, only the themes this site
-       uses. Absent: the full mode sheet, as before. */
-    ...(modeParts ? { modeParts } : {}),
   };
 }
 

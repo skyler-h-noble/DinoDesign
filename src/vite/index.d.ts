@@ -22,13 +22,6 @@ export interface OmniThemeOptions {
   dark?: 'system' | 'light' | 'dark';
   /** The provider's persistDarkMode key. Default 'omni-dark-mode'. */
   storageKey?: string;
-  /** Build: link only the themes the app's code uses. Needs a system published
-   *  with per-theme mode files (theme.json `modeParts`); others load in full.
-   *  Default true. `vite` dev always loads every theme. */
-  trim?: boolean;
-  /** Themes to keep even when the scan does not see them in the code, e.g.
-   *  ones whose names arrive from a CMS. */
-  themes?: string[];
   /** fetch() to use (Node 18+ has one). */
   fetch?: typeof fetch;
 }

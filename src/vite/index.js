@@ -32,11 +32,8 @@
 import { createHash } from 'crypto';
 import {
   OMNI_DARK_MODE_KEY, OMNI_THEME_SCRIPT_ID, manifestURLFor, resolveThemeManifest,
-  combineGoogleFonts, stripFontImports, headThemeConfig, themeHeadHTML, selectModeParts,
+  combineGoogleFonts, stripFontImports, headThemeConfig, themeHeadHTML,
 } from '../themeHead';
-import { scanAppThemes } from './scanThemes';
-
-export { scanAppThemes, themesInSource, importedComponents } from './scanThemes';
 
 export { OMNI_HEAD_SCRIPT, OMNI_DEFAULT_THEME_URL, combineGoogleFonts, stripFontImports } from '../themeHead';
 
@@ -102,8 +99,8 @@ const shortHash = (s) => createHash('sha256').update(s).digest('hex').slice(0, 8
  *            the SAME addresses (the browser makes one request for both),
  *            which starts them early without adding requests.
  */
-export function buildThemeHead(resolved, { themeURL, dark = 'system', storageKey = OMNI_DARK_MODE_KEY, sheets, copied = false, modeParts } = {}) {
-  const config = headThemeConfig(resolved, { themeURL, dark, storageKey, sheets, modeParts });
+export function buildThemeHead(resolved, { themeURL, dark = 'system', storageKey = OMNI_DARK_MODE_KEY, sheets, copied = false } = {}) {
+  const config = headThemeConfig(resolved, { themeURL, dark, storageKey, sheets });
   const fonts = resolved.fonts.length ? (copied ? combineGoogleFonts(resolved.fonts) : resolved.fonts) : [];
   const origins = [];
   if (!copied) {
@@ -140,39 +137,21 @@ export function injectIntoHead(html, block) {
  * @param {boolean} [options.copy=false]  build: self-host a SNAPSHOT of the sheets as hashed assets (re-build to pick up a re-published system). Default: link the live published files
  * @param {'system'|'light'|'dark'} [options.dark='system']  first mode when the visitor has no saved choice
  * @param {string} [options.storageKey='omni-dark-mode']  the provider's persistDarkMode key
- * @param {boolean} [options.trim=true]  build: load only the themes the app's code uses (systems published with per-theme mode files)
- * @param {string[]} [options.themes]  themes to keep even when the scan does not see them
  */
 export function omniTheme(options = {}) {
-  const { themeURL, copy = false, dark = 'system', storageKey = OMNI_DARK_MODE_KEY, fetch: fetchImpl, trim = true, themes: extraThemes = [] } = options;
+  const { themeURL, copy = false, dark = 'system', storageKey = OMNI_DARK_MODE_KEY, fetch: fetchImpl } = options;
   if (!themeURL || typeof themeURL !== 'string') throw new Error('omniTheme: pass { themeURL } — the theme.json URL your OmniDesignProvider uses');
   let isBuild = false;
   let base = '/';
   let assetsDir = 'assets';
   let resolvedP = null;
   let copiedSheets = null; // key → public path, after buildStart
-  let root = process.cwd();
-  let selected; // selectModeParts() for this app, once per build
   const resolved = () => (resolvedP = resolvedP || loadThemeManifest(themeURL, { fetch: fetchImpl }));
-  /* The themes this app uses, from its source (scanThemes.js). Build only:
-     `vite` dev links the full mode sheet, so a theme just added to the code
-     shows at once. Null when the system has no per-theme files. */
-  const trimmed = (r, log) => {
-    if (selected !== undefined) return selected;
-    selected = null;
-    if (!isBuild || !trim || !r.modeParts) return selected;
-    const scan = scanAppThemes(root, r.modeParts.order, { extra: extraThemes });
-    selected = selectModeParts(r.modeParts, scan.themes);
-    const left = r.modeParts.order.filter((t) => !scan.themes.includes(t));
-    if (log) log(`themes ${scan.themes.length} of ${r.modeParts.order.length} (${scan.themes.join(', ')})${left.length ? ` — not loaded: ${left.join(', ')}` : ''}`);
-    return selected;
-  };
 
   return {
     name: 'omni-theme',
     configResolved(config) {
       isBuild = config.command === 'build';
-      root = config.root || root;
       base = config.base || '/';
       assetsDir = (config.build && config.build.assetsDir) || 'assets';
     },
@@ -181,18 +160,6 @@ export function omniTheme(options = {}) {
       try {
         const r = await resolved();
         const files = await downloadThemeSheets(r, { fetch: fetchImpl });
-        /* Copied AND trimmed: each mode sheet becomes the selected parts,
-           concatenated in link order — one file, as before, only smaller. */
-        const sel = trimmed(r, (m) => this.info ? this.info(m) : console.log(`[omni-theme] ${m}`)); // eslint-disable-line no-console
-        if (sel) {
-          const f = getFetch(fetchImpl);
-          for (const key of ['lightMode', 'darkMode']) {
-            const file = files.find((x) => x.key === key);
-            if (!file) continue;
-            const parts = await Promise.all(sel[key].map(async (u) => absolutizeUrls(await fetchText(u, f), u)));
-            file.source = parts.join('\n');
-          }
-        }
         copiedSheets = {};
         files.forEach(({ key, name, source }) => {
           const fileName = `${assetsDir}/omni-${name.replace(/\.css$/, '')}-${shortHash(source)}.css`;
@@ -215,9 +182,7 @@ export function omniTheme(options = {}) {
           return html;
         }
         const copied = !!(isBuild && copy && copiedSheets);
-        // eslint-disable-next-line no-console
-        const sel = copied ? null : trimmed(r, (m) => console.log(`[omni-theme] ${m}`));
-        const block = buildThemeHead(r, { themeURL, dark, storageKey, copied, sheets: copied ? { ...r.sheets, ...copiedSheets } : undefined, modeParts: sel || undefined });
+        const block = buildThemeHead(r, { themeURL, dark, storageKey, copied, sheets: copied ? { ...r.sheets, ...copiedSheets } : undefined });
         return injectIntoHead(html, block);
       },
     },
