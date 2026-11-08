@@ -85,6 +85,19 @@ dark before the first paint (saved toggle, else the device — `dark: 'system'`,
 the default; use `'light'` or `'dark'` to match a provider without
 `defaultDarkMode="system"`).
 
+**Only the themes you use.** On `vite build` the plugin reads your code for
+the themes it names — `data-theme="Primary"`, `color="error"`,
+`variant="warning-outline"`, any string that names a theme — plus the ones lib
+components pick on their own (AppBar's App-Bar, CodeBlock's Neutral), and
+loads only those themes' colors. Each theme is about a twelfth of the color
+sheet, so a site that uses five of the twelve downloads well under half of it.
+It stays live, adds no JavaScript to your pages and nothing to set up. `vite`
+dev always loads every theme. A theme your code only knows at run time (a name
+from a CMS) is loaded the moment the page uses it; to have it from the first
+paint, list it: `omniTheme({ themeURL, themes: ['Info'] })`. `trim: false`
+turns it off. Needs a design system published from the studio after Nov 8,
+2026 — older ones load in full, as before. Figma always has every theme.
+
 Measured on a store app (150 ms latency, 1.6 Mbps, 4× CPU, median of 3): first
 styled paint 1.9–2.6 s with `themeURL` alone, 1.3 s with the plugin — live (1.34 s) or `copy: true` (1.31 s) — on every
 page (Lighthouse mobile home 82 → 87). Without Vite, `npx omni-theme-links <theme.json URL>` prints the same
