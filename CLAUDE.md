@@ -87,6 +87,13 @@ What the plugin does:
   pass the same `storageKey` to the plugin.
 - Keep `themeURL` on the provider. It finds the theme in the page (same URL),
   skips theme.json and never downloads a sheet twice.
+- There is ONE color sheet per mode (Light-Mode.css / Dark-Mode.css), and only
+  the active mode's loads. Do not split it per theme to "load only the themes
+  a site uses" — 0.39.0 did, and it made pages download MORE: the twelve
+  themes repeat the same variable names, so brotli packs the whole sheet into
+  ~14 KB, while each theme compressed alone loses that. Measured on Cocktail
+  Hour: full sheet 13.7 KB; the 5 themes a store rendered, as separate files,
+  15.0 KB; the 10 a scan kept, 29.6 KB in 11 requests. Reverted in 0.39.1.
 
 Not using Vite? Print the same block and paste it into `index.html` right
 after the `<meta>` tags, before any other `<link>`, `<script>` or `<style>`:
