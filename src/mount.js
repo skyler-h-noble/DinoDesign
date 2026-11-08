@@ -21,6 +21,11 @@
  * each field and where the cursor was. A page that was not prerendered starts
  * with createRoot as before.
  *
+ * A tap on a button before the app is ready is not lost either: that one
+ * button shows it was pressed (and is announced busy), and the tap is played
+ * again on the same button in the app once it is. Links are left alone — they
+ * already work as ordinary page loads.
+ *
  * Content that depends on the visitor (cart, signed-in name) belongs in
  * <ClientOnly fallback={…}>: the saved page shows the fallback, so it never
  * shows the wrong cart.
@@ -84,6 +89,61 @@ function drawn(next, saved) {
 
 const HIDE = ['position', 'top', 'left', 'right', 'visibility', 'pointerEvents'];
 
+/* Controls whose taps are held and replayed. Links (a[href]) are not: the
+   browser follows them as ordinary page loads. */
+const CONTROL = 'button, [role="button"], [role="switch"], [role="checkbox"], [role="tab"], [role="menuitem"], '
+  + 'input[type="checkbox"], input[type="radio"], summary';
+const MAX_TAPS = 3;
+const PENDING_CSS = '[data-omni-pending]{opacity:.72;cursor:progress}';
+
+/* A control's identity across the two copies: its kind, its name (aria-label
+   or text), and which one it is among controls with that kind and name. */
+const controlName = (el) => `${el.tagName}|${el.getAttribute('role') || el.type || ''}|${(el.getAttribute('aria-label') || el.textContent || '').trim().slice(0, 80)}`;
+function controlKey(root, el) {
+  const name = controlName(el);
+  const same = Array.from(root.querySelectorAll(CONTROL)).filter((c) => controlName(c) === name);
+  return { name, index: same.indexOf(el) };
+}
+function findControl(root, key) {
+  const same = Array.from(root.querySelectorAll(CONTROL)).filter((c) => controlName(c) === key.name);
+  return same[key.index] || null;
+}
+
+/* Hold taps on the saved page's controls until the app is ready. */
+function holdTaps(saved) {
+  const taps = [];
+  if (!document.getElementById('omni-pending-style')) {
+    const st = document.createElement('style');
+    st.id = 'omni-pending-style';
+    st.textContent = PENDING_CSS;
+    document.head.appendChild(st);
+  }
+  const onClick = (e) => {
+    const el = e.target instanceof Element ? e.target.closest(CONTROL) : null;
+    if (!el || !saved.contains(el) || el.closest('a[href]')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (taps.some((t) => t.el === el) || taps.length >= MAX_TAPS) return; // a double tap counts once
+    taps.push({ el, key: controlKey(saved, el) });
+    el.setAttribute('data-omni-pending', '');
+    el.setAttribute('aria-busy', 'true');
+  };
+  saved.addEventListener('click', onClick, true);
+  return {
+    release: () => saved.removeEventListener('click', onClick, true),
+    taps,
+  };
+}
+
+/* Play the held taps on the app's matching controls; a tap with no match
+   (the app drew a different page) is dropped, not guessed. */
+function replayTaps(next, taps) {
+  taps.forEach((t) => {
+    const el = findControl(next, t.key);
+    if (el && !el.disabled) el.click();
+  });
+}
+
 export function mountApp(el, element, options) {
   if (!el) throw new Error('mountApp: no element to mount into');
   const prerendered = el.hasAttribute('data-omni-prerendered') && el.firstElementChild;
@@ -103,11 +163,13 @@ export function mountApp(el, element, options) {
   Object.assign(next.style, { position: 'absolute', top: '0', left: '0', right: '0', visibility: 'hidden', pointerEvents: 'none' });
   el.parentNode.insertBefore(next, el.nextSibling);
 
+  const held = holdTaps(el);
   const root = createRoot(next, options);
   root.render(element);
 
   const started = Date.now();
   const swap = () => {
+    held.release();
     const fields = snapshotFields(el);
     HIDE.forEach((p) => { next.style[p] = ''; });
     next.removeAttribute('aria-hidden');
@@ -115,6 +177,7 @@ export function mountApp(el, element, options) {
     el.remove();
     if (id) next.id = id;
     restoreFields(next, fields);
+    replayTaps(next, held.taps);
   };
   const tick = () => {
     if (drawn(next, el) || Date.now() - started > SWAP_TIMEOUT_MS) swap();

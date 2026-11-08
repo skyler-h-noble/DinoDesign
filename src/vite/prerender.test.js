@@ -40,3 +40,8 @@ test('clean: lazy images keep their address aside; eager ones keep src', () => {
   expect(out).toContain('<img data-omni-src="a.jpg" loading="lazy" data-omni-srcset="a2.jpg 2x" alt="">');
   expect(out).toContain('<img src="b.jpg" fetchpriority="high" alt="">');
 });
+
+test('clean: the prerender flag does not reach the saved page', () => {
+  const { PRERENDER_FLAG } = require('./prerender');
+  expect(clean(`<head>${PRERENDER_FLAG}<title>x</title></head>`)).toBe('<head><title>x</title></head>');
+});

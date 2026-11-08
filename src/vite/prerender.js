@@ -48,14 +48,22 @@ export function findChrome() {
 
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.avif': 'image/avif', '.ico': 'image/x-icon', '.woff2': 'font/woff2', '.woff': 'font/woff' };
 
+/* Tells the page it is being prerendered: ClientOnly then stays on its
+   fallback, so the saved page shows "Cart", not the build machine's empty
+   cart. Taken out again by clean(). */
+export const PRERENDER_FLAG = '<script data-omni-prerender-flag>window.__OMNI_PRERENDER__=true</script>';
+const flagged = (html) => html.replace(/<head([^>]*)>/i, `<head$1>${PRERENDER_FLAG}`);
+
 /** The build folder over HTTP, with the SPA fallback every host applies. */
 function serve(dir, shell) {
+  const page = flagged(shell);
   const server = createServer((req, res) => {
     const path = decodeURIComponent((req.url || '/').split('?')[0]);
     let file = normalize(join(dir, path));
     if (!file.startsWith(normalize(dir)) || !existsSync(file) || statSync(file).isDirectory()) file = null;
+    const html = !file || extname(file) === '.html';
     res.setHeader('content-type', file ? (TYPES[extname(file)] || 'application/octet-stream') : 'text/html; charset=utf-8');
-    res.end(file ? readFileSync(file) : shell);
+    res.end(html ? (file ? flagged(readFileSync(file, 'utf8')) : page) : readFileSync(file));
   });
   return new Promise((resolve) => server.listen(0, '127.0.0.1', () => resolve(server)));
 }
@@ -82,6 +90,7 @@ function dumpDom(chrome, url, { budgetMs = 8000, timeoutMs = 45000 } = {}) {
    are what make the page styled before the JavaScript runs. */
 export function clean(html) {
   return html
+    .replace(/<script\b[^>]*\bdata-omni-prerender-flag[^>]*>[\s\S]*?<\/script>/g, '')
     .replace(/<link\b[^>]*\bdata-omni="(head|prefetch)"[^>]*>/g, '')
     .replace(/<style\b[^>]*\bdata-omni="true"[^>]*>[\s\S]*?<\/style>/g, '')
     /* A lazy image in prerendered HTML downloads at once: while the theme CSS

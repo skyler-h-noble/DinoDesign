@@ -80,3 +80,62 @@ test('not prerendered: an ordinary createRoot', async () => {
   await act(async () => { mountApp(el, <Page />); });
   expect(el.querySelector('h1').textContent).toBe('Shop');
 });
+
+describe('taps before the app is ready', () => {
+  function Shop({ onAdd, onToggle }) {
+    return (
+      <main>
+        <h1>Shop</h1>
+        <button type="button" onClick={onAdd}>Add to cart</button>
+        <button type="button" aria-label="Dark mode" onClick={onToggle}>☾</button>
+        <a href="/cart">Cart</a>
+      </main>
+    );
+  }
+  const saved = () => prerendered(renderToStaticMarkup(<Shop />));
+
+  test('a tap is held, shown pressed, and played once on the app\'s button', async () => {
+    const onAdd = jest.fn();
+    const el = saved();
+    await act(async () => { mountApp(el, <Shop onAdd={onAdd} onToggle={() => {}} />); });
+    const btn = el.querySelector('button');
+    btn.click();
+    btn.click(); // a double tap counts once
+    expect(btn.getAttribute('aria-busy')).toBe('true');
+    expect(btn.hasAttribute('data-omni-pending')).toBe(true);
+    expect(onAdd).not.toHaveBeenCalled();
+    await frames(3);
+    expect(onAdd).toHaveBeenCalledTimes(1);
+  });
+
+  test('the tap lands on the matching button by name, not another one', async () => {
+    const onAdd = jest.fn(); const onToggle = jest.fn();
+    const el = saved();
+    await act(async () => { mountApp(el, <Shop onAdd={onAdd} onToggle={onToggle} />); });
+    el.querySelector('button[aria-label="Dark mode"]').click();
+    await frames(3);
+    expect(onToggle).toHaveBeenCalledTimes(1);
+    expect(onAdd).not.toHaveBeenCalled();
+  });
+
+  test('links are left to the browser', async () => {
+    const el = saved();
+    await act(async () => { mountApp(el, <Shop onAdd={() => {}} onToggle={() => {}} />); });
+    const a = el.querySelector('a');
+    const ev = new MouseEvent('click', { bubbles: true, cancelable: true });
+    a.dispatchEvent(ev);
+    expect(a.hasAttribute('data-omni-pending')).toBe(false);
+  });
+});
+
+test('ClientOnly stays on its fallback while the page is being prerendered', async () => {
+  window.__OMNI_PRERENDER__ = true;
+  try {
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+    await act(async () => { mountApp(el, <ClientOnly fallback={<span>Cart</span>}><span>Cart, 0 items</span></ClientOnly>); });
+    expect(el.textContent).toBe('Cart');
+  } finally {
+    delete window.__OMNI_PRERENDER__;
+  }
+});

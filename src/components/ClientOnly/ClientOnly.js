@@ -15,7 +15,12 @@ import { useEffect, useState } from 'react';
  */
 export function ClientOnly({ children, fallback = null }) {
   const [ready, setReady] = useState(false);
-  useEffect(() => { setReady(true); }, []);
+  useEffect(() => {
+    /* While the Vite plugin prerenders, stay on the fallback: the saved page
+       must not show the build machine's (empty) cart. */
+    if (typeof window !== 'undefined' && window.__OMNI_PRERENDER__) return;
+    setReady(true);
+  }, []);
   return ready ? children : fallback;
 }
 
