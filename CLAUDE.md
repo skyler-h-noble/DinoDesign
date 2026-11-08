@@ -87,6 +87,11 @@ What the plugin does:
   pass the same `storageKey` to the plugin.
 - Keep `themeURL` on the provider. It finds the theme in the page (same URL),
   skips theme.json and never downloads a sheet twice.
+- On `vite build` it also prerenders: each page's HTML is saved, so it paints
+  before the JavaScript runs. Nothing to do — keep `createRoot`, link pages
+  with real `<a href>` / `Link` so they are found, and do not turn it off.
+- For the first image a visitor sees (a hero, the main product photo), use
+  `<Ratio priority>`.
 - There is ONE color sheet per mode (Light-Mode.css / Dark-Mode.css), and only
   the active mode's loads. Do not split it per theme to "load only the themes
   a site uses" — 0.39.0 did, and it made pages download MORE: the twelve
