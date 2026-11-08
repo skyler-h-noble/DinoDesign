@@ -87,14 +87,6 @@ What the plugin does:
   pass the same `storageKey` to the plugin.
 - Keep `themeURL` on the provider. It finds the theme in the page (same URL),
   skips theme.json and never downloads a sheet twice.
-- On `vite build` it loads only the THEMES the code uses: it reads string
-  literals that name a theme (`data-theme="Primary"`, `color="error"`,
-  `variant="warning-outline"`) plus themes lib components pick themselves.
-  Nothing to configure. So name themes with literals where you can — a theme
-  built at run time (`data-theme={'Pri' + x}`, a CMS value) still works (the
-  provider loads it on sight) but misses the first paint; list such themes in
-  `omniTheme({ themeURL, themes: ['Info'] })`. `trim: false` disables it.
-  Systems published before Nov 8, 2026 load every theme.
 
 Not using Vite? Print the same block and paste it into `index.html` right
 after the `<meta>` tags, before any other `<link>`, `<script>` or `<style>`:
