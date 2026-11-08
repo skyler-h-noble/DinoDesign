@@ -123,6 +123,20 @@ registerStaticStyles('omni-ratio', [
   ...Object.entries(PADDING_MAP).map(([k, v]) => `.omni-ratio-p-${k}{padding:${v * 8}px}`),
 ].join('\n'));
 
+/* Loading hints for <img> children: lazy unless `priority`, never blocking
+   the main thread to decode. The author's own attributes win. */
+function withImageLoading(children, priority) {
+  return React.Children.map(children, (child) => {
+    if (!React.isValidElement(child) || child.type !== 'img') return child;
+    const p = child.props;
+    return React.cloneElement(child, {
+      loading: p.loading ?? (priority ? 'eager' : 'lazy'),
+      decoding: p.decoding ?? 'async',
+      ...(priority && p.fetchPriority === undefined ? { fetchPriority: 'high' } : {}),
+    });
+  });
+}
+
 export function Ratio({
   ratio = '1:1',
   children,
@@ -139,6 +153,13 @@ export function Ratio({
   // might hold a map, a video or a chart. Pass `placeholder` for an image slot
   // with no image yet. A supplied child always wins.
   placeholder = false,
+  /* Images inside load LAZILY by default — the browser fetches them as they
+     near the screen. Mark the first image a visitor sees (a hero, the main
+     product photo, the first card of a grid) `priority`: it loads at once,
+     ahead of everything else. One or two per page; marking every image
+     priority is the same as marking none. An <img> that sets its own
+     loading / fetchPriority / decoding keeps them. */
+  priority = false,
   elevated = false,
   clickable = false,
   onClick,
@@ -218,7 +239,7 @@ export function Ratio({
       {/* Figma's Image Placeholder: a Border-Variant tint with the photo
           glyph in --Quiet, as large as the slot. It was a solid --Border
           block with a 36px --Background icon — the design inverted. */}
-      {showPlaceholder ? <ImagePlaceholder /> : children}
+      {showPlaceholder ? <ImagePlaceholder /> : withImageLoading(children, priority)}
     </div>
   );
   if (hasSx(sx)) return <SxBox component={Tag} sx={sx} {...root}>{inner}</SxBox>;

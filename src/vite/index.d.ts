@@ -22,6 +22,11 @@ export interface OmniThemeOptions {
   dark?: 'system' | 'light' | 'dark';
   /** The provider's persistDarkMode key. Default 'omni-dark-mode'. */
   storageKey?: string;
+  /** Build: merge JavaScript chunks smaller than this many bytes into the
+   *  chunk they always load with (Rollup experimentalMinChunkSize). Default
+   *  10000; false leaves Vite's chunking alone. Skipped when the app sets its
+   *  own manualChunks or experimentalMinChunkSize. */
+  minChunkSize?: number | false;
   /** fetch() to use (Node 18+ has one). */
   fetch?: typeof fetch;
 }

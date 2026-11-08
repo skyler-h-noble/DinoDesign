@@ -88,3 +88,29 @@ describe('no states', () => {
     warn.mockRestore();
   });
 });
+
+describe('Ratio image loading', () => {
+  test('an <img> inside loads lazily and decodes off the main thread', () => {
+    const { container } = render(<Ratio><img src="a.jpg" alt="" /></Ratio>);
+    const img = container.querySelector('img');
+    expect(img.getAttribute('loading')).toBe('lazy');
+    expect(img.getAttribute('decoding')).toBe('async');
+    expect(img.getAttribute('fetchpriority')).toBeNull();
+  });
+  test('priority: eager and high priority', () => {
+    const { container } = render(<Ratio priority><img src="a.jpg" alt="" /></Ratio>);
+    const img = container.querySelector('img');
+    expect(img.getAttribute('loading')).toBe('eager');
+    expect(img.getAttribute('fetchpriority')).toBe('high');
+  });
+  test("the image's own attributes win", () => {
+    const { container } = render(<Ratio priority><img src="a.jpg" alt="" loading="lazy" fetchPriority="low" /></Ratio>);
+    const img = container.querySelector('img');
+    expect(img.getAttribute('loading')).toBe('lazy');
+    expect(img.getAttribute('fetchpriority')).toBe('low');
+  });
+  test('non-image children are left alone', () => {
+    const { container } = render(<Ratio priority><video src="v.mp4" /></Ratio>);
+    expect(container.querySelector('video').hasAttribute('loading')).toBe(false);
+  });
+});

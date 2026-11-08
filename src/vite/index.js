@@ -88,6 +88,45 @@ export async function downloadThemeSheets(resolved, { fetch: fetchImpl } = {}) {
   }));
 }
 
+/* A browser's User-Agent, so Google Fonts answers with woff2 — the file a
+   browser will ask for. */
+const MODERN_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
+
+/**
+ * The woff2 file of the system's DISPLAY face (Latin), for a preload.
+ *
+ * Display headings (DisplayLarge…, an app's hero H1) use the decorative face,
+ * and a browser requests a font only when text needs it — after the app's
+ * JavaScript has rendered that heading, well after the other faces. A preload
+ * starts it with the CSS. Only the Display face: preloading every face would
+ * compete with the CSS and scripts the first paint is waiting on.
+ *
+ * Null when it cannot tell: no Google font for that family (a system face),
+ * or any request failing. The page then loads the font as before.
+ */
+export async function displayFontPreload(resolved, { fetch: fetchImpl } = {}) {
+  try {
+    if (!resolved.sheets.core || !resolved.fonts.length) return null;
+    const f = getFetch(fetchImpl);
+    const core = await fetchText(resolved.sheets.core, f);
+    const m = core.match(/--Set-Font-Family-Decorative\s*:\s*['"]?([^'",;]+)/);
+    if (!m) return null;
+    const family = m[1].trim();
+    const param = 'family=' + family.replace(/ /g, '+');
+    const url = resolved.fonts.find((u) => u.includes(param + ':') || u.includes(param + '&') || u.endsWith(param));
+    if (!url) return null;
+    const res = await f(url, { headers: { 'User-Agent': MODERN_UA } });
+    if (!res.ok) return null;
+    const css = await res.text();
+    /* Google labels each subset with a comment; Latin is the one pages need first. */
+    const latin = css.split('/* latin */')[1] || css;
+    const woff2 = latin.match(/url\((https:\/\/fonts\.gstatic\.com\/[^)]+\.woff2)\)/);
+    return woff2 ? woff2[1] : null;
+  } catch (e) {
+    return null;
+  }
+}
+
 const shortHash = (s) => createHash('sha256').update(s).digest('hex').slice(0, 8);
 
 /**
@@ -99,7 +138,7 @@ const shortHash = (s) => createHash('sha256').update(s).digest('hex').slice(0, 8
  *            the SAME addresses (the browser makes one request for both),
  *            which starts them early without adding requests.
  */
-export function buildThemeHead(resolved, { themeURL, dark = 'system', storageKey = OMNI_DARK_MODE_KEY, sheets, copied = false } = {}) {
+export function buildThemeHead(resolved, { themeURL, dark = 'system', storageKey = OMNI_DARK_MODE_KEY, sheets, copied = false, preloadFonts = [] } = {}) {
   const config = headThemeConfig(resolved, { themeURL, dark, storageKey, sheets });
   const fonts = resolved.fonts.length ? (copied ? combineGoogleFonts(resolved.fonts) : resolved.fonts) : [];
   const origins = [];
@@ -109,7 +148,7 @@ export function buildThemeHead(resolved, { themeURL, dark = 'system', storageKey
     });
   }
   if (fonts.length) FONT_ORIGINS.forEach((o) => { if (!origins.includes(o)) origins.push(o); });
-  return themeHeadHTML(config, { fonts, preconnect: origins });
+  return themeHeadHTML(config, { fonts, preconnect: origins, preloadFonts });
 }
 
 /**
@@ -137,9 +176,10 @@ export function injectIntoHead(html, block) {
  * @param {boolean} [options.copy=false]  build: self-host a SNAPSHOT of the sheets as hashed assets (re-build to pick up a re-published system). Default: link the live published files
  * @param {'system'|'light'|'dark'} [options.dark='system']  first mode when the visitor has no saved choice
  * @param {string} [options.storageKey='omni-dark-mode']  the provider's persistDarkMode key
+ * @param {number|false} [options.minChunkSize=10000]  build: merge JavaScript chunks smaller than this (bytes) into their neighbours; false leaves Vite's chunking alone
  */
 export function omniTheme(options = {}) {
-  const { themeURL, copy = false, dark = 'system', storageKey = OMNI_DARK_MODE_KEY, fetch: fetchImpl } = options;
+  const { themeURL, copy = false, dark = 'system', storageKey = OMNI_DARK_MODE_KEY, fetch: fetchImpl, minChunkSize = 10000 } = options;
   if (!themeURL || typeof themeURL !== 'string') throw new Error('omniTheme: pass { themeURL } — the theme.json URL your OmniDesignProvider uses');
   let isBuild = false;
   let base = '/';
@@ -150,6 +190,18 @@ export function omniTheme(options = {}) {
 
   return {
     name: 'omni-theme',
+    /* Fewer, larger chunks. An app that lazy-loads its pages gets one chunk
+       per lib component a page uses — 14 files of 1–4 KB on a product page —
+       requested together after the page's own chunk. Rollup's
+       experimentalMinChunkSize merges chunks below the size into one they
+       always load with, without moving code that loads on demand. Only when
+       the app has not set its own chunking. */
+    config(userConfig, env) {
+      if (env.command !== 'build' || !minChunkSize) return undefined;
+      const out = userConfig.build && userConfig.build.rollupOptions && userConfig.build.rollupOptions.output;
+      if (Array.isArray(out) || (out && (out.experimentalMinChunkSize !== undefined || out.manualChunks))) return undefined;
+      return { build: { rollupOptions: { output: { experimentalMinChunkSize: minChunkSize } } } };
+    },
     configResolved(config) {
       isBuild = config.command === 'build';
       base = config.base || '/';
@@ -182,7 +234,8 @@ export function omniTheme(options = {}) {
           return html;
         }
         const copied = !!(isBuild && copy && copiedSheets);
-        const block = buildThemeHead(r, { themeURL, dark, storageKey, copied, sheets: copied ? { ...r.sheets, ...copiedSheets } : undefined });
+        const displayFont = isBuild ? await displayFontPreload(r, { fetch: fetchImpl }) : null;
+        const block = buildThemeHead(r, { themeURL, dark, storageKey, copied, sheets: copied ? { ...r.sheets, ...copiedSheets } : undefined, preloadFonts: displayFont ? [displayFont] : [] });
         return injectIntoHead(html, block);
       },
     },

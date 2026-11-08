@@ -391,6 +391,13 @@ brand color.
   chunk. It is loaded only when a Footer social link names a brand.
 - **Do not import components from `@mui/material`** — the package re-exports
   the ones it supports, themed.
+- **Images: put them in a `Ratio`, and mark the first one `priority`.** An
+  `<img>` inside `<Ratio>` loads lazily on its own — do not add `loading`
+  yourself. The ONE image a visitor sees first (the hero, the main product
+  photo, the first card of a grid) gets `<Ratio priority>`: it loads at once,
+  ahead of the rest. One or two per page — every image priority is the same
+  as none. Lazy-loading the first image is the most common way a page gets
+  slow.
 
 ## 8. Only Modal, Dialog, Toast and Popover cast black shadows
 
