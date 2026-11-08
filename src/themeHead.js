@@ -211,12 +211,9 @@ const escJSON = (o) => JSON.stringify(o).replace(/</g, '\\u003c');
  *               they replace)
  *   preconnect  origins to open early (the theme host, Google Fonts)
  */
-export function themeHeadHTML(config, { fonts = [], preconnect = [], preloadFonts = [] } = {}) {
+export function themeHeadHTML(config, { fonts = [], preconnect = [] } = {}) {
   const lines = [];
   preconnect.forEach((o) => lines.push(`<link rel="preconnect" href="${escAttr(o)}"${/gstatic/.test(o) || o.crossorigin ? ' crossorigin' : ''}>`));
-  /* Font files to start now rather than when text first needs them (the
-     Display face: its heading renders only after the app's JavaScript). */
-  preloadFonts.forEach((u) => lines.push(`<link rel="preload" as="font" type="font/woff2" href="${escAttr(u)}" crossorigin data-omni="font-preload">`));
   lines.push(`<script type="application/json" id="${OMNI_THEME_SCRIPT_ID}">${escJSON(config)}</script>`);
   lines.push(`<script>${OMNI_HEAD_SCRIPT}</script>`);
   fonts.forEach((f) => lines.push(`<link rel="stylesheet" href="${escAttr(f)}" data-omni="font">`));

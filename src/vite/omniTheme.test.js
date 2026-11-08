@@ -157,38 +157,3 @@ test('buildThemeHead escapes the JSON so it cannot close its <script>', () => {
 test('omniTheme requires a themeURL', () => {
   expect(() => omniTheme({})).toThrow(/themeURL/);
 });
-
-/* ── Display font preload and chunk merging ─────────────────────────────── */
-// eslint-disable-next-line import/first
-import { displayFontPreload } from './index';
-
-const ALFA = 'https://fonts.googleapis.com/css2?family=Alfa+Slab+One:wght@400&display=swap';
-const GFONTS_CSS = '/* latin-ext */\n@font-face { src: url(https://fonts.gstatic.com/s/alfa/ext.woff2) format(\'woff2\'); }\n'
-  + '/* latin */\n@font-face { src: url(https://fonts.gstatic.com/s/alfa/latin.woff2) format(\'woff2\'); }\n';
-const fontFetch = (core) => jest.fn((url) => {
-  const body = url.endsWith('theme.json') ? JSON.stringify({ ...MANIFEST, fonts: [...MANIFEST.fonts, ALFA] })
-    : url.endsWith('core.css') ? core
-      : url.startsWith('https://fonts.googleapis.com/css2?family=Alfa') ? GFONTS_CSS : ':root{}';
-  return Promise.resolve({ ok: true, status: 200, text: () => Promise.resolve(body) });
-});
-
-test('build: the Display face (Latin woff2) is preloaded in the head', async () => {
-  const fetch = fontFetch(":root{--Set-Font-Family-Decorative:'Alfa Slab One', sans-serif;}");
-  const { html } = await runPlugin(omniTheme({ themeURL: BASE + 'theme.json', fetch }), 'build');
-  expect(html).toContain('<link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/alfa/latin.woff2" crossorigin');
-});
-
-test('no preload when the Display face is not a Google font, or in dev', async () => {
-  const sys = await runPlugin(omniTheme({ themeURL: BASE + 'theme.json', fetch: fontFetch(':root{--Set-Font-Family-Decorative:-apple-system, sans-serif;}') }), 'build');
-  expect(sys.html).not.toContain('rel="preload" as="font"');
-  const dev = await runPlugin(omniTheme({ themeURL: BASE + 'theme.json', fetch: fontFetch(":root{--Set-Font-Family-Decorative:'Alfa Slab One';}") }), 'serve');
-  expect(dev.html).not.toContain('rel="preload" as="font"');
-});
-
-test('build: small chunks are merged unless the app chunks its own way', () => {
-  const p = omniTheme({ themeURL: BASE + 'theme.json' });
-  expect(p.config({}, { command: 'build' }).build.rollupOptions.output.experimentalMinChunkSize).toBe(10000);
-  expect(p.config({}, { command: 'serve' })).toBeUndefined();
-  expect(p.config({ build: { rollupOptions: { output: { manualChunks: {} } } } }, { command: 'build' })).toBeUndefined();
-  expect(omniTheme({ themeURL: BASE + 'theme.json', minChunkSize: false }).config({}, { command: 'build' })).toBeUndefined();
-});
