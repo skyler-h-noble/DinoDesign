@@ -81,7 +81,16 @@ function dumpDom(chrome, url, { budgetMs = 8000, timeoutMs = 45000 } = {}) {
 export function clean(html) {
   return html
     .replace(/<link\b[^>]*\bdata-omni="(head|prefetch)"[^>]*>/g, '')
-    .replace(/<style\b[^>]*\bdata-omni="true"[^>]*>[\s\S]*?<\/style>/g, '');
+    .replace(/<style\b[^>]*\bdata-omni="true"[^>]*>[\s\S]*?<\/style>/g, '')
+    /* A lazy image in prerendered HTML downloads at once: while the theme CSS
+       is still on its way the page has no layout, so every image counts as
+       on screen (the benchmark home page: 8 photos instead of 2, +460 KB).
+       Its address is parked in data-omni-src; React's first render puts the
+       real src back and the browser lazy-loads it as usual. Eager / priority
+       images keep theirs and start with the HTML. */
+    .replace(/<img\b[^>]*\bloading="lazy"[^>]*>/g, (tag) => tag
+      .replace(/\ssrc="/, ' data-omni-src="')
+      .replace(/\ssrcset="/, ' data-omni-srcset="'));
 }
 
 /* Internal links on a page: same-origin paths, no file extension. */

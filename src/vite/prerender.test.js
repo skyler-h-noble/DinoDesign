@@ -33,3 +33,10 @@ test('routes in code: static router paths, not params, assets or API', async () 
   const js = 'path:"/checkout",path:"/p/:slug",path:"*",fetch("/api/orders"),"/assets/a.js",x="/order/confirmed/",`/account`';
   expect(routesInCode(js).sort()).toEqual(['/account', '/checkout', '/order/confirmed']);
 });
+
+test('clean: lazy images keep their address aside; eager ones keep src', () => {
+  const html = '<img src="a.jpg" loading="lazy" srcset="a2.jpg 2x" alt=""><img src="b.jpg" fetchpriority="high" alt="">';
+  const out = clean(html);
+  expect(out).toContain('<img data-omni-src="a.jpg" loading="lazy" data-omni-srcset="a2.jpg 2x" alt="">');
+  expect(out).toContain('<img src="b.jpg" fetchpriority="high" alt="">');
+});
