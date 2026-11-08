@@ -62,13 +62,14 @@ import { Glyph, SVG_ICON_DECLS } from '../_glyph';
    A lighter input is a lighter SURFACE: put the field on
    data-surface="Surface-Brightest" and keep variant="{color}-outline".
 
-   The field is its own surface: the inner wrapper declares
-   data-surface="Container" and the field paints that surface's --Background,
-   so its placeholder (--Quiet), value (--Text) and icons are the colors the
-   design system tuned for THAT fill. It used to rest on the page's --Hover
-   with the page's --Quiet on it — a pair nothing checks: 4.08:1 light and
-   3.53:1 dark inside a Default card. Every Container level meets 4.5:1 for
-   --Quiet by construction.
+   The field fills with the surface it sits on's --Hover, as Figma's Input
+   does — Pressed when hovered, Hover again when pressed. It was its own
+   Container surface for a while, because the card Quiet measured 4.08:1 on
+   a Default card's Hover; the fault was the card Hover (it moved toward the
+   text), fixed in the design system, which also solves card Quiet against
+   the card's Hover. A Container surface also resolved through the nearest
+   theme by source order, so a field in an App Bar inside a Brand page took
+   the Brand's card color.
 
    Hover deepens the fill to the field's --Hover and press to its --Pressed,
    and the placeholder turns --Text for both (the text the system pairs with
@@ -311,8 +312,8 @@ registerStaticStyles('omni-input', [
   '.omni-inp-on:hover::after{border-color:var(--_inp-hover)}',
   '.omni-inp-on:active::after{border-color:var(--_inp-press);border-width:2px}',
   `.omni-inp-on:hover${OR},.omni-inp-on:active${OR},.omni-inp-on:focus-within${OR}{color:var(--Text)}`,
-  `.omni-inp-on:hover${OR}{background-color:var(--Hover)}`,
-  `.omni-inp-on:active${OR}{background-color:var(--Pressed)}`,
+  `.omni-inp-on:hover${OR}{background-color:var(--Pressed)}`,
+  `.omni-inp-on:active${OR}{background-color:var(--Hover)}`,
   ...[':hover', ':active'].flatMap((st) => [
     ...PH(`.omni-inp-on${st} .omni-inp-in${OR} input`, 'color:var(--Text)'),
     ...PH(`.omni-inp-on${st} .omni-inp-ml${OR} textarea`, 'color:var(--Text)'),
@@ -322,7 +323,7 @@ registerStaticStyles('omni-input', [
   '.omni-inp-shell-off{opacity:var(--Disabled, 0.38)}',
 
   /* The field (the TextField's sx). */
-  `${TF}${OR}{background-color:var(--Background);color:var(--Quiet);font-family:var(--Body-Font-Family, var(--Font-Family-Body, inherit));`
+  `${TF}${OR}{background-color:var(--Hover);color:var(--Quiet);font-family:var(--Body-Font-Family, var(--Font-Family-Body, inherit));`
     + 'padding:0;border-radius:0;transition:color 0.15s ease-in-out}',
   ...SIZES.map((s) => `.omni-inp-s${SZ[s]}${OR}{font-size:${SIZE_MAP[s].fontSize};min-height:${SIZE_MAP[s].height}}`),
   ...SIZES.map((s) => `.omni-inp-f${SZ[s]}${OR}{font-size:${FLOATING_SIZE_MAP[s].fontSize};min-height:${FLOATING_SIZE_MAP[s].height}}`),
@@ -615,11 +616,9 @@ function InputStatic({
         + (validationConfig ? ' omni-inp-v omni-inp-v-' + validation : '')
         + (disabled ? ' omni-inp-shell-off' : ' omni-inp-on')}
       >
-        {/* Inner wrapper: the field's own surface, so its text and
-            placeholder read the tokens tuned for its fill (see defaultStyles).
-            The shell's edge and focus ring stay on the page's tokens — they
-            are drawn against the page. */}
-        <div className="MuiBox-root omni-inp-surf" data-surface="Container">
+        {/* Inner wrapper: the field reads the surface it sits on (its
+            Hover fill, Quiet placeholder, Text value), as Figma's Input. */}
+        <div className="MuiBox-root omni-inp-surf">
           <StaticTextField
             value={value}
             defaultValue={defaultValue}

@@ -88,14 +88,11 @@ registerStaticStyles('omni-select', [
   /* The shell, as Input's: the edge and the focus ring, both drawn against
      the PAGE the field sits on, so both read the page's tokens. */
   '.omni-sel-shell{position:relative;border:none;overflow:hidden;box-shadow:none}',
-  /* The fill is the field's own surface. The inner wrapper declares
-     data-surface="Container" and paints that surface's --Background, so the
-     placeholder's --Quiet, the value's --Text and the chevron's icon color are
-     the ones the design system tuned for THIS fill. The fill used to be the
-     page's --Hover with the page's --Quiet on it: a pair nothing checks, which
-     measured 4.08:1 (light) and 3.53:1 (dark) inside a Default card. Every
-     Container level meets 4.5:1 for --Quiet by construction. */
-  '.omni-sel-surf{background-color:var(--Background);transition:background-color 0.15s ease}',
+  /* Figma's Input: the field fills with the surface's Hover at rest, Pressed
+     when hovered, Hover again when pressed (with a 2px edge). Hover moves away
+     from the text on the surface, so the surface's Quiet clears it — the
+     design system solves card Quiet against the card's Hover too. */
+  '.omni-sel-surf{background-color:var(--Hover);transition:background-color 0.15s ease}',
   '.omni-sel-shell::after{content:"";position:absolute;inset:0;pointer-events:none;border-width:1px;border-style:solid;border-color:var(--Border);border-radius:inherit}',
   ...Object.keys(SZ).map((s) => `.omni-sel-shell-${SZ[s]}{border-radius:${SIZE_MAP[s].radius}}`),
   '.omni-sel-shell-f{border-radius:var(--Input-Radius, var(--Style-Border-Radius))}',
@@ -104,8 +101,8 @@ registerStaticStyles('omni-select', [
   /* Painted on the trigger, which fills the surface: the design system's own
      paint rule for a Container weighs as much as a class + :hover + class
      and comes later, so a state fill on the surface element itself loses. */
-  '.omni-sel-on:hover .omni-sel-trg{background-color:var(--Hover)}',
-  '.omni-sel-on:active .omni-sel-trg{background-color:var(--Pressed)}',
+  '.omni-sel-on:hover .omni-sel-trg{background-color:var(--Pressed)}',
+  '.omni-sel-on:active .omni-sel-trg{background-color:var(--Hover)}',
   // Pressed, the edge is 2px — Figma's Select (as Input) draws its stroke at 2 there.
   '.omni-sel-on:active::after{border-width:2px}',
   '.omni-sel-on:hover .select-trigger,.omni-sel-on:active .select-trigger,.omni-sel-on:focus-within .select-trigger{color:var(--Text)}',
@@ -559,8 +556,8 @@ export function Select({
       )}
 
       {/* Outer shell — Input's: the edge an inside-stroke overlay; the fill
-          the field's own Container surface, deepening to its --Hover under the
-          pointer and --Pressed while pressed; the 2px ring 1px out; 38% when
+          the surface's --Hover, --Pressed under the pointer and --Hover again
+          while pressed (Figma's Input); the 2px ring 1px out; 38% when
           disabled. */}
       {/* The wrapper is the shell's parent — read from here so it is found
           whether the wrapper is a plain div or the sx box. */}
@@ -568,7 +565,7 @@ export function Select({
         className={'select-shell MuiBox-root omni-sel-shell omni-sel-shell-' + (isFloating ? 'f' : SZ[sk])
         + (disabled ? ' omni-sel-shell-off' : ' omni-sel-on')}>
       {/* Inner wrapper — the field's own surface (see .omni-sel-surf). */}
-      <div className="MuiBox-root omni-sel-surf" data-surface="Container">
+      <div className="MuiBox-root omni-sel-surf">
 
       {/* Trigger */}
       <button

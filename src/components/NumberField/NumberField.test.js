@@ -219,14 +219,13 @@ describe('validation and label type', () => {
   });
 });
 
-// The stepper column sits on the field's own surface, inside the column's
-// page-scoped edge, so field and steppers are one fill and the ghost
-// buttons' glyph is the color tuned for it.
-test('outlined: the steppers sit on the field surface, inside the column edge', () => {
+// The stepper column shares the field's fill — the surface's Hover, as
+// Figma's Input — inside the column's edge, so the control reads as one.
+test('outlined: the steppers share the field fill, inside the column edge', () => {
   const { container } = render(<NumberField label="Qty" defaultValue={1} />);
   const column = container.querySelector('.omni-nf-steppers');
   const surf = column.querySelector('.omni-nf-steppers-surf');
-  expect(surf).toHaveAttribute('data-surface', 'Container');
-  expect(column.hasAttribute('data-surface')).toBe(false);
+  expect(surf).not.toBeNull();
+  expect(container.querySelectorAll('[data-surface]')).toHaveLength(0);
   expect(surf.querySelectorAll('button')).toHaveLength(2);
 });

@@ -86,13 +86,13 @@ registerStaticStyles('omni-autocomplete', wk([
   ...Object.entries(RADIUS).map(([size, r]) => `.omni-ac-shell-${size}{border-radius:${r}}`),
   '.omni-ac-shell-off{opacity:var(--Disabled, 0.38)}',
   '.omni-ac-shell:focus-within{outline:2px solid var(--Focus-Visible);outline-offset:2px}',
-  /* The field is its own surface: the row declares data-surface="Container"
-     and paints that surface's --Background, so the placeholder's --Quiet and
-     the value's colors are the ones tuned for this fill. It rested on the
-     page's --Hover with the page's --Quiet — a pair nothing checks (4.08:1
-     light, 3.53:1 dark in a Default card). The shell's edge and focus ring
-     stay on the page's tokens: they are drawn against the page. */
-  '.omni-ac-row{position:relative;display:flex;align-items:center;background-color:var(--Background)}',
+  /* Figma's Input: the field fills with the surface's Hover at rest, Pressed
+     when hovered, Hover again when pressed (with a 2px edge). Hover moves away
+     from the text on the surface, so the surface's Quiet clears it — the
+     design system solves card Quiet against the card's Hover too. */
+  '.omni-ac-row{position:relative;display:flex;align-items:center;background-color:var(--Hover)}',
+  '.omni-ac-shell:where(:not(.omni-ac-shell-off)):hover .omni-ac-row{background-color:var(--Pressed)}',
+  '.omni-ac-shell:where(:not(.omni-ac-shell-off)):active .omni-ac-row{background-color:var(--Hover)}',
   sizeRules('s', SIZE_MAP),
   sizeRules('f', FLOATING_SIZE_MAP),
   '.omni-ac-fl{position:absolute;top:50%;transform:translateY(-50%);transform-origin:top left;color:var(--Quiet);font-weight:400;'
@@ -305,7 +305,7 @@ export function Autocomplete({
 
       {/* --_ac-act is declared HERE, inside the field's surface, so the
           active text color resolves against the fill it is drawn on. */}
-      <div className={'MuiBox-root omni-ac-row omni-ac-row-' + sz} data-surface="Container" style={{ '--_ac-act': activeTextColor }}>
+      <div className={'MuiBox-root omni-ac-row omni-ac-row-' + sz} style={{ '--_ac-act': activeTextColor }}>
         {/* Floating label */}
         {isFloating && label && (
           <div className={'MuiBox-root omni-ac-fl omni-ac-fl-' + sizeKey + (raised ? ' omni-ac-fl-up' : '') + (focused ? ' omni-ac-fl-focus' : '')}>

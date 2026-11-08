@@ -43,13 +43,13 @@ describe('SearchField', () => {
    Container-Lowest, which pinned the field to one level regardless of where
    it was placed. */
 describe('Structure', () => {
-  test('the inner field is its own Container surface; nothing else pins one', () => {
+  /* Figma's Input: the field reads the surface it sits on and fills with its
+     Hover. A Container surface of its own resolved through the nearest theme
+     by source order — in an App Bar inside a Brand page it took the Brand. */
+  test('the field pins no surface and fills with the surface\'s Hover', () => {
     const { container } = renderField();
-    const surfaces = container.querySelectorAll('[data-surface]');
-    expect(surfaces).toHaveLength(1);
-    expect(surfaces[0]).toHaveAttribute('data-surface', 'Container');
-    expect(surfaces[0]).toHaveClass('omni-sf-field');
-    expect(surfaces[0].querySelector('input')).not.toBeNull();
+    expect(container.querySelectorAll('[data-surface]')).toHaveLength(0);
+    expect(container.querySelector('.omni-sf-field input')).not.toBeNull();
   });
 
   test('the border shell is the outer element', () => {

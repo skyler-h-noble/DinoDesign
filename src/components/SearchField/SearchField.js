@@ -65,11 +65,13 @@ registerStaticStyles('omni-searchfield', wk([
   '.omni-sf-shell:where(:not(.omni-sf-shell-off)):hover{border-color:var(--_sf-hv)}',
   '.omni-sf-shell:where(:not(.omni-sf-shell-off)):active{border-color:var(--_sf-pr)}',
   '.omni-sf-shell:focus-within{outline:2px solid var(--Focus-Visible);outline-offset:2px}',
-  /* The field is its own surface (data-surface="Container", painting its
-     --Background), so the placeholder's --Quiet is the one tuned for this
-     fill — the page's --Quiet on the page's --Hover was a pair nothing
-     checks (4.08:1 light, 3.53:1 dark in a Default card). */
-  '.omni-sf-field{display:flex;align-items:center;gap:8px;width:100%;box-sizing:border-box;background-color:var(--Background)}',
+  /* Figma's Input: the field fills with the surface's Hover at rest, Pressed
+     when hovered, Hover again when pressed (with a 2px edge). Hover moves away
+     from the text on the surface, so the surface's Quiet clears it — the
+     design system solves card Quiet against the card's Hover too. */
+  '.omni-sf-field{display:flex;align-items:center;gap:8px;width:100%;box-sizing:border-box;background-color:var(--Hover)}',
+  '.omni-sf-shell:where(:not(.omni-sf-shell-off)):hover .omni-sf-field{background-color:var(--Pressed)}',
+  '.omni-sf-shell:where(:not(.omni-sf-shell-off)):active .omni-sf-field{background-color:var(--Hover)}',
   ...Object.entries(SZ).map(([size, k]) => `.omni-sf-field-${k}{min-height:${SIZE_MAP[size].height};padding-left:${SIZE_MAP[size].px}px;padding-right:${SIZE_MAP[size].px}px}`),
   /* Two classes: the Icon's own colour rule is one. */
   '.omni-sf .omni-sf-icon{color:var(--Quiet);flex-shrink:0;transition:color 0.15s ease}',
@@ -176,10 +178,8 @@ export function SearchField({
           be used. */}
       <div className={'MuiBox-root omni-sf-shell omni-sf-shell-' + k + (disabled ? ' omni-sf-shell-off' : '')}>
 
-      {/* Inner field: its own Container surface (see .omni-sf-field).
-          --_sf-act is declared HERE, inside that surface, so the active text
-          color resolves against the fill it is drawn on. */}
-      <div className={'MuiBox-root omni-sf-field omni-sf-field-' + k} data-surface="Container" style={{ '--_sf-act': activeTextColor }}>
+      {/* Inner field: the surface's Hover fill (see .omni-sf-field). */}
+      <div className={'MuiBox-root omni-sf-field omni-sf-field-' + k} style={{ '--_sf-act': activeTextColor }}>
         <Icon size="small" className={'MuiBox-root omni-sf-icon' + (isActive ? ' omni-sf-icon-on' : '')}>
           <SearchIcon />
         </Icon>

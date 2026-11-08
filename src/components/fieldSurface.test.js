@@ -1,15 +1,17 @@
-// Every text field is its OWN surface: the element that paints the fill
-// declares data-surface="Container" and paints that surface's --Background,
-// and the placeholder is --Quiet — so the placeholder's color is the one the
-// design system checks at 4.5:1 against that very fill, on every theme and
-// surface, light and dark.
+// Every text field fills with the --Hover of the surface it sits on, as
+// Figma's Input does (Default: Surface/Hover; Hover: Pressed; Pressed: Hover
+// with a 2px edge), and its placeholder is that surface's --Quiet.
 //
-// Before, the fill was the PAGE's --Hover and the placeholder the PAGE's
-// --Quiet: a pair nothing checks. Inside a Default card it measured 4.08:1
-// (light) and 3.53:1 (dark) — the benchmark's "Select a country".
+// For a while each field was its OWN Container surface instead, because the
+// placeholder measured 4.08:1 (light) / 3.53:1 (dark) on a Default card's
+// Hover. The fault was the card Hover — it moved TOWARD the card's text — and
+// it is fixed in the design system, which also solves card Quiet against the
+// card's Hover (dinodesign-studio utils/cardStates.ts, pageCardTextParity).
+// A Container of its own also resolved through the nearest theme by source
+// order: a search field in an App Bar on a Brand page took the Brand's card.
 //
-// The edge and the focus ring stay OUTSIDE that surface: they are drawn
-// against the page, so they must read the page's --Border / --Focus-Visible.
+// So no field pins a surface: fill, placeholder, value, edge and ring all read
+// the surface the field sits on.
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -42,9 +44,6 @@ function placeholderColor(el) {
   return value;
 }
 
-const fillOf = (root) => Array.from(root.querySelectorAll('*'))
-  .find((el) => declared(el, 'background-color') === 'var(--Background)');
-
 const CASES = [
   ['Select', () => <Select label="Country" placeholder="Select a country" options={['Portugal', 'Spain']} />, '.select-value'],
   ['TextInput', () => <Input label="Card number" placeholder="4242 4242 4242 4242" />, 'input'],
@@ -55,45 +54,36 @@ const CASES = [
 ];
 
 describe.each(CASES)('%s', (name, ui, textSel) => {
-  test('the fill is a Container surface painting its own --Background', () => {
+  test('the resting fill is the surface\'s --Hover, and the text sits on it', () => {
     const { container } = render(ui());
-    const fill = fillOf(container);
+    const fill = Array.from(container.querySelectorAll('*'))
+      .find((el) => declared(el, 'background-color') === 'var(--Hover)');
     expect(fill).toBeTruthy();
-    expect(fill.closest('[data-surface]')).toHaveAttribute('data-surface', 'Container');
-    // The text (placeholder / value) sits inside that surface.
-    expect(fill.closest('[data-surface]').querySelector(textSel)).not.toBeNull();
+    expect(fill.querySelector(textSel)).not.toBeNull();
   });
 
-  test('nothing paints the page --Hover as the resting fill', () => {
+  test('no field pins a surface of its own', () => {
     const { container } = render(ui());
-    const hoverFilled = Array.from(container.querySelectorAll('*'))
-      .filter((el) => declared(el, 'background-color') === 'var(--Hover)');
-    expect(hoverFilled).toEqual([]);
+    expect(container.querySelectorAll('[data-surface]')).toHaveLength(0);
   });
 
   if (textSel === 'input') {
-    test('the placeholder is --Quiet at full strength, resolved inside the field surface', () => {
+    test('the placeholder is --Quiet at full strength', () => {
       const { container } = render(ui());
-      const input = container.querySelector('input');
-      expect(placeholderColor(input)).toMatch(/^var\(--Quiet\b/);
-      expect(input.closest('[data-surface]')).toHaveAttribute('data-surface', 'Container');
+      expect(placeholderColor(container.querySelector('input'))).toMatch(/^var\(--Quiet\b/);
     });
   }
 });
 
-test('Select: the placeholder is the trigger\'s --Quiet, inside the field surface; the ring and edge are outside it', () => {
+test('Select: the placeholder is the trigger\'s --Quiet', () => {
   const { container } = render(<Select label="Country" placeholder="Select a country" options={['Portugal']} />);
-  const trigger = container.querySelector('.select-trigger');
-  expect(declared(trigger, 'color')).toBe('var(--Quiet)');
-  expect(trigger.closest('[data-surface]')).toHaveAttribute('data-surface', 'Container');
-  const shell = container.querySelector('.omni-sel-shell');
-  expect(shell.closest('[data-surface]')).toBeNull();
+  expect(declared(container.querySelector('.select-trigger'), 'color')).toBe('var(--Quiet)');
 });
 
-test('TextInput: hover and press deepen the fill and turn the placeholder --Text', () => {
+test('TextInput: hover fills with --Pressed, press with --Hover (Figma\'s Input), and the placeholder turns --Text', () => {
   render(<Input label="x" placeholder="y" />);
   const all = Array.from(document.styleSheets).flatMap((s) => Array.from(s.cssRules || [])).map((r) => r.cssText).join('\n');
-  expect(all).toMatch(/\.omni-inp-on:hover \.MuiOutlinedInput-root\s*\{\s*background-color: var\(--Hover\)/);
-  expect(all).toMatch(/\.omni-inp-on:active \.MuiOutlinedInput-root\s*\{\s*background-color: var\(--Pressed\)/);
+  expect(all).toMatch(/\.omni-inp-on:hover \.MuiOutlinedInput-root\s*\{\s*background-color: var\(--Pressed\)/);
+  expect(all).toMatch(/\.omni-inp-on:active \.MuiOutlinedInput-root\s*\{\s*background-color: var\(--Hover\)/);
   expect(all).toMatch(/\.omni-inp-on:hover \.omni-inp-in \.MuiOutlinedInput-root input::placeholder\s*\{\s*color: var\(--Text\)/);
 });

@@ -102,23 +102,14 @@ export function TextField({
         onBlur={(e) => { setIsFocused(false); onBlurProp?.(e); }}
         error={error}
         fullWidth={fullWidth}
-        /* Label and helper sit beside the input box, so they take its surface. */
-        data-surface={disabled ? 'Container-Low' : 'Container'}
         slotProps={{
           htmlInput: {
             ...(ariaLabel ? { 'aria-label': ariaLabel } : {}),
             ...(ariaLabelledby ? { 'aria-labelledby': ariaLabelledby } : {}),
           },
           input: {
-            // The input is a CONTAINER on whatever surface it sits on. Declaring
-            // it here means --Background resolves to the container tone AND the
-            // paired --Text / --Border come with it, instead of naming a surface
-            // token directly and leaving the foregrounds on the parent's tone.
-            //
-            // Disabled is a different SURFACE, not a different color: saying
-            // Container-Low here brings its foregrounds too, where an sx
-            // override of backgroundColor would have left --Text where it was.
-            'data-surface': disabled ? 'Container-Low' : 'Container',
+            // The input reads the surface it sits on and fills with its
+            // Hover, as Figma's Input (fieldSurface.test.js).
             style: {
               color: textColor,
             },
@@ -134,7 +125,9 @@ export function TextField({
           width: fullWidth ? '100%' : 'auto',
           // Outlined variant styling
           '& .MuiOutlinedInput-root': {
-            backgroundColor: 'var(--Background)',
+            backgroundColor: 'var(--Hover)',
+            '&:hover': { backgroundColor: 'var(--Pressed)' },
+            '&.Mui-focused': { backgroundColor: 'var(--Hover)' },
             transition: 'all 0.2s ease-in-out',
             color: textColor,
 
@@ -161,7 +154,7 @@ export function TextField({
 
             // Disabled state
             '&.Mui-disabled': {
-              backgroundColor: 'var(--Background)',
+              backgroundColor: 'var(--Hover)',
               opacity: 'var(--Disabled, 0.38)',
             },
           },

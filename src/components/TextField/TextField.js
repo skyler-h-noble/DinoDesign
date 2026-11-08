@@ -23,7 +23,11 @@ registerStaticStyles('omni-text-field', [
   '.omni-tf-box-auto{width:auto}',
   '.omni-tf{width:100%}',
   '.omni-tf-auto{width:auto}',
-  `.omni-tf${OR}{background-color:var(--Background);transition:all 0.2s ease-in-out;color:var(--Text)}`,
+  /* The surface's Hover, as Figma's Input; Pressed under the pointer
+     (fieldSurface.test.js). */
+  `.omni-tf${OR}{background-color:var(--Hover);transition:all 0.2s ease-in-out;color:var(--Text)}`,
+  `.omni-tf${OR}:hover{background-color:var(--Pressed)}`,
+  `.omni-tf${OR}.Mui-focused{background-color:var(--Hover)}`,
   // Border: --Border at rest, the primary border focused, the error border in error.
   `.omni-tf${OR} fieldset{border-color:var(--Border);transition:border-color 0.2s ease-in-out}`,
   `.omni-tf-foc${OR} fieldset{border-color:var(--Buttons-Primary-Border)}`,
@@ -32,13 +36,11 @@ registerStaticStyles('omni-text-field', [
   `.omni-tf-err${OR}:hover fieldset{border-color:var(--Buttons-Error-Border)}`,
   `.omni-tf${OR}.Mui-focused fieldset{border-color:var(--Buttons-Primary-Border);border-width:2px}`,
   `.omni-tf-err${OR}.Mui-focused fieldset{border-color:var(--Buttons-Error-Border)}`,
-  `.omni-tf${OR}.Mui-disabled{background-color:var(--Background);opacity:var(--Disabled, 0.38)}`,
+  `.omni-tf${OR}.Mui-disabled{background-color:var(--Hover);opacity:var(--Disabled, 0.38)}`,
   // Label
-  /* The quiet tone of the FIELD's surface (the root declares Container
-     below), not the section's: the resting label sits on the Container fill,
-     and the section's quiet tone is tuned for the lighter page — 4.46:1 on
-     #f3f3f3. --Quiet is the surface role the accessibility report grades;
-     --Text-Quiet follows it and stays as the fallback. */
+  /* The surface's --Quiet: the field sits on that surface and fills with its
+     Hover, which moves away from the text, so Quiet clears it. --Text-Quiet
+     stays as the fallback. */
   '.omni-tf .MuiInputLabel-root{color:var(--Quiet, var(--Text-Quiet));transition:all 0.2s ease-in-out;font-size:14px;font-weight:500}',
   '.omni-tf-foc .MuiInputLabel-root,.omni-tf-err .MuiInputLabel-root{color:var(--Text)}',
   '.omni-tf .MuiInputLabel-root.Mui-focused{color:var(--Text);font-weight:600}',
@@ -128,19 +130,13 @@ function TextFieldStatic({
     onBlur: (e) => { setIsFocused(false); onBlurProp?.(e); },
     error,
     fullWidth,
-    /* The label and helper are siblings of the input box, not inside it, so
-       they need the box's surface too or they read the section's colors
-       while drawn over the Container fill. data-surface paints nothing. */
-    'data-surface': disabled ? 'Container-Low' : 'Container',
     inputProps: {
       ...(ariaLabel ? { 'aria-label': ariaLabel } : {}),
       ...(ariaLabelledby ? { 'aria-labelledby': ariaLabelledby } : {}),
     },
     InputProps: {
-      // The input is a CONTAINER on whatever surface it sits on: declaring it
-      // brings --Background AND the paired --Text / --Border with it.
-      // Disabled is a different SURFACE (Container-Low), not a different color.
-      'data-surface': disabled ? 'Container-Low' : 'Container',
+      // The input reads the surface it sits on: Hover fill, Text value
+      // (no surface of its own — fieldSurface.test.js).
       style: { color: 'var(--Text)' },
       startAdornment: startAdornment ? <FieldAdornment position="start">{startAdornment}</FieldAdornment> : undefined,
       endAdornment: endAdornment ? <FieldAdornment position="end">{endAdornment}</FieldAdornment> : undefined,
