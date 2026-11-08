@@ -30,6 +30,8 @@
  * Node only. No dependencies; Vite is not imported.
  */
 import { createHash } from 'crypto';
+import { resolve as resolvePath } from 'path';
+import { prerenderSite } from './prerender';
 import {
   OMNI_DARK_MODE_KEY, OMNI_THEME_SCRIPT_ID, manifestURLFor, resolveThemeManifest,
   combineGoogleFonts, stripFontImports, headThemeConfig, themeHeadHTML,
@@ -137,21 +139,26 @@ export function injectIntoHead(html, block) {
  * @param {boolean} [options.copy=false]  build: self-host a SNAPSHOT of the sheets as hashed assets (re-build to pick up a re-published system). Default: link the live published files
  * @param {'system'|'light'|'dark'} [options.dark='system']  first mode when the visitor has no saved choice
  * @param {string} [options.storageKey='omni-dark-mode']  the provider's persistDarkMode key
+ * @param {boolean|{routes?: string[], limit?: number}} [options.prerender=true]  build: save each page's rendered HTML (needs Chrome on the build machine; skipped without it)
  */
 export function omniTheme(options = {}) {
-  const { themeURL, copy = false, dark = 'system', storageKey = OMNI_DARK_MODE_KEY, fetch: fetchImpl } = options;
+  const { themeURL, copy = false, dark = 'system', storageKey = OMNI_DARK_MODE_KEY, fetch: fetchImpl, prerender = true } = options;
   if (!themeURL || typeof themeURL !== 'string') throw new Error('omniTheme: pass { themeURL } — the theme.json URL your OmniDesignProvider uses');
   let isBuild = false;
   let base = '/';
   let assetsDir = 'assets';
   let resolvedP = null;
   let copiedSheets = null; // key → public path, after buildStart
+  let outDir = 'dist';
+  let isSsr = false;
   const resolved = () => (resolvedP = resolvedP || loadThemeManifest(themeURL, { fetch: fetchImpl }));
 
   return {
     name: 'omni-theme',
     configResolved(config) {
       isBuild = config.command === 'build';
+      outDir = resolvePath(config.root || process.cwd(), (config.build && config.build.outDir) || 'dist');
+      isSsr = !!(config.build && config.build.ssr);
       base = config.base || '/';
       assetsDir = (config.build && config.build.assetsDir) || 'assets';
     },
@@ -169,6 +176,20 @@ export function omniTheme(options = {}) {
       } catch (err) {
         copiedSheets = null;
         this.warn(`could not copy the theme (${err.message}) — linking the published files instead`);
+      }
+    },
+    /* After the build is written: prerender its pages (prerender.js). On by
+       default; skipped with one line where it cannot run. */
+    async closeBundle() {
+      if (!isBuild || isSsr || prerender === false) return;
+      const opts = typeof prerender === 'object' ? prerender : {};
+      // eslint-disable-next-line no-console
+      const log = (m) => console.log(`[omni-theme] prerender: ${m}`);
+      try {
+        const r = await prerenderSite(outDir, { routes: opts.routes, limit: opts.limit, log });
+        log(r.skipped ? `skipped — ${r.skipped}` : `${r.written.length} page${r.written.length === 1 ? '' : 's'} (${r.written.join(', ')})`);
+      } catch (err) {
+        log(`skipped — ${err.message}`);
       }
     },
     transformIndexHtml: {

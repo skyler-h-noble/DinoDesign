@@ -71,7 +71,7 @@ const nodeHelpers = {
     { file: 'dist/vite.cjs', format: 'cjs', exports: 'named' },
   ],
   plugins: [omniVersion, resolve({ extensions: ['.js'] })],
-  external: (id) => /^(node:)?(crypto|fs|path|url)$/.test(id),
+  external: (id) => /^(node:)?(crypto|fs|path|url|child_process|http|os)$/.test(id),
 };
 
 export default [

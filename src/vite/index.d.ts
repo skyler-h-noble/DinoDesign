@@ -22,6 +22,11 @@ export interface OmniThemeOptions {
   dark?: 'system' | 'light' | 'dark';
   /** The provider's persistDarkMode key. Default 'omni-dark-mode'. */
   storageKey?: string;
+  /** Build: save each page's rendered HTML so it paints before the
+   *  JavaScript runs. On by default; pages are found by following links from
+   *  "/". Needs Chrome on the build machine — skipped with one line without it.
+   *  false turns it off; { routes, limit } chooses the pages. */
+  prerender?: boolean | { routes?: string[]; limit?: number };
   /** fetch() to use (Node 18+ has one). */
   fetch?: typeof fetch;
 }
