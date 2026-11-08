@@ -26,7 +26,7 @@
  */
 import { spawn } from 'child_process';
 import { createServer } from 'http';
-import { existsSync, mkdtempSync, readFileSync, writeFileSync, mkdirSync, statSync, rmSync } from 'fs';
+import { existsSync, mkdtempSync, readFileSync, writeFileSync, mkdirSync, statSync, rmSync, readdirSync } from 'fs';
 import { join, extname, normalize } from 'path';
 import { tmpdir } from 'os';
 
@@ -97,6 +97,33 @@ export function linksIn(html) {
   return [...out];
 }
 
+/* Page paths written in the app's code — a router's "/checkout" is a string
+   in the built JavaScript. Pages a visitor reaches by a button, not a link,
+   are found this way; without their own HTML they would get the host's
+   fallback (the prerendered home page), download it, empty it and only then
+   draw: measured 0.2 s later first paint on such a page. Static paths only —
+   nothing with a ":param" or "*" — and not assets or API addresses. */
+export function routesInCode(js) {
+  const out = new Set();
+  for (const m of js.matchAll(/["'`](\/[a-z0-9][a-z0-9\-_/]*)["'`]/gi)) {
+    const path = m[1].replace(/\/+$/, '');
+    if (!path || path.length > 60 || /^\/(assets|api|src|node_modules|static|images?|fonts?)(\/|$)/i.test(path)) continue;
+    out.add(path);
+  }
+  return [...out];
+}
+
+function routesInBuild(dir) {
+  const assets = join(dir, 'assets');
+  let files = [];
+  try { files = readdirSync(assets).filter((f) => f.endsWith('.js')); } catch (e) { return []; }
+  const all = new Set();
+  for (const f of files) {
+    try { routesInCode(readFileSync(join(assets, f), 'utf8')).forEach((r) => all.add(r)); } catch (e) { /* ignore */ }
+  }
+  return [...all];
+}
+
 /* A page shown at a different address (the host's fallback for a page that
    was not prerendered) empties its markup before the first paint; the app
    then draws the right page as it would without prerendering. */
@@ -143,7 +170,14 @@ export async function prerenderSite(dir, { routes, limit = 20, concurrency = 4, 
   };
   try {
     /* "/" first: its links seed the queue. Then up to `concurrency` at once. */
-    if (!routes && queue.length) { started++; await renderOne(queue.shift()); }
+    if (!routes && queue.length) {
+      started++;
+      await renderOne(queue.shift());
+      // The app's own routes next — top-level pages, ahead of crawled detail pages.
+      const fromCode = routesInBuild(dir).filter((r) => !seen.has(r));
+      fromCode.forEach((r) => seen.add(r));
+      queue.unshift(...fromCode);
+    }
     await Promise.all(Array.from({ length: concurrency }, worker));
   } finally {
     server.close();

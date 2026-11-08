@@ -27,3 +27,9 @@ test('no index.html: skipped, nothing written', async () => {
   expect(r.written).toEqual([]);
   expect(r.skipped).toBeTruthy();
 });
+
+test('routes in code: static router paths, not params, assets or API', async () => {
+  const { routesInCode } = await import('./prerender');
+  const js = 'path:"/checkout",path:"/p/:slug",path:"*",fetch("/api/orders"),"/assets/a.js",x="/order/confirmed/",`/account`';
+  expect(routesInCode(js).sort()).toEqual(['/account', '/checkout', '/order/confirmed']);
+});
