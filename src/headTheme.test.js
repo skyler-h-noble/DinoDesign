@@ -209,3 +209,57 @@ test('back-compat: themeURL with nothing in the head fetches theme.json and inje
   await act(async () => { omniLinks().forEach((l) => l.onload && l.onload()); await Promise.resolve(); });
   await waitFor(() => expect(status(container)).toBe('ready'));
 });
+
+/* ── Per-theme mode files (theme.json modeParts) ─────────────────────────── */
+
+const PART = (mode, t) => `https://cdn.test/modes/${mode}.${t}.css`;
+const ORDER = ['Default', 'Primary', 'Secondary', 'Error'];
+const PARTS = {
+  order: ORDER,
+  lightMode: { shared: PART('Light-Mode', 'shared'), themes: Object.fromEntries(ORDER.map((t) => [t, PART('Light-Mode', t)])) },
+  darkMode: { shared: PART('Dark-Mode', 'shared'), themes: Object.fromEntries(ORDER.map((t) => [t, PART('Dark-Mode', t)])) },
+};
+
+function writeTrimmedHead(themes) {
+  // eslint-disable-next-line global-require
+  const { selectModeParts } = require('./themeHead');
+  const resolved = resolveThemeManifest({ ...MANIFEST, modeParts: PARTS }, THEME_URL);
+  const config = headThemeConfig(resolved, { themeURL: THEME_URL, modeParts: selectModeParts(resolved.modeParts, themes) });
+  const json = document.createElement('script');
+  json.type = 'application/json';
+  json.id = 'omni-theme';
+  json.textContent = JSON.stringify(config);
+  document.head.appendChild(json);
+  // eslint-disable-next-line no-new-func
+  new Function(OMNI_HEAD_SCRIPT)();
+}
+
+test('parts: the mode slot links the selected themes in system order, then shared', () => {
+  writeTrimmedHead(['Primary', 'Default']);
+  expect(omniLinks().map((l) => l.id)).toEqual(['omni-foundation', 'omni-core', 'omni-typography', 'omni-mode', 'omni-mode-1', 'omni-mode-2', 'omni-base', 'omni-styles']);
+  expect(['omni-mode', 'omni-mode-1', 'omni-mode-2'].map((id) => document.getElementById(id).getAttribute('href')))
+    .toEqual([PART('Light-Mode', 'Default'), PART('Light-Mode', 'Primary'), PART('Light-Mode', 'shared')]);
+});
+
+test('parts: a toggle swaps every part to the dark files, in place', async () => {
+  writeTrimmedHead(['Default', 'Primary']);
+  const { getByText } = render(<OmniDesignProvider themeURL={THEME_URL}><Mode /></OmniDesignProvider>);
+  await act(async () => { getByText('t').click(); });
+  expect(['omni-mode', 'omni-mode-1', 'omni-mode-2'].map((id) => document.getElementById(id).getAttribute('href')))
+    .toEqual([PART('Dark-Mode', 'Default'), PART('Dark-Mode', 'Primary'), PART('Dark-Mode', 'shared')]);
+  expect(global.fetch).not.toHaveBeenCalled();
+});
+
+test('parts: a theme the build did not see is linked when the page uses it', async () => {
+  writeTrimmedHead(['Default', 'Primary']);
+  render(<OmniDesignProvider themeURL={THEME_URL}><div data-theme="Error">e</div></OmniDesignProvider>);
+  await waitFor(() => expect(document.getElementById('omni-mode-3')).not.toBeNull());
+  expect(['omni-mode', 'omni-mode-1', 'omni-mode-2', 'omni-mode-3'].map((id) => document.getElementById(id).getAttribute('href')))
+    .toEqual([PART('Light-Mode', 'Default'), PART('Light-Mode', 'Primary'), PART('Light-Mode', 'Error'), PART('Light-Mode', 'shared')]);
+});
+
+test('parts: a system without modeParts still links the one full mode sheet', () => {
+  writeHead();
+  expect(document.getElementById('omni-mode-1')).toBeNull();
+  expect(document.getElementById('omni-mode').getAttribute('href')).toBe(MANIFEST.lightMode);
+});

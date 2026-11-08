@@ -89,7 +89,7 @@ import React, {
 import { chartColorVisionCSS } from './components/Charts/colorVision';
 import { OmniLinkContext } from './components/_routerLink';
 import {
-  OMNI_TAG_IDS, manifestURLFor, resolveThemeManifest, readHeadTheme, readHeadMode, sameURL,
+  OMNI_TAG_IDS, manifestURLFor, resolveThemeManifest, readHeadTheme, readHeadMode, sameURL, modePartId,
 } from './themeHead';
 
 // ─── Context ──────────────────────────────────────────────────────────────────
@@ -261,6 +261,7 @@ function whenSheetSettled(el) {
  *  with that address and has already loaded. */
 function settledNow(id, source) {
   if (!source) return true;
+  if (Array.isArray(source)) return source.every((u, i) => settledNow(modePartId(i), u));
   if (typeof document === 'undefined' || !isURL(source)) return false;
   const el = document.getElementById(id);
   return !!el && el.tagName === 'LINK' && sameURL(el.getAttribute('href'), source) && sheetLoaded(el);
@@ -285,7 +286,13 @@ function detectHeadTheme(themeURL, hasCSSProps, topLevel) {
   if (config) {
     const matches = themeURL ? !!config.themeURL && sameURL(config.themeURL, themeURL) : (topLevel && !hasCSSProps);
     if (!matches) return null;
-    return { config, sources: { ...config.sheets }, scriptMode, fetchManifest: false };
+    const sources = { ...config.sheets };
+    const parts = config.modeParts;
+    if (parts && Array.isArray(parts.lightMode) && Array.isArray(parts.darkMode)) {
+      sources.lightMode = parts.lightMode;
+      sources.darkMode = parts.darkMode;
+    }
+    return { config, sources, scriptMode, fetchManifest: false };
   }
   if (!themeURL) return null;
   const href = (id) => {
@@ -348,8 +355,23 @@ function removeStyleTag(id) {
  */
 function loadCSSSource(id, source, beforeId) {
   if (!source) return Promise.resolve(null);
+  if (Array.isArray(source)) return loadModeParts(source, beforeId);
   if (isURL(source)) return injectLinkTag(id, source, beforeId);
   return injectStyleTag(id, source, beforeId);
+}
+
+/* The mode slot as a list — the per-theme files a build selected, then the
+   shared file (themeHead.selectModeParts). Part i is <link id=modePartId(i)>,
+   each placed before beforeId so the list keeps its order; a toggle swaps each
+   href in place (both modes list the same themes). Parts past the list's end,
+   left by an earlier, longer list, are taken out. */
+function loadModeParts(urls, beforeId) {
+  for (let i = urls.length; document.getElementById(modePartId(i)); i++) {
+    const el = document.getElementById(modePartId(i));
+    if (el.getAttribute('data-omni') === 'true' || el.getAttribute('data-omni') === 'head') el.remove();
+    else break;
+  }
+  return Promise.all(urls.map((u, i) => injectLinkTag(modePartId(i), u, beforeId)));
 }
 
 /**
@@ -953,18 +975,23 @@ export function OmniDesignProvider({
   // source has nothing to fetch.
   useEffect(() => {
     if (cssStatus !== 'ready' || typeof document === 'undefined') return undefined;
-    const other = isDark ? resolvedSources.lightMode : resolvedSources.darkMode;
-    if (!other || !/^(https?:)?\/\/|^\//.test(other)) return undefined;
+    const otherSource = isDark ? resolvedSources.lightMode : resolvedSources.darkMode;
+    const others = (Array.isArray(otherSource) ? otherSource : [otherSource])
+      .filter((u) => u && /^(https?:)?\/\/|^\//.test(u));
+    if (!others.length) return undefined;
     let cancelled = false;
     let idleId = null;
     const prefetch = () => {
-      if (cancelled || document.querySelector('link[rel="prefetch"][href="' + other + '"]')) return;
-      const link = document.createElement('link');
-      link.rel = 'prefetch';
-      link.as = 'style';
-      link.href = other;
-      link.setAttribute('data-omni', 'prefetch');
-      document.head.appendChild(link);
+      if (cancelled) return;
+      others.forEach((other) => {
+        if (document.querySelector('link[rel="prefetch"][href="' + other + '"]')) return;
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.as = 'style';
+        link.href = other;
+        link.setAttribute('data-omni', 'prefetch');
+        document.head.appendChild(link);
+      });
     };
     const whenIdle = () => {
       if (cancelled) return;
@@ -991,7 +1018,49 @@ export function OmniDesignProvider({
   }, [cssStatus, isDark, resolvedSources.lightMode, resolvedSources.darkMode]);
 
   // Cleanup mode tag on unmount
-  useEffect(() => { return () => removeStyleTag(TAG.mode); }, []);
+  useEffect(() => () => {
+    removeStyleTag(TAG.mode);
+    for (let i = 1; typeof document !== 'undefined' && document.getElementById(modePartId(i)); i++) removeStyleTag(modePartId(i));
+  }, []);
+
+  /* Safety net for a trimmed mode slot. The Vite plugin links only the themes
+     it found in the app's code; a theme it could not see — a name built at
+     run time, or from a CMS — would render without its colors. Watch for any
+     data-theme the page uses whose file is not linked yet, and link it (in
+     the system's order, both modes, so a toggle keeps it). Runs only when the
+     head carries a trimmed list; one observer, filtered to data-theme. */
+  useEffect(() => {
+    const parts = head && head.config && head.config.modeParts;
+    if (!parts || !parts.available || !Array.isArray(parts.all) || typeof MutationObserver === 'undefined') return undefined;
+    const have = new Set(parts.themes || []);
+    const add = (names) => {
+      const fresh = names.filter((t) => t && !have.has(t) && parts.available.lightMode[t] && parts.available.darkMode[t]);
+      if (!fresh.length) return;
+      fresh.forEach((t) => have.add(t));
+      const keep = parts.all.filter((t) => have.has(t));
+      const list = (m) => keep.map((t) => parts.available[m][t]).concat(parts[m][parts[m].length - 1]);
+      setResolvedSources((prev) => ({ ...prev, lightMode: list('lightMode'), darkMode: list('darkMode') }));
+    };
+    const namesIn = (node) => {
+      const out = [];
+      if (node.nodeType !== 1) return out;
+      const own = node.getAttribute('data-theme');
+      if (own) out.push(own);
+      node.querySelectorAll('[data-theme]').forEach((el) => out.push(el.getAttribute('data-theme')));
+      return out;
+    };
+    add(namesIn(document.documentElement));
+    const mo = new MutationObserver((records) => {
+      const names = [];
+      records.forEach((r) => {
+        if (r.type === 'attributes') names.push(r.target.getAttribute('data-theme'));
+        else r.addedNodes.forEach((n) => names.push(...namesIn(n)));
+      });
+      add(names);
+    });
+    mo.observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['data-theme'] });
+    return () => mo.disconnect();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* Keep <html data-omni-mode> in step with a toggle, so a reload's head
      script and anything styling off it see the current mode. Only when the

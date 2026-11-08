@@ -96,8 +96,8 @@ test('injectIntoHead puts the block before the first stylesheet/script, after me
   expect(out.indexOf('<!--OMNI-->')).toBeLessThan(out.indexOf('<script type="module"'));
 });
 
-async function runPlugin(plugin, command) {
-  plugin.configResolved({ command, base: '/', build: { assetsDir: 'assets' } });
+async function runPlugin(plugin, command, root) {
+  plugin.configResolved({ command, base: '/', build: { assetsDir: 'assets' }, ...(root ? { root } : {}) });
   const emitted = [];
   const ctx = { emitFile: (f) => emitted.push(f), warn: jest.fn() };
   await plugin.buildStart.call(ctx);
@@ -156,4 +156,54 @@ test('buildThemeHead escapes the JSON so it cannot close its <script>', () => {
 
 test('omniTheme requires a themeURL', () => {
   expect(() => omniTheme({})).toThrow(/themeURL/);
+});
+
+/* ── Trimming to the themes the app uses ─────────────────────────────────── */
+// eslint-disable-next-line import/first
+import { mkdtempSync, writeFileSync } from 'fs';
+// eslint-disable-next-line import/first
+import { tmpdir } from 'os';
+// eslint-disable-next-line import/first
+import { join } from 'path';
+
+const ORDER = ['Default', 'Primary', 'Secondary', 'Error'];
+const part = (m, t) => `${BASE}modes/${m}.${t}.css`;
+const WITH_PARTS = { ...MANIFEST, modeParts: {
+  order: ORDER,
+  lightMode: { shared: part('Light-Mode', 'shared'), themes: Object.fromEntries(ORDER.map((t) => [t, part('Light-Mode', t)])) },
+  darkMode: { shared: part('Dark-Mode', 'shared'), themes: Object.fromEntries(ORDER.map((t) => [t, part('Dark-Mode', t)])) },
+} };
+function appRoot(code) {
+  const root = mkdtempSync(join(tmpdir(), 'omni-app-'));
+  writeFileSync(join(root, 'App.jsx'), code);
+  return root;
+}
+
+test('build: the head lists only the themes the code uses, then shared', async () => {
+  const root = appRoot(`export default () => <Alert color="error">x</Alert>;`);
+  const { html } = await runPlugin(omniTheme({ themeURL: BASE + 'theme.json', fetch: fakeFetch(WITH_PARTS) }), 'build', root);
+  const c = jsonOf(html);
+  expect(c.modeParts.themes).toEqual(['Default', 'Error']);
+  expect(c.modeParts.lightMode).toEqual([part('Light-Mode', 'Default'), part('Light-Mode', 'Error'), part('Light-Mode', 'shared')]);
+  expect(c.modeParts.available.lightMode.Primary).toBe(part('Light-Mode', 'Primary'));
+});
+
+test('dev, trim: false, or a system without parts: the full mode sheet', async () => {
+  const root = appRoot(`"error"`);
+  const dev = await runPlugin(omniTheme({ themeURL: BASE + 'theme.json', fetch: fakeFetch(WITH_PARTS) }), 'serve', root);
+  expect(jsonOf(dev.html).modeParts).toBeUndefined();
+  const off = await runPlugin(omniTheme({ themeURL: BASE + 'theme.json', trim: false, fetch: fakeFetch(WITH_PARTS) }), 'build', root);
+  expect(jsonOf(off.html).modeParts).toBeUndefined();
+  const old = await runPlugin(omniTheme({ themeURL: BASE + 'theme.json', fetch: fakeFetch() }), 'build', root);
+  expect(jsonOf(old.html).modeParts).toBeUndefined();
+});
+
+test('build with copy: true: each copied mode sheet is the selected parts joined', async () => {
+  const root = appRoot(`<div data-theme="Secondary" />`);
+  const { emitted } = await runPlugin(omniTheme({ themeURL: BASE + 'theme.json', copy: true, fetch: fakeFetch(WITH_PARTS) }), 'build', root);
+  const light = emitted.find((f) => /omni-Light-Mode-/.test(f.fileName)).source;
+  expect(light).toContain(part('Light-Mode', 'Secondary'));
+  expect(light).toContain(part('Light-Mode', 'shared'));
+  expect(light).not.toContain(part('Light-Mode', 'Primary'));
+  expect(light.indexOf('Secondary')).toBeLessThan(light.indexOf('shared'));
 });
