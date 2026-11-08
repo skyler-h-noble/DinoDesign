@@ -19,9 +19,10 @@
  *   - Hosts serve index.html for any page that was not prerendered. Each
  *     saved page carries a one-line check that empties it when it is shown
  *     at a different address, so /p/another never flashes the home page.
- *   - An app started with mountApp (../mount.js) takes the saved page over
- *     (hydrateRoot); one started with createRoot draws it again over the same
- *     markup. Either works.
+ *   - An app started with mountApp (../mount.js) keeps the saved page on
+ *     screen until it has drawn the same page, then swaps them, carrying
+ *     typed text over; one started with createRoot redraws over it. Either
+ *     works.
  *
  * Node only. No dependencies.
  */

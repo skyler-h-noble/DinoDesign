@@ -90,8 +90,9 @@ What the plugin does:
 - On `vite build` it also prerenders: each page's HTML is saved, so it paints
   before the JavaScript runs. Link pages with real `<a href>` / `Link` so they
   are found, and do not turn it off.
-- Start the app with `mountApp`, not `createRoot` — it takes the prerendered
-  page over instead of redrawing it (nothing flickers, typed text is kept):
+- Start the app with `mountApp`, not `createRoot` — it keeps the prerendered
+  page on screen until the app has drawn the same page, then swaps them, so
+  nothing flashes and anything typed carries over:
   ```jsx
   import { mountApp } from '@omni-design/components/mount';
   mountApp(document.getElementById('root'), <App />);
@@ -99,7 +100,7 @@ What the plugin does:
 - Anything that depends on the visitor — the cart and its count, a signed-in
   name, anything read from localStorage — goes in `<ClientOnly fallback={…}>`
   with a fallback of the same size. The saved page then never shows the
-  wrong cart, and the page React takes over matches what it draws.
+  wrong cart.
 - For the first image a visitor sees (a hero, the main product photo), use
   `<Ratio priority>`.
 - There is ONE color sheet per mode (Light-Mode.css / Dark-Mode.css), and only
