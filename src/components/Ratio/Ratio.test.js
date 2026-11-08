@@ -88,3 +88,19 @@ describe('no states', () => {
     warn.mockRestore();
   });
 });
+
+describe('Ratio priority', () => {
+  test('without priority an <img> inside is left exactly as written', () => {
+    const { container } = render(<Ratio><img src="a.jpg" alt="" /></Ratio>);
+    const img = container.querySelector('img');
+    expect(img.hasAttribute('loading')).toBe(false);
+    expect(img.hasAttribute('fetchpriority')).toBe(false);
+  });
+  test('priority: eager and high priority; the image\'s own attributes win', () => {
+    const { container } = render(<Ratio priority><img src="a.jpg" alt="" /></Ratio>);
+    expect(container.querySelector('img').getAttribute('fetchpriority')).toBe('high');
+    expect(container.querySelector('img').getAttribute('loading')).toBe('eager');
+    const own = render(<Ratio priority><img src="b.jpg" alt="" fetchPriority="low" /></Ratio>);
+    expect(own.container.querySelector('img').getAttribute('fetchpriority')).toBe('low');
+  });
+});

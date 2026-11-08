@@ -139,6 +139,9 @@ export interface RatioProps extends Native<HTMLDivElement, 'onClick'> {
   fit?: 'width' | 'height';
   /** Show the image placeholder while empty. */
   placeholder?: boolean;
+  /** The first image a visitor sees: an <img> inside loads at once with high
+   *  priority. Off by default. */
+  priority?: boolean;
   /** CSS max width, e.g. 320 or "40%". */
   maxWidth?: number | string;
   maxHeight?: number | string;

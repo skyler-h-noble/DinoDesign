@@ -123,6 +123,19 @@ registerStaticStyles('omni-ratio', [
   ...Object.entries(PADDING_MAP).map(([k, v]) => `.omni-ratio-p-${k}{padding:${v * 8}px}`),
 ].join('\n'));
 
+/* priority: eager + fetchpriority=high on <img> children, unless the image
+   sets its own. */
+function withPriority(children) {
+  return React.Children.map(children, (child) => {
+    if (!React.isValidElement(child) || child.type !== 'img') return child;
+    const p = child.props;
+    return React.cloneElement(child, {
+      loading: p.loading ?? 'eager',
+      ...(p.fetchPriority === undefined ? { fetchPriority: 'high' } : {}),
+    });
+  });
+}
+
 export function Ratio({
   ratio = '1:1',
   children,
@@ -139,6 +152,10 @@ export function Ratio({
   // might hold a map, a video or a chart. Pass `placeholder` for an image slot
   // with no image yet. A supplied child always wins.
   placeholder = false,
+  /* The first image a visitor sees (a hero, the main product photo): an
+     <img> inside loads at once with high priority. Off by default — the
+     image's own attributes are left as they are. */
+  priority = false,
   elevated = false,
   clickable = false,
   onClick,
@@ -218,7 +235,7 @@ export function Ratio({
       {/* Figma's Image Placeholder: a Border-Variant tint with the photo
           glyph in --Quiet, as large as the slot. It was a solid --Border
           block with a 36px --Background icon — the design inverted. */}
-      {showPlaceholder ? <ImagePlaceholder /> : children}
+      {showPlaceholder ? <ImagePlaceholder /> : (priority ? withPriority(children) : children)}
     </div>
   );
   if (hasSx(sx)) return <SxBox component={Tag} sx={sx} {...root}>{inner}</SxBox>;
