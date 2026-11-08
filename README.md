@@ -91,7 +91,10 @@ paints the page before your JavaScript has loaded. On the benchmark store first
 paint went from 2.1 s to 1.7–1.9 s and the product page's largest paint from
 5.2 s to 2.1 s (Lighthouse mobile). It uses the Chrome already on the build
 machine — nothing to install — and skips itself with one line where there is
-none. Your app does not change. `prerender: false` turns it off;
+none. Start the app with `mountApp` from `@omni-design/components/mount`
+(it takes the saved page over instead of redrawing it) and put visitor-specific
+content — the cart, a signed-in name — in `<ClientOnly fallback={…}>`.
+`prerender: false` turns it off;
 `prerender: { routes: ['/', '/pricing'] }` picks the pages.
 
 Measured on a store app (150 ms latency, 1.6 Mbps, 4× CPU, median of 3): first

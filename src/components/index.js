@@ -179,6 +179,8 @@ export { RatingInput as Rating } from './Rating';
 
 // ========== PROVIDER ==========
 export { OmniDesignProvider, useOmniDesign, ThemedZone, Surfaced, OMNI_DEFAULT_THEME_URL } from '../OmniDesignProvider';
+// Visitor-dependent content on prerendered pages (see ../mount.js).
+export { ClientOnly } from './ClientOnly';
 
 export default {};
 

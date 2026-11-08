@@ -19,8 +19,9 @@
  *   - Hosts serve index.html for any page that was not prerendered. Each
  *     saved page carries a one-line check that empties it when it is shown
  *     at a different address, so /p/another never flashes the home page.
- *   - The app keeps createRoot: React draws the page again when it starts,
- *     over the same markup. Nothing in the app has to change.
+ *   - An app started with mountApp (../mount.js) takes the saved page over
+ *     (hydrateRoot); one started with createRoot draws it again over the same
+ *     markup. Either works.
  *
  * Node only. No dependencies.
  */

@@ -88,8 +88,18 @@ What the plugin does:
 - Keep `themeURL` on the provider. It finds the theme in the page (same URL),
   skips theme.json and never downloads a sheet twice.
 - On `vite build` it also prerenders: each page's HTML is saved, so it paints
-  before the JavaScript runs. Nothing to do — keep `createRoot`, link pages
-  with real `<a href>` / `Link` so they are found, and do not turn it off.
+  before the JavaScript runs. Link pages with real `<a href>` / `Link` so they
+  are found, and do not turn it off.
+- Start the app with `mountApp`, not `createRoot` — it takes the prerendered
+  page over instead of redrawing it (nothing flickers, typed text is kept):
+  ```jsx
+  import { mountApp } from '@omni-design/components/mount';
+  mountApp(document.getElementById('root'), <App />);
+  ```
+- Anything that depends on the visitor — the cart and its count, a signed-in
+  name, anything read from localStorage — goes in `<ClientOnly fallback={…}>`
+  with a fallback of the same size. The saved page then never shows the
+  wrong cart, and the page React takes over matches what it draws.
 - For the first image a visitor sees (a hero, the main product photo), use
   `<Ratio priority>`.
 - There is ONE color sheet per mode (Light-Mode.css / Dark-Mode.css), and only

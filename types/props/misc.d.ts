@@ -90,6 +90,23 @@ export interface SurfacedProps extends Native {
   children?: React.ReactNode;
 }
 
+/**
+ * Content that depends on the visitor (cart, signed-in name, saved choices),
+ * drawn only once the app runs. A prerendered page and React's first render
+ * both show `fallback`, so the saved HTML never shows the wrong cart and
+ * mountApp can take the page over. Give the fallback the content's size.
+ * @category Provider
+ * @exports ClientOnly
+ * @source ./ClientOnly/ClientOnly#ClientOnly
+ * @example
+ * <ClientOnly fallback={<BodySmall>Your cart</BodySmall>}><BodySmall>Your cart (3)</BodySmall></ClientOnly>
+ */
+export interface ClientOnlyProps {
+  /** Drawn on the prerendered page and on the first render. */
+  fallback?: React.ReactNode;
+  children?: React.ReactNode;
+}
+
 // ─── Media ───────────────────────────────────────────────────────────────────
 
 /** Font Awesome's IconDefinition, structurally — an import from

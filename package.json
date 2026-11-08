@@ -33,6 +33,11 @@
       "import": "./dist/esm/OmniDesignProvider.js",
       "require": "./dist/OmniDesignProvider.js"
     },
+    "./mount": {
+      "types": "./dist/types/mount.d.ts",
+      "import": "./dist/esm/mount.js",
+      "require": "./dist/mount.js"
+    },
     "./vite": {
       "types": "./dist/types/vite.d.ts",
       "import": "./dist/vite.mjs",
@@ -62,7 +67,7 @@
     "prepublishOnly": "npm run build:lib && npm run test:types",
     "predeploy": "npm run build:app",
     "deploy": "gh-pages -d build",
-    "build:types": "npx -y -p typescript@5.9 tsc -p tsconfig.dts.json && node scripts/fix-dts.mjs && cp src/vite/index.d.ts dist/types/vite.d.ts",
+    "build:types": "npx -y -p typescript@5.9 tsc -p tsconfig.dts.json && node scripts/fix-dts.mjs && cp src/vite/index.d.ts dist/types/vite.d.ts && cp src/mount.d.ts dist/types/mount.d.ts",
     "clean:lib": "rm -rf dist",
     "test:types": "node scripts/check-quickstart.mjs && node scripts/check-api-examples.mjs && npx -y -p typescript@5.9 tsc -p types-test/tsconfig.json && npx -y -p typescript@5.9 tsc -p types-test/tsconfig.examples.json && node scripts/audit-types.mjs && node scripts/build-api-doc.mjs --check"
   },

@@ -2,7 +2,7 @@
 
 Every exported component: purpose, props, required parent, one example. GENERATED from `types/` by `scripts/build-api-doc.mjs` — the same files the published .d.ts come from, so this cannot drift from the types. Do not edit by hand. Do not open `dist/` to learn a prop: if it is not here, the component does not take it. Rules (color, surfaces, layout) are in `CLAUDE.md`.
 
-Read a section, not the file: search for `### Name`. 238 components.
+Read a section, not the file: search for `### Name`. 239 components.
 
 Format: `` `name?: type` = default — meaning``. No `?` means required. "+ `children`" means it takes children; "+ `<div>`" means the native attributes of that element pass through (id, className, style, aria-*, data-*, on*). Defaults come from the component source.
 
@@ -122,6 +122,16 @@ Sets only data-surface (keeps the inherited theme), without painting.
 
 ```jsx
 <Surfaced surface="Container-High"><Body>Text tuned for that level.</Body></Surfaced>
+```
+
+### ClientOnly
+Content that depends on the visitor (cart, signed-in name, saved choices), drawn only once the app runs. A prerendered page and React's first render both show `fallback`, so the saved HTML never shows the wrong cart and mountApp can take the page over. Give the fallback the content's size.
+
+- `fallback?: ReactNode` = `null` — Drawn on the prerendered page and on the first render.
++ `children`
+
+```jsx
+<ClientOnly fallback={<BodySmall>Your cart</BodySmall>}><BodySmall>Your cart (3)</BodySmall></ClientOnly>
 ```
 
 ## Layout

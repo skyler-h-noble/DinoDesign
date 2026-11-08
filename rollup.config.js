@@ -108,7 +108,7 @@ export default [
      imported. Index and provider share ONE build, so there is one
      OmniDesign context, not a copy per entry. */
   {
-    input: { 'components/index': 'src/components/index.js', OmniDesignProvider: 'src/OmniDesignProvider.js' },
+    input: { 'components/index': 'src/components/index.js', OmniDesignProvider: 'src/OmniDesignProvider.js', mount: 'src/mount.js' },
     output: {
       dir: 'dist/esm',
       format: 'esm',
@@ -117,6 +117,14 @@ export default [
       preserveModulesRoot: 'src',
       entryFileNames: '[name].js',
     },
+    plugins,
+    external,
+  },
+
+  // ── mount (react-dom/client: React 18+, so not in the main entry) ───────
+  {
+    input: 'src/mount.js',
+    output: [{ file: 'dist/mount.js', format: 'cjs', sourcemap: true, exports: 'named' }],
     plugins,
     external,
   },
